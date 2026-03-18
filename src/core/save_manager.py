@@ -1,25 +1,24 @@
-import os
 import shutil
 from datetime import datetime
-from .structures import SAVE_SLOT, PLAYER_GAME_DATA, GA_ITEM
-from .crypto import decrypt_pc_save, encrypt_pc_save, calculate_sha256
+from .structures import PLAYER_GAME_DATA, GA_ITEM
+
 
 class SaveManager:
     PS4_SLOT_SIZE = 0x280000
     PS4_FIRST_SLOT_OFFSET = 0x310
-    NAME_OFFSET_IN_SLOT = 0xe2b5
+    NAME_OFFSET_IN_SLOT = 0xE2B5
     STATS_OFFSET_IN_SLOT = NAME_OFFSET_IN_SLOT - 88
-    EVENT_FLAGS_OFFSET_IN_SLOT = 0x1bfaf0 
+    EVENT_FLAGS_OFFSET_IN_SLOT = 0x1BFAF0
     GA_ITEMS_OFFSET_IN_SLOT = 0x20
-    
+
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = None
         self.is_pc = False
         self.slots = []
-        
+
     def load(self):
-        with open(self.file_path, 'rb') as f:
+        with open(self.file_path, "rb") as f:
             self.data = bytearray(f.read())
         self.is_pc = self.data.startswith(b"BND4")
         self._scan_slots()
@@ -32,23 +31,27 @@ class SaveManager:
                 break
             name_pos = offset + self.NAME_OFFSET_IN_SLOT
             name_bytes = self.data[name_pos : name_pos + 32]
-            name = name_bytes.decode('utf-16le').strip('\x00')
-            self.slots.append({
-                "id": i,
-                "offset": offset,
-                "name": name if name else "Empty Slot",
-                "active": bool(name)
-            })
+            name = name_bytes.decode("utf-16le").strip("\x00")
+            self.slots.append(
+                {
+                    "id": i,
+                    "offset": offset,
+                    "name": name if name else "Empty Slot",
+                    "active": bool(name),
+                }
+            )
 
     def get_character_stats(self, slot_id):
-        if slot_id >= len(self.slots): return None
+        if slot_id >= len(self.slots):
+            return None
         slot_offset = self.slots[slot_id]["offset"]
         stats_pos = slot_offset + self.STATS_OFFSET_IN_SLOT
         stats_data = self.data[stats_pos : stats_pos + 0x200]
         return PLAYER_GAME_DATA.parse(stats_data)
 
     def update_character_stats(self, slot_id, new_stats_dict):
-        if slot_id >= len(self.slots): return False
+        if slot_id >= len(self.slots):
+            return False
         slot_offset = self.slots[slot_id]["offset"]
         stats_pos = slot_offset + self.STATS_OFFSET_IN_SLOT
         current_stats = self.get_character_stats(slot_id)
@@ -62,54 +65,78 @@ class SaveManager:
 
     def import_character(self, source_manager, source_slot_id, target_slot_id):
         """Copies a character slot from another SaveManager instance."""
-        if source_slot_id >= len(source_manager.slots) or target_slot_id >= len(self.slots):
+        if source_slot_id >= len(source_manager.slots) or target_slot_id >= len(
+            self.slots
+        ):
             return False
-        
+
         src_off = source_manager.slots[source_slot_id]["offset"]
         dst_off = self.slots[target_slot_id]["offset"]
-        
+
         # Copy the entire 0x280000 block
-        self.data[dst_off : dst_off + self.PS4_SLOT_SIZE] = source_manager.data[src_off : src_off + self.PS4_SLOT_SIZE]
-        
+        self.data[dst_off : dst_off + self.PS4_SLOT_SIZE] = source_manager.data[
+            src_off : src_off + self.PS4_SLOT_SIZE
+        ]
+
         self._scan_slots()
         return True
 
     def add_item(self, slot_id, item_id, quantity=1):
-        if slot_id >= len(self.slots): return False
+        if slot_id >= len(self.slots):
+            return False
         slot_offset = self.slots[slot_id]["offset"]
         ga_items_pos = slot_offset + self.GA_ITEMS_OFFSET_IN_SLOT
         found_idx = -1
         max_handle = 0x80000000
         for i in range(0x1400):
             item_pos = ga_items_pos + (i * 17)
-            current_id = int.from_bytes(self.data[item_pos+4 : item_pos+8], 'little')
-            current_handle = int.from_bytes(self.data[item_pos : item_pos+4], 'little')
-            if current_id == 0 and found_idx == -1: found_idx = i
-            if current_handle > max_handle and current_handle < 0xFFFFFFFF: max_handle = current_handle
-        if found_idx == -1: return False
+            current_id = int.from_bytes(
+                self.data[item_pos + 4 : item_pos + 8], "little"
+            )
+            current_handle = int.from_bytes(
+                self.data[item_pos : item_pos + 4], "little"
+            )
+            if current_id == 0 and found_idx == -1:
+                found_idx = i
+            if current_handle > max_handle and current_handle < 0xFFFFFFFF:
+                max_handle = current_handle
+        if found_idx == -1:
+            return False
         new_handle = max_handle + 1
-        new_item = {"handle": new_handle, "id": item_id, "data": {"unk2": -1, "unk3": -1, "aow_handle": 0xFFFFFFFF, "unk5": 0}}
-        self.data[ga_items_pos + (found_idx * 17) : ga_items_pos + (found_idx * 17) + 17] = GA_ITEM.build(new_item)
+        new_item = {
+            "handle": new_handle,
+            "id": item_id,
+            "data": {"unk2": -1, "unk3": -1, "aow_handle": 0xFFFFFFFF, "unk5": 0},
+        }
+        self.data[
+            ga_items_pos + (found_idx * 17) : ga_items_pos + (found_idx * 17) + 17
+        ] = GA_ITEM.build(new_item)
         return True
 
     def get_event_flag(self, slot_id, flag_id):
-        if slot_id >= len(self.slots): return False
+        if slot_id >= len(self.slots):
+            return False
         byte_offset = flag_id // 8
         bit_mask = 1 << (flag_id % 8)
         slot_offset = self.slots[slot_id]["offset"]
         flag_pos = slot_offset + self.EVENT_FLAGS_OFFSET_IN_SLOT + byte_offset
-        if flag_pos >= len(self.data): return False
+        if flag_pos >= len(self.data):
+            return False
         return bool(self.data[flag_pos] & bit_mask)
 
     def set_event_flag(self, slot_id, flag_id, active):
-        if slot_id >= len(self.slots): return False
+        if slot_id >= len(self.slots):
+            return False
         byte_offset = flag_id // 8
         bit_mask = 1 << (flag_id % 8)
         slot_offset = self.slots[slot_id]["offset"]
         flag_pos = slot_offset + self.EVENT_FLAGS_OFFSET_IN_SLOT + byte_offset
-        if flag_pos >= len(self.data): return False
-        if active: self.data[flag_pos] |= bit_mask
-        else: self.data[flag_pos] &= ~bit_mask
+        if flag_pos >= len(self.data):
+            return False
+        if active:
+            self.data[flag_pos] |= bit_mask
+        else:
+            self.data[flag_pos] &= ~bit_mask
         return True
 
     def backup(self):
@@ -121,6 +148,6 @@ class SaveManager:
     def save(self, output_path=None):
         target = output_path or self.file_path
         self.backup()
-        with open(target, 'wb') as f:
+        with open(target, "wb") as f:
             f.write(self.data)
         print(f"File saved to: {target}")

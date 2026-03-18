@@ -1,4 +1,4 @@
-from construct import Struct, Bytes, Int32ul, Int32sl, Array, PaddedString, Const, Padding, Int16ul, Float32l, Int64ul, Byte
+from construct import Struct, Bytes, Int32ul, Int32sl, Array, PaddedString, Const, Byte
 
 # Character Stats (PlayerGameData in Rust)
 PLAYER_GAME_DATA = Struct(
@@ -33,24 +33,20 @@ PLAYER_GAME_DATA = Struct(
     "archetype" / Byte,
     "padding3" / Bytes(3),
     "gift" / Byte,
-    "padding4" / Bytes(0x1e),
+    "padding4" / Bytes(0x1E),
     "weapon_level" / Byte,
     "padding5" / Bytes(0x35),
     "password" / Bytes(0x12),
     "group_passwords" / Array(5, Bytes(0x12)),
-    "unk_end" / Bytes(0x34)
+    "unk_end" / Bytes(0x34),
 )
 
 # Individual Item in Inventory
 GA_ITEM = Struct(
     "handle" / Int32ul,
     "id" / Int32ul,
-    "data" / Struct(
-        "unk2" / Int32sl,
-        "unk3" / Int32sl,
-        "aow_handle" / Int32ul,
-        "unk5" / Byte
-    )
+    "data"
+    / Struct("unk2" / Int32sl, "unk3" / Int32sl, "aow_handle" / Int32ul, "unk5" / Byte),
 )
 
 # Full Save Slot Structure (0x280000 bytes)
@@ -60,9 +56,9 @@ SAVE_SLOT = Struct(
     "unk0" / Bytes(0x18),
     "ga_items" / Array(0x1400, GA_ITEM),
     "player_game_data" / PLAYER_GAME_DATA,
-    "padding_after_stats" / Bytes(0xd0),
+    "padding_after_stats" / Bytes(0xD0),
     # ... more structures will be added here for full parity ...
-    "data_rest" / Bytes(0x280000 - (4 + 4 + 0x18 + 0x1400 * 17 + 0x138 + 0xd0)) 
+    "data_rest" / Bytes(0x280000 - (4 + 4 + 0x18 + 0x1400 * 17 + 0x138 + 0xD0)),
 )
 
 # BND4 Header (PC only)
@@ -72,11 +68,15 @@ BND4_HEADER = Struct(
     "file_count" / Int32ul,
     "header_size" / Int32ul,
     "unknown2" / Bytes(8),
-    "file_headers" / Array(lambda ctx: ctx.file_count, Struct(
-        "unknown" / Bytes(12),
-        "offset" / Int32ul,
-        "size" / Int32ul,
-        "unknown2" / Bytes(8),
-        "name_offset" / Int32ul,
-    ))
+    "file_headers"
+    / Array(
+        lambda ctx: ctx.file_count,
+        Struct(
+            "unknown" / Bytes(12),
+            "offset" / Int32ul,
+            "size" / Int32ul,
+            "unknown2" / Bytes(8),
+            "name_offset" / Int32ul,
+        ),
+    ),
 )

@@ -1,13 +1,22 @@
 import os
-from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
-                             QListWidget, QStackedWidget, QLabel, QPushButton, 
-                             QFileDialog, QMessageBox)
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QMainWindow,
+    QWidget,
+    QHBoxLayout,
+    QVBoxLayout,
+    QListWidget,
+    QStackedWidget,
+    QLabel,
+    QPushButton,
+    QFileDialog,
+    QMessageBox,
+)
 from core.save_manager import SaveManager
 from ui.widgets.stats_widget import StatsWidget
 from ui.widgets.inventory_widget import InventoryWidget
 from ui.widgets.world_widget import WorldWidget
 from ui.widgets.importer_dialog import ImporterDialog
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -16,7 +25,7 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1000, 700)
         self.save_manager = None
         self.current_slot_id = None
-        
+
         self._setup_ui()
         self._load_styles()
 
@@ -30,14 +39,16 @@ class MainWindow(QMainWindow):
         # Sidebar
         self.sidebar = QListWidget()
         self.sidebar.setFixedWidth(200)
-        self.sidebar.addItems(["General", "Inventory", "World Progress", "Character Slots"])
+        self.sidebar.addItems(
+            ["General", "Inventory", "World Progress", "Character Slots"]
+        )
         self.sidebar.currentRowChanged.connect(self._on_sidebar_changed)
         main_layout.addWidget(self.sidebar)
 
         # Main Content Area
         content_container = QWidget()
         self.content_layout = QVBoxLayout(content_container)
-        
+
         # Toolbar
         toolbar = QHBoxLayout()
         self.btn_open = QPushButton("Open Save")
@@ -45,7 +56,7 @@ class MainWindow(QMainWindow):
         self.btn_save = QPushButton("Save Changes")
         self.btn_save.setEnabled(False)
         self.btn_save.clicked.connect(self._save_file)
-        
+
         toolbar.addWidget(self.btn_open)
         toolbar.addWidget(self.btn_save)
         toolbar.addStretch()
@@ -79,14 +90,14 @@ class MainWindow(QMainWindow):
         # Page 3: Character Slots
         self.page_slots = QWidget()
         self.slots_layout = QVBoxLayout(self.page_slots)
-        
+
         # Slot Actions
         actions_layout = QHBoxLayout()
         self.btn_import = QPushButton("Import Character from another Save")
         self.btn_import.clicked.connect(self._import_character)
         actions_layout.addWidget(self.btn_import)
         self.slots_layout.addLayout(actions_layout)
-        
+
         self.slots_layout.addWidget(QLabel("Select a character slot to edit:"))
         self.pages.addWidget(self.page_slots)
 
@@ -114,23 +125,25 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Error", f"Failed to load save: {str(e)}")
 
     def _refresh_slots_ui(self):
-        for i in reversed(range(self.slots_layout.count())): 
+        for i in reversed(range(self.slots_layout.count())):
             item = self.slots_layout.itemAt(i)
             if item and item.widget() and isinstance(item.widget(), QPushButton):
                 item.widget().setParent(None)
-        
+
         if self.save_manager:
             for slot in self.save_manager.slots:
-                status = "Active" if slot['active'] else "Empty"
+                status = "Active" if slot["active"] else "Empty"
                 btn = QPushButton(f"Slot {slot['id']}: {slot['name']} ({status})")
-                btn.clicked.connect(lambda checked=False, s_id=slot['id']: self._select_slot(s_id))
+                btn.clicked.connect(
+                    lambda checked=False, s_id=slot["id"]: self._select_slot(s_id)
+                )
                 self.slots_layout.addWidget(btn)
 
     def _select_slot(self, slot_id):
         self.current_slot_id = slot_id
         stats = self.save_manager.get_character_stats(slot_id)
         self.stats_widget.load_stats(stats)
-        
+
         active_flags = []
         for category in ["graces", "bosses"]:
             items = self.world_widget.db.get(category, {})
@@ -139,7 +152,7 @@ class MainWindow(QMainWindow):
                 if self.save_manager.get_event_flag(slot_id, flag_id):
                     active_flags.append(flag_id)
         self.world_widget.load_progress(active_flags)
-        
+
         self.sidebar.setCurrentRow(0)
         self.lbl_status.setText(f"Editing Slot {slot_id}: {stats.name}")
 
@@ -156,38 +169,49 @@ class MainWindow(QMainWindow):
                 selected_ids = self.world_widget.get_selected_ids(category)
                 for data in items.values():
                     flag_id = data.get("id")
-                    self.save_manager.set_event_flag(self.current_slot_id, flag_id, flag_id in selected_ids)
+                    self.save_manager.set_event_flag(
+                        self.current_slot_id, flag_id, flag_id in selected_ids
+                    )
             self.btn_save.setEnabled(True)
 
     def _on_add_item(self):
         if self.save_manager and self.current_slot_id is not None:
-            current_cat = self.inventory_widget.tabs.tabText(self.inventory_widget.tabs.currentIndex()).lower()
+            current_cat = self.inventory_widget.tabs.tabText(
+                self.inventory_widget.tabs.currentIndex()
+            ).lower()
             selected = self.inventory_widget.category_lists[current_cat].currentItem()
             if selected:
                 item_id = int(selected.text().split("ID: ")[1].strip(")"))
                 if self.save_manager.add_item(self.current_slot_id, item_id):
                     self.btn_save.setEnabled(True)
-                    QMessageBox.information(self, "Success", f"Item added to inventory.")
+                    QMessageBox.information(self, "Success", "Item added to inventory.")
 
     def _import_character(self):
-        if not self.save_manager: return
+        if not self.save_manager:
+            return
         dialog = ImporterDialog(self)
         if dialog.exec():
             source_manager = dialog.source_manager
             source_slot_id = dialog.get_selected_slot_id()
             # Simple logic: import to slot 9 for now, or ask user
             target_id = 9
-            if self.save_manager.import_character(source_manager, source_slot_id, target_id):
+            if self.save_manager.import_character(
+                source_manager, source_slot_id, target_id
+            ):
                 self.btn_save.setEnabled(True)
                 self._refresh_slots_ui()
-                QMessageBox.information(self, "Success", f"Character imported to Slot {target_id}.")
+                QMessageBox.information(
+                    self, "Success", f"Character imported to Slot {target_id}."
+                )
 
     def _save_file(self):
         if self.save_manager:
             try:
                 self.save_manager.save()
                 self.btn_save.setEnabled(False)
-                QMessageBox.information(self, "Success", "Save file updated and backup created.")
+                QMessageBox.information(
+                    self, "Success", "Save file updated and backup created."
+                )
                 self._refresh_slots_ui()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save: {str(e)}")

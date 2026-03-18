@@ -1,9 +1,8 @@
 import json
 import os
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
-                             QLineEdit, QPushButton, QLabel, QGroupBox, QTabWidget,
-                             QCheckBox, QScrollArea)
-from PySide6.QtCore import Qt, Signal
+from PySide6.QtWidgets import QWidget, QVBoxLayout, QTabWidget, QCheckBox, QScrollArea
+from PySide6.QtCore import Signal
+
 
 class WorldWidget(QWidget):
     progress_changed = Signal()
@@ -24,20 +23,20 @@ class WorldWidget(QWidget):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        
+
         self.tabs = QTabWidget()
         self.checkboxes = {"graces": {}, "bosses": {}}
-        
+
         for category in ["graces", "bosses"]:
             scroll = QScrollArea()
             scroll.setWidgetResizable(True)
             container = QWidget()
             vbox = QVBoxLayout(container)
-            
+
             items = self.db.get(category, {})
             # Sort by name for easier navigation
             sorted_items = sorted(items.items(), key=lambda x: x[0])
-            
+
             for enum_name, data in sorted_items:
                 display_name = data.get("name", enum_name)
                 cb = QCheckBox(display_name)
@@ -45,11 +44,11 @@ class WorldWidget(QWidget):
                 cb.stateChanged.connect(lambda: self.progress_changed.emit())
                 vbox.addWidget(cb)
                 self.checkboxes[category][data.get("id")] = cb
-                
+
             vbox.addStretch()
             scroll.setWidget(container)
             self.tabs.addTab(scroll, category.capitalize())
-            
+
         layout.addWidget(self.tabs)
 
     def load_progress(self, active_ids):

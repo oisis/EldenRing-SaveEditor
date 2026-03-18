@@ -1,8 +1,16 @@
 import json
 import os
-from PySide6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QListWidget, 
-                             QLineEdit, QPushButton, QLabel, QGroupBox, QTabWidget)
-from PySide6.QtCore import Qt
+from PySide6.QtWidgets import (
+    QWidget,
+    QVBoxLayout,
+    QHBoxLayout,
+    QListWidget,
+    QLineEdit,
+    QPushButton,
+    QLabel,
+    QTabWidget,
+)
+
 
 class InventoryWidget(QWidget):
     def __init__(self):
@@ -21,7 +29,7 @@ class InventoryWidget(QWidget):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        
+
         # Search Area
         search_layout = QHBoxLayout()
         self.txt_search = QLineEdit()
@@ -34,13 +42,13 @@ class InventoryWidget(QWidget):
         # Tabs for categories
         self.tabs = QTabWidget()
         self.category_lists = {}
-        
+
         for category in ["items", "weapons", "armors", "talismans"]:
             list_widget = QListWidget()
             self.category_lists[category] = list_widget
             self.tabs.addTab(list_widget, category.capitalize())
             self._populate_list(category)
-            
+
         layout.addWidget(self.tabs)
 
         # Actions
@@ -51,7 +59,7 @@ class InventoryWidget(QWidget):
         list_widget = self.category_lists[category]
         list_widget.clear()
         items = self.db.get(category, {})
-        
+
         for item_id, name in items.items():
             if filter_text.lower() in name.lower():
                 list_widget.addItem(f"{name} (ID: {item_id})")

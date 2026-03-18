@@ -1,6 +1,13 @@
-from PySide6.QtWidgets import (QWidget, QFormLayout, QLineEdit, QSpinBox, 
-                             QLabel, QVBoxLayout, QGroupBox)
+from PySide6.QtWidgets import (
+    QWidget,
+    QFormLayout,
+    QLineEdit,
+    QSpinBox,
+    QVBoxLayout,
+    QGroupBox,
+)
 from PySide6.QtCore import Signal
+
 
 class StatsWidget(QWidget):
     stats_changed = Signal()
@@ -11,7 +18,7 @@ class StatsWidget(QWidget):
 
     def _setup_ui(self):
         layout = QVBoxLayout(self)
-        
+
         # Identity Group
         group_identity = QGroupBox("Character Identity")
         form_identity = QFormLayout(group_identity)
@@ -23,10 +30,10 @@ class StatsWidget(QWidget):
         # Stats Group
         group_stats = QGroupBox("Attributes")
         form_stats = QFormLayout(group_stats)
-        
+
         self.spin_level = self._create_spin(1, 713, form_stats, "Level:")
         self.spin_souls = self._create_spin(0, 999999999, form_stats, "Souls:")
-        
+
         self.spin_vigor = self._create_spin(1, 99, form_stats, "Vigor:")
         self.spin_mind = self._create_spin(1, 99, form_stats, "Mind:")
         self.spin_endurance = self._create_spin(1, 99, form_stats, "Endurance:")
@@ -35,7 +42,7 @@ class StatsWidget(QWidget):
         self.spin_intelligence = self._create_spin(1, 99, form_stats, "Intelligence:")
         self.spin_faith = self._create_spin(1, 99, form_stats, "Faith:")
         self.spin_arcane = self._create_spin(1, 99, form_stats, "Arcane:")
-        
+
         layout.addWidget(group_stats)
         layout.addStretch()
 
