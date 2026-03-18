@@ -4,6 +4,7 @@ from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout,
                              QFileDialog, QMessageBox)
 from PySide6.QtCore import Qt
 from core.save_manager import SaveManager
+from ui.widgets.stats_widget import StatsWidget
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -11,6 +12,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Elden Ring Save Editor")
         self.setMinimumSize(1000, 700)
         self.save_manager = None
+        self.current_slot_id = None
         
         self._setup_ui()
         self._load_styles()
@@ -33,7 +35,7 @@ class MainWindow(QMainWindow):
         content_container = QWidget()
         self.content_layout = QVBoxLayout(content_container)
         
-        # Toolbar (Top)
+        # Toolbar
         toolbar = QHBoxLayout()
         self.btn_open = QPushButton("Open Save")
         self.btn_open.clicked.connect(self._open_file)
@@ -46,10 +48,9 @@ class MainWindow(QMainWindow):
         toolbar.addStretch()
         self.lbl_status = QLabel("No file loaded")
         toolbar.addWidget(self.lbl_status)
-        
         self.content_layout.addLayout(toolbar)
 
-        # Stacked Widget for pages
+        # Stacked Widget
         self.pages = QStackedWidget()
         self._setup_pages()
         self.content_layout.addWidget(self.pages)
@@ -57,28 +58,27 @@ class MainWindow(QMainWindow):
         main_layout.addWidget(content_container)
 
     def _setup_pages(self):
-        # Page 0: General
-        self.page_general = QWidget()
-        layout = QVBoxLayout(self.page_general)
-        layout.addWidget(QLabel("General Statistics (Placeholder)"))
-        self.pages.addWidget(self.page_general)
+        # Page 0: General Stats
+        self.stats_widget = StatsWidget()
+        self.stats_widget.stats_changed.connect(self._on_stats_modified)
+        self.pages.addWidget(self.stats_widget)
 
         # Page 1: Inventory
         self.page_inventory = QWidget()
         layout = QVBoxLayout(self.page_inventory)
-        layout.addWidget(QLabel("Inventory Editor (Placeholder)"))
+        layout.addWidget(QLabel("Inventory Editor (Coming Soon)"))
         self.pages.addWidget(self.page_inventory)
 
         # Page 2: World Progress
         self.page_world = QWidget()
         layout = QVBoxLayout(self.page_world)
-        layout.addWidget(QLabel("World Progress Editor (Placeholder)"))
+        layout.addWidget(QLabel("World Progress Editor (Coming Soon)"))
         self.pages.addWidget(self.page_world)
 
         # Page 3: Character Slots
         self.page_slots = QWidget()
         self.slots_layout = QVBoxLayout(self.page_slots)
-        self.slots_layout.addWidget(QLabel("Character Slot Management"))
+        self.slots_layout.addWidget(QLabel("Select a character slot to edit:"))
         self.pages.addWidget(self.page_slots)
 
     def _load_styles(self):
@@ -99,38 +99,44 @@ class MainWindow(QMainWindow):
                 self.save_manager = SaveManager(file_path)
                 self.save_manager.load()
                 self.lbl_status.setText(f"Loaded: {os.path.basename(file_path)}")
-                self.btn_save.setEnabled(True)
                 self._refresh_slots_ui()
-                QMessageBox.information(self, "Success", f"Loaded {len(self.save_manager.slots)} potential slots.")
+                self.sidebar.setCurrentRow(3) # Go to slots page
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to load save: {str(e)}")
 
     def _refresh_slots_ui(self):
-        # Clear previous slots
+        # Clear previous buttons
         for i in reversed(range(self.slots_layout.count())): 
-            widget = self.slots_layout.itemAt(i).widget()
-            if widget and isinstance(widget, QPushButton):
-                widget.setParent(None)
+            item = self.slots_layout.itemAt(i)
+            if item.widget() and isinstance(item.widget(), QPushButton):
+                item.widget().setParent(None)
         
         # Add slot buttons
-        if self.save_manager:
-            for slot in self.save_manager.slots:
-                status = "Active" if slot['active'] else "Empty"
-                btn = QPushButton(f"Slot {slot['id']}: {slot['name']} ({status})")
-                self.slots_layout.addWidget(btn)
+        for slot in self.save_manager.slots:
+            status = "Active" if slot['active'] else "Empty"
+            btn = QPushButton(f"Slot {slot['id']}: {slot['name']} ({status})")
+            btn.clicked.connect(lambda checked=False, s_id=slot['id']: self._select_slot(s_id))
+            self.slots_layout.addWidget(btn)
+
+    def _select_slot(self, slot_id):
+        self.current_slot_id = slot_id
+        stats = self.save_manager.get_character_stats(slot_id)
+        self.stats_widget.load_stats(stats)
+        self.sidebar.setCurrentRow(0) # Switch to General stats
+        self.lbl_status.setText(f"Editing Slot {slot_id}: {stats.name}")
+
+    def _on_stats_modified(self):
+        if self.save_manager and self.current_slot_id is not None:
+            new_stats = self.stats_widget.get_stats()
+            self.save_manager.update_character_stats(self.current_slot_id, new_stats)
+            self.btn_save.setEnabled(True)
 
     def _save_file(self):
         if self.save_manager:
             try:
                 self.save_manager.save()
+                self.btn_save.setEnabled(False)
                 QMessageBox.information(self, "Success", "Save file updated and backup created.")
+                self._refresh_slots_ui()
             except Exception as e:
                 QMessageBox.critical(self, "Error", f"Failed to save: {str(e)}")
-
-if __name__ == "__main__":
-    import sys
-    from PySide6.QtWidgets import QApplication
-    app = QApplication(sys.argv)
-    window = MainWindow()
-    window.show()
-    sys.exit(app.exec())
