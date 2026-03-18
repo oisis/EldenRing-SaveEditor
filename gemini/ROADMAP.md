@@ -36,6 +36,7 @@
 
 ## Phase 6: Advanced Features & Tools 🛠️
 - [ ] Character Importer (copying characters between saves).
+- [ ] Character Slot Management (Add new characters to empty slots, Delete existing characters).
 - [ ] SteamID changer for PC saves.
 - [ ] Bulk item adder.
 
