@@ -59,18 +59,19 @@ from ui.widgets.inventory_widget import InventoryWidget
 from ui.widgets.world_widget import WorldWidget
 
 class MainWindow(QMainWindow):
+def _setup_pages(self):
+    # Page 0: General Stats
+    self.stats_widget = StatsWidget()
+    self.stats_widget.stats_changed.connect(self._on_stats_modified)
+    self.pages.addWidget(self.stats_widget)
+
+    # Page 1: Inventory
+    self.inventory_widget = InventoryWidget()
+    self.inventory_widget.btn_add.clicked.connect(self._on_add_item)
+    self.pages.addWidget(self.inventory_widget)
+
+    # Page 2: World Progress
 ...
-    def _setup_pages(self):
-        # Page 0: General Stats
-        self.stats_widget = StatsWidget()
-        self.stats_widget.stats_changed.connect(self._on_stats_modified)
-        self.pages.addWidget(self.stats_widget)
-
-        # Page 1: Inventory
-        self.inventory_widget = InventoryWidget()
-        self.pages.addWidget(self.inventory_widget)
-
-        # Page 2: World Progress
         self.world_widget = WorldWidget()
         self.world_widget.progress_changed.connect(self._on_progress_modified)
         self.pages.addWidget(self.world_widget)
@@ -142,13 +143,23 @@ class MainWindow(QMainWindow):
     def _on_progress_modified(self):
         if self.save_manager and self.current_slot_id is not None:
             for category in ["graces", "bosses"]:
-                # This is a bit inefficient, but for now we update all flags in category
                 items = self.world_widget.db.get(category, {})
                 selected_ids = self.world_widget.get_selected_ids(category)
                 for data in items.values():
                     flag_id = data.get("id")
                     self.save_manager.set_event_flag(self.current_slot_id, flag_id, flag_id in selected_ids)
             self.btn_save.setEnabled(True)
+
+    def _on_add_item(self):
+        if self.save_manager and self.current_slot_id is not None:
+            current_cat = self.inventory_widget.tabs.tabText(self.inventory_widget.tabs.currentIndex()).lower()
+            selected = self.inventory_widget.category_lists[current_cat].currentItem()
+            if selected:
+                # Extract ID from string "Name (ID: 123)"
+                item_id = int(selected.text().split("ID: ")[1].strip(")"))
+                if self.save_manager.add_item(self.current_slot_id, item_id):
+                    self.btn_save.setEnabled(True)
+                    QMessageBox.information(self, "Success", f"Item {selected.text()} added to inventory.")
 
             self.save_manager.update_character_stats(self.current_slot_id, new_stats)
             self.btn_save.setEnabled(True)

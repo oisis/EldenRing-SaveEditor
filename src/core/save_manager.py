@@ -1,7 +1,7 @@
 import os
 import shutil
 from datetime import datetime
-from .structures import SAVE_SLOT, PLAYER_GAME_DATA
+from .structures import SAVE_SLOT, PLAYER_GAME_DATA, GA_ITEM
 from .crypto import decrypt_pc_save, encrypt_pc_save, calculate_sha256
 
 class SaveManager:
@@ -9,12 +9,12 @@ class SaveManager:
     PS4_FIRST_SLOT_OFFSET = 0x310
     NAME_OFFSET_IN_SLOT = 0xe2b5
     STATS_OFFSET_IN_SLOT = NAME_OFFSET_IN_SLOT - 88
-    # Event flags offset: based on Rust structure analysis
-    # In Rust: EventFlags is after tutorial data (0x408) and some unknown values (0x1d)
-    # Heuristic for PS4: Event flags start around 0x1bfaf0 from slot start
     EVENT_FLAGS_OFFSET_IN_SLOT = 0x1bfaf0 
-    EVENT_FLAGS_SIZE = 0x1bf99f
-
+    
+    # Inventory offsets
+    GA_ITEMS_OFFSET_IN_SLOT = 0x20 # After ver (4) and map_id (4) and unk0 (0x18)
+    GA_ITEM_DATA_OFFSET_IN_SLOT = 0x1bf190 # Offset for GaItemData (counts)
+    
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = None
@@ -63,32 +63,69 @@ class SaveManager:
         self._scan_slots()
         return True
 
-    def get_event_flag(self, slot_id, flag_id):
-        """Returns True if the event flag is set."""
+    def add_item(self, slot_id, item_id, quantity=1):
+        """Adds a new item to the character's inventory."""
         if slot_id >= len(self.slots): return False
         
-        # Calculate byte and bit
+        slot_offset = self.slots[slot_id]["offset"]
+        ga_items_pos = slot_offset + self.GA_ITEMS_OFFSET_IN_SLOT
+        
+        # 1. Find an empty slot in GA_ITEMS (5120 slots)
+        # An empty slot has id 0
+        found_idx = -1
+        max_handle = 0x80000000 # Base handle for items
+        
+        for i in range(0x1400):
+            item_pos = ga_items_pos + (i * 17) # GA_ITEM size is 17 bytes
+            current_id = int.from_bytes(self.data[item_pos+4 : item_pos+8], 'little')
+            current_handle = int.from_bytes(self.data[item_pos : item_pos+4], 'little')
+            
+            if current_id == 0 and found_idx == -1:
+                found_idx = i
+            if current_handle > max_handle and current_handle < 0xFFFFFFFF:
+                max_handle = current_handle
+
+        if found_idx == -1:
+            print("Inventory full!")
+            return False
+
+        # 2. Create new item data
+        new_handle = max_handle + 1
+        new_item = {
+            "handle": new_handle,
+            "id": item_id,
+            "data": {
+                "unk2": -1,
+                "unk3": -1,
+                "aow_handle": 0xFFFFFFFF,
+                "unk5": 0
+            }
+        }
+        
+        # 3. Write to data array
+        item_bytes = GA_ITEM.build(new_item)
+        write_pos = ga_items_pos + (found_idx * 17)
+        self.data[write_pos : write_pos + 17] = item_bytes
+        
+        print(f"Added item {hex(item_id)} to slot {found_idx} with handle {hex(new_handle)}")
+        return True
+
+    def get_event_flag(self, slot_id, flag_id):
+        if slot_id >= len(self.slots): return False
         byte_offset = flag_id // 8
         bit_mask = 1 << (flag_id % 8)
-        
         slot_offset = self.slots[slot_id]["offset"]
         flag_pos = slot_offset + self.EVENT_FLAGS_OFFSET_IN_SLOT + byte_offset
-        
         if flag_pos >= len(self.data): return False
         return bool(self.data[flag_pos] & bit_mask)
 
     def set_event_flag(self, slot_id, flag_id, active):
-        """Sets or clears an event flag."""
         if slot_id >= len(self.slots): return False
-        
         byte_offset = flag_id // 8
         bit_mask = 1 << (flag_id % 8)
-        
         slot_offset = self.slots[slot_id]["offset"]
         flag_pos = slot_offset + self.EVENT_FLAGS_OFFSET_IN_SLOT + byte_offset
-        
         if flag_pos >= len(self.data): return False
-        
         if active:
             self.data[flag_pos] |= bit_mask
         else:

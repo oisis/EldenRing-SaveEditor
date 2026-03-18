@@ -44,9 +44,8 @@ class InventoryWidget(QWidget):
         layout.addWidget(self.tabs)
 
         # Actions
-        btn_add = QPushButton("Add Selected Item")
-        btn_add.clicked.connect(self._add_item)
-        layout.addWidget(btn_add)
+        self.btn_add = QPushButton("Add Selected Item")
+        layout.addWidget(self.btn_add)
 
     def _populate_list(self, category, filter_text=""):
         list_widget = self.category_lists[category]
