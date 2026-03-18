@@ -16,6 +16,8 @@ export function GetSteamID():Promise<number>;
 
 export function Greet(arg1:string):Promise<string>;
 
+export function ImportCharacter(arg1:number):Promise<void>;
+
 export function OpenSaveFile():Promise<string>;
 
 export function SaveCharacterDetails(arg1:backend.CharacterDetails):Promise<void>;

@@ -303,6 +303,56 @@ func (a *App) AddBulkItems(slotIndex int, category string) (int, error) {
 	return count, nil
 }
 
+// ImportCharacter opens a file dialog to select a source save and imports a character slot
+func (a *App) ImportCharacter(targetSlotIndex int) error {
+	if a.saveManager.CurrentSave == nil {
+		return fmt.Errorf("no save file loaded")
+	}
+
+	// 1. Select source file
+	sourcePath, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
+		Title: "Select Source Elden Ring Save File (.sl2)",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "Elden Ring Save (*.sl2)", Pattern: "*.sl2"},
+		},
+	})
+	if err != nil || sourcePath == "" {
+		return err
+	}
+
+	// 2. Load source save
+	sourceManager := core.NewSaveManager()
+	if err := sourceManager.LoadSave(sourcePath); err != nil {
+		return fmt.Errorf("failed to load source save: %v", err)
+	}
+
+	// 3. For now, we'll just take the first active slot from source
+	// In a full version, we could show a dialog to pick the source slot
+	sourceSlotIndex := -1
+	for i := 0; i < 10; i++ {
+		if sourceManager.CurrentSave.UserData10.ActiveSlots[i] == 0x01 {
+			sourceSlotIndex = i
+			break
+		}
+	}
+
+	if sourceSlotIndex == -1 {
+		return fmt.Errorf("source save has no active characters")
+	}
+
+	// 4. Copy the slot data
+	sourceSlot := sourceManager.CurrentSave.Slots[sourceSlotIndex].Slot
+	a.saveManager.CurrentSave.Slots[targetSlotIndex].Slot = sourceSlot
+
+	// 5. Copy ProfileSummary and set active flag
+	sourceSummary := sourceManager.CurrentSave.UserData10.ProfileSummary[sourceSlotIndex]
+	a.saveManager.CurrentSave.UserData10.ProfileSummary[targetSlotIndex] = sourceSummary
+	a.saveManager.CurrentSave.UserData10.ActiveSlots[targetSlotIndex] = 0x01
+
+	// 6. Save the file
+	return a.saveManager.SaveFile()
+}
+
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)

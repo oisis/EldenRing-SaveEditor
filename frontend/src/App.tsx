@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import './App.css';
-import {OpenSaveFile, GetCharacters, GetCharacterDetails, SaveCharacterDetails, GetSteamID, SaveSteamID, GetGraces, GetBosses, SetEventFlag, AddBulkItems} from "../wailsjs/go/backend/App";
+import {OpenSaveFile, GetCharacters, GetCharacterDetails, SaveCharacterDetails, GetSteamID, SaveSteamID, GetGraces, GetBosses, SetEventFlag, AddBulkItems, ImportCharacter} from "../wailsjs/go/backend/App";
 import {backend} from "../wailsjs/go/models";
 
 interface CharacterInfo {
@@ -31,6 +31,16 @@ function App() {
                 setSteamID(sid.toString());
                 setError("");
             }
+        } catch (err) {
+            setError(String(err));
+        }
+    }
+
+    async function handleImport(slotIndex: number) {
+        try {
+            await ImportCharacter(slotIndex);
+            refreshCharacters();
+            alert("Character imported successfully!");
         } catch (err) {
             setError(String(err));
         }
@@ -150,7 +160,11 @@ function App() {
                                     <h3>{char.isActive ? char.name : "Empty Slot"}</h3>
                                     {char.isActive && <p>Level: {char.level}</p>}
                                 </div>
-                                {char.isActive && <button className="btn-edit" onClick={() => handleEdit(char.slotIndex)}>Edit</button>}
+                                {char.isActive ? (
+                                    <button className="btn-edit" onClick={() => handleEdit(char.slotIndex)}>Edit</button>
+                                ) : (
+                                    <button className="btn-import" onClick={() => handleImport(char.slotIndex)}>Import</button>
+                                )}
                             </div>
                         ))}
                     </div>

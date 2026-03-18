@@ -117,6 +117,19 @@ h1 {
     background-color: #2980b9;
 }
 
+.btn-import {
+    background-color: #27ae60;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.btn-import:hover {
+    background-color: #219150;
+}
+
 .edit-view {
     background-color: #2c3e50;
     padding: 2rem;

@@ -30,6 +30,10 @@ export function Greet(arg1) {
   return window['go']['backend']['App']['Greet'](arg1);
 }
 
+export function ImportCharacter(arg1) {
+  return window['go']['backend']['App']['ImportCharacter'](arg1);
+}
+
 export function OpenSaveFile() {
   return window['go']['backend']['App']['OpenSaveFile']();
 }
