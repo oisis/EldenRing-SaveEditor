@@ -121,14 +121,35 @@ class MainWindow(QMainWindow):
 
     def _select_slot(self, slot_id):
         self.current_slot_id = slot_id
+
+        # Load Stats
         stats = self.save_manager.get_character_stats(slot_id)
         self.stats_widget.load_stats(stats)
-        self.sidebar.setCurrentRow(0) # Switch to General stats
+
+        # Load World Progress
+        active_flags = []
+        for category in ["graces", "bosses"]:
+            items = self.world_widget.db.get(category, {})
+            for data in items.values():
+                flag_id = data.get("id")
+                if self.save_manager.get_event_flag(slot_id, flag_id):
+                    active_flags.append(flag_id)
+        self.world_widget.load_progress(active_flags)
+
+        self.sidebar.setCurrentRow(0)
         self.lbl_status.setText(f"Editing Slot {slot_id}: {stats.name}")
 
-    def _on_stats_modified(self):
+    def _on_progress_modified(self):
         if self.save_manager and self.current_slot_id is not None:
-            new_stats = self.stats_widget.get_stats()
+            for category in ["graces", "bosses"]:
+                # This is a bit inefficient, but for now we update all flags in category
+                items = self.world_widget.db.get(category, {})
+                selected_ids = self.world_widget.get_selected_ids(category)
+                for data in items.values():
+                    flag_id = data.get("id")
+                    self.save_manager.set_event_flag(self.current_slot_id, flag_id, flag_id in selected_ids)
+            self.btn_save.setEnabled(True)
+
             self.save_manager.update_character_stats(self.current_slot_id, new_stats)
             self.btn_save.setEnabled(True)
 
