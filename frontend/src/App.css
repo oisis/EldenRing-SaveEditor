@@ -1,59 +1,189 @@
-#app {
-    height: 100vh;
+#App {
+    background-color: #1b2636;
+    color: #ffffff;
+    min-height: 100vh;
+    font-family: 'Nunito', sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 2rem;
+    background-color: #161e2b;
+    border-bottom: 2px solid #2c3e50;
     text-align: center;
 }
 
-#logo {
-    display: block;
-    width: 50%;
-    height: 50%;
-    margin: auto;
-    padding: 10% 0 0;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: 100% 100%;
-    background-origin: content-box;
+h1 {
+    margin-bottom: 1.5rem;
+    color: #f1c40f;
 }
 
-.result {
-    height: 20px;
-    line-height: 20px;
-    margin: 1.5rem auto;
-}
-
-.input-box .btn {
-    width: 60px;
-    height: 30px;
-    line-height: 30px;
-    border-radius: 3px;
+.btn {
+    background-color: #f1c40f;
+    color: #1b2636;
     border: none;
-    margin: 0 0 0 20px;
-    padding: 0 8px;
+    padding: 0.8rem 1.5rem;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #d4ac0d;
+}
+
+.file-path {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #bdc3c7;
+}
+
+.error {
+    color: #e74c3c;
+    margin-top: 1rem;
+}
+
+.main {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.character-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    width: 100%;
+    max-width: 1200px;
+}
+
+.character-card {
+    background-color: #2c3e50;
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid #34495e;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.character-card.active:hover {
+    transform: translateY(-5px);
+    border-color: #f1c40f;
+}
+
+.character-card.empty {
+    opacity: 0.5;
+    background-color: #1a252f;
+}
+
+.slot-id {
+    background-color: #1b2636;
+    padding: 0.5rem;
+    border-radius: 5px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #f1c40f;
+}
+
+.char-info {
+    flex: 1;
+}
+
+.char-info h3 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.char-info p {
+    margin: 0.2rem 0 0 0;
+    color: #bdc3c7;
+}
+
+.btn-edit {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
     cursor: pointer;
 }
 
-.input-box .btn:hover {
-    background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-    color: #333333;
+.btn-edit:hover {
+    background-color: #2980b9;
 }
 
-.input-box .input {
-    border: none;
-    border-radius: 3px;
+.edit-view {
+    background-color: #2c3e50;
+    padding: 2rem;
+    border-radius: 10px;
+    width: 100%;
+    max-width: 800px;
+}
+
+.edit-view h2 {
+    color: #f1c40f;
+    margin-top: 0;
+    margin-bottom: 2rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.stat-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.stat-item label {
+    font-size: 0.9rem;
+    color: #bdc3c7;
+}
+
+.stat-item input {
+    background-color: #1b2636;
+    border: 1px solid #34495e;
+    color: white;
+    padding: 0.5rem;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.stat-item input:focus {
+    border-color: #f1c40f;
     outline: none;
-    height: 30px;
-    line-height: 30px;
-    padding: 0 10px;
-    background-color: rgba(240, 240, 240, 1);
-    -webkit-font-smoothing: antialiased;
 }
 
-.input-box .input:hover {
-    border: none;
-    background-color: rgba(255, 255, 255, 1);
+.edit-actions {
+    margin-top: 2.5rem;
+    display: flex;
+    justify-content: flex-end;
 }
 
-.input-box .input:focus {
-    border: none;
-    background-color: rgba(255, 255, 255, 1);
+.btn-save {
+    background-color: #27ae60;
+    color: white;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+}
+
+.btn-save:hover {
+    background-color: #219150;
+}
+
+.btn-back {
+    background-color: #7f8c8d;
+    margin-left: 1rem;
+}
+
+.btn-back:hover {
+    background-color: #95a5a6;
 }
