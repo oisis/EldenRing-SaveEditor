@@ -157,22 +157,9 @@ data/
 GEMINI.md
 gemini/
 .geminiignore
+gemini/ROADMAP.md
 
 # Custom dirs
 org-src/
 save/
-
-# Python specific
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
 build/
-dist/
-*.egg-info/
-.venv/
-.env
-.ruff_cache/
-*.spec
-gemini/ROADMAP.md
