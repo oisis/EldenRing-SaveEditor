@@ -16,7 +16,6 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Elden Ring Save Editor")
         self.setMinimumSize(1100, 800)
         
-        # Set Window Icon (if exists)
         icon_path = get_resource_path("assets/32.png")
         if os.path.exists(icon_path):
             self.setWindowIcon(QIcon(icon_path))
@@ -35,19 +34,16 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(15)
 
-        # Sidebar
         sidebar_container = QWidget()
         sidebar_layout = QVBoxLayout(sidebar_container)
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         
         self.sidebar = QListWidget()
         self.sidebar.setFixedWidth(220)
-        self._add_sidebar_item("General Stats", "contact-new")
         self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("contact-new"), "General Stats"))
         self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("package-x-generic"), "Inventory Editor"))
         self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("applications-internet"), "World Progress"))
         self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("system-users"), "Character Slots"))
-        
         self.sidebar.currentRowChanged.connect(self._on_sidebar_changed)
         sidebar_layout.addWidget(self.sidebar)
         
@@ -57,12 +53,10 @@ class MainWindow(QMainWindow):
         
         main_layout.addWidget(sidebar_container)
 
-        # Content Area
         content_container = QWidget()
         self.content_layout = QVBoxLayout(content_container)
         self.content_layout.setContentsMargins(0, 0, 0, 0)
         
-        # Toolbar
         toolbar = QFrame()
         toolbar.setFrameShape(QFrame.StyledPanel)
         toolbar_layout = QHBoxLayout(toolbar)
@@ -80,19 +74,13 @@ class MainWindow(QMainWindow):
         self.lbl_status = QLabel("Ready")
         self.lbl_status.setStyleSheet("font-weight: bold;")
         toolbar_layout.addWidget(self.lbl_status)
-        
         self.content_layout.addWidget(toolbar)
 
-        # Pages
         self.pages = QStackedWidget()
         self._setup_pages()
         self.content_layout.addWidget(self.pages)
 
         main_layout.addWidget(content_container)
-
-    def _add_sidebar_item(self, text, icon_name):
-        # Helper to clear previous manual items if needed
-        pass
 
     def _setup_pages(self):
         self.stats_widget = StatsWidget()
@@ -176,7 +164,9 @@ class MainWindow(QMainWindow):
     def _select_slot(self, slot_id):
         self.current_slot_id = slot_id
         stats = self.save_manager.get_character_stats(slot_id)
-        self.stats_widget.load_stats(stats)
+        
+        steam_id = self.save_manager.steam_id if self.save_manager.is_pc else None
+        self.stats_widget.load_stats(stats, steam_id)
         
         active_flags = []
         for category in ["graces", "bosses"]:
@@ -193,6 +183,14 @@ class MainWindow(QMainWindow):
     def _on_stats_modified(self):
         if self.save_manager and self.current_slot_id is not None:
             new_stats = self.stats_widget.get_stats()
+            
+            if self.save_manager.is_pc and new_stats.get("steam_id"):
+                try:
+                    new_id = int(new_stats["steam_id"])
+                    self.save_manager.set_steam_id(new_id)
+                except ValueError:
+                    pass
+            
             self.save_manager.update_character_stats(self.current_slot_id, new_stats)
             self.btn_save.setEnabled(True)
 
