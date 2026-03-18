@@ -52,6 +52,22 @@ export namespace backend {
 	        this.isActive = source["isActive"];
 	    }
 	}
+	export class EventItem {
+	    id: number;
+	    name: string;
+	    enabled: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new EventItem(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.enabled = source["enabled"];
+	    }
+	}
 
 }
 

@@ -3,10 +3,70 @@ package backend
 import (
 	"context"
 	"er-save-editor/backend/core"
+	"er-save-editor/backend/db"
 	"fmt"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 	"unicode/utf16"
 )
+
+// EventItem represents a grace or boss with its current status
+type EventItem struct {
+	ID      uint32 `json:"id"`
+	Name    string `json:"name"`
+	Enabled bool   `json:"enabled"`
+}
+
+// GetGraces returns all graces with their status for a specific slot
+func (a *App) GetGraces(slotIndex int) ([]EventItem, error) {
+	if a.saveManager.CurrentSave == nil {
+		return nil, fmt.Errorf("no save file loaded")
+	}
+
+	slot := &a.saveManager.CurrentSave.Slots[slotIndex].Slot
+	database := db.GetInstance()
+	
+	var graces []EventItem
+	for _, g := range database.Graces {
+		graces = append(graces, EventItem{
+			ID:      g.ID,
+			Name:    g.Name,
+			Enabled: slot.GetEventFlag(g.ID),
+		})
+	}
+	return graces, nil
+}
+
+// GetBosses returns all bosses with their status for a specific slot
+func (a *App) GetBosses(slotIndex int) ([]EventItem, error) {
+	if a.saveManager.CurrentSave == nil {
+		return nil, fmt.Errorf("no save file loaded")
+	}
+
+	slot := &a.saveManager.CurrentSave.Slots[slotIndex].Slot
+	database := db.GetInstance()
+	
+	var bosses []EventItem
+	for _, b := range database.Bosses {
+		bosses = append(bosses, EventItem{
+			ID:      b.ID,
+			Name:    b.Name,
+			Enabled: slot.GetEventFlag(b.ID),
+		})
+	}
+	return bosses, nil
+}
+
+// SetEventFlag updates a grace or boss status and saves the file
+func (a *App) SetEventFlag(slotIndex int, flagID uint32, enabled bool) error {
+	if a.saveManager.CurrentSave == nil {
+		return fmt.Errorf("no save file loaded")
+	}
+
+	slot := &a.saveManager.CurrentSave.Slots[slotIndex].Slot
+	slot.SetEventFlag(flagID, enabled)
+	
+	return a.saveManager.SaveFile()
+}
 
 // CharacterInfo represents basic character data for the UI
 type CharacterInfo struct {
@@ -179,6 +239,24 @@ func (a *App) SaveCharacterDetails(details CharacterDetails) error {
 	a.saveManager.CurrentSave.UserData10.ProfileSummary[details.SlotIndex].Level = pgd.Level
 
 	// Save the entire file (includes backup and checksum updates)
+	return a.saveManager.SaveFile()
+}
+
+// GetSteamID returns the SteamID from the current save
+func (a *App) GetSteamID() (uint64, error) {
+	if a.saveManager.CurrentSave == nil {
+		return 0, fmt.Errorf("no save file loaded")
+	}
+	return a.saveManager.CurrentSave.UserData10.SteamID, nil
+}
+
+// SaveSteamID updates the SteamID and saves the file
+func (a *App) SaveSteamID(steamID uint64) error {
+	if a.saveManager.CurrentSave == nil {
+		return fmt.Errorf("no save file loaded")
+	}
+
+	a.saveManager.CurrentSave.UserData10.SteamID = steamID
 	return a.saveManager.SaveFile()
 }
 
