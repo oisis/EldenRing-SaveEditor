@@ -293,3 +293,20 @@ h1 {
 .event-list::-webkit-scrollbar-thumb:hover {
     background: #f1c40f;
 }
+
+.inventory-view {
+    text-align: left;
+}
+
+.bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.bulk-actions .btn-secondary {
+    padding: 1rem;
+    flex: 1;
+    min-width: 200px;
+}

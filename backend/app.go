@@ -260,6 +260,49 @@ func (a *App) SaveSteamID(steamID uint64) error {
 	return a.saveManager.SaveFile()
 }
 
+// AddBulkItems adds all items from a specific category to a character slot
+func (a *App) AddBulkItems(slotIndex int, category string) (int, error) {
+	if a.saveManager.CurrentSave == nil {
+		return 0, fmt.Errorf("no save file loaded")
+	}
+
+	database := db.GetInstance()
+	var itemIDs []uint32
+
+	// Find items in the requested category
+	var groups []db.ItemGroup
+	switch category {
+	case "Weapons":
+		groups = database.Weapons
+	case "Armors":
+		groups = database.Armors
+	case "Items":
+		groups = database.Items
+	case "Talismans":
+		groups = database.Talismans
+	}
+
+	for _, group := range groups {
+		for _, item := range group.Items {
+			itemIDs = append(itemIDs, item.ID)
+		}
+	}
+
+	if len(itemIDs) == 0 {
+		return 0, fmt.Errorf("no items found in category %s", category)
+	}
+
+	slot := &a.saveManager.CurrentSave.Slots[slotIndex].Slot
+	count := slot.AddBulkItems(itemIDs)
+
+	// Save the file to apply changes
+	if err := a.saveManager.SaveFile(); err != nil {
+		return 0, err
+	}
+
+	return count, nil
+}
+
 // Greet returns a greeting for the given name
 func (a *App) Greet(name string) string {
 	return fmt.Sprintf("Hello %s, It's show time!", name)

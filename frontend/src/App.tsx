@@ -1,6 +1,6 @@
 import {useState} from 'react';
 import './App.css';
-import {OpenSaveFile, GetCharacters, GetCharacterDetails, SaveCharacterDetails, GetSteamID, SaveSteamID, GetGraces, GetBosses, SetEventFlag} from "../wailsjs/go/backend/App";
+import {OpenSaveFile, GetCharacters, GetCharacterDetails, SaveCharacterDetails, GetSteamID, SaveSteamID, GetGraces, GetBosses, SetEventFlag, AddBulkItems} from "../wailsjs/go/backend/App";
 import {backend} from "../wailsjs/go/models";
 
 interface CharacterInfo {
@@ -16,7 +16,7 @@ function App() {
     const [editingChar, setEditingChar] = useState<backend.CharacterDetails | null>(null);
     const [graces, setGraces] = useState<backend.EventItem[]>([]);
     const [bosses, setBosses] = useState<backend.EventItem[]>([]);
-    const [activeTab, setActiveTab] = useState<"stats" | "graces" | "bosses">("stats");
+    const [activeTab, setActiveTab] = useState<"stats" | "graces" | "bosses" | "inventory">("stats");
     const [steamID, setSteamID] = useState<string>("0");
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [error, setError] = useState("");
@@ -75,6 +75,16 @@ function App() {
             } else {
                 setBosses(bosses.map(b => b.id === flagID ? {...b, enabled} : b));
             }
+        } catch (err) {
+            setError(String(err));
+        }
+    }
+
+    async function handleBulkAdd(category: string) {
+        if (!editingChar) return;
+        try {
+            const count = await AddBulkItems(editingChar.slotIndex, category);
+            alert(`Added ${count} items from ${category} category!`);
         } catch (err) {
             setError(String(err));
         }
@@ -150,6 +160,7 @@ function App() {
                             <h2>Editing: {editingChar.name}</h2>
                             <div className="tabs">
                                 <button className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Stats</button>
+                                <button className={`tab-btn ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>Inventory</button>
                                 <button className={`tab-btn ${activeTab === 'graces' ? 'active' : ''}`} onClick={() => setActiveTab('graces')}>Graces</button>
                                 <button className={`tab-btn ${activeTab === 'bosses' ? 'active' : ''}`} onClick={() => setActiveTab('bosses')}>Bosses</button>
                             </div>
@@ -197,6 +208,19 @@ function App() {
                                 </div>
                                 <div className="edit-actions">
                                     <button className="btn btn-save" onClick={handleSave}>Save Changes</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'inventory' && (
+                            <div className="tab-content inventory-view">
+                                <h3>Bulk Add Items</h3>
+                                <p className="help-text">Add all items from a category that you don't already have.</p>
+                                <div className="bulk-actions">
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Talismans')}>Add All Talismans</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Weapons')}>Add All Weapons</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Armors')}>Add All Armors</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Items')}>Add All Consumables</button>
                                 </div>
                             </div>
                         )}

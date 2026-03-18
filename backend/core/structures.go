@@ -39,22 +39,31 @@ type PlayerGameData struct {
 	_0x108         [0x18]byte
 }
 
+// GaItem represents an item in the game's global inventory
+// Size: 17 bytes
+type GaItem struct {
+	Handle uint32 // Unique ID for this instance of the item
+	ItemID uint32 // The ID of the item from the game database
+	Unk08  uint32
+	Unk0C  uint32
+	Unk10  byte
+}
+
 // SaveSlot is the 0x280000 byte block for a single character
 type SaveSlot struct {
-	Version        uint32
-	MapID          [4]byte
-	_0x08          [0x18]byte
-	// GaItems and other structures will be added as needed
-	// For now, we use a large byte array to maintain size
-	Data           [0x280000 - 0x20]byte
+	Version uint32
+	MapID   [4]byte
+	_0x08   [0x18]byte
+	// GaItems: 5120 items * 17 bytes = 87040 (0x15400)
+	GaItems [5120]GaItem
+	Data    [0x280000 - 0x20 - 87040]byte
 }
 
 // GetPlayerGameData extracts PlayerGameData from the raw SaveSlot data
 func (s *SaveSlot) GetPlayerGameData() (*PlayerGameData, error) {
 	// PlayerGameData starts at 0x15420 in the slot
-	// Since we skipped 0x20 bytes in Data, it's at 0x15420 - 0x20 = 0x15400
-	offset := 0x15400
-	pgdData := s.Data[offset : offset+0x120] // Size of PlayerGameData
+	// Our Data field now starts exactly at 0x15420 (0x20 + 0x15400)
+	pgdData := s.Data[0:0x120] // Size of PlayerGameData
 	
 	pgd := &PlayerGameData{}
 	reader := bytes.NewReader(pgdData)
@@ -66,12 +75,11 @@ func (s *SaveSlot) GetPlayerGameData() (*PlayerGameData, error) {
 
 // SetPlayerGameData writes PlayerGameData back to the raw SaveSlot data
 func (s *SaveSlot) SetPlayerGameData(pgd *PlayerGameData) error {
-	offset := 0x15400
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.LittleEndian, pgd); err != nil {
 		return err
 	}
-	copy(s.Data[offset:], buf.Bytes())
+	copy(s.Data[0:], buf.Bytes())
 	return nil
 }
 
