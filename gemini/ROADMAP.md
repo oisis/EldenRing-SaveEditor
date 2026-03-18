@@ -41,6 +41,12 @@
 - [ ] Bulk item adder.
 
 ## Phase 7: Distribution & Quality 🚀
-- [ ] Cross-platform packaging using `PyInstaller` (Single File Executable, no external dependencies).
+- [x] Cross-platform packaging using `PyInstaller` (Single File Executable, no external dependencies).
 - [ ] Automated tests for binary parsing and checksums.
 - [ ] Final I18n pass (Polish/English).
+
+## Phase 8: UX/UI Refinement & Themes 🎨
+- [ ] Implement Dynamic Theme Switching (Light/Dark Mode).
+- [ ] Improve UI Scaling and Readability (Spacing, Typography, Layouts).
+- [ ] Add Icons for categories and actions.
+- [ ] Responsive design for different window sizes.

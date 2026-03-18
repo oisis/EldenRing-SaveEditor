@@ -1,7 +1,8 @@
 import os
 from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
                              QListWidget, QStackedWidget, QLabel, QPushButton, 
-                             QFileDialog, QMessageBox)
+                             QFileDialog, QMessageBox, QFrame)
+from PySide6.QtCore import Qt
 from core.save_manager import SaveManager
 from ui.widgets.stats_widget import StatsWidget
 from ui.widgets.inventory_widget import InventoryWidget
@@ -13,43 +14,66 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Elden Ring Save Editor")
-        self.setMinimumSize(1000, 700)
+        self.setMinimumSize(1100, 800)
         self.save_manager = None
         self.current_slot_id = None
+        self.is_dark_mode = True
         
         self._setup_ui()
-        self._load_styles()
+        self._apply_theme()
 
     def _setup_ui(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QHBoxLayout(central_widget)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.setSpacing(0)
+        main_layout.setContentsMargins(10, 10, 10, 10)
+        main_layout.setSpacing(15)
 
+        # Sidebar with styling
+        sidebar_container = QWidget()
+        sidebar_layout = QVBoxLayout(sidebar_container)
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        
         self.sidebar = QListWidget()
-        self.sidebar.setFixedWidth(200)
-        self.sidebar.addItems(["General", "Inventory", "World Progress", "Character Slots"])
+        self.sidebar.setFixedWidth(220)
+        self.sidebar.addItems(["General Stats", "Inventory Editor", "World Progress", "Character Slots"])
         self.sidebar.currentRowChanged.connect(self._on_sidebar_changed)
-        main_layout.addWidget(self.sidebar)
+        sidebar_layout.addWidget(self.sidebar)
+        
+        # Theme Toggle Button
+        self.btn_theme = QPushButton("Switch to Light Mode")
+        self.btn_theme.clicked.connect(self._toggle_theme)
+        sidebar_layout.addWidget(self.btn_theme)
+        
+        main_layout.addWidget(sidebar_container)
 
+        # Content Area
         content_container = QWidget()
         self.content_layout = QVBoxLayout(content_container)
+        self.content_layout.setContentsMargins(0, 0, 0, 0)
         
-        toolbar = QHBoxLayout()
-        self.btn_open = QPushButton("Open Save")
+        # Toolbar
+        toolbar = QFrame()
+        toolbar.setFrameShape(QFrame.StyledPanel)
+        toolbar_layout = QHBoxLayout(toolbar)
+        
+        self.btn_open = QPushButton("Open Save File")
         self.btn_open.clicked.connect(self._open_file)
         self.btn_save = QPushButton("Save Changes")
         self.btn_save.setEnabled(False)
         self.btn_save.clicked.connect(self._save_file)
         
-        toolbar.addWidget(self.btn_open)
-        toolbar.addWidget(self.btn_save)
-        toolbar.addStretch()
-        self.lbl_status = QLabel("No file loaded")
-        toolbar.addWidget(self.lbl_status)
-        self.content_layout.addLayout(toolbar)
+        toolbar_layout.addWidget(self.btn_open)
+        toolbar_layout.addWidget(self.btn_save)
+        toolbar_layout.addStretch()
+        
+        self.lbl_status = QLabel("Ready")
+        self.lbl_status.setStyleSheet("font-weight: bold;")
+        toolbar_layout.addWidget(self.lbl_status)
+        
+        self.content_layout.addWidget(toolbar)
 
+        # Pages
         self.pages = QStackedWidget()
         self._setup_pages()
         self.content_layout.addWidget(self.pages)
@@ -71,20 +95,32 @@ class MainWindow(QMainWindow):
 
         self.page_slots = QWidget()
         self.slots_layout = QVBoxLayout(self.page_slots)
+        self.slots_layout.setSpacing(10)
+        
         actions_layout = QHBoxLayout()
-        self.btn_import = QPushButton("Import Character from another Save")
+        self.btn_import = QPushButton("Import Character")
         self.btn_import.clicked.connect(self._import_character)
-        self.btn_delete = QPushButton("Delete Selected Character")
+        self.btn_delete = QPushButton("Delete Character")
         self.btn_delete.clicked.connect(self._delete_character)
         self.btn_delete.setStyleSheet("background-color: #a83232;")
+        
         actions_layout.addWidget(self.btn_import)
         actions_layout.addWidget(self.btn_delete)
         self.slots_layout.addLayout(actions_layout)
-        self.slots_layout.addWidget(QLabel("Select a character slot to edit:"))
+        
+        header = QLabel("Select a character slot to edit:")
+        header.setStyleSheet("font-size: 16px; font-weight: bold; margin-top: 10px;")
+        self.slots_layout.addWidget(header)
         self.pages.addWidget(self.page_slots)
 
-    def _load_styles(self):
-        style_path = get_resource_path("src/ui/styles.qss")
+    def _toggle_theme(self):
+        self.is_dark_mode = not self.is_dark_mode
+        self.btn_theme.setText("Switch to Dark Mode" if self.is_dark_mode else "Switch to Light Mode")
+        self._apply_theme()
+
+    def _apply_theme(self):
+        theme_file = "src/ui/styles.qss" if self.is_dark_mode else "src/ui/light_style.qss"
+        style_path = get_resource_path(theme_file)
         if os.path.exists(style_path):
             with open(style_path, "r") as f:
                 self.setStyleSheet(f.read())
@@ -109,15 +145,17 @@ class MainWindow(QMainWindow):
     def _refresh_slots_ui(self):
         for i in reversed(range(self.slots_layout.count())): 
             item = self.slots_layout.itemAt(i)
-            if item and item.widget() and isinstance(item.widget(), QPushButton):
+            if item and item.widget() and isinstance(item.widget(), QPushButton) and item.widget() not in [self.btn_import, self.btn_delete]:
                 item.widget().setParent(None)
         
         if self.save_manager:
             for slot in self.save_manager.slots:
                 status = "Active" if slot['active'] else "Empty"
                 btn = QPushButton(f"Slot {slot['id']}: {slot['name']} ({status})")
+                btn.setMinimumHeight(50)
                 btn.clicked.connect(lambda checked=False, s_id=slot['id']: self._select_slot(s_id))
                 self.slots_layout.addWidget(btn)
+            self.slots_layout.addStretch()
 
     def _select_slot(self, slot_id):
         self.current_slot_id = slot_id
@@ -134,7 +172,7 @@ class MainWindow(QMainWindow):
         self.world_widget.load_progress(active_flags)
         
         self.sidebar.setCurrentRow(0)
-        self.lbl_status.setText(f"Editing Slot {slot_id}: {stats.name}")
+        self.lbl_status.setText(f"Editing: {stats.name}")
 
     def _on_stats_modified(self):
         if self.save_manager and self.current_slot_id is not None:
@@ -160,7 +198,7 @@ class MainWindow(QMainWindow):
                 item_id = int(selected.text().split("ID: ")[1].strip(")"))
                 if self.save_manager.add_item(self.current_slot_id, item_id):
                     self.btn_save.setEnabled(True)
-                    QMessageBox.information(self, "Success", "Item added to inventory.")
+                    QMessageBox.information(self, "Success", f"Item added to inventory.")
 
     def _delete_character(self):
         if not self.save_manager or self.current_slot_id is None:
