@@ -175,3 +175,4 @@ dist/
 .env
 .ruff_cache/
 *.spec
+gemini/ROADMAP.md
