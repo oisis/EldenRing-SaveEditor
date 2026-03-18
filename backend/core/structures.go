@@ -11,14 +11,14 @@ type SaveHeader [0x70]byte
 // PlayerGameData contains character stats and name
 // Offset in SaveSlot: 0x15420
 type PlayerGameData struct {
-	_0x00          [0x94]byte
+	Unk00          [0x94]byte
 	CharacterName  [32]byte // UTF-16, 16 characters max
-	_0xB4          [0x01]byte
-	_0xB5          [0x01]byte
-	_0xB6          [0x01]byte
-	_0xB7          [0x01]byte
+	UnkB4          [0x01]byte
+	UnkB5          [0x01]byte
+	UnkB6          [0x01]byte
+	UnkB7          [0x01]byte
 	Level          uint32
-	_0xBC          [0x04]byte
+	UnkBC          [0x04]byte
 	Vigor          uint32
 	Mind           uint32
 	Endurance      uint32
@@ -27,16 +27,16 @@ type PlayerGameData struct {
 	Intelligence   uint32
 	Faith          uint32
 	Arcane         uint32
-	_0xDC          [0x04]byte
+	UnkDC          [0x04]byte
 	HP             uint32
-	_0xE4          [0x04]byte
+	UnkE4          [0x04]byte
 	FP             uint32
-	_0xEC          [0x04]byte
+	UnkEC          [0x04]byte
 	SP             uint32
-	_0xF4          [0x0C]byte
+	UnkF4          [0x0C]byte
 	Souls          uint32
 	TotalSouls     uint32
-	_0x108         [0x18]byte
+	Unk108         [0x18]byte
 }
 
 // GaItem represents an item in the game's global inventory
@@ -53,7 +53,7 @@ type GaItem struct {
 type SaveSlot struct {
 	Version uint32
 	MapID   [4]byte
-	_0x08   [0x18]byte
+	Unk08   [0x18]byte
 	// GaItems: 5120 items * 17 bytes = 87040 (0x15400)
 	GaItems [5120]GaItem
 	Data    [0x280000 - 0x20 - 87040]byte
@@ -63,9 +63,10 @@ type SaveSlot struct {
 func (s *SaveSlot) GetPlayerGameData() (*PlayerGameData, error) {
 	// PlayerGameData starts at 0x15420 in the slot
 	// Our Data field now starts exactly at 0x15420 (0x20 + 0x15400)
-	pgdData := s.Data[0:0x120] // Size of PlayerGameData
-	
 	pgd := &PlayerGameData{}
+	size := binary.Size(pgd)
+	pgdData := s.Data[0:size]
+	
 	reader := bytes.NewReader(pgdData)
 	if err := binary.Read(reader, binary.LittleEndian, pgd); err != nil {
 		return nil, err
@@ -93,19 +94,19 @@ type PCSaveSlot struct {
 type ProfileSummary struct {
 	CharacterName [32]byte
 	Level         uint32
-	_0x24         [0x0C]byte
+	Unk24         [0x0C]byte
 }
 
 // UserData10 contains account info and slot status
 type UserData10 struct {
 	Checksum       [16]byte
-	_0x10          [0x04]byte
+	Unk10          [0x04]byte
 	SteamID        uint64
-	_0x1C          [0x04]byte
+	Unk1C          [0x04]byte
 	ActiveSlots    [10]byte // 0x01 = active, 0x00 = empty
-	_0x2A          [0x12]byte
+	Unk2A          [0x12]byte
 	ProfileSummary [10]ProfileSummary
-	_0x262         [0x5FD9E]byte
+	Unk262         [0x5FD9E]byte
 }
 
 // UserData11 contains regulation data

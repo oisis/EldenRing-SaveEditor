@@ -14,8 +14,37 @@
     text-align: center;
 }
 
+.header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto 1.5rem auto;
+}
+
+.lang-switch {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.lang-btn {
+    background-color: #34495e;
+    color: white;
+    border: none;
+    padding: 0.3rem 0.6rem;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.lang-btn.active {
+    background-color: #f1c40f;
+    color: #1b2636;
+    font-weight: bold;
+}
+
 h1 {
-    margin-bottom: 1.5rem;
+    margin: 0;
     color: #f1c40f;
 }
 

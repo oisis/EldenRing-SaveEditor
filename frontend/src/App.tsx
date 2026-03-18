@@ -2,6 +2,7 @@ import {useState} from 'react';
 import './App.css';
 import {OpenSaveFile, GetCharacters, GetCharacterDetails, SaveCharacterDetails, GetSteamID, SaveSteamID, GetGraces, GetBosses, SetEventFlag, AddBulkItems, ImportCharacter} from "../wailsjs/go/backend/App";
 import {backend} from "../wailsjs/go/models";
+import {translations, Language} from "./i18n";
 
 interface CharacterInfo {
     slotIndex: number;
@@ -11,6 +12,9 @@ interface CharacterInfo {
 }
 
 function App() {
+    const [lang, setLang] = useState<Language>("en");
+    const t = translations[lang];
+
     const [filePath, setFilePath] = useState("");
     const [characters, setCharacters] = useState<CharacterInfo[]>([]);
     const [editingChar, setEditingChar] = useState<backend.CharacterDetails | null>(null);
@@ -40,7 +44,7 @@ function App() {
         try {
             await ImportCharacter(slotIndex);
             refreshCharacters();
-            alert("Character imported successfully!");
+            alert(t.importSuccess);
         } catch (err) {
             setError(String(err));
         }
@@ -49,7 +53,7 @@ function App() {
     async function handleSaveSteamID() {
         try {
             await SaveSteamID(BigInt(steamID) as any);
-            alert("SteamID saved successfully!");
+            alert(t.saveSuccess);
             setIsSettingsOpen(false);
         } catch (err) {
             setError(String(err));
@@ -94,7 +98,7 @@ function App() {
         if (!editingChar) return;
         try {
             const count = await AddBulkItems(editingChar.slotIndex, category);
-            alert(`Added ${count} items from ${category} category!`);
+            alert(`Added ${count} items!`);
         } catch (err) {
             setError(String(err));
         }
@@ -107,7 +111,7 @@ function App() {
             setEditingChar(null);
             refreshCharacters();
             setError("");
-            alert("Save successful!");
+            alert(t.saveSuccess);
         } catch (err) {
             setError(String(err));
         }
@@ -124,31 +128,37 @@ function App() {
     return (
         <div id="App">
             <header className="header">
-                <h1>ER Save Editor</h1>
+                <div className="header-top">
+                    <h1>{t.title}</h1>
+                    <div className="lang-switch">
+                        <button className={`lang-btn ${lang === 'en' ? 'active' : ''}`} onClick={() => setLang('en')}>EN</button>
+                        <button className={`lang-btn ${lang === 'pl' ? 'active' : ''}`} onClick={() => setLang('pl')}>PL</button>
+                    </div>
+                </div>
                 {!editingChar && !isSettingsOpen && (
                     <div className="header-actions">
-                        <button className="btn" onClick={handleOpenFile}>Open Save File</button>
-                        {filePath && <button className="btn btn-secondary" onClick={() => setIsSettingsOpen(true)}>Settings</button>}
+                        <button className="btn" onClick={handleOpenFile}>{t.openFile}</button>
+                        {filePath && <button className="btn btn-secondary" onClick={() => setIsSettingsOpen(true)}>{t.settings}</button>}
                     </div>
                 )}
                 {(editingChar || isSettingsOpen) && (
-                    <button className="btn btn-back" onClick={() => {setEditingChar(null); setIsSettingsOpen(false);}}>Back to List</button>
+                    <button className="btn btn-back" onClick={() => {setEditingChar(null); setIsSettingsOpen(false);}}>{t.back}</button>
                 )}
-                {filePath && !editingChar && !isSettingsOpen && <p className="file-path">Loaded: {filePath}</p>}
+                {filePath && !editingChar && !isSettingsOpen && <p className="file-path">{t.loaded}: {filePath}</p>}
                 {error && <p className="error">{error}</p>}
             </header>
 
             <main className="main">
                 {isSettingsOpen ? (
                     <div className="settings-view">
-                        <h2>Account Settings</h2>
+                        <h2>{t.steamIdTitle}</h2>
                         <div className="stat-item">
-                            <label>SteamID (64-bit)</label>
+                            <label>{t.steamIdLabel}</label>
                             <input type="text" value={steamID} onChange={(e) => setSteamID(e.target.value)} />
-                            <p className="help-text">Change this to match your Steam Account ID to use this save on another account.</p>
+                            <p className="help-text">{t.steamIdHelp}</p>
                         </div>
                         <div className="edit-actions">
-                            <button className="btn btn-save" onClick={handleSaveSteamID}>Save SteamID</button>
+                            <button className="btn btn-save" onClick={handleSaveSteamID}>{t.saveSteamId}</button>
                         </div>
                     </div>
                 ) : !editingChar ? (
@@ -157,13 +167,13 @@ function App() {
                             <div key={char.slotIndex} className={`character-card ${char.isActive ? 'active' : 'empty'}`}>
                                 <div className="slot-id">Slot {char.slotIndex}</div>
                                 <div className="char-info">
-                                    <h3>{char.isActive ? char.name : "Empty Slot"}</h3>
-                                    {char.isActive && <p>Level: {char.level}</p>}
+                                    <h3>{char.isActive ? char.name : t.emptySlot}</h3>
+                                    {char.isActive && <p>{t.level}: {char.level}</p>}
                                 </div>
                                 {char.isActive ? (
-                                    <button className="btn-edit" onClick={() => handleEdit(char.slotIndex)}>Edit</button>
+                                    <button className="btn-edit" onClick={() => handleEdit(char.slotIndex)}>{t.edit}</button>
                                 ) : (
-                                    <button className="btn-import" onClick={() => handleImport(char.slotIndex)}>Import</button>
+                                    <button className="btn-import" onClick={() => handleImport(char.slotIndex)}>{t.import}</button>
                                 )}
                             </div>
                         ))}
@@ -171,12 +181,12 @@ function App() {
                 ) : (
                     <div className="edit-view">
                         <div className="edit-header">
-                            <h2>Editing: {editingChar.name}</h2>
+                            <h2>{editingChar.name}</h2>
                             <div className="tabs">
-                                <button className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>Stats</button>
-                                <button className={`tab-btn ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>Inventory</button>
-                                <button className={`tab-btn ${activeTab === 'graces' ? 'active' : ''}`} onClick={() => setActiveTab('graces')}>Graces</button>
-                                <button className={`tab-btn ${activeTab === 'bosses' ? 'active' : ''}`} onClick={() => setActiveTab('bosses')}>Bosses</button>
+                                <button className={`tab-btn ${activeTab === 'stats' ? 'active' : ''}`} onClick={() => setActiveTab('stats')}>{t.stats}</button>
+                                <button className={`tab-btn ${activeTab === 'inventory' ? 'active' : ''}`} onClick={() => setActiveTab('inventory')}>{t.inventory}</button>
+                                <button className={`tab-btn ${activeTab === 'graces' ? 'active' : ''}`} onClick={() => setActiveTab('graces')}>{t.graces}</button>
+                                <button className={`tab-btn ${activeTab === 'bosses' ? 'active' : ''}`} onClick={() => setActiveTab('bosses')}>{t.bosses}</button>
                             </div>
                         </div>
 
@@ -184,57 +194,57 @@ function App() {
                             <div className="tab-content">
                                 <div className="stats-grid">
                                     <div className="stat-item">
-                                        <label>Souls</label>
+                                        <label>{t.souls}</label>
                                         <input type="number" value={editingChar.souls} onChange={(e) => updateStat('souls', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Vigor</label>
+                                        <label>{t.vigor}</label>
                                         <input type="number" value={editingChar.vigor} onChange={(e) => updateStat('vigor', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Mind</label>
+                                        <label>{t.mind}</label>
                                         <input type="number" value={editingChar.mind} onChange={(e) => updateStat('mind', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Endurance</label>
+                                        <label>{t.endurance}</label>
                                         <input type="number" value={editingChar.endurance} onChange={(e) => updateStat('endurance', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Strength</label>
+                                        <label>{t.strength}</label>
                                         <input type="number" value={editingChar.strength} onChange={(e) => updateStat('strength', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Dexterity</label>
+                                        <label>{t.dexterity}</label>
                                         <input type="number" value={editingChar.dexterity} onChange={(e) => updateStat('dexterity', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Intelligence</label>
+                                        <label>{t.intelligence}</label>
                                         <input type="number" value={editingChar.intelligence} onChange={(e) => updateStat('intelligence', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Faith</label>
+                                        <label>{t.faith}</label>
                                         <input type="number" value={editingChar.faith} onChange={(e) => updateStat('faith', e.target.value)} />
                                     </div>
                                     <div className="stat-item">
-                                        <label>Arcane</label>
+                                        <label>{t.arcane}</label>
                                         <input type="number" value={editingChar.arcane} onChange={(e) => updateStat('arcane', e.target.value)} />
                                     </div>
                                 </div>
                                 <div className="edit-actions">
-                                    <button className="btn btn-save" onClick={handleSave}>Save Changes</button>
+                                    <button className="btn btn-save" onClick={handleSave}>{t.saveChanges}</button>
                                 </div>
                             </div>
                         )}
 
                         {activeTab === 'inventory' && (
                             <div className="tab-content inventory-view">
-                                <h3>Bulk Add Items</h3>
-                                <p className="help-text">Add all items from a category that you don't already have.</p>
+                                <h3>{t.bulkAddTitle}</h3>
+                                <p className="help-text">{t.bulkAddHelp}</p>
                                 <div className="bulk-actions">
-                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Talismans')}>Add All Talismans</button>
-                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Weapons')}>Add All Weapons</button>
-                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Armors')}>Add All Armors</button>
-                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Items')}>Add All Consumables</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Talismans')}>{t.addTalismans}</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Weapons')}>{t.addWeapons}</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Armors')}>{t.addArmors}</button>
+                                    <button className="btn btn-secondary" onClick={() => handleBulkAdd('Items')}>{t.addConsumables}</button>
                                 </div>
                             </div>
                         )}
