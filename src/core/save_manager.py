@@ -1,24 +1,24 @@
 import shutil
 from datetime import datetime
-from .structures import PLAYER_GAME_DATA, GA_ITEM
-
+from .structures import SAVE_SLOT, PLAYER_GAME_DATA, GA_ITEM
+from .crypto import decrypt_pc_save, encrypt_pc_save, calculate_sha256
 
 class SaveManager:
     PS4_SLOT_SIZE = 0x280000
     PS4_FIRST_SLOT_OFFSET = 0x310
-    NAME_OFFSET_IN_SLOT = 0xE2B5
+    NAME_OFFSET_IN_SLOT = 0xe2b5
     STATS_OFFSET_IN_SLOT = NAME_OFFSET_IN_SLOT - 88
-    EVENT_FLAGS_OFFSET_IN_SLOT = 0x1BFAF0
+    EVENT_FLAGS_OFFSET_IN_SLOT = 0x1bfaf0 
     GA_ITEMS_OFFSET_IN_SLOT = 0x20
-
+    
     def __init__(self, file_path):
         self.file_path = file_path
         self.data = None
         self.is_pc = False
         self.slots = []
-
+        
     def load(self):
-        with open(self.file_path, "rb") as f:
+        with open(self.file_path, 'rb') as f:
             self.data = bytearray(f.read())
         self.is_pc = self.data.startswith(b"BND4")
         self._scan_slots()
@@ -29,17 +29,17 @@ class SaveManager:
             offset = self.PS4_FIRST_SLOT_OFFSET + (i * self.PS4_SLOT_SIZE)
             if offset + self.PS4_SLOT_SIZE > len(self.data):
                 break
+            
             name_pos = offset + self.NAME_OFFSET_IN_SLOT
             name_bytes = self.data[name_pos : name_pos + 32]
-            name = name_bytes.decode("utf-16le").strip("\x00")
-            self.slots.append(
-                {
-                    "id": i,
-                    "offset": offset,
-                    "name": name if name else "Empty Slot",
-                    "active": bool(name),
-                }
-            )
+            name = name_bytes.decode('utf-16le').strip('\x00')
+            
+            self.slots.append({
+                "id": i,
+                "offset": offset,
+                "name": name if name else "Empty Slot",
+                "active": bool(name)
+            })
 
     def get_character_stats(self, slot_id):
         if slot_id >= len(self.slots):
@@ -64,20 +64,23 @@ class SaveManager:
         return True
 
     def import_character(self, source_manager, source_slot_id, target_slot_id):
-        """Copies a character slot from another SaveManager instance."""
-        if source_slot_id >= len(source_manager.slots) or target_slot_id >= len(
-            self.slots
-        ):
+        if source_slot_id >= len(source_manager.slots) or target_slot_id >= len(self.slots):
             return False
-
         src_off = source_manager.slots[source_slot_id]["offset"]
         dst_off = self.slots[target_slot_id]["offset"]
+        self.data[dst_off : dst_off + self.PS4_SLOT_SIZE] = source_manager.data[src_off : src_off + self.PS4_SLOT_SIZE]
+        self._scan_slots()
+        return True
 
-        # Copy the entire 0x280000 block
-        self.data[dst_off : dst_off + self.PS4_SLOT_SIZE] = source_manager.data[
-            src_off : src_off + self.PS4_SLOT_SIZE
-        ]
-
+    def delete_character(self, slot_id):
+        """Wipes a character slot by filling it with zeros."""
+        if slot_id >= len(self.slots):
+            return False
+        
+        offset = self.slots[slot_id]["offset"]
+        # Fill the entire 0x280000 slot with zeros
+        self.data[offset : offset + self.PS4_SLOT_SIZE] = b'\x00' * self.PS4_SLOT_SIZE
+        
         self._scan_slots()
         return True
 
@@ -90,12 +93,8 @@ class SaveManager:
         max_handle = 0x80000000
         for i in range(0x1400):
             item_pos = ga_items_pos + (i * 17)
-            current_id = int.from_bytes(
-                self.data[item_pos + 4 : item_pos + 8], "little"
-            )
-            current_handle = int.from_bytes(
-                self.data[item_pos : item_pos + 4], "little"
-            )
+            current_id = int.from_bytes(self.data[item_pos+4 : item_pos+8], 'little')
+            current_handle = int.from_bytes(self.data[item_pos : item_pos+4], 'little')
             if current_id == 0 and found_idx == -1:
                 found_idx = i
             if current_handle > max_handle and current_handle < 0xFFFFFFFF:
@@ -103,14 +102,8 @@ class SaveManager:
         if found_idx == -1:
             return False
         new_handle = max_handle + 1
-        new_item = {
-            "handle": new_handle,
-            "id": item_id,
-            "data": {"unk2": -1, "unk3": -1, "aow_handle": 0xFFFFFFFF, "unk5": 0},
-        }
-        self.data[
-            ga_items_pos + (found_idx * 17) : ga_items_pos + (found_idx * 17) + 17
-        ] = GA_ITEM.build(new_item)
+        new_item = {"handle": new_handle, "id": item_id, "data": {"unk2": -1, "unk3": -1, "aow_handle": 0xFFFFFFFF, "unk5": 0}}
+        self.data[ga_items_pos + (found_idx * 17) : ga_items_pos + (found_idx * 17) + 17] = GA_ITEM.build(new_item)
         return True
 
     def get_event_flag(self, slot_id, flag_id):
@@ -148,6 +141,6 @@ class SaveManager:
     def save(self, output_path=None):
         target = output_path or self.file_path
         self.backup()
-        with open(target, "wb") as f:
+        with open(target, 'wb') as f:
             f.write(self.data)
         print(f"File saved to: {target}")

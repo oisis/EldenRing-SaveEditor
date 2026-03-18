@@ -95,8 +95,30 @@ class MainWindow(QMainWindow):
         actions_layout = QHBoxLayout()
         self.btn_import = QPushButton("Import Character from another Save")
         self.btn_import.clicked.connect(self._import_character)
+        self.btn_delete = QPushButton("Delete Selected Character")
+        self.btn_delete.clicked.connect(self._delete_character)
+        self.btn_delete.setStyleSheet("background-color: #a83232;") # Red for danger
+        
         actions_layout.addWidget(self.btn_import)
+        actions_layout.addWidget(self.btn_delete)
         self.slots_layout.addLayout(actions_layout)
+
+    def _delete_character(self):
+        if not self.save_manager or self.current_slot_id is None:
+            QMessageBox.warning(self, "Warning", "Please select a character slot first.")
+            return
+        
+        slot_name = self.save_manager.slots[self.current_slot_id]["name"]
+        reply = QMessageBox.question(self, "Confirm Delete", 
+                                   f"Are you sure you want to delete character '{slot_name}'? This cannot be undone.",
+                                   QMessageBox.Yes | QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            if self.save_manager.delete_character(self.current_slot_id):
+                self.btn_save.setEnabled(True)
+                self._refresh_slots_ui()
+                self.sidebar.setCurrentRow(3)
+                QMessageBox.information(self, "Success", "Character deleted.")
 
         self.slots_layout.addWidget(QLabel("Select a character slot to edit:"))
         self.pages.addWidget(self.page_slots)
