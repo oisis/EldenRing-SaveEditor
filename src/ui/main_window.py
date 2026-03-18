@@ -56,6 +56,8 @@ class MainWindow(QMainWindow):
         self.content_layout.addWidget(self.pages)
 from ui.widgets.inventory_widget import InventoryWidget
 
+from ui.widgets.world_widget import WorldWidget
+
 class MainWindow(QMainWindow):
 ...
     def _setup_pages(self):
@@ -69,13 +71,12 @@ class MainWindow(QMainWindow):
         self.pages.addWidget(self.inventory_widget)
 
         # Page 2: World Progress
-...
-        self.page_world = QWidget()
-        layout = QVBoxLayout(self.page_world)
-        layout.addWidget(QLabel("World Progress Editor (Coming Soon)"))
-        self.pages.addWidget(self.page_world)
+        self.world_widget = WorldWidget()
+        self.world_widget.progress_changed.connect(self._on_progress_modified)
+        self.pages.addWidget(self.world_widget)
 
         # Page 3: Character Slots
+...
         self.page_slots = QWidget()
         self.slots_layout = QVBoxLayout(self.page_slots)
         self.slots_layout.addWidget(QLabel("Select a character slot to edit:"))
@@ -129,6 +130,10 @@ class MainWindow(QMainWindow):
         if self.save_manager and self.current_slot_id is not None:
             new_stats = self.stats_widget.get_stats()
             self.save_manager.update_character_stats(self.current_slot_id, new_stats)
+            self.btn_save.setEnabled(True)
+
+    def _on_progress_modified(self):
+        if self.save_manager and self.current_slot_id is not None:
             self.btn_save.setEnabled(True)
 
     def _save_file(self):
