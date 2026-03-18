@@ -1,8 +1,8 @@
 import os
 from PySide6.QtWidgets import (QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, 
-                             QListWidget, QStackedWidget, QLabel, QPushButton, 
-                             QFileDialog, QMessageBox, QFrame)
-from PySide6.QtCore import Qt
+                             QListWidget, QListWidgetItem, QStackedWidget, QLabel, 
+                             QPushButton, QFileDialog, QMessageBox, QFrame)
+from PySide6.QtGui import QIcon
 from core.save_manager import SaveManager
 from ui.widgets.stats_widget import StatsWidget
 from ui.widgets.inventory_widget import InventoryWidget
@@ -15,6 +15,12 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Elden Ring Save Editor")
         self.setMinimumSize(1100, 800)
+        
+        # Set Window Icon (if exists)
+        icon_path = get_resource_path("assets/32.png")
+        if os.path.exists(icon_path):
+            self.setWindowIcon(QIcon(icon_path))
+            
         self.save_manager = None
         self.current_slot_id = None
         self.is_dark_mode = True
@@ -29,19 +35,23 @@ class MainWindow(QMainWindow):
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(15)
 
-        # Sidebar with styling
+        # Sidebar
         sidebar_container = QWidget()
         sidebar_layout = QVBoxLayout(sidebar_container)
         sidebar_layout.setContentsMargins(0, 0, 0, 0)
         
         self.sidebar = QListWidget()
         self.sidebar.setFixedWidth(220)
-        self.sidebar.addItems(["General Stats", "Inventory Editor", "World Progress", "Character Slots"])
+        self._add_sidebar_item("General Stats", "contact-new")
+        self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("contact-new"), "General Stats"))
+        self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("package-x-generic"), "Inventory Editor"))
+        self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("applications-internet"), "World Progress"))
+        self.sidebar.addItem(QListWidgetItem(QIcon.fromTheme("system-users"), "Character Slots"))
+        
         self.sidebar.currentRowChanged.connect(self._on_sidebar_changed)
         sidebar_layout.addWidget(self.sidebar)
         
-        # Theme Toggle Button
-        self.btn_theme = QPushButton("Switch to Light Mode")
+        self.btn_theme = QPushButton(QIcon.fromTheme("display"), " Switch Theme")
         self.btn_theme.clicked.connect(self._toggle_theme)
         sidebar_layout.addWidget(self.btn_theme)
         
@@ -57,9 +67,9 @@ class MainWindow(QMainWindow):
         toolbar.setFrameShape(QFrame.StyledPanel)
         toolbar_layout = QHBoxLayout(toolbar)
         
-        self.btn_open = QPushButton("Open Save File")
+        self.btn_open = QPushButton(QIcon.fromTheme("document-open"), " Open Save File")
         self.btn_open.clicked.connect(self._open_file)
-        self.btn_save = QPushButton("Save Changes")
+        self.btn_save = QPushButton(QIcon.fromTheme("document-save"), " Save Changes")
         self.btn_save.setEnabled(False)
         self.btn_save.clicked.connect(self._save_file)
         
@@ -80,12 +90,17 @@ class MainWindow(QMainWindow):
 
         main_layout.addWidget(content_container)
 
+    def _add_sidebar_item(self, text, icon_name):
+        # Helper to clear previous manual items if needed
+        pass
+
     def _setup_pages(self):
         self.stats_widget = StatsWidget()
         self.stats_widget.stats_changed.connect(self._on_stats_modified)
         self.pages.addWidget(self.stats_widget)
 
         self.inventory_widget = InventoryWidget()
+        self.inventory_widget.btn_add.setIcon(QIcon.fromTheme("list-add"))
         self.inventory_widget.btn_add.clicked.connect(self._on_add_item)
         self.pages.addWidget(self.inventory_widget)
 
@@ -98,9 +113,9 @@ class MainWindow(QMainWindow):
         self.slots_layout.setSpacing(10)
         
         actions_layout = QHBoxLayout()
-        self.btn_import = QPushButton("Import Character")
+        self.btn_import = QPushButton(QIcon.fromTheme("edit-copy"), " Import Character")
         self.btn_import.clicked.connect(self._import_character)
-        self.btn_delete = QPushButton("Delete Character")
+        self.btn_delete = QPushButton(QIcon.fromTheme("edit-delete"), " Delete Character")
         self.btn_delete.clicked.connect(self._delete_character)
         self.btn_delete.setStyleSheet("background-color: #a83232;")
         
@@ -115,7 +130,7 @@ class MainWindow(QMainWindow):
 
     def _toggle_theme(self):
         self.is_dark_mode = not self.is_dark_mode
-        self.btn_theme.setText("Switch to Dark Mode" if self.is_dark_mode else "Switch to Light Mode")
+        self.btn_theme.setText(" Switch to Dark Mode" if self.is_dark_mode else " Switch to Light Mode")
         self._apply_theme()
 
     def _apply_theme(self):
@@ -151,7 +166,8 @@ class MainWindow(QMainWindow):
         if self.save_manager:
             for slot in self.save_manager.slots:
                 status = "Active" if slot['active'] else "Empty"
-                btn = QPushButton(f"Slot {slot['id']}: {slot['name']} ({status})")
+                icon = QIcon.fromTheme("user-available" if slot['active'] else "user-away")
+                btn = QPushButton(icon, f" Slot {slot['id']}: {slot['name']} ({status})")
                 btn.setMinimumHeight(50)
                 btn.clicked.connect(lambda checked=False, s_id=slot['id']: self._select_slot(s_id))
                 self.slots_layout.addWidget(btn)
