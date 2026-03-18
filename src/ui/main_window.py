@@ -54,9 +54,10 @@ class MainWindow(QMainWindow):
         self.pages = QStackedWidget()
         self._setup_pages()
         self.content_layout.addWidget(self.pages)
+from ui.widgets.inventory_widget import InventoryWidget
 
-        main_layout.addWidget(content_container)
-
+class MainWindow(QMainWindow):
+...
     def _setup_pages(self):
         # Page 0: General Stats
         self.stats_widget = StatsWidget()
@@ -64,12 +65,11 @@ class MainWindow(QMainWindow):
         self.pages.addWidget(self.stats_widget)
 
         # Page 1: Inventory
-        self.page_inventory = QWidget()
-        layout = QVBoxLayout(self.page_inventory)
-        layout.addWidget(QLabel("Inventory Editor (Coming Soon)"))
-        self.pages.addWidget(self.page_inventory)
+        self.inventory_widget = InventoryWidget()
+        self.pages.addWidget(self.inventory_widget)
 
         # Page 2: World Progress
+...
         self.page_world = QWidget()
         layout = QVBoxLayout(self.page_world)
         layout.addWidget(QLabel("World Progress Editor (Coming Soon)"))
