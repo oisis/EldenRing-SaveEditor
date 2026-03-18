@@ -16,7 +16,7 @@ run:
 	$(BIN)/python src/main.py
 
 build:
-	$(BIN)/pyinstaller --clean --noconfirm --windowed src/main.py
+	$(BIN)/pyinstaller --clean --noconfirm --onefile --windowed src/main.py
 
 lint:
 	$(BIN)/ruff check .

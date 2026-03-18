@@ -1,0 +1,146 @@
+{
+    "RoundtableHold": {
+        "id": 71190,
+        "name": "RoundtableHold"
+    },
+    "Limgrave": {
+        "id": 76120,
+        "name": "Limgrave"
+    },
+    "StrandedGraveyard": {
+        "id": 71801,
+        "name": "StrandedGraveyard"
+    },
+    "Stormhill": {
+        "id": 76118,
+        "name": "Stormhill"
+    },
+    "WeepingPeninsula": {
+        "id": 73102,
+        "name": "WeepingPeninsula"
+    },
+    "StormveilCastle": {
+        "id": 71008,
+        "name": "StormveilCastle"
+    },
+    "LiurniaOfTheLakes": {
+        "id": 76220,
+        "name": "LiurniaOfTheLakes"
+    },
+    "BellumHighway": {
+        "id": 76209,
+        "name": "BellumHighway"
+    },
+    "RuinStrewnPrecipice": {
+        "id": 73902,
+        "name": "RuinStrewnPrecipice"
+    },
+    "MoonlightAltar": {
+        "id": 76250,
+        "name": "MoonlightAltar"
+    },
+    "AcademyOfRayaLucaria": {
+        "id": 71403,
+        "name": "AcademyOfRayaLucaria"
+    },
+    "AltusPlateau": {
+        "id": 76308,
+        "name": "AltusPlateau"
+    },
+    "MtGelmir": {
+        "id": 73007,
+        "name": "MtGelmir"
+    },
+    "CapitalOutskirts": {
+        "id": 73431,
+        "name": "CapitalOutskirts"
+    },
+    "VolcanoManor": {
+        "id": 71602,
+        "name": "VolcanoManor"
+    },
+    "LeyndellRoyalCapital": {
+        "id": 71105,
+        "name": "LeyndellRoyalCapital"
+    },
+    "SubterraneanShunningGrounds": {
+        "id": 73501,
+        "name": "SubterraneanShunningGrounds"
+    },
+    "LeyndellAshenCapital": {
+        "id": 71124,
+        "name": "LeyndellAshenCapital"
+    },
+    "StonePlatform": {
+        "id": 71900,
+        "name": "StonePlatform"
+    },
+    "Caelid": {
+        "id": 73016,
+        "name": "Caelid"
+    },
+    "SwampOfAeonia": {
+        "id": 76413,
+        "name": "SwampOfAeonia"
+    },
+    "GreyollsDragonbarrow": {
+        "id": 73111,
+        "name": "GreyollsDragonbarrow"
+    },
+    "ForbiddenLands": {
+        "id": 73020,
+        "name": "ForbiddenLands"
+    },
+    "MountaintopsOfTheGiants": {
+        "id": 76501,
+        "name": "MountaintopsOfTheGiants"
+    },
+    "FlamePeak": {
+        "id": 73018,
+        "name": "FlamePeak"
+    },
+    "ConsecratedSnowfield": {
+        "id": 73211,
+        "name": "ConsecratedSnowfield"
+    },
+    "MiquellasHaligtree": {
+        "id": 71508,
+        "name": "MiquellasHaligtree"
+    },
+    "ElphaelBraceOfTheHaligtree": {
+        "id": 71501,
+        "name": "ElphaelBraceOfTheHaligtree"
+    },
+    "CrumblingFarumAzula": {
+        "id": 71305,
+        "name": "CrumblingFarumAzula"
+    },
+    "AinselRiver": {
+        "id": 71210,
+        "name": "AinselRiver"
+    },
+    "AinselRiverMain": {
+        "id": 71219,
+        "name": "AinselRiverMain"
+    },
+    "LakeOfRot": {
+        "id": 71216,
+        "name": "LakeOfRot"
+    },
+    "NokronEternalCity": {
+        "id": 71271,
+        "name": "NokronEternalCity"
+    },
+    "SiofraRiver": {
+        "id": 71223,
+        "name": "SiofraRiver"
+    },
+    "MohgwynPalace": {
+        "id": 71251,
+        "name": "MohgwynPalace"
+    },
+    "DeeprootDepths": {
+        "id": 71234,
+        "name": "DeeprootDepths"
+    }
+}

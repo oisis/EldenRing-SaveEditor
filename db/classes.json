@@ -1,0 +1,142 @@
+{
+    "Vagabond": {
+        "id": 0,
+        "stats": {
+            "level": 9,
+            "vigor": 15,
+            "mind": 10,
+            "endurance": 11,
+            "strength": 14,
+            "dexterity": 13,
+            "intelligence": 9,
+            "faith": 9,
+            "arcane": 7
+        }
+    },
+    "Warrior": {
+        "id": 1,
+        "stats": {
+            "level": 8,
+            "vigor": 11,
+            "mind": 12,
+            "endurance": 11,
+            "strength": 10,
+            "dexterity": 16,
+            "intelligence": 10,
+            "faith": 8,
+            "arcane": 9
+        }
+    },
+    "Hero": {
+        "id": 2,
+        "stats": {
+            "vigor": 14,
+            "mind": 9,
+            "endurance": 12,
+            "strength": 16,
+            "dexterity": 9,
+            "intelligence": 7,
+            "faith": 8,
+            "arcane": 11,
+            "level": 7
+        }
+    },
+    "Bandit": {
+        "id": 3,
+        "stats": {
+            "level": 5,
+            "vigor": 10,
+            "mind": 11,
+            "endurance": 10,
+            "strength": 9,
+            "dexterity": 13,
+            "intelligence": 9,
+            "faith": 8,
+            "arcane": 14
+        }
+    },
+    "Astrologer": {
+        "id": 4,
+        "stats": {
+            "level": 6,
+            "vigor": 9,
+            "mind": 15,
+            "endurance": 9,
+            "strength": 8,
+            "dexterity": 12,
+            "intelligence": 16,
+            "faith": 7,
+            "arcane": 9
+        }
+    },
+    "Prophet": {
+        "id": 5,
+        "stats": {
+            "level": 7,
+            "vigor": 10,
+            "mind": 14,
+            "endurance": 8,
+            "strength": 11,
+            "dexterity": 10,
+            "intelligence": 7,
+            "faith": 16,
+            "arcane": 10
+        }
+    },
+    "Samurai": {
+        "id": 7,
+        "stats": {
+            "level": 9,
+            "vigor": 12,
+            "mind": 11,
+            "endurance": 13,
+            "strength": 12,
+            "dexterity": 15,
+            "intelligence": 9,
+            "faith": 8,
+            "arcane": 8
+        }
+    },
+    "Prisoner": {
+        "id": 8,
+        "stats": {
+            "level": 9,
+            "vigor": 11,
+            "mind": 12,
+            "endurance": 11,
+            "strength": 11,
+            "dexterity": 14,
+            "intelligence": 14,
+            "faith": 6,
+            "arcane": 9
+        }
+    },
+    "Confessor": {
+        "id": 6,
+        "stats": {
+            "level": 10,
+            "vigor": 10,
+            "mind": 13,
+            "endurance": 10,
+            "strength": 12,
+            "dexterity": 12,
+            "intelligence": 9,
+            "faith": 14,
+            "arcane": 9
+        }
+    },
+    "Wretch": {
+        "id": 9,
+        "stats": {
+            "level": 1,
+            "vigor": 10,
+            "mind": 10,
+            "endurance": 10,
+            "strength": 10,
+            "dexterity": 10,
+            "intelligence": 10,
+            "faith": 10,
+            "arcane": 10
+        }
+    }
+}

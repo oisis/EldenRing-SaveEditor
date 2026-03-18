@@ -1,0 +1,630 @@
+{
+    "AlabasterLordEvergaol": {
+        "id": 1036500800,
+        "name": "Alabaster Lord (Evergaol)"
+    },
+    "BeastmanofFaramAzulaGrovesideCave": {
+        "id": 31030800,
+        "name": "Beastman of Faram Azula (Groveside Cave)"
+    },
+    "BellBearingHunterWarmastersShack": {
+        "id": 1042380850,
+        "name": "Bell Bearing Hunter (Warmaster's Shack)"
+    },
+    "BlackKnifeAssassinDeathtouchedCatacombs": {
+        "id": 30110800,
+        "name": "Black Knife Assassin (Deathtouched Catacombs)"
+    },
+    "BloodhoundKnightDarriwilForlornHoundEvergaol": {
+        "id": 1044350800,
+        "name": "Bloodhound Knight Darriwil (Forlorn Hound Evergaol)"
+    },
+    "CrucibleKnightStormhillEvergaol": {
+        "id": 1042370800,
+        "name": "Crucible Knight (Stormhill Evergaol)"
+    },
+    "DeathbirdLimgrave": {
+        "id": 1042380800,
+        "name": "Deathbird (Limgrave)"
+    },
+    "DemiHumanChiefsCoastalCave": {
+        "id": 31150800,
+        "name": "Demi-Human Chiefs (Coastal Cave)"
+    },
+    "ErdtreeBurialWatchdogStormfrontCatacombs": {
+        "id": 30020800,
+        "name": "Erdtree Burial Watchdog (Stormfront Catacombs)"
+    },
+    "FlyingDragonAgheelLimgrave": {
+        "id": 1043360800,
+        "name": "Flying Dragon Agheel (Limgrave)"
+    },
+    "GodricktheGrafted": {
+        "id": 10000800,
+        "name": "Godrick the Grafted"
+    },
+    "GraftedScionChapelofAnticipation": {
+        "id": 10010800,
+        "name": "Grafted Scion (Chapel of Anticipation)"
+    },
+    "GraveWardenDuelistMurkwaterCatacombs": {
+        "id": 30040800,
+        "name": "Grave Warden Duelist (Murkwater Catacombs)"
+    },
+    "GuardianGolemHighroadCave": {
+        "id": 31170800,
+        "name": "Guardian Golem (Highroad Cave)"
+    },
+    "MadPumpkinHeadWaypointRuins": {
+        "id": 1044360800,
+        "name": "Mad Pumpkin Head (Waypoint Ruins)"
+    },
+    "MargittheFellOmen": {
+        "id": 10000850,
+        "name": "Margit the Fell Omen"
+    },
+    "NightsCavalryLimgrave": {
+        "id": 1043370800,
+        "name": "Night's Cavalry (Limgrave)"
+    },
+    "PatchesMurkwaterCave": {
+        "id": 31000800,
+        "name": "Patches (Murkwater Cave)"
+    },
+    "SoldierofGodrick": {
+        "id": 18000850,
+        "name": "Soldier of Godrick"
+    },
+    "StonediggerTrollLimgraveTunnels": {
+        "id": 32010800,
+        "name": "Stonedigger Troll (Limgrave Tunnels)"
+    },
+    "TibiaMarinerSummonwaterVillage": {
+        "id": 1045390800,
+        "name": "Tibia Mariner (Summonwater Village)"
+    },
+    "TreeSentinelLimgrave": {
+        "id": 1042360800,
+        "name": "Tree Sentinel (Limgrave)"
+    },
+    "AncientHeroofZamorWeepingEvergaol": {
+        "id": 1042330800,
+        "name": "Ancient Hero of Zamor (Weeping Evergaol)"
+    },
+    "CemeteryShadeTombswardCatacombs": {
+        "id": 30000800,
+        "name": "Cemetery Shade (Tombsward Catacombs)"
+    },
+    "DeathbirdWeepingPeninsula": {
+        "id": 1044320800,
+        "name": "Deathbird (Weeping Peninsula)"
+    },
+    "EdtreeBurialWatchdogImpalersCatacombs": {
+        "id": 30010800,
+        "name": "Edtree Burial Watchdog (Impaler's Catacombs)"
+    },
+    "ErdtreeAvatar": {
+        "id": 1043330800,
+        "name": "Erdtree Avatar"
+    },
+    "LeonineMisbegottenMorneMoangrave": {
+        "id": 1043300800,
+        "name": "Leonine Misbegotten (Morne Moangrave)"
+    },
+    "MirandatheBlightedBloomTombswardCave": {
+        "id": 31020800,
+        "name": "Miranda the Blighted Bloom (Tombsward Cave)"
+    },
+    "NightsCavalryWeepingPeninsula": {
+        "id": 1044320850,
+        "name": "Night's Cavalry (Weeping Peninsula)"
+    },
+    "RunebearEarthboreCave": {
+        "id": 31010800,
+        "name": "Runebear (Earthbore Cave)"
+    },
+    "AdanThiefofFireMalefactorsEvergaol": {
+        "id": 1038410800,
+        "name": "Adan, Thief of Fire (Malefactor's Evergaol)"
+    },
+    "AlectoBlackKnifeRingleaderRingleadersEvergaol": {
+        "id": 1033420800,
+        "name": "Alecto, Black Knife Ringleader (Ringleader's Evergaol)"
+    },
+    "BellBearingHunterChurchofVows": {
+        "id": 1037460800,
+        "name": "Bell Bearing Hunter (Church of Vows)"
+    },
+    "BlackKnifeAssassinBlackKnifeCatacombs": {
+        "id": 30050850,
+        "name": "Black Knife Assassin (Black Knife Catacombs)"
+    },
+    "BloodhoundKnightLakesideCrystalCave": {
+        "id": 31050800,
+        "name": "Bloodhound Knight (Lakeside Crystal Cave)"
+    },
+    "BolsCarianKnightCuckoosEvergaol": {
+        "id": 1033450800,
+        "name": "Bols, Carian Knight (Cuckoo's Evergaol)"
+    },
+    "CemeteryShadeBlackKnifeCatacombs": {
+        "id": 30050800,
+        "name": "Cemetery Shade (Black Knife Catacombs)"
+    },
+    "CleanrotKnightStillwaterCave": {
+        "id": 31040800,
+        "name": "Cleanrot Knight (Stillwater Cave)"
+    },
+    "CrystalianRayaLucariaCrystalTunnel": {
+        "id": 32020800,
+        "name": "Crystalian (Raya Lucaria Crystal Tunnel)"
+    },
+    "CrystalianSpearCrystalianStaffAcademyCrystalCave": {
+        "id": 31060800,
+        "name": "Crystalian Spear Crystalian Staff (Academy Crystal Cave)"
+    },
+    "DeathbirdLiurniaSouth": {
+        "id": 1037420800,
+        "name": "Deathbird (Liurnia South)"
+    },
+    "DeathRiteBirdLiurniaNorth": {
+        "id": 1036450800,
+        "name": "Death Rite Bird (Liurnia North)"
+    },
+    "ErdtreeAvatarLiurniaNortheast": {
+        "id": 1038480800,
+        "name": "Erdtree Avatar (Liurnia Northeast)"
+    },
+    "ErdtreeAvatarLiurniaSouthwest": {
+        "id": 1033430800,
+        "name": "Erdtree Avatar (Liurnia Southwest)"
+    },
+    "ErdtreeBurialWatchdogCliffbottomCatacombs": {
+        "id": 30060800,
+        "name": "Erdtree Burial Watchdog (Cliffbottom Catacombs)"
+    },
+    "GlintstoneDragonAdulaMoonlightAltar": {
+        "id": 1034500800,
+        "name": "Glintstone Dragon Adula (Moonlight Altar)"
+    },
+    "GlintstoneDragonSmaragLiurnia": {
+        "id": 1034450800,
+        "name": "Glintstone Dragon Smarag (Liurnia)"
+    },
+    "NightsCavalryLiurniaNorth": {
+        "id": 1036480800,
+        "name": "Night's Cavalry (Liurnia North)"
+    },
+    "NightsCavalryLiurniaSouth": {
+        "id": 1039430800,
+        "name": "Night's Cavalry (Liurnia South)"
+    },
+    "OmenkillerVillageoftheAlbinaurics": {
+        "id": 1035420800,
+        "name": "Omenkiller (Village of the Albinaurics)"
+    },
+    "OnyxLordRoyalGraveEvergaol": {
+        "id": 1036500800,
+        "name": "Onyx Lord (Royal Grave Evergaol)"
+    },
+    "RoyalKnightLorettaCariaManor": {
+        "id": 1035500800,
+        "name": "Royal Knight Loretta (Caria Manor)"
+    },
+    "RoyalRevenantKingsrealmRuins": {
+        "id": 1034480800,
+        "name": "Royal Revenant (Kingsrealm Ruins)"
+    },
+    "SpiritcallerSnailRoadsEndCatacombs": {
+        "id": 30030800,
+        "name": "Spiritcaller Snail (Road's End Catacombs)"
+    },
+    "RennalaQueenoftheFullMoon": {
+        "id": 14000800,
+        "name": "Rennala, Queen of the Full Moon"
+    },
+    "RedWolfofRadagonRayaLucaria": {
+        "id": 14000850,
+        "name": "Red Wolf of Radagon (Raya Lucaria)"
+    },
+    "MagmaWyrmMakarRuinStrewnPrecipice": {
+        "id": 39200800,
+        "name": "Magma Wyrm Makar (Ruin-Strewn Precipice)"
+    },
+    "CommanderONeilSwampofAeonia": {
+        "id": 1049380800,
+        "name": "Commander O'Neil (Swamp of Aeonia)"
+    },
+    "CrucibleKnightMisbegottenWarriorRedmaneCastle": {
+        "id": 1051360800,
+        "name": "Crucible Knight. Misbegotten Warrior (Redmane Castle) "
+    },
+    "DeathRiteBirdCaelid": {
+        "id": 1049370850,
+        "name": "Death Rite Bird (Caelid)"
+    },
+    "DecayingEkzykesCaelid": {
+        "id": 1048370800,
+        "name": "Decaying Ekzykes (Caelid)"
+    },
+    "ElderDragonGreyollcanapparentlyspawninvisible": {
+        "id": 1050400800,
+        "name": "Elder Dragon Greyoll"
+    },
+    "ErdtreeBurialWatchdogsMinorErdtreeCatacombs": {
+        "id": 30140800,
+        "name": "Erdtree Burial Watchdogs (Minor Erdtree Catacombs)"
+    },
+    "FallingstarBeastSelliaCrystalTunnel": {
+        "id": 32080800,
+        "name": "Fallingstar Beast (Sellia Crystal Tunnel)"
+    },
+    "FrenziedDuelistGaolCave": {
+        "id": 31210800,
+        "name": "Frenzied Duelist (Gaol Cave)"
+    },
+    "MadPumpkinHeadsCaelemRuins": {
+        "id": 1048400800,
+        "name": "Mad Pumpkin Heads (Caelem Ruins)"
+    },
+    "MagmaWyrmGaelTunnel": {
+        "id": 32070800,
+        "name": "Magma Wyrm (Gael Tunnel)"
+    },
+    "NightsCavalryCaelid": {
+        "id": 1049370800,
+        "name": "Night's Cavalry (Caelid)"
+    },
+    "NoxSwordstressandNoxPriestSelliaTownofSorcery": {
+        "id": 1049390800,
+        "name": "Nox Swordstress and Nox Priest (Sellia, Town of Sorcery)"
+    },
+    "PutridAvatarCaelid": {
+        "id": 1047400800,
+        "name": "Putrid Avatar (Caelid)"
+    },
+    "BattlemageHuguesSelliaEvergaol": {
+        "id": 1049390850,
+        "name": "Battlemage Hugues (Sellia Evergaol)"
+    },
+    "BeastmenofFaramAzulaDragonbarrowCave": {
+        "id": 31100800,
+        "name": "Beastmen of Faram Azula (Dragonbarrow Cave)"
+    },
+    "BellBearingHunterIsolatedMerchantsShack": {
+        "id": 1048410800,
+        "name": "Bell Bearing Hunter (Isolated Merchant's Shack)"
+    },
+    "BlackBladeKindredBestialSanctum": {
+        "id": 1051430800,
+        "name": "Black Blade Kindred (Bestial Sanctum)"
+    },
+    "FlyingDragonGreyllGreyollsDragonbarrow": {
+        "id": 1052410800,
+        "name": "Flying Dragon Greyll (Greyoll's Dragonbarrow)"
+    },
+    "GodskinApostleDivineTowerofCaelid": {
+        "id": 34130800,
+        "name": "Godskin Apostle (Divine Tower of Caelid)"
+    },
+    "NightsCavalryDragonbarrow": {
+        "id": 1052410850,
+        "name": "Night's Cavalry (Dragonbarrow)"
+    },
+    "PutridAvatarDragonbarrow": {
+        "id": 1052560800,
+        "name": "Putrid Avatar (Dragonbarrow)"
+    },
+    "PutridCrystaliansSelliaHideaway": {
+        "id": 31110800,
+        "name": "Putrid Crystalians (Sellia Hideaway)"
+    },
+    "AncientDragonLansseaxAltusPlateau": {
+        "id": 1041520800,
+        "name": "Ancient Dragon Lansseax (Altus Plateau)"
+    },
+    "AncientHeroofZamorSaintedHerosGrave": {
+        "id": 30080800,
+        "name": "Ancient Hero of Zamor (Sainted Hero's Grave)"
+    },
+    "BlackKnifeAssassinSagesCave": {
+        "id": 31190800,
+        "name": "Black Knife Assassin (Sage's Cave)"
+    },
+    "BlackKnifeAssassinSaintedHerosGrave": {
+        "id": 1040520800,
+        "name": "Black Knife Assassin (Sainted Hero's Grave)"
+    },
+    "CrystalianSpearandCrystalianRingbladeAltusTunnel": {
+        "id": 32050800,
+        "name": "Crystalian Spear and Crystalian Ringblade (Altus Tunnel)"
+    },
+    "DemiHumanQueenGilikaLuxRuins": {
+        "id": 1038510800,
+        "name": "Demi-Human Queen Gilika (Lux Ruins)"
+    },
+    "ElemeroftheBriarTheShadedCastle": {
+        "id": 1039540800,
+        "name": "Elemer of the Briar (The Shaded Castle)"
+    },
+    "ErdtreeBurialWatchdogWyndhamCatacombs": {
+        "id": 30070800,
+        "name": "Erdtree Burial Watchdog (Wyndham Catacombs)"
+    },
+    "FallingstarBeastAltusPlateau": {
+        "id": 1041500800,
+        "name": "Fallingstar Beast (Altus Plateau)"
+    },
+    "GodefroytheGraftedGoldenLineageEvergaol": {
+        "id": 1039500800,
+        "name": "Godefroy the Grafted (Golden Lineage Evergaol)"
+    },
+    "GodskinApostleDominulaWindmillVillage": {
+        "id": 1042550800,
+        "name": "Godskin Apostle (Dominula, Windmill Village)"
+    },
+    "NecromancerGarrisSagesCave": {
+        "id": 31190850,
+        "name": "Necromancer Garris (Sage's Cave)"
+    },
+    "NightsCavalryAltusPlateau": {
+        "id": 1039510800,
+        "name": "Night's Cavalry (Altus Plateau)"
+    },
+    "OmenkillerandMirandatheBlightedBloomPerfumersGrotto": {
+        "id": 31180800,
+        "name": "Omenkiller and Miranda the Blighted Bloom (Perfumer's Grotto)"
+    },
+    "PerfumerTriciaandMisbegottenWarriorUnsightlyCatacombs": {
+        "id": 30120800,
+        "name": "Perfumer Tricia and Misbegotten Warrior (Unsightly Catacombs)"
+    },
+    "SanguineNobleWrithebloodRuins": {
+        "id": 1040530800,
+        "name": "Sanguine Noble (Writheblood Ruins)"
+    },
+    "StonediggerTrollOldAltusTunnel": {
+        "id": 32040800,
+        "name": "Stonedigger Troll (Old Altus Tunnel)"
+    },
+    "TibiaMarinerWyndhamRuins": {
+        "id": 1038520800,
+        "name": "Tibia Mariner (Wyndham Ruins)"
+    },
+    "TreeSentinelsAltusPlateau": {
+        "id": 1041510800,
+        "name": "Tree Sentinels (Altus Plateau)"
+    },
+    "BellBearingHunterHermitMerchantsShack": {
+        "id": 1043530800,
+        "name": "Bell Bearing Hunter (Hermit Merchant's Shack)"
+    },
+    "CrucibleKnightCrucibleKnightOrdovisAurizaHeroGrave": {
+        "id": 30100800,
+        "name": "Crucible Knight, Crucible Knight Ordovis (Auriza Hero Grave)"
+    },
+    "DeathbirdWarmastersShack": {
+        "id": 1042380850,
+        "name": "Deathbird (Warmaster's Shack)"
+    },
+    "DraconicTreeSentinelCapitalOutskirts": {
+        "id": 1045520800,
+        "name": "Draconic Tree Sentinel (Capital Outskirts)"
+    },
+    "FellTwinsDivineTowerofEastAltus": {
+        "id": 34140850,
+        "name": "Fell Twins (Divine Tower of East Altus)"
+    },
+    "GraveWardenDuelistAurizaSideTomb": {
+        "id": 30130800,
+        "name": "Grave Warden Duelist (Auriza Side Tomb)"
+    },
+    "GodfreyFirstEldenLordGoldenShade": {
+        "id": 11000850,
+        "name": "Godfrey, First Elden Lord (Golden Shade)"
+    },
+    "MohgtheOmenCathedraloftheForsaken": {
+        "id": 35000800,
+        "name": "Mohg, the Omen (Cathedral of the Forsaken)"
+    },
+    "MorgotttheOmenKing": {
+        "id": 11000800,
+        "name": "Morgott, the Omen King"
+    },
+    "AbductorVirginsMtGelmir": {
+        "id": 16000860,
+        "name": "Abductor Virgins (Mt. Gelmir)"
+    },
+    "DemiHumanQueenMaggieHermitVillage": {
+        "id": 1037530800,
+        "name": "Demi-Human Queen Maggie (Hermit Village)"
+    },
+    "DemiHumanQueenMargotVolanoCave": {
+        "id": 31090800,
+        "name": "Demi-Human Queen Margot (Volano Cave)"
+    },
+    "FullGrownFallingstarBeastNinthMtGelmirCampsite": {
+        "id": 1036540800,
+        "name": "Full-Grown Fallingstar Beast (Ninth Mt. Gelmir Campsite)"
+    },
+    "GodDevouringSerpentRykardLordofBlasphemy": {
+        "id": 16000800,
+        "name": "God-Devouring Serpent / Rykard, Lord of Blasphemy"
+    },
+    "GodskinNobleTempleofEiglay": {
+        "id": 16000850,
+        "name": "Godskin Noble (Temple of Eiglay)"
+    },
+    "KindredofRotSeethewaterCave": {
+        "id": 31070800,
+        "name": "Kindred of Rot (Seethewater Cave)"
+    },
+    "MagmaWyrmMtGelmir": {
+        "id": 1035530800,
+        "name": "Magma Wyrm (Mt. Gelmir)"
+    },
+    "RedWolfoftheChampionGelmirHerosGrave": {
+        "id": 30090800,
+        "name": "Red Wolf of the Champion (Gelmir Hero's Grave)"
+    },
+    "UlceratedTreeSpiritMtGelmir": {
+        "id": 1037540810,
+        "name": "Ulcerated Tree Spirit (Mt. Gelmir)"
+    },
+    "AncientHeroofZamorGiantConquringHerosGrave": {
+        "id": 30170800,
+        "name": "Ancient Hero of Zamor (Giant-Conquring Hero's Grave)"
+    },
+    "BorealistheFreezingFogFreezingLake": {
+        "id": 1054560800,
+        "name": "Borealis the Freezing Fog (Freezing Lake)"
+    },
+    "CommanderNiallCastleSol": {
+        "id": 1051570800,
+        "name": "Commander Niall (Castle Sol)"
+    },
+    "DeathRiteBirdMountaintopsoftheGiants": {
+        "id": 1050570800,
+        "name": "Death Rite Bird (Mountaintops of the Giants)"
+    },
+    "ErdtreeAvatarMountaintopsoftheGiants": {
+        "id": 1050570800,
+        "name": "Erdtree Avatar (Mountaintops of the Giants)"
+    },
+    "FireGiant": {
+        "id": 1052520800,
+        "name": "Fire Giant"
+    },
+    "GodskinApostleandGodskinNobleSpiritcallerCaveSpiritcallerSnail": {
+        "id": 31220800,
+        "name": "Godskin Apostle and Godskin Noble  (Spiritcaller Cave) Spiritcaller Snail"
+    },
+    "UlceratedTreeSpiritGiantsMountaintopCatacombs": {
+        "id": 30180800,
+        "name": "Ulcerated Tree Spirit (Giants' Mountaintop Catacombs)"
+    },
+    "VykeKnightoftheRoundtableLordContendersEvergaol": {
+        "id": 1053560800,
+        "name": "Vyke, Knight of the Roundtable (Lord Contender's Evergaol)"
+    },
+    "DragonlordPlacidusax": {
+        "id": 13000830,
+        "name": "Dragonlord Placidusax"
+    },
+    "GodskinDuo": {
+        "id": 13000850,
+        "name": "Godskin Duo"
+    },
+    "MalekiththeBlackBlade": {
+        "id": 13000800,
+        "name": "Malekith, the Black Blade"
+    },
+    "BlackBladeKindredForbiddenLands": {
+        "id": 1049520800,
+        "name": "Black Blade Kindred (Forbidden Lands)"
+    },
+    "NightsCavalryForbiddenLands": {
+        "id": 1048510800,
+        "name": "Night's Cavalry (Forbidden Lands)"
+    },
+    "StrayMimicTearHiddenPathtotheHaligtree": {
+        "id": 30200800,
+        "name": "Stray Mimic Tear (Hidden Path to the Haligtree)"
+    },
+    "AstelStarsofDarknessYeloughAnixTunnel": {
+        "id": 32110800,
+        "name": "Astel, Stars of Darkness (Yelough Anix Tunnel)"
+    },
+    "DeathRiteBirdConsecratedSnowfield": {
+        "id": 1048570800,
+        "name": "Death Rite Bird (Consecrated Snowfield)"
+    },
+    "GreatWyrmTheodorixConsecratedSnowfield": {
+        "id": 1050560800,
+        "name": "Great Wyrm Theodorix (Consecrated Snowfield)"
+    },
+    "MisbegottenCrusaderCaveoftheForlorn": {
+        "id": 31120800,
+        "name": "Misbegotten Crusader (Cave of the Forlorn)"
+    },
+    "NightsCavalryDuoConsecratedSnowfield": {
+        "id": 1248550800,
+        "name": "Night's Cavalry Duo (Consecrated Snowfield)"
+    },
+    "PutridAvatar": {
+        "id": 1050570850,
+        "name": "Putrid Avatar"
+    },
+    "PutridGraveWardenDuelistConsecratedSnowfieldCatacombs": {
+        "id": 30190800,
+        "name": "Putrid Grave Warden Duelist (Consecrated Snowfield Catacombs)"
+    },
+    "LorettaKnightoftheHaligtree": {
+        "id": 15000850,
+        "name": "Loretta, Knight of the Haligtree"
+    },
+    "MaleniaGoddessofRot": {
+        "id": 15000800,
+        "name": "Malenia, Goddess of Rot"
+    },
+    "AncestorSpiritSiofraRiverBank": {
+        "id": 12080800,
+        "name": "Ancestor Spirit (Siofra River Bank)"
+    },
+    "DragonkinSoldierSiofraRiverBank": {
+        "id": 12020830,
+        "name": "Dragonkin Soldier (Siofra River Bank)"
+    },
+    "MohgLordofBlood": {
+        "id": 12050800,
+        "name": "Mohg, Lord of Blood"
+    },
+    "DragonkinSoldierofNokstellaAinselRiver": {
+        "id": 12010800,
+        "name": "Dragonkin Soldier of Nokstella (Ainsel River)"
+    },
+    "MimicTearNokronEternalCity": {
+        "id": 12020850,
+        "name": "Mimic Tear (Nokron, Eternal City)"
+    },
+    "RegalAncestorSpiritAncestralWoods": {
+        "id": 12090800,
+        "name": "Regal Ancestor Spirit (Ancestral Woods)"
+    },
+    "ValiantGargoylesSiofraAqueduct": {
+        "id": 12020800,
+        "name": "Valiant Gargoyles (Siofra Aqueduct)"
+    },
+    "CrucibleKnightSiluria": {
+        "id": 12030390,
+        "name": "Crucible Knight Siluria"
+    },
+    "FiasChampions": {
+        "id": 12030800,
+        "name": "Fia's Champions"
+    },
+    "LichdragonFortissax": {
+        "id": 12030850,
+        "name": "Lichdragon Fortissax"
+    },
+    "AstelNaturalbornoftheVoid": {
+        "id": 12040800,
+        "name": "Astel, Naturalborn of the Void"
+    },
+    "DragonkinSoldierLakeofRot": {
+        "id": 12010850,
+        "name": "Dragonkin Soldier (Lake of Rot)"
+    },
+    "GodfreyFirstEldenLordHoarahLoux": {
+        "id": 11050800,
+        "name": "Godfrey, First Elden Lord (Hoarah Loux)"
+    },
+    "SirGideonOfnirtheAllKnowing": {
+        "id": 11050850,
+        "name": "Sir Gideon Ofnir, the All-Knowing"
+    },
+    "RadagonoftheGoldenOrderEldenBeast": {
+        "id": 19000810,
+        "name": "Radagon of the Golden Order / Elden Beast"
+    }
+}
