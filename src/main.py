@@ -1,24 +1,7 @@
 import sys
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget
+from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import Qt
-
-class MainWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("Elden Ring Save Editor")
-        self.setMinimumSize(800, 600)
-        
-        # Central widget
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        
-        # Layout
-        layout = QVBoxLayout(central_widget)
-        
-        # Welcome label (Placeholder)
-        label = QLabel("Elden Ring Save Editor - Python Version")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(label)
+from ui.main_window import MainWindow
 
 def main():
     # HiDPI Scaling
@@ -26,6 +9,9 @@ def main():
     QApplication.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
     
     app = QApplication(sys.argv)
+    
+    # Set application name
+    app.setApplicationName("Elden Ring Save Editor")
     
     window = MainWindow()
     window.show()
