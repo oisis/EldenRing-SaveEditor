@@ -1,0 +1,2297 @@
+[
+  {
+    "category": "Consumables",
+    "items": [
+      {
+        "id": 1073742764,
+        "name": "Preserving Boluses"
+      },
+      {
+        "id": 1073742774,
+        "name": "Rejuvenating Boluses"
+      },
+      {
+        "id": 1073742784,
+        "name": "Clarifying Boluses"
+      },
+      {
+        "id": 1073742754,
+        "name": "Stimulating Boluses"
+      },
+      {
+        "id": 1073742744,
+        "name": "Thawfrost Boluses"
+      },
+      {
+        "id": 1073742734,
+        "name": "Stanching Boluses"
+      },
+      {
+        "id": 1073742724,
+        "name": "Neutralizing Boluses"
+      },
+      {
+        "id": 1073742014,
+        "name": "Rune Arc"
+      },
+      {
+        "id": 1073741974,
+        "name": "Furlcalling Finger Remedy"
+      },
+      {
+        "id": 1073742644,
+        "name": "Boiled Crab"
+      },
+      {
+        "id": 1073745185,
+        "name": "Radiant Baldachin's Blessing"
+      },
+      {
+        "id": 1073742636,
+        "name": "Frozen Raisin"
+      },
+      {
+        "id": 1073743114,
+        "name": "Starlight Shards"
+      },
+      {
+        "id": 1073745134,
+        "name": "Warming Stone"
+      },
+      {
+        "id": 1073745135,
+        "name": "Frenzyflame Stone"
+      },
+      {
+        "id": 1073745144,
+        "name": "Scriptstone"
+      },
+      {
+        "id": 1073745174,
+        "name": "Bewitching Branch"
+      },
+      {
+        "id": 1073743014,
+        "name": "Silver-Pickled Fowl Foot"
+      },
+      {
+        "id": 1073743024,
+        "name": "Gold-Pickled Fowl Foot"
+      },
+      {
+        "id": 1073743584,
+        "name": "Ruin Fragment"
+      },
+      {
+        "id": 1073744743,
+        "name": "Lord's Rune"
+      },
+      {
+        "id": 1073749824,
+        "name": "Stonesword Key"
+      },
+      {
+        "id": 1073743924,
+        "name": "Soft Cotton"
+      },
+      {
+        "id": 1073743874,
+        "name": "Grace Mimic"
+      }
+    ]
+  },
+  {
+    "category": "Meats",
+    "items": [
+      {
+        "id": 1073742924,
+        "name": "Pickled Turtle Neck"
+      },
+      {
+        "id": 1073742944,
+        "name": "Invigorating Cured Meat"
+      },
+      {
+        "id": 1073742934,
+        "name": "Immunizing Cured Meat"
+      },
+      {
+        "id": 1073742954,
+        "name": "Clarifying Cured Meat"
+      },
+      {
+        "id": 1073742964,
+        "name": "Dappled Cured Meat"
+      },
+      {
+        "id": 1073743034,
+        "name": "Exalted Flesh"
+      },
+      {
+        "id": 1073743044,
+        "name": "Deathsbane Jerky"
+      },
+      {
+        "id": 1073743059,
+        "name": "Raw Meat Dumpling"
+      },
+      {
+        "id": 1073743134,
+        "name": "Immunizing White Cured Meat"
+      },
+      {
+        "id": 1073743144,
+        "name": "Invigorating White Cured Meat"
+      },
+      {
+        "id": 1073743154,
+        "name": "Clarifying White Cured Meat"
+      },
+      {
+        "id": 1073743164,
+        "name": "Dappled White Cured Meat"
+      },
+      {
+        "id": 1073743174,
+        "name": "Deathsbane White Jerky"
+      },
+      {
+        "id": 1073742974,
+        "name": "Spellproof Dried Liver"
+      },
+      {
+        "id": 1073742984,
+        "name": "Fireproof Dried Liver"
+      },
+      {
+        "id": 1073742994,
+        "name": "Lightningproof Dried Liver"
+      },
+      {
+        "id": 1073743004,
+        "name": "Holyproof Dried Liver"
+      }
+    ]
+  },
+  {
+    "category": "Throwables",
+    "items": [
+      {
+        "id": 1073743524,
+        "name": "Throwing Dagger"
+      },
+      {
+        "id": 1073743534,
+        "name": "Bone Dart"
+      },
+      {
+        "id": 1073743544,
+        "name": "Poisonbone Dart"
+      },
+      {
+        "id": 1073743554,
+        "name": "Kukri"
+      },
+      {
+        "id": 1073743564,
+        "name": "Crystal Dart"
+      },
+      {
+        "id": 1073743574,
+        "name": "Fan Daggers"
+      },
+      {
+        "id": 1073743654,
+        "name": "Explosive Stone"
+      },
+      {
+        "id": 1073743655,
+        "name": "Explosive Stone Clump"
+      },
+      {
+        "id": 1073743664,
+        "name": "Poisoned Stone"
+      },
+      {
+        "id": 1073743665,
+        "name": "Poisoned Stone Clump"
+      },
+      {
+        "id": 1073743844,
+        "name": "Rainbow Stone"
+      },
+      {
+        "id": 1073743854,
+        "name": "Glowstone"
+      },
+      {
+        "id": 1073744844,
+        "name": "Miranda's Prayer"
+      },
+      {
+        "id": 1073744854,
+        "name": "Cuckoo Glintstone"
+      },
+      {
+        "id": 1073744874,
+        "name": "Glintstone Scrap"
+      },
+      {
+        "id": 1073744875,
+        "name": "Large Glintstone Scrap"
+      },
+      {
+        "id": 1073744884,
+        "name": "Gravity Stone Fan"
+      },
+      {
+        "id": 1073744894,
+        "name": "Gravity Stone Chunk"
+      }
+    ]
+  },
+  {
+    "category": "Grease",
+    "items": [
+      {
+        "id": 1073743224,
+        "name": "Fire Grease"
+      },
+      {
+        "id": 1073743234,
+        "name": "Lightning Grease"
+      },
+      {
+        "id": 1073743244,
+        "name": "Magic Grease"
+      },
+      {
+        "id": 1073743254,
+        "name": "Holy Grease"
+      },
+      {
+        "id": 1073743264,
+        "name": "Blood Grease"
+      },
+      {
+        "id": 1073743274,
+        "name": "Soporific Grease"
+      },
+      {
+        "id": 1073743284,
+        "name": "Poison Grease"
+      },
+      {
+        "id": 1073743294,
+        "name": "Freezing Grease"
+      },
+      {
+        "id": 1073743304,
+        "name": "Dragonwound Grease"
+      },
+      {
+        "id": 1073743314,
+        "name": "Rot Grease"
+      },
+      {
+        "id": 1073743324,
+        "name": "Drawstring Fire Grease"
+      },
+      {
+        "id": 1073743334,
+        "name": "Drawstring Lightning Grease"
+      },
+      {
+        "id": 1073743344,
+        "name": "Drawstring Magic Grease"
+      },
+      {
+        "id": 1073743354,
+        "name": "Drawstring Holy Grease"
+      },
+      {
+        "id": 1073743364,
+        "name": "Drawstring Blood Grease"
+      },
+      {
+        "id": 1073743374,
+        "name": "Drawstring Soporific Grease"
+      },
+      {
+        "id": 1073743384,
+        "name": "Drawstring Poison Grease"
+      },
+      {
+        "id": 1073743394,
+        "name": "Drawstring Freezing Grease"
+      },
+      {
+        "id": 1073743414,
+        "name": "Drawstring Rot Grease"
+      },
+      {
+        "id": 1073743514,
+        "name": "Shield Grease"
+      },
+      {
+        "id": 1073745124,
+        "name": "Holy Water Grease"
+      }
+    ]
+  },
+  {
+    "category": "Crafting: Animal",
+    "items": [
+      {
+        "id": 1073756824,
+        "name": "Sliver of Meat"
+      },
+      {
+        "id": 1073756834,
+        "name": "Beast Liver"
+      },
+      {
+        "id": 1073756844,
+        "name": "Lump of Flesh"
+      },
+      {
+        "id": 1073756854,
+        "name": "Beast Blood"
+      },
+      {
+        "id": 1073756864,
+        "name": "Old Fang"
+      },
+      {
+        "id": 1073756874,
+        "name": "Budding Horn"
+      },
+      {
+        "id": 1073756884,
+        "name": "Flight Pinion"
+      },
+      {
+        "id": 1073756904,
+        "name": "Four-Toed Fowl Foot"
+      },
+      {
+        "id": 1073756914,
+        "name": "Turtle Neck Meat"
+      },
+      {
+        "id": 1073756924,
+        "name": "Human Bone Shard"
+      },
+      {
+        "id": 1073756934,
+        "name": "Great Dragonfly Head"
+      },
+      {
+        "id": 1073756944,
+        "name": "Slumbering Egg"
+      },
+      {
+        "id": 1073756954,
+        "name": "Crab Eggs"
+      },
+      {
+        "id": 1073756964,
+        "name": "Land Octopus Ovary"
+      },
+      {
+        "id": 1073756984,
+        "name": "Strip of White Flesh"
+      },
+      {
+        "id": 1073757164,
+        "name": "Thin Beast Bones"
+      },
+      {
+        "id": 1073757165,
+        "name": "Hefty Beast Bone"
+      },
+      {
+        "id": 1073757234,
+        "name": "Living Jar Shard"
+      },
+      {
+        "id": 1073757244,
+        "name": "Albinauric Bloodclot"
+      },
+      {
+        "id": 1073757254,
+        "name": "Stormhawk Feather"
+      },
+      {
+        "id": 1073762624,
+        "name": "Nascent Butterfly"
+      },
+      {
+        "id": 1073762625,
+        "name": "Aeonian Butterfly"
+      },
+      {
+        "id": 1073762626,
+        "name": "Smoldering Butterfly"
+      },
+      {
+        "id": 1073762634,
+        "name": "Silver Firefly"
+      },
+      {
+        "id": 1073762635,
+        "name": "Gold Firefly"
+      },
+      {
+        "id": 1073762636,
+        "name": "Glintstone Firefly"
+      },
+      {
+        "id": 1073762644,
+        "name": "Golden Centipede"
+      },
+      {
+        "id": 1073762649,
+        "name": "Silver Tear Husk"
+      },
+      {
+        "id": 1073762654,
+        "name": "Gold-Tinged Excrement"
+      },
+      {
+        "id": 1073762655,
+        "name": "Blood-Tainted Excrement"
+      },
+      {
+        "id": 1073762669,
+        "name": "Yellow Ember"
+      }
+    ]
+  },
+  {
+    "category": "Crafting: Plant",
+    "items": [
+      {
+        "id": 1073756974,
+        "name": "Miranda Powder"
+      },
+      {
+        "id": 1073762474,
+        "name": "Poisonbloom"
+      },
+      {
+        "id": 1073762475,
+        "name": "Trina's Lily"
+      },
+      {
+        "id": 1073762476,
+        "name": "Fulgurbloom"
+      },
+      {
+        "id": 1073762477,
+        "name": "Miquella's Lily"
+      },
+      {
+        "id": 1073762478,
+        "name": "Grave Violet"
+      },
+      {
+        "id": 1073762484,
+        "name": "Faded Erdleaf Flower"
+      },
+      {
+        "id": 1073762504,
+        "name": "Erdleaf Flower"
+      },
+      {
+        "id": 1073762505,
+        "name": "Altus Bloom"
+      },
+      {
+        "id": 1073762506,
+        "name": "Fire Blossom"
+      },
+      {
+        "id": 1073762507,
+        "name": "Golden Sunflower"
+      },
+      {
+        "id": 1073762509,
+        "name": "Tarnished Golden Sunflower"
+      },
+      {
+        "id": 1073762514,
+        "name": "Herba"
+      },
+      {
+        "id": 1073762515,
+        "name": "Arteria Leaf"
+      },
+      {
+        "id": 1073762534,
+        "name": "Dewkissed Herba"
+      },
+      {
+        "id": 1073762544,
+        "name": "Rowa Fruit"
+      },
+      {
+        "id": 1073762545,
+        "name": "Golden Rowa"
+      },
+      {
+        "id": 1073762546,
+        "name": "Rimed Rowa"
+      },
+      {
+        "id": 1073762547,
+        "name": "Bloodrose"
+      },
+      {
+        "id": 1073762564,
+        "name": "Eye of Yelough"
+      },
+      {
+        "id": 1073762574,
+        "name": "Crystal Bud"
+      },
+      {
+        "id": 1073762575,
+        "name": "Rimed Crystal Bud"
+      },
+      {
+        "id": 1073762577,
+        "name": "Sacramental Bud"
+      },
+      {
+        "id": 1073762584,
+        "name": "Mushroom"
+      },
+      {
+        "id": 1073762585,
+        "name": "Melted Mushroom"
+      },
+      {
+        "id": 1073762594,
+        "name": "Toxic Mushroom"
+      },
+      {
+        "id": 1073762599,
+        "name": "Root Resin"
+      },
+      {
+        "id": 1073762664,
+        "name": "Cave Moss"
+      },
+      {
+        "id": 1073762665,
+        "name": "Budding Cave Moss"
+      },
+      {
+        "id": 1073762666,
+        "name": "Crystal Cave Moss"
+      }
+    ]
+  },
+  {
+    "category": "Crafting: Inorganic",
+    "items": [
+      {
+        "id": 1073743584,
+        "name": "Ruin Fragment"
+      },
+      {
+        "id": 1073757224,
+        "name": "String"
+      },
+      {
+        "id": 1073762604,
+        "name": "Cracked Crystal"
+      },
+      {
+        "id": 1073762619,
+        "name": "Sanctuary Stone"
+      },
+      {
+        "id": 1073762674,
+        "name": "Volcanic Stone"
+      },
+      {
+        "id": 1073762676,
+        "name": "Formic Rock"
+      },
+      {
+        "id": 1073762679,
+        "name": "Gravel Stone"
+      }
+    ]
+  },
+  {
+    "category": "Smithing Stone",
+    "items": [
+      {
+        "id": 1073751924,
+        "name": "Smithing Stone [1]"
+      },
+      {
+        "id": 1073751925,
+        "name": "Smithing Stone [2]"
+      },
+      {
+        "id": 1073751926,
+        "name": "Smithing Stone [3]"
+      },
+      {
+        "id": 1073751927,
+        "name": "Smithing Stone [4]"
+      },
+      {
+        "id": 1073751928,
+        "name": "Smithing Stone [5]"
+      },
+      {
+        "id": 1073751929,
+        "name": "Smithing Stone [6]"
+      },
+      {
+        "id": 1073751930,
+        "name": "Smithing Stone [7]"
+      },
+      {
+        "id": 1073751931,
+        "name": "Smithing Stone [8]"
+      },
+      {
+        "id": 1073751964,
+        "name": "Ancient Dragon Smithing Stone"
+      }
+    ]
+  },
+  {
+    "category": "Somber Smithing Stone",
+    "items": [
+      {
+        "id": 1073751984,
+        "name": "Somber Smithing Stone [1]"
+      },
+      {
+        "id": 1073751985,
+        "name": "Somber Smithing Stone [2]"
+      },
+      {
+        "id": 1073751986,
+        "name": "Somber Smithing Stone [3]"
+      },
+      {
+        "id": 1073751987,
+        "name": "Somber Smithing Stone [4]"
+      },
+      {
+        "id": 1073751988,
+        "name": "Somber Smithing Stone [5]"
+      },
+      {
+        "id": 1073751989,
+        "name": "Somber Smithing Stone [6]"
+      },
+      {
+        "id": 1073751990,
+        "name": "Somber Smithing Stone [7]"
+      },
+      {
+        "id": 1073751991,
+        "name": "Somber Smithing Stone [8]"
+      },
+      {
+        "id": 1073751992,
+        "name": "Somber Ancient Dragon Smithing Stone"
+      },
+      {
+        "id": 1073752024,
+        "name": "Somber Smithing Stone [9]"
+      }
+    ]
+  },
+  {
+    "category": "Grave Glovewort",
+    "items": [
+      {
+        "id": 1073752724,
+        "name": "Grave Glovewort [1]"
+      },
+      {
+        "id": 1073752725,
+        "name": "Grave Glovewort [2]"
+      },
+      {
+        "id": 1073752726,
+        "name": "Grave Glovewort [3]"
+      },
+      {
+        "id": 1073752727,
+        "name": "Grave Glovewort [4]"
+      },
+      {
+        "id": 1073752728,
+        "name": "Grave Glovewort [5]"
+      },
+      {
+        "id": 1073752729,
+        "name": "Grave Glovewort [6]"
+      },
+      {
+        "id": 1073752730,
+        "name": "Grave Glovewort [7]"
+      },
+      {
+        "id": 1073752731,
+        "name": "Grave Glovewort [8]"
+      },
+      {
+        "id": 1073752732,
+        "name": "Grave Glovewort [9]"
+      },
+      {
+        "id": 1073752733,
+        "name": "Great Grave Glovewort"
+      }
+    ]
+  },
+  {
+    "category": "Ghost Glovewort",
+    "items": [
+      {
+        "id": 1073752734,
+        "name": "Ghost Glovewort [1]"
+      },
+      {
+        "id": 1073752735,
+        "name": "Ghost Glovewort [2]"
+      },
+      {
+        "id": 1073752736,
+        "name": "Ghost Glovewort [3]"
+      },
+      {
+        "id": 1073752737,
+        "name": "Ghost Glovewort [4]"
+      },
+      {
+        "id": 1073752738,
+        "name": "Ghost Glovewort [5]"
+      },
+      {
+        "id": 1073752739,
+        "name": "Ghost Glovewort [6]"
+      },
+      {
+        "id": 1073752740,
+        "name": "Ghost Glovewort [7]"
+      },
+      {
+        "id": 1073752741,
+        "name": "Ghost Glovewort [8]"
+      },
+      {
+        "id": 1073752742,
+        "name": "Ghost Glovewort [9]"
+      },
+      {
+        "id": 1073752743,
+        "name": "Great Ghost Glovewort"
+      }
+    ]
+  },
+  {
+    "category": "Perfumes",
+    "items": [
+      {
+        "id": 1073745324,
+        "name": "Uplifting Aromatic"
+      },
+      {
+        "id": 1073745334,
+        "name": "Spark Aromatic"
+      },
+      {
+        "id": 1073745344,
+        "name": "Ironjar Aromatic"
+      },
+      {
+        "id": 1073745374,
+        "name": "Bloodboil Aromatic"
+      },
+      {
+        "id": 1073745404,
+        "name": "Poison Spraymist"
+      },
+      {
+        "id": 1073745434,
+        "name": "Acid Spraymist"
+      },
+      {
+        "id": 1073745344,
+        "name": "Ironjar Aromatic"
+      }
+    ]
+  },
+  {
+    "category": "Pots",
+    "items": [
+      {
+        "id": 1073742124,
+        "name": "Fire Pot"
+      },
+      {
+        "id": 1073742125,
+        "name": "Redmane Fire Pot"
+      },
+      {
+        "id": 1073742126,
+        "name": "Giantsflame Fire Pot"
+      },
+      {
+        "id": 1073742144,
+        "name": "Lightning Pot"
+      },
+      {
+        "id": 1073742145,
+        "name": "Ancient Dragonbolt Pot"
+      },
+      {
+        "id": 1073742154,
+        "name": "Fetid Pot"
+      },
+      {
+        "id": 1073742174,
+        "name": "Holy Water Pot"
+      },
+      {
+        "id": 1073742175,
+        "name": "Sacred Order Pot"
+      },
+      {
+        "id": 1073742184,
+        "name": "Freezing Pot"
+      },
+      {
+        "id": 1073742194,
+        "name": "Poison Pot"
+      },
+      {
+        "id": 1073742204,
+        "name": "Oil Pot"
+      },
+      {
+        "id": 1073742214,
+        "name": "Alluring Pot"
+      },
+      {
+        "id": 1073742215,
+        "name": "Beastlure Pot"
+      },
+      {
+        "id": 1073742224,
+        "name": "Roped Fire Pot"
+      },
+      {
+        "id": 1073742164,
+        "name": "Swarm Pot"
+      },
+      {
+        "id": 1073742464,
+        "name": "Sleep Pot"
+      },
+      {
+        "id": 1073742244,
+        "name": "Roped Lightning Pot"
+      },
+      {
+        "id": 1073742254,
+        "name": "Roped Fetid Pot"
+      },
+      {
+        "id": 1073742264,
+        "name": "Roped Poison Pot"
+      },
+      {
+        "id": 1073742274,
+        "name": "Roped Oil Pot"
+      },
+      {
+        "id": 1073742284,
+        "name": "Roped Magic Pot"
+      },
+      {
+        "id": 1073742294,
+        "name": "Roped Fly Pot"
+      },
+      {
+        "id": 1073742314,
+        "name": "Roped Volcano Pot"
+      },
+      {
+        "id": 1073742334,
+        "name": "Roped Holy Water Pot"
+      },
+      {
+        "id": 1073742424,
+        "name": "Volcano Pot"
+      },
+      {
+        "id": 1073742434,
+        "name": "Albinauric Pot"
+      },
+      {
+        "id": 1073742454,
+        "name": "Cursed-Blood Pot"
+      },
+      {
+        "id": 1073742484,
+        "name": "Magic Pot"
+      },
+      {
+        "id": 1073742485,
+        "name": "Academy Magic Pot"
+      }
+    ]
+  },
+  {
+    "category": "Crystal tears",
+    "items": [
+      {
+        "id": 1073752824,
+        "name": "Crimsonspill Crystal Tear"
+      },
+      {
+        "id": 1073752825,
+        "name": "Greenspill Crystal Tear"
+      },
+      {
+        "id": 1073752826,
+        "name": "Crimson Crystal Tear"
+      },
+      {
+        "id": 1073752827,
+        "name": "Crimson Crystal Tear"
+      },
+      {
+        "id": 1073752828,
+        "name": "Cerulean Crystal Tear"
+      },
+      {
+        "id": 1073752829,
+        "name": "Cerulean Crystal Tear"
+      },
+      {
+        "id": 1073752830,
+        "name": "Speckled Hardtear"
+      },
+      {
+        "id": 1073752831,
+        "name": "Crimson Bubbletear"
+      },
+      {
+        "id": 1073752832,
+        "name": "Opaline Bubbletear"
+      },
+      {
+        "id": 1073752833,
+        "name": "Crimsonburst Crystal Tear"
+      },
+      {
+        "id": 1073752834,
+        "name": "Greenburst Crystal Tear"
+      },
+      {
+        "id": 1073752835,
+        "name": "Opaline Hardtear"
+      },
+      {
+        "id": 1073752836,
+        "name": "Winged Crystal Tear"
+      },
+      {
+        "id": 1073752837,
+        "name": "Thorny Cracked Tear"
+      },
+      {
+        "id": 1073752838,
+        "name": "Spiked Cracked Tear"
+      },
+      {
+        "id": 1073752839,
+        "name": "Windy Crystal Tear"
+      },
+      {
+        "id": 1073752840,
+        "name": "Ruptured Crystal Tear"
+      },
+      {
+        "id": 1073752841,
+        "name": "Ruptured Crystal Tear"
+      },
+      {
+        "id": 1073752842,
+        "name": "Leaden Hardtear"
+      },
+      {
+        "id": 1073752843,
+        "name": "Twiggy Cracked Tear"
+      },
+      {
+        "id": 1073752844,
+        "name": "Crimsonwhorl Bubbletear"
+      },
+      {
+        "id": 1073752845,
+        "name": "Strength-knot Crystal Tear"
+      },
+      {
+        "id": 1073752846,
+        "name": "Dexterity-knot Crystal Tear"
+      },
+      {
+        "id": 1073752847,
+        "name": "Intelligence-knot Crystal Tear"
+      },
+      {
+        "id": 1073752848,
+        "name": "Faith-knot Crystal Tear"
+      },
+      {
+        "id": 1073752849,
+        "name": "Cerulean Hidden Tear"
+      },
+      {
+        "id": 1073752850,
+        "name": "Stonebarb Cracked Tear"
+      },
+      {
+        "id": 1073752851,
+        "name": "Purifying Crystal Tear"
+      },
+      {
+        "id": 1073752852,
+        "name": "Flame-Shrouding Cracked Tear"
+      },
+      {
+        "id": 1073752853,
+        "name": "Magic-Shrouding Cracked Tear"
+      },
+      {
+        "id": 1073752854,
+        "name": "Lightning-Shrouding Cracked Tear"
+      },
+      {
+        "id": 1073752855,
+        "name": "Holy-Shrouding Cracked Tear"
+      }
+    ]
+  },
+  {
+    "category": "Prattling Pates",
+    "items": [
+      {
+        "id": 1073744024,
+        "name": "Prattling Pate \"Hello\""
+      },
+      {
+        "id": 1073744025,
+        "name": "Prattling Pate \"Thank you\""
+      },
+      {
+        "id": 1073744026,
+        "name": "Prattling Pate \"Apologies\""
+      },
+      {
+        "id": 1073744027,
+        "name": "Prattling Pate \"Wonderful\""
+      },
+      {
+        "id": 1073744028,
+        "name": "Prattling Pate \"Please help\""
+      },
+      {
+        "id": 1073744029,
+        "name": "Prattling Pate \"My beloved\""
+      },
+      {
+        "id": 1073744030,
+        "name": "Prattling Pate \"Let's get to it\""
+      },
+      {
+        "id": 1073744031,
+        "name": "Prattling Pate \"You're beautiful\""
+      }
+    ]
+  },
+  {
+    "category": "Bell Bearings",
+    "items": [
+      {
+        "id": 1073750734,
+        "name": "Pidia's Bell Bearing"
+      },
+      {
+        "id": 1073750735,
+        "name": "Seluvis's Bell Bearing"
+      },
+      {
+        "id": 1073750736,
+        "name": "Patches' Bell Bearing"
+      },
+      {
+        "id": 1073750737,
+        "name": "Sellen's Bell Bearing"
+      },
+      {
+        "id": 1073750739,
+        "name": "D's Bell Bearing"
+      },
+      {
+        "id": 1073750740,
+        "name": "Bernahl's Bell Bearing"
+      },
+      {
+        "id": 1073750741,
+        "name": "Miriel's Bell Bearing"
+      },
+      {
+        "id": 1073750742,
+        "name": "Gostoc's Bell Bearing"
+      },
+      {
+        "id": 1073750743,
+        "name": "Thops's Bell Bearing"
+      },
+      {
+        "id": 1073750744,
+        "name": "Kalé's Bell Bearing"
+      },
+      {
+        "id": 1073750745,
+        "name": "Nomadic Merchant's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750746,
+        "name": "Nomadic Merchant's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750747,
+        "name": "Nomadic Merchant's Bell Bearing [3]"
+      },
+      {
+        "id": 1073750748,
+        "name": "Nomadic Merchant's Bell Bearing [4]"
+      },
+      {
+        "id": 1073750749,
+        "name": "Nomadic Merchant's Bell Bearing [5]"
+      },
+      {
+        "id": 1073750750,
+        "name": "Isolated Merchant's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750751,
+        "name": "Isolated Merchant's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750752,
+        "name": "Nomadic Merchant's Bell Bearing [6]"
+      },
+      {
+        "id": 1073750753,
+        "name": "Hermit Merchant's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750754,
+        "name": "Nomadic Merchant's Bell Bearing [7]"
+      },
+      {
+        "id": 1073750755,
+        "name": "Nomadic Merchant's Bell Bearing [8]"
+      },
+      {
+        "id": 1073750756,
+        "name": "Nomadic Merchant's Bell Bearing [9]"
+      },
+      {
+        "id": 1073750757,
+        "name": "Nomadic Merchant's Bell Bearing [10]"
+      },
+      {
+        "id": 1073750759,
+        "name": "Isolated Merchant's Bell Bearing [3]"
+      },
+      {
+        "id": 1073750760,
+        "name": "Hermit Merchant's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750761,
+        "name": "Abandoned Merchant's Bell Bearing"
+      },
+      {
+        "id": 1073750762,
+        "name": "Hermit Merchant's Bell Bearing [3]"
+      },
+      {
+        "id": 1073750763,
+        "name": "Imprisoned Merchant's Bell Bearing"
+      },
+      {
+        "id": 1073750764,
+        "name": "Iji's Bell Bearing"
+      },
+      {
+        "id": 1073750765,
+        "name": "Rogier's Bell Bearing"
+      },
+      {
+        "id": 1073750766,
+        "name": "Blackguard's Bell Bearing"
+      },
+      {
+        "id": 1073750767,
+        "name": "Corhyn's Bell Bearing"
+      },
+      {
+        "id": 1073750768,
+        "name": "Gowry's Bell Bearing"
+      },
+      {
+        "id": 1073750769,
+        "name": "Bone Peddler's Bell Bearing"
+      },
+      {
+        "id": 1073750770,
+        "name": "Meat Peddler's Bell Bearing"
+      },
+      {
+        "id": 1073750771,
+        "name": "Medicine Peddler's Bell Bearing"
+      },
+      {
+        "id": 1073750772,
+        "name": "Gravity Stone Peddler's Bell Bearing"
+      },
+      {
+        "id": 1073750775,
+        "name": "Smithing-Stone Miner's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750776,
+        "name": "Smithing-Stone Miner's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750777,
+        "name": "Smithing-Stone Miner's Bell Bearing [3]"
+      },
+      {
+        "id": 1073750778,
+        "name": "Smithing-Stone Miner's Bell Bearing [4]"
+      },
+      {
+        "id": 1073750779,
+        "name": "Somberstone Miner's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750780,
+        "name": "Somberstone Miner's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750781,
+        "name": "Somberstone Miner's Bell Bearing [3]"
+      },
+      {
+        "id": 1073750782,
+        "name": "Somberstone Miner's Bell Bearing [4]"
+      },
+      {
+        "id": 1073750783,
+        "name": "Somberstone Miner's Bell Bearing [5]"
+      },
+      {
+        "id": 1073750784,
+        "name": "Glovewort Picker's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750785,
+        "name": "Glovewort Picker's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750786,
+        "name": "Glovewort Picker's Bell Bearing [3]"
+      },
+      {
+        "id": 1073750787,
+        "name": "Ghost-Glovewort Picker's Bell Bearing [1]"
+      },
+      {
+        "id": 1073750788,
+        "name": "Ghost-Glovewort Picker's Bell Bearing [2]"
+      },
+      {
+        "id": 1073750789,
+        "name": "Ghost-Glovewort Picker's Bell Bearing [3]"
+      }
+    ]
+  },
+  {
+    "category": "Spirit Ashes",
+    "items": [
+      {
+        "id": 1073941824,
+        "name": "Black Knife Tiche"
+      },
+      {
+        "id": 1073942824,
+        "name": "Banished Knight Oleg"
+      },
+      {
+        "id": 1073943824,
+        "name": "Banished Knight Engvall"
+      },
+      {
+        "id": 1073944824,
+        "name": "Fanged Imp Ashes"
+      },
+      {
+        "id": 1073945824,
+        "name": "Latenna the Albinauric"
+      },
+      {
+        "id": 1073946824,
+        "name": "Nomad Ashes"
+      },
+      {
+        "id": 1073947824,
+        "name": "Nightmaiden \u0026 Swordstress Puppets"
+      },
+      {
+        "id": 1073948824,
+        "name": "Mimic Tear Ashes"
+      },
+      {
+        "id": 1073949824,
+        "name": "Crystalian Ashes"
+      },
+      {
+        "id": 1073950824,
+        "name": "Ancestral Follower Ashes"
+      },
+      {
+        "id": 1073951824,
+        "name": "Winged Misbegotten Ashes"
+      },
+      {
+        "id": 1073952824,
+        "name": "Albinauric Ashes"
+      },
+      {
+        "id": 1073953824,
+        "name": "Skeletal Militiaman Ashes"
+      },
+      {
+        "id": 1073954824,
+        "name": "Skeletal Bandit Ashes"
+      },
+      {
+        "id": 1073955824,
+        "name": "Oracle Envoy Ashes"
+      },
+      {
+        "id": 1073956824,
+        "name": "Putrid Corpse Ashes"
+      },
+      {
+        "id": 1073957824,
+        "name": "Depraved Perfumer Carmaan"
+      },
+      {
+        "id": 1073958824,
+        "name": "Perfumer Tricia"
+      },
+      {
+        "id": 1073959824,
+        "name": "Glintstone Sorcerer Ashes"
+      },
+      {
+        "id": 1073960824,
+        "name": "Twinsage Sorcerer Ashes"
+      },
+      {
+        "id": 1073961824,
+        "name": "Page Ashes"
+      },
+      {
+        "id": 1073962824,
+        "name": "Battlemage Hugues"
+      },
+      {
+        "id": 1073963824,
+        "name": "Clayman Ashes"
+      },
+      {
+        "id": 1073964824,
+        "name": "Cleanrot Knight Finlay"
+      },
+      {
+        "id": 1073965824,
+        "name": "Kindred of Rot Ashes"
+      },
+      {
+        "id": 1073966824,
+        "name": "Marionette Soldier Ashes"
+      },
+      {
+        "id": 1073967824,
+        "name": "Avionette Soldier Ashes"
+      },
+      {
+        "id": 1073968824,
+        "name": "Fire Monk Ashes"
+      },
+      {
+        "id": 1073969824,
+        "name": "Blackflame Monk Amon"
+      },
+      {
+        "id": 1073970824,
+        "name": "Man-Serpent Ashes"
+      },
+      {
+        "id": 1073971824,
+        "name": "Azula Beastman Ashes"
+      },
+      {
+        "id": 1073972824,
+        "name": "Kaiden Sellsword Ashes"
+      },
+      {
+        "id": 1073973824,
+        "name": "Lone Wolf Ashes"
+      },
+      {
+        "id": 1073974824,
+        "name": "Giant Rat Ashes"
+      },
+      {
+        "id": 1073975824,
+        "name": "Demi-Human Ashes"
+      },
+      {
+        "id": 1073976824,
+        "name": "Rotten Stray Ashes"
+      },
+      {
+        "id": 1073977824,
+        "name": "Spirit Jellyfish Ashes"
+      },
+      {
+        "id": 1073978824,
+        "name": "Warhawk Ashes"
+      },
+      {
+        "id": 1073979824,
+        "name": "Stormhawk Deenh"
+      },
+      {
+        "id": 1073980824,
+        "name": "Bloodhound Knight Floh"
+      },
+      {
+        "id": 1073981824,
+        "name": "Wandering Noble Ashes"
+      },
+      {
+        "id": 1073982824,
+        "name": "Noble Sorcerer Ashes"
+      },
+      {
+        "id": 1073983824,
+        "name": "Vulgar Militia Ashes"
+      },
+      {
+        "id": 1073984824,
+        "name": "Mad Pumpkin Head Ashes"
+      },
+      {
+        "id": 1073985824,
+        "name": "Land Squirt Ashes"
+      },
+      {
+        "id": 1073986824,
+        "name": "Miranda Sprout Ashes"
+      },
+      {
+        "id": 1073987824,
+        "name": "Soldjars of Fortune Ashes"
+      },
+      {
+        "id": 1073988824,
+        "name": "Omenkiller Rollo"
+      },
+      {
+        "id": 1073989824,
+        "name": "Greatshield Soldier Ashes"
+      },
+      {
+        "id": 1073990824,
+        "name": "Archer Ashes"
+      },
+      {
+        "id": 1073991824,
+        "name": "Godrick Soldier Ashes"
+      },
+      {
+        "id": 1073992824,
+        "name": "Raya Lucaria Soldier Ashes"
+      },
+      {
+        "id": 1073993824,
+        "name": "Leyndell Soldier Ashes"
+      },
+      {
+        "id": 1073994824,
+        "name": "Radahn Soldier Ashes"
+      },
+      {
+        "id": 1073995824,
+        "name": "Mausoleum Soldier Ashes"
+      },
+      {
+        "id": 1073996824,
+        "name": "Haligtree Soldier Ashes"
+      },
+      {
+        "id": 1073997824,
+        "name": "Ancient Dragon Knight Kristoff"
+      },
+      {
+        "id": 1073998824,
+        "name": "Redmane Knight Ogha"
+      },
+      {
+        "id": 1073999824,
+        "name": "Lhutel the Headless"
+      },
+      {
+        "id": 1074000824,
+        "name": "Nepheli Loux Puppet"
+      },
+      {
+        "id": 1074001824,
+        "name": "Dung Eater Puppet"
+      },
+      {
+        "id": 1074002824,
+        "name": "Finger Maiden Therolina Puppet"
+      },
+      {
+        "id": 1074003824,
+        "name": "Dolores the Sleeping Arrow Puppet"
+      },
+      {
+        "id": 1074004824,
+        "name": "Jarwight Puppet"
+      }
+    ]
+  },
+  {
+    "category": "Sorceries",
+    "items": [
+      {
+        "id": 1073745824,
+        "name": "Glintstone Pebble"
+      },
+      {
+        "id": 1073745825,
+        "name": "Great Glintstone Shard"
+      },
+      {
+        "id": 1073745834,
+        "name": "Swift Glintstone Shard"
+      },
+      {
+        "id": 1073745844,
+        "name": "Glintstone Cometshard"
+      },
+      {
+        "id": 1073745845,
+        "name": "Comet"
+      },
+      {
+        "id": 1073745854,
+        "name": "Shard Spiral"
+      },
+      {
+        "id": 1073745864,
+        "name": "Glintstone Stars"
+      },
+      {
+        "id": 1073745874,
+        "name": "Star Shower"
+      },
+      {
+        "id": 1073745884,
+        "name": "Crystal Barrage"
+      },
+      {
+        "id": 1073745894,
+        "name": "Glintstone Arc"
+      },
+      {
+        "id": 1073745904,
+        "name": "Cannon of Haima"
+      },
+      {
+        "id": 1073745914,
+        "name": "Crystal Burst"
+      },
+      {
+        "id": 1073745924,
+        "name": "Shatter Earth"
+      },
+      {
+        "id": 1073745934,
+        "name": "Rock Blaster"
+      },
+      {
+        "id": 1073745944,
+        "name": "Gavel of Haima"
+      },
+      {
+        "id": 1073745954,
+        "name": "Terra Magicus"
+      },
+      {
+        "id": 1073745964,
+        "name": "Starlight"
+      },
+      {
+        "id": 1073746024,
+        "name": "Comet Azur"
+      },
+      {
+        "id": 1073746034,
+        "name": "Founding Rain of Stars"
+      },
+      {
+        "id": 1073746044,
+        "name": "Stars of Ruin"
+      },
+      {
+        "id": 1073746124,
+        "name": "Glintblade Phalanx"
+      },
+      {
+        "id": 1073746125,
+        "name": "Carian Phalanx"
+      },
+      {
+        "id": 1073746126,
+        "name": "Greatblade Phalanx"
+      },
+      {
+        "id": 1073746184,
+        "name": "Rennala's Full Moon"
+      },
+      {
+        "id": 1073746185,
+        "name": "Ranni's Dark Moon"
+      },
+      {
+        "id": 1073746194,
+        "name": "Magic Downpour"
+      },
+      {
+        "id": 1073746204,
+        "name": "Loretta's Greatbow"
+      },
+      {
+        "id": 1073746205,
+        "name": "Loretta's Mastery"
+      },
+      {
+        "id": 1073746214,
+        "name": "Magic Glintblade"
+      },
+      {
+        "id": 1073746224,
+        "name": "Glintstone Icecrag"
+      },
+      {
+        "id": 1073746234,
+        "name": "Zamor Ice Storm"
+      },
+      {
+        "id": 1073746244,
+        "name": "Freezing Mist"
+      },
+      {
+        "id": 1073746254,
+        "name": "Carian Greatsword"
+      },
+      {
+        "id": 1073746255,
+        "name": "Adula's Moonblade"
+      },
+      {
+        "id": 1073746264,
+        "name": "Carian Slicer"
+      },
+      {
+        "id": 1073746274,
+        "name": "Carian Piercer"
+      },
+      {
+        "id": 1073746284,
+        "name": "Scholar's Armament"
+      },
+      {
+        "id": 1073746294,
+        "name": "Scholar's Shield"
+      },
+      {
+        "id": 1073746304,
+        "name": "Lucidity"
+      },
+      {
+        "id": 1073746314,
+        "name": "Frozen Armament"
+      },
+      {
+        "id": 1073746324,
+        "name": "Shattering Crystal"
+      },
+      {
+        "id": 1073746334,
+        "name": "Crystal Release"
+      },
+      {
+        "id": 1073746344,
+        "name": "Crystal Torrent"
+      },
+      {
+        "id": 1073746424,
+        "name": "Ambush Shard"
+      },
+      {
+        "id": 1073746434,
+        "name": "Night Shard"
+      },
+      {
+        "id": 1073746444,
+        "name": "Night Comet"
+      },
+      {
+        "id": 1073746454,
+        "name": "Thops's Barrier"
+      },
+      {
+        "id": 1073746464,
+        "name": "Carian Retaliation"
+      },
+      {
+        "id": 1073746474,
+        "name": "Eternal Darkness"
+      },
+      {
+        "id": 1073746484,
+        "name": "Unseen Blade"
+      },
+      {
+        "id": 1073746494,
+        "name": "Unseen Form"
+      },
+      {
+        "id": 1073746524,
+        "name": "Meteorite"
+      },
+      {
+        "id": 1073746525,
+        "name": "Meteorite of Astel"
+      },
+      {
+        "id": 1073746534,
+        "name": "Rock Sling"
+      },
+      {
+        "id": 1073746544,
+        "name": "Gravity Well"
+      },
+      {
+        "id": 1073746545,
+        "name": "Collapsing Stars"
+      },
+      {
+        "id": 1073746624,
+        "name": "Magma Shot"
+      },
+      {
+        "id": 1073746634,
+        "name": "Gelmir's Fury"
+      },
+      {
+        "id": 1073746644,
+        "name": "Roiling Magma"
+      },
+      {
+        "id": 1073746654,
+        "name": "Rykard's Rancor"
+      },
+      {
+        "id": 1073746724,
+        "name": "Briars of Sin"
+      },
+      {
+        "id": 1073746734,
+        "name": "Briars of Punishment"
+      },
+      {
+        "id": 1073746824,
+        "name": "Rancorcall"
+      },
+      {
+        "id": 1073746825,
+        "name": "Ancient Death Rancor"
+      },
+      {
+        "id": 1073746834,
+        "name": "Explosive Ghostflame"
+      },
+      {
+        "id": 1073746844,
+        "name": "Fia's Mist"
+      },
+      {
+        "id": 1073746854,
+        "name": "Tibia's Summons"
+      },
+      {
+        "id": 1073746864,
+        "name": "Death Lightning"
+      },
+      {
+        "id": 1073746924,
+        "name": "Oracle Bubbles"
+      },
+      {
+        "id": 1073746934,
+        "name": "Great Oracular Bubble"
+      },
+      {
+        "id": 1073748324,
+        "name": "Night Maiden's Mist"
+      }
+    ]
+  },
+  {
+    "category": "Incantations",
+    "items": [
+      {
+        "id": 1073747824,
+        "name": "Catch Flame"
+      },
+      {
+        "id": 1073747825,
+        "name": "O, Flame!"
+      },
+      {
+        "id": 1073747834,
+        "name": "Flame Sling"
+      },
+      {
+        "id": 1073747844,
+        "name": "Flame, Fall Upon Them"
+      },
+      {
+        "id": 1073747854,
+        "name": "Whirl, O Flame!"
+      },
+      {
+        "id": 1073747864,
+        "name": "Flame, Cleanse Me"
+      },
+      {
+        "id": 1073747874,
+        "name": "Flame, Grant Me Strength"
+      },
+      {
+        "id": 1073747884,
+        "name": "Flame, Protect Me"
+      },
+      {
+        "id": 1073747924,
+        "name": "Giantsflame Take Thee"
+      },
+      {
+        "id": 1073747934,
+        "name": "Flame of the Fell God"
+      },
+      {
+        "id": 1073747944,
+        "name": "Burn, O Flame!"
+      },
+      {
+        "id": 1073748034,
+        "name": "Black Flame"
+      },
+      {
+        "id": 1073748044,
+        "name": "Surge, O Flame!"
+      },
+      {
+        "id": 1073748054,
+        "name": "Scouring Black Flame"
+      },
+      {
+        "id": 1073748064,
+        "name": "Black Flame Ritual"
+      },
+      {
+        "id": 1073748074,
+        "name": "Black Flame Blade"
+      },
+      {
+        "id": 1073748084,
+        "name": "Black Flame's Protection"
+      },
+      {
+        "id": 1073748094,
+        "name": "Noble Presence"
+      },
+      {
+        "id": 1073748124,
+        "name": "Bloodflame Talons"
+      },
+      {
+        "id": 1073748134,
+        "name": "Bloodboon"
+      },
+      {
+        "id": 1073748144,
+        "name": "Bloodflame Blade"
+      },
+      {
+        "id": 1073748154,
+        "name": "Barrier of Gold"
+      },
+      {
+        "id": 1073748164,
+        "name": "Protection of the Erdtree"
+      },
+      {
+        "id": 1073748224,
+        "name": "Rejection"
+      },
+      {
+        "id": 1073748234,
+        "name": "Wrath of Gold"
+      },
+      {
+        "id": 1073748244,
+        "name": "Urgent Heal"
+      },
+      {
+        "id": 1073748245,
+        "name": "Heal"
+      },
+      {
+        "id": 1073748246,
+        "name": "Great Heal"
+      },
+      {
+        "id": 1073748247,
+        "name": "Lord's Heal"
+      },
+      {
+        "id": 1073748248,
+        "name": "Erdtree Heal"
+      },
+      {
+        "id": 1073748254,
+        "name": "Blessing's Boon"
+      },
+      {
+        "id": 1073748255,
+        "name": "Blessing of the Erdtree"
+      },
+      {
+        "id": 1073748264,
+        "name": "Cure Poison"
+      },
+      {
+        "id": 1073748265,
+        "name": "Lord's Aid"
+      },
+      {
+        "id": 1073748274,
+        "name": "Flame Fortification"
+      },
+      {
+        "id": 1073748284,
+        "name": "Magic Fortification"
+      },
+      {
+        "id": 1073748294,
+        "name": "Lightning Fortification"
+      },
+      {
+        "id": 1073748304,
+        "name": "Divine Fortification"
+      },
+      {
+        "id": 1073748314,
+        "name": "Lord's Divine Fortification"
+      },
+      {
+        "id": 1073748334,
+        "name": "Assassin's Approach"
+      },
+      {
+        "id": 1073748344,
+        "name": "Shadow Bait"
+      },
+      {
+        "id": 1073748354,
+        "name": "Darkness"
+      },
+      {
+        "id": 1073748424,
+        "name": "Golden Vow"
+      },
+      {
+        "id": 1073748524,
+        "name": "Discus of Light"
+      },
+      {
+        "id": 1073748525,
+        "name": "Triple Rings of Light"
+      },
+      {
+        "id": 1073748534,
+        "name": "Radagon's Rings of Light"
+      },
+      {
+        "id": 1073748544,
+        "name": "Elden Stars"
+      },
+      {
+        "id": 1073748554,
+        "name": "Law of Regression"
+      },
+      {
+        "id": 1073748564,
+        "name": "Immutable Shield"
+      },
+      {
+        "id": 1073748574,
+        "name": "Litany of Proper Death"
+      },
+      {
+        "id": 1073748584,
+        "name": "Law of Causality"
+      },
+      {
+        "id": 1073748594,
+        "name": "Order's Blade"
+      },
+      {
+        "id": 1073748604,
+        "name": "Order Healing"
+      },
+      {
+        "id": 1073748624,
+        "name": "Bestial Sling"
+      },
+      {
+        "id": 1073748634,
+        "name": "Stone of Gurranq"
+      },
+      {
+        "id": 1073748644,
+        "name": "Beast Claw"
+      },
+      {
+        "id": 1073748654,
+        "name": "Gurranq's Beast Claw"
+      },
+      {
+        "id": 1073748664,
+        "name": "Bestial Vitality"
+      },
+      {
+        "id": 1073748674,
+        "name": "Bestial Constitution"
+      },
+      {
+        "id": 1073748724,
+        "name": "Lightning Spear"
+      },
+      {
+        "id": 1073748734,
+        "name": "Ancient Dragons' Lightning Strike"
+      },
+      {
+        "id": 1073748744,
+        "name": "Lightning Strike"
+      },
+      {
+        "id": 1073748745,
+        "name": "Frozen Lightning Spear"
+      },
+      {
+        "id": 1073748754,
+        "name": "Honed Bolt"
+      },
+      {
+        "id": 1073748764,
+        "name": "Ancient Dragons' Lightning Spear"
+      },
+      {
+        "id": 1073748765,
+        "name": "Fortissax's Lightning Spear"
+      },
+      {
+        "id": 1073748774,
+        "name": "Lansseax's Glaive"
+      },
+      {
+        "id": 1073748784,
+        "name": "Electrify Armament"
+      },
+      {
+        "id": 1073748794,
+        "name": "Vyke's Dragonbolt"
+      },
+      {
+        "id": 1073748795,
+        "name": "Dragonbolt Blessing"
+      },
+      {
+        "id": 1073748824,
+        "name": "Dragonfire"
+      },
+      {
+        "id": 1073748825,
+        "name": "Agheel's Flame"
+      },
+      {
+        "id": 1073748834,
+        "name": "Magma Breath"
+      },
+      {
+        "id": 1073748835,
+        "name": "Theodorix's Magma"
+      },
+      {
+        "id": 1073748844,
+        "name": "Dragonice"
+      },
+      {
+        "id": 1073748845,
+        "name": "Borealis's Mist"
+      },
+      {
+        "id": 1073748854,
+        "name": "Rotten Breath"
+      },
+      {
+        "id": 1073748855,
+        "name": "Ekzykes's Decay"
+      },
+      {
+        "id": 1073748864,
+        "name": "Glintstone Breath"
+      },
+      {
+        "id": 1073748865,
+        "name": "Smarag's Glintstone Breath"
+      },
+      {
+        "id": 1073748874,
+        "name": "Placidusax's Ruin"
+      },
+      {
+        "id": 1073748884,
+        "name": "Dragonclaw"
+      },
+      {
+        "id": 1073748904,
+        "name": "Dragonmaw"
+      },
+      {
+        "id": 1073748914,
+        "name": "Greyoll's Roar"
+      },
+      {
+        "id": 1073749024,
+        "name": "Pest Threads"
+      },
+      {
+        "id": 1073749034,
+        "name": "Swarm of Flies"
+      },
+      {
+        "id": 1073749044,
+        "name": "Poison Mist"
+      },
+      {
+        "id": 1073749054,
+        "name": "Poison Armament"
+      },
+      {
+        "id": 1073749064,
+        "name": "Scarlet Aeonia"
+      },
+      {
+        "id": 1073749124,
+        "name": "Inescapable Frenzy"
+      },
+      {
+        "id": 1073749134,
+        "name": "The Flame of Frenzy"
+      },
+      {
+        "id": 1073749135,
+        "name": "Unendurable Frenzy"
+      },
+      {
+        "id": 1073749144,
+        "name": "Frenzied Burst"
+      },
+      {
+        "id": 1073749154,
+        "name": "Howl of Shabriri"
+      },
+      {
+        "id": 1073749324,
+        "name": "Aspects of the Crucible 00000001 00000000 FFFFFFFF //  Tail"
+      },
+      {
+        "id": 1073749334,
+        "name": "Aspects of the Crucible 00000001 00000000 FFFFFFFF //  Horns"
+      },
+      {
+        "id": 1073749344,
+        "name": "Aspects of the Crucible 00000001 00000000 FFFFFFFF //  Breath"
+      },
+      {
+        "id": 1073749354,
+        "name": "Black Blade"
+      },
+      {
+        "id": 1073749724,
+        "name": "Fire's Deadly Sin"
+      },
+      {
+        "id": 1073749727,
+        "name": "Golden Lightning Fortification"
+      }
+    ]
+  }
+]

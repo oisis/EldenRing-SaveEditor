@@ -1,0 +1,1952 @@
+[
+  {
+    "category": "Daggers",
+    "items": [
+      {
+        "id": 1000000,
+        "name": "Dagger"
+      },
+      {
+        "id": 1010000,
+        "name": "Black Knife"
+      },
+      {
+        "id": 1020000,
+        "name": "Parrying Dagger"
+      },
+      {
+        "id": 1030000,
+        "name": "Miséricorde"
+      },
+      {
+        "id": 1040000,
+        "name": "Reduvia"
+      },
+      {
+        "id": 1050000,
+        "name": "Crystal Knife"
+      },
+      {
+        "id": 1060000,
+        "name": "Celebrant's Sickle"
+      },
+      {
+        "id": 1070000,
+        "name": "Glintstone Kris"
+      },
+      {
+        "id": 1080000,
+        "name": "Scorpion's Stinger"
+      },
+      {
+        "id": 1090000,
+        "name": "Great Knife"
+      },
+      {
+        "id": 1100000,
+        "name": "Wakizashi"
+      },
+      {
+        "id": 1110000,
+        "name": "Cinquedea"
+      },
+      {
+        "id": 1130000,
+        "name": "Ivory Sickle"
+      },
+      {
+        "id": 1140000,
+        "name": "Bloodstained Dagger"
+      },
+      {
+        "id": 1150000,
+        "name": "Erdsteel Dagger"
+      },
+      {
+        "id": 1160000,
+        "name": "Blade of Calling"
+      }
+    ]
+  },
+  {
+    "category": "Straight Swords",
+    "items": [
+      {
+        "id": 2000000,
+        "name": "Longsword"
+      },
+      {
+        "id": 2010000,
+        "name": "Short Sword"
+      },
+      {
+        "id": 2020000,
+        "name": "Broadsword"
+      },
+      {
+        "id": 2040000,
+        "name": "Lordsworn's Straight Sword"
+      },
+      {
+        "id": 2050000,
+        "name": "Weathered Straight Sword"
+      },
+      {
+        "id": 2060000,
+        "name": "Ornamental Straight Sword"
+      },
+      {
+        "id": 2070000,
+        "name": "Golden Epitaph"
+      },
+      {
+        "id": 2080000,
+        "name": "Nox Flowing Sword"
+      },
+      {
+        "id": 2090000,
+        "name": "Inseparable Sword"
+      },
+      {
+        "id": 2110000,
+        "name": "Coded Sword"
+      },
+      {
+        "id": 2140000,
+        "name": "Sword of Night and Flame"
+      },
+      {
+        "id": 2150000,
+        "name": "Crystal Sword"
+      },
+      {
+        "id": 2180000,
+        "name": "Carian Knight's Sword"
+      },
+      {
+        "id": 2190000,
+        "name": "Sword of St. Trina"
+      },
+      {
+        "id": 2200000,
+        "name": "Miquellan Knight's Sword"
+      },
+      {
+        "id": 2210000,
+        "name": "Cane Sword"
+      },
+      {
+        "id": 2220000,
+        "name": "Regalia of Eochaid"
+      },
+      {
+        "id": 2230000,
+        "name": "Noble's Slender Sword"
+      },
+      {
+        "id": 2240000,
+        "name": "Warhawk's Talon"
+      },
+      {
+        "id": 2250000,
+        "name": "Lazuli Glintstone Sword"
+      },
+      {
+        "id": 2260000,
+        "name": "Rotten Crystal Sword"
+      }
+    ]
+  },
+  {
+    "category": "Greatswords",
+    "items": [
+      {
+        "id": 3000000,
+        "name": "Bastard Sword"
+      },
+      {
+        "id": 3010000,
+        "name": "Forked Greatsword"
+      },
+      {
+        "id": 3020000,
+        "name": "Iron Greatsword"
+      },
+      {
+        "id": 3030000,
+        "name": "Lordsworn's Greatsword"
+      },
+      {
+        "id": 3040000,
+        "name": "Knight's Greatsword"
+      },
+      {
+        "id": 3050000,
+        "name": "Flamberge"
+      },
+      {
+        "id": 3060000,
+        "name": "Ordovis's Greatsword"
+      },
+      {
+        "id": 3070000,
+        "name": "Alabaster Lord's Sword"
+      },
+      {
+        "id": 3080000,
+        "name": "Banished Knight's Greatsword"
+      },
+      {
+        "id": 3090000,
+        "name": "Dark Moon Greatsword"
+      },
+      {
+        "id": 3100000,
+        "name": "Sacred Relic Sword"
+      },
+      {
+        "id": 3130000,
+        "name": "Helphen's Steeple"
+      },
+      {
+        "id": 3140000,
+        "name": "Blasphemous Blade"
+      },
+      {
+        "id": 3150000,
+        "name": "Marais Executioner's Sword"
+      },
+      {
+        "id": 3160000,
+        "name": "Sword of Milos"
+      },
+      {
+        "id": 3170000,
+        "name": "Golden Order Greatsword"
+      },
+      {
+        "id": 3180000,
+        "name": "Claymore"
+      },
+      {
+        "id": 3190000,
+        "name": "Gargoyle's Greatsword"
+      },
+      {
+        "id": 3200000,
+        "name": "Death's Poker"
+      },
+      {
+        "id": 3210000,
+        "name": "Gargoyle's Blackblade"
+      }
+    ]
+  },
+  {
+    "category": "Colossal Swords",
+    "items": [
+      {
+        "id": 4000000,
+        "name": "Greatsword"
+      },
+      {
+        "id": 4010000,
+        "name": "Watchdog's Greatsword"
+      },
+      {
+        "id": 4020000,
+        "name": "Maliketh's Black Blade"
+      },
+      {
+        "id": 4030000,
+        "name": "Troll's Golden Sword"
+      },
+      {
+        "id": 4040000,
+        "name": "Zweihander"
+      },
+      {
+        "id": 4050000,
+        "name": "Starscourge Greatsword"
+      },
+      {
+        "id": 4060000,
+        "name": "Royal Greatsword"
+      },
+      {
+        "id": 4070000,
+        "name": "Godslayer's Greatsword"
+      },
+      {
+        "id": 4080000,
+        "name": "Ruins Greatsword"
+      },
+      {
+        "id": 4100000,
+        "name": "Grafted Blade Greatsword"
+      },
+      {
+        "id": 4110000,
+        "name": "Troll Knight's Sword"
+      }
+    ]
+  },
+  {
+    "category": "Thrusting Swords",
+    "items": [
+      {
+        "id": 5000000,
+        "name": "Estoc"
+      },
+      {
+        "id": 5010000,
+        "name": "Cleanrot Knight's Sword"
+      },
+      {
+        "id": 5020000,
+        "name": "Rapier"
+      },
+      {
+        "id": 5030000,
+        "name": "Rogier's Rapier"
+      },
+      {
+        "id": 5040000,
+        "name": "Antspur Rapier"
+      },
+      {
+        "id": 5050000,
+        "name": "Frozen Needle"
+      },
+      {
+        "id": 5060000,
+        "name": "Noble's Estoc"
+      }
+    ]
+  },
+  {
+    "category": "Heavy Thrusting Swords",
+    "items": [
+      {
+        "id": 6000000,
+        "name": "Bloody Helice"
+      },
+      {
+        "id": 6010000,
+        "name": "Godskin Stitcher"
+      },
+      {
+        "id": 6020000,
+        "name": "Great Épée"
+      },
+      {
+        "id": 6040000,
+        "name": "Dragon King's Cragblade"
+      }
+    ]
+  },
+  {
+    "category": "Curved Swords",
+    "items": [
+      {
+        "id": 7000000,
+        "name": "Falchion"
+      },
+      {
+        "id": 7010000,
+        "name": "Beastman's Curved Sword"
+      },
+      {
+        "id": 7020000,
+        "name": "Shotel"
+      },
+      {
+        "id": 7030000,
+        "name": "Shamshir"
+      },
+      {
+        "id": 7040000,
+        "name": "Bandit's Curved Sword"
+      },
+      {
+        "id": 7050000,
+        "name": "Magma Blade"
+      },
+      {
+        "id": 7060000,
+        "name": "Flowing Curved Sword"
+      },
+      {
+        "id": 7070000,
+        "name": "Wing of Astel"
+      },
+      {
+        "id": 7080000,
+        "name": "Scavenger's Curved Sword"
+      },
+      {
+        "id": 7100000,
+        "name": "Eclipse Shotel"
+      },
+      {
+        "id": 7110000,
+        "name": "Serpent-God's Curved Sword"
+      },
+      {
+        "id": 7120000,
+        "name": "Mantis Blade"
+      },
+      {
+        "id": 7140000,
+        "name": "Scimitar"
+      },
+      {
+        "id": 7150000,
+        "name": "Grossmesser"
+      }
+    ]
+  },
+  {
+    "category": "Curved Greatswords",
+    "items": [
+      {
+        "id": 8010000,
+        "name": "Onyx Lord's Greatsword"
+      },
+      {
+        "id": 8020000,
+        "name": "Dismounter"
+      },
+      {
+        "id": 8030000,
+        "name": "Bloodhound's Fang"
+      },
+      {
+        "id": 8040000,
+        "name": "Magma Wyrm's Scalesword"
+      },
+      {
+        "id": 8050000,
+        "name": "Zamor Curved Sword"
+      },
+      {
+        "id": 8060000,
+        "name": "Omen Cleaver"
+      },
+      {
+        "id": 8070000,
+        "name": "Monk's Flameblade"
+      },
+      {
+        "id": 8080000,
+        "name": "Beastman's Cleaver"
+      },
+      {
+        "id": 8100000,
+        "name": "Morgott's Cursed Sword"
+      }
+    ]
+  },
+  {
+    "category": "Katana",
+    "items": [
+      {
+        "id": 9000000,
+        "name": "Uchigatana"
+      },
+      {
+        "id": 9010000,
+        "name": "Nagakiba"
+      },
+      {
+        "id": 9020000,
+        "name": "Hand of Malenia"
+      },
+      {
+        "id": 9030000,
+        "name": "Meteoric Ore Blade"
+      },
+      {
+        "id": 9040000,
+        "name": "Rivers of Blood"
+      },
+      {
+        "id": 9060000,
+        "name": "Moonveil"
+      },
+      {
+        "id": 9070000,
+        "name": "Dragonscale Blade"
+      },
+      {
+        "id": 9080000,
+        "name": "Serpentbone Blade"
+      }
+    ]
+  },
+  {
+    "category": "Twinblades",
+    "items": [
+      {
+        "id": 10000000,
+        "name": "Twinblade"
+      },
+      {
+        "id": 10010000,
+        "name": "Godskin Peeler"
+      },
+      {
+        "id": 10030000,
+        "name": "Twinned Knight Swords"
+      },
+      {
+        "id": 10050000,
+        "name": "Eleonora's Poleblade"
+      },
+      {
+        "id": 10080000,
+        "name": "Gargoyle's Twinblade"
+      },
+      {
+        "id": 10090000,
+        "name": "Gargoyle's Black Blades"
+      }
+    ]
+  },
+  {
+    "category": "Hammers",
+    "items": [
+      {
+        "id": 11000000,
+        "name": "Mace"
+      },
+      {
+        "id": 11010000,
+        "name": "Club"
+      },
+      {
+        "id": 11030000,
+        "name": "Curved Club"
+      },
+      {
+        "id": 11040000,
+        "name": "Warpick"
+      },
+      {
+        "id": 11050000,
+        "name": "Morning Star"
+      },
+      {
+        "id": 11060000,
+        "name": "Varré's Bouquet"
+      },
+      {
+        "id": 11070000,
+        "name": "Spiked Club"
+      },
+      {
+        "id": 11080000,
+        "name": "Hammer"
+      },
+      {
+        "id": 11090000,
+        "name": "Monk's Flamemace"
+      },
+      {
+        "id": 11100000,
+        "name": "Envoy's Horn"
+      },
+      {
+        "id": 11110000,
+        "name": "Scepter of the All-Knowing"
+      },
+      {
+        "id": 11120000,
+        "name": "Nox Flowing Hammer"
+      },
+      {
+        "id": 11130000,
+        "name": "Ringed Finger"
+      },
+      {
+        "id": 11140000,
+        "name": "Stone Club"
+      },
+      {
+        "id": 11150000,
+        "name": "Marika's Hammer"
+      }
+    ]
+  },
+  {
+    "category": "Great Hammers",
+    "items": [
+      {
+        "id": 12000000,
+        "name": "Large Club"
+      },
+      {
+        "id": 12010000,
+        "name": "Greathorn Hammer"
+      },
+      {
+        "id": 12020000,
+        "name": "Battle Hammer"
+      },
+      {
+        "id": 12060000,
+        "name": "Great Mace"
+      },
+      {
+        "id": 12080000,
+        "name": "Curved Great Club"
+      },
+      {
+        "id": 12130000,
+        "name": "Celebrant's Skull"
+      }
+    ]
+  },
+  {
+    "category": "Warhammers",
+    "items": [
+      {
+        "id": 12140000,
+        "name": "Pickaxe"
+      },
+      {
+        "id": 12150000,
+        "name": "Beastclaw Greathammer"
+      },
+      {
+        "id": 12160000,
+        "name": "Envoy's Long Horn"
+      },
+      {
+        "id": 12170000,
+        "name": "Cranial Vessel Candlestand"
+      },
+      {
+        "id": 12180000,
+        "name": "Great Stars"
+      },
+      {
+        "id": 12190000,
+        "name": "Brick Hammer"
+      },
+      {
+        "id": 12200000,
+        "name": "Devourer's Scepter"
+      },
+      {
+        "id": 12210000,
+        "name": "Rotten Battle Hammer"
+      }
+    ]
+  },
+  {
+    "category": "Flails",
+    "items": [
+      {
+        "id": 13000000,
+        "name": "Nightrider Flail"
+      },
+      {
+        "id": 13010000,
+        "name": "Flail"
+      },
+      {
+        "id": 13020000,
+        "name": "Family Heads"
+      },
+      {
+        "id": 13030000,
+        "name": "Bastard's Stars"
+      },
+      {
+        "id": 13040000,
+        "name": "Chainlink Flail"
+      }
+    ]
+  },
+  {
+    "category": "Axes",
+    "items": [
+      {
+        "id": 14000000,
+        "name": "Battle Axe"
+      },
+      {
+        "id": 14010000,
+        "name": "Forked Hatchet"
+      },
+      {
+        "id": 14020000,
+        "name": "Hand Axe"
+      },
+      {
+        "id": 14030000,
+        "name": "Jawbone Axe"
+      },
+      {
+        "id": 14040000,
+        "name": "Iron Cleaver"
+      },
+      {
+        "id": 14050000,
+        "name": "Ripple Blade"
+      },
+      {
+        "id": 14060000,
+        "name": "Celebrant's Cleaver"
+      },
+      {
+        "id": 14080000,
+        "name": "Icerind Hatchet"
+      },
+      {
+        "id": 14100000,
+        "name": "Highland Axe"
+      },
+      {
+        "id": 14110000,
+        "name": "Sacrificial Axe"
+      },
+      {
+        "id": 14120000,
+        "name": "Rosus' Axe"
+      },
+      {
+        "id": 14140000,
+        "name": "Stormhawk Axe"
+      }
+    ]
+  },
+  {
+    "category": "Greataxes",
+    "items": [
+      {
+        "id": 15000000,
+        "name": "Greataxe"
+      },
+      {
+        "id": 15010000,
+        "name": "Warped Axe"
+      },
+      {
+        "id": 15020000,
+        "name": "Great Omenkiller Cleaver"
+      },
+      {
+        "id": 15030000,
+        "name": "Crescent Moon Axe"
+      },
+      {
+        "id": 15040000,
+        "name": "Axe of Godrick"
+      },
+      {
+        "id": 15050000,
+        "name": "Longhaft Axe"
+      },
+      {
+        "id": 15060000,
+        "name": "Rusted Anchor"
+      },
+      {
+        "id": 15080000,
+        "name": "Executioner's Greataxe"
+      },
+      {
+        "id": 15110000,
+        "name": "Winged Greathorn"
+      },
+      {
+        "id": 15120000,
+        "name": "Butchering Knife"
+      },
+      {
+        "id": 15130000,
+        "name": "Gargoyle's Great Axe"
+      },
+      {
+        "id": 15140000,
+        "name": "Gargoyle's Black Axe"
+      }
+    ]
+  },
+  {
+    "category": "Spears",
+    "items": [
+      {
+        "id": 16000000,
+        "name": "Short Spear"
+      },
+      {
+        "id": 16010000,
+        "name": "Spear"
+      },
+      {
+        "id": 16020000,
+        "name": "Crystal Spear"
+      },
+      {
+        "id": 16030000,
+        "name": "Clayman's Harpoon"
+      },
+      {
+        "id": 16040000,
+        "name": "Cleanrot Spear"
+      },
+      {
+        "id": 16050000,
+        "name": "Partisan"
+      },
+      {
+        "id": 16060000,
+        "name": "Celebrant's Rib-Rake"
+      },
+      {
+        "id": 16070000,
+        "name": "Pike"
+      },
+      {
+        "id": 16080000,
+        "name": "Torchpole"
+      },
+      {
+        "id": 16090000,
+        "name": "Bolt of Gransax"
+      },
+      {
+        "id": 16110000,
+        "name": "Cross-Naginata"
+      },
+      {
+        "id": 16120000,
+        "name": "Death Ritual Spear"
+      },
+      {
+        "id": 16130000,
+        "name": "Inquisitor's Girandole"
+      },
+      {
+        "id": 16140000,
+        "name": "Spiked Spear"
+      },
+      {
+        "id": 16150000,
+        "name": "Iron Spear"
+      },
+      {
+        "id": 16160000,
+        "name": "Rotten Crystal Spear"
+      }
+    ]
+  },
+  {
+    "category": "Great Spears",
+    "items": [
+      {
+        "id": 17010000,
+        "name": "Mohgwyn's Sacred Spear"
+      },
+      {
+        "id": 17020000,
+        "name": "Siluria's Tree"
+      },
+      {
+        "id": 17030000,
+        "name": "Serpent-Hunter"
+      },
+      {
+        "id": 17050000,
+        "name": "Vyke's War Spear"
+      },
+      {
+        "id": 17060000,
+        "name": "Lance"
+      },
+      {
+        "id": 17070000,
+        "name": "Treespear"
+      }
+    ]
+  },
+  {
+    "category": "Halberds",
+    "items": [
+      {
+        "id": 18000000,
+        "name": "Halberd"
+      },
+      {
+        "id": 18010000,
+        "name": "Pest's Glaive"
+      },
+      {
+        "id": 18020000,
+        "name": "Lucerne"
+      },
+      {
+        "id": 18030000,
+        "name": "Banished Knight's Halberd"
+      },
+      {
+        "id": 18040000,
+        "name": "Commander's Standard"
+      },
+      {
+        "id": 18050000,
+        "name": "Nightrider Glaive"
+      },
+      {
+        "id": 18060000,
+        "name": "Ripple Crescent Halberd"
+      },
+      {
+        "id": 18070000,
+        "name": "Vulgar Militia Saw"
+      },
+      {
+        "id": 18080000,
+        "name": "Golden Halberd"
+      },
+      {
+        "id": 18090000,
+        "name": "Glaive"
+      },
+      {
+        "id": 18100000,
+        "name": "Loretta's War Sickle"
+      },
+      {
+        "id": 18110000,
+        "name": "Guardian's Swordspear"
+      },
+      {
+        "id": 18130000,
+        "name": "Vulgar Militia Shotel"
+      },
+      {
+        "id": 18140000,
+        "name": "Dragon Halberd"
+      },
+      {
+        "id": 18150000,
+        "name": "Gargoyle's Halberd"
+      },
+      {
+        "id": 18160000,
+        "name": "Gargoyle's Black Halberd"
+      }
+    ]
+  },
+  {
+    "category": "Reapers",
+    "items": [
+      {
+        "id": 19000000,
+        "name": "Scythe"
+      },
+      {
+        "id": 19010000,
+        "name": "Grave Scythe"
+      },
+      {
+        "id": 19020000,
+        "name": "Halo Scythe"
+      },
+      {
+        "id": 19060000,
+        "name": "Winged Scythe"
+      }
+    ]
+  },
+  {
+    "category": "Whips",
+    "items": [
+      {
+        "id": 20000000,
+        "name": "Whip"
+      },
+      {
+        "id": 20020000,
+        "name": "Thorned Whip"
+      },
+      {
+        "id": 20030000,
+        "name": "Magma Whip Candlestick"
+      },
+      {
+        "id": 20050000,
+        "name": "Hoslow's Petal Whip"
+      },
+      {
+        "id": 20060000,
+        "name": "Giant's Red Braid"
+      },
+      {
+        "id": 20070000,
+        "name": "Urumi"
+      }
+    ]
+  },
+  {
+    "category": "Fists",
+    "items": [
+      {
+        "id": 21000000,
+        "name": "Caestus"
+      },
+      {
+        "id": 21010000,
+        "name": "Spiked Caestus"
+      },
+      {
+        "id": 21060000,
+        "name": "Grafted Dragon"
+      },
+      {
+        "id": 21070000,
+        "name": "Iron Ball"
+      },
+      {
+        "id": 21080000,
+        "name": "Star Fist"
+      },
+      {
+        "id": 21100000,
+        "name": "Katar"
+      },
+      {
+        "id": 21110000,
+        "name": "Clinging Bone"
+      },
+      {
+        "id": 21120000,
+        "name": "Veteran's Prosthesis"
+      },
+      {
+        "id": 21130000,
+        "name": "Cipher Pata"
+      }
+    ]
+  },
+  {
+    "category": "Claws",
+    "items": [
+      {
+        "id": 22000000,
+        "name": "Hookclaws"
+      },
+      {
+        "id": 22010000,
+        "name": "Venomous Fang"
+      },
+      {
+        "id": 22020000,
+        "name": "Bloodhound Claws"
+      },
+      {
+        "id": 22030000,
+        "name": "Raptor Talons"
+      }
+    ]
+  },
+  {
+    "category": "Colossal Weapons",
+    "items": [
+      {
+        "id": 23000000,
+        "name": "Prelate's Inferno Crozier"
+      },
+      {
+        "id": 23010000,
+        "name": "Watchdog's Staff"
+      },
+      {
+        "id": 23020000,
+        "name": "Great Club"
+      },
+      {
+        "id": 23030000,
+        "name": "Envoy's Greathorn"
+      },
+      {
+        "id": 23040000,
+        "name": "Duelist Greataxe"
+      },
+      {
+        "id": 23050000,
+        "name": "Axe of Godfrey"
+      },
+      {
+        "id": 23060000,
+        "name": "Dragon Greatclaw"
+      },
+      {
+        "id": 23070000,
+        "name": "Staff of the Avatar"
+      },
+      {
+        "id": 23080000,
+        "name": "Fallingstar Beast Jaw"
+      },
+      {
+        "id": 23100000,
+        "name": "Ghiza's Wheel"
+      },
+      {
+        "id": 23110000,
+        "name": "Giant-Crusher"
+      },
+      {
+        "id": 23120000,
+        "name": "Golem's Halberd"
+      },
+      {
+        "id": 23130000,
+        "name": "Troll's Hammer"
+      },
+      {
+        "id": 23140000,
+        "name": "Rotten Staff"
+      },
+      {
+        "id": 23150000,
+        "name": "Rotten Greataxe"
+      }
+    ]
+  },
+  {
+    "category": "Torches",
+    "items": [
+      {
+        "id": 24000000,
+        "name": "Torch"
+      },
+      {
+        "id": 24020000,
+        "name": "Steel-Wire Torch"
+      },
+      {
+        "id": 24040000,
+        "name": "St. Trina's Torch"
+      },
+      {
+        "id": 24050000,
+        "name": "Ghostflame Torch"
+      },
+      {
+        "id": 24060000,
+        "name": "Beast-Repellent Torch"
+      },
+      {
+        "id": 24070000,
+        "name": "Sentry's Torch"
+      }
+    ]
+  },
+  {
+    "category": "Shields",
+    "items": [
+      {
+        "id": 30000000,
+        "name": "Buckler"
+      },
+      {
+        "id": 30010000,
+        "name": "Perfumer's Shield"
+      },
+      {
+        "id": 30020000,
+        "name": "Man-Serpent's Shield"
+      },
+      {
+        "id": 30030000,
+        "name": "Rickety Shield"
+      },
+      {
+        "id": 30040000,
+        "name": "Pillory Shield"
+      },
+      {
+        "id": 30060000,
+        "name": "Beastman's Jar-Shield"
+      },
+      {
+        "id": 30070000,
+        "name": "Red Thorn Roundshield"
+      },
+      {
+        "id": 30080000,
+        "name": "Scripture Wooden Shield"
+      },
+      {
+        "id": 30090000,
+        "name": "Riveted Wooden Shield"
+      },
+      {
+        "id": 30100000,
+        "name": "Blue-White Wooden Shield"
+      },
+      {
+        "id": 30110000,
+        "name": "Rift Shield"
+      },
+      {
+        "id": 30120000,
+        "name": "Iron Roundshield"
+      },
+      {
+        "id": 30130000,
+        "name": "Gilded Iron Shield"
+      },
+      {
+        "id": 30140000,
+        "name": "Ice Crest Shield"
+      },
+      {
+        "id": 30150000,
+        "name": "Smoldering Shield"
+      },
+      {
+        "id": 30190000,
+        "name": "Spiralhorn Shield"
+      },
+      {
+        "id": 30200000,
+        "name": "Coil Shield"
+      },
+      {
+        "id": 31000000,
+        "name": "Kite Shield"
+      },
+      {
+        "id": 31010000,
+        "name": "Marred Leather Shield"
+      },
+      {
+        "id": 31020000,
+        "name": "Marred Wooden Shield"
+      },
+      {
+        "id": 31030000,
+        "name": "Banished Knight's Shield"
+      },
+      {
+        "id": 31040000,
+        "name": "Albinauric Shield"
+      },
+      {
+        "id": 31050000,
+        "name": "Sun Realm Shield"
+      },
+      {
+        "id": 31060000,
+        "name": "Silver Mirrorshield"
+      },
+      {
+        "id": 31070000,
+        "name": "Round Shield"
+      },
+      {
+        "id": 31080000,
+        "name": "Scorpion Kite Shield"
+      },
+      {
+        "id": 31090000,
+        "name": "Twinbird Kite Shield"
+      },
+      {
+        "id": 31100000,
+        "name": "Blue-Gold Kite Shield"
+      },
+      {
+        "id": 31130000,
+        "name": "Brass Shield"
+      },
+      {
+        "id": 31140000,
+        "name": "Great Turtle Shell"
+      },
+      {
+        "id": 31170000,
+        "name": "Shield of the Guilty"
+      },
+      {
+        "id": 31190000,
+        "name": "Carian Knight's Shield"
+      },
+      {
+        "id": 31230000,
+        "name": "Large Leather Shield"
+      },
+      {
+        "id": 31240000,
+        "name": "Horse Crest Wooden Shield"
+      },
+      {
+        "id": 31250000,
+        "name": "Candletree Wooden Shield"
+      },
+      {
+        "id": 31260000,
+        "name": "Flame Crest Wooden Shield"
+      },
+      {
+        "id": 31270000,
+        "name": "Hawk Crest Wooden Shield"
+      },
+      {
+        "id": 31280000,
+        "name": "Beast Crest Heater Shield"
+      },
+      {
+        "id": 31290000,
+        "name": "Red Crest Heater Shield"
+      },
+      {
+        "id": 31300000,
+        "name": "Blue Crest Heater Shield"
+      },
+      {
+        "id": 31310000,
+        "name": "Eclipse Crest Heater Shield"
+      },
+      {
+        "id": 31320000,
+        "name": "Inverted Hawk Heater Shield"
+      },
+      {
+        "id": 31330000,
+        "name": "Heater Shield"
+      },
+      {
+        "id": 31340000,
+        "name": "Black Leather Shield"
+      }
+    ]
+  },
+  {
+    "category": "Greatshields",
+    "items": [
+      {
+        "id": 32000000,
+        "name": "Dragon Towershield"
+      },
+      {
+        "id": 32020000,
+        "name": "Distinguished Greatshield"
+      },
+      {
+        "id": 32030000,
+        "name": "Crucible Hornshield"
+      },
+      {
+        "id": 32040000,
+        "name": "Dragonclaw Shield"
+      },
+      {
+        "id": 32050000,
+        "name": "Briar Greatshield"
+      },
+      {
+        "id": 32080000,
+        "name": "Erdtree Greatshield"
+      },
+      {
+        "id": 32090000,
+        "name": "Golden Beast Crest Shield"
+      },
+      {
+        "id": 32120000,
+        "name": "Jellyfish Shield"
+      },
+      {
+        "id": 32130000,
+        "name": "Fingerprint Stone Shield"
+      },
+      {
+        "id": 32140000,
+        "name": "Icon Shield"
+      },
+      {
+        "id": 32150000,
+        "name": "One-Eyed Shield"
+      },
+      {
+        "id": 32160000,
+        "name": "Visage Shield"
+      },
+      {
+        "id": 32170000,
+        "name": "Spiked Palisade Shield"
+      },
+      {
+        "id": 32190000,
+        "name": "Manor Towershield"
+      },
+      {
+        "id": 32200000,
+        "name": "Crossed-Tree Towershield"
+      },
+      {
+        "id": 32210000,
+        "name": "Inverted Hawk Towershield"
+      },
+      {
+        "id": 32220000,
+        "name": "Ant's Skull Plate"
+      },
+      {
+        "id": 32230000,
+        "name": "Redmane Greatshield"
+      },
+      {
+        "id": 32240000,
+        "name": "Eclipse Crest Greatshield"
+      },
+      {
+        "id": 32250000,
+        "name": "Cuckoo Greatshield"
+      },
+      {
+        "id": 32260000,
+        "name": "Golden Greatshield"
+      },
+      {
+        "id": 32270000,
+        "name": "Gilded Greatshield"
+      },
+      {
+        "id": 32280000,
+        "name": "Haligtree Crest Greatshield"
+      },
+      {
+        "id": 32290000,
+        "name": "Wooden Greatshield"
+      },
+      {
+        "id": 32300000,
+        "name": "Lordsworn's Shield"
+      }
+    ]
+  },
+  {
+    "category": "Staves",
+    "items": [
+      {
+        "id": 33000000,
+        "name": "Glintstone Staff"
+      },
+      {
+        "id": 33040000,
+        "name": "Crystal Staff"
+      },
+      {
+        "id": 33050000,
+        "name": "Gelmir Glintstone Staff"
+      },
+      {
+        "id": 33060000,
+        "name": "Demi-Human Queen's Staff"
+      },
+      {
+        "id": 33090000,
+        "name": "Carian Regal Scepter"
+      },
+      {
+        "id": 33120000,
+        "name": "Digger's Staff"
+      },
+      {
+        "id": 33130000,
+        "name": "Astrologer's Staff"
+      },
+      {
+        "id": 33170000,
+        "name": "Carian Glintblade Staff"
+      },
+      {
+        "id": 33180000,
+        "name": "Prince of Death's Staff"
+      },
+      {
+        "id": 33190000,
+        "name": "Albinauric Staff"
+      },
+      {
+        "id": 33200000,
+        "name": "Academy Glintstone Staff"
+      },
+      {
+        "id": 33210000,
+        "name": "Carian Glintstone Staff"
+      },
+      {
+        "id": 33230000,
+        "name": "Azur's Glintstone Staff"
+      },
+      {
+        "id": 33240000,
+        "name": "Lusat's Glintstone Staff"
+      },
+      {
+        "id": 33250000,
+        "name": "Meteorite Staff"
+      },
+      {
+        "id": 33260000,
+        "name": "Staff of the Guilty"
+      },
+      {
+        "id": 33270000,
+        "name": "Rotten Crystal Staff"
+      },
+      {
+        "id": 33280000,
+        "name": "Staff of Loss"
+      }
+    ]
+  },
+  {
+    "category": "Seals",
+    "items": [
+      {
+        "id": 34000000,
+        "name": "Finger Seal"
+      },
+      {
+        "id": 34010000,
+        "name": "Godslayer's Seal"
+      },
+      {
+        "id": 34020000,
+        "name": "Giant's Seal"
+      },
+      {
+        "id": 34030000,
+        "name": "Gravel Stone Seal"
+      },
+      {
+        "id": 34040000,
+        "name": "Clawmark Seal"
+      },
+      {
+        "id": 34060000,
+        "name": "Golden Order Seal"
+      },
+      {
+        "id": 34070000,
+        "name": "Erdtree Seal"
+      },
+      {
+        "id": 34080000,
+        "name": "Dragon Communion Seal"
+      },
+      {
+        "id": 34090000,
+        "name": "Frenzied Flame Seal"
+      }
+    ]
+  },
+  {
+    "category": "Light Bows",
+    "items": [
+      {
+        "id": 40000000,
+        "name": "Shortbow"
+      },
+      {
+        "id": 40010000,
+        "name": "Misbegotten Shortbow"
+      },
+      {
+        "id": 40020000,
+        "name": "Red Branch Shortbow"
+      },
+      {
+        "id": 40030000,
+        "name": "Harp Bow"
+      },
+      {
+        "id": 40050000,
+        "name": "Composite Bow"
+      }
+    ]
+  },
+  {
+    "category": "Bows",
+    "items": [
+      {
+        "id": 41000000,
+        "name": "Longbow"
+      },
+      {
+        "id": 41010000,
+        "name": "Albinauric Bow"
+      },
+      {
+        "id": 41020000,
+        "name": "Horn Bow"
+      },
+      {
+        "id": 41030000,
+        "name": "Erdtree Bow"
+      },
+      {
+        "id": 41040000,
+        "name": "Serpent Bow"
+      },
+      {
+        "id": 41060000,
+        "name": "Pulley Bow"
+      },
+      {
+        "id": 41070000,
+        "name": "Black Bow"
+      }
+    ]
+  },
+  {
+    "category": "Greatbows",
+    "items": [
+      {
+        "id": 42000000,
+        "name": "Lion Greatbow"
+      },
+      {
+        "id": 42010000,
+        "name": "Golem Greatbow"
+      },
+      {
+        "id": 42030000,
+        "name": "Erdtree Greatbow"
+      },
+      {
+        "id": 42040000,
+        "name": "Greatbow"
+      }
+    ]
+  },
+  {
+    "category": "Crossbows",
+    "items": [
+      {
+        "id": 43000000,
+        "name": "Soldier's Crossbow"
+      },
+      {
+        "id": 43020000,
+        "name": "Light Crossbow"
+      },
+      {
+        "id": 43030000,
+        "name": "Heavy Crossbow"
+      },
+      {
+        "id": 43050000,
+        "name": "Pulley Crossbow"
+      },
+      {
+        "id": 43060000,
+        "name": "Full Moon Crossbow"
+      },
+      {
+        "id": 43080000,
+        "name": "Arbalest"
+      },
+      {
+        "id": 43110000,
+        "name": "Crepus's Black-Key Crossbow"
+      }
+    ]
+  },
+  {
+    "category": "Ballistae",
+    "items": [
+      {
+        "id": 44000000,
+        "name": "Hand Ballista"
+      },
+      {
+        "id": 44010000,
+        "name": "Jar Cannon"
+      }
+    ]
+  },
+  {
+    "category": "Arrows",
+    "items": [
+      {
+        "id": 50000000,
+        "name": "Arrow"
+      },
+      {
+        "id": 50010000,
+        "name": "Fire Arrow"
+      },
+      {
+        "id": 50020000,
+        "name": "Serpent Arrow"
+      },
+      {
+        "id": 50030000,
+        "name": "Bone Arrow (Fletched)"
+      },
+      {
+        "id": 50040000,
+        "name": "St. Trina's Arrow"
+      },
+      {
+        "id": 50060000,
+        "name": "Shattershard Arrow (Fletched)"
+      },
+      {
+        "id": 50080000,
+        "name": "Rainbow Stone Arrow (Fletched)"
+      },
+      {
+        "id": 50090000,
+        "name": "Golden Arrow"
+      },
+      {
+        "id": 50100000,
+        "name": "Dwelling Arrow"
+      },
+      {
+        "id": 50110000,
+        "name": "Bone Arrow"
+      },
+      {
+        "id": 50130000,
+        "name": "Firebone Arrow (Fletched)"
+      },
+      {
+        "id": 50140000,
+        "name": "Firebone Arrow"
+      },
+      {
+        "id": 50150000,
+        "name": "Poisonbone Arrow (Fletched)"
+      },
+      {
+        "id": 50160000,
+        "name": "Poisonbone Arrow"
+      },
+      {
+        "id": 50170000,
+        "name": "Sleepbone Arrow (Fletched)"
+      },
+      {
+        "id": 50180000,
+        "name": "Sleepbone Arrow"
+      },
+      {
+        "id": 50190000,
+        "name": "Stormwing Bone Arrow"
+      },
+      {
+        "id": 50200000,
+        "name": "Lightningbone Arrow (Fletched)"
+      },
+      {
+        "id": 50210000,
+        "name": "Lightningbone Arrow"
+      },
+      {
+        "id": 50220000,
+        "name": "Rainbow Stone Arrow"
+      },
+      {
+        "id": 50230000,
+        "name": "Shattershard Arrow"
+      },
+      {
+        "id": 50240000,
+        "name": "Spiritflame Arrow"
+      },
+      {
+        "id": 50260000,
+        "name": "Magicbone Arrow (Fletched)"
+      },
+      {
+        "id": 50270000,
+        "name": "Magicbone Arrow"
+      },
+      {
+        "id": 50280000,
+        "name": "Haligbone Arrow (Fletched)"
+      },
+      {
+        "id": 50290000,
+        "name": "Haligbone Arrow"
+      },
+      {
+        "id": 50300000,
+        "name": "Bloodbone Arrow (Fletched)"
+      },
+      {
+        "id": 50310000,
+        "name": "Bloodbone Arrow"
+      },
+      {
+        "id": 50320000,
+        "name": "Coldbone Arrow (Fletched)"
+      },
+      {
+        "id": 50330000,
+        "name": "Coldbone Arrow"
+      },
+      {
+        "id": 50340000,
+        "name": "Rotbone Arrow (Fletched)"
+      },
+      {
+        "id": 50350000,
+        "name": "Rotbone Arrow"
+      }
+    ]
+  },
+  {
+    "category": "Greatarrows",
+    "items": [
+      {
+        "id": 51000000,
+        "name": "Great Arrow"
+      },
+      {
+        "id": 51010000,
+        "name": "Golem's Great Arrow"
+      },
+      {
+        "id": 51020000,
+        "name": "Golden Great Arrow"
+      },
+      {
+        "id": 51030000,
+        "name": "Golem's Magic Arrow"
+      },
+      {
+        "id": 51040000,
+        "name": "Radahn's Spear"
+      },
+      {
+        "id": 51050000,
+        "name": "Bone Great Arrow (Fletched)"
+      },
+      {
+        "id": 51060000,
+        "name": "Bone Great Arrow"
+      }
+    ]
+  },
+  {
+    "category": "Bolts",
+    "items": [
+      {
+        "id": 52000000,
+        "name": "Bolt"
+      },
+      {
+        "id": 52010000,
+        "name": "Lightning Bolt"
+      },
+      {
+        "id": 52020000,
+        "name": "Perfumer's Bolt"
+      },
+      {
+        "id": 52030000,
+        "name": "Black-Key Bolt"
+      },
+      {
+        "id": 52040000,
+        "name": "Burred Bolt"
+      },
+      {
+        "id": 52050000,
+        "name": "Meteor Bolt"
+      },
+      {
+        "id": 52060000,
+        "name": "Explosive Bolt"
+      },
+      {
+        "id": 52070000,
+        "name": "Golden Bolt"
+      },
+      {
+        "id": 52080000,
+        "name": "Lordsworn's Bolt"
+      },
+      {
+        "id": 52090000,
+        "name": "Bone Bolt"
+      },
+      {
+        "id": 52100000,
+        "name": "Firebone Bolt"
+      },
+      {
+        "id": 52110000,
+        "name": "Lightningbone Bolt"
+      },
+      {
+        "id": 52120000,
+        "name": "Magicbone Bolt"
+      },
+      {
+        "id": 52130000,
+        "name": "Haligbone Bolt"
+      },
+      {
+        "id": 52140000,
+        "name": "Poisonbone Bolt"
+      },
+      {
+        "id": 52150000,
+        "name": "Bloodbone Bolt"
+      },
+      {
+        "id": 52160000,
+        "name": "Coldbone Bolt"
+      },
+      {
+        "id": 52170000,
+        "name": "Rotbone Bolt"
+      },
+      {
+        "id": 52180000,
+        "name": "Sleepbone Bolt"
+      },
+      {
+        "id": 52190000,
+        "name": "Flaming Bolt"
+      }
+    ]
+  },
+  {
+    "category": "Greatbolts",
+    "items": [
+      {
+        "id": 53000000,
+        "name": "Ballista Bolt"
+      },
+      {
+        "id": 53010000,
+        "name": "Lightning Greatbolt"
+      },
+      {
+        "id": 53020000,
+        "name": "Explosive Greatbolt"
+      },
+      {
+        "id": 53030000,
+        "name": "Bone Ballista Bolt"
+      }
+    ]
+  }
+]
