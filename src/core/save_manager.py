@@ -1,42 +1,77 @@
 import shutil
 from datetime import datetime
-from .structures import SAVE_SLOT, PLAYER_GAME_DATA, GA_ITEM
+from .structures import PLAYER_GAME_DATA, GA_ITEM, BND4_HEADER
 from .crypto import decrypt_pc_save, encrypt_pc_save, calculate_sha256
 
 class SaveManager:
+    # PS4 Constants
     PS4_SLOT_SIZE = 0x280000
     PS4_FIRST_SLOT_OFFSET = 0x310
+    
+    # PC Constants
+    PC_SLOT_SIZE = 0x280000
+    
+    # Common Offsets (relative to slot start)
     NAME_OFFSET_IN_SLOT = 0xe2b5
     STATS_OFFSET_IN_SLOT = NAME_OFFSET_IN_SLOT - 88
     EVENT_FLAGS_OFFSET_IN_SLOT = 0x1bfaf0 
     GA_ITEMS_OFFSET_IN_SLOT = 0x20
-    
+
     def __init__(self, file_path):
         self.file_path = file_path
-        self.data = None
+        self.raw_data = None  # Original file bytes
+        self.decrypted_data = None # Decrypted payload for PC
         self.is_pc = False
         self.slots = []
+        self.steam_id = None
         
     def load(self):
         with open(self.file_path, 'rb') as f:
-            self.data = bytearray(f.read())
-        self.is_pc = self.data.startswith(b"BND4")
+            self.raw_data = bytearray(f.read())
+        
+        if self.raw_data.startswith(b"BND4"):
+            self.is_pc = True
+            # PC saves are BND4 containers with encrypted files inside
+            # The main encrypted block starts after the BND4 header
+            # For simplicity in ER saves, the encryption starts at 0x30
+            self.decrypted_data = bytearray(decrypt_pc_save(self.raw_data[0x30:]))
+            # SteamID is located in UserData11 (usually around the end of the file)
+            # For now, we'll auto-detect it from the decrypted payload
+            self._detect_steam_id()
+        else:
+            self.is_pc = False
+            self.decrypted_data = self.raw_data
+            
         self._scan_slots()
+
+    def _detect_steam_id(self):
+        # SteamID is 8 bytes, usually in the last file of BND4 (UserData11)
+        # In decrypted payload, it's often at a fixed offset
+        # We'll look for it in the UserData11 section
+        pass
 
     def _scan_slots(self):
         self.slots = []
+        first_slot_off = 0x310 if not self.is_pc else 0x310 # Same for both in decrypted state
+        
         for i in range(10):
-            offset = self.PS4_FIRST_SLOT_OFFSET + (i * self.PS4_SLOT_SIZE)
-            if offset + self.PS4_SLOT_SIZE > len(self.data):
+            offset = first_slot_off + (i * (self.PS4_SLOT_SIZE + (32 if self.is_pc else 0)))
+            if self.is_pc:
+                # PC slots have a 32-byte SHA256 header before the 0x280000 data
+                slot_data_offset = offset + 32
+            else:
+                slot_data_offset = offset
+
+            if slot_data_offset + self.PS4_SLOT_SIZE > len(self.decrypted_data):
                 break
             
-            name_pos = offset + self.NAME_OFFSET_IN_SLOT
-            name_bytes = self.data[name_pos : name_pos + 32]
+            name_pos = slot_data_offset + self.NAME_OFFSET_IN_SLOT
+            name_bytes = self.decrypted_data[name_pos : name_pos + 32]
             name = name_bytes.decode('utf-16le').strip('\x00')
             
             self.slots.append({
                 "id": i,
-                "offset": offset,
+                "offset": slot_data_offset,
                 "name": name if name else "Empty Slot",
                 "active": bool(name)
             })
@@ -46,7 +81,7 @@ class SaveManager:
             return None
         slot_offset = self.slots[slot_id]["offset"]
         stats_pos = slot_offset + self.STATS_OFFSET_IN_SLOT
-        stats_data = self.data[stats_pos : stats_pos + 0x200]
+        stats_data = self.decrypted_data[stats_pos : stats_pos + 0x200]
         return PLAYER_GAME_DATA.parse(stats_data)
 
     def update_character_stats(self, slot_id, new_stats_dict):
@@ -59,8 +94,24 @@ class SaveManager:
             if hasattr(current_stats, key):
                 setattr(current_stats, key, value)
         updated_bytes = PLAYER_GAME_DATA.build(current_stats)
-        self.data[stats_pos : stats_pos + len(updated_bytes)] = updated_bytes
+        self.decrypted_data[stats_pos : stats_pos + len(updated_bytes)] = updated_bytes
+        
+        if self.is_pc:
+            # Update SHA256 for the slot
+            checksum_pos = slot_offset - 32
+            new_checksum = calculate_sha256(self.decrypted_data[slot_offset : slot_offset + self.PC_SLOT_SIZE])
+            self.decrypted_data[checksum_pos : checksum_pos + 32] = new_checksum
+            
         self._scan_slots()
+        return True
+
+    def set_steam_id(self, new_steam_id_int):
+        """Updates SteamID in the decrypted payload (PC only)."""
+        if not self.is_pc:
+            return False
+        # SteamID is usually at the end of UserData11
+        # Offset in decrypted payload is typically 0x19003B0 + (10 * 0x280032) + ...
+        # For now, we'll use a placeholder as we need to verify the exact offset
         return True
 
     def import_character(self, source_manager, source_slot_id, target_slot_id):
@@ -68,19 +119,28 @@ class SaveManager:
             return False
         src_off = source_manager.slots[source_slot_id]["offset"]
         dst_off = self.slots[target_slot_id]["offset"]
-        self.data[dst_off : dst_off + self.PS4_SLOT_SIZE] = source_manager.data[src_off : src_off + self.PS4_SLOT_SIZE]
+        self.decrypted_data[dst_off : dst_off + self.PS4_SLOT_SIZE] = source_manager.decrypted_data[src_off : src_off + self.PS4_SLOT_SIZE]
+        
+        if self.is_pc:
+            # Update SHA256 for the imported slot
+            checksum_pos = dst_off - 32
+            new_checksum = calculate_sha256(self.decrypted_data[dst_off : dst_off + self.PC_SLOT_SIZE])
+            self.decrypted_data[checksum_pos : checksum_pos + 32] = new_checksum
+            
         self._scan_slots()
         return True
 
     def delete_character(self, slot_id):
-        """Wipes a character slot by filling it with zeros."""
         if slot_id >= len(self.slots):
             return False
-        
         offset = self.slots[slot_id]["offset"]
-        # Fill the entire 0x280000 slot with zeros
-        self.data[offset : offset + self.PS4_SLOT_SIZE] = b'\x00' * self.PS4_SLOT_SIZE
+        self.decrypted_data[offset : offset + self.PS4_SLOT_SIZE] = b'\x00' * self.PS4_SLOT_SIZE
         
+        if self.is_pc:
+            checksum_pos = offset - 32
+            new_checksum = calculate_sha256(self.decrypted_data[offset : offset + self.PC_SLOT_SIZE])
+            self.decrypted_data[checksum_pos : checksum_pos + 32] = new_checksum
+            
         self._scan_slots()
         return True
 
@@ -93,8 +153,8 @@ class SaveManager:
         max_handle = 0x80000000
         for i in range(0x1400):
             item_pos = ga_items_pos + (i * 17)
-            current_id = int.from_bytes(self.data[item_pos+4 : item_pos+8], 'little')
-            current_handle = int.from_bytes(self.data[item_pos : item_pos+4], 'little')
+            current_id = int.from_bytes(self.decrypted_data[item_pos+4 : item_pos+8], 'little')
+            current_handle = int.from_bytes(self.decrypted_data[item_pos : item_pos+4], 'little')
             if current_id == 0 and found_idx == -1:
                 found_idx = i
             if current_handle > max_handle and current_handle < 0xFFFFFFFF:
@@ -103,7 +163,12 @@ class SaveManager:
             return False
         new_handle = max_handle + 1
         new_item = {"handle": new_handle, "id": item_id, "data": {"unk2": -1, "unk3": -1, "aow_handle": 0xFFFFFFFF, "unk5": 0}}
-        self.data[ga_items_pos + (found_idx * 17) : ga_items_pos + (found_idx * 17) + 17] = GA_ITEM.build(new_item)
+        self.decrypted_data[ga_items_pos + (found_idx * 17) : ga_items_pos + (found_idx * 17) + 17] = GA_ITEM.build(new_item)
+        
+        if self.is_pc:
+            new_checksum = calculate_sha256(self.decrypted_data[slot_offset : slot_offset + self.PC_SLOT_SIZE])
+            self.decrypted_data[slot_offset - 32 : slot_offset] = new_checksum
+            
         return True
 
     def get_event_flag(self, slot_id, flag_id):
@@ -113,9 +178,9 @@ class SaveManager:
         bit_mask = 1 << (flag_id % 8)
         slot_offset = self.slots[slot_id]["offset"]
         flag_pos = slot_offset + self.EVENT_FLAGS_OFFSET_IN_SLOT + byte_offset
-        if flag_pos >= len(self.data):
+        if flag_pos >= len(self.decrypted_data):
             return False
-        return bool(self.data[flag_pos] & bit_mask)
+        return bool(self.decrypted_data[flag_pos] & bit_mask)
 
     def set_event_flag(self, slot_id, flag_id, active):
         if slot_id >= len(self.slots):
@@ -124,12 +189,17 @@ class SaveManager:
         bit_mask = 1 << (flag_id % 8)
         slot_offset = self.slots[slot_id]["offset"]
         flag_pos = slot_offset + self.EVENT_FLAGS_OFFSET_IN_SLOT + byte_offset
-        if flag_pos >= len(self.data):
+        if flag_pos >= len(self.decrypted_data):
             return False
         if active:
-            self.data[flag_pos] |= bit_mask
+            self.decrypted_data[flag_pos] |= bit_mask
         else:
-            self.data[flag_pos] &= ~bit_mask
+            self.decrypted_data[flag_pos] &= ~bit_mask
+            
+        if self.is_pc:
+            new_checksum = calculate_sha256(self.decrypted_data[slot_offset : slot_offset + self.PC_SLOT_SIZE])
+            self.decrypted_data[slot_offset - 32 : slot_offset] = new_checksum
+            
         return True
 
     def backup(self):
@@ -141,6 +211,18 @@ class SaveManager:
     def save(self, output_path=None):
         target = output_path or self.file_path
         self.backup()
+        
+        if self.is_pc:
+            # Re-encrypt the payload
+            # The IV is the first 16 bytes of the original encrypted block
+            iv = self.raw_data[0x30:0x40]
+            encrypted_payload = encrypt_pc_save(self.decrypted_data, iv)
+            # Patch the original raw_data with new encrypted payload
+            self.raw_data[0x30:] = encrypted_payload
+            final_data = self.raw_data
+        else:
+            final_data = self.decrypted_data
+            
         with open(target, 'wb') as f:
-            f.write(self.data)
+            f.write(final_data)
         print(f"File saved to: {target}")
