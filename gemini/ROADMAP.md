@@ -38,8 +38,8 @@
     - [x] Define `PSSaveSlot` and `PSUserData` structs
     - [x] Implement raw binary reading/writing for Save Wizard compatibility
     - [ ] **Test:** Round-trip validation for PS raw saves
-- [ ] **3.4. SteamID Logic**
-    - [ ] Implement SteamID detection and modification in `UserData10`
+- [x] **3.4. SteamID Logic**
+    - [x] Implement SteamID detection and modification in `UserData10`
     - [ ] **Test:** Verify MD5 checksum recalculation after SteamID change
 - [ ] **3.5. Backup System**
     - [ ] Implement automatic `.bak` creation with timestamps before any write

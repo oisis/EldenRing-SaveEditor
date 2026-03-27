@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"os"
+	"time"
 )
 
 // Save interface for both PC and PS4 saves.
@@ -112,29 +114,26 @@ func (s *PCSave) SetSteamID(steamID uint64) {
 	binary.LittleEndian.PutUint64(s.UserData10.Data[4:12], steamID)
 
 	// Update SaveSlots
-	// According to analiza_rusta.md, SteamID is at the end of the slot.
-	// In Rust SaveSlot struct:
-	// L1475:     pub steam_id: u64,
-	// L1479:     _rest: Vec<u8>
-	// We need to find the exact offset.
-	// SaveSlot size is 0x280000.
-	// Let's check the offset of steam_id in SaveSlot.
-	steamIDOffset := 0x280000 - 8 - 0x80 - 0x32 - 0x20 // Roughly
-	// Wait, let's be more precise.
-	// In Rust SaveSlot::default():
-	// _cs_ps5_activity: [0; 0x20],
-	// _cs_dlc: [0; 0x32],
-	// _0x80: [0; 0x80],
-	// _rest: Vec::new(),
-	// So steam_id is at 0x280000 - (0x80 + 0x32 + 0x20 + 8) = 0x280000 - 0xDA = 0x27FF26?
-	// No, let's check the actual offset in Rust code or use a marker.
-	
-	// Actually, let's look at the Rust Write implementation for SaveSlot.
-	// It's in common/save_slot.rs
+	// SteamID is at offset 0x27FF26 in the 0x280000 byte SaveSlot data.
+	steamIDOffset := 0x27FF26
+	for i := 0; i < 10; i++ {
+		// Only update if the slot is not empty (we can check a marker or just update all)
+		// The Rust code updates all slots.
+		binary.LittleEndian.PutUint64(s.SaveSlots[i].Data[steamIDOffset:steamIDOffset+8], steamID)
+	}
 }
 
 // Write encrypts and writes the save file to the given path.
+// It automatically creates a backup of the original file if it exists.
 func (s *PCSave) Write(path string) error {
+	// Create backup if file exists
+	if _, err := os.Stat(path); err == nil {
+		backupPath := fmt.Sprintf("%s.%s.bak", path, time.Now().Format("20060102-150405"))
+		if err := copyFile(path, backupPath); err != nil {
+			return fmt.Errorf("failed to create backup: %v", err)
+		}
+	}
+
 	var buf bytes.Buffer
 
 	// Recalculate checksums
@@ -173,3 +172,22 @@ func (s *PCSave) Write(path string) error {
 
 	return os.WriteFile(path, encrypted, 0644)
 }
+
+// copyFile copies a file from src to dst.
+func copyFile(src, dst string) error {
+	sourceFile, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, sourceFile)
+	return err
+}
+
