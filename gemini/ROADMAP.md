@@ -1,6 +1,6 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** 🏗️ Phase 3 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** ✅ Phase 3 Complete | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
@@ -26,7 +26,7 @@
     - [x] Port HP/FP/SP tables from `src/db/stats.rs`
     - [x] Port base class stats from `src/db/classes.rs`
 
-## Phase 3: Binary Core (The "encoding/binary" Layer) 🏗️
+## Phase 3: Binary Core (The "encoding/binary" Layer) ✅
 - [x] **3.1. Crypto Implementation**
     - [x] Port AES-128-CBC logic for PC saves (`backend/core/crypto.go`)
     - [x] Implement MD5 and SHA256 checksum logic (1:1 with Rust)
@@ -41,10 +41,10 @@
 - [x] **3.4. SteamID Logic**
     - [x] Implement SteamID detection and modification in `UserData10`
     - [ ] **Test:** Verify MD5 checksum recalculation after SteamID change
-- [ ] **3.5. Backup System**
-    - [ ] Implement automatic `.bak` creation with timestamps before any write
+- [x] **3.5. Backup System**
+    - [x] Implement automatic `.bak` creation with timestamps before any write
 
-## Phase 4: Logic & ViewModel (Go Backend) 🧠
+## Phase 4: Logic & ViewModel (Go Backend) 🏗️
 - [ ] **4.1. Save Manager**
     - [ ] Implement `LoadSave(path)` with auto-detection (PC vs PS)
     - [ ] Implement `SaveFile()` with integrity check (Round-trip Validation)
