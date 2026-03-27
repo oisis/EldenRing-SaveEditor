@@ -33,11 +33,14 @@ func UpdateUserDataSteamID(data []byte, newID uint64, isPC bool) error {
 // UpdateSlotSteamID updates the SteamID in a SaveSlot block.
 // Note: This requires the slot data to be decrypted (if PC).
 func UpdateSlotSteamID(slotData []byte, newID uint64, isPC bool) error {
-	// On PC, each slot is preceded by 16 bytes of MD5.
-	// The SteamID offset within the 0x280000 data block needs to be exact.
-	// Based on Rust analysis, it's located after event_flags and net_data_chunks.
+	// Based on Rust analysis, SteamID is located near the end of the 0x280000 block.
+	// Offset calculation: 0x280000 - 0x80 (padding) - 0x32 (dlc) - 0x20 (ps5) - 8 (steam_id) = 0x27FF2A
+	offset := 0x27FF2A
 	
-	// TODO: Implement exact offset calculation after full slot structure mapping.
-	// For now, this is a placeholder to be completed in Phase 4.
+	if len(slotData) < offset+8 {
+		return fmt.Errorf("slot data buffer too small for SteamID update")
+	}
+
+	binary.LittleEndian.PutUint64(slotData[offset:], newID)
 	return nil
 }
