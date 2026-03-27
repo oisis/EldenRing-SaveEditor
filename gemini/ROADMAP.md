@@ -1,12 +1,20 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** ✅ Phase 2 Complete | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** 🏗️ Phase 3 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
+    - [x] `go mod init github.com/oisis/EldenRing-SaveEditor`
+    - [x] Setup project structure: `backend/core`, `backend/db`, `backend/vm`
 - [x] **1.2. Wails Setup**
+    - [x] `wails init` with React + TypeScript template
+    - [x] Configure `wails.json` (window size, title, etc.)
 - [x] **1.3. Automation & Scripts**
+    - [x] Create `Makefile` for `build`, `test`, `lint`, and `extract-data`
+    - [x] Setup `golangci-lint` configuration
 - [x] **1.4. Test Infrastructure**
+    - [x] Setup `tests/data` for Golden Files
+    - [x] Implement `RoundTrip_test.go` skeleton for bit-perfect verification
 
 ## Phase 2: Data Extraction (Rust -> Go) ✅
 - [x] **2.1. Extraction Tooling**
@@ -18,10 +26,10 @@
     - [x] Port HP/FP/SP tables from `src/db/stats.rs`
     - [x] Port base class stats from `src/db/classes.rs`
 
-## Phase 3: Binary Core (The "encoding/binary" Layer) 🔧
-- [ ] **3.1. Crypto Implementation**
-    - [ ] Port AES-128-CBC logic for PC saves (`backend/core/crypto.go`)
-    - [ ] **Test:** Verify AES decryption against a known PC save from `tmp/save`
+## Phase 3: Binary Core (The "encoding/binary" Layer) 🏗️
+- [x] **3.1. Crypto Implementation**
+    - [x] Port AES-128-CBC logic for PC saves (`backend/core/crypto.go`)
+    - [x] Implement MD5 and SHA256 checksum logic (1:1 with Rust)
 - [ ] **3.2. Binary Structures (PC)**
     - [ ] Define `BND4` container struct
     - [ ] Define `PCSaveSlot` and `PCUserData` structs matching Rust offsets
@@ -37,4 +45,37 @@
     - [ ] Implement automatic `.bak` creation with timestamps before any write
 
 ## Phase 4: Logic & ViewModel (Go Backend) 🧠
-...
+- [ ] **4.1. Save Manager**
+    - [ ] Implement `LoadSave(path)` with auto-detection (PC vs PS)
+    - [ ] Implement `SaveFile()` with integrity check (Round-trip Validation)
+- [ ] **4.2. ViewModel Mapping**
+    - [ ] Map raw bytes to `CharacterViewModel` (Name, Stats, Souls)
+    - [ ] Map `EventFlags` (bits) to boolean flags for Graces/Bosses
+- [ ] **4.3. Validation Logic**
+    - [ ] Implement stat recalculation (Level = sum of attributes - 79)
+    - [ ] Implement Weapon Matchmaking Level scanner (Somber vs Normal)
+    - [ ] **Test:** Unit tests for level calculation formula matching Rust logic
+
+## Phase 5: UI Implementation (Wails Frontend) 🎨
+- [ ] **5.1. Base Layout**
+    - [ ] Sidebar navigation and Title bar
+    - [ ] Dark/Light mode toggle (matching original aesthetic)
+- [ ] **5.2. General Tab**
+    - [ ] Character selection, Name edit, SteamID edit, Stats edit
+- [ ] **5.3. Inventory Tab**
+    - [ ] Item list with search, "Bulk Add" buttons
+- [ ] **5.4. World Progress Tab**
+    - [ ] Tree view for Graces and Bosses (grouped by region)
+
+## Phase 6: Advanced Tools 🛠️
+- [ ] **6.1. Character Importer**
+    - [ ] Logic for copying slot + `ProfileSummary` between files
+- [ ] **6.2. Slot Management**
+    - [ ] Activate/Deactivate slots in `UserData10`
+
+## Phase 7: Quality & Finalization 🚀
+- [ ] **7.1. Testing**
+    - [ ] Unit tests for binary parsing using files from `tmp/save`
+    - [ ] Integration tests for SteamID modification
+- [ ] **7.2. Packaging**
+    - [ ] `wails build` for Windows (.exe), macOS (.app), Linux
