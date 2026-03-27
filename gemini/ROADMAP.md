@@ -1,6 +1,6 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** ✅ Phase 3 Complete | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** 🏗️ Phase 4 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
@@ -24,7 +24,7 @@
     - [x] Port grace and boss flag IDs from `src/db/graces.rs` and `src/db/bosses.rs`
 - [x] **2.3. Stats & Classes**
     - [x] Port HP/FP/SP tables from `src/db/stats.rs`
-    - [x] Port base class stats from `src/db/classes.rs`
+    - [x] Port base class stats from `src/db/classes.go`
 
 ## Phase 3: Binary Core (The "encoding/binary" Layer) ✅
 - [x] **3.1. Crypto Implementation**
@@ -45,8 +45,8 @@
     - [x] Implement automatic `.bak` creation with timestamps before any write
 
 ## Phase 4: Logic & ViewModel (Go Backend) 🏗️
-- [ ] **4.1. Save Manager**
-    - [ ] Implement `LoadSave(path)` with auto-detection (PC vs PS)
+- [x] **4.1. Save Manager**
+    - [x] Implement `LoadSave(path)` with auto-detection (PC vs PS)
     - [ ] Implement `SaveFile()` with integrity check (Round-trip Validation)
 - [ ] **4.2. ViewModel Mapping**
     - [ ] Map raw bytes to `CharacterViewModel` (Name, Stats, Souls)
