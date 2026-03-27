@@ -153,11 +153,11 @@ venv/
 data/
 
 # Gemini CLI local settings and state
-.gemini/
-GEMINI.md
-gemini/
-.geminiignore
-gemini/ROADMAP.md
+# .gemini/
+# GEMINI.md
+# gemini/
+# .geminiignore
+# gemini/ROADMAP.md
 
 # Custom dirs
 org-src/
