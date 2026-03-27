@@ -30,13 +30,13 @@
 - [x] **3.1. Crypto Implementation**
     - [x] Port AES-128-CBC logic for PC saves (`backend/core/crypto.go`)
     - [x] Implement MD5 and SHA256 checksum logic (1:1 with Rust)
-- [ ] **3.2. Binary Structures (PC)**
-    - [ ] Define `BND4` container struct
-    - [ ] Define `PCSaveSlot` and `PCUserData` structs matching Rust offsets
+- [x] **3.2. Binary Structures (PC)**
+    - [x] Define `BND4` container struct
+    - [x] Define `PCSaveSlot` and `PCUserData` structs matching Rust offsets
     - [ ] **Test:** Round-trip validation for PC raw saves
-- [ ] **3.3. Binary Structures (PlayStation)**
-    - [ ] Define `PSSaveSlot` and `PSUserData` structs
-    - [ ] Implement raw binary reading/writing for Save Wizard compatibility
+- [x] **3.3. Binary Structures (PlayStation)**
+    - [x] Define `PSSaveSlot` and `PSUserData` structs
+    - [x] Implement raw binary reading/writing for Save Wizard compatibility
     - [ ] **Test:** Round-trip validation for PS raw saves
 - [ ] **3.4. SteamID Logic**
     - [ ] Implement SteamID detection and modification in `UserData10`

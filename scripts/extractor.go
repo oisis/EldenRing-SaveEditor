@@ -163,7 +163,7 @@ func generateGoMap(varName string, data map[string]string) {
 	sort.Strings(keys)
 
 	for _, id := range keys {
-		fmt.Fprintf(out, "\t%s: \"%s\",\n", id, data[id])
+		fmt.Fprintf(out, "\t%s: %q,\n", id, data[id])
 	}
 	fmt.Fprintln(out, "}")
 }
