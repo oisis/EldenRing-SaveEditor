@@ -40,7 +40,7 @@
     - [ ] **Test:** Round-trip validation for PS raw saves
 - [x] **3.4. SteamID Logic**
     - [x] Implement SteamID detection and modification in `UserData10`
-    - [ ] **Test:** Verify MD5 checksum recalculation after SteamID change
+    - [x] **Test:** Verify MD5 checksum recalculation after SteamID change
 - [x] **3.5. Backup System**
     - [x] Implement automatic `.bak` creation with timestamps before any write
 
@@ -48,8 +48,8 @@
 - [x] **4.1. Save Manager**
     - [x] Implement `LoadSave(path)` with auto-detection (PC vs PS)
     - [ ] Implement `SaveFile()` with integrity check (Round-trip Validation)
-- [ ] **4.2. ViewModel Mapping**
-    - [ ] Map raw bytes to `CharacterViewModel` (Name, Stats, Souls)
+- [x] **4.2. ViewModel Mapping**
+    - [x] Map raw bytes to `CharacterViewModel` (Name, Stats, Souls)
     - [ ] Map `EventFlags` (bits) to boolean flags for Graces/Bosses
 - [ ] **4.3. Validation Logic**
     - [ ] Implement stat recalculation (Level = sum of attributes - 79)
