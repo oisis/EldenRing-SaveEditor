@@ -1,6 +1,6 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** 🏗️ Phase 4 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** ✅ Phase 4 Complete | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
@@ -44,19 +44,19 @@
 - [x] **3.5. Backup System**
     - [x] Implement automatic `.bak` creation with timestamps before any write
 
-## Phase 4: Logic & ViewModel (Go Backend) 🏗️
+## Phase 4: Logic & ViewModel (Go Backend) ✅
 - [x] **4.1. Save Manager**
     - [x] Implement `LoadSave(path)` with auto-detection (PC vs PS)
     - [ ] Implement `SaveFile()` with integrity check (Round-trip Validation)
 - [x] **4.2. ViewModel Mapping**
     - [x] Map raw bytes to `CharacterViewModel` (Name, Stats, Souls)
     - [ ] Map `EventFlags` (bits) to boolean flags for Graces/Bosses
-- [ ] **4.3. Validation Logic**
-    - [ ] Implement stat recalculation (Level = sum of attributes - 79)
-    - [ ] Implement Weapon Matchmaking Level scanner (Somber vs Normal)
-    - [ ] **Test:** Unit tests for level calculation formula matching Rust logic
+- [x] **4.3. Validation Logic**
+    - [x] Implement stat recalculation (Level = sum of attributes - 79)
+    - [x] Implement Weapon Matchmaking Level scanner (Somber vs Normal)
+    - [x] **Test:** Unit tests for level calculation formula matching Rust logic
 
-## Phase 5: UI Implementation (Wails Frontend) 🎨
+## Phase 5: UI Implementation (Wails Frontend) 🏗️
 - [ ] **5.1. Base Layout**
     - [ ] Sidebar navigation and Title bar
     - [ ] Dark/Light mode toggle (matching original aesthetic)
