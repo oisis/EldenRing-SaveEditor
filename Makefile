@@ -2,6 +2,7 @@
 BINARY_NAME=ER-Save-Editor
 VERSION=0.1.0
 BUILD_DIR=build/bin
+WAILS=/Users/oisis/go/bin/wails
 
 .PHONY: all build dev test lint clean extract-data deps help
 
@@ -10,17 +11,17 @@ all: deps build test
 # Install dependencies for both Go and Frontend
 deps:
 	@echo "📥 Installing dependencies..."
-	go mod download
+	go mod tidy
 	cd frontend && npm install
 
 # Build the application for the current platform
 build:
 	@echo "🔨 Building $(BINARY_NAME) v$(VERSION)..."
-	wails build -o $(BINARY_NAME)
+	$(WAILS) build -o $(BINARY_NAME)
 
 # Run Wails in development mode (hot reload)
 dev:
-	wails dev
+	$(WAILS) dev
 
 # Run all tests
 test:

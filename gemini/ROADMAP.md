@@ -1,19 +1,19 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** 🏗️ Planning | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** 🏗️ In Development | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure 🏗️
-- [ ] **1.1. Go Initialization**
-    - [ ] `go mod init github.com/oisis/EldenRing-SaveEditor`
-    - [ ] Setup project structure: `backend/core`, `backend/db`, `backend/vm`
-- [ ] **1.2. Wails Setup**
-    - [ ] `wails init` with React + TypeScript template
-    - [ ] Configure `wails.json` (window size, title, etc.)
-- [ ] **1.3. Automation & Scripts**
-    - [ ] Create `Makefile` for `build`, `test`, `lint`, and `extract-data`
-    - [ ] Setup `golangci-lint` configuration
+- [x] **1.1. Go Initialization**
+    - [x] `go mod init github.com/oisis/EldenRing-SaveEditor`
+    - [x] Setup project structure: `backend/core`, `backend/db`, `backend/vm`
+- [x] **1.2. Wails Setup**
+    - [x] `wails init` with React + TypeScript template
+    - [x] Configure `wails.json` (window size, title, etc.)
+- [x] **1.3. Automation & Scripts**
+    - [x] Create `Makefile` for `build`, `test`, `lint`, and `extract-data`
+    - [x] Setup `golangci-lint` configuration
 - [ ] **1.4. Test Infrastructure**
-    - [ ] Setup `tests/data` for Golden Files
+    - [x] Setup `tests/data` for Golden Files
     - [ ] Implement `RoundTrip_test.go` skeleton for bit-perfect verification
 
 ## Phase 2: Data Extraction (Rust -> Go) 📂
@@ -29,7 +29,6 @@
 ## Phase 3: Binary Core (The "encoding/binary" Layer) 🔧
 - [ ] **3.1. Crypto Implementation**
     - [ ] Port AES-128-CBC logic for PC saves (`backend/core/crypto.go`)
-    - [ ] Implement MD5 and SHA256 checksum logic (1:1 with Rust)
     - [ ] **Test:** Verify AES decryption against a known PC save from `tmp/save`
 - [ ] **3.2. Binary Structures (PC)**
     - [ ] Define `BND4` container struct
