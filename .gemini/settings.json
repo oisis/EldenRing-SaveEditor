@@ -1,7 +1,7 @@
 {
   "context": {
     "fileName": ["CONTEXT.md", "GEMINI.md", "prd.md", "ROADMAP.md", "analiza_rusta.md"],
-    "includeDirectories": ["./gemini", "./src", "./assets", "./db"]
+    "includeDirectories": ["./gemini", "./backend", "./frontend", "./scripts", "./tests"]
   },
   "plans_path": ".gemini/plans"
 }
