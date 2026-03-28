@@ -67,9 +67,9 @@
 - [x] **5.4. World Progress Tab**
     - [x] Tree view for Graces and Bosses (grouped by region)
 
-## Phase 6: Advanced Tools 🛠️
-- [ ] **6.1. Character Importer**
-    - [ ] Logic for copying slot + `ProfileSummary` between files
+## Phase 6: Advanced Tools 🏗️
+- [x] **6.1. Character Importer**
+    - [x] Logic for copying slot + `ProfileSummary` between files
 - [ ] **6.2. Slot Management**
     - [ ] Activate/Deactivate slots in `UserData10`
 

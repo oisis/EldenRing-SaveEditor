@@ -3,6 +3,7 @@ import {OpenSave} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
+import {CharacterImporter} from './components/CharacterImporter';
 import './App.css';
 
 function App() {
@@ -11,7 +12,7 @@ function App() {
     const [platform, setPlatform] = useState<string | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
 
-    const tabs = ['General', 'Stats', 'Equipment', 'Inventory', 'World Progress'];
+    const tabs = ['General', 'Stats', 'Equipment', 'Inventory', 'World Progress', 'Importer'];
 
     const handleOpen = async () => {
         try {
@@ -116,6 +117,7 @@ function App() {
                             {activeTab === 'general' && <GeneralTab charIndex={selectedChar} />}
                             {activeTab === 'inventory' && <InventoryTab />}
                             {activeTab === 'world progress' && <WorldProgressTab />}
+                            {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={() => setActiveTab('general')} />}
                             
                             {['stats', 'equipment'].includes(activeTab) && (
                                 <div className="bg-er-gray/50 p-12 rounded-lg border border-gray-800 text-center space-y-4">

@@ -1,21 +1,21 @@
 import {useEffect, useState} from 'react';
-import {GetGracesByRegion} from '../../wailsjs/go/main/App';
+import {GetAllGraces} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 export function WorldProgressTab() {
-    const [regions, setRegions] = useState<{[key: string]: db.GraceEntry[]}>({});
+    const [graces, setGraces] = useState<db.GraceEntry[]>([]);
     const [loading, setLoading] = useState(false);
     const [expandedRegions, setExpandedRegions] = useState<{[key: string]: boolean}>({});
 
     useEffect(() => {
         setLoading(true);
-        GetGracesByRegion()
+        GetAllGraces()
             .then(res => {
-                setRegions(res || {});
-                // Expand all by default
-                const initial: {[key: string]: boolean} = {};
-                Object.keys(res || {}).forEach(k => initial[k] = true);
-                setExpandedRegions(initial);
+                setGraces(res || []);
+                // Expand first region by default
+                if (res && res.length > 0) {
+                    setExpandedRegions({[res[0].region]: true});
+                }
                 setLoading(false);
             })
             .catch(err => {
@@ -23,6 +23,13 @@ export function WorldProgressTab() {
                 setLoading(false);
             });
     }, []);
+
+    // Group graces by region
+    const regions = graces.reduce((acc, grace) => {
+        if (!acc[grace.region]) acc[grace.region] = [];
+        acc[grace.region].push(grace);
+        return acc;
+    }, {} as {[key: string]: db.GraceEntry[]});
 
     const toggleRegion = (region: string) => {
         setExpandedRegions(prev => ({...prev, [region]: !prev[region]}));
@@ -32,7 +39,7 @@ export function WorldProgressTab() {
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 pb-12">
-            {Object.entries(regions).sort().map(([region, graces]) => (
+            {Object.entries(regions).sort().map(([region, regionGraces]) => (
                 <div key={region} className="bg-er-gray rounded-lg border border-gray-700 shadow-lg overflow-hidden transition-all">
                     <button 
                         onClick={() => toggleRegion(region)}
@@ -48,14 +55,13 @@ export function WorldProgressTab() {
                             <h2 className="text-er-gold font-serif text-xl tracking-tight">{region}</h2>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <span className="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">{graces.length} Sites of Grace</span>
-                            <button className="text-[10px] bg-er-gold/10 hover:bg-er-gold/20 text-er-gold border border-er-gold/30 px-3 py-1 rounded uppercase tracking-tighter transition-all">Unlock All</button>
+                            <span className="text-[10px] text-gray-500 uppercase font-bold tracking-[0.2em]">{regionGraces.length} Sites of Grace</span>
                         </div>
                     </button>
                     
                     {expandedRegions[region] && (
                         <div className="p-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-4 animate-in slide-in-from-top-2 duration-300">
-                            {graces.map(grace => (
+                            {regionGraces.map(grace => (
                                 <label key={grace.id} className="flex items-center space-x-4 group cursor-pointer py-1">
                                     <div className="relative flex items-center justify-center">
                                         <input 

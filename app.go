@@ -64,9 +64,23 @@ func (a *App) GetItemList(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category)
 }
 
-// GetGracesByRegion returns Sites of Grace grouped by region
-func (a *App) GetGracesByRegion() map[string][]db.GraceEntry {
-	return db.GetGracesByRegion()
+// GetAllGraces returns all Sites of Grace
+func (a *App) GetAllGraces() []db.GraceEntry {
+	return db.GetAllGraces()
+}
+
+// ImportSlot copies a slot from another save file
+func (a *App) ImportSlot(sourcePath string, srcIdx, destIdx int) error {
+	if a.save == nil {
+		return fmt.Errorf("no destination save loaded")
+	}
+	
+	sourceSave, err := core.LoadSave(sourcePath)
+	if err != nil {
+		return fmt.Errorf("failed to load source save: %w", err)
+	}
+	
+	return a.save.ImportSlot(sourceSave, srcIdx, destIdx)
 }
 
 // GetSteamID returns the global SteamID from UserData10

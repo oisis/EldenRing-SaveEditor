@@ -1,3 +1,38 @@
+export namespace db {
+	
+	export class GraceEntry {
+	    id: number;
+	    name: string;
+	    region: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new GraceEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.region = source["region"];
+	    }
+	}
+	export class ItemEntry {
+	    id: number;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	    }
+	}
+
+}
+
 export namespace vm {
 	
 	export class CharacterViewModel {

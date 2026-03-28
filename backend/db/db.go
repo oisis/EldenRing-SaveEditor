@@ -50,9 +50,9 @@ func GetItemsByCategory(category string) []ItemEntry {
 	return items
 }
 
-// GetGracesByRegion returns Sites of Grace grouped and sorted by region.
-func GetGracesByRegion() map[string][]GraceEntry {
-	grouped := make(map[string][]GraceEntry)
+// GetAllGraces returns all Sites of Grace as a flat list.
+func GetAllGraces() []GraceEntry {
+	graces := make([]GraceEntry, 0, len(data.Graces))
 	
 	for id, fullName := range data.Graces {
 		parts := strings.Split(fullName, " (")
@@ -62,19 +62,19 @@ func GetGracesByRegion() map[string][]GraceEntry {
 			region = strings.TrimSuffix(parts[1], ")")
 		}
 		
-		grouped[region] = append(grouped[region], GraceEntry{
+		graces = append(graces, GraceEntry{
 			ID:     id,
 			Name:   name,
 			Region: region,
 		})
 	}
 
-	// Sort graces within each region
-	for region := range grouped {
-		sort.Slice(grouped[region], func(i, j int) bool {
-			return grouped[region][i].Name < grouped[region][j].Name
-		})
-	}
+	sort.Slice(graces, func(i, j int) bool {
+		if graces[i].Region != graces[j].Region {
+			return graces[i].Region < graces[j].Region
+		}
+		return graces[i].Name < graces[j].Name
+	})
 
-	return grouped
+	return graces
 }
