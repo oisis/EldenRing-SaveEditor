@@ -2,6 +2,7 @@ import {useState} from 'react';
 import {OpenSave} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
+import {WorldProgressTab} from './components/WorldProgressTab';
 import './App.css';
 
 function App() {
@@ -114,8 +115,9 @@ function App() {
                             
                             {activeTab === 'general' && <GeneralTab charIndex={selectedChar} />}
                             {activeTab === 'inventory' && <InventoryTab />}
+                            {activeTab === 'world progress' && <WorldProgressTab />}
                             
-                            {['stats', 'equipment', 'world progress'].includes(activeTab) && (
+                            {['stats', 'equipment'].includes(activeTab) && (
                                 <div className="bg-er-gray/50 p-12 rounded-lg border border-gray-800 text-center space-y-4">
                                     <div className="text-er-gold/40 text-5xl font-serif">Coming Soon</div>
                                     <p className="text-gray-500 text-sm">The {activeTab} editor is currently under development.</p>

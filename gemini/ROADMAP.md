@@ -1,6 +1,6 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** 🏗️ Phase 5 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** 🏗️ Phase 6 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
@@ -56,7 +56,7 @@
     - [x] Implement Weapon Matchmaking Level scanner (Somber vs Normal)
     - [x] **Test:** Unit tests for level calculation formula matching Rust logic
 
-## Phase 5: UI Implementation (Wails Frontend) 🏗️
+## Phase 5: UI Implementation (Wails Frontend) ✅
 - [x] **5.1. Base Layout**
     - [x] Sidebar navigation and Title bar
     - [x] Dark/Light mode toggle (matching original aesthetic)
@@ -64,8 +64,8 @@
     - [x] Character selection, Name edit, SteamID edit, Stats edit
 - [x] **5.3. Inventory Tab**
     - [x] Item list with search, "Bulk Add" buttons
-- [ ] **5.4. World Progress Tab**
-    - [ ] Tree view for Graces and Bosses (grouped by region)
+- [x] **5.4. World Progress Tab**
+    - [x] Tree view for Graces and Bosses (grouped by region)
 
 ## Phase 6: Advanced Tools 🛠️
 - [ ] **6.1. Character Importer**

@@ -64,11 +64,15 @@ func (a *App) GetItemList(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category)
 }
 
+// GetGracesByRegion returns Sites of Grace grouped by region
+func (a *App) GetGracesByRegion() map[string][]db.GraceEntry {
+	return db.GetGracesByRegion()
+}
+
 // GetSteamID returns the global SteamID from UserData10
 func (a *App) GetSteamID() uint64 {
 	if a.save == nil {
 		return 0
 	}
-	// Simplified: logic to extract from UserData10 should be here
 	return 0 
 }
