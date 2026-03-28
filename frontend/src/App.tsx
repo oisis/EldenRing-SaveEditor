@@ -1,5 +1,5 @@
-import {useState} from 'react';
-import {OpenSave} from '../wailsjs/go/main/App';
+import {useState, useEffect} from 'react';
+import {OpenSave, GetActiveSlots, SetSlotActivity} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
@@ -11,17 +11,38 @@ function App() {
     const [activeTab, setActiveTab] = useState('general');
     const [platform, setPlatform] = useState<string | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
+    const [activeSlots, setActiveSlots] = useState<boolean[]>(new Array(10).fill(false));
 
     const tabs = ['General', 'Stats', 'Equipment', 'Inventory', 'World Progress', 'Importer'];
+
+    const refreshSlots = async () => {
+        try {
+            const res = await GetActiveSlots();
+            setActiveSlots(res || new Array(10).fill(false));
+        } catch (e) {
+            console.error(e);
+        }
+    };
 
     const handleOpen = async () => {
         try {
             const res = await OpenSave("tmp/save/ER0000.sl2"); 
             setPlatform(res);
             setIsLoaded(true);
+            await refreshSlots();
         } catch (e) {
             console.error(e);
-            alert("Failed to open save file. Check console for details.");
+            alert("Failed to open save file.");
+        }
+    };
+
+    const handleToggleSlot = async (e: React.MouseEvent, idx: number) => {
+        e.stopPropagation();
+        try {
+            await SetSlotActivity(idx, !activeSlots[idx]);
+            await refreshSlots();
+        } catch (e) {
+            console.error(e);
         }
     };
 
@@ -37,18 +58,32 @@ function App() {
                 <div className="p-4 bg-black/20">
                     <div className="text-gray-500 uppercase text-[10px] font-bold mb-3 px-2">Characters</div>
                     <div className="space-y-1 overflow-y-auto max-h-[calc(100vh-250px)] custom-scrollbar">
-                        {[...Array(10)].map((_, i) => (
+                        {activeSlots.map((isActive, i) => (
                             <button
                                 key={i}
                                 onClick={() => setSelectedChar(i)}
                                 disabled={!isLoaded}
-                                className={`w-full text-left px-4 py-3 rounded transition-all text-sm flex items-center space-x-3 group ${
+                                className={`w-full text-left px-4 py-3 rounded transition-all text-sm flex items-center justify-between group ${
                                     !isLoaded ? 'opacity-30 cursor-not-allowed' : 
                                     selectedChar === i ? 'bg-er-gold/10 text-er-gold border border-er-gold/30' : 'text-gray-400 hover:bg-white/5 hover:text-gray-200'
                                 }`}
                             >
-                                <span className={`w-1.5 h-1.5 rounded-full ${selectedChar === i ? 'bg-er-gold shadow-[0_0_8px_#c1a35f]' : 'bg-gray-700 group-hover:bg-gray-500'}`}></span>
-                                <span>Slot {i + 1}</span>
+                                <div className="flex items-center space-x-3">
+                                    <span className={`w-1.5 h-1.5 rounded-full ${selectedChar === i ? 'bg-er-gold shadow-[0_0_8px_#c1a35f]' : isActive ? 'bg-green-500/50' : 'bg-gray-700'}`}></span>
+                                    <span>Slot {i + 1}</span>
+                                </div>
+                                {isLoaded && (
+                                    <div 
+                                        onClick={(e) => handleToggleSlot(e, i)}
+                                        className={`text-[9px] px-1.5 py-0.5 rounded border transition-all ${
+                                            isActive 
+                                            ? 'border-green-500/30 text-green-500 bg-green-500/5 hover:bg-green-500/20' 
+                                            : 'border-gray-700 text-gray-600 hover:text-gray-400'
+                                        }`}
+                                    >
+                                        {isActive ? 'ACTIVE' : 'EMPTY'}
+                                    </div>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -70,7 +105,6 @@ function App() {
 
             {/* Main Content */}
             <div className="flex-1 flex flex-col bg-[#0f0f0f] relative overflow-hidden">
-                {/* Decorative Background Element */}
                 <div className="absolute top-0 right-0 w-96 h-96 bg-er-gold/5 blur-[120px] rounded-full -mr-48 -mt-48"></div>
 
                 {/* Navbar - Tabs */}
@@ -104,7 +138,7 @@ function App() {
                             </div>
                             <div className="space-y-2">
                                 <h2 className="text-er-gold font-serif text-2xl">No Save File Loaded</h2>
-                                <p className="text-gray-500 text-sm max-w-xs">Please select an Elden Ring save file (.sl2 or decrypted PS4) to begin editing.</p>
+                                <p className="text-gray-500 text-sm max-w-xs">Please select an Elden Ring save file to begin.</p>
                             </div>
                         </div>
                     ) : (
@@ -117,7 +151,7 @@ function App() {
                             {activeTab === 'general' && <GeneralTab charIndex={selectedChar} />}
                             {activeTab === 'inventory' && <InventoryTab />}
                             {activeTab === 'world progress' && <WorldProgressTab />}
-                            {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={() => setActiveTab('general')} />}
+                            {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             
                             {['stats', 'equipment'].includes(activeTab) && (
                                 <div className="bg-er-gray/50 p-12 rounded-lg border border-gray-800 text-center space-y-4">

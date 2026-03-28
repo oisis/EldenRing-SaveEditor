@@ -83,10 +83,31 @@ func (a *App) ImportSlot(sourcePath string, srcIdx, destIdx int) error {
 	return a.save.ImportSlot(sourceSave, srcIdx, destIdx)
 }
 
+// GetActiveSlots returns the activity status of all 10 slots
+func (a *App) GetActiveSlots() []bool {
+	if a.save == nil {
+		return make([]bool, 10)
+	}
+	return a.save.GetActiveSlots()
+}
+
+// SetSlotActivity toggles a slot's active status
+func (a *App) SetSlotActivity(index int, active bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	return a.save.SetSlotActivity(index, active)
+}
+
 // GetSteamID returns the global SteamID from UserData10
 func (a *App) GetSteamID() uint64 {
 	if a.save == nil {
 		return 0
 	}
 	return 0 
+}
+
+// Dummy method to force Wails to export types
+func (a *App) _forceExportTypes() (db.GraceEntry, db.ItemEntry) {
+	return db.GraceEntry{}, db.ItemEntry{}
 }

@@ -1,6 +1,6 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** 🏗️ Phase 6 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** ✅ Phase 6 Complete | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
@@ -67,11 +67,11 @@
 - [x] **5.4. World Progress Tab**
     - [x] Tree view for Graces and Bosses (grouped by region)
 
-## Phase 6: Advanced Tools 🏗️
+## Phase 6: Advanced Tools ✅
 - [x] **6.1. Character Importer**
     - [x] Logic for copying slot + `ProfileSummary` between files
-- [ ] **6.2. Slot Management**
-    - [ ] Activate/Deactivate slots in `UserData10`
+- [x] **6.2. Slot Management**
+    - [x] Activate/Deactivate slots in `UserData10`
 
 ## Phase 7: Quality & Finalization 🚀
 - [ ] **7.1. Testing**

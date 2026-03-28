@@ -48,28 +48,69 @@ func LoadSave(path string) (*SaveFile, error) {
 	return nil, fmt.Errorf("unknown save format")
 }
 
+// GetActiveSlots returns a boolean array indicating which slots are active.
+func (s *SaveFile) GetActiveSlots() []bool {
+	active := make([]bool, 10)
+	reader := bytes.NewReader(s.UserData10)
+	
+	// Skip Unk3B4 (4), SteamID (8), Padding (0x140)
+	reader.Seek(4+8+0x140, 1)
+	
+	// Read CSMenuSystemSaveLoad (dynamic)
+	var unk, length uint32
+	if err := binary.Read(reader, binary.LittleEndian, &unk); err != nil { return active }
+	if err := binary.Read(reader, binary.LittleEndian, &length); err != nil { return active }
+	reader.Seek(int64(length), 1)
+	
+	// Read 10 active slot bytes
+	for i := 0; i < 10; i++ {
+		b, err := reader.ReadByte()
+		if err != nil { break }
+		active[i] = b == 1
+	}
+	return active
+}
+
+// SetSlotActivity toggles the active flag for a specific slot.
+func (s *SaveFile) SetSlotActivity(index int, active bool) error {
+	if index < 0 || index >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	// We need to find the offset again to write
+	reader := bytes.NewReader(s.UserData10)
+	reader.Seek(4+8+0x140, 1)
+	
+	var unk, length uint32
+	binary.Read(reader, binary.LittleEndian, &unk)
+	binary.Read(reader, binary.LittleEndian, &length)
+	
+	// Offset of active_slot array
+	offset := 4 + 8 + 0x140 + 4 + 4 + int(length) + index
+	
+	val := byte(0)
+	if active { val = 1 }
+	s.UserData10[offset] = val
+	
+	return nil
+}
+
 // ImportSlot copies a character slot from source save to this save.
 func (dest *SaveFile) ImportSlot(source *SaveFile, srcIdx, destIdx int) error {
 	if srcIdx < 0 || srcIdx >= 10 || destIdx < 0 || destIdx >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
 
-	// 1. Copy raw slot data
 	newSlotData := make([]byte, 0x280000)
 	copy(newSlotData, source.Slots[srcIdx])
 
-	// 2. Overwrite version in the new slot with destination's version
-	// Version is the first 4 bytes of the slot
 	destVersion := dest.Slots[destIdx][:4]
 	copy(newSlotData[:4], destVersion)
 
 	dest.Slots[destIdx] = newSlotData
-
-	// 3. Update UserData10 (Active Slot and Profile Summary)
-	// This requires complex sequential parsing of UserData10 to find exact offsets.
-	// Placeholder for UserData10 update logic.
 	
-	return nil
+	// Automatically activate the slot after import
+	return dest.SetSlotActivity(destIdx, true)
 }
 
 func loadPC(data []byte, save *SaveFile) (*SaveFile, error) {
