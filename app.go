@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
+	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 	"github.com/oisis/EldenRing-SaveEditor/backend/vm"
 )
 
@@ -56,6 +57,11 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 	charVM.RecalculateLevel()
 	
 	return vm.ApplyVMToSlot(&charVM, a.save.Slots[index])
+}
+
+// GetItemList returns a list of items for a given category
+func (a *App) GetItemList(category string) []db.ItemEntry {
+	return db.GetItemsByCategory(category)
 }
 
 // GetSteamID returns the global SteamID from UserData10

@@ -62,8 +62,8 @@
     - [x] Dark/Light mode toggle (matching original aesthetic)
 - [x] **5.2. General Tab**
     - [x] Character selection, Name edit, SteamID edit, Stats edit
-- [ ] **5.3. Inventory Tab**
-    - [ ] Item list with search, "Bulk Add" buttons
+- [x] **5.3. Inventory Tab**
+    - [x] Item list with search, "Bulk Add" buttons
 - [ ] **5.4. World Progress Tab**
     - [ ] Tree view for Graces and Bosses (grouped by region)
 

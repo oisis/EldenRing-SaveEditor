@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import {OpenSave} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
+import {InventoryTab} from './components/InventoryTab';
 import './App.css';
 
 function App() {
@@ -13,8 +14,6 @@ function App() {
 
     const handleOpen = async () => {
         try {
-            // Placeholder: In a real app, we would use Wails FileDialog
-            // For now, we'll implement the Go side to handle the dialog later
             const res = await OpenSave("tmp/save/ER0000.sl2"); 
             setPlatform(res);
             setIsLoaded(true);
@@ -114,8 +113,9 @@ function App() {
                             </header>
                             
                             {activeTab === 'general' && <GeneralTab charIndex={selectedChar} />}
+                            {activeTab === 'inventory' && <InventoryTab />}
                             
-                            {activeTab !== 'general' && (
+                            {['stats', 'equipment', 'world progress'].includes(activeTab) && (
                                 <div className="bg-er-gray/50 p-12 rounded-lg border border-gray-800 text-center space-y-4">
                                     <div className="text-er-gold/40 text-5xl font-serif">Coming Soon</div>
                                     <p className="text-gray-500 text-sm">The {activeTab} editor is currently under development.</p>
