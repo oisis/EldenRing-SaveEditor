@@ -148,5 +148,5 @@ type ProfileSummary struct {
 // UserData11 represents the regulation and other data.
 type UserData11 struct {
 	Regulation []byte // 0x1c5f70 bytes
-	Rest       []byte // 0x7A090 bytes
+	Rest       []byte // 0x7A0A0 bytes (Updated to match 0x240010 total)
 }

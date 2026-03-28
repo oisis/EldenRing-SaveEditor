@@ -22,7 +22,7 @@ type SaveFile struct {
 	SlotsMD5      [10][16]byte // PC only
 	UserData10    []byte       // 0x60000 bytes
 	UserData10MD5 [16]byte     // PC only
-	UserData11    []byte       // 0x23FFF0 bytes (Regulation + Rest)
+	UserData11    []byte       // 0x240010 bytes (Regulation + Rest)
 	UserData11MD5 [16]byte     // PC only
 }
 
@@ -48,21 +48,49 @@ func LoadSave(path string) (*SaveFile, error) {
 	return nil, fmt.Errorf("unknown save format")
 }
 
+// Write saves the current state to a file.
+func (s *SaveFile) Write(path string) error {
+	var buf bytes.Buffer
+
+	if s.Platform == PlatformPC {
+		// PC Write Logic
+		binary.Write(&buf, binary.LittleEndian, &s.Header)
+		padding := make([]byte, 0x300-buf.Len())
+		buf.Write(padding)
+
+		for i := 0; i < 10; i++ {
+			buf.Write(s.SlotsMD5[i][:])
+			buf.Write(s.Slots[i])
+		}
+
+		buf.Write(s.UserData10MD5[:])
+		buf.Write(s.UserData10)
+
+		buf.Write(s.UserData11MD5[:])
+		buf.Write(s.UserData11)
+
+		return os.WriteFile(path, buf.Bytes(), 0644)
+	} else {
+		// PS4 Write Logic (Raw)
+		binary.Write(&buf, binary.LittleEndian, &s.Header)
+		for i := 0; i < 10; i++ {
+			buf.Write(s.Slots[i])
+		}
+		buf.Write(s.UserData10)
+		buf.Write(s.UserData11)
+		return os.WriteFile(path, buf.Bytes(), 0644)
+	}
+}
+
 // GetActiveSlots returns a boolean array indicating which slots are active.
 func (s *SaveFile) GetActiveSlots() []bool {
 	active := make([]bool, 10)
 	reader := bytes.NewReader(s.UserData10)
-	
-	// Skip Unk3B4 (4), SteamID (8), Padding (0x140)
 	reader.Seek(4+8+0x140, 1)
-	
-	// Read CSMenuSystemSaveLoad (dynamic)
 	var unk, length uint32
 	if err := binary.Read(reader, binary.LittleEndian, &unk); err != nil { return active }
 	if err := binary.Read(reader, binary.LittleEndian, &length); err != nil { return active }
 	reader.Seek(int64(length), 1)
-	
-	// Read 10 active slot bytes
 	for i := 0; i < 10; i++ {
 		b, err := reader.ReadByte()
 		if err != nil { break }
@@ -76,22 +104,15 @@ func (s *SaveFile) SetSlotActivity(index int, active bool) error {
 	if index < 0 || index >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
-
-	// We need to find the offset again to write
 	reader := bytes.NewReader(s.UserData10)
 	reader.Seek(4+8+0x140, 1)
-	
 	var unk, length uint32
 	binary.Read(reader, binary.LittleEndian, &unk)
 	binary.Read(reader, binary.LittleEndian, &length)
-	
-	// Offset of active_slot array
 	offset := 4 + 8 + 0x140 + 4 + 4 + int(length) + index
-	
 	val := byte(0)
 	if active { val = 1 }
 	s.UserData10[offset] = val
-	
 	return nil
 }
 
@@ -100,16 +121,11 @@ func (dest *SaveFile) ImportSlot(source *SaveFile, srcIdx, destIdx int) error {
 	if srcIdx < 0 || srcIdx >= 10 || destIdx < 0 || destIdx >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
-
 	newSlotData := make([]byte, 0x280000)
 	copy(newSlotData, source.Slots[srcIdx])
-
 	destVersion := dest.Slots[destIdx][:4]
 	copy(newSlotData[:4], destVersion)
-
 	dest.Slots[destIdx] = newSlotData
-	
-	// Automatically activate the slot after import
 	return dest.SetSlotActivity(destIdx, true)
 }
 
@@ -153,7 +169,7 @@ func loadPC(data []byte, save *SaveFile) (*SaveFile, error) {
 	if err := binary.Read(reader, binary.LittleEndian, &save.UserData11MD5); err != nil {
 		return nil, err
 	}
-	save.UserData11 = make([]byte, 0x23FFF0)
+	save.UserData11 = make([]byte, 0x240010)
 	if _, err := reader.Read(save.UserData11); err != nil {
 		return nil, err
 	}
@@ -180,7 +196,7 @@ func loadPS(data []byte, save *SaveFile) (*SaveFile, error) {
 		return nil, err
 	}
 
-	save.UserData11 = make([]byte, 0x23FFF0)
+	save.UserData11 = make([]byte, 0x240010)
 	if _, err := reader.Read(save.UserData11); err != nil {
 		return nil, err
 	}

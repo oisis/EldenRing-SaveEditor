@@ -2,43 +2,55 @@ package tests
 
 import (
 	"bytes"
-	"crypto/sha256"
+	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"os"
 	"testing"
 )
 
-// TestRoundTrip verifies that loading and saving a file without changes
-// results in a bit-perfect copy of the original.
-func TestRoundTrip(t *testing.T) {
-	testCases := []struct {
-		name string
-		path string
-	}{
-		// Paths will be populated as we add test data from tmp/save
-		// {"PCSave", "data/pc/ER0000.sl2"},
-		// {"PS4Save", "data/ps4/memory.dat"},
+func TestRoundTripPS4(t *testing.T) {
+	// Use the provided test save file
+	path := "../tmp/save/oisis_pl-org.txt"
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Skip("Test save file not found in tmp/save/")
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			original, err := os.ReadFile(tc.path)
-			if err != nil {
-				t.Fatalf("Failed to read original file: %v", err)
+	// 1. Load original
+	save, err := core.LoadSave(path)
+	if err != nil {
+		t.Fatalf("Failed to load save: %v", err)
+	}
+
+	if save.Platform != core.PlatformPS {
+		t.Fatalf("Expected PS4 platform, got %s", save.Platform)
+	}
+
+	// 2. Write to a temporary file
+	tmpPath := "data/ps4/roundtrip_test.dat"
+	os.MkdirAll("data/ps4", 0755)
+	if err := save.Write(tmpPath); err != nil {
+		t.Fatalf("Failed to write save: %v", err)
+	}
+	defer os.Remove(tmpPath)
+
+	// 3. Compare bytes bit-per-bit
+	originalData, _ := os.ReadFile(path)
+	newData, _ := os.ReadFile(tmpPath)
+
+	if !bytes.Equal(originalData, newData) {
+		t.Errorf("Byte mismatch! Round-trip failed to preserve data integrity.")
+		
+		// Find first mismatch for debugging
+		for i := 0; i < len(originalData); i++ {
+			if i >= len(newData) {
+				t.Logf("New data is shorter than original (len: %d vs %d)", len(newData), len(originalData))
+				break
 			}
-
-			// TODO: Implement Load -> Save logic once backend/core is ready
-			// saveObj, err := core.Load(tc.path)
-			// modified, err := saveObj.Write()
-
-			// For now, this is a placeholder that just compares the file to itself
-			modified := original 
-
-			if !bytes.Equal(original, modified) {
-				origHash := sha256.Sum256(original)
-				modHash := sha256.Sum256(modified)
-				t.Errorf("Round-trip failed for %s\nOriginal SHA256: %x\nModified SHA256: %x", 
-					tc.name, origHash, modHash)
+			if originalData[i] != newData[i] {
+				t.Logf("First mismatch at offset 0x%x: expected %02x, got %02x", i, originalData[i], newData[i])
+				break
 			}
-		})
+		}
+	} else {
+		t.Logf("Round-trip successful! Data integrity preserved.")
 	}
 }
