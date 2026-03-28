@@ -1,6 +1,6 @@
 # Project Roadmap: ER-Save-Editor-Go (100% Rust Parity)
 
-> **Status:** ✅ Phase 4 Complete | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
+> **Status:** 🏗️ Phase 5 In Progress | **Source of Truth:** `tmp/org-src` | **Test Strategy:** Round-trip & Golden Files
 
 ## Phase 1: Environment & Infrastructure ✅
 - [x] **1.1. Go Initialization**
@@ -57,9 +57,9 @@
     - [x] **Test:** Unit tests for level calculation formula matching Rust logic
 
 ## Phase 5: UI Implementation (Wails Frontend) 🏗️
-- [ ] **5.1. Base Layout**
-    - [ ] Sidebar navigation and Title bar
-    - [ ] Dark/Light mode toggle (matching original aesthetic)
+- [x] **5.1. Base Layout**
+    - [x] Sidebar navigation and Title bar
+    - [x] Dark/Light mode toggle (matching original aesthetic)
 - [ ] **5.2. General Tab**
     - [ ] Character selection, Name edit, SteamID edit, Stats edit
 - [ ] **5.3. Inventory Tab**
