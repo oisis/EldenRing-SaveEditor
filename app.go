@@ -3,14 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/oisis/EldenRing-SaveEditor/backend/core"
+	"github.com/oisis/EldenRing-SaveEditor/backend/vm"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx  context.Context
+	save *core.SaveFile
 }
 
-// NewApp creates a new App application struct
+// NewApp creates a new App struct
 func NewApp() *App {
 	return &App{}
 }
@@ -21,7 +24,45 @@ func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 }
 
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
+// OpenSave loads a save file and returns basic info
+func (a *App) OpenSave(path string) (string, error) {
+	save, err := core.LoadSave(path)
+	if err != nil {
+		return "", err
+	}
+	a.save = save
+	return string(save.Platform), nil
+}
+
+// GetCharacter returns the ViewModel for a specific slot
+func (a *App) GetCharacter(index int) (*vm.CharacterViewModel, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if index < 0 || index >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+	return vm.MapSlotToVM(a.save.Slots[index])
+}
+
+// SaveCharacter updates the raw slot data from the ViewModel
+func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	
+	// Validate and recalculate level before saving
+	charVM.ValidateStats()
+	charVM.RecalculateLevel()
+	
+	return vm.ApplyVMToSlot(&charVM, a.save.Slots[index])
+}
+
+// GetSteamID returns the global SteamID from UserData10
+func (a *App) GetSteamID() uint64 {
+	if a.save == nil {
+		return 0
+	}
+	// Simplified: logic to extract from UserData10 should be here
+	return 0 
 }

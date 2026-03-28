@@ -1,9 +1,5 @@
 package vm
 
-import (
-	"encoding/binary"
-)
-
 // RecalculateLevel updates the character level based on current attributes.
 // Formula: Level = Vigor + Mind + Endurance + Strength + Dexterity + Intelligence + Faith + Arcane - 79
 func (vm *CharacterViewModel) RecalculateLevel() {
