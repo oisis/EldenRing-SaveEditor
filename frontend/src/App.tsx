@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity} from '../wailsjs/go/main/App';
+import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {StatsTab} from './components/StatsTab';
 import {InventoryTab} from './components/InventoryTab';
@@ -15,6 +15,7 @@ function App() {
     const [platform, setPlatform] = useState<string | null>(null);
     const [isLoaded, setIsLoaded] = useState(false);
     const [activeSlots, setActiveSlots] = useState<boolean[]>(new Array(10).fill(false));
+    const [charNames, setCharNames] = useState<string[]>(new Array(10).fill('Empty Slot'));
     const [theme, setTheme] = useState<Theme>(() => (localStorage.getItem('theme') as Theme) || 'system');
 
     useEffect(() => {
@@ -35,8 +36,12 @@ function App() {
 
     const refreshSlots = async () => {
         try {
-            const res = await GetActiveSlots();
-            setActiveSlots(res || new Array(10).fill(false));
+            const [slots, names] = await Promise.all([
+                GetActiveSlots(),
+                GetCharacterNames()
+            ]);
+            setActiveSlots(slots || new Array(10).fill(false));
+            setCharNames(names || new Array(10).fill('Empty Slot'));
         } catch (e) {
             console.error("Failed to refresh slots:", e);
         }
@@ -95,7 +100,7 @@ function App() {
                     <div className="h-px bg-border/50 w-full" />
                 </div>
 
-                <nav className="flex-1 overflow-y-auto px-2 space-y-0.5 custom-scrollbar">
+                <nav className="flex-1 overflow-y-auto px-2 space-y-1.5 custom-scrollbar">
                     <p className="px-3 text-[10px] font-bold text-muted-foreground uppercase tracking-[0.15em] mb-3 mt-2">Character Slots</p>
                     {activeSlots.map((isActive, i) => (
                         <button 
@@ -103,31 +108,31 @@ function App() {
                             disabled={!isLoaded}
                             onClick={() => setSelectedChar(i)}
                             className={`
-                                w-full group px-3 py-2 rounded-md transition-all flex items-center justify-between
+                                w-full group px-3 py-2.5 rounded-md transition-all flex items-center justify-between border
                                 ${!isLoaded ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
-                                ${selectedChar === i ? 'bg-accent text-accent-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground hover:bg-accent/40'}
+                                ${isActive ? 'bg-green-500/10 border-green-500/20 hover:bg-green-500/20' : 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20'}
+                                ${selectedChar === i ? 'ring-2 ring-blue-500 shadow-sm' : ''}
                             `}
                         >
-                            <div className="flex items-center space-x-3">
-                                <div className={`w-2 h-2 rounded-full transition-all ${isActive ? 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]' : 'bg-zinc-300 dark:bg-zinc-800'}`} />
-                                <span className="text-xs font-semibold tracking-tight">Slot {i + 1}</span>
+                            <div className="flex items-center space-x-3 overflow-hidden">
+                                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${isActive ? 'bg-green-500' : 'bg-red-500'}`} />
+                                <span className="text-xs font-bold tracking-tight truncate">{charNames[i]}</span>
                             </div>
                             {isLoaded && (
                                 <div 
                                     onClick={(e) => { e.stopPropagation(); handleToggleSlot(i); }}
-                                    className={`
-                                        text-[9px] font-black px-1.5 py-0.5 rounded border transition-all
-                                        ${isActive ? 'border-blue-500/30 text-blue-500 bg-blue-500/5' : 'border-border text-muted-foreground hover:border-foreground hover:text-foreground'}
-                                    `}
+                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-blue-500 transition-all"
                                 >
-                                    {isActive ? 'ACTIVE' : 'OFF'}
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                                    </svg>
                                 </div>
                             )}
                         </button>
                     ))}
                 </nav>
                 
-                <div className="p-4 border-t border-border bg-muted/10">
+                <div className="p-5 border-t border-border bg-muted/10 mt-auto">
                     <div className="flex items-center justify-between bg-background/50 border border-border p-1 rounded-lg mb-4">
                         {(['light', 'dark', 'system'] as Theme[]).map((t) => (
                             <button
@@ -142,9 +147,9 @@ function App() {
                             </button>
                         ))}
                     </div>
-                    <div className="flex justify-between items-center text-[10px] px-1">
-                        <span className="text-muted-foreground font-medium">Platform</span>
-                        <span className="font-bold text-foreground uppercase tracking-widest">{platform || 'None'}</span>
+                    <div className="flex justify-between items-center text-[10px] px-1 pb-2">
+                        <span className="text-muted-foreground font-medium uppercase tracking-widest">Platform</span>
+                        <span className="font-black text-foreground uppercase tracking-widest bg-muted/50 px-2 py-0.5 rounded">{platform || 'None'}</span>
                     </div>
                 </div>
             </aside>

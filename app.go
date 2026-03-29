@@ -123,6 +123,26 @@ func (a *App) GetActiveSlots() []bool {
 	return active
 }
 
+// GetCharacterNames returns the names of all 10 characters from ProfileSummary
+func (a *App) GetCharacterNames() []string {
+	names := make([]string, 10)
+	if a.save == nil {
+		for i := 0; i < 10; i++ {
+			names[i] = "Empty Slot"
+		}
+		return names
+	}
+	for i := 0; i < 10; i++ {
+		name := core.UTF16ToString(a.save.ProfileSummaries[i].CharacterName[:])
+		if name == "" {
+			names[i] = "Empty Slot"
+		} else {
+			names[i] = name
+		}
+	}
+	return names
+}
+
 // GetSourceActiveSlots returns the activity status of all 10 slots in the source file
 func (a *App) GetSourceActiveSlots() []bool {
 	if a.sourceSave == nil {

@@ -86,3 +86,26 @@ func (r *Reader) Seek(offset int64, whence int) (int64, error) {
 func (r *Reader) Pos() int {
 	return r.pos
 }
+
+// UTF16ToString converts a slice of uint16 (UTF-16) to a Go string, stopping at the first null terminator.
+func UTF16ToString(u []uint16) string {
+	for i, v := range u {
+		if v == 0 {
+			u = u[:i]
+			break
+		}
+	}
+	return string(decodeUTF16(u))
+}
+
+func decodeUTF16(u []uint16) []rune {
+	return []rune(string(runeSliceFromUint16(u)))
+}
+
+func runeSliceFromUint16(u []uint16) []rune {
+	r := make([]rune, len(u))
+	for i, v := range u {
+		r[i] = rune(v)
+	}
+	return r
+}

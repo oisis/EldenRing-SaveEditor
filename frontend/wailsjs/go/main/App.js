@@ -14,6 +14,10 @@ export function GetCharacter(arg1) {
   return window['go']['main']['App']['GetCharacter'](arg1);
 }
 
+export function GetCharacterNames() {
+  return window['go']['main']['App']['GetCharacterNames']();
+}
+
 export function GetItemList(arg1) {
   return window['go']['main']['App']['GetItemList'](arg1);
 }

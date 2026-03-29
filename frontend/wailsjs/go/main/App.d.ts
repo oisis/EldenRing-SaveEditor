@@ -9,6 +9,8 @@ export function GetAllGraces():Promise<Array<db.GraceEntry>>;
 
 export function GetCharacter(arg1:number):Promise<vm.CharacterViewModel>;
 
+export function GetCharacterNames():Promise<Array<string>>;
+
 export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 
 export function GetSourceActiveSlots():Promise<Array<boolean>>;
