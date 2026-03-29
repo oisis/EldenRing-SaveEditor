@@ -45,60 +45,82 @@ export function GeneralTab({charIndex}: Props) {
     );
 
     return (
-        <div className="space-y-10 animate-in fade-in duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                {/* Identity */}
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                {/* Identity Card */}
                 <div className="space-y-6">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-1 h-4 bg-blue-500 rounded-full" />
-                        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Identity</h3>
+                    <div className="flex items-center space-x-2 px-1">
+                        <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Identity & Profile</h3>
                     </div>
                     
-                    <div className="space-y-5">
+                    <div className="card p-6 space-y-6">
                         <div className="space-y-2">
-                            <label className="block text-xs font-medium text-muted-foreground">Character Name</label>
-                            <input 
-                                type="text" 
-                                value={char.name} 
-                                onChange={e => setChar({...char, name: e.target.value})}
-                                className="w-full bg-muted/50 border border-border rounded px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
-                                maxLength={16}
-                            />
+                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Character Name</label>
+                            <div className="relative">
+                                <input 
+                                    type="text" 
+                                    value={char.name} 
+                                    onChange={e => setChar({...char, name: e.target.value})}
+                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    maxLength={16}
+                                />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/50">
+                                    {char.name.length}/16
+                                </div>
+                            </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-xs font-medium text-muted-foreground">Runes (Souls)</label>
-                            <input 
-                                type="number" 
-                                value={char.souls} 
-                                onChange={e => setChar({...char, souls: parseInt(e.target.value) || 0})}
-                                className="w-full bg-muted/50 border border-border rounded px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono"
-                            />
+                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Runes (Souls)</label>
+                            <div className="relative">
+                                <input 
+                                    type="number" 
+                                    value={char.souls} 
+                                    onChange={e => setChar({...char, souls: parseInt(e.target.value) || 0})}
+                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono tracking-tight"
+                                />
+                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                                    <svg className="w-4 h-4 text-blue-500/50" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
+                                    </svg>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Level Card */}
+                {/* Level Summary Card */}
                 <div className="space-y-6">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-1 h-4 bg-zinc-500 rounded-full" />
-                        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Summary</h3>
+                    <div className="flex items-center space-x-2 px-1">
+                        <div className="w-1 h-3 bg-zinc-500 rounded-full" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Level Analysis</h3>
                     </div>
-                    <div className="bg-muted/30 border border-border rounded-lg p-8 flex flex-col items-center justify-center text-center h-[180px] relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-blue-500/50" />
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2">Calculated Level</span>
-                        <span className="text-6xl font-bold tracking-tighter">{char.level}</span>
-                        <p className="mt-4 text-[10px] font-medium text-muted-foreground uppercase tracking-tight opacity-60">
-                            Derived from attributes
+                    <div className="card p-8 flex flex-col items-center justify-center text-center h-[214px] relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-50" />
+                        <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-all duration-1000" />
+                        
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Calculated Level</span>
+                        <div className="relative">
+                            <span className="text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
+                                {char.level}
+                            </span>
+                            <div className="absolute -top-2 -right-4 w-2 h-2 bg-blue-500 rounded-full animate-ping opacity-20" />
+                        </div>
+                        <p className="mt-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">
+                            Verified via attribute summation
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div className="pt-8 border-t border-border flex justify-end">
+            <div className="pt-10 border-t border-border flex justify-end items-center space-x-6">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">
+                    Changes are staged in memory
+                </p>
                 <button 
                     onClick={handleSave}
-                    className="bg-foreground text-background hover:opacity-90 transition-opacity font-semibold px-6 py-2 rounded text-xs shadow-sm uppercase tracking-wider"
+                    className="bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] transition-all font-black px-8 py-3 rounded-md text-[11px] shadow-xl uppercase tracking-[0.2em] ring-offset-2 ring-offset-background focus:ring-2 focus:ring-foreground"
                 >
                     Apply Changes
                 </button>

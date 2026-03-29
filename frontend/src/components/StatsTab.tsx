@@ -62,62 +62,66 @@ export function StatsTab({charIndex}: Props) {
     if (!char) return null;
 
     return (
-        <div className="space-y-10 animate-in fade-in duration-500">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 items-start">
+        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
                 {/* Attributes */}
                 <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-1 h-4 bg-blue-500 rounded-full" />
-                        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Primary Attributes</h3>
+                    <div className="flex items-center space-x-2 px-1">
+                        <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Primary Attributes</h3>
                     </div>
                     
-                    <div className="grid grid-cols-1 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {attributes.map(stat => (
-                            <div key={stat.id} className="flex items-center justify-between bg-muted/20 border border-border rounded px-4 py-3 hover:bg-muted/40 transition-colors group">
-                                <div className="min-w-[100px]">
-                                    <label className="text-xs font-semibold text-muted-foreground uppercase tracking-tight group-hover:text-foreground transition-colors">
+                            <div key={stat.id} className="card p-4 hover:border-blue-500/30 transition-all group">
+                                <div className="flex items-center justify-between mb-4">
+                                    <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">
                                         {stat.label}
                                     </label>
-                                </div>
-                                <div className="flex items-center space-x-6 flex-1 max-w-md">
-                                    <input 
-                                        type="range"
-                                        min="1" max="99"
-                                        value={(char as any)[stat.id]}
-                                        onChange={e => updateStat(stat.id, parseInt(e.target.value))}
-                                        className="flex-1 h-1 bg-zinc-200 dark:bg-zinc-800 rounded-full appearance-none cursor-pointer accent-foreground"
-                                    />
                                     <input 
                                         type="number" 
                                         min="1" max="99"
                                         value={(char as any)[stat.id]} 
                                         onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
-                                        className="w-12 bg-background border border-border rounded py-1 text-center text-sm font-bold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                        className="w-10 bg-muted/30 border border-border rounded text-center text-xs font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all py-1"
                                     />
                                 </div>
+                                <input 
+                                    type="range"
+                                    min="1" max="99"
+                                    value={(char as any)[stat.id]}
+                                    onChange={e => updateStat(stat.id, parseInt(e.target.value))}
+                                    className="w-full h-1 bg-muted rounded-full appearance-none cursor-pointer accent-foreground"
+                                />
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Summary */}
-                <div className="sticky top-8 space-y-6">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-1 h-4 bg-zinc-500 rounded-full" />
-                        <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Summary</h3>
+                <div className="sticky top-20 space-y-6">
+                    <div className="flex items-center space-x-2 px-1">
+                        <div className="w-1 h-3 bg-zinc-500 rounded-full" />
+                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Summary</h3>
                     </div>
-                    <div className="bg-muted/30 border border-border rounded-lg p-8 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-blue-500/50" />
-                        <span className="text-xs font-medium text-muted-foreground uppercase tracking-widest mb-2">Calculated Level</span>
-                        <span className="text-7xl font-bold tracking-tighter">{char.level}</span>
-                        <div className="mt-8 pt-6 border-t border-border w-full">
+                    <div className="card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group">
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-50" />
+                        
+                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Calculated Level</span>
+                        <div className="relative mb-8">
+                            <span className="text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
+                                {char.level}
+                            </span>
+                        </div>
+
+                        <div className="w-full space-y-4">
                             <button 
                                 onClick={handleSave}
-                                className="w-full bg-foreground text-background hover:opacity-90 transition-opacity font-semibold py-2.5 rounded text-xs shadow-sm uppercase tracking-wider"
+                                className="w-full bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] transition-all font-black py-3 rounded-md text-[11px] shadow-xl uppercase tracking-[0.2em]"
                             >
                                 Apply Attributes
                             </button>
-                            <p className="mt-4 text-[10px] font-medium text-muted-foreground uppercase tracking-tight opacity-60">
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight opacity-40">
                                 Level = Σ(Attributes) - 79
                             </p>
                         </div>
