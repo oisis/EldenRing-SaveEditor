@@ -25,6 +25,9 @@ func main() {
 	// Phase 2.3: Stats & Classes
 	extractStats("stats.rs")
 	extractClasses("classes.rs")
+
+	// Missing Event Flags (Bit Mapping)
+	extractEventFlags("event_flags.rs")
 	
 	fmt.Println("✅ Data extraction complete!")
 }
@@ -45,7 +48,10 @@ func extractItems(filename, varName string) {
 	for scanner.Scan() {
 		matches := re.FindStringSubmatch(scanner.Text())
 		if len(matches) == 3 {
-			items[matches[1]] = strings.TrimSpace(matches[2])
+			name := strings.TrimSpace(matches[2])
+			// Escape double quotes for Go string literal
+			name = strings.ReplaceAll(name, "\"", "\\\"")
+			items[matches[1]] = name
 		}
 	}
 
@@ -71,6 +77,8 @@ func extractGraces(filename, varName string) {
 			id := matches[2]
 			region := matches[1]
 			name := matches[3]
+			// Escape double quotes
+			name = strings.ReplaceAll(name, "\"", "\\\"")
 			graces[id] = fmt.Sprintf("%s (%s)", name, region)
 		}
 	}
@@ -149,6 +157,44 @@ func extractClasses(filename string) {
 	fmt.Fprintln(out, "}")
 }
 
+func extractEventFlags(filename string) {
+	inputPath := "tmp/org-src/src/db/" + filename
+	content, err := os.ReadFile(inputPath)
+	if err != nil {
+		fmt.Printf("⚠️ Error opening %s: %v\n", filename, err)
+		return
+	}
+	
+	outputPath := "backend/db/data/event_flags.go"
+	out, _ := os.Create(outputPath)
+	defer out.Close()
+
+	fmt.Fprintf(out, "package data\n\ntype EventFlagInfo struct {\n\tByte uint32\n\tBit  uint8\n}\n\n")
+	fmt.Fprintf(out, "var EventFlags = map[uint32]EventFlagInfo{\n")
+
+	re := regexp.MustCompile(`\((\d+),\s*\((0x[0-9A-Fa-f]+|\d+),\s*(\d+)\)\)`)
+	matches := re.FindAllStringSubmatch(string(content), -1)
+
+	uniqueFlags := make(map[string]string)
+	for _, m := range matches {
+		id := m[1]
+		byteIdx := m[2]
+		bitIdx := m[3]
+		uniqueFlags[id] = fmt.Sprintf("{Byte: %s, Bit: %s}", byteIdx, bitIdx)
+	}
+
+	ids := make([]string, 0, len(uniqueFlags))
+	for id := range uniqueFlags {
+		ids = append(ids, id)
+	}
+	sort.Strings(ids)
+
+	for _, id := range ids {
+		fmt.Fprintf(out, "\t%s: %s,\n", id, uniqueFlags[id])
+	}
+	fmt.Fprintln(out, "}")
+}
+
 func generateGoMap(varName string, data map[string]string) {
 	outputPath := "backend/db/data/" + strings.ToLower(varName) + ".go"
 	out, _ := os.Create(outputPath)
@@ -163,7 +209,7 @@ func generateGoMap(varName string, data map[string]string) {
 	sort.Strings(keys)
 
 	for _, id := range keys {
-		fmt.Fprintf(out, "\t%s: %q,\n", id, data[id])
+		fmt.Fprintf(out, "\t%s: \"%s\",\n", id, data[id])
 	}
 	fmt.Fprintln(out, "}")
 }

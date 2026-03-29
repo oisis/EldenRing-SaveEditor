@@ -78,3 +78,33 @@ func GetAllGraces() []GraceEntry {
 
 	return graces
 }
+
+// GetEventFlag checks if a specific event flag is set in the bit array.
+func GetEventFlag(flags []byte, id uint32) bool {
+	info, ok := data.EventFlags[id]
+	if !ok {
+		return false
+	}
+	if int(info.Byte) >= len(flags) {
+		return false
+	}
+	
+	return (flags[info.Byte] & (1 << info.Bit)) != 0
+}
+
+// SetEventFlag sets or clears a specific event flag in the bit array.
+func SetEventFlag(flags []byte, id uint32, value bool) {
+	info, ok := data.EventFlags[id]
+	if !ok {
+		return
+	}
+	if int(info.Byte) >= len(flags) {
+		return
+	}
+	
+	if value {
+		flags[info.Byte] |= (1 << info.Bit)
+	} else {
+		flags[info.Byte] &= ^(1 << info.Bit)
+	}
+}

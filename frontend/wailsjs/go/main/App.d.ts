@@ -3,16 +3,24 @@
 import {db} from '../models';
 import {vm} from '../models';
 
+export function GetActiveSlots():Promise<Array<boolean>>;
+
 export function GetAllGraces():Promise<Array<db.GraceEntry>>;
 
 export function GetCharacter(arg1:number):Promise<vm.CharacterViewModel>;
 
 export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 
+export function GetSourceActiveSlots():Promise<Array<boolean>>;
+
 export function GetSteamID():Promise<number>;
 
-export function ImportSlot(arg1:string,arg2:number,arg3:number):Promise<void>;
-
-export function OpenSave(arg1:string):Promise<string>;
+export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 
 export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<void>;
+
+export function SelectAndOpenSave():Promise<string>;
+
+export function SelectAndOpenSourceSave():Promise<string>;
+
+export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;

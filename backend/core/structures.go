@@ -1,45 +1,47 @@
 package core
 
-// SaveHeader represents the 0x70 byte file header common to both PC and PS4.
-type SaveHeader struct {
-	Signature [4]byte // "BND4"
-	Unk04     uint8
-	Unk05     uint8
-	Padding06 [2]byte
-	Unk08     uint8
-	BigEndian uint8
-	BitBigEnd uint8
-	Padding0B uint8
-	FileCount int32
-	HeaderEnd int64 // 0x40
-	Version   [8]byte
-	EntrySize int64
-	Unused00  int64
-	Unicode   uint8
-	RawFormat uint8
-	Extended  uint8
-	Padding33 uint8
-	Unused01  int32
-	HashOff   int64
-	Padding40 [0x30]byte // Remainder to 0x70
+// GaItem represents an inventory item with dynamic size.
+type GaItem struct {
+	Handle uint32
+	ItemID uint32
+	Unk2   int32
+	Unk3   int32
+	AoW    uint32
+	Unk5   uint8
 }
 
-// PlayerGameData represents the character stats and identity.
-// Located at offset 0x15420 from the start of a SaveSlot.
+func (g *GaItem) Read(r *Reader) error {
+	var err error
+	g.Handle, err = r.ReadU32()
+	if err != nil { return err }
+	g.ItemID, err = r.ReadU32()
+	if err != nil { return err }
+
+	// Weapon Logic: (id != 0 && (id & 0xf0000000) == 0)
+	if g.ItemID != 0 && (g.ItemID&0xf0000000) == 0 {
+		g.Unk2, _ = r.ReadI32()
+		g.Unk3, _ = r.ReadI32()
+		g.AoW, _ = r.ReadU32()
+		g.Unk5, _ = r.ReadU8()
+	} else if g.ItemID != 0 && (g.ItemID&0xf0000000) == 0x10000000 {
+		// Armor Logic: (id != 0 && (id & 0xf0000000) == 0x10000000)
+		g.Unk2, _ = r.ReadI32()
+		g.Unk3, _ = r.ReadI32()
+	}
+	return nil
+}
+
+// PlayerGameData represents character stats.
 type PlayerGameData struct {
-	Unk00          int32
-	Unk04          int32
 	Health         uint32
 	MaxHealth      uint32
 	BaseMaxHealth  uint32
 	FP             uint32
 	MaxFP          uint32
 	BaseMaxFP      uint32
-	Unk20          int32
 	SP             uint32
 	MaxSP          uint32
 	BaseMaxSP      uint32
-	Unk30          int32
 	Vigor          uint32
 	Mind           uint32
 	Endurance      uint32
@@ -48,105 +50,93 @@ type PlayerGameData struct {
 	Intelligence   uint32
 	Faith          uint32
 	Arcane         uint32
-	Unk54          int32
-	Unk58          int32
-	Unk5C          int32
 	Level          uint32
 	Souls          uint32
 	SoulsMemory    uint32
-	Padding28      [0x28]byte
-	CharacterName  [16]uint16 // UTF-16
-	Padding02      [2]byte
-	Gender         uint8
-	ArcheType      uint8
-	Padding03      [3]byte
-	Gift           uint8
-	Padding1E      [0x1E]byte
-	MatchmakingLvl uint8
-	Padding35      [0x35]byte
-	Password       [0x12]byte
-	GroupPass1     [0x12]byte
-	GroupPass2     [0x12]byte
-	GroupPass3     [0x12]byte
-	GroupPass4     [0x12]byte
-	GroupPass5     [0x12]byte
-	UnkRemainder   [0x34]byte
+	CharacterName  [16]uint16
 }
 
-// GaItem represents an inventory item. Its size is dynamic.
-type GaItem struct {
-	Handle   uint32
-	ItemID   uint32
-	Unk2     int32  // Only for Weapons/Armor
-	Unk3     int32  // Only for Weapons/Armor
-	AoW      uint32 // Only for Weapons
-	Unk5     uint8  // Only for Weapons
+func (p *PlayerGameData) Read(r *Reader) error {
+	r.ReadI32() // _0x4
+	r.ReadI32() // _0x4_1
+	p.Health, _ = r.ReadU32()
+	p.MaxHealth, _ = r.ReadU32()
+	p.BaseMaxHealth, _ = r.ReadU32()
+	p.FP, _ = r.ReadU32()
+	p.MaxFP, _ = r.ReadU32()
+	p.BaseMaxFP, _ = r.ReadU32()
+	r.ReadI32() // _0x4_2
+	p.SP, _ = r.ReadU32()
+	p.MaxSP, _ = r.ReadU32()
+	p.BaseMaxSP, _ = r.ReadU32()
+	r.ReadI32() // _0x4_3
+	p.Vigor, _ = r.ReadU32()
+	p.Mind, _ = r.ReadU32()
+	p.Endurance, _ = r.ReadU32()
+	p.Strength, _ = r.ReadU32()
+	p.Dexterity, _ = r.ReadU32()
+	p.Intelligence, _ = r.ReadU32()
+	p.Faith, _ = r.ReadU32()
+	p.Arcane, _ = r.ReadU32()
+	r.ReadI32() // _0x4_4
+	r.ReadI32() // _0x4_5
+	r.ReadI32() // _0x4_6
+	p.Level, _ = r.ReadU32()
+	p.Souls, _ = r.ReadU32()
+	p.SoulsMemory, _ = r.ReadU32()
+	r.ReadBytes(0x28) // _0x28
+	for i := 0; i < 16; i++ {
+		p.CharacterName[i], _ = r.ReadU16()
+	}
+	return nil
 }
 
-// EquipData represents the equipped item indices.
-type EquipData struct {
-	LeftHandArmaments  [3]uint32
-	RightHandArmaments [3]uint32
-	Arrows             [2]uint32
-	Bolts              [2]uint32
-	Unk04              uint32
-	Unk04_1            uint32
-	Head               uint32
-	Chest              uint32
-	Arms               uint32
-	Legs               uint32
-	Unk04_2            uint32
-	Talismans          [4]uint32
-	Unk                uint32
-}
-
-// ChrAsm represents the character assembly (actual Item IDs).
-type ChrAsm struct {
-	ArmStyle            uint32
-	LeftHandActiveSlot  uint32
-	RightHandActiveSlot uint32
-	LeftArrowActiveSlot uint32
-	RightArrowActiveSlot uint32
-	LeftBoltActiveSlot  uint32
-	RightBoltActiveSlot uint32
-	LeftHandArmaments   [3]uint32
-	RightHandArmaments  [3]uint32
-	Arrows              [2]uint32
-	Bolts               [2]uint32
-	Unk04               uint32
-	Unk04_1             uint32
-	Head                uint32
-	Chest               uint32
-	Arms                uint32
-	Legs                uint32
-	Unk04_2             uint32
-	Talismans           [4]uint32
-	Unk                 uint32
-}
-
-// UserData10 represents the account metadata and profile summaries.
-type UserData10 struct {
-	Unk3B4      int32
-	SteamID     uint64
-	Padding4FC  [0x140]byte
-	// Profile summaries and active slots are handled manually in the parser
-}
-
-// ProfileSummary represents the character data shown in the "Load Game" menu.
+// ProfileSummary represents character data in the menu.
 type ProfileSummary struct {
 	CharacterName [17]uint16
 	Level         uint32
-	Unk28         uint32
-	Unk2C         uint32
-	Unk30         uint32
-	Unk34         uint32
-	Unk38_150     uint32
-	Unk38_8       [0x120]byte
-	// Equipment data follows in the binary stream
 }
 
-// UserData11 represents the regulation and other data.
-type UserData11 struct {
-	Regulation []byte // 0x1c5f70 bytes
-	Rest       []byte // 0x7A0A0 bytes (Updated to match 0x240010 total)
+func (p *ProfileSummary) Read(r *Reader) error {
+	for i := 0; i < 17; i++ {
+		p.CharacterName[i], _ = r.ReadU16()
+	}
+	p.Level, _ = r.ReadU32()
+	r.ReadBytes(20)  // unks
+	r.ReadBytes(288) // padding 0x120
+	r.ReadBytes(120) // EquipGaitem
+	r.ReadBytes(112) // EquipItem
+	r.ReadBytes(6)   // unks
+	r.ReadI32()      // unk
+	return nil
+}
+
+// CSMenuSystemSaveLoad represents dynamic menu data.
+type CSMenuSystemSaveLoad struct {
+	Length uint32
+	Data   []byte
+}
+
+func (c *CSMenuSystemSaveLoad) Read(r *Reader) error {
+	r.ReadU32() // unk
+	len, _ := r.ReadU32()
+	c.Length = len
+	c.Data, _ = r.ReadBytes(int(len))
+	return nil
+}
+
+// SaveSlot represents a full character slot.
+type SaveSlot struct {
+	GaItems        [0x1400]GaItem
+	PlayerGameData PlayerGameData
+}
+
+func (s *SaveSlot) Read(r *Reader) error {
+	r.ReadU32()      // ver
+	r.ReadBytes(4)   // map_id
+	r.ReadBytes(0x18) // _0x18
+	for i := 0; i < 0x1400; i++ {
+		s.GaItems[i].Read(r)
+	}
+	return s.PlayerGameData.Read(r)
 }

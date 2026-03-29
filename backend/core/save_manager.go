@@ -2,7 +2,6 @@ package core
 
 import (
 	"bytes"
-	"encoding/binary"
 	"fmt"
 	"os"
 )
@@ -16,14 +15,10 @@ const (
 
 // SaveFile represents the entire save file state in memory.
 type SaveFile struct {
-	Platform      Platform
-	Header        SaveHeader
-	Slots         [10][]byte   // Raw slot data (0x280000 bytes each)
-	SlotsMD5      [10][16]byte // PC only
-	UserData10    []byte       // 0x60000 bytes
-	UserData10MD5 [16]byte     // PC only
-	UserData11    []byte       // 0x240010 bytes (Regulation + Rest)
-	UserData11MD5 [16]byte     // PC only
+	Platform         Platform
+	Slots            [10]SaveSlot
+	ActiveSlots      [10]bool
+	ProfileSummaries [10]ProfileSummary
 }
 
 // LoadSave loads a save file from the given path, auto-detecting the platform.
@@ -34,172 +29,72 @@ func LoadSave(path string) (*SaveFile, error) {
 	}
 
 	save := &SaveFile{}
+	reader := NewReader(data)
 
+	// 1. Detect Platform
 	if bytes.HasPrefix(data, []byte("BND4")) {
 		save.Platform = PlatformPC
-		return loadPC(data, save)
-	}
-
-	if len(data) >= 0x1960070+0x240010 {
-		save.Platform = PlatformPS
-		return loadPS(data, save)
-	}
-
-	return nil, fmt.Errorf("unknown save format")
-}
-
-// Write saves the current state to a file.
-func (s *SaveFile) Write(path string) error {
-	var buf bytes.Buffer
-
-	if s.Platform == PlatformPC {
-		// PC Write Logic
-		binary.Write(&buf, binary.LittleEndian, &s.Header)
-		padding := make([]byte, 0x300-buf.Len())
-		buf.Write(padding)
-
-		for i := 0; i < 10; i++ {
-			buf.Write(s.SlotsMD5[i][:])
-			buf.Write(s.Slots[i])
-		}
-
-		buf.Write(s.UserData10MD5[:])
-		buf.Write(s.UserData10)
-
-		buf.Write(s.UserData11MD5[:])
-		buf.Write(s.UserData11)
-
-		return os.WriteFile(path, buf.Bytes(), 0644)
+		return nil, fmt.Errorf("PC support temporarily disabled for PS4 fix")
 	} else {
-		// PS4 Write Logic (Raw)
-		binary.Write(&buf, binary.LittleEndian, &s.Header)
-		for i := 0; i < 10; i++ {
-			buf.Write(s.Slots[i])
-		}
-		buf.Write(s.UserData10)
-		buf.Write(s.UserData11)
-		return os.WriteFile(path, buf.Bytes(), 0644)
+		save.Platform = PlatformPS
+		return loadPSSequential(reader, save)
 	}
 }
 
-// GetActiveSlots returns a boolean array indicating which slots are active.
-func (s *SaveFile) GetActiveSlots() []bool {
-	active := make([]bool, 10)
-	reader := bytes.NewReader(s.UserData10)
-	reader.Seek(4+8+0x140, 1)
-	var unk, length uint32
-	if err := binary.Read(reader, binary.LittleEndian, &unk); err != nil { return active }
-	if err := binary.Read(reader, binary.LittleEndian, &length); err != nil { return active }
-	reader.Seek(int64(length), 1)
+func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
+	// 1. Skip Header (0x70)
+	r.ReadBytes(0x70)
+
+	// 2. Read 10 Slots
 	for i := 0; i < 10; i++ {
-		b, err := reader.ReadByte()
-		if err != nil { break }
-		active[i] = b == 1
+		slotStart := r.Pos()
+		if err := save.Slots[i].Read(r); err != nil {
+			return nil, fmt.Errorf("failed to read slot %d: %w", i, err)
+		}
+		// Each slot is exactly 0x280000 bytes. Skip remainder.
+		r.Seek(int64(slotStart+0x280000), 0)
 	}
-	return active
+
+	// 3. Read UserData10
+	r.ReadI32()       // _0x19003b4
+	r.ReadU64()       // steam_id
+	r.ReadBytes(0x140) // _0x19004fc
+	
+	var menu CSMenuSystemSaveLoad
+	menu.Read(r)
+
+	// Active Slots
+	for i := 0; i < 10; i++ {
+		b, _ := r.ReadU8()
+		save.ActiveSlots[i] = b == 1
+	}
+
+	// Profile Summaries
+	for i := 0; i < 10; i++ {
+		save.ProfileSummaries[i].Read(r)
+	}
+
+	return save, nil
 }
 
-// SetSlotActivity toggles the active flag for a specific slot.
-func (s *SaveFile) SetSlotActivity(index int, active bool) error {
-	if index < 0 || index >= 10 {
-		return fmt.Errorf("invalid slot index")
-	}
-	reader := bytes.NewReader(s.UserData10)
-	reader.Seek(4+8+0x140, 1)
-	var unk, length uint32
-	binary.Read(reader, binary.LittleEndian, &unk)
-	binary.Read(reader, binary.LittleEndian, &length)
-	offset := 4 + 8 + 0x140 + 4 + 4 + int(length) + index
-	val := byte(0)
-	if active { val = 1 }
-	s.UserData10[offset] = val
-	return nil
+func (s *SaveFile) Write(path string) error {
+	return fmt.Errorf("write not implemented in sequential mode yet")
 }
 
-// ImportSlot copies a character slot from source save to this save.
-func (dest *SaveFile) ImportSlot(source *SaveFile, srcIdx, destIdx int) error {
+// ImportSlot copies a slot and its metadata from another SaveFile.
+func (s *SaveFile) ImportSlot(source *SaveFile, srcIdx, destIdx int) error {
 	if srcIdx < 0 || srcIdx >= 10 || destIdx < 0 || destIdx >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
-	newSlotData := make([]byte, 0x280000)
-	copy(newSlotData, source.Slots[srcIdx])
-	destVersion := dest.Slots[destIdx][:4]
-	copy(newSlotData[:4], destVersion)
-	dest.Slots[destIdx] = newSlotData
-	return dest.SetSlotActivity(destIdx, true)
-}
-
-func loadPC(data []byte, save *SaveFile) (*SaveFile, error) {
-	payload := data[0x30:]
-	decrypted, err := DecryptSave(payload)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt PC save: %w", err)
-	}
-
-	fullData := make([]byte, 0, 0x30+len(decrypted))
-	fullData = append(fullData, data[:0x30]...)
-	fullData = append(fullData, decrypted...)
-
-	reader := bytes.NewReader(fullData)
-
-	if err := binary.Read(reader, binary.LittleEndian, &save.Header); err != nil {
-		return nil, fmt.Errorf("failed to read header: %w", err)
-	}
-
-	reader.Seek(0x300, 0)
-
-	for i := 0; i < 10; i++ {
-		if err := binary.Read(reader, binary.LittleEndian, &save.SlotsMD5[i]); err != nil {
-			return nil, err
-		}
-		save.Slots[i] = make([]byte, 0x280000)
-		if _, err := reader.Read(save.Slots[i]); err != nil {
-			return nil, err
-		}
-	}
-
-	if err := binary.Read(reader, binary.LittleEndian, &save.UserData10MD5); err != nil {
-		return nil, err
-	}
-	save.UserData10 = make([]byte, 0x60000)
-	if _, err := reader.Read(save.UserData10); err != nil {
-		return nil, err
-	}
-
-	if err := binary.Read(reader, binary.LittleEndian, &save.UserData11MD5); err != nil {
-		return nil, err
-	}
-	save.UserData11 = make([]byte, 0x240010)
-	if _, err := reader.Read(save.UserData11); err != nil {
-		return nil, err
-	}
-
-	return save, nil
-}
-
-func loadPS(data []byte, save *SaveFile) (*SaveFile, error) {
-	reader := bytes.NewReader(data)
-
-	if err := binary.Read(reader, binary.LittleEndian, &save.Header); err != nil {
-		return nil, fmt.Errorf("failed to read header: %w", err)
-	}
-
-	for i := 0; i < 10; i++ {
-		save.Slots[i] = make([]byte, 0x280000)
-		if _, err := reader.Read(save.Slots[i]); err != nil {
-			return nil, err
-		}
-	}
-
-	save.UserData10 = make([]byte, 0x60000)
-	if _, err := reader.Read(save.UserData10); err != nil {
-		return nil, err
-	}
-
-	save.UserData11 = make([]byte, 0x240010)
-	if _, err := reader.Read(save.UserData11); err != nil {
-		return nil, err
-	}
-
-	return save, nil
+	
+	// Copy slot data
+	s.Slots[destIdx] = source.Slots[srcIdx]
+	
+	// Copy activity status
+	s.ActiveSlots[destIdx] = source.ActiveSlots[srcIdx]
+	
+	// Copy profile summary
+	s.ProfileSummaries[destIdx] = source.ProfileSummaries[srcIdx]
+	
+	return nil
 }

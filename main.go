@@ -17,9 +17,11 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:  "app",
-		Width:  1024,
-		Height: 768,
+		Title:     "ER Save Editor",
+		Width:     1280,
+		Height:    800,
+		MinWidth:  1024,
+		MinHeight: 768,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
