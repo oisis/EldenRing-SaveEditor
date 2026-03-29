@@ -79,11 +79,17 @@ A block of bytes containing all slider values, skin colors, hair types, etc.
 - **Size**: ~0x12F bytes (Face Data sliders).
 
 ### 4.5 Equipment & Inventory
-- **GaItems**: Main inventory (dynamic size).
+- **GaItems**: Main inventory (dynamic size). Exactly `0x1400` (5120) slots.
 - **Storage Box**: `storage_inventory_data` - separate block for items in the chest.
 - **ChrAsm (Character Assembly)**: Detailed mapping of equipped items.
 - **Gestures**: `gesture_game_data` - all unlocked gestures.
 - **Magic**: `equip_magic_data` - currently equipped spells.
+
+### 4.6 Undescribed & Reserved Blocks (at the end of Slot data)
+- **_cs_ps5_activity (32 bytes)**: Platform-specific activity data (found in both PC and PS saves).
+- **_cs_dlc (50 bytes)**: DLC-specific state (likely Recent Items metadata or new DLC flags).
+- **_0x80 (128 bytes)**: **Local Profile Summary**. A redundant copy of character name, level, and equipment handles.
+- **_rest**: Large padding block (approx. 400 KB) extending to the end of the `0x280000` slot.
 
 ## 5. UserData10 (Account Metadata)
 - **SteamID**: Offset `+0x04` (PS4) or `+0x14` (PC). Type: `u64`.
