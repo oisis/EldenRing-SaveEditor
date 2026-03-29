@@ -218,7 +218,7 @@ function App() {
                                 <div className="min-h-[400px]">
                                     {activeTab === 'general' && <GeneralTab charIndex={selectedChar} />}
                                     {activeTab === 'stats' && <StatsTab charIndex={selectedChar} />}
-                                    {activeTab === 'inventory' && <InventoryTab />}
+                                    {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} />}
                                     {activeTab === 'world progress' && <WorldProgressTab />}
                                     {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                                 </div>

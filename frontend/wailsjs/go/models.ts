@@ -35,6 +35,26 @@ export namespace db {
 
 export namespace vm {
 	
+	export class ItemViewModel {
+	    handle: number;
+	    id: number;
+	    name: string;
+	    category: string;
+	    quantity: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ItemViewModel(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.handle = source["handle"];
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.category = source["category"];
+	        this.quantity = source["quantity"];
+	    }
+	}
 	export class CharacterViewModel {
 	    name: string;
 	    level: number;
@@ -47,6 +67,7 @@ export namespace vm {
 	    intelligence: number;
 	    faith: number;
 	    arcane: number;
+	    inventory: ItemViewModel[];
 	
 	    static createFrom(source: any = {}) {
 	        return new CharacterViewModel(source);
@@ -65,7 +86,26 @@ export namespace vm {
 	        this.intelligence = source["intelligence"];
 	        this.faith = source["faith"];
 	        this.arcane = source["arcane"];
+	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }

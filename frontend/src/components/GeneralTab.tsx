@@ -61,7 +61,7 @@ export function GeneralTab({charIndex}: Props) {
                                 <input 
                                     type="text" 
                                     value={char.name} 
-                                    onChange={e => setChar({...char, name: e.target.value})}
+                                    onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
                                     className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     maxLength={16}
                                 />
@@ -77,7 +77,7 @@ export function GeneralTab({charIndex}: Props) {
                                 <input 
                                     type="number" 
                                     value={char.souls} 
-                                    onChange={e => setChar({...char, souls: parseInt(e.target.value) || 0})}
+                                    onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
                                     className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono tracking-tight"
                                 />
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">

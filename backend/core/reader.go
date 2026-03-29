@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"encoding/binary"
 	"io"
 )
@@ -42,8 +43,16 @@ func (r *Reader) ReadU32() (uint32, error) {
 }
 
 func (r *Reader) ReadI32() (int32, error) {
-	val, err := r.ReadU32()
-	return int32(val), err
+	if r.pos+4 > len(r.data) {
+		return 0, io.EOF
+	}
+	var val int32
+	err := binary.Read(bytes.NewReader(r.data[r.pos:]), binary.LittleEndian, &val)
+	if err != nil {
+		return 0, err
+	}
+	r.pos += 4
+	return val, nil
 }
 
 func (r *Reader) ReadU64() (uint64, error) {
@@ -56,8 +65,16 @@ func (r *Reader) ReadU64() (uint64, error) {
 }
 
 func (r *Reader) ReadF32() (float32, error) {
-	// Not used for stats but good for parity
-	return 0, nil
+	if r.pos+4 > len(r.data) {
+		return 0, io.EOF
+	}
+	var val float32
+	err := binary.Read(bytes.NewReader(r.data[r.pos:]), binary.LittleEndian, &val)
+	if err != nil {
+		return 0, err
+	}
+	r.pos += 4
+	return val, nil
 }
 
 func (r *Reader) ReadBytes(n int) ([]byte, error) {

@@ -37,11 +37,11 @@ export function StatsTab({charIndex}: Props) {
     const updateStat = (key: string, val: number) => {
         if (!char) return;
         const clampedVal = Math.min(99, Math.max(1, val));
-        const newChar = {...char, [key]: clampedVal} as any;
-        const sum = newChar.vigor + newChar.mind + newChar.endurance + newChar.strength + 
-                    newChar.dexterity + newChar.intelligence + newChar.faith + newChar.arcane;
-        newChar.level = Math.max(1, sum - 79);
-        setChar(newChar);
+        const updatedData = {...char, [key]: clampedVal} as any;
+        const sum = updatedData.vigor + updatedData.mind + updatedData.endurance + updatedData.strength + 
+                    updatedData.dexterity + updatedData.intelligence + updatedData.faith + updatedData.arcane;
+        updatedData.level = Math.max(1, sum - 79);
+        setChar(vm.CharacterViewModel.createFrom(updatedData));
     };
 
     const handleSave = () => {

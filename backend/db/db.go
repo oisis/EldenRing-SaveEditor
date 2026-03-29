@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db/data"
 	"sort"
 	"strings"
@@ -17,6 +18,48 @@ type GraceEntry struct {
 	ID     uint32 `json:"id"`
 	Name   string `json:"name"`
 	Region string `json:"region"`
+}
+
+// GetItemName returns the name of an item by its ID, searching across all categories.
+func GetItemName(id uint32) string {
+	// Mask the ID to get the base ID (remove upgrade level for weapons)
+	baseID := id
+	if (id & 0xf0000000) == 0 {
+		baseID = (id / 10000) * 10000
+	}
+
+	if name, ok := data.Weapons[baseID]; ok && name != "" {
+		return name
+	}
+	if name, ok := data.Armors[id]; ok && name != "" {
+		return name
+	}
+	if name, ok := data.Items[id]; ok && name != "" {
+		return name
+	}
+	if name, ok := data.Talismans[id]; ok && name != "" {
+		return name
+	}
+	return fmt.Sprintf("Unknown Item (0x%X)", id)
+}
+
+// GetItemCategory returns the category name based on the item ID prefix.
+func GetItemCategory(id uint32) string {
+	prefix := id & 0xf0000000
+	switch prefix {
+	case 0x00000000:
+		return "Weapon"
+	case 0x10000000:
+		return "Armor"
+	case 0x20000000:
+		return "Talisman"
+	case 0x40000000:
+		return "Item"
+	case 0x80000000:
+		return "Ash of War"
+	default:
+		return "Unknown"
+	}
 }
 
 // GetItemsByCategory returns a sorted list of items for a given category.

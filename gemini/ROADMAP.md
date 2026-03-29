@@ -79,3 +79,14 @@
     - [x] Integration tests for SteamID modification
 - [x] **7.2. Packaging**
     - [x] `wails build` for Windows (.exe), macOS (.app), Linux
+
+## Phase 8: Item Browser (New Feature) ✅
+- [x] **8.1. Binary Inventory Parsing**
+    - [x] Implement sequential `GaItem` reader in `backend/core/reader.go`
+    - [x] Handle dynamic sizes for Weapons (21b) and Armor (16b)
+- [x] **8.2. Data Mapping & ViewModel**
+    - [x] Map `GaItem` handles to names using `backend/db`
+    - [x] Expose `Inventory` list in `CharacterViewModel`
+- [x] **8.3. UI Implementation**
+    - [x] Create searchable inventory list in `InventoryTab.tsx`
+    - [x] Add category filters (Weapons, Armor, Talismans, Goods)

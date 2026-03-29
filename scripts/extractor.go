@@ -15,11 +15,11 @@ func main() {
 	// Ensure directory exists
 	os.MkdirAll("backend/db/data", 0755)
 	
-	// Phase 2.2: Constants
-	extractItems("weapons.rs", "Weapons")
-	extractItems("armors.rs", "Armors")
-	extractItems("items.rs", "Items")
-	extractItems("talismans.rs", "Talismans")
+	// Phase 2.2: Constants (Using full name databases)
+	extractNames("weapon_name.rs", "Weapons", 0x00000000)
+	extractNames("armor_name.rs", "Armors", 0x10000000)
+	extractNames("item_name.rs", "Items", 0x40000000)
+	extractNames("accessory_name.rs", "Talismans", 0x20000000)
 	extractGraces("graces.rs", "Graces")
 	
 	// Phase 2.3: Stats & Classes
@@ -32,7 +32,7 @@ func main() {
 	fmt.Println("✅ Data extraction complete!")
 }
 
-func extractItems(filename, varName string) {
+func extractNames(filename, varName string, prefix uint32) {
 	inputPath := "tmp/org-src/src/db/" + filename
 	file, err := os.Open(inputPath)
 	if err != nil {
@@ -41,17 +41,27 @@ func extractItems(filename, varName string) {
 	}
 	defer file.Close()
 
-	re := regexp.MustCompile(`(0x[0-9A-Fa-f]+),\s*//\s*(.*)`)
+	// Regex for (id, "name")
+	re := regexp.MustCompile(`\((\d+),\s*"(.*)"\)`)
 	items := make(map[string]string)
 	
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		matches := re.FindStringSubmatch(scanner.Text())
 		if len(matches) == 3 {
+			idStr := matches[1]
 			name := strings.TrimSpace(matches[2])
-			// Escape double quotes for Go string literal
+			if name == "" {
+				continue
+			}
+			// Escape double quotes
 			name = strings.ReplaceAll(name, "\"", "\\\"")
-			items[matches[1]] = name
+			
+			// Convert to hex with prefix
+			var id uint32
+			fmt.Sscanf(idStr, "%d", &id)
+			fullID := id | prefix
+			items[fmt.Sprintf("0x%08X", fullID)] = name
 		}
 	}
 
