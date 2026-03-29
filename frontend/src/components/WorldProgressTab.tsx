@@ -36,7 +36,7 @@ export function WorldProgressTab() {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700 pb-12">
             <div className="flex items-center space-x-2 px-1">
-                <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                <div className="w-1 h-3 bg-primary rounded-full" />
                 <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Sites of Grace</h3>
             </div>
             
@@ -48,7 +48,7 @@ export function WorldProgressTab() {
                             className={`w-full px-5 py-4 flex justify-between items-center transition-all ${expandedRegions[region] ? 'bg-muted/30 border-b border-border' : 'hover:bg-muted/10'}`}
                         >
                             <div className="flex items-center space-x-4">
-                                <div className={`transition-transform duration-300 ${expandedRegions[region] ? 'rotate-90 text-blue-500' : 'text-muted-foreground'}`}>
+                                <div className={`transition-transform duration-300 ${expandedRegions[region] ? 'rotate-90 text-primary' : 'text-muted-foreground'}`}>
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"></path>
                                     </svg>
@@ -67,7 +67,7 @@ export function WorldProgressTab() {
                                         <div className="relative flex items-center justify-center">
                                             <input 
                                                 type="checkbox" 
-                                                className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-blue-600 checked:border-blue-600 transition-all cursor-pointer focus:ring-2 focus:ring-blue-500/20"
+                                                className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer focus:ring-2 focus:ring-primary/20"
                                             />
                                             <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path>

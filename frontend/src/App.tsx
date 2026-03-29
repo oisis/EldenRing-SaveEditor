@@ -70,7 +70,7 @@ function App() {
     };
 
     return (
-        <div className="flex h-screen bg-background text-foreground font-sans overflow-hidden selection:bg-blue-500/20">
+        <div className="flex h-screen bg-background text-foreground font-sans overflow-hidden selection:bg-primary/20">
             {/* Sidebar */}
             <aside className="w-64 border-r border-border bg-muted/20 flex flex-col flex-shrink-0 z-20">
                 <div className="p-5">
@@ -108,10 +108,12 @@ function App() {
                             disabled={!isLoaded}
                             onClick={() => setSelectedChar(i)}
                             className={`
-                                w-full group px-3 py-2.5 rounded-md transition-all flex items-center justify-between border
+                                w-full group px-3 py-2.5 rounded-md transition-all flex items-center justify-between border text-foreground
                                 ${!isLoaded ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer'}
-                                ${isActive ? 'bg-green-500/10 border-green-500/20 hover:bg-green-500/20' : 'bg-red-500/10 border-red-500/20 hover:bg-red-500/20'}
-                                ${selectedChar === i ? 'ring-2 ring-blue-500 shadow-sm' : ''}
+                                ${isActive 
+                                    ? 'bg-slot-active-bg border-slot-active-border hover:opacity-80' 
+                                    : 'bg-slot-empty-bg border-slot-empty-border hover:opacity-80'}
+                                ${selectedChar === i ? 'ring-2 ring-primary shadow-sm border-transparent' : ''}
                             `}
                         >
                             <div className="flex items-center space-x-3 overflow-hidden">
@@ -121,7 +123,7 @@ function App() {
                             {isLoaded && (
                                 <div 
                                     onClick={(e) => { e.stopPropagation(); handleToggleSlot(i); }}
-                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-blue-500 transition-all"
+                                    className="opacity-0 group-hover:opacity-100 p-1 hover:text-primary transition-all"
                                 >
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
@@ -172,7 +174,7 @@ function App() {
                             >
                                 {tab}
                                 {activeTab === tab.toLowerCase() && (
-                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                                 )}
                             </button>
                         ))}
@@ -201,11 +203,6 @@ function App() {
                             <div className="animate-in fade-in slide-in-from-bottom-3 duration-700">
                                 <div className="flex items-end justify-between mb-12 border-b border-border pb-8">
                                     <div>
-                                        <div className="flex items-center space-x-2 mb-2">
-                                            <span className="text-[10px] font-black text-blue-500 uppercase tracking-[0.2em]">Session Active</span>
-                                            <div className="w-1 h-1 bg-muted-foreground rounded-full" />
-                                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Slot {selectedChar + 1}</span>
-                                        </div>
                                         <h2 className="text-3xl font-black tracking-tighter capitalize">{activeTab}</h2>
                                     </div>
                                     <div className="flex items-center space-x-3 bg-muted/20 px-4 py-2 rounded-lg border border-border shadow-sm">
@@ -214,7 +211,7 @@ function App() {
                                             <span className="text-xs font-black uppercase">{platform}</span>
                                         </div>
                                         <div className="w-px h-8 bg-border" />
-                                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
                                     </div>
                                 </div>
                                 

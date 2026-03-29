@@ -67,13 +67,13 @@ export function StatsTab({charIndex}: Props) {
                 {/* Attributes */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex items-center space-x-2 px-1">
-                        <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                        <div className="w-1 h-3 bg-primary rounded-full" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Primary Attributes</h3>
                     </div>
                     
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {attributes.map(stat => (
-                            <div key={stat.id} className="card p-4 hover:border-blue-500/30 transition-all group">
+                            <div key={stat.id} className="card p-4 hover:border-primary/30 transition-all group">
                                 <div className="flex items-center justify-between mb-4">
                                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">
                                         {stat.label}
@@ -83,7 +83,7 @@ export function StatsTab({charIndex}: Props) {
                                         min="1" max="99"
                                         value={(char as any)[stat.id]} 
                                         onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
-                                        className="w-10 bg-muted/30 border border-border rounded text-center text-xs font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all py-1"
+                                        className="w-10 bg-muted/30 border border-border rounded text-center text-xs font-black focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all py-1"
                                     />
                                 </div>
                                 <input 
@@ -91,7 +91,7 @@ export function StatsTab({charIndex}: Props) {
                                     min="1" max="99"
                                     value={(char as any)[stat.id]}
                                     onChange={e => updateStat(stat.id, parseInt(e.target.value))}
-                                    className="w-full h-1 bg-muted rounded-full appearance-none cursor-pointer accent-foreground"
+                                    className="w-full h-1 bg-muted rounded-full appearance-none cursor-pointer accent-primary"
                                 />
                             </div>
                         ))}
@@ -105,7 +105,7 @@ export function StatsTab({charIndex}: Props) {
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Summary</h3>
                     </div>
                     <div className="card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-50" />
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-600 opacity-50" />
                         
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Calculated Level</span>
                         <div className="relative mb-8">

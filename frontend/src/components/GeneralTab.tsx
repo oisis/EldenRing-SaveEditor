@@ -50,7 +50,7 @@ export function GeneralTab({charIndex}: Props) {
                 {/* Identity Card */}
                 <div className="space-y-6">
                     <div className="flex items-center space-x-2 px-1">
-                        <div className="w-1 h-3 bg-blue-500 rounded-full" />
+                        <div className="w-1 h-3 bg-primary rounded-full" />
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Identity & Profile</h3>
                     </div>
                     
@@ -62,7 +62,7 @@ export function GeneralTab({charIndex}: Props) {
                                     type="text" 
                                     value={char.name} 
                                     onChange={e => setChar({...char, name: e.target.value})}
-                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                     maxLength={16}
                                 />
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/50">
@@ -78,10 +78,10 @@ export function GeneralTab({charIndex}: Props) {
                                     type="number" 
                                     value={char.souls} 
                                     onChange={e => setChar({...char, souls: parseInt(e.target.value) || 0})}
-                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono tracking-tight"
+                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono tracking-tight"
                                 />
                                 <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    <svg className="w-4 h-4 text-blue-500/50" fill="currentColor" viewBox="0 0 24 24">
+                                    <svg className="w-4 h-4 text-primary/50" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
                                     </svg>
                                 </div>
@@ -97,15 +97,15 @@ export function GeneralTab({charIndex}: Props) {
                         <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Level Analysis</h3>
                     </div>
                     <div className="card p-8 flex flex-col items-center justify-center text-center h-[214px] relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600 opacity-50" />
-                        <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-blue-500/5 rounded-full blur-3xl group-hover:bg-blue-500/10 transition-all duration-1000" />
+                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-600 opacity-50" />
+                        <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-1000" />
                         
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Calculated Level</span>
                         <div className="relative">
                             <span className="text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
                                 {char.level}
                             </span>
-                            <div className="absolute -top-2 -right-4 w-2 h-2 bg-blue-500 rounded-full animate-ping opacity-20" />
+                            <div className="absolute -top-2 -right-4 w-2 h-2 bg-primary rounded-full animate-ping opacity-20" />
                         </div>
                         <p className="mt-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">
                             Verified via attribute summation

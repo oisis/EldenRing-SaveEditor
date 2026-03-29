@@ -1,41 +1,57 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Design System - Zinc Palette */
+  --color-background: #ffffff;
+  --color-foreground: #09090b;
+  --color-muted: #f4f4f5;
+  --color-muted-foreground: #71717a;
+  --color-border: #e4e4e7;
+  --color-accent: #f4f4f5;
+  --color-accent-foreground: #18181b;
+  
+  /* Primary Accent - Linear Blue */
+  --color-primary: #3b82f6;
+  --color-primary-foreground: #ffffff;
+
+  --radius-lg: 0.5rem;
+  --radius-md: calc(0.5rem - 2px);
+  --radius-sm: calc(0.5rem - 4px);
+
+  /* Custom Colors for Slots */
+  --color-slot-active-bg: rgba(34, 197, 94, 0.15);
+  --color-slot-active-border: rgba(34, 197, 94, 0.3);
+  --color-slot-empty-bg: rgba(239, 68, 68, 0.15);
+  --color-slot-empty-border: rgba(239, 68, 68, 0.3);
+}
 
 @layer base {
-  :root {
-    --background: 255 255 255;
-    --foreground: 9 9 11;
-    --muted: 244 244 245;
-    --muted-foreground: 113 113 122;
-    --border: 228 228 231;
-    --accent: 244 244 245;
-    --accent-foreground: 24 24 27;
-    --ring: 9 9 11;
-    --radius: 0.5rem;
-  }
-
   .dark {
-    --background: 9 9 11;
-    --foreground: 250 250 250;
-    --muted: 24 24 27;
-    --muted-foreground: 161 161 170;
-    --border: 39 39 42;
-    --accent: 24 24 27;
-    --accent-foreground: 250 250 250;
-    --ring: 212 212 216;
+    --color-background: #09090b;
+    --color-foreground: #fafafa;
+    --color-muted: #18181b;
+    --color-muted-foreground: #a1a1aa;
+    --color-border: #27272a;
+    --color-accent: #18181b;
+    --color-accent-foreground: #fafafa;
+
+    --color-primary: #3b82f6;
+    --color-primary-foreground: #ffffff;
+
+    --color-slot-active-bg: rgba(34, 197, 94, 0.1);
+    --color-slot-active-border: rgba(34, 197, 94, 0.2);
+    --color-slot-empty-bg: rgba(239, 68, 68, 0.1);
+    --color-slot-empty-border: rgba(239, 68, 68, 0.2);
   }
 }
 
 @layer base {
   * {
-    border-color: rgb(var(--border));
+    @apply border-border;
   }
   body {
-    background-color: rgb(var(--background));
-    color: rgb(var(--foreground));
+    @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
-    -webkit-font-smoothing: antialiased;
     font-family: 'Inter', sans-serif;
   }
 }
@@ -54,30 +70,23 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--border));
-  border-radius: 10px;
+  @apply bg-border rounded-full;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(var(--muted-foreground) / 0.5);
+  @apply bg-muted-foreground/50;
 }
 
 /* Glass effect for headers */
 .glass {
-  background-color: rgb(var(--background) / 0.8);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  @apply bg-background/80 backdrop-blur-md;
 }
 
 /* Card style */
 .card {
-  background-color: rgb(var(--background));
-  border: 1px solid rgb(var(--border));
-  border-radius: var(--radius);
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  @apply bg-background border border-border rounded-lg shadow-sm;
 }
 
 .dark .card {
-  background-color: rgb(var(--muted) / 0.3);
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  @apply bg-muted/30 shadow-md;
 }
