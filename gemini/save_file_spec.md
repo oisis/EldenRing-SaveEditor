@@ -63,8 +63,8 @@ Integrity is maintained via MD5 hashes. If a hash is incorrect, the game will re
     - **Revered Spirit Ash**: `0x4000514A` (20810)
 - **DLC Weapon IDs (Prefix 0x00000000)**:
     - **Milady** (Light Greatsword): `0x00A7D8C0` (11000000)
-    - **Dryleaf Arts** (Martial Arts): `0x00B71B00` (12000000)
     - **Great Katana**: `0x00C65D40` (13000000)
+    - **Dryleaf Arts** (Martial Arts): `0x0121F700` (19000000)
 
 ### 4.3 Advanced Progress & World
 - **0x1BF99F**: **EventFlags** start (Size: 0x1BF99F).
