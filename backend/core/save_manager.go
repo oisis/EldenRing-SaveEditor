@@ -57,8 +57,8 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		slotStart := r.Pos()
 		// PC slots have a 16-byte MD5 checksum prefix
 		r.ReadBytes(0x10)
-		
-		if err := save.Slots[i].Read(r); err != nil {
+
+		if err := save.Slots[i].Read(r, "PC"); err != nil {
 			return nil, fmt.Errorf("failed to read slot %d: %w", i, err)
 		}
 		// Each slot is exactly 0x280000 bytes (excluding checksum). Skip remainder.
@@ -68,11 +68,11 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	// 3. Read UserData10
 	// PC UserData10 also has a 16-byte MD5 checksum
 	r.ReadBytes(0x10)
-	
-	r.ReadI32()       // _0x19003b4
-	r.ReadU64()       // steam_id
+
+	r.ReadI32()        // _0x19003b4
+	r.ReadU64()        // steam_id
 	r.ReadBytes(0x140) // _0x19004fc
-	
+
 	var menu CSMenuSystemSaveLoad
 	menu.Read(r)
 
@@ -97,7 +97,7 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	// 2. Read 10 Slots
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
-		if err := save.Slots[i].Read(r); err != nil {
+		if err := save.Slots[i].Read(r, "PS4"); err != nil {
 			return nil, fmt.Errorf("failed to read slot %d: %w", i, err)
 		}
 		// Each slot is exactly 0x280000 bytes. Skip remainder.
@@ -105,10 +105,10 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	}
 
 	// 3. Read UserData10
-	r.ReadI32()       // _0x19003b4
-	r.ReadU64()       // steam_id
+	r.ReadI32()        // _0x19003b4
+	r.ReadU64()        // steam_id
 	r.ReadBytes(0x140) // _0x19004fc
-	
+
 	var menu CSMenuSystemSaveLoad
 	menu.Read(r)
 
@@ -135,15 +135,15 @@ func (s *SaveFile) ImportSlot(source *SaveFile, srcIdx, destIdx int) error {
 	if srcIdx < 0 || srcIdx >= 10 || destIdx < 0 || destIdx >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
-	
+
 	// Copy slot data
 	s.Slots[destIdx] = source.Slots[srcIdx]
-	
+
 	// Copy activity status
 	s.ActiveSlots[destIdx] = source.ActiveSlots[srcIdx]
-	
+
 	// Copy profile summary
 	s.ProfileSummaries[destIdx] = source.ProfileSummaries[srcIdx]
-	
+
 	return nil
 }

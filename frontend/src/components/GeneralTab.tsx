@@ -10,6 +10,17 @@ export function GeneralTab({charIndex}: Props) {
     const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
     const [loading, setLoading] = useState(false);
 
+    const attributes = [
+        { id: 'vigor', label: 'Vigor' },
+        { id: 'mind', label: 'Mind' },
+        { id: 'endurance', label: 'Endurance' },
+        { id: 'strength', label: 'Strength' },
+        { id: 'dexterity', label: 'Dexterity' },
+        { id: 'intelligence', label: 'Intelligence' },
+        { id: 'faith', label: 'Faith' },
+        { id: 'arcane', label: 'Arcane' }
+    ];
+
     useEffect(() => {
         setLoading(true);
         GetCharacter(charIndex)
@@ -23,6 +34,16 @@ export function GeneralTab({charIndex}: Props) {
             });
     }, [charIndex]);
 
+    const updateStat = (key: string, val: number) => {
+        if (!char) return;
+        const clampedVal = Math.min(99, Math.max(1, val));
+        const updatedData = {...char, [key]: clampedVal} as any;
+        const sum = updatedData.vigor + updatedData.mind + updatedData.endurance + updatedData.strength + 
+                    updatedData.dexterity + updatedData.intelligence + updatedData.faith + updatedData.arcane;
+        updatedData.level = Math.max(1, sum - 79);
+        setChar(vm.CharacterViewModel.createFrom(updatedData));
+    };
+
     const handleSave = () => {
         if (char) {
             SaveCharacter(charIndex, char)
@@ -32,98 +53,94 @@ export function GeneralTab({charIndex}: Props) {
     };
 
     if (loading) return (
-        <div className="py-20 flex flex-col items-center justify-center space-y-4">
-            <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
-            <p className="text-xs font-medium text-muted-foreground">Loading character...</p>
+        <div className="py-10 flex flex-col items-center justify-center space-y-3">
+            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loading...</p>
         </div>
     );
 
     if (!char) return (
-        <div className="py-20 text-center border border-dashed border-border rounded-lg">
-            <p className="text-sm text-muted-foreground">No data found in this slot.</p>
+        <div className="py-10 text-center border border-dashed border-border rounded-lg">
+            <p className="text-xs text-muted-foreground">No character data.</p>
         </div>
     );
 
     return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                {/* Identity Card */}
-                <div className="space-y-6">
-                    <div className="flex items-center space-x-2 px-1">
-                        <div className="w-1 h-3 bg-primary rounded-full" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Identity & Profile</h3>
+        <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                {/* Left Column: Identity & Level */}
+                <div className="md:col-span-4 space-y-6">
+                    <div className="card p-5 space-y-4">
+                        <div className="flex items-center space-x-2 mb-2">
+                            <div className="w-1 h-3 bg-primary rounded-full" />
+                            <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Profile</h3>
+                        </div>
+                        
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
+                            <input 
+                                type="text" 
+                                value={char.name} 
+                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-bold focus:ring-1 focus:ring-primary/30 outline-none transition-all"
+                                maxLength={16}
+                            />
+                        </div>
+
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Runes</label>
+                            <input 
+                                type="number" 
+                                value={char.souls} 
+                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="card p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-0.5 bg-primary/50" />
+                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Current Level</span>
+                        <span className="text-5xl font-black tracking-tighter text-foreground">{char.level}</span>
+                    </div>
+                </div>
+
+                {/* Right Column: Attributes Grid */}
+                <div className="md:col-span-8 card p-5">
+                    <div className="flex items-center space-x-2 mb-6">
+                        <div className="w-1 h-3 bg-zinc-500 rounded-full" />
+                        <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Attributes</h3>
                     </div>
                     
-                    <div className="card p-6 space-y-6">
-                        <div className="space-y-2">
-                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Character Name</label>
-                            <div className="relative">
-                                <input 
-                                    type="text" 
-                                    value={char.name} 
-                                    onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
-                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                    maxLength={16}
-                                />
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[9px] font-bold text-muted-foreground/50">
-                                    {char.name.length}/16
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Runes (Souls)</label>
-                            <div className="relative">
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                        {attributes.map(stat => (
+                            <div key={stat.id} className="flex items-center justify-between group py-1 border-b border-border/30 hover:border-primary/30 transition-all">
+                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">
+                                    {stat.label}
+                                </label>
                                 <input 
                                     type="number" 
-                                    value={char.souls} 
-                                    onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
-                                    className="w-full bg-muted/30 border border-border rounded-md px-3 py-2.5 text-sm font-black focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all font-mono tracking-tight"
+                                    min="1" max="99"
+                                    value={(char as any)[stat.id]} 
+                                    onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
+                                    className="w-12 bg-muted/30 border border-border rounded text-center text-xs font-black py-1 focus:ring-1 focus:ring-primary/30 outline-none"
                                 />
-                                <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                                    <svg className="w-4 h-4 text-primary/50" fill="currentColor" viewBox="0 0 24 24">
-                                        <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71L12 2z" />
-                                    </svg>
-                                </div>
                             </div>
-                        </div>
+                        ))}
                     </div>
-                </div>
 
-                {/* Level Summary Card */}
-                <div className="space-y-6">
-                    <div className="flex items-center space-x-2 px-1">
-                        <div className="w-1 h-3 bg-zinc-500 rounded-full" />
-                        <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">Level Analysis</h3>
-                    </div>
-                    <div className="card p-8 flex flex-col items-center justify-center text-center h-[214px] relative overflow-hidden group">
-                        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-600 opacity-50" />
-                        <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-1000" />
-                        
-                        <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Calculated Level</span>
-                        <div className="relative">
-                            <span className="text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">
-                                {char.level}
-                            </span>
-                            <div className="absolute -top-2 -right-4 w-2 h-2 bg-primary rounded-full animate-ping opacity-20" />
-                        </div>
-                        <p className="mt-6 text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-40">
-                            Verified via attribute summation
+                    <div className="mt-8 pt-6 border-t border-border/50 flex justify-end items-center space-x-4">
+                        <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">
+                            Staged in memory
                         </p>
+                        <button 
+                            onClick={handleSave}
+                            className="bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all font-black px-6 py-2 rounded-md text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                        >
+                            Apply Changes
+                        </button>
                     </div>
                 </div>
-            </div>
-
-            <div className="pt-10 border-t border-border flex justify-end items-center space-x-6">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">
-                    Changes are staged in memory
-                </p>
-                <button 
-                    onClick={handleSave}
-                    className="bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] transition-all font-black px-8 py-3 rounded-md text-[11px] shadow-xl uppercase tracking-[0.2em] ring-offset-2 ring-offset-background focus:ring-2 focus:ring-foreground"
-                >
-                    Apply Changes
-                </button>
             </div>
         </div>
     );

@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 // GaItem represents an inventory item with dynamic size.
 type GaItem struct {
 	Handle uint32
@@ -94,6 +96,8 @@ type PlayerGameData struct {
 	Souls          uint32
 	SoulsMemory    uint32
 	CharacterName  [16]uint16
+	Gender         uint8
+	Class          uint8
 }
 
 func (p *PlayerGameData) Read(r *Reader) error {
@@ -128,6 +132,11 @@ func (p *PlayerGameData) Read(r *Reader) error {
 	for i := 0; i < 16; i++ {
 		p.CharacterName[i], _ = r.ReadU16()
 	}
+	p.Gender, _ = r.ReadU8()
+	p.Class, _ = r.ReadU8()
+	r.ReadU8() // gift
+	r.ReadU8() // match_making_wpn_lvl
+	r.ReadBytes(126) // Passwords (18 * 7)
 	return nil
 }
 
@@ -157,16 +166,14 @@ type EquipInventoryData struct {
 
 func (e *EquipInventoryData) Read(r *Reader, commonLen, keyLen int) error {
 	r.ReadU32() // common_inventory_items_distinct_count
+	e.CommonItems = make([]EquipInventoryItem, commonLen)
 	for i := 0; i < commonLen; i++ {
-		item := EquipInventoryItem{}
-		item.Read(r)
-		e.CommonItems = append(e.CommonItems, item)
+		e.CommonItems[i].Read(r)
 	}
 	r.ReadU32() // key_inventory_items_distinct_count
+	e.KeyItems = make([]EquipInventoryItem, keyLen)
 	for i := 0; i < keyLen; i++ {
-		item := EquipInventoryItem{}
-		item.Read(r)
-		e.KeyItems = append(e.KeyItems, item)
+		e.KeyItems[i].Read(r)
 	}
 	r.ReadU32() // next_equip_index
 	r.ReadU32() // next_acquisition_sort_id
@@ -209,51 +216,75 @@ func (c *CSMenuSystemSaveLoad) Read(r *Reader) error {
 
 // SaveSlot represents a full character slot.
 type SaveSlot struct {
-	GaItems            [0x1400]GaItem
-	PlayerGameData     PlayerGameData
-	EquipInventoryData EquipInventoryData
-	GaItemData         GaItemData
+	GaItems               [0x1400]GaItem
+	PlayerGameData        PlayerGameData
+	EquipInventoryData    EquipInventoryData
+	StorageInventoryData  EquipInventoryData
+	GaItemData            GaItemData
 }
 
-func (s *SaveSlot) Read(r *Reader) error {
+func (s *SaveSlot) Read(r *Reader, platform string) error {
+	startPos := r.Pos()
+
+	// 1. Header
 	r.ReadU32()      // ver
 	r.ReadBytes(4)   // map_id
 	r.ReadBytes(0x18) // _0x18
+
+	// PC has an extra header block
+	if platform == "PC" {
+		r.ReadBytes(0x290)
+	}
+
+	// 2. GaItems (5120 items)
 	for i := 0; i < 0x1400; i++ {
 		s.GaItems[i].Read(r)
 	}
+
+	// 3. PlayerGameData
 	s.PlayerGameData.Read(r)
 
 	r.ReadBytes(0xd0) // _0xd0
-	r.ReadBytes(88)   // EquipData
-	r.ReadBytes(112)  // ChrAsm
-	r.ReadBytes(88)   // ChrAsm2
+	
+	// EquipData (88 bytes)
+	r.ReadBytes(88)
+	// ChrAsm (116 bytes)
+	r.ReadBytes(116)
+	// ChrAsm2 (88 bytes)
+	r.ReadBytes(88)
 
+	// 5. Inventory
 	s.EquipInventoryData.Read(r, 0xa80, 0x180)
 
+	// 6. Skip to Storage (EquipInventoryData 2)
 	r.ReadBytes(40)   // EquipMagicData
 	r.ReadBytes(104)  // EquipItemData
 	r.ReadBytes(24)   // equip_gesture_data
 	r.ReadBytes(64)   // EquipProjectileData
-	r.ReadBytes(112)  // EquippedItems
+	r.ReadBytes(116)  // EquippedItems
 	r.ReadBytes(12)   // EquipPhysicsData
 	r.ReadBytes(4)    // _0x4
 	r.ReadBytes(0x12f) // _face_data
-	
-	// storage_inventory_data (EquipInventoryData)
-	storage := EquipInventoryData{}
-	storage.Read(r, 0x780, 0x80)
 
+	// 7. Storage
+	s.StorageInventoryData.Read(r, 0x780, 0x80)
+
+	// 8. Skip to GaItemData
 	r.ReadBytes(256) // gesture_game_data
 	r.ReadBytes(16)  // regions
 	r.ReadBytes(40)  // ride_game_data
 	r.ReadBytes(1)   // _0x1
 	r.ReadBytes(0x40) // _0x40
-	r.ReadBytes(12)  // _0x4_1, _0x4_2, _0x4_3
-	r.ReadBytes(0x1008) // _menu_profile_save_load
-	r.ReadBytes(0x34)   // _trophy_equip_data
+	r.ReadBytes(12)  // unks
+	r.ReadBytes(0x1008) // menu_profile
+	r.ReadBytes(0x34)   // trophy
 
 	s.GaItemData.Read(r)
+
+	// Ensure we don't exceed slot size
+	if r.Pos() > startPos+0x280000 {
+		return fmt.Errorf("parser overflowed slot size")
+	}
 
 	return nil
 }

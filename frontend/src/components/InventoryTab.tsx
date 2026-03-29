@@ -7,24 +7,25 @@ interface InventoryTabProps {
 }
 
 export function InventoryTab({ charIndex }: InventoryTabProps) {
-    const [mode, setMode] = useState<'database' | 'character'>('character');
+    const [mode, setMode] = useState<'database' | 'character' | 'storage'>('character');
     const [category, setCategory] = useState('weapons');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
+    const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        setLoading(true);
         if (mode === 'database') {
-            setLoading(true);
             GetItemList(category).then(res => {
                 setDbItems(res || []);
                 setLoading(false);
             });
         } else {
-            setLoading(true);
             GetCharacter(charIndex).then(res => {
                 setCharInventory(res?.inventory || []);
+                setCharStorage(res?.storage || []);
                 setLoading(false);
             }).catch(err => {
                 console.error(err);
@@ -38,7 +39,8 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
         item.id.toString(16).toLowerCase().includes(search.toLowerCase())
     );
 
-    const filteredCharItems = charInventory.filter(item => 
+    const activeItems = mode === 'character' ? charInventory : charStorage;
+    const filteredOwnedItems = activeItems.filter(item => 
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.category.toLowerCase().includes(search.toLowerCase()) ||
         item.id.toString(16).toLowerCase().includes(search.toLowerCase())
@@ -53,7 +55,13 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                         onClick={() => setMode('character')}
                         className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'character' ? 'bg-background text-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
                     >
-                        Character
+                        Inventory
+                    </button>
+                    <button 
+                        onClick={() => setMode('storage')}
+                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'storage' ? 'bg-background text-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                    >
+                        Storage
                     </button>
                     <button 
                         onClick={() => setMode('database')}
@@ -84,7 +92,7 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                 <div className="relative flex-1">
                     <input 
                         type="text" 
-                        placeholder={mode === 'character' ? "Search inventory..." : "Search database..."}
+                        placeholder={mode === 'database' ? "Search database..." : "Search owned items..."}
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         className="w-full bg-muted/30 border border-border rounded-md px-10 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -103,8 +111,8 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                             <tr>
                                 <th className="px-6 py-4">ID (Hex)</th>
                                 <th className="px-6 py-4">Designation</th>
-                                <th className="px-6 py-4">{mode === 'character' ? 'Category' : 'Action'}</th>
-                                {mode === 'character' && <th className="px-6 py-4 text-right">Qty</th>}
+                                <th className="px-6 py-4">{mode === 'database' ? 'Action' : 'Category'}</th>
+                                {mode !== 'database' && <th className="px-6 py-4 text-right">Qty</th>}
                                 {mode === 'database' && <th className="px-6 py-4 text-right">Action</th>}
                             </tr>
                         </thead>
@@ -118,9 +126,9 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                         </div>
                                     </td>
                                 </tr>
-                            ) : mode === 'character' ? (
-                                filteredCharItems.length > 0 ? (
-                                    filteredCharItems.map((item, idx) => (
+                            ) : mode !== 'database' ? (
+                                filteredOwnedItems.length > 0 ? (
+                                    filteredOwnedItems.map((item, idx) => (
                                         <tr key={`${item.handle}-${idx}`} className="hover:bg-muted/20 transition-colors group">
                                             <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
                                                 {item.id.toString(16).toUpperCase().padStart(8, '0')}
@@ -145,7 +153,7 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                 ) : (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-24 text-center">
-                                            <p className="text-xs text-muted-foreground font-medium italic">Inventory is empty or not yet explored.</p>
+                                            <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                         </td>
                                     </tr>
                                 )
@@ -155,13 +163,13 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                         <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
                                             {item.id.toString(16).toUpperCase().padStart(8, '0')}
                                         </td>
-                                            <td className="px-6 py-4 font-bold text-foreground text-xs">
-                                                {item.name.startsWith('Unknown Item') ? (
-                                                    <span className="text-muted-foreground italic font-medium opacity-60">
-                                                        {item.name}
-                                                    </span>
-                                                ) : item.name}
-                                            </td>
+                                        <td className="px-6 py-4 font-bold text-foreground text-xs">
+                                            {item.name.startsWith('Unknown Item') ? (
+                                                <span className="text-muted-foreground italic font-medium opacity-60">
+                                                    {item.name}
+                                                </span>
+                                            ) : item.name}
+                                        </td>
                                         <td colSpan={2} className="px-6 py-4 text-right">
                                             <button className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors px-3 py-1 border border-transparent hover:border-primary/30 rounded">
                                                 Add to bag
@@ -181,7 +189,7 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                 </div>
                 <div className="px-6 py-3 bg-muted/10 text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] border-t border-border flex justify-between items-center">
                     <div className="flex items-center space-x-4">
-                        <span>Total: {mode === 'character' ? filteredCharItems.length : filteredDbItems.length}</span>
+                        <span>Total: {mode === 'database' ? filteredDbItems.length : filteredOwnedItems.length}</span>
                         <span className="w-1 h-1 bg-border rounded-full" />
                         <span>Mode: {mode}</span>
                     </div>

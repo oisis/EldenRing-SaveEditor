@@ -30,6 +30,7 @@ type CharacterViewModel struct {
 	Faith        uint32          `json:"faith"`
 	Arcane       uint32          `json:"arcane"`
 	Inventory    []ItemViewModel `json:"inventory"`
+	Storage      []ItemViewModel `json:"storage"`
 }
 
 // MapParsedSlotToVM extracts character data from the parsed core.SaveSlot structure.
@@ -47,6 +48,7 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 		Faith:        data.Faith,
 		Arcane:       data.Arcane,
 		Inventory:    []ItemViewModel{},
+		Storage:      []ItemViewModel{},
 	}
 
 	// Decode Name
@@ -68,52 +70,52 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 		}
 	}
 
-	// Process Common Items
-	for _, item := range slot.EquipInventoryData.CommonItems {
-		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
-			continue
-		}
+	// Process Inventory (Common + Key)
+	vm.Inventory = mapItems(slot.EquipInventoryData, handleToID)
 
-		itemID, ok := handleToID[item.GaItemHandle]
-		if !ok {
-			continue
-		}
-
-		// Filter out "Unarmed" (110000) if it's noise
-		if itemID == 110000 {
-			continue
-		}
-
-		vm.Inventory = append(vm.Inventory, ItemViewModel{
-			Handle:   item.GaItemHandle,
-			ID:       itemID,
-			Name:     db.GetItemName(itemID),
-			Category: db.GetItemCategory(itemID),
-			Quantity: item.Quantity,
-		})
-	}
-
-	// Process Key Items
-	for _, item := range slot.EquipInventoryData.KeyItems {
-		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
-			continue
-		}
-
-		itemID, ok := handleToID[item.GaItemHandle]
-		if !ok {
-			continue
-		}
-
-		vm.Inventory = append(vm.Inventory, ItemViewModel{
-			Handle:   item.GaItemHandle,
-			ID:       itemID,
-			Name:     db.GetItemName(itemID),
-			Category: db.GetItemCategory(itemID),
-			Quantity: item.Quantity,
-		})
-	}
+	// Process Storage (Common + Key)
+	vm.Storage = mapItems(slot.StorageInventoryData, handleToID)
 
 	return vm, nil
+}
+
+func mapItems(data core.EquipInventoryData, handleToID map[uint32]uint32) []ItemViewModel {
+	items := []ItemViewModel{}
+	
+	// Common Items
+	for _, item := range data.CommonItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			continue
+		}
+		if itemID, ok := handleToID[item.GaItemHandle]; ok {
+			if itemID == 110000 { continue } // Filter Unarmed
+			items = append(items, ItemViewModel{
+				Handle:   item.GaItemHandle,
+				ID:       itemID,
+				Name:     db.GetItemName(itemID),
+				Category: db.GetItemCategory(itemID),
+				Quantity: item.Quantity,
+			})
+		}
+	}
+
+	// Key Items
+	for _, item := range data.KeyItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			continue
+		}
+		if itemID, ok := handleToID[item.GaItemHandle]; ok {
+			items = append(items, ItemViewModel{
+				Handle:   item.GaItemHandle,
+				ID:       itemID,
+				Name:     db.GetItemName(itemID),
+				Category: db.GetItemCategory(itemID),
+				Quantity: item.Quantity,
+			})
+		}
+	}
+
+	return items
 }
 
 // Placeholder for old method to avoid compilation errors during refactor

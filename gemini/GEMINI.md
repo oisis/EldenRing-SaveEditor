@@ -14,7 +14,7 @@
 - **Format**: Zawsze podawaj CAŁY kod pliku. Używaj nagłówka H3 z pełną nazwą pliku.
 - **Binary Parsing**: Używaj wbudowanego pakietu `encoding/binary` do definiowania i mapowania struktur plików save.
 - **UI**: Używaj nowoczesnych technologii webowych (HTML/CSS/JS) w ramach frameworka Wails, odwzorowując układ z oryginału.
-- **Styling**: Używaj CSS/Tailwind dla spójnego wyglądu.
+- **Styling**: Używaj wyłącznie **Tailwind CSS v4**. Pamiętaj o nowej składni (@import "tailwindcss", @theme, @utility). Nigdy nie używaj składni v3 (@tailwind base itd.).
 
 # ITERATIVE WORKFLOW
 1. **Research**: Analiza logiki w `tmp/org-src`.

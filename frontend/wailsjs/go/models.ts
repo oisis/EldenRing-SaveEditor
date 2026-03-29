@@ -68,6 +68,7 @@ export namespace vm {
 	    faith: number;
 	    arcane: number;
 	    inventory: ItemViewModel[];
+	    storage: ItemViewModel[];
 	
 	    static createFrom(source: any = {}) {
 	        return new CharacterViewModel(source);
@@ -87,6 +88,7 @@ export namespace vm {
 	        this.faith = source["faith"];
 	        this.arcane = source["arcane"];
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
+	        this.storage = this.convertValues(source["storage"], ItemViewModel);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
