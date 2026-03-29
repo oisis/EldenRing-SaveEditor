@@ -17,8 +17,8 @@ After decryption (PC) or in raw format (PS4), the data is organized into sequent
 | **SaveHeader** | `0x70` | `0x0000000` | `0x0000000` | Versioning and MapID. |
 | **SaveSlot 0** | `0x280000` | `0x0000070` | `0x0000080` | Character 1 data. |
 | **SaveSlot 1** | `0x280000` | `0x0280070` | `0x0280090` | Character 2 data. |
-| **SaveSlot 2** | `0x280000` | `0x0500070` | `0x05000A0` | Character 3 data. |
-| **SaveSlot 3** | `0x280000" | `0x0780070` | `0x07800B0` | Character 4 data. |
+| **SaveSlot 2** | `0x280000` | `0x0500070` | `0x05000A0" | Character 3 data. |
+| **SaveSlot 3** | `0x280000` | `0x0780070` | `0x07800B0` | Character 4 data. |
 | **SaveSlot 4** | `0x280000` | `0x0A00070` | `0x0A000C0` | Character 5 data. |
 | **SaveSlot 5** | `0x280000` | `0x0C80070` | `0x0C800D0` | Character 6 data. |
 | **SaveSlot 6** | `0x280000` | `0x0F00070` | `0x0F000E0` | Character 7 data. |
@@ -46,32 +46,42 @@ Key data points within each character slot (offsets relative to Slot Start):
 - `+0x50`: Level (u32).
 - `+0x54`: Souls / Runes (u32).
 - `+0x58`: Souls Memory / Total Runes (u32).
+- **+0x70**: **Scadutree Blessing Level** (u32, Max: 20).
+- **+0x74**: **Revered Spirit Ash Level** (u32, Max: 10).
+- **+0x78**: **Scadutree Fragments** (u32, current held count).
 - `+0x94`: **Character Name** (UTF-16, 16 chars + null).
 - `+0xBC`: Gender (u8: 0=Male, 1=Female).
 - `+0xBD`: Archetype / Class (u8).
+- `+0x108`: **NG+ Cycle** (u32: 0=NG, 1=NG+1, etc.).
+- `+0x10C`: **Play Time** (u32, in milliseconds).
+- `+0x110`: **Death Counter** (u32).
 
 ### 4.2 Advanced Progress & World
 - **0x1BF99F**: **EventFlags** start (Size: 0x1BF99F).
-- **0x15420 + 0x108**: **NG+ Cycle** (u32: 0=NG, 1=NG+1, etc.).
-- **0x15420 + 0x10C**: **Play Time** (u32, in milliseconds).
-- **0x15420 + 0x110**: **Death Counter** (u32).
+- **Player Coordinates**: `f32[3]` (X, Y, Z) located in `PlayerCoords` block.
+- **Ride Data**: Horse (Torrent) coordinates and HP.
+- **Weather & Time**: `world_area_weather` and `world_area_time`.
+- **Tutorials**: `_tutorial_data` (0x408 bytes) - bitflags for shown tutorials.
 
 ### 4.3 Appearance Data (Offset: 0x15420 + 0x120)
 A block of bytes containing all slider values, skin colors, hair types, etc.
-- **Size**: ~0x1000 bytes.
+- **Size**: ~0x12F bytes (Face Data sliders).
+
+### 4.4 Equipment & Inventory
+- **GaItems**: Main inventory (dynamic size).
+- **Storage Box**: `storage_inventory_data` - separate block for items in the chest.
+- **ChrAsm (Character Assembly)**: Detailed mapping of equipped items.
+- **Gestures**: `gesture_game_data` - all unlocked gestures.
+- **Magic**: `equip_magic_data` - currently equipped spells.
 
 ## 5. UserData10 (Account Metadata)
 - **SteamID**: Offset `0x00` (PS4) or `0x10` (PC). Type: `u64`.
 - **Active Slots**: Offset `0x08` (PS4) or `0x18` (PC). Array of 10 bytes (1 = active, 0 = empty).
 - **Profile Summary**: 10 blocks (0x120 bytes each) containing character name and level for the main menu.
 
-## 6. Inventory Data (GaItems)
-Located before `PlayerGameData`. Each item has a dynamic structure:
-- `Handle` (u32)
-- `ItemID` (u32)
-- **Weapon Specific**: If `(id & 0xf0000000) == 0`:
-    - `Upgrade Level`: Encoded in the ItemID (e.g., `ItemID + level`).
-    - `Ash of War`: Handle to the assigned AoW.
+## 6. UserData11 (Regulation)
+- **Regulation Data**: Offset `0x10`. Size: `0x1C5F70`.
+- **Description**: Contains a copy of game parameters (equivalent to `regulation.bin`).
 
 ## 7. Online Safety & Ban Risks (Easy Anti-Cheat)
 Modifying the save file carries risks when playing online. EAC validates consistency.
@@ -81,6 +91,7 @@ Modifying the save file carries risks when playing online. EAC validates consist
 - **Illegal Items**: Cut content (e.g., Deathbed Smalls), unreleased DLC items, or items with impossible quantities.
 - **Invalid Combinations**: Ash of War applied to an incompatible weapon type.
 - **Impossible Spells/Gestures**: Spells added without meeting world-state requirements.
+- **Blessing Inconsistency**: Setting high Scadutree levels without corresponding world event flags (fragment collection).
 
 ### 7.2 Low Risk (Generally Safe)
 - **Runes**: Modifying current rune count (within u32 limits).
