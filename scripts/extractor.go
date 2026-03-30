@@ -1,7 +1,9 @@
 package main
 
 import (
-	"bufio"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 	"regexp"
@@ -9,104 +11,145 @@ import (
 	"strings"
 )
 
+// PY_PROJECT_PATH is the path to the newer Python project, prioritized by the user.
+const PY_PROJECT_PATH = "tmp/repos/Elden-Ring-Save-Editor/src/Resources/Json/"
+
+// RUST_PROJECT_PATH is the path to the original Rust project, used for data not in the Python JSONs.
+const RUST_PROJECT_PATH = "tmp/repos/ER-Save-Editor/src/db/"
+
 func main() {
-	fmt.Println("🚀 Starting data extraction from Rust source...")
-	
-	// Ensure directory exists
+	fmt.Println("🚀 Starting data extraction...")
+
+	// Ensure target directory exists
 	os.MkdirAll("backend/db/data", 0755)
-	
-	// Phase 2.2: Constants (Using full name databases)
-	extractNames("weapon_name.rs", "Weapons", 0x00000000)
-	extractNames("armor_name.rs", "Armors", 0x10000000)
-	extractNames("item_name.rs", "Items", 0x40000000)
-	extractNames("accessory_name.rs", "Talismans", 0x20000000)
-	extractGraces("graces.rs", "Graces")
-	
-	// Phase 2.3: Stats & Classes
+
+	// --- Data from Python Project (Primary) ---
+	fmt.Println("🔍 Extracting from Python project JSON files...")
+	extractNamesFromJSON("weapons.json", "Weapons")
+	extractNamesFromJSON("armor.json", "Armors")
+	extractNamesFromJSON("goods.json", "Items")
+	extractNamesFromJSON("talisman.json", "Talismans")
+	extractNamesFromJSON("aow.json", "Aows")
+	extractGracesFromJSON("graces.json", "Graces")
+
+	// --- Data from Rust Project (Secondary/Fallback) ---
+	fmt.Println("🔍 Extracting from Rust project .rs files...")
 	extractStats("stats.rs")
 	extractClasses("classes.rs")
-
-	// Missing Event Flags (Bit Mapping)
 	extractEventFlags("event_flags.rs")
-	
+
 	fmt.Println("✅ Data extraction complete!")
 }
 
-func extractNames(filename, varName string, prefix uint32) {
-	inputPath := "tmp/org-src/src/db/" + filename
+// extractNamesFromJSON parses the key-value JSON files from the Python project.
+func extractNamesFromJSON(filename, varName string) {
+	inputPath := PY_PROJECT_PATH + filename
 	file, err := os.Open(inputPath)
 	if err != nil {
-		fmt.Printf("⚠️ Error opening %s: %v\n", filename, err)
+		fmt.Printf("⚠️ Error opening %s: %v\n", inputPath, err)
 		return
 	}
 	defer file.Close()
 
-	// Regex for (id, "name")
-	re := regexp.MustCompile(`\((\d+),\s*"(.*)"\)`)
-	items := make(map[string]string)
-	
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		matches := re.FindStringSubmatch(scanner.Text())
-		if len(matches) == 3 {
-			idStr := matches[1]
-			name := strings.TrimSpace(matches[2])
-			if name == "" {
-				continue
-			}
-			// Escape double quotes
-			name = strings.ReplaceAll(name, "\"", "\\\"")
-			
-			// Convert to hex with prefix
-			var id uint32
-			fmt.Sscanf(idStr, "%d", &id)
-			fullID := id | prefix
-			items[fmt.Sprintf("0x%08X", fullID)] = name
+	var data map[string]string
+	if err := json.NewDecoder(file).Decode(&data); err != nil {
+		fmt.Printf("⚠️ Error decoding JSON from %s: %v\n", filename, err)
+		return
+	}
+
+	items := make(map[uint32]string)
+	for name, idHexStr := range data {
+		// Convert "80 97 FA 01" to a byte slice
+		byteStr := strings.ReplaceAll(idHexStr, " ", "")
+		byteSlice, err := hex.DecodeString(byteStr)
+		if err != nil {
+			fmt.Printf("⚠️ Skipping invalid hex '%s' for item '%s'\n", idHexStr, name)
+			continue
 		}
+
+		// Interpret bytes as a little-endian uint32
+		if len(byteSlice) != 4 {
+			// Some items like 'Unarmed' might have different lengths, skip them.
+			continue
+		}
+		id := binary.LittleEndian.Uint32(byteSlice)
+		items[id] = name
 	}
 
 	generateGoMap(varName, items)
+	fmt.Printf("   ✓ Extracted %d entries for %s\n", len(items), varName)
 }
 
-func extractGraces(filename, varName string) {
-	inputPath := "tmp/org-src/src/db/" + filename
+// GraceJSON represents the structure in Python project's graces.json
+type GraceJSON struct {
+	GraceName string `json:"grace_name"`
+	MapID     uint32 `json:"map_id"`
+	Offset    string `json:"offset"`
+	Index     int    `json:"index"`
+}
+
+func extractGracesFromJSON(filename, varName string) {
+	inputPath := PY_PROJECT_PATH + filename
 	file, err := os.Open(inputPath)
 	if err != nil {
-		fmt.Printf("⚠️ Error opening %s: %v\n", filename, err)
+		fmt.Printf("⚠️ Error opening %s: %v\n", inputPath, err)
 		return
 	}
 	defer file.Close()
 
-	re := regexp.MustCompile(`\(Grace::.*,\s*\(MapName::(.*),\s*(\d+),\s*"(.*)"\)\)`)
-	graces := make(map[string]string)
-	
-	scanner := bufio.NewScanner(file)
-	for scanner.Scan() {
-		matches := re.FindStringSubmatch(scanner.Text())
-		if len(matches) == 4 {
-			id := matches[2]
-			region := matches[1]
-			name := matches[3]
-			// Escape double quotes
-			name = strings.ReplaceAll(name, "\"", "\\\"")
-			graces[id] = fmt.Sprintf("%s (%s)", name, region)
-		}
+	var data []GraceJSON
+	if err := json.NewDecoder(file).Decode(&data); err != nil {
+		fmt.Printf("⚠️ Error decoding JSON from %s: %v\n", filename, err)
+		return
+	}
+
+	graces := make(map[uint32]string)
+	for _, g := range data {
+		graces[g.MapID] = g.GraceName
 	}
 
 	generateGoMap(varName, graces)
+	fmt.Printf("   ✓ Extracted %d entries for %s\n", len(graces), varName)
+}
+
+// generateGoMap writes the extracted map to a .go file.
+func generateGoMap(varName string, data map[uint32]string) {
+	outputPath := "backend/db/data/" + strings.ToLower(varName) + ".go"
+	out, err := os.Create(outputPath)
+	if err != nil {
+		fmt.Printf("⚠️ Error creating output file %s: %v\n", outputPath, err)
+		return
+	}
+	defer out.Close()
+
+	fmt.Fprintf(out, "package data\n\n// %s contains the map of item IDs to names.\nvar %s = map[uint32]string{\n", varName, varName)
+
+	// Sort keys for consistent output
+	keys := make([]uint32, 0, len(data))
+	for k := range data {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
+
+	for _, id := range keys {
+		// Escape double quotes in names
+		name := strings.ReplaceAll(data[id], "\"", "\\\"")
+		fmt.Fprintf(out, "\t0x%08X: \"%s\",\n", id, name)
+	}
+	fmt.Fprintln(out, "}")
 }
 
 func extractStats(filename string) {
-	inputPath := "tmp/org-src/src/db/" + filename
+	inputPath := RUST_PROJECT_PATH + filename
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
 		fmt.Printf("⚠️ Error opening %s: %v\n", filename, err)
 		return
 	}
-	
+
 	re := regexp.MustCompile(`pub const (HP|FP|SP): \[f32; \d+\] = (\[[\s\S]*?\]);`)
 	matches := re.FindAllStringSubmatch(string(content), -1)
-	
+
 	outputPath := "backend/db/data/stats.go"
 	out, _ := os.Create(outputPath)
 	defer out.Close()
@@ -119,16 +162,17 @@ func extractStats(filename string) {
 		values = regexp.MustCompile(`(\d+)\.,`).ReplaceAllString(values, "$1.0,")
 		fmt.Fprintf(out, "var %s = %s\n\n", name, values)
 	}
+	fmt.Printf("   ✓ Extracted stats tables (HP, FP, SP)\n")
 }
 
 func extractClasses(filename string) {
-	inputPath := "tmp/org-src/src/db/" + filename
+	inputPath := RUST_PROJECT_PATH + filename
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
 		fmt.Printf("⚠️ Error opening %s: %v\n", filename, err)
 		return
 	}
-	
+
 	outputPath := "backend/db/data/classes.go"
 	out, _ := os.Create(outputPath)
 	defer out.Close()
@@ -147,7 +191,10 @@ func extractClasses(filename string) {
 	for _, m := range matches {
 		name := m[1]
 		statsRaw := m[2]
-		id := archeTypeIDs[name]
+		id, ok := archeTypeIDs[name]
+		if !ok {
+			continue
+		}
 
 		stats := make(map[string]string)
 		statLines := strings.Split(statsRaw, ",")
@@ -165,16 +212,17 @@ func extractClasses(filename string) {
 			stats["strength"], stats["dexterity"], stats["intelligence"], stats["faith"], stats["arcane"], name)
 	}
 	fmt.Fprintln(out, "}")
+	fmt.Printf("   ✓ Extracted starter class stats\n")
 }
 
 func extractEventFlags(filename string) {
-	inputPath := "tmp/org-src/src/db/" + filename
+	inputPath := RUST_PROJECT_PATH + filename
 	content, err := os.ReadFile(inputPath)
 	if err != nil {
 		fmt.Printf("⚠️ Error opening %s: %v\n", filename, err)
 		return
 	}
-	
+
 	outputPath := "backend/db/data/event_flags.go"
 	out, _ := os.Create(outputPath)
 	defer out.Close()
@@ -185,41 +233,33 @@ func extractEventFlags(filename string) {
 	re := regexp.MustCompile(`\((\d+),\s*\((0x[0-9A-Fa-f]+|\d+),\s*(\d+)\)\)`)
 	matches := re.FindAllStringSubmatch(string(content), -1)
 
-	uniqueFlags := make(map[string]string)
+	type eventFlagInfoHolder struct {
+		Byte uint32
+		Bit  uint8
+	}
+	uniqueFlags := make(map[uint32]eventFlagInfoHolder)
 	for _, m := range matches {
-		id := m[1]
-		byteIdx := m[2]
-		bitIdx := m[3]
-		uniqueFlags[id] = fmt.Sprintf("{Byte: %s, Bit: %s}", byteIdx, bitIdx)
+		var id uint32
+		var byteIdx uint32
+		var bitIdx uint8
+
+		fmt.Sscanf(m[1], "%d", &id)
+		fmt.Sscanf(m[2], "%v", &byteIdx)
+		fmt.Sscanf(m[3], "%d", &bitIdx)
+
+		uniqueFlags[id] = eventFlagInfoHolder{Byte: byteIdx, Bit: bitIdx}
 	}
 
-	ids := make([]string, 0, len(uniqueFlags))
+	ids := make([]uint32, 0, len(uniqueFlags))
 	for id := range uniqueFlags {
 		ids = append(ids, id)
 	}
-	sort.Strings(ids)
+	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 
 	for _, id := range ids {
-		fmt.Fprintf(out, "\t%s: %s,\n", id, uniqueFlags[id])
+		info := uniqueFlags[id]
+		fmt.Fprintf(out, "\t%d: {Byte: 0x%X, Bit: %d},\n", id, info.Byte, info.Bit)
 	}
 	fmt.Fprintln(out, "}")
-}
-
-func generateGoMap(varName string, data map[string]string) {
-	outputPath := "backend/db/data/" + strings.ToLower(varName) + ".go"
-	out, _ := os.Create(outputPath)
-	defer out.Close()
-
-	fmt.Fprintf(out, "package data\n\nvar %s = map[uint32]string{\n", varName)
-	
-	keys := make([]string, 0, len(data))
-	for k := range data {
-		keys = append(keys, k)
-	}
-	sort.Strings(keys)
-
-	for _, id := range keys {
-		fmt.Fprintf(out, "\t%s: \"%s\",\n", id, data[id])
-	}
-	fmt.Fprintln(out, "}")
+	fmt.Printf("   ✓ Extracted %d event flags\n", len(uniqueFlags))
 }
