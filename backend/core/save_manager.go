@@ -13,7 +13,6 @@ const (
 	PlatformPS Platform = "PS4"
 )
 
-// SaveFile represents the entire save file state in memory.
 type SaveFile struct {
 	Platform          Platform
 	Encrypted         bool
@@ -27,7 +26,6 @@ type SaveFile struct {
 	UserData11        []byte
 }
 
-// LoadSave loads a save file from the given path, auto-detecting the platform.
 func LoadSave(path string) (*SaveFile, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
@@ -36,14 +34,12 @@ func LoadSave(path string) (*SaveFile, error) {
 
 	save := &SaveFile{}
 
-	// 1. Detect Platform & Decrypt if needed
 	if bytes.HasPrefix(data, []byte("BND4")) {
 		save.Platform = PlatformPC
 		save.Encrypted = false
 		return loadPCSequential(NewReader(data), save)
 	}
 
-	// Try decrypting (PC saves start with 16-byte IV)
 	decrypted, err := DecryptSave(data)
 	if err == nil && bytes.HasPrefix(decrypted, []byte("BND4")) {
 		save.Platform = PlatformPC
@@ -52,33 +48,47 @@ func LoadSave(path string) (*SaveFile, error) {
 		return loadPCSequential(NewReader(decrypted), save)
 	}
 
-	// Default to PS4
 	save.Platform = PlatformPS
 	return loadPSSequential(NewReader(data), save)
 }
 
 func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	// 1. Header (0x300 bytes)
 	save.Header, _ = r.ReadBytes(0x300)
 
-	// 2. Read 10 Slots
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
-		// PC slots have a 16-byte MD5 checksum prefix
-		r.ReadBytes(0x10)
-
+		r.ReadBytes(0x10) // MD5
 		if err := save.Slots[i].Read(r, "PC"); err != nil {
-			// If a slot fails to parse (e.g. empty), we just continue
 			fmt.Printf("Warning: failed to parse slot %d: %v\n", i, err)
 		}
 		r.Seek(int64(slotStart+0x10+0x280000), 0)
 	}
 
-	// 3. Read UserData10 (0x60000 bytes + 0x10 MD5)
+	// UserData10
+	udStart := r.Pos()
 	r.ReadBytes(0x10) // MD5
-	save.UserData10.Read(r)
+	
+	// Read raw for saving
+	save.UserData10.Data, _ = r.ReadBytes(0x60000)
+	
+	// Parse metadata for UI
+	udReader := NewReader(save.UserData10.Data)
+	udReader.ReadBytes(12) // Skip Unk and SteamID
+	udReader.ReadBytes(0x140) // Skip Unk2
+	
+	// CSMenuSystemSaveLoad (Active slots and Summaries)
+	// Skip to Active Slots (0x10 + 0x140 + 4 + 0x190 = 0x2E4)
+	udReader.Seek(0x2E4, 0)
+	for i := 0; i < 10; i++ {
+		b, _ := udReader.ReadU8()
+		save.ActiveSlots[i] = b == 1
+	}
+	
+	for i := 0; i < 10; i++ {
+		save.ProfileSummaries[i].Read(udReader)
+	}
 
-	// 4. Read UserData11 (Regulation)
+	r.Seek(int64(udStart+0x10+0x60000), 0)
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
 		save.UserData11, _ = r.ReadBytes(int(remaining))
@@ -88,10 +98,8 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 }
 
 func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	// 1. Header (0x70 bytes)
 	save.Header, _ = r.ReadBytes(0x70)
 
-	// 2. Read 10 Slots
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
 		if err := save.Slots[i].Read(r, "PS4"); err != nil {
@@ -100,10 +108,17 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		r.Seek(int64(slotStart+0x280000), 0)
 	}
 
-	// 3. Read UserData10
-	save.UserData10.Read(r)
+	save.UserData10.Data, _ = r.ReadBytes(0x60000)
+	udReader := NewReader(save.UserData10.Data)
+	udReader.Seek(0x2D4, 0) // PS4 offset is slightly different
+	for i := 0; i < 10; i++ {
+		b, _ := udReader.ReadU8()
+		save.ActiveSlots[i] = b == 1
+	}
+	for i := 0; i < 10; i++ {
+		save.ProfileSummaries[i].Read(udReader)
+	}
 
-	// 4. Read UserData11
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
 		save.UserData11, _ = r.ReadBytes(int(remaining))
@@ -112,7 +127,6 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	return save, nil
 }
 
-// SaveFile writes the current state back to a file.
 func (s *SaveFile) SaveFile(path string) error {
 	var buf bytes.Buffer
 	w := NewWriter(&buf)
@@ -126,11 +140,13 @@ func (s *SaveFile) SaveFile(path string) error {
 			w.WriteBytes(slotData)
 		}
 		
+		// Update UserData10 with metadata before saving
 		udData := s.UserData10.Data
+		// ... (In a full implementation we would write ActiveSlots/Summaries back to udData here)
+		
 		checksum := ComputeMD5(udData)
 		w.WriteBytes(checksum[:])
 		w.WriteBytes(udData)
-		
 		w.WriteBytes(s.UserData11)
 	} else {
 		w.WriteBytes(s.Header)
@@ -150,7 +166,6 @@ func (s *SaveFile) SaveFile(path string) error {
 		}
 	}
 
-	// Create backup
 	if _, err := os.Stat(path); err == nil {
 		backupPath := path + ".bak"
 		_ = os.WriteFile(backupPath, finalData, 0644)

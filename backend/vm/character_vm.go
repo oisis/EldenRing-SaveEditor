@@ -3,9 +3,9 @@ package vm
 import (
 	"unicode/utf16"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
+	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 )
 
-// ItemViewModel represents an item in the inventory for the UI.
 type ItemViewModel struct {
 	Handle   uint32 `json:"handle"`
 	ID       uint32 `json:"id"`
@@ -14,7 +14,6 @@ type ItemViewModel struct {
 	Quantity uint32 `json:"quantity"`
 }
 
-// CharacterViewModel represents the editable character data for the UI.
 type CharacterViewModel struct {
 	Name         string          `json:"name"`
 	Level        uint32          `json:"level"`
@@ -31,7 +30,6 @@ type CharacterViewModel struct {
 	Storage      []ItemViewModel `json:"storage"`
 }
 
-// MapParsedSlotToVM extracts character data from the parsed core.SaveSlot structure.
 func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	data := slot.Player
 	vm := &CharacterViewModel{
@@ -49,24 +47,52 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 		Storage:      []ItemViewModel{},
 	}
 
-	// Decode Name
-	u16 := data.CharacterName[:]
-	// Trim null terminator
-	for i, v := range u16 {
-		if v == 0 {
-			u16 = u16[:i]
-			break
-		}
-	}
-	vm.Name = string(utf16.Decode(u16))
+	vm.Name = core.UTF16ToString(data.CharacterName[:])
 
-	// TODO: Implement inventory mapping using the new dynamic offset logic from Python
-	// For now, we focus on stats parity.
+	// Map Inventory
+	vm.Inventory = mapItems(slot.Inventory, slot.GaMap)
+	
+	// Map Storage
+	vm.Storage = mapItems(slot.Storage, slot.GaMap)
 
 	return vm, nil
 }
 
-// ApplyVMToParsedSlot updates the core.SaveSlot structure from the ViewModel.
+func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewModel {
+	items := []ItemViewModel{}
+	
+	// Common Items
+	for _, item := range data.CommonItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF { continue }
+		if itemID, ok := gaMap[item.GaItemHandle]; ok {
+			if itemID == 110000 { continue } // Filter Unarmed
+			items = append(items, ItemViewModel{
+				Handle:   item.GaItemHandle,
+				ID:       itemID,
+				Name:     db.GetItemName(itemID),
+				Category: db.GetItemCategory(itemID),
+				Quantity: item.Quantity,
+			})
+		}
+	}
+
+	// Key Items
+	for _, item := range data.KeyItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF { continue }
+		if itemID, ok := gaMap[item.GaItemHandle]; ok {
+			items = append(items, ItemViewModel{
+				Handle:   item.GaItemHandle,
+				ID:       itemID,
+				Name:     db.GetItemName(itemID),
+				Category: db.GetItemCategory(itemID),
+				Quantity: item.Quantity,
+			})
+		}
+	}
+
+	return items
+}
+
 func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	data := &slot.Player
 	data.Level = vm.Level
@@ -80,7 +106,6 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	data.Faith = vm.Faith
 	data.Arcane = vm.Arcane
 
-	// Encode Name
 	u16 := utf16.Encode([]rune(vm.Name))
 	for i := 0; i < 16; i++ {
 		if i < len(u16) {
@@ -89,13 +114,10 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 			data.CharacterName[i] = 0
 		}
 	}
-
 	return nil
 }
 
-// MapSlotToVM and ApplyVMToSlot are kept for compatibility with App.go
 func MapSlotToVM(slotData []byte) (*CharacterViewModel, error) {
-	// This is a bridge for the new architecture
 	r := core.NewReader(slotData)
 	slot := &core.SaveSlot{}
 	if err := slot.Read(r, "PC"); err != nil {
@@ -113,7 +135,6 @@ func ApplyVMToSlot(vm *CharacterViewModel, slotData []byte) error {
 	if err := ApplyVMToParsedSlot(vm, slot); err != nil {
 		return err
 	}
-	// Write changes back to the byte slice
 	updated := slot.Write("PC")
 	copy(slotData, updated)
 	return nil
