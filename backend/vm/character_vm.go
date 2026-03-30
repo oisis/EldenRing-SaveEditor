@@ -118,11 +118,61 @@ func mapItems(data core.EquipInventoryData, handleToID map[uint32]uint32) []Item
 	return items
 }
 
+// ApplyVMToParsedSlot updates the core.SaveSlot structure from the ViewModel.
+func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
+	data := &slot.PlayerGameData
+	data.Level = vm.Level
+	data.Souls = vm.Souls
+	data.Vigor = vm.Vigor
+	data.Mind = vm.Mind
+	data.Endurance = vm.Endurance
+	data.Strength = vm.Strength
+	data.Dexterity = vm.Dexterity
+	data.Intelligence = vm.Intelligence
+	data.Faith = vm.Faith
+	data.Arcane = vm.Arcane
+
+	// Encode Name
+	u16 := utf16.Encode([]rune(vm.Name))
+	for i := 0; i < 16; i++ {
+		if i < len(u16) {
+			data.CharacterName[i] = u16[i]
+		} else {
+			data.CharacterName[i] = 0
+		}
+	}
+
+	// Inventory updates are more complex (adding/removing items).
+	// For now, we only update quantities of existing items.
+	updateQuantities(vm.Inventory, &slot.EquipInventoryData)
+	updateQuantities(vm.Storage, &slot.StorageInventoryData)
+
+	return nil
+}
+
+func updateQuantities(vmItems []ItemViewModel, data *core.EquipInventoryData) {
+	handleToQty := make(map[uint32]uint32)
+	for _, item := range vmItems {
+		handleToQty[item.Handle] = item.Quantity
+	}
+
+	for i := range data.CommonItems {
+		if qty, ok := handleToQty[data.CommonItems[i].GaItemHandle]; ok {
+			data.CommonItems[i].Quantity = qty
+		}
+	}
+	for i := range data.KeyItems {
+		if qty, ok := handleToQty[data.KeyItems[i].GaItemHandle]; ok {
+			data.KeyItems[i].Quantity = qty
+		}
+	}
+}
+
 // Placeholder for old method to avoid compilation errors during refactor
 func MapSlotToVM(slotData []byte) (*CharacterViewModel, error) {
 	return nil, fmt.Errorf("use MapParsedSlotToVM instead")
 }
 
 func ApplyVMToSlot(vm *CharacterViewModel, slotData []byte) error {
-	return fmt.Errorf("apply not implemented in sequential mode yet")
+	return fmt.Errorf("use ApplyVMToParsedSlot instead")
 }

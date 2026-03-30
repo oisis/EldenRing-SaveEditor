@@ -26,3 +26,7 @@ export function SelectAndOpenSave():Promise<string>;
 export function SelectAndOpenSourceSave():Promise<string>;
 
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
+
+export function SetSteamID(arg1:number):Promise<void>;
+
+export function WriteSave():Promise<void>;

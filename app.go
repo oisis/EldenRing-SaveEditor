@@ -90,7 +90,52 @@ func (a *App) GetCharacter(index int) (*vm.CharacterViewModel, error) {
 
 // SaveCharacter updates the raw slot data from the ViewModel
 func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
-	return fmt.Errorf("save not implemented in sequential mode yet")
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if index < 0 || index >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	// 1. Update the slot data
+	if err := vm.ApplyVMToParsedSlot(&charVM, &a.save.Slots[index]); err != nil {
+		return err
+	}
+
+	// 2. Update ProfileSummary (for the menu)
+	a.save.ProfileSummaries[index].Level = a.save.Slots[index].PlayerGameData.Level
+	copy(a.save.ProfileSummaries[index].CharacterName[:16], a.save.Slots[index].PlayerGameData.CharacterName[:])
+	a.save.ProfileSummaries[index].CharacterName[16] = 0
+
+	return nil
+}
+
+// WriteSave writes the current save state to a file
+func (a *App) WriteSave() error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+
+	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
+		Title: "Save Elden Ring Save File",
+		Filters: []runtime.FileFilter{
+			{DisplayName: "Elden Ring Save (*.sl2;*.dat;*.txt)", Pattern: "*.sl2;*.dat;*.txt"},
+			{DisplayName: "All Files (*.*)", Pattern: "*.*"},
+		},
+	})
+	if err != nil {
+		return err
+	}
+	if path == "" {
+		return fmt.Errorf("no file selected")
+	}
+
+	// Create backup before writing
+	if _, err := core.CreateBackup(path); err != nil {
+		fmt.Printf("Warning: failed to create backup: %v\n", err)
+	}
+
+	return a.save.Write(path)
 }
 
 // GetItemList returns a list of items for a given category
@@ -166,7 +211,19 @@ func (a *App) SetSlotActivity(index int, active bool) error {
 
 // GetSteamID returns the global SteamID from UserData10
 func (a *App) GetSteamID() uint64 {
-	return 0 
+	if a.save == nil {
+		return 0
+	}
+	return a.save.SteamID
+}
+
+// SetSteamID updates the global SteamID
+func (a *App) SetSteamID(id uint64) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	a.save.SteamID = id
+	return nil
 }
 
 // Dummy method to force Wails to export types

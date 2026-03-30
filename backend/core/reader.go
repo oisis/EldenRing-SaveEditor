@@ -104,6 +104,10 @@ func (r *Reader) Pos() int {
 	return r.pos
 }
 
+func (r *Reader) Len() int {
+	return len(r.data)
+}
+
 // UTF16ToString converts a slice of uint16 (UTF-16) to a Go string, stopping at the first null terminator.
 func UTF16ToString(u []uint16) string {
 	for i, v := range u {

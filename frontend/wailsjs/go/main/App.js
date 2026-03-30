@@ -49,3 +49,11 @@ export function SelectAndOpenSourceSave() {
 export function SetSlotActivity(arg1, arg2) {
   return window['go']['main']['App']['SetSlotActivity'](arg1, arg2);
 }
+
+export function SetSteamID(arg1) {
+  return window['go']['main']['App']['SetSteamID'](arg1);
+}
+
+export function WriteSave() {
+  return window['go']['main']['App']['WriteSave']();
+}
