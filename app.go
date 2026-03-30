@@ -154,17 +154,19 @@ func (a *App) ImportCharacter(srcIdx, destIdx int) error {
 
 // GetActiveSlots returns the activity status of all 10 slots
 func (a *App) GetActiveSlots() []bool {
-	if a.save == nil {
-		return make([]bool, 10)
-	}
 	active := make([]bool, 10)
+	if a.save == nil {
+		return active
+	}
 	for i := 0; i < 10; i++ {
-		active[i] = a.save.ActiveSlots[i]
+		// Slot is active if it has a name (Python method)
+		name := core.UTF16ToString(a.save.Slots[i].Player.CharacterName[:])
+		active[i] = name != ""
 	}
 	return active
 }
 
-// GetCharacterNames returns the names of all 10 characters from ProfileSummary
+// GetCharacterNames returns the names of all 10 characters
 func (a *App) GetCharacterNames() []string {
 	names := make([]string, 10)
 	if a.save == nil {
@@ -174,7 +176,8 @@ func (a *App) GetCharacterNames() []string {
 		return names
 	}
 	for i := 0; i < 10; i++ {
-		name := core.UTF16ToString(a.save.ProfileSummaries[i].CharacterName[:])
+		// Get name directly from the character slot (Python method)
+		name := core.UTF16ToString(a.save.Slots[i].Player.CharacterName[:])
 		if name == "" {
 			names[i] = "Empty Slot"
 		} else {
@@ -186,12 +189,13 @@ func (a *App) GetCharacterNames() []string {
 
 // GetSourceActiveSlots returns the activity status of all 10 slots in the source file
 func (a *App) GetSourceActiveSlots() []bool {
-	if a.sourceSave == nil {
-		return make([]bool, 10)
-	}
 	active := make([]bool, 10)
+	if a.sourceSave == nil {
+		return active
+	}
 	for i := 0; i < 10; i++ {
-		active[i] = a.sourceSave.ActiveSlots[i]
+		name := core.UTF16ToString(a.sourceSave.Slots[i].Player.CharacterName[:])
+		active[i] = name != ""
 	}
 	return active
 }
