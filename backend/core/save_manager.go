@@ -20,13 +20,10 @@ type SaveFile struct {
 	IV                []byte
 	Header            []byte
 	Slots             [10]SaveSlot
-	Unk1              int32
 	SteamID           uint64
-	Unk2              []byte
-	Menu              CSMenuSystemSaveLoad
+	UserData10        CSMenuSystemSaveLoad
 	ActiveSlots       [10]bool
 	ProfileSummaries  [10]ProfileSummary
-	UserData10Padding []byte
 	UserData11        []byte
 }
 
@@ -61,7 +58,7 @@ func LoadSave(path string) (*SaveFile, error) {
 }
 
 func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	// 1. Skip Header (0x300)
+	// 1. Header (0x300 bytes)
 	save.Header, _ = r.ReadBytes(0x300)
 
 	// 2. Read 10 Slots
@@ -71,43 +68,17 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		r.ReadBytes(0x10)
 
 		if err := save.Slots[i].Read(r, "PC"); err != nil {
-			return nil, fmt.Errorf("failed to read slot %d: %w", i, err)
+			// If a slot fails to parse (e.g. empty), we just continue
+			fmt.Printf("Warning: failed to parse slot %d: %v\n", i, err)
 		}
-		// Each slot is exactly 0x280000 bytes (excluding checksum). Skip remainder.
 		r.Seek(int64(slotStart+0x10+0x280000), 0)
 	}
 
-	// 3. Read UserData10
-	// PC UserData10 also has a 16-byte MD5 checksum
-	udStart := r.Pos()
-	r.ReadBytes(0x10)
+	// 3. Read UserData10 (0x60000 bytes + 0x10 MD5)
+	r.ReadBytes(0x10) // MD5
+	save.UserData10.Read(r)
 
-	save.Unk1, _ = r.ReadI32()
-	save.SteamID, _ = r.ReadU64()
-	save.Unk2, _ = r.ReadBytes(0x140)
-
-	save.Menu.Read(r)
-
-	// Active Slots
-	for i := 0; i < 10; i++ {
-		b, _ := r.ReadU8()
-		save.ActiveSlots[i] = b == 1
-	}
-
-	// Profile Summaries
-	for i := 0; i < 10; i++ {
-		save.ProfileSummaries[i].Read(r)
-	}
-
-	// 4. Read UserData10 Padding
-	// UserData10 is exactly 0x60000 bytes (excluding MD5 checksum)
-	currentPos := r.Pos()
-	remainingUD := (udStart + 0x10 + 0x60000) - currentPos
-	if remainingUD > 0 {
-		save.UserData10Padding, _ = r.ReadBytes(int(remainingUD))
-	}
-
-	// 5. Read UserData11 (Regulation)
+	// 4. Read UserData11 (Regulation)
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
 		save.UserData11, _ = r.ReadBytes(int(remaining))
@@ -117,46 +88,22 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 }
 
 func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	// 1. Skip Header (0x70)
+	// 1. Header (0x70 bytes)
 	save.Header, _ = r.ReadBytes(0x70)
 
 	// 2. Read 10 Slots
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
 		if err := save.Slots[i].Read(r, "PS4"); err != nil {
-			return nil, fmt.Errorf("failed to read slot %d: %w", i, err)
+			fmt.Printf("Warning: failed to parse slot %d: %v\n", i, err)
 		}
-		// Each slot is exactly 0x280000 bytes. Skip remainder.
 		r.Seek(int64(slotStart+0x280000), 0)
 	}
 
 	// 3. Read UserData10
-	udStart := r.Pos()
-	save.Unk1, _ = r.ReadI32()
-	save.SteamID, _ = r.ReadU64()
-	save.Unk2, _ = r.ReadBytes(0x140)
+	save.UserData10.Read(r)
 
-	save.Menu.Read(r)
-
-	// Active Slots
-	for i := 0; i < 10; i++ {
-		b, _ := r.ReadU8()
-		save.ActiveSlots[i] = b == 1
-	}
-
-	// Profile Summaries
-	for i := 0; i < 10; i++ {
-		save.ProfileSummaries[i].Read(r)
-	}
-
-	// 4. Read UserData10 Padding
-	currentPos := r.Pos()
-	remainingUD := (udStart + 0x60000) - currentPos
-	if remainingUD > 0 {
-		save.UserData10Padding, _ = r.ReadBytes(int(remainingUD))
-	}
-
-	// 5. Read UserData11 (Regulation)
+	// 4. Read UserData11
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
 		save.UserData11, _ = r.ReadBytes(int(remaining))
@@ -165,133 +112,49 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	return save, nil
 }
 
-var (
-	// DefaultPCHeader is a template BND4 header for Elden Ring PC saves
-	DefaultPCHeader = []byte{
-		0x42, 0x4e, 0x44, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-		0x0c, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30,
-		0x30, 0x30, 0x30, 0x31, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	}
-	// DefaultPSHeader is a template header for PS4 saves (decrypted)
-	DefaultPSHeader = make([]byte, 0x70)
-)
-
-func (s *SaveFile) Write(path string, targetPlatform Platform) error {
+// SaveFile writes the current state back to a file.
+func (s *SaveFile) SaveFile(path string) error {
 	var buf bytes.Buffer
 	w := NewWriter(&buf)
 
-	// 1. Header
-	header := s.Header
-	if targetPlatform != s.Platform {
-		if targetPlatform == PlatformPC {
-			// Convert to PC: Use default BND4 header
-			header = make([]byte, 0x300)
-			copy(header, DefaultPCHeader)
-		} else {
-			// Convert to PS4: Use default empty header
-			header = make([]byte, 0x70)
-			copy(header, DefaultPSHeader)
-		}
-	}
-	w.WriteBytes(header)
-
-	// 2. Slots
-	for i := 0; i < 10; i++ {
-		if targetPlatform == PlatformPC {
-			// PC: MD5(slot_data) + slot_data
-			var slotBuf bytes.Buffer
-			sw := NewWriter(&slotBuf)
-			s.Slots[i].Write(sw, "PC")
-
-			hash := ComputeMD5(slotBuf.Bytes())
-			w.WriteBytes(hash[:])
-			w.WriteBytes(slotBuf.Bytes())
-		} else {
-			// PS4: just slot_data
-			s.Slots[i].Write(w, "PS4")
-		}
-	}
-
-	// 3. UserData10
-	if targetPlatform == PlatformPC {
-		var udBuf bytes.Buffer
-		uw := NewWriter(&udBuf)
-
-		uw.WriteI32(s.Unk1)
-		uw.WriteU64(s.SteamID)
-		uw.WriteBytes(s.Unk2)
-		s.Menu.Write(uw)
+	if s.Platform == PlatformPC {
+		w.WriteBytes(s.Header)
 		for i := 0; i < 10; i++ {
-			if s.ActiveSlots[i] {
-				uw.WriteU8(1)
-			} else {
-				uw.WriteU8(0)
-			}
+			slotData := s.Slots[i].Write("PC")
+			checksum := ComputeMD5(slotData)
+			w.WriteBytes(checksum[:])
+			w.WriteBytes(slotData)
 		}
-		for i := 0; i < 10; i++ {
-			s.ProfileSummaries[i].Write(uw)
-		}
-		uw.WriteBytes(s.UserData10Padding)
-
-		hash := ComputeMD5(udBuf.Bytes())
-		w.WriteBytes(hash[:])
-		w.WriteBytes(udBuf.Bytes())
+		
+		udData := s.UserData10.Data
+		checksum := ComputeMD5(udData)
+		w.WriteBytes(checksum[:])
+		w.WriteBytes(udData)
+		
+		w.WriteBytes(s.UserData11)
 	} else {
-		w.WriteI32(s.Unk1)
-		w.WriteU64(s.SteamID)
-		w.WriteBytes(s.Unk2)
-		s.Menu.Write(w)
+		w.WriteBytes(s.Header)
 		for i := 0; i < 10; i++ {
-			if s.ActiveSlots[i] {
-				w.WriteU8(1)
-			} else {
-				w.WriteU8(0)
-			}
+			w.WriteBytes(s.Slots[i].Write("PS4"))
 		}
-		for i := 0; i < 10; i++ {
-			s.ProfileSummaries[i].Write(w)
-		}
-		w.WriteBytes(s.UserData10Padding)
+		w.WriteBytes(s.UserData10.Data)
+		w.WriteBytes(s.UserData11)
 	}
 
-	// 4. UserData11
-	w.WriteBytes(s.UserData11)
-
-	// 5. Finalize
-	data := buf.Bytes()
-
-	if targetPlatform == PlatformPC && s.Encrypted {
-		// PC saves are typically encrypted with AES-128-CBC
-		iv := s.IV
-		if len(iv) != 16 {
-			iv = make([]byte, 16)
-		}
-
-		encrypted, err := EncryptSave(data, iv)
+	finalData := buf.Bytes()
+	if s.Encrypted && s.Platform == PlatformPC {
+		var err error
+		finalData, err = EncryptSave(finalData, s.IV)
 		if err != nil {
 			return fmt.Errorf("failed to encrypt save: %w", err)
 		}
-		data = encrypted
 	}
 
-	return os.WriteFile(path, data, 0644)
-}
-
-// ImportSlot copies a slot and its metadata from another SaveFile.
-func (s *SaveFile) ImportSlot(source *SaveFile, srcIdx, destIdx int) error {
-	if srcIdx < 0 || srcIdx >= 10 || destIdx < 0 || destIdx >= 10 {
-		return fmt.Errorf("invalid slot index")
+	// Create backup
+	if _, err := os.Stat(path); err == nil {
+		backupPath := path + ".bak"
+		_ = os.WriteFile(backupPath, finalData, 0644)
 	}
 
-	// Copy slot data
-	s.Slots[destIdx] = source.Slots[srcIdx]
-
-	// Copy activity status
-	s.ActiveSlots[destIdx] = source.ActiveSlots[srcIdx]
-
-	// Copy profile summary
-	s.ProfileSummaries[destIdx] = source.ProfileSummaries[srcIdx]
-
-	return nil
+	return os.WriteFile(path, finalData, 0644)
 }

@@ -1,6 +1,28 @@
 package core
 
-import "bytes"
+import (
+	"encoding/binary"
+	"fmt"
+	"unicode/utf16"
+)
+
+// MagicPattern is the bit pattern used to locate character stats (PlayerGameData).
+// It's a long sequence of 00 FF FF FF FF... found in every save slot.
+var MagicPattern = []byte{
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF,
+}
 
 // GaItem represents an inventory item with dynamic size.
 type GaItem struct {
@@ -49,402 +71,161 @@ func (g *GaItem) Write(w *Writer) error {
 	return nil
 }
 
-// GaItem2 represents an item in the GaItemData block.
-type GaItem2 struct {
-	ID            uint32
-	Unk           uint32
-	ReinforceType uint32
-	Unk1          uint32
-}
-
-func (g *GaItem2) Read(r *Reader) error {
-	var err error
-	g.ID, err = r.ReadU32()
-	if err != nil { return err }
-	g.Unk, err = r.ReadU32()
-	if err != nil { return err }
-	g.ReinforceType, err = r.ReadU32()
-	if err != nil { return err }
-	g.Unk1, err = r.ReadU32()
-	if err != nil { return err }
-	return nil
-}
-
-func (g *GaItem2) Write(w *Writer) error {
-	w.WriteU32(g.ID)
-	w.WriteU32(g.Unk)
-	w.WriteU32(g.ReinforceType)
-	w.WriteU32(g.Unk1)
-	return nil
-}
-
-// GaItemData represents the acquired items database in the save slot.
-type GaItemData struct {
-	AcquiredCount int32
-	Unk1          int32
-	Items         [0x1b58]GaItem2
-}
-
-func (g *GaItemData) Read(r *Reader) error {
-	var err error
-	g.AcquiredCount, err = r.ReadI32()
-	if err != nil { return err }
-	g.Unk1, err = r.ReadI32()
-	if err != nil { return err }
-	for i := 0; i < 0x1b58; i++ {
-		g.Items[i].Read(r)
-	}
-	return nil
-}
-
-func (g *GaItemData) Write(w *Writer) error {
-	w.WriteI32(g.AcquiredCount)
-	w.WriteI32(g.Unk1)
-	for i := 0; i < 0x1b58; i++ {
-		g.Items[i].Write(w)
-	}
-	return nil
-}
-
-// PlayerGameData represents character stats.
+// PlayerGameData represents character stats mapped via relative offsets from MagicPattern.
 type PlayerGameData struct {
-	Header         []byte // 8 bytes
-	Health         uint32
-	MaxHealth      uint32
-	BaseMaxHealth  uint32
-	FP             uint32
-	MaxFP          uint32
-	BaseMaxFP      uint32
-	Unk1           int32
-	SP             uint32
-	MaxSP          uint32
-	BaseMaxSP      uint32
-	Unk2           int32
-	Vigor          uint32
-	Mind           uint32
-	Endurance      uint32
-	Strength       uint32
-	Dexterity      uint32
-	Intelligence   uint32
-	Faith          uint32
-	Arcane         uint32
-	Unk3           []byte // 12 bytes
-	Level          uint32
-	Souls          uint32
-	SoulsMemory    uint32
-	Unk4           []byte // 0x28 bytes
-	CharacterName  [16]uint16
-	Gender         uint8
-	Class          uint8
-	Unk5           []byte // 128 bytes (gift, match_making_wpn_lvl, passwords)
-}
-
-func (p *PlayerGameData) Read(r *Reader) error {
-	p.Header, _ = r.ReadBytes(8)
-	p.Health, _ = r.ReadU32()
-	p.MaxHealth, _ = r.ReadU32()
-	p.BaseMaxHealth, _ = r.ReadU32()
-	p.FP, _ = r.ReadU32()
-	p.MaxFP, _ = r.ReadU32()
-	p.BaseMaxFP, _ = r.ReadU32()
-	p.Unk1, _ = r.ReadI32()
-	p.SP, _ = r.ReadU32()
-	p.MaxSP, _ = r.ReadU32()
-	p.BaseMaxSP, _ = r.ReadU32()
-	p.Unk2, _ = r.ReadI32()
-	p.Vigor, _ = r.ReadU32()
-	p.Mind, _ = r.ReadU32()
-	p.Endurance, _ = r.ReadU32()
-	p.Strength, _ = r.ReadU32()
-	p.Dexterity, _ = r.ReadU32()
-	p.Intelligence, _ = r.ReadU32()
-	p.Faith, _ = r.ReadU32()
-	p.Arcane, _ = r.ReadU32()
-	p.Unk3, _ = r.ReadBytes(12)
-	p.Level, _ = r.ReadU32()
-	p.Souls, _ = r.ReadU32()
-	p.SoulsMemory, _ = r.ReadU32()
-	p.Unk4, _ = r.ReadBytes(0x28)
-	for i := 0; i < 16; i++ {
-		p.CharacterName[i], _ = r.ReadU16()
-	}
-	p.Gender, _ = r.ReadU8()
-	p.Class, _ = r.ReadU8()
-	p.Unk5, _ = r.ReadBytes(128)
-	return nil
-}
-
-func (p *PlayerGameData) Write(w *Writer) error {
-	w.WriteBytes(p.Header)
-	w.WriteU32(p.Health)
-	w.WriteU32(p.MaxHealth)
-	w.WriteU32(p.BaseMaxHealth)
-	w.WriteU32(p.FP)
-	w.WriteU32(p.MaxFP)
-	w.WriteU32(p.BaseMaxFP)
-	w.WriteI32(p.Unk1)
-	w.WriteU32(p.SP)
-	w.WriteU32(p.MaxSP)
-	w.WriteU32(p.BaseMaxSP)
-	w.WriteI32(p.Unk2)
-	w.WriteU32(p.Vigor)
-	w.WriteU32(p.Mind)
-	w.WriteU32(p.Endurance)
-	w.WriteU32(p.Strength)
-	w.WriteU32(p.Dexterity)
-	w.WriteU32(p.Intelligence)
-	w.WriteU32(p.Faith)
-	w.WriteU32(p.Arcane)
-	w.WriteBytes(p.Unk3)
-	w.WriteU32(p.Level)
-	w.WriteU32(p.Souls)
-	w.WriteU32(p.SoulsMemory)
-	w.WriteBytes(p.Unk4)
-	for i := 0; i < 16; i++ {
-		w.WriteU16(p.CharacterName[i])
-	}
-	w.WriteU8(p.Gender)
-	w.WriteU8(p.Class)
-	w.WriteBytes(p.Unk5)
-	return nil
-}
-
-// EquipInventoryItem represents an item entry in the inventory list.
-type EquipInventoryItem struct {
-	GaItemHandle   uint32
-	Quantity       uint32
-	InventoryIndex uint32
-}
-
-func (e *EquipInventoryItem) Read(r *Reader) error {
-	var err error
-	e.GaItemHandle, err = r.ReadU32()
-	if err != nil { return err }
-	e.Quantity, err = r.ReadU32()
-	if err != nil { return err }
-	e.InventoryIndex, err = r.ReadU32()
-	if err != nil { return err }
-	return nil
-}
-
-func (e *EquipInventoryItem) Write(w *Writer) error {
-	w.WriteU32(e.GaItemHandle)
-	w.WriteU32(e.Quantity)
-	w.WriteU32(e.InventoryIndex)
-	return nil
-}
-
-// EquipInventoryData represents the inventory and storage lists.
-type EquipInventoryData struct {
-	CommonCount uint32
-	CommonItems []EquipInventoryItem
-	KeyCount    uint32
-	KeyItems    []EquipInventoryItem
-	Unk1        uint32
-	Unk2        uint32
-}
-
-func (e *EquipInventoryData) Read(r *Reader, commonLen, keyLen int) error {
-	e.CommonCount, _ = r.ReadU32()
-	e.CommonItems = make([]EquipInventoryItem, commonLen)
-	for i := 0; i < commonLen; i++ {
-		e.CommonItems[i].Read(r)
-	}
-	e.KeyCount, _ = r.ReadU32()
-	e.KeyItems = make([]EquipInventoryItem, keyLen)
-	for i := 0; i < keyLen; i++ {
-		e.KeyItems[i].Read(r)
-	}
-	e.Unk1, _ = r.ReadU32()
-	e.Unk2, _ = r.ReadU32()
-	return nil
-}
-
-func (e *EquipInventoryData) Write(w *Writer) error {
-	w.WriteU32(e.CommonCount)
-	for i := 0; i < len(e.CommonItems); i++ {
-		e.CommonItems[i].Write(w)
-	}
-	w.WriteU32(e.KeyCount)
-	for i := 0; i < len(e.KeyItems); i++ {
-		e.KeyItems[i].Write(w)
-	}
-	w.WriteU32(e.Unk1)
-	w.WriteU32(e.Unk2)
-	return nil
-}
-
-// ProfileSummary represents character data in the menu.
-type ProfileSummary struct {
-	CharacterName [17]uint16
 	Level         uint32
-	Unk1          []byte // 20 bytes
-	Padding       []byte // 288 bytes
-	EquipGaitem   []byte // 120 bytes
-	EquipItem     []byte // 112 bytes
-	Unk2          []byte // 6 bytes
-	Unk3          int32
+	Vigor         uint32
+	Mind          uint32
+	Endurance     uint32
+	Strength      uint32
+	Dexterity     uint32
+	Intelligence  uint32
+	Faith         uint32
+	Arcane        uint32
+	Souls         uint32
+	CharacterName [16]uint16
+	Gender        uint8
+	Class         uint8
+	
+	// Offsets relative to the start of the slot
+	MagicOffset int
 }
 
-func (p *ProfileSummary) Read(r *Reader) error {
-	for i := 0; i < 17; i++ {
-		p.CharacterName[i], _ = r.ReadU16()
+func (p *PlayerGameData) Read(r *Reader, slotStart int) error {
+	// 1. Find Magic Pattern within the slot
+	magicPos := r.FindPattern(MagicPattern)
+	if magicPos == -1 {
+		return fmt.Errorf("magic pattern not found in slot")
 	}
-	p.Level, _ = r.ReadU32()
-	p.Unk1, _ = r.ReadBytes(20)
-	p.Padding, _ = r.ReadBytes(288)
-	p.EquipGaitem, _ = r.ReadBytes(120)
-	p.EquipItem, _ = r.ReadBytes(112)
-	p.Unk2, _ = r.ReadBytes(6)
-	p.Unk3, _ = r.ReadI32()
-	return nil
-}
+	p.MagicOffset = magicPos
 
-func (p *ProfileSummary) Write(w *Writer) error {
-	for i := 0; i < 17; i++ {
-		w.WriteU16(p.CharacterName[i])
+	// 2. Read Stats using relative offsets from Python project
+	// Distances: Level:-335, Vigor:-379, Mind:-375, Endurance:-371, Strength:-367, 
+	// Dexterity:-363, Intelligence:-359, Faith:-355, Arcane:-351, Souls:-331, Gender:-249, Class:-248
+	
+	p.Level = binary.LittleEndian.Uint32(r.data[magicPos-335:])
+	p.Vigor = binary.LittleEndian.Uint32(r.data[magicPos-379:])
+	p.Mind = binary.LittleEndian.Uint32(r.data[magicPos-375:])
+	p.Endurance = binary.LittleEndian.Uint32(r.data[magicPos-371:])
+	p.Strength = binary.LittleEndian.Uint32(r.data[magicPos-367:])
+	p.Dexterity = binary.LittleEndian.Uint32(r.data[magicPos-363:])
+	p.Intelligence = binary.LittleEndian.Uint32(r.data[magicPos-359:])
+	p.Faith = binary.LittleEndian.Uint32(r.data[magicPos-355:])
+	p.Arcane = binary.LittleEndian.Uint32(r.data[magicPos-351:])
+	p.Souls = binary.LittleEndian.Uint32(r.data[magicPos-331:])
+	
+	p.Gender = r.data[magicPos-249]
+	p.Class = r.data[magicPos-248]
+
+	// 3. Read Character Name (magic_offset - 0x11b)
+	nameOffset := magicPos - 0x11b
+	for i := 0; i < 16; i++ {
+		p.CharacterName[i] = binary.LittleEndian.Uint16(r.data[nameOffset+i*2:])
 	}
-	w.WriteU32(p.Level)
-	w.WriteBytes(p.Unk1)
-	w.WriteBytes(p.Padding)
-	w.WriteBytes(p.EquipGaitem)
-	w.WriteBytes(p.EquipItem)
-	w.WriteBytes(p.Unk2)
-	w.WriteI32(p.Unk3)
+
 	return nil
 }
 
-// CSMenuSystemSaveLoad represents dynamic menu data.
-type CSMenuSystemSaveLoad struct {
-	Unk    uint32
-	Length uint32
-	Data   []byte
+func (p *PlayerGameData) Write(data []byte) {
+	// Write stats back using the same relative offsets
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-335:], p.Level)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-379:], p.Vigor)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-375:], p.Mind)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-371:], p.Endurance)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-367:], p.Strength)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-363:], p.Dexterity)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-359:], p.Intelligence)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-355:], p.Faith)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-351:], p.Arcane)
+	binary.LittleEndian.PutUint32(data[p.MagicOffset-331:], p.Souls)
+	
+	data[p.MagicOffset-249] = p.Gender
+	data[p.MagicOffset-248] = p.Class
+
+	nameOffset := p.MagicOffset - 0x11b
+	for i := 0; i < 16; i++ {
+		binary.LittleEndian.PutUint16(data[nameOffset+i*2:], p.CharacterName[i])
+	}
 }
 
-func (c *CSMenuSystemSaveLoad) Read(r *Reader) error {
-	c.Unk, _ = r.ReadU32()
-	len, _ := r.ReadU32()
-	c.Length = len
-	c.Data, _ = r.ReadBytes(int(len))
-	return nil
-}
-
-func (c *CSMenuSystemSaveLoad) Write(w *Writer) error {
-	w.WriteU32(c.Unk)
-	w.WriteU32(c.Length)
-	w.WriteBytes(c.Data)
-	return nil
-}
-
-// SaveSlot represents a full character slot.
+// SaveSlot represents a character slot. We now store the raw data to preserve 
+// everything except the parts we explicitly modify.
 type SaveSlot struct {
-	Header                []byte // 0x20 bytes
-	PCHeader              []byte // 0x290 bytes
-	GaItems               [0x1400]GaItem
-	PlayerGameData        PlayerGameData
-	Unk1                  []byte // 0xd0 bytes
-	EquipData             []byte // 88 bytes
-	ChrAsm                []byte // 116 bytes
-	ChrAsm2               []byte // 88 bytes
-	EquipInventoryData    EquipInventoryData
-	StorageInventoryData  EquipInventoryData
-	Skip1                 []byte // magic, item, gesture, projectile, equipped, physics, etc.
-	Skip2                 []byte // gesture_game, regions, ride, unks, menu, trophy
-	GaItemData            GaItemData
-	Padding               []byte // Rest of the slot (0x280000 - current pos)
+	Data    []byte
+	Player  PlayerGameData
+	SteamID uint64
 }
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
-	startPos := r.Pos()
+	var err error
+	s.Data, err = r.ReadBytes(0x280000)
+	if err != nil {
+		return err
+	}
 
-	// 1. Header
-	s.Header, _ = r.ReadBytes(0x20)
+	// Use a temporary reader for the slot data to find patterns
+	slotReader := NewReader(s.Data)
+	if err := s.Player.Read(slotReader, 0); err != nil {
+		return err
+	}
 
-	// PC has an extra header block
+	// SteamID is at the end of the slot on PC
 	if platform == "PC" {
-		s.PCHeader, _ = r.ReadBytes(0x290)
-	}
-
-	// 2. GaItems (5120 items)
-	for i := 0; i < 0x1400; i++ {
-		s.GaItems[i].Read(r)
-	}
-
-	// 3. PlayerGameData
-	s.PlayerGameData.Read(r)
-
-	s.Unk1, _ = r.ReadBytes(0xd0)
-	s.EquipData, _ = r.ReadBytes(88)
-	s.ChrAsm, _ = r.ReadBytes(116)
-	s.ChrAsm2, _ = r.ReadBytes(88)
-
-	// 5. Inventory
-	s.EquipInventoryData.Read(r, 0xa80, 0x180)
-
-	// 6. Skip to Storage (EquipInventoryData 2)
-	s.Skip1, _ = r.ReadBytes(40 + 104 + 24 + 64 + 116 + 12 + 4 + 0x12f)
-
-	// 7. Storage
-	s.StorageInventoryData.Read(r, 0x780, 0x80)
-
-	// 8. Skip to GaItemData
-	s.Skip2, _ = r.ReadBytes(256 + 16 + 40 + 1 + 0x40 + 12 + 0x1008 + 0x34)
-
-	s.GaItemData.Read(r)
-
-	// 9. Padding
-	currentPos := r.Pos()
-	remaining := (startPos + 0x280000) - currentPos
-	if remaining > 0 {
-		s.Padding, _ = r.ReadBytes(int(remaining))
+		// Based on Python's logic, it's near the end. 
+		// In our previous spec it was at the very end before padding.
+		s.SteamID = binary.LittleEndian.Uint64(s.Data[0x280000-8:])
 	}
 
 	return nil
 }
 
-func (s *SaveSlot) Write(w *Writer, platform string) error {
-	// We need to capture the start position to calculate padding at the end.
-	// Since Writer doesn't support Pos(), we'll use a temporary buffer.
-	var buf bytes.Buffer
-	tw := NewWriter(&buf)
-
-	if len(s.Header) == 0 {
-		s.Header = make([]byte, 0x20)
-	}
-	tw.WriteBytes(s.Header)
+func (s *SaveSlot) Write(platform string) []byte {
+	// Update player data in the raw byte slice
+	s.Player.Write(s.Data)
 
 	if platform == "PC" {
-		if len(s.PCHeader) == 0 {
-			s.PCHeader = make([]byte, 0x290)
+		binary.LittleEndian.PutUint64(s.Data[0x280000-8:], s.SteamID)
+	}
+
+	return s.Data
+}
+
+// ProfileSummary represents character info in the main menu.
+type ProfileSummary struct {
+	CharacterName [16]uint16
+	Level         uint32
+	Souls         uint32 // Added to match Python's more complete view
+	Data          []byte // Raw data for the rest
+}
+
+func (p *ProfileSummary) Read(r *Reader) error {
+	start := r.Pos()
+	for i := 0; i < 16; i++ {
+		p.CharacterName[i], _ = r.ReadU16()
+	}
+	p.Level, _ = r.ReadU32()
+	// Skip some bytes to get to souls if needed, or just store raw
+	r.Seek(int64(start), 0)
+	p.Data, _ = r.ReadBytes(0x100) // Profile summaries are usually around this size
+	return nil
+}
+
+// CSMenuSystemSaveLoad matches the UserData10 block.
+type CSMenuSystemSaveLoad struct {
+	Data []byte
+}
+
+func (c *CSMenuSystemSaveLoad) Read(r *Reader) {
+	c.Data, _ = r.ReadBytes(0x60000)
+}
+
+// UTF16ToString converts a UTF-16 slice to a Go string, trimming the null terminator.
+func UTF16ToString(u16 []uint16) string {
+	for i, v := range u16 {
+		if v == 0 {
+			u16 = u16[:i]
+			break
 		}
-		tw.WriteBytes(s.PCHeader)
 	}
-
-	for i := 0; i < 0x1400; i++ {
-		s.GaItems[i].Write(tw)
-	}
-	s.PlayerGameData.Write(tw)
-	tw.WriteBytes(s.Unk1)
-	tw.WriteBytes(s.EquipData)
-	tw.WriteBytes(s.ChrAsm)
-	tw.WriteBytes(s.ChrAsm2)
-	s.EquipInventoryData.Write(tw)
-	tw.WriteBytes(s.Skip1)
-	s.StorageInventoryData.Write(tw)
-	tw.WriteBytes(s.Skip2)
-	s.GaItemData.Write(tw)
-
-	// Calculate remaining padding to reach exactly 0x280000 bytes
-	currentSize := buf.Len()
-	remaining := 0x280000 - currentSize
-	if remaining > 0 {
-		padding := make([]byte, remaining)
-		// If we have existing padding, try to preserve as much as possible
-		if len(s.Padding) > 0 {
-			copy(padding, s.Padding)
-		}
-		tw.WriteBytes(padding)
-	}
-
-	return w.WriteBytes(buf.Bytes())
+	return string(utf16.Decode(u16))
 }

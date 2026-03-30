@@ -103,9 +103,8 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 	}
 
 	// 2. Update ProfileSummary (for the menu)
-	a.save.ProfileSummaries[index].Level = a.save.Slots[index].PlayerGameData.Level
-	copy(a.save.ProfileSummaries[index].CharacterName[:16], a.save.Slots[index].PlayerGameData.CharacterName[:])
-	a.save.ProfileSummaries[index].CharacterName[16] = 0
+	a.save.ProfileSummaries[index].Level = a.save.Slots[index].Player.Level
+	copy(a.save.ProfileSummaries[index].CharacterName[:], a.save.Slots[index].Player.CharacterName[:])
 
 	return nil
 }
@@ -114,11 +113,6 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 func (a *App) WriteSave(platform string) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
-	}
-
-	targetPlatform := core.Platform(platform)
-	if targetPlatform != core.PlatformPC && targetPlatform != core.PlatformPS {
-		return fmt.Errorf("invalid target platform: %s", platform)
 	}
 
 	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
@@ -140,7 +134,7 @@ func (a *App) WriteSave(platform string) error {
 		fmt.Printf("Warning: failed to create backup: %v\n", err)
 	}
 
-	return a.save.Write(path, targetPlatform)
+	return a.save.SaveFile(path)
 }
 
 // GetItemList returns a list of items for a given category
@@ -155,10 +149,7 @@ func (a *App) GetAllGraces() []db.GraceEntry {
 
 // ImportCharacter copies a slot from the source save file to the destination save file
 func (a *App) ImportCharacter(srcIdx, destIdx int) error {
-	if a.save == nil || a.sourceSave == nil {
-		return fmt.Errorf("both source and destination saves must be loaded")
-	}
-	return a.save.ImportSlot(a.sourceSave, srcIdx, destIdx)
+	return fmt.Errorf("ImportCharacter is temporarily disabled during architecture refactor")
 }
 
 // GetActiveSlots returns the activity status of all 10 slots

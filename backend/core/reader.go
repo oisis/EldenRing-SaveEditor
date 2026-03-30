@@ -15,6 +15,14 @@ func NewReader(data []byte) *Reader {
 	return &Reader{data: data, pos: 0}
 }
 
+func (r *Reader) Pos() int {
+	return r.pos
+}
+
+func (r *Reader) Len() int {
+	return len(r.data)
+}
+
 func (r *Reader) ReadU8() (uint8, error) {
 	if r.pos >= len(r.data) {
 		return 0, io.EOF
@@ -96,37 +104,30 @@ func (r *Reader) Seek(offset int64, whence int) (int64, error) {
 	case io.SeekEnd:
 		newPos = int64(len(r.data)) + offset
 	}
+	if newPos < 0 || newPos > int64(len(r.data)) {
+		return int64(r.pos), io.EOF
+	}
 	r.pos = int(newPos)
 	return newPos, nil
 }
 
-func (r *Reader) Pos() int {
-	return r.pos
-}
-
-func (r *Reader) Len() int {
-	return len(r.data)
-}
-
-// UTF16ToString converts a slice of uint16 (UTF-16) to a Go string, stopping at the first null terminator.
-func UTF16ToString(u []uint16) string {
-	for i, v := range u {
-		if v == 0 {
-			u = u[:i]
-			break
-		}
+// FindPattern searches for a byte pattern in the data starting from the current position.
+func (r *Reader) FindPattern(pattern []byte) int {
+	index := bytes.Index(r.data[r.pos:], pattern)
+	if index == -1 {
+		return -1
 	}
-	return string(decodeUTF16(u))
+	return r.pos + index
 }
 
-func decodeUTF16(u []uint16) []rune {
-	return []rune(string(runeSliceFromUint16(u)))
-}
-
-func runeSliceFromUint16(u []uint16) []rune {
-	r := make([]rune, len(u))
-	for i, v := range u {
-		r[i] = rune(v)
+// ReadAt reads data into p starting at off.
+func (r *Reader) ReadAt(p []byte, off int64) (n int, err error) {
+	if off < 0 || off >= int64(len(r.data)) {
+		return 0, io.EOF
 	}
-	return r
+	n = copy(p, r.data[off:])
+	if n < len(p) {
+		err = io.EOF
+	}
+	return
 }
