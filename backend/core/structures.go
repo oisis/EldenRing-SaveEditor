@@ -62,7 +62,7 @@ type PlayerGameData struct {
 type SaveSlot struct {
 	Data    []byte
 	Player  PlayerGameData
-	GaMap   map[uint32]uint32 // Handle -> ItemID
+	GaMap   map[uint32]uint32
 	Inventory EquipInventoryData
 	Storage   EquipInventoryData
 	SteamID uint64
@@ -87,9 +87,6 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	startGa := 0x310
 	if platform == "PS4" { startGa = 0x20 }
 	s.scanGaItems(startGa)
-
-	// Inwentarz i Skrzynia mają stałe offsety relatywne do PlayerGameData lub Inwentarza
-	// Dla uproszczenia i stabilności użyjemy offsetów, które Python wylicza dynamicznie
 	s.mapInventory()
 
 	if platform == "PC" {
@@ -144,18 +141,13 @@ func (s *SaveSlot) scanGaItems(start int) {
 
 func (s *SaveSlot) mapInventory() {
 	if s.InventoryEnd == 0 { return }
-	
-	// Offsety oparte na łańcuchu z Pythona
 	playerData := s.InventoryEnd + 0x1B0
 	invStart := playerData + 0xD0 + 0x58 + 0x1C + 0x58 + 0x58
-	
 	ir := NewReader(s.Data)
 	ir.Seek(int64(invStart), 0)
 	s.Inventory.Read(ir, 0xa80, 0x180)
 	
-	// Skrzynia (Storage)
 	faceData := invStart + (0xa80+0x180)*10 + 0x74 + 0x8c + 0x18
-	// Python: storage_box = face_data + 0x6010
 	storageStart := faceData + 0x6010
 	ir.Seek(int64(storageStart), 0)
 	s.Storage.Read(ir, 0x780, 0x80)
@@ -191,11 +183,13 @@ type ProfileSummary struct {
 }
 
 func (p *ProfileSummary) Read(r *Reader) error {
+	start := r.Pos()
 	for i := 0; i < 16; i++ {
 		p.CharacterName[i], _ = r.ReadU16()
 	}
 	p.Level, _ = r.ReadU32()
-	r.ReadBytes(0x100 - 36)
+	// Each summary block is exactly 0x100 bytes
+	r.Seek(int64(start + 0x100), 0)
 	return nil
 }
 

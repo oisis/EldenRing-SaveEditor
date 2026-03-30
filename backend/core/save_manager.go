@@ -67,23 +67,22 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	// UserData10
 	udStart := r.Pos()
 	r.ReadBytes(0x10) // MD5
-	
-	// Read raw for saving
 	save.UserData10.Data, _ = r.ReadBytes(0x60000)
 	
-	// Parse metadata for UI
 	udReader := NewReader(save.UserData10.Data)
-	udReader.ReadBytes(12) // Skip Unk and SteamID
-	udReader.ReadBytes(0x140) // Skip Unk2
 	
-	// CSMenuSystemSaveLoad (Active slots and Summaries)
-	// Skip to Active Slots (0x10 + 0x140 + 4 + 0x190 = 0x2E4)
-	udReader.Seek(0x2E4, 0)
+	// SteamID is at the beginning of UserData10 data on PC
+	save.SteamID, _ = udReader.ReadU64()
+
+	// Active Slots are at 0x310
+	udReader.Seek(0x310, 0)
 	for i := 0; i < 10; i++ {
 		b, _ := udReader.ReadU8()
 		save.ActiveSlots[i] = b == 1
 	}
 	
+	// Profile Summaries start at 0x31A (ActiveSlots + 10 bytes)
+	// Each summary is 0x100 bytes
 	for i := 0; i < 10; i++ {
 		save.ProfileSummaries[i].Read(udReader)
 	}
@@ -110,7 +109,9 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 	save.UserData10.Data, _ = r.ReadBytes(0x60000)
 	udReader := NewReader(save.UserData10.Data)
-	udReader.Seek(0x2D4, 0) // PS4 offset is slightly different
+	
+	// PS4: Active Slots are at 0x300, Summaries at 0x30A
+	udReader.Seek(0x300, 0)
 	for i := 0; i < 10; i++ {
 		b, _ := udReader.ReadU8()
 		save.ActiveSlots[i] = b == 1
@@ -140,10 +141,7 @@ func (s *SaveFile) SaveFile(path string) error {
 			w.WriteBytes(slotData)
 		}
 		
-		// Update UserData10 with metadata before saving
 		udData := s.UserData10.Data
-		// ... (In a full implementation we would write ActiveSlots/Summaries back to udData here)
-		
 		checksum := ComputeMD5(udData)
 		w.WriteBytes(checksum[:])
 		w.WriteBytes(udData)
