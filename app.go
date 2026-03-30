@@ -111,9 +111,14 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 }
 
 // WriteSave writes the current save state to a file
-func (a *App) WriteSave() error {
+func (a *App) WriteSave(platform string) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
+	}
+
+	targetPlatform := core.Platform(platform)
+	if targetPlatform != core.PlatformPC && targetPlatform != core.PlatformPS {
+		return fmt.Errorf("invalid target platform: %s", platform)
 	}
 
 	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
@@ -135,7 +140,7 @@ func (a *App) WriteSave() error {
 		fmt.Printf("Warning: failed to create backup: %v\n", err)
 	}
 
-	return a.save.Write(path)
+	return a.save.Write(path, targetPlatform)
 }
 
 // GetItemList returns a list of items for a given category

@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames} from '../wailsjs/go/main/App';
+import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
@@ -14,6 +14,7 @@ function App() {
     const [selectedChar, setSelectedChar] = useState<number>(0);
     const [activeTab, setActiveTab] = useState('character');
     const [theme, setTheme] = useState<Theme>('dark');
+    const [targetPlatform, setTargetPlatform] = useState<string>('PC');
 
     const tabs = ['character', 'inventory', 'world progress', 'importer'];
 
@@ -32,6 +33,15 @@ function App() {
             const plat = await SelectAndOpenSave();
             setPlatform(plat);
             refreshSlots();
+        } catch (err) {
+            alert(err);
+        }
+    };
+
+    const handleExportSave = async () => {
+        try {
+            await WriteSave(targetPlatform);
+            alert(`Save exported successfully as ${targetPlatform}!`);
         } catch (err) {
             alert(err);
         }
@@ -117,7 +127,28 @@ function App() {
                     )}
                 </div>
                 
-                <div className="p-4 border-t border-border bg-muted/5">
+                <div className="p-4 border-t border-border bg-muted/5 space-y-4">
+                    {platform && (
+                        <div className="space-y-3">
+                            <div className="flex bg-muted/20 p-1 rounded-lg border border-border/50">
+                                {(['PC', 'PS4'] as const).map(p => (
+                                    <button
+                                        key={p}
+                                        onClick={() => setTargetPlatform(p)}
+                                        className={`flex-1 py-1.5 rounded-md text-[8px] font-black uppercase tracking-widest transition-all ${targetPlatform === p ? 'bg-background text-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        {p === 'PC' ? 'Steam (PC)' : 'PlayStation'}
+                                    </button>
+                                ))}
+                            </div>
+                            <button 
+                                onClick={handleExportSave}
+                                className="w-full bg-primary text-primary-foreground font-black py-3 rounded-lg text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all animate-in slide-in-from-bottom-2 duration-500"
+                            >
+                                Export Save
+                            </button>
+                        </div>
+                    )}
                     <div className="flex items-center justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
                         <span>v0.1.0 Alpha</span>
                         <span>System Ready</span>

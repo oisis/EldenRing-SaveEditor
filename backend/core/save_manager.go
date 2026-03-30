@@ -165,16 +165,40 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	return save, nil
 }
 
-func (s *SaveFile) Write(path string) error {
+var (
+	// DefaultPCHeader is a template BND4 header for Elden Ring PC saves
+	DefaultPCHeader = []byte{
+		0x42, 0x4e, 0x44, 0x34, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+		0x0c, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30, 0x30, 0x30, 0x30,
+		0x30, 0x30, 0x30, 0x31, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	}
+	// DefaultPSHeader is a template header for PS4 saves (decrypted)
+	DefaultPSHeader = make([]byte, 0x70)
+)
+
+func (s *SaveFile) Write(path string, targetPlatform Platform) error {
 	var buf bytes.Buffer
 	w := NewWriter(&buf)
 
 	// 1. Header
-	w.WriteBytes(s.Header)
+	header := s.Header
+	if targetPlatform != s.Platform {
+		if targetPlatform == PlatformPC {
+			// Convert to PC: Use default BND4 header
+			header = make([]byte, 0x300)
+			copy(header, DefaultPCHeader)
+		} else {
+			// Convert to PS4: Use default empty header
+			header = make([]byte, 0x70)
+			copy(header, DefaultPSHeader)
+		}
+	}
+	w.WriteBytes(header)
 
 	// 2. Slots
 	for i := 0; i < 10; i++ {
-		if s.Platform == PlatformPC {
+		if targetPlatform == PlatformPC {
 			// PC: MD5(slot_data) + slot_data
 			var slotBuf bytes.Buffer
 			sw := NewWriter(&slotBuf)
@@ -190,7 +214,7 @@ func (s *SaveFile) Write(path string) error {
 	}
 
 	// 3. UserData10
-	if s.Platform == PlatformPC {
+	if targetPlatform == PlatformPC {
 		var udBuf bytes.Buffer
 		uw := NewWriter(&udBuf)
 
@@ -237,9 +261,8 @@ func (s *SaveFile) Write(path string) error {
 	// 5. Finalize
 	data := buf.Bytes()
 
-	if s.Platform == PlatformPC && s.Encrypted {
+	if targetPlatform == PlatformPC && s.Encrypted {
 		// PC saves are typically encrypted with AES-128-CBC
-		// Use the original IV for bit-perfect round-trip
 		iv := s.IV
 		if len(iv) != 16 {
 			iv = make([]byte, 16)

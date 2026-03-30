@@ -29,4 +29,4 @@ export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
 
 export function SetSteamID(arg1:number):Promise<void>;
 
-export function WriteSave():Promise<void>;
+export function WriteSave(arg1:string):Promise<void>;

@@ -54,6 +54,6 @@ export function SetSteamID(arg1) {
   return window['go']['main']['App']['SetSteamID'](arg1);
 }
 
-export function WriteSave() {
-  return window['go']['main']['App']['WriteSave']();
+export function WriteSave(arg1) {
+  return window['go']['main']['App']['WriteSave'](arg1);
 }

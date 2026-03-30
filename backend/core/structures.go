@@ -1,5 +1,7 @@
 package core
 
+import "bytes"
+
 // GaItem represents an inventory item with dynamic size.
 type GaItem struct {
 	Handle uint32
@@ -401,23 +403,48 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 }
 
 func (s *SaveSlot) Write(w *Writer, platform string) error {
-	w.WriteBytes(s.Header)
+	// We need to capture the start position to calculate padding at the end.
+	// Since Writer doesn't support Pos(), we'll use a temporary buffer.
+	var buf bytes.Buffer
+	tw := NewWriter(&buf)
+
+	if len(s.Header) == 0 {
+		s.Header = make([]byte, 0x20)
+	}
+	tw.WriteBytes(s.Header)
+
 	if platform == "PC" {
-		w.WriteBytes(s.PCHeader)
+		if len(s.PCHeader) == 0 {
+			s.PCHeader = make([]byte, 0x290)
+		}
+		tw.WriteBytes(s.PCHeader)
 	}
+
 	for i := 0; i < 0x1400; i++ {
-		s.GaItems[i].Write(w)
+		s.GaItems[i].Write(tw)
 	}
-	s.PlayerGameData.Write(w)
-	w.WriteBytes(s.Unk1)
-	w.WriteBytes(s.EquipData)
-	w.WriteBytes(s.ChrAsm)
-	w.WriteBytes(s.ChrAsm2)
-	s.EquipInventoryData.Write(w)
-	w.WriteBytes(s.Skip1)
-	s.StorageInventoryData.Write(w)
-	w.WriteBytes(s.Skip2)
-	s.GaItemData.Write(w)
-	w.WriteBytes(s.Padding)
-	return nil
+	s.PlayerGameData.Write(tw)
+	tw.WriteBytes(s.Unk1)
+	tw.WriteBytes(s.EquipData)
+	tw.WriteBytes(s.ChrAsm)
+	tw.WriteBytes(s.ChrAsm2)
+	s.EquipInventoryData.Write(tw)
+	tw.WriteBytes(s.Skip1)
+	s.StorageInventoryData.Write(tw)
+	tw.WriteBytes(s.Skip2)
+	s.GaItemData.Write(tw)
+
+	// Calculate remaining padding to reach exactly 0x280000 bytes
+	currentSize := buf.Len()
+	remaining := 0x280000 - currentSize
+	if remaining > 0 {
+		padding := make([]byte, remaining)
+		// If we have existing padding, try to preserve as much as possible
+		if len(s.Padding) > 0 {
+			copy(padding, s.Padding)
+		}
+		tw.WriteBytes(padding)
+	}
+
+	return w.WriteBytes(buf.Bytes())
 }
