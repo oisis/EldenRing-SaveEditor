@@ -13,7 +13,7 @@ function App() {
     const [charNames, setCharacterNames] = useState<string[]>([]);
     const [selectedChar, setSelectedChar] = useState<number>(0);
     const [activeTab, setActiveTab] = useState('character');
-    const [theme, setTheme] = useState<Theme>('dark');
+    const [theme, setTheme] = useState<Theme>('light');
     const [targetPlatform, setTargetPlatform] = useState<string>('PC');
 
     const tabs = ['character', 'inventory', 'world progress', 'importer'];
