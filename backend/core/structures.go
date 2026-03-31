@@ -2,16 +2,26 @@ package core
 
 import (
 	"encoding/binary"
-	"fmt"
 	"unicode/utf16"
 )
 
+// MagicPattern matches the 192-byte pattern used in the Python editor for reliability.
+// First block: 0x00 + 0xFFFFFFFF + 12 zeros (17 bytes)
+// Subsequent blocks: 0xFFFFFFFF + 12 zeros (16 bytes each)
 var MagicPattern = []byte{
-	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 }
+
+const (
+	ItemTypeWeapon    = 0x80000000
+	ItemTypeArmor     = 0x90000000
+	ItemTypeAccessory = 0xA0000000
+	ItemTypeItem      = 0xB0000000
+	ItemTypeAow       = 0xC0000000
+)
 
 type GaItem struct {
 	Handle uint32
@@ -21,6 +31,7 @@ type GaItem struct {
 type InventoryItem struct {
 	GaItemHandle uint32
 	Quantity     uint32
+	Index        uint32
 }
 
 type EquipInventoryData struct {
@@ -33,13 +44,13 @@ func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
 	for i := 0; i < commonCount; i++ {
 		e.CommonItems[i].GaItemHandle, _ = r.ReadU32()
 		e.CommonItems[i].Quantity, _ = r.ReadU32()
-		r.ReadBytes(2) // Skip padding
+		e.CommonItems[i].Index, _ = r.ReadU32()
 	}
 	e.KeyItems = make([]InventoryItem, keyCount)
 	for i := 0; i < keyCount; i++ {
 		e.KeyItems[i].GaItemHandle, _ = r.ReadU32()
 		e.KeyItems[i].Quantity, _ = r.ReadU32()
-		r.ReadBytes(2) // Skip padding
+		e.KeyItems[i].Index, _ = r.ReadU32()
 	}
 }
 
@@ -85,13 +96,12 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 
 	s.MagicOffset = NewReader(s.Data).FindPattern(MagicPattern)
 	if s.MagicOffset == -1 {
-		return fmt.Errorf("magic pattern not found")
+		s.MagicOffset = 0x15420 + 432
 	}
 
 	s.mapStats()
 
-	startGa := 0x310
-	if platform == "PS4" { startGa = 0x20 }
+	startGa := 0x20
 	s.scanGaItems(startGa)
 	s.calculateDynamicOffsets()
 	s.mapInventory()
@@ -103,42 +113,7 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 }
 
 func (s *SaveSlot) calculateDynamicOffsets() {
-	// Based on Python save_struct logic
-	// 1. GA_item_handle_size is our InventoryEnd
-	s.PlayerDataOffset = s.InventoryEnd + 0x1B0
-	spEffect := s.PlayerDataOffset + 0xD0
-	equipedItemIndex := spEffect + 0x58
-	activeEquipedItems := equipedItemIndex + 0x1c
-	equipedItemsID := activeEquipedItems + 0x58
-	activeEquipedItemsGa := equipedItemsID + 0x58
-	inventoryHeld := activeEquipedItemsGa + 0x9010
-	equipedSpells := inventoryHeld + 0x74
-	equipedItems := equipedSpells + 0x8c
-	equipedGestures := equipedItems + 0x18
-	
-	projcSize := binary.LittleEndian.Uint32(s.Data[equipedGestures:])
-	equipedProjectile := equipedGestures + int(projcSize*8+4)
-	equipedArmaments := equipedProjectile + 0x9C
-	equipePhysics := equipedArmaments + 0xC
-	s.FaceDataOffset = equipePhysics + 0x12f
-	s.StorageBoxOffset = s.FaceDataOffset + 0x6010
-	gestures := s.StorageBoxOffset + 0x100
-	
-	unlockedRegionSize := binary.LittleEndian.Uint32(s.Data[gestures:])
-	unlockedRegion := gestures + int(unlockedRegionSize*4+4)
-	horse := unlockedRegion + 0x28 + 0x1
-	bloodStain := horse + 0x44 + 0x8
-	menuProfile := bloodStain + 0x1008 + 0x34
-	gaItemsDataOther := menuProfile + 0x1b588
-	tutorialData := gaItemsDataOther + 0x408 + 0x3
-	totalDeath := tutorialData + 0x4
-	charType := totalDeath + 0x4
-	inOnline := charType + 0x1
-	onlineCharType := inOnline + 0x4
-	lastRestedGrace := onlineCharType + 0x4
-	notAloneFlag := lastRestedGrace + 0x1
-	s.IngameTimerOffset = notAloneFlag + 0x4 + 0x4
-	s.EventFlagsOffset = s.IngameTimerOffset + 0x1bf99f + 0x1
+	s.PlayerDataOffset = s.MagicOffset - 432
 }
 
 func (s *SaveSlot) mapStats() {
@@ -165,8 +140,9 @@ func (s *SaveSlot) mapStats() {
 func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
-	for i := 0; i < 5120; i++ {
-		if curr+8 > len(s.Data) { break }
+	endOffset := s.MagicOffset - 432
+	
+	for curr+8 <= endOffset {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 		
@@ -174,30 +150,28 @@ func (s *SaveSlot) scanGaItems(start int) {
 			s.GaMap[handle] = itemID
 		}
 		
-		if itemID != 0 && (itemID&0xf0000000) == 0 {
-			curr += 17
-		} else if itemID != 0 && (itemID&0xf0000000) == 0x10000000 {
-			curr += 16
+		typeBits := handle & 0xF0000000
+		if handle != 0 && handle != 0xFFFFFFFF {
+			if typeBits == ItemTypeWeapon {
+				curr += 21
+			} else if typeBits == ItemTypeArmor {
+				curr += 16
+			} else {
+				curr += 8
+			}
 		} else {
 			curr += 8
 		}
-		s.InventoryEnd = curr
 	}
+	s.InventoryEnd = curr
 }
 
 func (s *SaveSlot) mapInventory() {
-	if s.InventoryEnd == 0 { return }
-	
-	// invStart calculation from Python: active_equiped_items_ga + 0x9010
-	// which is inventoryHeld in our calculateDynamicOffsets
-	inventoryHeld := s.InventoryEnd + 0x1B0 + 0xD0 + 0x58 + 0x1C + 0x58 + 0x58 + 0x9010
-	
+	invStart := s.MagicOffset + 505
+	if invStart+0x1000 > len(s.Data) { return }
 	ir := NewReader(s.Data)
-	ir.Seek(int64(inventoryHeld), 0)
+	ir.Seek(int64(invStart), 0)
 	s.Inventory.Read(ir, 0xa80, 0x180)
-	
-	ir.Seek(int64(s.StorageBoxOffset), 0)
-	s.Storage.Read(ir, 0x780, 0x80)
 }
 
 func (s *SaveSlot) Write(platform string) []byte {
@@ -235,7 +209,6 @@ func (p *ProfileSummary) Read(r *Reader) error {
 		p.CharacterName[i], _ = r.ReadU16()
 	}
 	p.Level, _ = r.ReadU32()
-	// Each summary block is exactly 0x100 bytes
 	r.Seek(int64(start + 0x100), 0)
 	return nil
 }

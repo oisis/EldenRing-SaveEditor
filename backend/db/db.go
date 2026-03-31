@@ -22,24 +22,41 @@ type GraceEntry struct {
 
 // GetItemName returns the name of an item by its ID, searching across all categories.
 func GetItemName(id uint32) string {
-	// Mask the ID to get the base ID (remove upgrade level for weapons)
-	baseID := id
+	// 1. Try Weapons with upgrade masking
 	if (id & 0xf0000000) == 0 {
-		baseID = (id / 10000) * 10000
+		baseID := id
+		if id > 100000 {
+			baseID = (id / 100) * 100
+		}
+		if name, ok := data.Weapons[baseID]; ok && name != "" {
+			upgrade := id % 100
+			if upgrade > 0 {
+				return fmt.Sprintf("%s +%d", name, upgrade)
+			}
+			return name
+		}
 	}
 
-	if name, ok := data.Weapons[baseID]; ok && name != "" {
-		return name
-	}
+	// 2. Try Armors
 	if name, ok := data.Armors[id]; ok && name != "" {
 		return name
 	}
-	if name, ok := data.Items[id]; ok && name != "" {
-		return name
-	}
+
+	// 3. Try Talismans
 	if name, ok := data.Talismans[id]; ok && name != "" {
 		return name
 	}
+
+	// 4. Try Items (Goods)
+	if name, ok := data.Items[id]; ok && name != "" {
+		return name
+	}
+
+	// 5. Try Ash of War
+	if name, ok := data.Aows[id]; ok && name != "" {
+		return name
+	}
+
 	return fmt.Sprintf("Unknown Item (0x%X)", id)
 }
 
@@ -51,11 +68,11 @@ func GetItemCategory(id uint32) string {
 		return "Weapon"
 	case 0x10000000:
 		return "Armor"
-	case 0x20000000:
+	case 0xA0000000:
 		return "Talisman"
-	case 0x40000000:
+	case 0xB0000000:
 		return "Item"
-	case 0x80000000:
+	case 0xC0000000:
 		return "Ash of War"
 	default:
 		return "Unknown"

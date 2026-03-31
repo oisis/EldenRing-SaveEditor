@@ -61,11 +61,24 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewModel {
 	items := []ItemViewModel{}
 	
-	// Common Items
-	for _, item := range data.CommonItems {
-		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF { continue }
-		if itemID, ok := gaMap[item.GaItemHandle]; ok {
-			if itemID == 110000 { continue } // Filter Unarmed
+	processItem := func(item core.InventoryItem) {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF { return }
+		
+		var itemID uint32
+		var ok bool
+		
+		typeBits := item.GaItemHandle & 0xF0000000
+		
+		// For Accessories and Items, the handle IS the ID (with prefix)
+		if typeBits == core.ItemTypeAccessory || typeBits == core.ItemTypeItem {
+			itemID = item.GaItemHandle
+			ok = true
+		} else {
+			itemID, ok = gaMap[item.GaItemHandle]
+		}
+
+		if ok {
+			if itemID == 110000 { return } // Filter Unarmed
 			items = append(items, ItemViewModel{
 				Handle:   item.GaItemHandle,
 				ID:       itemID,
@@ -76,18 +89,14 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 		}
 	}
 
+	// Common Items
+	for _, item := range data.CommonItems {
+		processItem(item)
+	}
+
 	// Key Items
 	for _, item := range data.KeyItems {
-		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF { continue }
-		if itemID, ok := gaMap[item.GaItemHandle]; ok {
-			items = append(items, ItemViewModel{
-				Handle:   item.GaItemHandle,
-				ID:       itemID,
-				Name:     db.GetItemName(itemID),
-				Category: db.GetItemCategory(itemID),
-				Quantity: item.Quantity,
-			})
-		}
+		processItem(item)
 	}
 
 	return items
