@@ -70,6 +70,12 @@ type SaveSlot struct {
 	MagicOffset      int
 	InventoryEnd     int
 	EventFlagsOffset int
+
+	// Dynamic offsets from Python logic
+	PlayerDataOffset   int
+	FaceDataOffset     int
+	StorageBoxOffset   int
+	IngameTimerOffset  int
 }
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
@@ -87,12 +93,52 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	startGa := 0x310
 	if platform == "PS4" { startGa = 0x20 }
 	s.scanGaItems(startGa)
+	s.calculateDynamicOffsets()
 	s.mapInventory()
 
 	if platform == "PC" {
 		s.SteamID = binary.LittleEndian.Uint64(s.Data[0x280000-8:])
 	}
 	return nil
+}
+
+func (s *SaveSlot) calculateDynamicOffsets() {
+	// Based on Python save_struct logic
+	// 1. GA_item_handle_size is our InventoryEnd
+	s.PlayerDataOffset = s.InventoryEnd + 0x1B0
+	spEffect := s.PlayerDataOffset + 0xD0
+	equipedItemIndex := spEffect + 0x58
+	activeEquipedItems := equipedItemIndex + 0x1c
+	equipedItemsID := activeEquipedItems + 0x58
+	activeEquipedItemsGa := equipedItemsID + 0x58
+	inventoryHeld := activeEquipedItemsGa + 0x9010
+	equipedSpells := inventoryHeld + 0x74
+	equipedItems := equipedSpells + 0x8c
+	equipedGestures := equipedItems + 0x18
+	
+	projcSize := binary.LittleEndian.Uint32(s.Data[equipedGestures:])
+	equipedProjectile := equipedGestures + int(projcSize*8+4)
+	equipedArmaments := equipedProjectile + 0x9C
+	equipePhysics := equipedArmaments + 0xC
+	s.FaceDataOffset = equipePhysics + 0x12f
+	s.StorageBoxOffset = s.FaceDataOffset + 0x6010
+	gestures := s.StorageBoxOffset + 0x100
+	
+	unlockedRegionSize := binary.LittleEndian.Uint32(s.Data[gestures:])
+	unlockedRegion := gestures + int(unlockedRegionSize*4+4)
+	horse := unlockedRegion + 0x28 + 0x1
+	bloodStain := horse + 0x44 + 0x8
+	menuProfile := bloodStain + 0x1008 + 0x34
+	gaItemsDataOther := menuProfile + 0x1b588
+	tutorialData := gaItemsDataOther + 0x408 + 0x3
+	totalDeath := tutorialData + 0x4
+	charType := totalDeath + 0x4
+	inOnline := charType + 0x1
+	onlineCharType := inOnline + 0x4
+	lastRestedGrace := onlineCharType + 0x4
+	notAloneFlag := lastRestedGrace + 0x1
+	s.IngameTimerOffset = notAloneFlag + 0x4 + 0x4
+	s.EventFlagsOffset = s.IngameTimerOffset + 0x1bf99f + 0x1
 }
 
 func (s *SaveSlot) mapStats() {
@@ -141,15 +187,16 @@ func (s *SaveSlot) scanGaItems(start int) {
 
 func (s *SaveSlot) mapInventory() {
 	if s.InventoryEnd == 0 { return }
-	playerData := s.InventoryEnd + 0x1B0
-	invStart := playerData + 0xD0 + 0x58 + 0x1C + 0x58 + 0x58
+	
+	// invStart calculation from Python: active_equiped_items_ga + 0x9010
+	// which is inventoryHeld in our calculateDynamicOffsets
+	inventoryHeld := s.InventoryEnd + 0x1B0 + 0xD0 + 0x58 + 0x1C + 0x58 + 0x58 + 0x9010
+	
 	ir := NewReader(s.Data)
-	ir.Seek(int64(invStart), 0)
+	ir.Seek(int64(inventoryHeld), 0)
 	s.Inventory.Read(ir, 0xa80, 0x180)
 	
-	faceData := invStart + (0xa80+0x180)*10 + 0x74 + 0x8c + 0x18
-	storageStart := faceData + 0x6010
-	ir.Seek(int64(storageStart), 0)
+	ir.Seek(int64(s.StorageBoxOffset), 0)
 	s.Storage.Read(ir, 0x780, 0x80)
 }
 
