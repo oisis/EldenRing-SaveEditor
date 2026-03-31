@@ -4,6 +4,7 @@ import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
 import {CharacterImporter} from './components/CharacterImporter';
+import {SettingsTab} from './components/SettingsTab';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -13,10 +14,13 @@ function App() {
     const [charNames, setCharacterNames] = useState<string[]>([]);
     const [selectedChar, setSelectedChar] = useState<number>(0);
     const [activeTab, setActiveTab] = useState('character');
-    const [theme, setTheme] = useState<Theme>('light');
-    const [targetPlatform, setTargetPlatform] = useState<string>('PC');
+    const [theme, setTheme] = useState<Theme>('dark');
+    const [columnVisibility, setColumnVisibility] = useState({
+        id: false,
+        category: true
+    });
 
-    const tabs = ['character', 'inventory', 'world progress', 'importer'];
+    const tabs = ['character', 'inventory', 'world progress', 'importer', 'settings'];
 
     useEffect(() => {
         const root = document.documentElement;
@@ -33,15 +37,6 @@ function App() {
             const plat = await SelectAndOpenSave();
             setPlatform(plat);
             refreshSlots();
-        } catch (err) {
-            alert(err);
-        }
-    };
-
-    const handleExportSave = async () => {
-        try {
-            await WriteSave(targetPlatform);
-            alert(`Save exported successfully as ${targetPlatform}!`);
         } catch (err) {
             alert(err);
         }
@@ -71,19 +66,6 @@ function App() {
                             </div>
                             <h1 className="text-[10px] font-black uppercase tracking-[0.2em] leading-none">Editor</h1>
                         </div>
-                    </div>
-
-                    {/* Theme Selector */}
-                    <div className="flex bg-muted/20 p-1 rounded-lg border border-border/50">
-                        {(['light', 'dark', 'system'] as Theme[]).map(t => (
-                            <button
-                                key={t}
-                                onClick={() => setTheme(t)}
-                                className={`flex-1 py-1.5 rounded-md text-[8px] font-black uppercase tracking-widest transition-all ${theme === t ? 'bg-background text-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground'}`}
-                            >
-                                {t}
-                            </button>
-                        ))}
                     </div>
 
                     <button 
@@ -128,27 +110,6 @@ function App() {
                 </div>
                 
                 <div className="p-4 border-t border-border bg-muted/5 space-y-4">
-                    {platform && (
-                        <div className="space-y-3">
-                            <div className="flex bg-muted/20 p-1 rounded-lg border border-border/50">
-                                {(['PC', 'PS4'] as const).map(p => (
-                                    <button
-                                        key={p}
-                                        onClick={() => setTargetPlatform(p)}
-                                        className={`flex-1 py-1.5 rounded-md text-[8px] font-black uppercase tracking-widest transition-all ${targetPlatform === p ? 'bg-background text-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground'}`}
-                                    >
-                                        {p === 'PC' ? 'Steam (PC)' : 'PlayStation'}
-                                    </button>
-                                ))}
-                            </div>
-                            <button 
-                                onClick={handleExportSave}
-                                className="w-full bg-primary text-primary-foreground font-black py-3 rounded-lg text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all animate-in slide-in-from-bottom-2 duration-500"
-                            >
-                                Export Save
-                            </button>
-                        </div>
-                    )}
                     <div className="flex items-center justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
                         <span>v0.1.0 Alpha</span>
                         <span>System Ready</span>
@@ -184,7 +145,19 @@ function App() {
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar relative">
                     <div className="max-w-5xl mx-auto p-6 pb-24">
-                        {!platform ? (
+                        {activeTab === 'settings' ? (
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <SettingsTab 
+                                    theme={theme} 
+                                    setTheme={setTheme} 
+                                    columnVisibility={columnVisibility} 
+                                    setColumnVisibility={setColumnVisibility}
+                                    platform={platform}
+                                    setPlatform={setPlatform}
+                                    refreshSlots={refreshSlots}
+                                />
+                            </div>
+                        ) : !platform ? (
                             <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-700">
                                 <div className="w-16 h-16 bg-muted/10 rounded-2xl flex items-center justify-center border border-border/50">
                                     <svg className="w-8 h-8 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
@@ -200,7 +173,7 @@ function App() {
                         ) : (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} />}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} columnVisibility={columnVisibility} />}
                                 {activeTab === 'world progress' && <WorldProgressTab />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>

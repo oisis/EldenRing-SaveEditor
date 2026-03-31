@@ -4,9 +4,13 @@ import {db, vm} from '../../wailsjs/go/models';
 
 interface InventoryTabProps {
     charIndex: number;
+    columnVisibility: {
+        id: boolean;
+        category: boolean;
+    };
 }
 
-export function InventoryTab({ charIndex }: InventoryTabProps) {
+export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps) {
     const [mode, setMode] = useState<'database' | 'character' | 'storage'>('character');
     const [category, setCategory] = useState('weapons');
     const [search, setSearch] = useState('');
@@ -109,9 +113,9 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
-                                <th className="px-6 py-4">ID (Hex)</th>
+                                {columnVisibility.id && <th className="px-6 py-4">ID (Hex)</th>}
                                 <th className="px-6 py-4">Designation</th>
-                                <th className="px-6 py-4">{mode === 'database' ? 'Action' : 'Category'}</th>
+                                {columnVisibility.category && <th className="px-6 py-4">{mode === 'database' ? 'Action' : 'Category'}</th>}
                                 {mode !== 'database' && <th className="px-6 py-4 text-right">Qty</th>}
                                 {mode === 'database' && <th className="px-6 py-4 text-right">Action</th>}
                             </tr>
@@ -130,9 +134,11 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                 filteredOwnedItems.length > 0 ? (
                                     filteredOwnedItems.map((item, idx) => (
                                         <tr key={`${item.handle}-${idx}`} className="hover:bg-muted/20 transition-colors group">
-                                            <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
-                                                {item.id.toString(16).toUpperCase().padStart(8, '0')}
-                                            </td>
+                                            {columnVisibility.id && (
+                                                <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
+                                                    {item.id.toString(16).toUpperCase().padStart(8, '0')}
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4 font-bold text-foreground text-xs">
                                                 {item.name.startsWith('Unknown Item') ? (
                                                     <span className="text-muted-foreground italic font-medium opacity-60">
@@ -140,11 +146,13 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                                     </span>
                                                 ) : item.name}
                                             </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-muted/50 text-muted-foreground">
-                                                    {item.category}
-                                                </span>
-                                            </td>
+                                            {columnVisibility.category && (
+                                                <td className="px-6 py-4">
+                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-muted/50 text-muted-foreground">
+                                                        {item.category}
+                                                    </span>
+                                                </td>
+                                            )}
                                             <td className="px-6 py-4 text-right font-mono text-xs text-primary font-bold">
                                                 {item.quantity}
                                             </td>
@@ -152,7 +160,7 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={4} className="px-6 py-24 text-center">
+                                        <td colSpan={5} className="px-6 py-24 text-center">
                                             <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                         </td>
                                     </tr>
@@ -160,9 +168,11 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                             ) : filteredDbItems.length > 0 ? (
                                 filteredDbItems.map(item => (
                                     <tr key={item.id} className="hover:bg-muted/20 transition-colors group">
-                                        <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
-                                            {item.id.toString(16).toUpperCase().padStart(8, '0')}
-                                        </td>
+                                        {columnVisibility.id && (
+                                            <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
+                                                {item.id.toString(16).toUpperCase().padStart(8, '0')}
+                                            </td>
+                                        )}
                                         <td className="px-6 py-4 font-bold text-foreground text-xs">
                                             {item.name.startsWith('Unknown Item') ? (
                                                 <span className="text-muted-foreground italic font-medium opacity-60">
@@ -179,7 +189,7 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={3} className="px-6 py-24 text-center">
+                                    <td colSpan={5} className="px-6 py-24 text-center">
                                         <p className="text-xs text-muted-foreground font-medium italic">No results found in the Lands Between.</p>
                                     </td>
                                 </tr>
@@ -199,3 +209,4 @@ export function InventoryTab({ charIndex }: InventoryTabProps) {
         </div>
     );
 }
+
