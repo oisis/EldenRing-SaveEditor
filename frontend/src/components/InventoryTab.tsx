@@ -26,7 +26,34 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
 
     const getItemIconPath = (name: string, category: string) => {
-        const cleanName = name.toLowerCase()
+        let cleanName = name.toLowerCase();
+
+        // 1. Remove common prefixes
+        cleanName = cleanName
+            .replace(/^ash of war: /i, '')
+            .replace(/^sorcery: /i, '')
+            .replace(/^incantation: /i, '');
+
+        // 2. Remove weapon affixes (only if it's a weapon)
+        if (category.toLowerCase() === 'weapon') {
+            const affixes = [
+                'heavy ', 'keen ', 'quality ', 'fire ', 'flame art ', 
+                'lightning ', 'sacred ', 'magic ', 'cold ', 'poison ', 
+                'blood ', 'occult ', 'bloody '
+            ];
+            for (const affix of affixes) {
+                if (cleanName.startsWith(affix)) {
+                    cleanName = cleanName.substring(affix.length);
+                    break;
+                }
+            }
+        }
+
+        // 3. Remove upgrade levels (+10, etc.)
+        cleanName = cleanName.replace(/\s+\+\d+$/, '');
+
+        // 4. Final character normalization
+        cleanName = cleanName
             .replace(/'/g, '')
             .replace(/\s+/g, '_')
             .replace(/\(/g, '')
@@ -35,7 +62,8 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             .replace(/,/g, '')
             .replace(/\[/g, '')
             .replace(/\]/g, '')
-            .replace(/:/g, '');
+            .replace(/:/g, '')
+            .replace(/!/g, '');
         
         let catDir = category.toLowerCase();
         if (catDir === 'weapon') catDir = 'weapons';
@@ -44,8 +72,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         else if (catDir === 'ash of war') catDir = 'ashes';
         else if (catDir === 'talisman') catDir = 'talismans';
         
-        const path = `items/${catDir}/${cleanName}.png`;
-        return path;
+        return `items/${catDir}/${cleanName}.png`;
     };
 
     useEffect(() => {
