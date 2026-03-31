@@ -23,6 +23,31 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [sortCol, setSortCol] = useState<string>('name');
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
+    const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
+
+    const getItemIconPath = (name: string, category: string) => {
+        const cleanName = name.toLowerCase()
+            .replace(/'/g, '')
+            .replace(/\s+/g, '_')
+            .replace(/\(/g, '')
+            .replace(/\)/g, '')
+            .replace(/\+/g, '')
+            .replace(/,/g, '')
+            .replace(/\[/g, '')
+            .replace(/\]/g, '')
+            .replace(/:/g, '');
+        
+        let catDir = category.toLowerCase();
+        if (catDir === 'weapon') catDir = 'weapons';
+        else if (catDir === 'armor') catDir = 'armor';
+        else if (catDir === 'item') catDir = 'goods';
+        else if (catDir === 'ash of war') catDir = 'ashes';
+        else if (catDir === 'talisman') catDir = 'talismans';
+        
+        const path = `items/${catDir}/${cleanName}.png`;
+        return path;
+    };
+
     useEffect(() => {
         setLoading(true);
         if (mode === 'database') {
@@ -86,6 +111,31 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Icon Popover */}
+            {selectedIcon && (
+                <div 
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300"
+                    onClick={() => setSelectedIcon(null)}
+                >
+                    <div className="card p-8 flex flex-col items-center space-y-6 max-w-sm w-full mx-4 shadow-2xl shadow-primary/20 border-primary/20 animate-in zoom-in-95 duration-300">
+                        <div className="relative group">
+                            <div className="absolute -inset-4 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
+                            <img 
+                                src={selectedIcon.path} 
+                                alt={selectedIcon.name}
+                                className="w-48 h-48 object-contain relative z-10 drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]"
+                                onError={(e) => (e.currentTarget.src = '/src/assets/images/logo-universal.png')}
+                            />
+                        </div>
+                        <div className="text-center space-y-2">
+                            <h3 className="text-lg font-black uppercase tracking-widest text-foreground">{selectedIcon.name}</h3>
+                            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.3em]">Item Preview</p>
+                        </div>
+                        <button className="text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">Click anywhere to close</button>
+                    </div>
+                </div>
+            )}
+
             {/* Mode Toggle & Search Bar */}
             <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex bg-muted/30 p-1 rounded-lg border border-border w-full md:w-auto">
@@ -188,11 +238,22 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                 </td>
                                             )}
                                             <td className="px-6 py-4 font-bold text-foreground text-xs">
-                                                {item.name.startsWith('Unknown Item') ? (
-                                                    <span className="text-muted-foreground italic font-medium opacity-60">
+                                                <div 
+                                                    className="flex items-center space-x-3 cursor-pointer group/item"
+                                                    onClick={() => setSelectedIcon({ name: item.name, path: getItemIconPath(item.name, item.category) })}
+                                                >
+                                                    <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
+                                                        <img 
+                                                            src={getItemIconPath(item.name, item.category)} 
+                                                            alt="" 
+                                                            className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
+                                                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                        />
+                                                    </div>
+                                                    <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
                                                         {item.name}
                                                     </span>
-                                                ) : item.name}
+                                                </div>
                                             </td>
                                             {columnVisibility.category && (
                                                 <td className="px-6 py-4">
@@ -222,11 +283,22 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                             </td>
                                         )}
                                         <td className="px-6 py-4 font-bold text-foreground text-xs">
-                                            {item.name.startsWith('Unknown Item') ? (
-                                                <span className="text-muted-foreground italic font-medium opacity-60">
+                                            <div 
+                                                className="flex items-center space-x-3 cursor-pointer group/item"
+                                                onClick={() => setSelectedIcon({ name: item.name, path: getItemIconPath(item.name, category) })}
+                                            >
+                                                <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
+                                                    <img 
+                                                        src={getItemIconPath(item.name, category)} 
+                                                        alt="" 
+                                                        className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
+                                                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                    />
+                                                </div>
+                                                <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
                                                     {item.name}
                                                 </span>
-                                            ) : item.name}
+                                            </div>
                                         </td>
                                         <td colSpan={2} className="px-6 py-4 text-right">
                                             <button className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors px-3 py-1 border border-transparent hover:border-primary/30 rounded">
@@ -257,4 +329,3 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         </div>
     );
 }
-
