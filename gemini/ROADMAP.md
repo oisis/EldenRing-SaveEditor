@@ -90,3 +90,25 @@
 - [x] **8.3. UI Implementation**
     - [x] Create searchable inventory list in `InventoryTab.tsx`
     - [x] Add category filters (Weapons, Armor, Talismans, Goods)
+
+## Phase 9: PvP Optimization & Advanced Tweaks (In Progress) 🛠
+- [ ] **9.1. Faster Invasions (Meliodas Method)**
+    - [ ] Research exact offsets for `NetworkParam` in `UserData11` (Regulation block)
+    - [ ] Implement matchmaking interval reduction (20s -> 4s)
+    - [ ] Implement search scope expansion (Global region polling)
+    - [ ] Add "Enable Faster Invasions" toggle in Settings tab
+- [ ] **9.2. World Progress Automation**
+    - [ ] Add "Unlock All Invasion Regions" button
+    - [ ] Add "Activate All Summoning Pools" button
+- [ ] **9.3. Matchmaking Safety Tools**
+    - [ ] Implement Weapon Level scanner and "Safe De-leveling" logic
+
+---
+
+### Technical Note: Faster Invasions (Meliodas Method)
+A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
+- **Refresh Interval**: Reduced from 20s to 4s.
+- **Search Scope**: Increased simultaneous region checks for "Near/Far" invasions.
+- **Location**: `UserData11` (Offset `0x1960070` on PC).
+- **Status**: Researching exact byte offsets for automated implementation.
+
