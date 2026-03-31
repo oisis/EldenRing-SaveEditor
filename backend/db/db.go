@@ -22,14 +22,20 @@ type GraceEntry struct {
 
 // GetItemName returns the name of an item by its ID, searching across all categories.
 func GetItemName(id uint32) string {
+	// Normalize ID: If it has a handle prefix (0x8), treat it as a weapon ID (0x0)
+	normalizedID := id
+	if (id & 0xF0000000) == 0x80000000 {
+		normalizedID = id & 0x0FFFFFFF
+	}
+
 	// 1. Try Weapons with upgrade masking
-	if (id & 0xf0000000) == 0 {
-		baseID := id
-		if id > 100000 {
-			baseID = (id / 100) * 100
+	if (normalizedID & 0xF0000000) == 0 {
+		baseID := normalizedID
+		if normalizedID > 100000 {
+			baseID = (normalizedID / 100) * 100
 		}
 		if name, ok := data.Weapons[baseID]; ok && name != "" {
-			upgrade := id % 100
+			upgrade := normalizedID % 100
 			if upgrade > 0 {
 				return fmt.Sprintf("%s +%d", name, upgrade)
 			}
@@ -62,17 +68,16 @@ func GetItemName(id uint32) string {
 
 // GetItemCategory returns the category name based on the item ID prefix.
 func GetItemCategory(id uint32) string {
-	prefix := id & 0xf0000000
-	switch prefix {
+	switch id & 0xF0000000 {
 	case 0x00000000:
 		return "Weapon"
 	case 0x10000000:
 		return "Armor"
-	case 0xA0000000:
+	case 0x20000000:
 		return "Talisman"
-	case 0xB0000000:
+	case 0x40000000:
 		return "Item"
-	case 0xC0000000:
+	case 0x80000000:
 		return "Ash of War"
 	default:
 		return "Unknown"

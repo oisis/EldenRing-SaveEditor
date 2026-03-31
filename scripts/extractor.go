@@ -59,21 +59,46 @@ func extractNamesFromJSON(filename, varName string) {
 
 	items := make(map[uint32]string)
 	for name, idHexStr := range data {
-		// Convert "80 97 FA 01" to a byte slice
 		byteStr := strings.ReplaceAll(idHexStr, " ", "")
 		byteSlice, err := hex.DecodeString(byteStr)
 		if err != nil {
-			fmt.Printf("⚠️ Skipping invalid hex '%s' for item '%s'\n", idHexStr, name)
 			continue
 		}
 
-		// Interpret bytes as a little-endian uint32
-		if len(byteSlice) != 4 {
-			// Some items like 'Unarmed' might have different lengths, skip them.
-			continue
+		var rawID uint32
+		if len(byteSlice) == 4 {
+			rawID = binary.LittleEndian.Uint32(byteSlice)
+		} else if len(byteSlice) < 4 {
+			padded := make([]byte, 4)
+			copy(padded, byteSlice)
+			rawID = binary.LittleEndian.Uint32(padded)
+		} else {
+			rawID = binary.LittleEndian.Uint32(byteSlice[:4])
 		}
-		id := binary.LittleEndian.Uint32(byteSlice)
-		items[id] = name
+
+		// Clean ID from any existing prefix
+		baseID := rawID & 0x0FFFFFFF
+		
+		// Generate variants based on category
+		switch varName {
+		case "Weapons":
+			items[baseID] = name             // 0x0...
+			items[baseID|0x80000000] = name  // 0x8... (Handle)
+		case "Armors":
+			items[baseID|0x10000000] = name  // 0x1...
+			items[baseID|0x90000000] = name  // 0x9... (Handle)
+		case "Talismans":
+			items[baseID|0x20000000] = name  // 0x2...
+			items[baseID|0xA0000000] = name  // 0xA... (Handle)
+		case "Items":
+			items[baseID|0x40000000] = name  // 0x4...
+			items[baseID|0xB0000000] = name  // 0xB... (Handle)
+		case "Aows":
+			items[baseID|0x80000000] = name  // 0x8...
+			items[baseID|0xC0000000] = name  // 0xC... (Handle)
+		default:
+			items[rawID] = name
+		}
 	}
 
 	generateGoMap(varName, items)
@@ -112,8 +137,81 @@ func extractGracesFromJSON(filename, varName string) {
 	fmt.Printf("   ✓ Extracted %d entries for %s\n", len(graces), varName)
 }
 
+func getHardcodedItems(varName string) map[uint32]string {
+	switch varName {
+	case "Armors":
+		return map[uint32]string{
+			0x10002710: "Naked (Head)",
+			0x10002774: "Naked (Body)",
+			0x100027D8: "Naked (Arms)",
+			0x1000283C: "Naked (Legs)",
+		}
+	case "Items":
+		return map[uint32]string{
+			0x40000064: "Tarnished's Furled Finger (Base)",
+			0x40000065: "Small Golden Effigy (Base)",
+			0x40000066: "Small Golden Effigy (Base Alt)",
+			0x40000067: "Finger Severer (Base)",
+			0x40000068: "Blue Cipher Ring (Base)",
+			0x40000069: "White Cipher Ring (Base)",
+			0x4000006C: "Duelist's Furled Finger (Base Alt)",
+			0x4000006D: "Duelist's Furled Finger (Base)",
+			0x4000006E: "Small Red Effigy (Base)",
+			0x4000006F: "Small Red Effigy (Base Alt)",
+			0x40000070: "Finger Severer (Base Alt)",
+			0x40000082: "Duelist's Furled Finger (Alt)",
+			0x40000096: "Tarnished's Furled Finger (Alt)",
+			0x400000A6: "Vision of Grace",
+			0x400000FA: "Flask of Wondrous Physick (Base)",
+			0x40001FBF: "About Leveling Up",
+			0x40002020: "About Sites of Grace",
+			0x40002021: "About Map",
+			0x400021FC: "About Fast Travel",
+			0x400021FD: "About Map Gaps (Alt 3)",
+			0x400021FE: "About Summoning Pools",
+			0x400021FF: "About Stakes of Marika",
+			0x40002200: "About Compass",
+			0x40002201: "About Map Gaps (Alt 4)",
+			0x40002203: "About Markers",
+			0x40002204: "About Beacons",
+			0x40002205: "About Map Symbols",
+			0x40002206: "About Map Gaps (Alt)",
+			0x40002207: "About Bird's-Eye Telescopes",
+			0x40002208: "About Map Gaps",
+			0x40002209: "About Map Gaps (Alt 2)",
+			0x4000220B: "About Flask of Wondrous Physick",
+			0x4000220D: "About Great Runes",
+			0x400023B2: "About Dodging",
+			0x400023B4: "About Wielding Armaments",
+			0x400023B5: "About Pouch",
+			0x400023B6: "About Adding to Pouch",
+			0x400023BE: "About Spirit Calling Bell",
+			0x400023BF: "About Summoning Spirits",
+			0x400023C0: "About Multiplayer",
+			0x400023C1: "About Cooperative Play",
+			0x401EA3DF: "About Item Crafting",
+		}
+	case "Weapons":
+		return map[uint32]string{
+			0x02FB1790: "Weathered Straight Sword",
+			0x030AA7F0: "Weathered Straight Sword (Alt)",
+			0x03199C10: "Weathered Straight Sword (Alt 2)",
+			0x0328DE50: "Weathered Straight Sword (Alt 3)",
+			0x000138E4: "Torch",
+			0x800138E4: "Torch (Handle)",
+		}
+	}
+	return nil
+}
+
 // generateGoMap writes the extracted map to a .go file.
 func generateGoMap(varName string, data map[uint32]string) {
+	// Add hardcoded items
+	hardcoded := getHardcodedItems(varName)
+	for id, name := range hardcoded {
+		data[id] = name
+	}
+
 	outputPath := "backend/db/data/" + strings.ToLower(varName) + ".go"
 	out, err := os.Create(outputPath)
 	if err != nil {

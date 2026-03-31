@@ -60,25 +60,34 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 
 func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewModel {
 	items := []ItemViewModel{}
-	
+
 	processItem := func(item core.InventoryItem) {
-		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF { return }
-		
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			return
+		}
+
 		var itemID uint32
 		var ok bool
-		
+
 		typeBits := item.GaItemHandle & 0xF0000000
-		
-		// For Accessories and Items, the handle IS the ID (with prefix)
-		if typeBits == core.ItemTypeAccessory || typeBits == core.ItemTypeItem {
-			itemID = item.GaItemHandle
+
+		// For Accessories and Items, the handle often contains the ID information.
+		// We normalize it to the standard item prefixes (0x2 for Talisman, 0x4 for Item).
+		if typeBits == core.ItemTypeAccessory {
+			itemID = (item.GaItemHandle & 0x0FFFFFFF) | 0x20000000
+			ok = true
+		} else if typeBits == core.ItemTypeItem {
+			itemID = (item.GaItemHandle & 0x0FFFFFFF) | 0x40000000
 			ok = true
 		} else {
+			// For Weapons and Armor, we MUST use the GaMap to find the real ItemID.
 			itemID, ok = gaMap[item.GaItemHandle]
 		}
 
 		if ok {
-			if itemID == 110000 { return } // Filter Unarmed
+			if itemID == 110000 {
+				return
+			} // Filter Unarmed
 			items = append(items, ItemViewModel{
 				Handle:   item.GaItemHandle,
 				ID:       itemID,
@@ -101,7 +110,6 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 
 	return items
 }
-
 func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	data := &slot.Player
 	data.Level = vm.Level

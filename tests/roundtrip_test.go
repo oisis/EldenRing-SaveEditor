@@ -27,7 +27,7 @@ func TestRoundTripPS4(t *testing.T) {
 	// 2. Write to a temporary file
 	tmpPath := "data/ps4/roundtrip_test.dat"
 	os.MkdirAll("data/ps4", 0755)
-	if err := save.Write(tmpPath, save.Platform); err != nil {
+	if err := save.SaveFile(tmpPath); err != nil {
 		t.Fatalf("Failed to write save: %v", err)
 	}
 	defer os.Remove(tmpPath)
@@ -74,7 +74,7 @@ func TestRoundTripPC(t *testing.T) {
 	// 2. Write to a temporary file
 	tmpPath := "data/pc/roundtrip_test.sl2"
 	os.MkdirAll("data/pc", 0755)
-	if err := save.Write(tmpPath, save.Platform); err != nil {
+	if err := save.SaveFile(tmpPath); err != nil {
 		t.Fatalf("Failed to write save: %v", err)
 	}
 	defer os.Remove(tmpPath)
@@ -115,9 +115,10 @@ func TestConversionPS4ToPC(t *testing.T) {
 	}
 
 	// 2. Convert to PC
+	ps4Save.Platform = core.PlatformPC
 	tmpPath := "data/pc/conversion_test.sl2"
 	os.MkdirAll("data/pc", 0755)
-	if err := ps4Save.Write(tmpPath, core.PlatformPC); err != nil {
+	if err := ps4Save.SaveFile(tmpPath); err != nil {
 		t.Fatalf("Failed to write as PC: %v", err)
 	}
 	defer os.Remove(tmpPath)
@@ -135,12 +136,12 @@ func TestConversionPS4ToPC(t *testing.T) {
 	// 4. Verify data preservation (e.g., Name of first active slot)
 	for i := 0; i < 10; i++ {
 		if ps4Save.ActiveSlots[i] {
-			ps4Name := core.UTF16ToString(ps4Save.Slots[i].PlayerGameData.CharacterName[:])
-			pcName := core.UTF16ToString(pcSave.Slots[i].PlayerGameData.CharacterName[:])
+			ps4Name := core.UTF16ToString(ps4Save.Slots[i].Player.CharacterName[:])
+			pcName := core.UTF16ToString(pcSave.Slots[i].Player.CharacterName[:])
 			if ps4Name != pcName {
 				t.Errorf("Name mismatch after conversion at slot %d: expected %s, got %s", i, ps4Name, pcName)
 			}
-			if ps4Save.Slots[i].PlayerGameData.Level != pcSave.Slots[i].PlayerGameData.Level {
+			if ps4Save.Slots[i].Player.Level != pcSave.Slots[i].Player.Level {
 				t.Errorf("Level mismatch after conversion at slot %d", i)
 			}
 		}
@@ -160,9 +161,10 @@ func TestConversionPCToPS4(t *testing.T) {
 	}
 
 	// 2. Convert to PS4
+	pcSave.Platform = core.PlatformPS
 	tmpPath := "data/ps4/conversion_test.dat"
 	os.MkdirAll("data/ps4", 0755)
-	if err := pcSave.Write(tmpPath, core.PlatformPS); err != nil {
+	if err := pcSave.SaveFile(tmpPath); err != nil {
 		t.Fatalf("Failed to write as PS4: %v", err)
 	}
 	defer os.Remove(tmpPath)
@@ -180,8 +182,8 @@ func TestConversionPCToPS4(t *testing.T) {
 	// 4. Verify data preservation
 	for i := 0; i < 10; i++ {
 		if pcSave.ActiveSlots[i] {
-			pcName := core.UTF16ToString(pcSave.Slots[i].PlayerGameData.CharacterName[:])
-			ps4Name := core.UTF16ToString(ps4Save.Slots[i].PlayerGameData.CharacterName[:])
+			pcName := core.UTF16ToString(pcSave.Slots[i].Player.CharacterName[:])
+			ps4Name := core.UTF16ToString(ps4Save.Slots[i].Player.CharacterName[:])
 			if pcName != ps4Name {
 				t.Errorf("Name mismatch after conversion at slot %d: expected %s, got %s", i, pcName, ps4Name)
 			}
