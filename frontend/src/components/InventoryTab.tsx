@@ -12,7 +12,7 @@ interface InventoryTabProps {
 
 export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps) {
     const [mode, setMode] = useState<'database' | 'character' | 'storage'>('character');
-    const [category, setCategory] = useState('weapons');
+    const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
@@ -78,7 +78,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     useEffect(() => {
         setLoading(true);
         if (mode === 'database') {
-            GetItemList(category).then(res => {
+            // If mode is database and category is 'all', default to 'weapons'
+            const fetchCat = category === 'all' ? 'weapons' : category;
+            GetItemList(fetchCat).then(res => {
                 setDbItems(res || []);
                 setLoading(false);
             });
@@ -125,11 +127,23 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     ));
 
     const activeItems = mode === 'character' ? charInventory : charStorage;
-    const filteredOwnedItems = sortItems(activeItems.filter(item => 
-        item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.category.toLowerCase().includes(search.toLowerCase()) ||
-        item.id.toString(16).toLowerCase().includes(search.toLowerCase())
-    ));
+    const filteredOwnedItems = sortItems(activeItems.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
+                            item.category.toLowerCase().includes(search.toLowerCase()) ||
+                            item.id.toString(16).toLowerCase().includes(search.toLowerCase());
+        
+        if (category === 'all') return matchesSearch;
+        
+        // Map internal category names to selector values
+        const itemCat = item.category.toLowerCase();
+        if (category === 'weapons' && itemCat === 'weapon') return matchesSearch;
+        if (category === 'armors' && itemCat === 'armor') return matchesSearch;
+        if (category === 'items' && itemCat === 'item') return matchesSearch;
+        if (category === 'talismans' && itemCat === 'talisman') return matchesSearch;
+        if (category === 'aows' && itemCat === 'ash of war') return matchesSearch;
+        
+        return false;
+    }));
 
     const SortIndicator = ({ col }: { col: string }) => {
         if (sortCol !== col) return <span className="ml-1 opacity-20">↕</span>;
@@ -186,23 +200,23 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     </button>
                 </div>
 
-                {mode === 'database' && (
-                    <div className="relative w-full md:w-48">
-                        <select 
-                            value={category}
-                            onChange={e => setCategory(e.target.value)}
-                            className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
-                        >
-                            <option value="weapons">Weapons</option>
-                            <option value="armors">Armors</option>
-                            <option value="items">Items</option>
-                            <option value="talismans">Talismans</option>
-                        </select>
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
-                        </div>
+                <div className="relative w-full md:w-48">
+                    <select 
+                        value={category}
+                        onChange={e => setCategory(e.target.value)}
+                        className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
+                    >
+                        {mode !== 'database' && <option value="all">All Categories</option>}
+                        <option value="weapons">Weapons</option>
+                        <option value="armors">Armors</option>
+                        <option value="items">Items</option>
+                        <option value="talismans">Talismans</option>
+                        <option value="aows">Ashes of War</option>
+                    </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
-                )}
+                </div>
                 
                 <div className="relative flex-1">
                     <input 
@@ -234,7 +248,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                 </th>
                                 {columnVisibility.category && (
                                     <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('category')}>
-                                        {mode === 'database' ? 'Action' : 'Category'} <SortIndicator col="category" />
+                                        Category <SortIndicator col="category" />
                                     </th>
                                 )}
                                 {mode !== 'database' && (
