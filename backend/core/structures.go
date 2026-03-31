@@ -113,7 +113,24 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 }
 
 func (s *SaveSlot) calculateDynamicOffsets() {
-	s.PlayerDataOffset = s.MagicOffset - 432
+	s.PlayerDataOffset = s.InventoryEnd + 0x1B0
+	
+	spEffect := s.PlayerDataOffset + 0xD0
+	equipedItemIndex := spEffect + 0x58
+	activeEquipedItems := equipedItemIndex + 0x1c
+	equipedItemsID := activeEquipedItems + 0x58
+	activeEquipedItemsGa := equipedItemsID + 0x58
+	inventoryHeld := activeEquipedItemsGa + 0x9010
+	equipedSpells := inventoryHeld + 0x74
+	equipedItems := equipedSpells + 0x8c
+	equipedGestures := equipedItems + 0x18
+	
+	equipedProjcSize := binary.LittleEndian.Uint32(s.Data[equipedGestures:])
+	equipedProjectile := equipedGestures + int(equipedProjcSize*8+4)
+	equipedArmaments := equipedProjectile + 0x9C
+	equipePhysics := equipedArmaments + 0xC
+	s.FaceDataOffset = equipePhysics + 0x12f
+	s.StorageBoxOffset = s.FaceDataOffset + 0x6010
 }
 
 func (s *SaveSlot) mapStats() {
@@ -140,18 +157,19 @@ func (s *SaveSlot) mapStats() {
 func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
-	endOffset := s.MagicOffset - 432
+	// We search until we hit the MagicPattern (Inventory Start)
+	// but we need to know where the GaItems section actually ends.
+	// Python logic: max(offsets) + 8 (or 16/21 depending on type)
 	
-	for curr+8 <= endOffset {
+	lastEnd := start
+	for curr+8 <= s.MagicOffset {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 		
 		if handle != 0 && handle != 0xFFFFFFFF {
 			s.GaMap[handle] = itemID
-		}
-		
-		typeBits := handle & 0xF0000000
-		if handle != 0 && handle != 0xFFFFFFFF {
+			
+			typeBits := handle & 0xF0000000
 			if typeBits == ItemTypeWeapon {
 				curr += 21
 			} else if typeBits == ItemTypeArmor {
@@ -159,19 +177,41 @@ func (s *SaveSlot) scanGaItems(start int) {
 			} else {
 				curr += 8
 			}
+			lastEnd = curr
 		} else {
 			curr += 8
 		}
 	}
-	s.InventoryEnd = curr
+	s.InventoryEnd = lastEnd
+}
+
+func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
+	e.CommonItems = make([]InventoryItem, count)
+	for i := 0; i < count; i++ {
+		e.CommonItems[i].GaItemHandle, _ = r.ReadU32()
+		e.CommonItems[i].Quantity, _ = r.ReadU32()
+		e.CommonItems[i].Index, _ = r.ReadU32()
+	}
+	e.KeyItems = []InventoryItem{}
 }
 
 func (s *SaveSlot) mapInventory() {
+	// Main Inventory
 	invStart := s.MagicOffset + 505
-	if invStart+0x1000 > len(s.Data) { return }
-	ir := NewReader(s.Data)
-	ir.Seek(int64(invStart), 0)
-	s.Inventory.Read(ir, 0xa80, 0x180)
+	if invStart+0x9000 < len(s.Data) {
+		ir := NewReader(s.Data)
+		ir.Seek(int64(invStart), 0)
+		s.Inventory.Read(ir, 0xa80, 0x180)
+	}
+
+	// Storage Box
+	// The storage box starts at StorageBoxOffset + 4 and has a fixed size of 0x6000 bytes (2048 items)
+	storageStart := s.StorageBoxOffset + 4
+	if storageStart+0x6000 < len(s.Data) {
+		sr := NewReader(s.Data)
+		sr.Seek(int64(storageStart), 0)
+		s.Storage.ReadStorage(sr, 2048)
+	}
 }
 
 func (s *SaveSlot) Write(platform string) []byte {

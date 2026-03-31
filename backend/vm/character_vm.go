@@ -85,9 +85,9 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 		}
 
 		if ok {
-			if itemID == 110000 {
+			if itemID == 0 || itemID == 110000 {
 				return
-			} // Filter Unarmed
+			} // Filter Unarmed and Empty
 			items = append(items, ItemViewModel{
 				Handle:   item.GaItemHandle,
 				ID:       itemID,
