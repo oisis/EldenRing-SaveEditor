@@ -18,6 +18,10 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
     const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
     const [loading, setLoading] = useState(false);
+    
+    // Sorting state
+    const [sortCol, setSortCol] = useState<string>('name');
+    const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
     useEffect(() => {
         setLoading(true);
@@ -38,17 +42,47 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         }
     }, [mode, category, charIndex]);
 
-    const filteredDbItems = dbItems.filter(item => 
+    const handleSort = (col: string) => {
+        if (sortCol === col) {
+            setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortCol(col);
+            setSortDir('asc');
+        }
+    };
+
+    const sortItems = (items: any[]) => {
+        return [...items].sort((a, b) => {
+            let valA = a[sortCol as keyof typeof a];
+            let valB = b[sortCol as keyof typeof b];
+
+            if (typeof valA === 'string') {
+                valA = valA.toLowerCase();
+                valB = valB.toLowerCase();
+            }
+
+            if (valA < valB) return sortDir === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+    };
+
+    const filteredDbItems = sortItems(dbItems.filter(item => 
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.id.toString(16).toLowerCase().includes(search.toLowerCase())
-    );
+    ));
 
     const activeItems = mode === 'character' ? charInventory : charStorage;
-    const filteredOwnedItems = activeItems.filter(item => 
+    const filteredOwnedItems = sortItems(activeItems.filter(item => 
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.category.toLowerCase().includes(search.toLowerCase()) ||
         item.id.toString(16).toLowerCase().includes(search.toLowerCase())
-    );
+    ));
+
+    const SortIndicator = ({ col }: { col: string }) => {
+        if (sortCol !== col) return <span className="ml-1 opacity-20">↕</span>;
+        return <span className="ml-1 text-primary">{sortDir === 'asc' ? '↑' : '↓'}</span>;
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
@@ -113,10 +147,24 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
-                                {columnVisibility.id && <th className="px-6 py-4">ID (Hex)</th>}
-                                <th className="px-6 py-4">Designation</th>
-                                {columnVisibility.category && <th className="px-6 py-4">{mode === 'database' ? 'Action' : 'Category'}</th>}
-                                {mode !== 'database' && <th className="px-6 py-4 text-right">Qty</th>}
+                                {columnVisibility.id && (
+                                    <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('id')}>
+                                        ID (Hex) <SortIndicator col="id" />
+                                    </th>
+                                )}
+                                <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('name')}>
+                                    Designation <SortIndicator col="name" />
+                                </th>
+                                {columnVisibility.category && (
+                                    <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('category')}>
+                                        {mode === 'database' ? 'Action' : 'Category'} <SortIndicator col="category" />
+                                    </th>
+                                )}
+                                {mode !== 'database' && (
+                                    <th className="px-6 py-4 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('quantity')}>
+                                        Qty <SortIndicator col="quantity" />
+                                    </th>
+                                )}
                                 {mode === 'database' && <th className="px-6 py-4 text-right">Action</th>}
                             </tr>
                         </thead>
