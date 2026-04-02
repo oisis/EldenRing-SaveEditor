@@ -143,10 +143,10 @@ function App() {
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar relative">
-                    <div className="max-w-5xl mx-auto p-6 pb-24">
+                <div className="flex-1 flex flex-col min-h-0 relative">
+                    <div className="w-full h-full p-6 flex flex-col min-h-0">
                         {activeTab === 'settings' ? (
-                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-y-auto custom-scrollbar pr-2">
                                 <SettingsTab 
                                     theme={theme} 
                                     setTheme={setTheme} 
@@ -158,7 +158,7 @@ function App() {
                                 />
                             </div>
                         ) : !platform ? (
-                            <div className="h-[60vh] flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-700">
+                            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-700">
                                 <div className="w-16 h-16 bg-muted/10 rounded-2xl flex items-center justify-center border border-border/50">
                                     <svg className="w-8 h-8 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
@@ -171,7 +171,7 @@ function App() {
                                 </button>
                             </div>
                         ) : (
-                            <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
+                            <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} columnVisibility={columnVisibility} />}
                                 {activeTab === 'world progress' && <WorldProgressTab />}

@@ -174,7 +174,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     };
 
     return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="flex-1 flex flex-col min-h-0 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Icon Popover */}
             {selectedIcon && (
                 <div 
@@ -201,7 +201,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             )}
 
             {/* Mode Toggle & Search Bar */}
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4 shrink-0">
                 <div className="flex bg-muted/30 p-1 rounded-lg border border-border w-full md:w-auto">
                     <button 
                         onClick={() => setMode('character')}
@@ -256,7 +256,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             </div>
 
             {/* Table Card */}
-            <div className="card overflow-hidden flex flex-col h-[550px]">
+            <div className="card overflow-hidden flex flex-col flex-1 min-h-0">
                 <div className="overflow-y-auto flex-1 custom-scrollbar">
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">

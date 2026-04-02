@@ -119,6 +119,8 @@
     - [x] Display icons in Inventory, Storage, and Database tables
     - [x] Implement "Icon Popover" for high-resolution preview
     - [x] Add icons to Character Importer and Stats tabs
+    - [x] Fix UI scaling issues (removed max-w-5xl and fixed heights for full-width/height support)
+    - [x] Improve scrollbar visibility and fix nested scrolling conflicts
 
 ---
 
