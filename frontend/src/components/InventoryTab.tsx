@@ -35,7 +35,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             .replace(/^incantation: /i, '');
 
         // 2. Remove weapon affixes (only if it's a weapon)
-        if (category.toLowerCase() === 'weapon') {
+        if (category.toLowerCase() === 'weapon' || category.toLowerCase() === 'weapons') {
             const affixes = [
                 'heavy ', 'keen ', 'quality ', 'fire ', 'flame art ', 
                 'lightning ', 'sacred ', 'magic ', 'cold ', 'poison ', 
@@ -55,6 +55,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         // 4. Final character normalization
         cleanName = cleanName
             .replace(/'/g, '')
+            // .replace(/-/g, '_') // REMOVED: Hyphens should be preserved (e.g. all-knowing)
             .replace(/\s+/g, '_')
             .replace(/\(/g, '')
             .replace(/\)/g, '')
@@ -64,15 +65,37 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             .replace(/\]/g, '')
             .replace(/:/g, '')
             .replace(/!/g, '');
+
+        // 5. Handle Altered variants for Armor
+        if ((category.toLowerCase() === 'armor' || category.toLowerCase() === 'armors') && name.toLowerCase().includes(' (altered)')) {
+            cleanName = cleanName.replace('_altered', '') + '_altered';
+        }
+
+        // 6. Special cases
+        if (cleanName === 'golden_vow' && (category.toLowerCase() === 'ash of war' || category.toLowerCase() === 'aows')) {
+            cleanName = 'ashes_of_war_golden_vow';
+        }
         
         let catDir = category.toLowerCase();
-        if (catDir === 'weapon') catDir = 'weapons';
-        else if (catDir === 'armor') catDir = 'armor';
-        else if (catDir === 'item') catDir = 'goods';
-        else if (catDir === 'ash of war') catDir = 'ashes';
-        else if (catDir === 'talisman') catDir = 'talismans';
+        if (catDir === 'weapon' || catDir === 'weapons') catDir = 'weapons';
+        else if (catDir === 'armor' || catDir === 'armors') catDir = 'armor';
+        else if (catDir === 'item' || catDir === 'items') catDir = 'goods';
+        else if (catDir === 'ash of war' || catDir === 'aows') catDir = 'ashes';
+        else if (catDir === 'talisman' || catDir === 'talismans') catDir = 'talismans';
         
         return `items/${catDir}/${cleanName}.png`;
+    };
+
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+        const target = e.currentTarget;
+        target.style.display = 'none';
+        const parent = target.parentElement;
+        if (parent) {
+            const placeholder = document.createElement('div');
+            placeholder.className = 'text-[10px] font-black text-muted-foreground/30 select-none';
+            placeholder.innerText = '?';
+            parent.appendChild(placeholder);
+        }
     };
 
     useEffect(() => {
@@ -288,7 +311,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                             src={getItemIconPath(item.name, item.category)} 
                                                             alt="" 
                                                             className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
-                                                            onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                            onError={handleImageError}
                                                         />
                                                     </div>
                                                     <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
@@ -333,7 +356,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                         src={getItemIconPath(item.name, category)} 
                                                         alt="" 
                                                         className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
-                                                        onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                        onError={handleImageError}
                                                     />
                                                 </div>
                                                 <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>

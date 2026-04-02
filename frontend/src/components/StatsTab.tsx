@@ -107,6 +107,14 @@ export function StatsTab({charIndex}: Props) {
                     <div className="card p-8 flex flex-col items-center justify-center text-center relative overflow-hidden group">
                         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-indigo-600 opacity-50" />
                         
+                        <div className="w-20 h-20 rounded-full bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden mb-6 group-hover:border-primary/50 transition-all shadow-inner">
+                            <img 
+                                src="items/armor/raging_wolf_armor.png" 
+                                alt="Character" 
+                                className="w-14 h-14 object-contain opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all"
+                            />
+                        </div>
+
                         <span className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-4">Calculated Level</span>
                         <div className="relative mb-8">
                             <span className="text-7xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-b from-foreground to-foreground/70">

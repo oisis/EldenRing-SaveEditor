@@ -83,6 +83,13 @@ export function CharacterImporter({destSlot, onComplete}: Props) {
                                         `}
                                     >
                                         <span className={`text-[9px] font-black uppercase tracking-widest ${selectedSourceSlot === i ? 'text-primary' : 'text-muted-foreground'}`}>Slot {i + 1}</span>
+                                        <div className="w-10 h-10 rounded-full bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden mb-1 group-hover:border-primary/50 transition-all">
+                                            <img 
+                                                src="items/armor/knight_helm.png" 
+                                                alt="" 
+                                                className={`w-7 h-7 object-contain opacity-60 transition-all ${selectedSourceSlot === i ? 'opacity-100 scale-110' : ''}`}
+                                            />
+                                        </div>
                                         <div className={`w-2 h-2 rounded-full ${isActive ? 'bg-green-500' : 'bg-zinc-300 dark:bg-zinc-800'}`} />
                                         {selectedSourceSlot === i && (
                                             <div className="absolute top-1 right-1">

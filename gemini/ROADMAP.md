@@ -103,6 +103,23 @@
 - [ ] **9.3. Matchmaking Safety Tools**
     - [ ] Implement Weapon Level scanner and "Safe De-leveling" logic
 
+## Phase 10: Item Icons & Visual Assets (In Progress) 🛠
+- [x] **10.1. Icon Directory Structure**
+    - [x] Setup `frontend/public/items/` with subdirectories for categories
+- [x] **10.2. Name Normalization Logic**
+    - [x] Implement `getItemIconPath` in `InventoryTab.tsx`
+    - [x] Fix edge cases for special characters (apostrophes, hyphens, dots)
+    - [x] Handle "Altered" armor variants mapping (e.g., "Banished Knight Armor (Altered)")
+    - [ ] Support for DLC item name normalization
+- [x] **10.3. Asset Coverage & Validation**
+    - [ ] Audit missing icons for DLC items
+    - [x] Implement fallback icon (placeholder) for missing assets
+    - [x] Fix broken links for items with non-standard filenames (e.g. "All-Knowing" vs "all_knowing")
+- [x] **10.4. UI Integration**
+    - [x] Display icons in Inventory, Storage, and Database tables
+    - [x] Implement "Icon Popover" for high-resolution preview
+    - [x] Add icons to Character Importer and Stats tabs
+
 ---
 
 ### Technical Note: Faster Invasions (Meliodas Method)
