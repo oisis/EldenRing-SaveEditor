@@ -73,7 +73,7 @@ export function SettingsTab({
                                 <button
                                     key={t}
                                     onClick={() => setTheme(t)}
-                                    className={`px-6 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${theme === t ? 'bg-background text-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                                    className={`px-6 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${theme === t ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                                 >
                                     {t}
                                 </button>

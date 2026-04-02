@@ -70,7 +70,7 @@ function App() {
 
                     <button 
                         onClick={handleOpenSave}
-                        className="w-full bg-foreground text-background font-black py-3 rounded-lg text-[9px] uppercase tracking-[0.2em] shadow-xl hover:brightness-110 active:scale-95 transition-all"
+                        className="w-full bg-primary text-primary-foreground font-black py-3 rounded-lg text-[9px] uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:brightness-110 active:scale-95 transition-all"
                     >
                         {platform ? `Change Save (${platform})` : 'Open Save File'}
                     </button>
@@ -125,7 +125,7 @@ function App() {
                             <button
                                 key={tab}
                                 onClick={() => setActiveTab(tab)}
-                                className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === tab ? 'bg-foreground text-background shadow-lg' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}
+                                className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}
                             >
                                 {tab}
                             </button>

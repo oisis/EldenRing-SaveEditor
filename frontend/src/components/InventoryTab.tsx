@@ -205,19 +205,19 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                 <div className="flex bg-muted/30 p-1 rounded-lg border border-border w-full md:w-auto">
                     <button 
                         onClick={() => setMode('character')}
-                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'character' ? 'bg-background text-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'character' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         Inventory
                     </button>
                     <button 
                         onClick={() => setMode('storage')}
-                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'storage' ? 'bg-background text-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'storage' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         Storage
                     </button>
                     <button 
                         onClick={() => setMode('database')}
-                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'database' ? 'bg-background text-foreground shadow-sm shadow-primary/20 ring-1 ring-primary/30' : 'text-muted-foreground hover:text-foreground'}`}
+                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'database' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         Database
                     </button>
