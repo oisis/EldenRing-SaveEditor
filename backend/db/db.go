@@ -22,10 +22,18 @@ type GraceEntry struct {
 
 // GetItemName returns the name of an item by its ID, searching across all categories.
 func GetItemName(id uint32) string {
-	// Normalize ID: If it has a handle prefix (0x8), treat it as a weapon ID (0x0)
+	// Normalize ID: Handle prefixes (0x8, 0x9, 0xA, 0xB) to canonical prefixes (0x0, 0x1, 0x2, 0x4)
 	normalizedID := id
-	if (id & 0xF0000000) == 0x80000000 {
-		normalizedID = id & 0x0FFFFFFF
+	prefix := id & 0xF0000000
+	switch prefix {
+	case 0x80000000:
+		normalizedID = id & 0x0FFFFFFF // Weapon handle -> Weapon ID
+	case 0x90000000:
+		normalizedID = (id & 0x0FFFFFFF) | 0x10000000 // Armor handle -> Armor ID
+	case 0xA0000000:
+		normalizedID = (id & 0x0FFFFFFF) | 0x20000000 // Talisman handle -> Talisman ID
+	case 0xB0000000:
+		normalizedID = (id & 0x0FFFFFFF) | 0x40000000 // Item handle -> Item ID
 	}
 
 	// 1. Try Weapons with upgrade masking
@@ -44,23 +52,30 @@ func GetItemName(id uint32) string {
 	}
 
 	// 2. Try Armors
-	if name, ok := data.Armors[id]; ok && name != "" {
+	if name, ok := data.Armors[normalizedID]; ok && name != "" {
 		return name
 	}
 
 	// 3. Try Talismans
-	if name, ok := data.Talismans[id]; ok && name != "" {
+	if name, ok := data.Talismans[normalizedID]; ok && name != "" {
 		return name
 	}
 
 	// 4. Try Items (Goods)
-	if name, ok := data.Items[id]; ok && name != "" {
+	if name, ok := data.Items[normalizedID]; ok && name != "" {
 		return name
 	}
 
-	// 5. Try Ash of War
-	if name, ok := data.Aows[id]; ok && name != "" {
+	// 5. Try Ash of War (both 0x8 and 0xC prefixes)
+	if name, ok := data.Aows[normalizedID]; ok && name != "" {
 		return name
+	}
+	// Also try with 0xC prefix if it was 0x8
+	if prefix == 0x80000000 {
+		aowID := (id & 0x0FFFFFFF) | 0xC0000000
+		if name, ok := data.Aows[aowID]; ok && name != "" {
+			return name
+		}
 	}
 
 	return fmt.Sprintf("Unknown Item (0x%X)", id)
@@ -69,15 +84,16 @@ func GetItemName(id uint32) string {
 // GetItemCategory returns the category name based on the item ID prefix.
 func GetItemCategory(id uint32) string {
 	switch id & 0xF0000000 {
-	case 0x00000000:
+	case 0x00000000, 0x80000000:
+		// Note: 0x8 is also used for AoW handles, but usually we check weapons first
 		return "Weapon"
-	case 0x10000000:
+	case 0x10000000, 0x90000000:
 		return "Armor"
-	case 0x20000000:
+	case 0x20000000, 0xA0000000:
 		return "Talisman"
-	case 0x40000000:
+	case 0x40000000, 0xB0000000:
 		return "Item"
-	case 0x80000000:
+	case 0xC0000000:
 		return "Ash of War"
 	default:
 		return "Unknown"
@@ -87,15 +103,24 @@ func GetItemCategory(id uint32) string {
 // GetItemsByCategory returns a sorted list of items for a given category.
 func GetItemsByCategory(category string) []ItemEntry {
 	var source map[uint32]string
+	var prefix uint32
+
 	switch category {
 	case "weapons":
 		source = data.Weapons
+		prefix = 0x00000000
 	case "armors":
 		source = data.Armors
+		prefix = 0x10000000
 	case "items":
 		source = data.Items
+		prefix = 0x40000000
 	case "talismans":
 		source = data.Talismans
+		prefix = 0x20000000
+	case "aows":
+		source = data.Aows
+		prefix = 0xC0000000
 	default:
 		return nil
 	}
@@ -103,6 +128,10 @@ func GetItemsByCategory(category string) []ItemEntry {
 	items := make([]ItemEntry, 0, len(source))
 	for id, name := range source {
 		if name == "" {
+			continue
+		}
+		// Filter for canonical item ID prefix to avoid duplicates with handle prefixes
+		if (id & 0xF0000000) != prefix {
 			continue
 		}
 		items = append(items, ItemEntry{ID: id, Name: name})
