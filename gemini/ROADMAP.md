@@ -122,6 +122,7 @@
     - [x] Fix UI scaling issues (removed max-w-5xl and fixed heights for full-width/height support)
     - [x] Improve scrollbar visibility and fix nested scrolling conflicts
     - [x] Enable window maximization on macOS (explicitly set DisableResize: false and added Mac options)
+    - [x] Fix "Unknown Item" spam in Storage Box (stop reading at first empty slot and strict DB filtering)
 
 ---
 

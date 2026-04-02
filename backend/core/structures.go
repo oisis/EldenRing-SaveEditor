@@ -186,11 +186,25 @@ func (s *SaveSlot) scanGaItems(start int) {
 }
 
 func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
-	e.CommonItems = make([]InventoryItem, count)
+	e.CommonItems = []InventoryItem{}
 	for i := 0; i < count; i++ {
-		e.CommonItems[i].GaItemHandle, _ = r.ReadU32()
-		e.CommonItems[i].Quantity, _ = r.ReadU32()
-		e.CommonItems[i].Index, _ = r.ReadU32()
+		handle, _ := r.ReadU32()
+		quantity, _ := r.ReadU32()
+		index, _ := r.ReadU32()
+		
+		if handle == 0 || handle == 0xFFFFFFFF {
+			// Stop reading at the first empty slot to avoid garbage data
+			// Note: We don't break because we need to maintain the reader position if needed,
+			// but for storage box it's usually the end of the section.
+			// Actually, breaking is safer here to avoid "Unknown Items".
+			break
+		}
+		
+		e.CommonItems = append(e.CommonItems, InventoryItem{
+			GaItemHandle: handle,
+			Quantity:     quantity,
+			Index:        index,
+		})
 	}
 	e.KeyItems = []InventoryItem{}
 }

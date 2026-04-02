@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"fmt"
 	"unicode/utf16"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
@@ -88,10 +89,18 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			if itemID == 0 || itemID == 110000 {
 				return
 			} // Filter Unarmed and Empty
+			
+			name := db.GetItemName(itemID)
+			if name == "" || name == fmt.Sprintf("Unknown Item (0x%X)", itemID) {
+				// If the item is not in our database, it might be garbage data or a new DLC item.
+				// For now, we skip it to avoid "Unknown Item" spam.
+				return
+			}
+
 			items = append(items, ItemViewModel{
 				Handle:   item.GaItemHandle,
 				ID:       itemID,
-				Name:     db.GetItemName(itemID),
+				Name:     name,
 				Category: db.GetItemCategory(itemID),
 				Quantity: item.Quantity,
 			})
