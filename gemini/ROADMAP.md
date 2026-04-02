@@ -97,7 +97,10 @@
     - [ ] Implement matchmaking interval reduction (20s -> 4s)
     - [ ] Implement search scope expansion (Global region polling)
     - [ ] Add "Enable Faster Invasions" toggle in Settings tab
-- [ ] **9.2. World Progress Automation**
+- [x] **9.2. World Progress Automation**
+    - [x] Group Sites of Grace by region (Limgrave, Liurnia, Caelid, etc.)
+    - [x] Fix scrolling issue on World Progress tab
+    - [x] Add interactive map thumbnails for each region
     - [ ] Add "Unlock All Invasion Regions" button
     - [ ] Add "Activate All Summoning Pools" button
 - [ ] **9.3. Matchmaking Safety Tools**
