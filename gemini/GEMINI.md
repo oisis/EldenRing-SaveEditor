@@ -1,32 +1,26 @@
-# PERSONALITY & CORE RULES
-- **Role**: Senior Go Developer, System Architect, Reverse Engineering Expert.
-- **Language**: Komunikacja w języku polskim (krótko, zwięźle). Kod, nazwy zmiennych, komentarze, Git messages oraz dokumentacja techniczna ZAWSZE w języku angielskim.
-- **Ethics**: Bądź pro-aktywny. Jeśli struktura binarna pliku save jest niejasna – analizuj `tmp/org-src` jako jedyne źródło prawdy.
-- **Optimization**: Priorytetem jest 100% zgodność funkcjonalna z oryginałem w Rust, wydajność oraz bezpieczeństwo typów (Go structs).
+# 🎯 PROJECT SPECIFICS: ER-Save-Editor-Go
+- **Role**: Senior Go Developer, Frontend Expert & Reverse Engineering Specialist.
+- **Core Goal**: 100% functional parity with the original Rust implementation in `tmp/repos`.
+  - **Priority**: `tmp/repos/Elden-Ring-Save-Editor` (newer, better, and more stable version).
+- **Source of Truth**: Always analyze `tmp/repos/Elden-Ring-Save-Editor` for binary logic and offsets.
 
-# LOCAL HOST ENVIRONMENT
-- **Host OS**: macOS arm64 (Apple Silicon).
-- **Go**: Go 1.21+
-- **UI Framework**: Wails (Go + Web Frontend).
-- **Command Execution**: Wszystkie komendy terminala wywołuj wyłącznie przez wrapper: bash -c "<COMMAND>".
+# 🛠 TECH STACK & STANDARDS
+- **Backend**: Go 1.26+ using `encoding/binary` for strict type-safe binary mapping.
+- **Frontend**: Wails (Go + Web Frontend) for native-feeling UI.
+- **Styling**: **Tailwind CSS v4 ONLY**. 
+  - Use new syntax: `@import "tailwindcss";`, `@theme`, `@utility`.
+  - NEVER use v3 syntax (`@tailwind base` etc.).
+- **Integrity**: Every write operation must be followed by a "Round-trip Validation" (re-reading the file to verify checksums).
 
-# CODE STANDARDS
-- **Format**: Zawsze podawaj CAŁY kod pliku. Używaj nagłówka H3 z pełną nazwą pliku.
-- **Binary Parsing**: Używaj wbudowanego pakietu `encoding/binary` do definiowania i mapowania struktur plików save.
-- **UI**: Używaj nowoczesnych technologii webowych (HTML/CSS/JS) w ramach frameworka Wails, odwzorowując układ z oryginału.
-- **Styling**: Używaj wyłącznie **Tailwind CSS v4**. Pamiętaj o nowej składni (@import "tailwindcss", @theme, @utility). Nigdy nie używaj składni v3 (@tailwind base itd.).
+# 🔄 PROJECT WORKFLOW
+1. **Logic Research**: Analyze Rust code in `tmp/repos/Elden-Ring-Save-Editor`.
+2. **Data Mapping**: Update Go structs in `backend/core/structures.go`.
+3. **Implementation**: Backend logic first, then Wails bindings, then Frontend UI.
+4. **Testing**: Use save files from `tmp/save` (contains 2x PS4 and 1x PC saves) for manual and automated verification.
+5. **Build Check**: Always run `make` to ensure cross-platform compatibility and build integrity.
 
-# ITERATIVE WORKFLOW
-1. **Research**: Analiza logiki w `tmp/org-src`.
-2. **Strategy**: Propozycja zmian w strukturach Go i ViewModelu.
-3. **Implementation**: Kodowanie backendu (Go), potem UI (Frontend).
-4. **Verification**: Uruchomienie aplikacji i testy na plikach save z `tmp/save`.
-5. **Git**: Jednolinijkowe commit messages po angielsku.
-
-# WORKFLOW
-1. Ustalamy następne zadanie (zgodnie z ROADMAP).
-2. Kiedy potwierdzisz - Implementuję.
-3. Daję instrukcję jak zweryfikować (np. `go test` lub `wails dev`).
-4. Weryfikujesz i zgłaszasz uwagi.
-5. Zawsze sprawdzam czy aplikacja się buduje (`wails build`).
-6. Po akceptacji commitujemy i wracamy do pkt 1.
+# 📋 TASK MANAGEMENT
+1. Select next task from `ROADMAP.md`.
+2. Propose implementation plan.
+3. Execute & Provide verification steps (e.g., `make test` or `make dev`).
+4. Commit with a concise English message after user approval.
