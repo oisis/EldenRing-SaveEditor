@@ -9,7 +9,7 @@ Plik składa się z nagłówka BND4 (PC), slotów postaci oraz bloków metadanyc
 | :--- | :--- | :--- | :--- |
 | **SaveHeader** | `0x70` | `0x300` | BND4 Container header (PC). |
 | **SaveSlot (x10)** | `0x280000` | `0x280010` | Character data. PC includes 16-byte MD5 prefix. |
-| **UserData10** | `0x60000` | `0x60010` | Account metadata & Profile Summaries. PC includes MD5. |
+| **UserData10** | `0x600000` | `0x60010` | Account metadata & Profile Summaries. PC includes MD5. |
 | **UserData11** | `0x23FFF0` | `0x23FFF0` | Regulation.bin (NetworkParam, etc.). |
 
 ### 1.1. PC Checksum & SteamID
@@ -97,3 +97,33 @@ Aplikacja stosuje maskowanie prefiksów dla poprawnego mapowania nazw:
 - **Active Slots**: Tablica `[u8; 10]` pod offsetem `0x190`.
 - **ProfileSummary**: Dane dla menu "Load Game" (Name, Level).
     - Każdy wpis ma rozmiar `0x100` bajtów.
+
+---
+
+## 6. Shadow of the Erdtree (DLC) Data
+Dane specyficzne dla dodatku DLC, zlokalizowane względem `MagicOffset` lub stałych offsetów wewnątrz slotu:
+- **Scadutree Blessing Level**: Offset relatywny `0x19188`. Max: 20.
+- **Revered Spirit Ash Level**: Offset relatywny `0x1918C`. Max: 10.
+- **DLC Item IDs (Prefix 0x40000000)**:
+    - Scadutree Fragment: `0x40005140`
+    - Revered Spirit Ash: `0x4000514A`
+
+---
+
+## 7. World Progress & Event Flags
+- **EventFlags Start**: Offset `0x1BF99F` wewnątrz slotu (może ulegać przesunięciom w zależności od wersji).
+- Służą do zarządzania odblokowanymi regionami, bossami i polami przywołań (Summoning Pools).
+
+---
+
+## 8. Online Safety & Ban Risks (EAC)
+Aby uniknąć bana przez Easy Anti-Cheat (EAC), należy przestrzegać zasad:
+- **Statystyki**: Poziom (Level) musi zawsze zgadzać się z sumą atrybutów minus bazowe statystyki klasy (zazwyczaj suma - 79).
+- **Przedmioty**: Unikać dodawania przedmiotów "Cut Content" lub niemożliwych ilości (np. 99 unikalnych broni).
+- **Spójność DLC**: Nie ustawiać maksymalnego poziomu Scadutree bez posiadania odpowiednich fragmentów w ekwipunku lub ustawionych flag zdarzeń.
+
+---
+
+## 9. Technical Reference (PC Encryption)
+- **AES Key**: `99 AD 2D 50 ED F2 FB 01 C5 F3 EC 3A 2B CA B6 9D`
+- **IV**: Pierwsze 16 bajtów pliku `.sl2`.
