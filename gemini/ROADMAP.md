@@ -121,6 +121,7 @@
     - [x] Add icons to Character Importer and Stats tabs
     - [x] Fix UI scaling issues (removed max-w-5xl and fixed heights for full-width/height support)
     - [x] Improve scrollbar visibility and fix nested scrolling conflicts
+    - [x] Enable window maximization on macOS (explicitly set DisableResize: false and added Mac options)
 
 ---
 
