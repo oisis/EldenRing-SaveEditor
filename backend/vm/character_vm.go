@@ -67,42 +67,52 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			return
 		}
 
+		category := db.GetItemCategoryFromHandle(item.GaItemHandle)
 		var itemID uint32
 		var ok bool
 
-		typeBits := item.GaItemHandle & 0xF0000000
-
-		// For Accessories and Items, the handle often contains the ID information.
-		// We normalize it to the standard item prefixes (0x2 for Talisman, 0x4 for Item).
-		if typeBits == core.ItemTypeAccessory {
-			itemID = (item.GaItemHandle & 0x0FFFFFFF) | 0x20000000
-			ok = true
-		} else if typeBits == core.ItemTypeItem {
-			itemID = (item.GaItemHandle & 0x0FFFFFFF) | 0x40000000
-			ok = true
-		} else {
-			// For Weapons and Armor, we MUST use the GaMap to find the real ItemID.
+		if category == "Weapon" || category == "Armor" || category == "Ash of War" {
+			// For Weapons, Armor, and AoW, we MUST use the GaMap to find the real ItemID.
 			itemID, ok = gaMap[item.GaItemHandle]
+		} else if category != "Unknown" {
+			// For others (Talisman, Item), the handle IS the ID.
+			itemID = item.GaItemHandle
+			ok = true
 		}
 
 		if ok {
+			// Filter Unarmed and Empty
 			if itemID == 0 || itemID == 110000 {
 				return
-			} // Filter Unarmed and Empty
+			}
+
+			name := db.GetItemName(itemID, category)
 			
-			name := db.GetItemName(itemID)
-			if name == "" || name == fmt.Sprintf("Unknown Item (0x%X)", itemID) {
-				// If the item is not in our database, it might be garbage data or a new DLC item.
-				// For now, we skip it to avoid "Unknown Item" spam.
+			// Strict filtering: skip items that are not in our database (Unknown)
+			// to avoid garbage data from misaligned offsets.
+			if name == "" || name == fmt.Sprintf("Unknown Item (0x%X)", itemID) || 
+			   name == fmt.Sprintf("Unknown Weapon (0x%X)", itemID) ||
+			   name == fmt.Sprintf("Unknown Armor (0x%X)", itemID) ||
+			   name == fmt.Sprintf("Unknown Talisman (0x%X)", itemID) ||
+			   name == fmt.Sprintf("Unknown Ash of War (0x%X)", itemID) {
 				return
+			}
+
+			displayQuantity := item.Quantity
+			// For non-stackable items, force quantity to 1.
+			if category == "Weapon" || category == "Armor" || category == "Talisman" || category == "Ash of War" {
+				displayQuantity = 1
+			} else {
+				// For stackable items, mask the high bit which is often used by the engine
+				displayQuantity = item.Quantity & 0x7FFFFFFF
 			}
 
 			items = append(items, ItemViewModel{
 				Handle:   item.GaItemHandle,
 				ID:       itemID,
 				Name:     name,
-				Category: db.GetItemCategory(itemID),
-				Quantity: item.Quantity,
+				Category: category,
+				Quantity: displayQuantity,
 			})
 		}
 	}

@@ -123,6 +123,8 @@
     - [x] Improve scrollbar visibility and fix nested scrolling conflicts
     - [x] Enable window maximization on macOS (explicitly set DisableResize: false and added Mac options)
     - [x] Fix "Unknown Item" spam in Storage Box (stop reading at first empty slot and strict DB filtering)
+    - [x] Fix Ash of War categorization and item mapping (100% Python parity)
+    - [x] Fix incorrect quantities for non-stackable items (forced to 1 for Weapons, Armor, Talismans, AoW)
 
 ---
 

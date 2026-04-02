@@ -157,9 +157,6 @@ func (s *SaveSlot) mapStats() {
 func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
-	// We search until we hit the MagicPattern (Inventory Start)
-	// but we need to know where the GaItems section actually ends.
-	// Python logic: max(offsets) + 8 (or 16/21 depending on type)
 	
 	lastEnd := start
 	for curr+8 <= s.MagicOffset {
@@ -174,6 +171,8 @@ func (s *SaveSlot) scanGaItems(start int) {
 				curr += 21
 			} else if typeBits == ItemTypeArmor {
 				curr += 16
+			} else if typeBits == ItemTypeAow {
+				curr += 8
 			} else {
 				curr += 8
 			}

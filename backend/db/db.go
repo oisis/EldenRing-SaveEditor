@@ -20,78 +20,55 @@ type GraceEntry struct {
 	Region string `json:"region"`
 }
 
-// GetItemName returns the name of an item by its ID, searching across all categories.
-func GetItemName(id uint32) string {
-	// Normalize ID: Handle prefixes (0x8, 0x9, 0xA, 0xB) to canonical prefixes (0x0, 0x1, 0x2, 0x4)
-	normalizedID := id
-	prefix := id & 0xF0000000
-	switch prefix {
-	case 0x80000000:
-		normalizedID = id & 0x0FFFFFFF // Weapon handle -> Weapon ID
-	case 0x90000000:
-		normalizedID = (id & 0x0FFFFFFF) | 0x10000000 // Armor handle -> Armor ID
-	case 0xA0000000:
-		normalizedID = (id & 0x0FFFFFFF) | 0x20000000 // Talisman handle -> Talisman ID
-	case 0xB0000000:
-		normalizedID = (id & 0x0FFFFFFF) | 0x40000000 // Item handle -> Item ID
-	}
-
-	// 1. Try Weapons with upgrade masking
-	if (normalizedID & 0xF0000000) == 0 {
-		baseID := normalizedID
-		if normalizedID > 100000 {
-			baseID = (normalizedID / 100) * 100
-		}
-		if name, ok := data.Weapons[baseID]; ok && name != "" {
-			upgrade := normalizedID % 100
-			if upgrade > 0 {
-				return fmt.Sprintf("%s +%d", name, upgrade)
+// GetItemName returns the name of an item by its ID and category.
+func GetItemName(id uint32, category string) string {
+	switch category {
+	case "Weapon":
+		for baseID, name := range data.Weapons {
+			if (id & 0xFFFFFF00) == (baseID & 0xFFFFFF00) {
+				level := id - baseID
+				if level > 0 {
+					return fmt.Sprintf("%s +%d", name, level)
+				}
+				return name
 			}
+		}
+		return fmt.Sprintf("Unknown Weapon (0x%X)", id)
+	case "Armor":
+		if name, ok := data.Armors[id]; ok && name != "" {
 			return name
 		}
-	}
-
-	// 2. Try Armors
-	if name, ok := data.Armors[normalizedID]; ok && name != "" {
-		return name
-	}
-
-	// 3. Try Talismans
-	if name, ok := data.Talismans[normalizedID]; ok && name != "" {
-		return name
-	}
-
-	// 4. Try Items (Goods)
-	if name, ok := data.Items[normalizedID]; ok && name != "" {
-		return name
-	}
-
-	// 5. Try Ash of War (both 0x8 and 0xC prefixes)
-	if name, ok := data.Aows[normalizedID]; ok && name != "" {
-		return name
-	}
-	// Also try with 0xC prefix if it was 0x8
-	if prefix == 0x80000000 {
-		aowID := (id & 0x0FFFFFFF) | 0xC0000000
-		if name, ok := data.Aows[aowID]; ok && name != "" {
+		return fmt.Sprintf("Unknown Armor (0x%X)", id)
+	case "Talisman":
+		if name, ok := data.Talismans[id]; ok && name != "" {
 			return name
 		}
+		return fmt.Sprintf("Unknown Talisman (0x%X)", id)
+	case "Item":
+		if name, ok := data.Items[id]; ok && name != "" {
+			return name
+		}
+		return fmt.Sprintf("Unknown Item (0x%X)", id)
+	case "Ash of War":
+		if name, ok := data.Aows[id]; ok && name != "" {
+			return name
+		}
+		return fmt.Sprintf("Unknown Ash of War (0x%X)", id)
+	default:
+		return fmt.Sprintf("Unknown Item (0x%X)", id)
 	}
-
-	return fmt.Sprintf("Unknown Item (0x%X)", id)
 }
 
-// GetItemCategory returns the category name based on the item ID prefix.
-func GetItemCategory(id uint32) string {
-	switch id & 0xF0000000 {
-	case 0x00000000, 0x80000000:
-		// Note: 0x8 is also used for AoW handles, but usually we check weapons first
+// GetItemCategoryFromHandle returns the category string based on the GaItemHandle prefix.
+func GetItemCategoryFromHandle(handle uint32) string {
+	switch handle & 0xF0000000 {
+	case 0x80000000:
 		return "Weapon"
-	case 0x10000000, 0x90000000:
+	case 0x90000000:
 		return "Armor"
-	case 0x20000000, 0xA0000000:
+	case 0xA0000000:
 		return "Talisman"
-	case 0x40000000, 0xB0000000:
+	case 0xB0000000:
 		return "Item"
 	case 0xC0000000:
 		return "Ash of War"
@@ -130,8 +107,12 @@ func GetItemsByCategory(category string) []ItemEntry {
 		if name == "" {
 			continue
 		}
-		// Filter for canonical item ID prefix to avoid duplicates with handle prefixes
-		if (id & 0xF0000000) != prefix {
+		// For weapons, we only want base items (usually ending in 0)
+		if category == "weapons" && id%100 != 0 {
+			continue
+		}
+		// Filter by prefix
+		if (id & 0xF0000000) != prefix && !(category == "weapons" && (id&0xF0000000) == 0) {
 			continue
 		}
 		items = append(items, ItemEntry{ID: id, Name: name})
