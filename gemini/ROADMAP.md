@@ -105,6 +105,7 @@
     - [ ] Add "Activate All Summoning Pools" button
 - [ ] **9.3. Matchmaking Safety Tools**
     - [ ] Implement Weapon Level scanner and "Safe De-leveling" logic
+    - [ ] Add "Global Weapon Level" setting for bulk item addition (Future)
 
 ## Phase 10: Item Icons & Visual Assets (In Progress) 🛠
 - [x] **10.1. Icon Directory Structure**

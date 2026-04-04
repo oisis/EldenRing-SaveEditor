@@ -28,31 +28,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const getItemIconPath = (name: string, category: string) => {
         let cleanName = name.toLowerCase();
 
-        // 1. Remove common prefixes
-        cleanName = cleanName
-            .replace(/^ash of war: /i, '')
-            .replace(/^sorcery: /i, '')
-            .replace(/^incantation: /i, '');
-
-        // 2. Remove weapon affixes (only if it's a weapon)
-        if (category.toLowerCase() === 'weapon' || category.toLowerCase() === 'weapons') {
-            const affixes = [
-                'heavy ', 'keen ', 'quality ', 'fire ', 'flame art ', 
-                'lightning ', 'sacred ', 'magic ', 'cold ', 'poison ', 
-                'blood ', 'occult ', 'bloody '
-            ];
-            for (const affix of affixes) {
-                if (cleanName.startsWith(affix)) {
-                    cleanName = cleanName.substring(affix.length);
-                    break;
-                }
-            }
-        }
-
-        // 3. Remove upgrade levels (+10, etc.) for all items (especially spirit ashes)
-        cleanName = cleanName.replace(/\s+\+\d+$/, '');
-
-        // 4. Final character normalization
+        // 1. Final character normalization (only letters, numbers, and underscores)
         cleanName = cleanName
             .replace(/'/g, '')
             .replace(/\s+/g, '_')
@@ -61,13 +37,8 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             .replace(/_+/g, '_')   // Collapse multiple underscores
             .replace(/^_+|_+$/g, ''); // Trim underscores from ends
 
-        // 5. Handle Altered variants for Armor
-        if ((category.toLowerCase() === 'armor' || category.toLowerCase() === 'armors') && name.toLowerCase().includes(' (altered)')) {
-            cleanName = cleanName.replace('_altered', '') + '_altered';
-        }
-
-        // 6. Special cases
-        if (cleanName === 'golden_vow' && (category.toLowerCase() === 'ash of war' || category.toLowerCase() === 'aows')) {
+        // 2. Special cases
+        if (cleanName === 'golden_vow' && (category.toLowerCase() === 'ash of war' || category.toLowerCase() === 'aows' || category.toLowerCase() === 'ashes')) {
             cleanName = 'ashes_of_war_golden_vow';
         }
         
