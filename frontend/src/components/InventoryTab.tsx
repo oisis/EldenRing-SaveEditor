@@ -73,17 +73,14 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         
         let catDir = category.toLowerCase();
         
-        // Force 'ashes' category for Ash of War items regardless of backend category
-        // This fixes issues where some AoWs are categorized as Weapons by the backend
-        if (name.toLowerCase().startsWith('ash of war:')) {
-            catDir = 'ashes';
-        } else if (catDir === 'weapon' || catDir === 'weapons') {
+        // Map categories to folder names
+        if (catDir === 'weapon' || catDir === 'weapons') {
             catDir = 'weapons';
         } else if (catDir === 'armor' || catDir === 'armors') {
             catDir = 'armor';
         } else if (catDir === 'item' || catDir === 'items') {
             catDir = 'goods';
-        } else if (catDir === 'ash of war' || catDir === 'aows') {
+        } else if (catDir === 'ash of war' || catDir === 'aows' || catDir === 'ashes') {
             catDir = 'ashes';
         } else if (catDir === 'talisman' || catDir === 'talismans') {
             catDir = 'talismans';
