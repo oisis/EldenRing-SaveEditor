@@ -1,0 +1,2521 @@
+Auditing category: goods
+MISSING: [goods] Hefty Fetid Pot -> hefty_fetid_pot.png
+MISSING: [goods] Divine Beast Tornado -> divine_beast_tornado.png
+MISSING: [goods] Meat Peddler's Bell Bearing -> meat_peddlers_bell_bearing.png
+MISSING: [goods] Ancient Ruins Cross Message -> ancient_ruins_cross_message.png
+MISSING: [goods] Lord's Rune -> lords_rune.png
+MISSING: [goods] Fire Knight's Cookbook [2] -> fire_knights_cookbook_2.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Assassin's Prayerbook -> assassins_prayerbook.png
+MISSING: [goods] Prophecy Painting -> prophecy_painting.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Note: Gateway -> note_gateway.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Borealis's Mist -> borealiss_mist.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Miriam's Vanishing -> miriams_vanishing.png
+MISSING: [goods] Glintstone Nails -> glintstone_nails.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Adula's Moonblade -> adulas_moonblade.png
+MISSING: [goods] Small Red Effigy (Base) -> small_red_effigy_base.png
+MISSING: [goods] Godrick's Great Rune -> godricks_great_rune.png
+MISSING: [goods] Casual Greeting -> casual_greeting.png
+MISSING: [goods] Dejection -> dejection.png
+MISSING: [goods] About Strengthening Armaments -> about_strengthening_armaments.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Greater Potentate's Cookbook [2] -> greater_potentates_cookbook_2.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Note: Miquella's Needle -> note_miquellas_needle.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [4] -> ancient_dragon_apostles_cookbook_4.png
+MISSING: [goods] Cross Map -> cross_map.png
+MISSING: [goods] Let Us Go Together -> let_us_go_together.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [7] -> glintstone_craftsmans_cookbook_7.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Knifeprint Clue -> knifeprint_clue.png
+MISSING: [goods] Gravitational Missile -> gravitational_missile.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Reverential Bow -> reverential_bow.png
+MISSING: [goods] Shadow Realm Rune [2] -> shadow_realm_rune_2.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Black Syrup -> black_syrup.png
+MISSING: [goods] Innard Meat -> innard_meat.png
+MISSING: [goods] Scorpion Liver -> scorpion_liver.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Messmerfire Grease -> messmerfire_grease.png
+MISSING: [goods] Armorer's Cookbook [6] -> armorers_cookbook_6.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Dragonscale Flesh -> dragonscale_flesh.png
+MISSING: [goods] Rune of an Unsung Hero -> rune_of_an_unsung_hero.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Remembrance of the Dancing Lion -> remembrance_of_the_dancing_lion.png
+MISSING: [goods] Forager Brood Cookbook [7] -> forager_brood_cookbook_7.png
+MISSING: [goods] Duelist's Furled Finger -> duelists_furled_finger.png
+MISSING: [goods] My Thanks -> my_thanks.png
+MISSING: [goods] Rapture -> rapture.png
+MISSING: [goods] Rock Heart -> rock_heart.png
+MISSING: [goods] Minor Erdtree -> minor_erdtree.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [1] -> somberstone_miners_bell_bearing_1.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Sitting Sideways -> sitting_sideways.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Serpent's Amnion -> serpents_amnion.png
+MISSING: [goods] Gravity Stone Peddler's Bell Bearing -> gravity_stone_peddlers_bell_bearing.png
+MISSING: [goods] Deathsbane Jerky -> deathsbane_jerky.png
+MISSING: [goods] Horn-Strewn Excrement -> horn_strewn_excrement.png
+MISSING: [goods] Pidia's Bell Bearing -> pidias_bell_bearing.png
+MISSING: [goods] May the Best Win -> may_the_best_win.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Spirit Raisin -> spirit_raisin.png
+MISSING: [goods] Prattling Pate "Let's get to it" -> prattling_pate_"lets_get_to_it".png
+MISSING: [goods] Prattling Pate "Wonderful" -> prattling_pate_"wonderful".png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Glintstone Nail -> glintstone_nail.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Glovewort Picker's Bell Bearing [3] -> glovewort_pickers_bell_bearing_3.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Duelist's Furled Finger (Base) -> duelists_furled_finger_base.png
+MISSING: [goods] Eternal Sleep Grease -> eternal_sleep_grease.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Hefty Red Lightning Pot -> hefty_red_lightning_pot.png
+MISSING: [goods] Ancestral Infant's Head -> ancestral_infants_head.png
+MISSING: [goods] Cherishing Fingers -> cherishing_fingers.png
+MISSING: [goods] Greater Potentate's Cookbook [7] -> greater_potentates_cookbook_7.png
+MISSING: [goods] Loretta's Greatbow -> lorettas_greatbow.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [19] -> nomadic_warriors_cookbook_19.png
+MISSING: [goods] Heart of Bayle -> heart_of_bayle.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] About Multiplayer -> about_multiplayer.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [6] -> nomadic_merchants_bell_bearing_6.png
+MISSING: [goods] About Wielding Armaments -> about_wielding_armaments.png
+MISSING: [goods] Golden Arcs -> golden_arcs.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Resurrection Painting -> resurrection_painting.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Spellmachinist's Bell Bearing -> spellmachinists_bell_bearing.png
+MISSING: [goods] Sitting Sideways -> sitting_sideways.png
+MISSING: [goods] Ruins Map -> ruins_map.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Conspectus Scroll -> conspectus_scroll.png
+MISSING: [goods] Scadutree Fragment -> scadutree_fragment.png
+MISSING: [goods] Rallying Cry -> rallying_cry.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Bravo! -> bravo.png
+MISSING: [goods] Ghostflame Breath -> ghostflame_breath.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] About Bows -> about_bows.png
+MISSING: [goods] Horned Bairn -> horned_bairn.png
+MISSING: [goods] Map: Mt. Gelmir -> map_mt._gelmir.png
+MISSING: [goods] Wave -> wave.png
+MISSING: [goods] O Mother -> o_mother.png
+MISSING: [goods] Drawstring Royal Magic Grease -> drawstring_royal_magic_grease.png
+MISSING: [goods] Battlefield Priest's Cookbook [4] -> battlefield_priests_cookbook_4.png
+MISSING: [goods] Theodorix's Magma -> theodorixs_magma.png
+MISSING: [goods] Fire's Deadly Sin -> fires_deadly_sin.png
+MISSING: [goods] What Do You Want? -> what_do_you_want?.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Gowry's Bell Bearing -> gowrys_bell_bearing.png
+MISSING: [goods] Hefty Poison Pot -> hefty_poison_pot.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Greater Potentate's Cookbook [11] -> greater_potentates_cookbook_11.png
+MISSING: [goods] Loretta's Mastery -> lorettas_mastery.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Nomadic Warrior's Cookbook [7] -> nomadic_warriors_cookbook_7.png
+MISSING: [goods] Land of Shadow -> land_of_shadow.png
+MISSING: [goods] Letter to Bernahl -> letter_to_bernahl.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Note: Gravity's Advantage -> note_gravitys_advantage.png
+MISSING: [goods] Well Depths Key -> well_depths_key.png
+MISSING: [goods] My Lord -> my_lord.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] St. Trina Disciple's Cookbook [2] -> st._trina_disciples_cookbook_2.png
+MISSING: [goods] Nomadic Warrior's Cookbook [2] -> nomadic_warriors_cookbook_2.png
+MISSING: [goods] Frenzied's Cookbook [2] -> frenzieds_cookbook_2.png
+MISSING: [goods] Flask of Cerulean Tears2 -> flask_of_cerulean_tears2.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Note: Frenzied Flame Village -> note_frenzied_flame_village.png
+MISSING: [goods] Finger-Weaver's Cookbook [2] -> finger_weavers_cookbook_2.png
+MISSING: [goods] Strength! -> strength.png
+MISSING: [goods] Hefty Lightning Pot -> hefty_lightning_pot.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [6] -> nomadic_warriors_cookbook_6.png
+MISSING: [goods] Mushroom-Seller's Bell Bearing [1] -> mushroom_sellers_bell_bearing_1.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Lamenter's Mask -> lamenters_mask.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Multilayered Ring of Light -> multilayered_ring_of_light.png
+MISSING: [goods] Gas Stone -> gas_stone.png
+MISSING: [goods] Seluvis's Potion -> seluviss_potion.png
+MISSING: [goods] About Adding Affinities -> about_adding_affinities.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Black Flame's Protection -> black_flames_protection.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Redmane Fire Pot -> redmane_fire_pot.png
+MISSING: [goods] Antiquity Scholar's Cookbook [2] -> antiquity_scholars_cookbook_2.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Rogier's Letter -> rogiers_letter.png
+MISSING: [goods] Note: Sealed Spiritsprings -> note_sealed_spiritsprings.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Lord's Divine Fortification -> lords_divine_fortification.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [3] -> somberstone_miners_bell_bearing_3.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Charming Branch -> charming_branch.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] About Map Gaps (Alt 4) -> about_map_gaps_alt_4.png
+MISSING: [goods] Rauh Burrow -> rauh_burrow.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Missionary's Cookbook [2] -> missionarys_cookbook_2.png
+MISSING: [goods] Duelist's Furled Finger (Base Alt) -> duelists_furled_finger_base_alt.png
+MISSING: [goods] Ranni's Dark Moon -> rannis_dark_moon.png
+MISSING: [goods] Deathsbane White Jerky -> deathsbane_white_jerky.png
+MISSING: [goods] Zorayas's Letter -> zorayass_letter.png
+MISSING: [goods] Thops's Barrier -> thopss_barrier.png
+MISSING: [goods] Lightningproof Pickled Liver -> lightningproof_pickled_liver.png
+MISSING: [goods] Bayle's Tyranny -> bayles_tyranny.png
+MISSING: [goods] St. Trina Disciple's Cookbook [3] -> st._trina_disciples_cookbook_3.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [24] -> nomadic_warriors_cookbook_24.png
+MISSING: [goods] Morgott's Great Rune -> morgotts_great_rune.png
+MISSING: [goods] Shadow Realm Rune [6] -> shadow_realm_rune_6.png
+MISSING: [goods] Gostoc's Bell Bearing -> gostocs_bell_bearing.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [2] -> glintstone_craftsmans_cookbook_2.png
+MISSING: [goods] Remembrance of the Impaler -> remembrance_of_the_impaler.png
+MISSING: [goods] Mohg's Shackle -> mohgs_shackle.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Lost Ashes of War -> lost_ashes_of_war.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Abandoned Merchant's Bell Bearing -> abandoned_merchants_bell_bearing.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Hefty Rot Pot -> hefty_rot_pot.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Crimson-Sapping Cracked Tear -> crimson_sapping_cracked_tear.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Nomadic Warrior's Cookbook [18] -> nomadic_warriors_cookbook_18.png
+MISSING: [goods] Tibia's Summons -> tibias_summons.png
+MISSING: [goods] About Monument Icon -> about_monument_icon.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Note: Great Coffins -> note_great_coffins.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [4] -> nomadic_merchants_bell_bearing_4.png
+MISSING: [goods] Fly Mold -> fly_mold.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Grave Keeper's Cookbook [2] -> grave_keepers_cookbook_2.png
+MISSING: [goods] About Vanquishing Enemy Groups -> about_vanquishing_enemy_groups.png
+MISSING: [goods] About Cooperative Play -> about_cooperative_play.png
+MISSING: [goods] Fire Coil -> fire_coil.png
+MISSING: [goods] Patches' Crouch -> patches_crouch.png
+MISSING: [goods] Shadow Realm Rune [7] -> shadow_realm_rune_7.png
+MISSING: [goods] Rykard's Great Rune -> rykards_great_rune.png
+MISSING: [goods] About Requesting Help from Hunters -> about_requesting_help_from_hunters.png
+MISSING: [goods] Revered Spirit Ash -> revered_spirit_ash.png
+MISSING: [goods] Note: Demi-human Mobs -> note_demi_human_mobs.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Nomadic Warrior's Cookbook [1] -> nomadic_warriors_cookbook_1.png
+MISSING: [goods] Sunwarmth Stone -> sunwarmth_stone.png
+MISSING: [goods] Armorer's Cookbook (5) -> armorers_cookbook_5.png
+MISSING: [goods] Armorer's Cookbook [4] -> armorers_cookbook_4.png
+MISSING: [goods] Toxic Mossling -> toxic_mossling.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Fire's Deadly Sin -> fires_deadly_sin.png
+MISSING: [goods] Spira -> spira.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [11] -> nomadic_merchants_bell_bearing_11.png
+MISSING: [goods] About Summoning Pools -> about_summoning_pools.png
+MISSING: [goods] Perfumed Oil of Ranah -> perfumed_oil_of_ranah.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Giantsflame Fire Pot -> giantsflame_fire_pot.png
+MISSING: [goods] Prophecy Painting -> prophecy_painting.png
+MISSING: [goods] Ring of Miquella -> ring_of_miquella.png
+MISSING: [goods] Bow -> bow.png
+MISSING: [goods] Nomadic Warrior's Cookbook [23] -> nomadic_warriors_cookbook_23.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Outer Order -> outer_order.png
+MISSING: [goods] Nomadic Warrior's Cookbook [1] -> nomadic_warriors_cookbook_1.png
+MISSING: [goods] Surging Frenzied Flame -> surging_frenzied_flame.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] About Multiplayer -> about_multiplayer.png
+MISSING: [goods] About Death -> about_death.png
+MISSING: [goods] Mantle of Thorns -> mantle_of_thorns.png
+MISSING: [goods] Strength! -> strength.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [6] -> nomadic_merchants_bell_bearing_6.png
+MISSING: [goods] Mad Craftsman's Cookbook [1] -> mad_craftsmans_cookbook_1.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Drawstring Freezing Grease -> drawstring_freezing_grease.png
+MISSING: [goods] Drawstring Golden Grease -> drawstring_golden_grease.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Ymir's Bell Bearing -> ymirs_bell_bearing.png
+MISSING: [goods] Desperate Prayer -> desperate_prayer.png
+MISSING: [goods] Erudition -> erudition.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Black Flame's Protection -> black_flames_protection.png
+MISSING: [goods] Sellia's Secret -> sellias_secret.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Hefty Magic Pot -> hefty_magic_pot.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Spellproof Pickled Liver -> spellproof_pickled_liver.png
+MISSING: [goods] Prattling Pate "Please help" -> prattling_pate_"please_help".png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Prattling Pate "Hello" -> prattling_pate_"hello".png
+MISSING: [goods] Alexander's Innards -> alexanders_innards.png
+MISSING: [goods] Sellen's Primal Glintstone -> sellens_primal_glintstone.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Lord's Heal -> lords_heal.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Moore's Bell Bearing -> moores_bell_bearing.png
+MISSING: [goods] Gostoc's Bell Bearing -> gostocs_bell_bearing.png
+MISSING: [goods] Shadow Realm Rune [3] -> shadow_realm_rune_3.png
+MISSING: [goods] About Fast Travel to Sites of Grace -> about_fast_travel_to_sites_of_grace.png
+MISSING: [goods] Redmane Painting -> redmane_painting.png
+MISSING: [goods] Nomadic Warrior's Cookbook [22] -> nomadic_warriors_cookbook_22.png
+MISSING: [goods] Hefty Lightning Pot -> hefty_lightning_pot.png
+MISSING: [goods] Spark Aromatic -> spark_aromatic.png
+MISSING: [goods] Messmer's Kindling -> messmers_kindling.png
+MISSING: [goods] About Requesting Help from Hunters -> about_requesting_help_from_hunters.png
+MISSING: [goods] About Summoning Other Players -> about_summoning_other_players.png
+MISSING: [goods] Fire Spur Me -> fire_spur_me.png
+MISSING: [goods] Finger-Weaver's Cookbook [1] -> finger_weavers_cookbook_1.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Dragon Communion Flesh -> dragon_communion_flesh.png
+MISSING: [goods] Inner Order -> inner_order.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Sellen's Bell Bearing -> sellens_bell_bearing.png
+MISSING: [goods] Forager Brood Cookbook [7] -> forager_brood_cookbook_7.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Rya's Necklace -> ryas_necklace.png
+MISSING: [goods] Hole-Laden Necklace -> hole_laden_necklace.png
+MISSING: [goods] Hero's Rune [2] -> heros_rune_2.png
+MISSING: [goods] Greater Potentate's Cookbook [4] -> greater_potentates_cookbook_4.png
+MISSING: [goods] Rauh Burrow -> rauh_burrow.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Rennala's Full Moon -> rennalas_full_moon.png
+MISSING: [goods] Morgott's Great Rune -> morgotts_great_rune.png
+MISSING: [goods] Note: Gateway -> note_gateway.png
+MISSING: [goods] Fire Spritestone -> fire_spritestone.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Nailstone -> nailstone.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [4] -> smithing_stone_miners_bell_bearing_4.png
+MISSING: [goods] Ghost-Glovewort Picker's Bell Bearing [1] -> ghost_glovewort_pickers_bell_bearing_1.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Note: Frenzied Flame Village -> note_frenzied_flame_village.png
+MISSING: [goods] Call of Tibia -> call_of_tibia.png
+MISSING: [goods] Small Red Effigy (Base Alt) -> small_red_effigy_base_alt.png
+MISSING: [goods] Rotten Butterflies -> rotten_butterflies.png
+MISSING: [goods] Spritestone -> spritestone.png
+MISSING: [goods] About Horseback Riding -> about_horseback_riding.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Grave Keeper's Brainpan -> grave_keepers_brainpan.png
+MISSING: [goods] Bondstone -> bondstone.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Frenzied's Cookbook [2] -> frenzieds_cookbook_2.png
+MISSING: [goods] Hefty Oil Pot -> hefty_oil_pot.png
+MISSING: [goods] Triumphant Delight -> triumphant_delight.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Ekzykes's Decay -> ekzykess_decay.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [3] -> glintstone_craftsmans_cookbook_3.png
+MISSING: [goods] About Markers -> about_markers.png
+MISSING: [goods] Agheel's Flame -> agheels_flame.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Aspects of the Crucible: Bloom -> aspects_of_the_crucible_bloom.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Missionary's Cookbook [6] -> missionarys_cookbook_6.png
+MISSING: [goods] Gaol Upper Level Key -> gaol_upper_level_key.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Toxic Mossling -> toxic_mossling.png
+MISSING: [goods] Gaol Lower Level Key -> gaol_lower_level_key.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Horned Bairn -> horned_bairn.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] About Bows -> about_bows.png
+MISSING: [goods] Call of Tibia -> call_of_tibia.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Herbalist's Bell Bearing -> herbalists_bell_bearing.png
+MISSING: [goods] Armorer's Cookbook [3] -> armorers_cookbook_3.png
+MISSING: [goods] Note: Waypoint Ruins -> note_waypoint_ruins.png
+MISSING: [goods] As You Wish -> as_you_wish.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Remembrance of the Impaler -> remembrance_of_the_impaler.png
+MISSING: [goods] Radahn's Great Rune -> radahns_great_rune.png
+MISSING: [goods] Deflecting Hardtear -> deflecting_hardtear.png
+MISSING: [goods] Map: Southern Shore -> map_southern_shore.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Meat Peddler's Bell Bearing -> meat_peddlers_bell_bearing.png
+MISSING: [goods] Nomadic Warrior's Cookbook [23] -> nomadic_warriors_cookbook_23.png
+MISSING: [goods] Giantsflame Fire Pot -> giantsflame_fire_pot.png
+MISSING: [goods] Pureblood Knight's Medal -> pureblood_knights_medal.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Erdtree Prayerbook -> erdtree_prayerbook.png
+MISSING: [goods] Yellow Fulgurbloom -> yellow_fulgurbloom.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [8] -> nomadic_merchants_bell_bearing_8.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] About Death -> about_death.png
+MISSING: [goods] Drawstring Messmerfire Grease -> drawstring_messmerfire_grease.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Antiquity Scholar's Cookbook [2] -> antiquity_scholars_cookbook_2.png
+MISSING: [goods] Golden Order Totality -> golden_order_totality.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Sellia's Secret -> sellias_secret.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [7] -> glintstone_craftsmans_cookbook_7.png
+MISSING: [goods] Holyproof Pickled Liver -> holyproof_pickled_liver.png
+MISSING: [goods] Secret Rite Scroll -> secret_rite_scroll.png
+MISSING: [goods] St. Trina Disciple's Cookbook [2] -> st._trina_disciples_cookbook_2.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Drawstring Royal Magic Grease -> drawstring_royal_magic_grease.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Roped Magic Pot -> roped_magic_pot.png
+MISSING: [goods] Aspects of the Crucible: Bloom -> aspects_of_the_crucible_bloom.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Ancient Dragon Knight's Cookbook [2] -> ancient_dragon_knights_cookbook_2.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Hole-Laden Necklace -> hole_laden_necklace.png
+MISSING: [goods] Miranda's Prayer -> mirandas_prayer.png
+MISSING: [goods] Dragonscale Flesh -> dragonscale_flesh.png
+MISSING: [goods] Beast Horn -> beast_horn.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [6] -> glintstone_craftsmans_cookbook_6.png
+MISSING: [goods] Ghost-Glovewort Picker's Bell Bearing [2] -> ghost_glovewort_pickers_bell_bearing_2.png
+MISSING: [goods] Thops's Bell Bearing -> thopss_bell_bearing.png
+MISSING: [goods] About Skills -> about_skills.png
+MISSING: [goods] About Cooperative Multiplayer -> about_cooperative_multiplayer.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [4] -> nomadic_merchants_bell_bearing_4.png
+MISSING: [goods] Hoslow's Oath -> hoslows_oath.png
+MISSING: [goods] Note: Land Squirts -> note_land_squirts.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Letter for Freyja -> letter_for_freyja.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Black Flame Blade -> black_flame_blade.png
+MISSING: [goods] Corhyn's Bell Bearing -> corhyns_bell_bearing.png
+MISSING: [goods] Scadutree Fragment -> scadutree_fragment.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Letter for Freyja -> letter_for_freyja.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] About Pouches -> about_pouches.png
+MISSING: [goods] Greasemonger's Bell Bearing -> greasemongers_bell_bearing.png
+MISSING: [goods] Irina's Letter -> irinas_letter.png
+MISSING: [goods] Medicine Peddler's Bell Bearing -> medicine_peddlers_bell_bearing.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Tarnished's Furled Finger -> tarnisheds_furled_finger.png
+MISSING: [goods] Serpent's Amnion -> serpents_amnion.png
+MISSING: [goods] Perfumer's Cookbook (1) -> perfumers_cookbook_1.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Polite Bow -> polite_bow.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] By My Sword -> by_my_sword.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Seluvis's Introduction -> seluviss_introduction.png
+MISSING: [goods] Greater Potentate's Cookbook [7] -> greater_potentates_cookbook_7.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Pureblood Knight's Medal -> pureblood_knights_medal.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Royal Magic Grease -> royal_magic_grease.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Letter to Bernahl -> letter_to_bernahl.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Flask of Wondrous Physick (Base) -> flask_of_wondrous_physick_base.png
+MISSING: [goods] Prattling Pate "Apologies" -> prattling_pate_"apologies".png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Placidusax's Ruin -> placidusaxs_ruin.png
+MISSING: [goods] Wrath from Afar -> wrath_from_afar.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Storehouse Cross Message -> storehouse_cross_message.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Armorer's Cookbook [5] -> armorers_cookbook_5.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Forager Brood Cookbook [6] -> forager_brood_cookbook_6.png
+MISSING: [goods] Igon's Cookbook [2] -> igons_cookbook_2.png
+MISSING: [goods] Remembrance of the Twin Moon Knight -> remembrance_of_the_twin_moon_knight.png
+MISSING: [goods] Land of Shadow -> land_of_shadow.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Agheel's Flame -> agheels_flame.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Rennala's Full Moon -> rennalas_full_moon.png
+MISSING: [goods] Gaol Upper Level Key -> gaol_upper_level_key.png
+MISSING: [goods] Duelist's Furled Finger (Alt) -> duelists_furled_finger_alt.png
+MISSING: [goods] Winter-Lantern Fly -> winter_lantern_fly.png
+MISSING: [goods] Nomadic Warrior's Cookbook [13] -> nomadic_warriors_cookbook_13.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Forager Brood Cookbook [5] -> forager_brood_cookbook_5.png
+MISSING: [goods] Opaline Pickled Liver -> opaline_pickled_liver.png
+MISSING: [goods] Remembrance of the Wild Boar Rider -> remembrance_of_the_wild_boar_rider.png
+MISSING: [goods] Blue Cipher Ring (Base) -> blue_cipher_ring_base.png
+MISSING: [goods] Winter-Lantern Fly -> winter_lantern_fly.png
+MISSING: [goods] Blackguard's Bell Bearing -> blackguards_bell_bearing.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Knot Resin -> knot_resin.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Fingerprint Nostrum -> fingerprint_nostrum.png
+MISSING: [goods] Golden Arcs -> golden_arcs.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Viridian Hidden Tear -> viridian_hidden_tear.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] About Wielding Armaments -> about_wielding_armaments.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [3] -> ancient_dragon_apostles_cookbook_3.png
+MISSING: [goods] About Guidance of Grace -> about_guidance_of_grace.png
+MISSING: [goods] Seluvis's Bell Bearing -> seluviss_bell_bearing.png
+MISSING: [goods] Missionary's Cookbook (3) -> missionarys_cookbook_3.png
+MISSING: [goods] Meeting Place Map -> meeting_place_map.png
+MISSING: [goods] Knight's Lightning Spear -> knights_lightning_spear.png
+MISSING: [goods] Scarlet Bud -> scarlet_bud.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Roar of Rugalea -> roar_of_rugalea.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Frenzied's Cookbook [1] -> frenzieds_cookbook_1.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Lamenter's Mask -> lamenters_mask.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Roped Frenzied Flame Pot -> roped_frenzied_flame_pot.png
+MISSING: [goods] Messmer's Orb -> messmers_orb.png
+MISSING: [goods] Reverential Bow -> reverential_bow.png
+MISSING: [goods] Storeroom Key -> storeroom_key.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Innard Meat -> innard_meat.png
+MISSING: [goods] About Flask of Wondrous Physick -> about_flask_of_wondrous_physick.png
+MISSING: [goods] Black Syrup -> black_syrup.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Wrath from Afar -> wrath_from_afar.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Knight's Lightning Spear -> knights_lightning_spear.png
+MISSING: [goods] The Stormhawk King -> the_stormhawk_king.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Flask of Crimson Tears1 -> flask_of_crimson_tears1.png
+MISSING: [goods] Jump for Joy -> jump_for_joy.png
+MISSING: [goods] Charming Branch -> charming_branch.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Malenia's Great Rune -> malenias_great_rune.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Bloodflame Blade -> bloodflame_blade.png
+MISSING: [goods] Scholar's Armament -> scholars_armament.png
+MISSING: [goods] Ghost-Glovewort Picker's Bell Bearing [1] -> ghost_glovewort_pickers_bell_bearing_1.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Light of Miquella -> light_of_miquella.png
+MISSING: [goods] Igon's Bell Bearing -> igons_bell_bearing.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Message from Leda -> message_from_leda.png
+MISSING: [goods] Ekzykes's Decay -> ekzykess_decay.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [1] -> somberstone_miners_bell_bearing_1.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [3] -> glintstone_craftsmans_cookbook_3.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Forager Brood Cookbook [5] -> forager_brood_cookbook_5.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Prattling Pate "My beloved" -> prattling_pate_"my_beloved".png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Frozen Maggot -> frozen_maggot.png
+MISSING: [goods] Hefty Freezing Pot -> hefty_freezing_pot.png
+MISSING: [goods] Inner Order -> inner_order.png
+MISSING: [goods] Map: Southern Shore -> map_southern_shore.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Thops's Barrier -> thopss_barrier.png
+MISSING: [goods] Kalé's Bell Bearing -> kalés_bell_bearing.png
+MISSING: [goods] Note: Flask of Wondrous Physick -> note_flask_of_wondrous_physick.png
+MISSING: [goods] Finger Mimic -> finger_mimic.png
+MISSING: [goods] Note: Land Squirts -> note_land_squirts.png
+MISSING: [goods] Borealis's Mist -> borealiss_mist.png
+MISSING: [goods] Medicine Peddler's Bell Bearing -> medicine_peddlers_bell_bearing.png
+MISSING: [goods] About Vanquishing Enemy Groups -> about_vanquishing_enemy_groups.png
+MISSING: [goods] Rock Heart -> rock_heart.png
+MISSING: [goods] Messmer's Kindling -> messmers_kindling.png
+MISSING: [goods] The Stormhawk King -> the_stormhawk_king.png
+MISSING: [goods] Note: Stonedigger Trolls -> note_stonedigger_trolls.png
+MISSING: [goods] Hefty Furnace Pot -> hefty_furnace_pot.png
+MISSING: [goods] Map: Mt. Gelmir -> map_mt._gelmir.png
+MISSING: [goods] About Invasion Multiplayer -> about_invasion_multiplayer.png
+MISSING: [goods] Map: Gravesite Plain -> map_gravesite_plain.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Rogier's Letter -> rogiers_letter.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Knifeprint Clue -> knifeprint_clue.png
+MISSING: [goods] Trina's Lily -> trinas_lily.png
+MISSING: [goods] Erdtree Codex -> erdtree_codex.png
+MISSING: [goods] Extreme Repentance -> extreme_repentance.png
+MISSING: [goods] About Summoning Spirits -> about_summoning_spirits.png
+MISSING: [goods] Furnace Visage -> furnace_visage.png
+MISSING: [goods] Golden Grease -> golden_grease.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Corhyn's Bell Bearing -> corhyns_bell_bearing.png
+MISSING: [goods] Giant Golden Arc -> giant_golden_arc.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Finger-Weaver's Cookbook [1] -> finger_weavers_cookbook_1.png
+MISSING: [goods] Frozen Maggot -> frozen_maggot.png
+MISSING: [goods] Polter Stone -> polter_stone.png
+MISSING: [goods] Gowry's Bell Bearing -> gowrys_bell_bearing.png
+MISSING: [goods] Grovel For Mercy -> grovel_for_mercy.png
+MISSING: [goods] Golden Order Totality -> golden_order_totality.png
+MISSING: [goods] Spritestone -> spritestone.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Hefty Poison Pot -> hefty_poison_pot.png
+MISSING: [goods] Iris of Occultation -> iris_of_occultation.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] About Competitive Multiplayer -> about_competitive_multiplayer.png
+MISSING: [goods] Note: Sealed Spiritsprings -> note_sealed_spiritsprings.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Adula's Moonblade -> adulas_moonblade.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Mirage Riddle -> mirage_riddle.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Nectarblood Burgeon -> nectarblood_burgeon.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Hermit Merchant's Bell Bearing [3] -> hermit_merchants_bell_bearing_3.png
+MISSING: [goods] Remembrance of the Twin Moon Knight -> remembrance_of_the_twin_moon_knight.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Spira -> spira.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Night Maiden's Mist -> night_maidens_mist.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Iji's Confession -> ijis_confession.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Greyoll's Roar -> greyolls_roar.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Patches' Crouch -> patches_crouch.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [2] -> ancient_dragon_apostles_cookbook_2.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Bondstone -> bondstone.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Divine Beast Tornado -> divine_beast_tornado.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Nomadic Warrior's Cookbook [24] -> nomadic_warriors_cookbook_24.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Ancient Dragon Knight's Cookbook [1] -> ancient_dragon_knights_cookbook_1.png
+MISSING: [goods] Domain of Dragons Painting -> domain_of_dragons_painting.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Scarlet Bud -> scarlet_bud.png
+MISSING: [goods] About Summoning Pools -> about_summoning_pools.png
+MISSING: [goods] Dragonbolt of Florissax -> dragonbolt_of_florissax.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] About the Scadutree Blessing -> about_the_scadutree_blessing.png
+MISSING: [goods] Hefty Cracked Pot -> hefty_cracked_pot.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Rallying Cry -> rallying_cry.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Red Letter -> red_letter.png
+MISSING: [goods] My Lord -> my_lord.png
+MISSING: [goods] Monk's Missive -> monks_missive.png
+MISSING: [goods] About Competitive Multiplayer -> about_competitive_multiplayer.png
+MISSING: [goods] Eternal Sleep Pot -> eternal_sleep_pot.png
+MISSING: [goods] Nomadic Warrior's Cookbook [20] -> nomadic_warriors_cookbook_20.png
+MISSING: [goods] Battlefield Priest's Cookbook [3] -> battlefield_priests_cookbook_3.png
+MISSING: [goods] Horn-Strewn Excrement -> horn_strewn_excrement.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Jump for Joy -> jump_for_joy.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] About Leveling Up -> about_leveling_up.png
+MISSING: [goods] Conspectus Scroll -> conspectus_scroll.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Missionary's Cookbook [1] -> missionarys_cookbook_1.png
+MISSING: [goods] Rellana's Twin Moons -> rellanas_twin_moons.png
+MISSING: [goods] Greater Potentate's Cookbook [3] -> greater_potentates_cookbook_3.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Nomadic Warrior's Cookbook [8] -> nomadic_warriors_cookbook_8.png
+MISSING: [goods] Yellow Fulgurbloom -> yellow_fulgurbloom.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [10] -> nomadic_merchants_bell_bearing_10.png
+MISSING: [goods] Missionary's Cookbook [1] -> missionarys_cookbook_1.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [15] -> nomadic_warriors_cookbook_15.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Remembrance of the Shadow Sunflower -> remembrance_of_the_shadow_sunflower.png
+MISSING: [goods] About Map Gaps -> about_map_gaps.png
+MISSING: [goods] About Birdseye Telescopes -> about_birdseye_telescopes.png
+MISSING: [goods] Letter to Patches -> letter_to_patches.png
+MISSING: [goods] Gourmet Scorpion Stew -> gourmet_scorpion_stew.png
+MISSING: [goods] Swollen Grape -> swollen_grape.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Cerulean-Sapping Cracked Tear -> cerulean_sapping_cracked_tear.png
+MISSING: [goods] Radahn's Great Rune -> radahns_great_rune.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Night Maiden's Mist -> night_maidens_mist.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Drawstring Golden Grease -> drawstring_golden_grease.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Fire Spur Me -> fire_spur_me.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Holy Water Grease -> holy_water_grease.png
+MISSING: [goods] Vortex of Putrescence -> vortex_of_putrescence.png
+MISSING: [goods] Asimi, Silver Tear -> asimi_silver_tear.png
+MISSING: [goods] Academy Scroll -> academy_scroll.png
+MISSING: [goods] Remembrance of the Wild Boar Rider -> remembrance_of_the_wild_boar_rider.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [6] -> glintstone_craftsmans_cookbook_6.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Beckon -> beckon.png
+MISSING: [goods] Well-Pickled Turtle Neck -> well_pickled_turtle_neck.png
+MISSING: [goods] Thops's Bell Bearing -> thopss_bell_bearing.png
+MISSING: [goods] Hefty Rancor Pot -> hefty_rancor_pot.png
+MISSING: [goods] Redflesh Mushroom -> redflesh_mushroom.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Bloodsucking Cracked Tear -> bloodsucking_cracked_tear.png
+MISSING: [goods] Deflecting Hardtear -> deflecting_hardtear.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Ruins Map (3rd) -> ruins_map_3rd.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Finger Snap -> finger_snap.png
+MISSING: [goods] Lord's Aid -> lords_aid.png
+MISSING: [goods] Prattling Pate "You're beautiful" -> prattling_pate_"youre_beautiful".png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Surging Frenzied Flame -> surging_frenzied_flame.png
+MISSING: [goods] Rogier's Bell Bearing -> rogiers_bell_bearing.png
+MISSING: [goods] Armorer's Cookbook [3] -> armorers_cookbook_3.png
+MISSING: [goods] Nomadic Warrior's Cookbook [5] -> nomadic_warriors_cookbook_5.png
+MISSING: [goods] mit Kreuz markierte Karte -> mit_kreuz_markierte_karte.png
+MISSING: [goods] Rada Fruit -> rada_fruit.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] About Roundtable Hold -> about_roundtable_hold.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [1] -> glintstone_craftsmans_cookbook_1.png
+MISSING: [goods] Blades of Stone -> blades_of_stone.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [2] -> nomadic_merchants_bell_bearing_2.png
+MISSING: [goods] Nomadic Warrior's Cookbook [18] -> nomadic_warriors_cookbook_18.png
+MISSING: [goods] Thin Beast Bones -> thin_beast_bones.png
+MISSING: [goods] Fancy Spin -> fancy_spin.png
+MISSING: [goods] Glovewort Picker's Bell Bearing [1] -> glovewort_pickers_bell_bearing_1.png
+MISSING: [goods] Hefty Frenzied Flame Pot -> hefty_frenzied_flame_pot.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Incursion Painting -> incursion_painting.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Remembrance of a God and a Lord -> remembrance_of_a_god_and_a_lord.png
+MISSING: [goods] Antiquity Scholar's Cookbook [1] -> antiquity_scholars_cookbook_1.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Nod In Thought -> nod_in_thought.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Drawstring Freezing Grease -> drawstring_freezing_grease.png
+MISSING: [goods] Domain of Dragons Painting -> domain_of_dragons_painting.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Greater Potentate's Cookbook [5] -> greater_potentates_cookbook_5.png
+MISSING: [goods] White Cipher Ring (Base) -> white_cipher_ring_base.png
+MISSING: [goods] Drawstring Dragonbolt Grease -> drawstring_dragonbolt_grease.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Holy Water Grease -> holy_water_grease.png
+MISSING: [goods] Isolated Merchant's Bell Bearing [3] -> isolated_merchants_bell_bearing_3.png
+MISSING: [goods] Greater Potentate's Cookbook [4] -> greater_potentates_cookbook_4.png
+MISSING: [goods] Radagon's Rings of Light -> radagons_rings_of_light.png
+MISSING: [goods] Dragonbolt of Florissax -> dragonbolt_of_florissax.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Order's Blade -> orders_blade.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] About Sites of Grace -> about_sites_of_grace.png
+MISSING: [goods] About Summoning Pools -> about_summoning_pools.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Storehouse Cross Message -> storehouse_cross_message.png
+MISSING: [goods] Perfumed Oil of Ranah -> perfumed_oil_of_ranah.png
+MISSING: [goods] Vortex of Putrescence -> vortex_of_putrescence.png
+MISSING: [goods] Igon's Cookbook [1] -> igons_cookbook_1.png
+MISSING: [goods] Pest-Thread Spears -> pest_thread_spears.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Spellproof Pickled Liver -> spellproof_pickled_liver.png
+MISSING: [goods] Redflesh Mushroom -> redflesh_mushroom.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Forager Brood Cookbook [1] -> forager_brood_cookbook_1.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Glinting Nail -> glinting_nail.png
+MISSING: [goods] Shadow Realm Rune [1] -> shadow_realm_rune_1.png
+MISSING: [goods] Letter from Volcano Manor -> letter_from_volcano_manor.png
+MISSING: [goods] D's Bell Bearing -> ds_bell_bearing.png
+MISSING: [goods] Note: Walking Mausoleum -> note_walking_mausoleum.png
+MISSING: [goods] Point Upwards -> point_upwards.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Greater Potentate's Cookbook [12] -> greater_potentates_cookbook_12.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Malenia's Great Rune -> malenias_great_rune.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Grave Keeper's Cookbook [2] -> grave_keepers_cookbook_2.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Dragonbolt Grease -> dragonbolt_grease.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] About Flask of Wondrous Physick -> about_flask_of_wondrous_physick.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [1] -> glintstone_craftsmans_cookbook_1.png
+MISSING: [goods] Drawstring Eternal Sleep Grease -> drawstring_eternal_sleep_grease.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Desperate Prayer -> desperate_prayer.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Aspects of the Crucible: Thorns -> aspects_of_the_crucible_thorns.png
+MISSING: [goods] Antiquity Scholar's Cookbook [1] -> antiquity_scholars_cookbook_1.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Nod In Thought -> nod_in_thought.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [3] -> ancient_dragon_apostles_cookbook_3.png
+MISSING: [goods] Rain of Fire -> rain_of_fire.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Greyoll's Roar -> greyolls_roar.png
+MISSING: [goods] Bernahl's Bell Bearing -> bernahls_bell_bearing.png
+MISSING: [goods] Perfumer's Cookbook (2) -> perfumers_cookbook_2.png
+MISSING: [goods] Roar of Rugalea -> roar_of_rugalea.png
+MISSING: [goods] Impenetrable Thorns -> impenetrable_thorns.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] mit Kreuz markierte Karte -> mit_kreuz_markierte_karte.png
+MISSING: [goods] About Roundtable Hold -> about_roundtable_hold.png
+MISSING: [goods] Beast Horn -> beast_horn.png
+MISSING: [goods] Rada Fruit -> rada_fruit.png
+MISSING: [goods] Missionary's Cookbook [5] -> missionarys_cookbook_5.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Nomadic Warrior's Cookbook [15] -> nomadic_warriors_cookbook_15.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Lost Ashes of War -> lost_ashes_of_war.png
+MISSING: [goods] Grave Cricket -> grave_cricket.png
+MISSING: [goods] Lulling Branch -> lulling_branch.png
+MISSING: [goods] About Guarding -> about_guarding.png
+MISSING: [goods] Golden Horn Tender -> golden_horn_tender.png
+MISSING: [goods] Incursion Painting -> incursion_painting.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [2] -> smithing_stone_miners_bell_bearing_2.png
+MISSING: [goods] About Beacons -> about_beacons.png
+MISSING: [goods] Marika's Rune -> marikas_rune.png
+MISSING: [goods] Nomadic Warrior's Cookbook [8] -> nomadic_warriors_cookbook_8.png
+MISSING: [goods] Rellana's Twin Moons -> rellanas_twin_moons.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Greater Potentate's Cookbook [12] -> greater_potentates_cookbook_12.png
+MISSING: [goods] Perfumer's Cookbook [2] -> perfumers_cookbook_2.png
+MISSING: [goods] Silver Horn Tender -> silver_horn_tender.png
+MISSING: [goods] Fugitive Warrior's Recipe [5] -> fugitive_warriors_recipe_5.png
+MISSING: [goods] Hermit Merchant's Bell Bearing [3] -> hermit_merchants_bell_bearing_3.png
+MISSING: [goods] Forager Brood Cookbook [6] -> forager_brood_cookbook_6.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Hefty Cracked Pot -> hefty_cracked_pot.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Watchful Spirit -> watchful_spirit.png
+MISSING: [goods] Rya's Necklace -> ryas_necklace.png
+MISSING: [goods] Seluvis's Introduction -> seluviss_introduction.png
+MISSING: [goods] Rogier's Bell Bearing -> rogiers_bell_bearing.png
+MISSING: [goods] Point Forwards -> point_forwards.png
+MISSING: [goods] Mohg's Shackle -> mohgs_shackle.png
+MISSING: [goods] About Summoning Spirits -> about_summoning_spirits.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Rykard's Great Rune -> rykards_great_rune.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Armorer's Cookbook [5] -> armorers_cookbook_5.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Burial Crow's Letter -> burial_crows_letter.png
+MISSING: [goods] Heal from Afar -> heal_from_afar.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Radiant Baldachin's Blessing -> radiant_baldachins_blessing.png
+MISSING: [goods] Miriel's Bell Bearing -> miriels_bell_bearing.png
+MISSING: [goods] Bernahl's Bell Bearing -> bernahls_bell_bearing.png
+MISSING: [goods] Aspects of the Crucible: Thorns -> aspects_of_the_crucible_thorns.png
+MISSING: [goods] Hefty Volcano Pot -> hefty_volcano_pot.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Greater Potentate's Cookbook [3] -> greater_potentates_cookbook_3.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Hefty Oil Pot -> hefty_oil_pot.png
+MISSING: [goods] Fire Knight's Cookbook [1] -> fire_knights_cookbook_1.png
+MISSING: [goods] Rest -> rest.png
+MISSING: [goods] Dragon Communion Harpoon -> dragon_communion_harpoon.png
+MISSING: [goods] Ring of Miquella -> ring_of_miquella.png
+MISSING: [goods] Asimi's Husk -> asimis_husk.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Pearlescent Scale -> pearlescent_scale.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Crossed Legs -> crossed_legs.png
+MISSING: [goods] Viridian Hidden Tear -> viridian_hidden_tear.png
+MISSING: [goods] Black Pyrefly -> black_pyrefly.png
+MISSING: [goods] Hero's Rune [4] -> heros_rune_4.png
+MISSING: [goods] Scholar's Shield -> scholars_shield.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Perfumer's Cookbook [2] -> perfumers_cookbook_2.png
+MISSING: [goods] Silver Horn Tender -> silver_horn_tender.png
+MISSING: [goods] Thin Beast Bones -> thin_beast_bones.png
+MISSING: [goods] Hermit Merchant's Bell Bearing [1] -> hermit_merchants_bell_bearing_1.png
+MISSING: [goods] Small Golden Effigy (Base) -> small_golden_effigy_base.png
+MISSING: [goods] The Two Fingers -> the_two_fingers.png
+MISSING: [goods] Note: Revenants -> note_revenants.png
+MISSING: [goods] About Sites of Grace -> about_sites_of_grace.png
+MISSING: [goods] Radagon's Rings of Light -> radagons_rings_of_light.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Hermit Merchant's Bell Bearing [2] -> hermit_merchants_bell_bearing_2.png
+MISSING: [goods] Dozing Cross-Legged -> dozing_cross_legged.png
+MISSING: [goods] About Invasion Multiplayer -> about_invasion_multiplayer.png
+MISSING: [goods] Frenzied's Cookbook [1] -> frenzieds_cookbook_1.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Remembrance of Putrescence -> remembrance_of_putrescence.png
+MISSING: [goods] About Monument Icon -> about_monument_icon.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [9] -> nomadic_warriors_cookbook_9.png
+MISSING: [goods] Deep-Purple Lily -> deep_purple_lily.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Small Golden Effigy (Base Alt) -> small_golden_effigy_base_alt.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [11] -> nomadic_merchants_bell_bearing_11.png
+MISSING: [goods] Midra's Flame of Frenzy -> midras_flame_of_frenzy.png
+MISSING: [goods] Rykard's Rancor -> rykards_rancor.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Leda's Rune -> ledas_rune.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Point Upwards -> point_upwards.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Pearlescent Scale -> pearlescent_scale.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [8] -> nomadic_merchants_bell_bearing_8.png
+MISSING: [goods] Remembrance of the Lord of Frenzied Flame -> remembrance_of_the_lord_of_frenzied_flame.png
+MISSING: [goods] Lulling Branch -> lulling_branch.png
+MISSING: [goods] Asimi, Silver Chrysalid -> asimi_silver_chrysalid.png
+MISSING: [goods] Scholar's Shield -> scholars_shield.png
+MISSING: [goods] About Map -> about_map.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Gaol Lower Level Key -> gaol_lower_level_key.png
+MISSING: [goods] About Compass -> about_compass.png
+MISSING: [goods] Perfumer's Cookbook [4] -> perfumers_cookbook_4.png
+MISSING: [goods] Glintslab Firefly -> glintslab_firefly.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] About Great Runes -> about_great_runes.png
+MISSING: [goods] Heartening Cry -> heartening_cry.png
+MISSING: [goods] Castle Cross Message -> castle_cross_message.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Dragon Communion Grease -> dragon_communion_grease.png
+MISSING: [goods] Isolated Merchant's Bell Bearing [3] -> isolated_merchants_bell_bearing_3.png
+MISSING: [goods] Shadow Realm Rune [3] -> shadow_realm_rune_3.png
+MISSING: [goods] St. Trina Disciple's Cookbook [1] -> st._trina_disciples_cookbook_1.png
+MISSING: [goods] Smarag's Glintstone Breath -> smarags_glintstone_breath.png
+MISSING: [goods] Missionary's Cookbook [2] -> missionarys_cookbook_2.png
+MISSING: [goods] About Skills -> about_skills.png
+MISSING: [goods] About Strengthening Armaments -> about_strengthening_armaments.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] About Containers -> about_containers.png
+MISSING: [goods] Electrocharge -> electrocharge.png
+MISSING: [goods] About Map Gaps (Alt 2) -> about_map_gaps_alt_2.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [2] -> nomadic_merchants_bell_bearing_2.png
+MISSING: [goods] Patches' Bell Bearing -> patches_bell_bearing.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [2] -> somberstone_miners_bell_bearing_2.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Dragonbolt Grease -> dragonbolt_grease.png
+MISSING: [goods] Remembrance of Putrescence -> remembrance_of_putrescence.png
+MISSING: [goods] Perfumer's Cookbook [3] -> perfumers_cookbook_3.png
+MISSING: [goods] Alexander's Innards -> alexanders_innards.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] D's Bell Bearing -> ds_bell_bearing.png
+MISSING: [goods] Iris of Occultation -> iris_of_occultation.png
+MISSING: [goods] Vyke's Dragonbolt -> vykes_dragonbolt.png
+MISSING: [goods] Thiollier's Concoction -> thiolliers_concoction.png
+MISSING: [goods] Missionary's Cookbook [6] -> missionarys_cookbook_6.png
+MISSING: [goods] Fancy Spin -> fancy_spin.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Multilayered Ring of Light -> multilayered_ring_of_light.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Scorpion Stew -> scorpion_stew.png
+MISSING: [goods] Remembrance of the Saint of the Bud -> remembrance_of_the_saint_of_the_bud.png
+MISSING: [goods] Hoslow's Oath -> hoslows_oath.png
+MISSING: [goods] Note: Unseen Assassins -> note_unseen_assassins.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Battlefield Priest's Cookbook [4] -> battlefield_priests_cookbook_4.png
+MISSING: [goods] Drawstring Messmerfire Grease -> drawstring_messmerfire_grease.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Miquella's Needle -> miquellas_needle.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Bone Peddler's Bell Bearing -> bone_peddlers_bell_bearing.png
+MISSING: [goods] Nomadic Warrior's Cookbook [3] -> nomadic_warriors_cookbook_3.png
+MISSING: [goods] Greater Potentate's Cookbook [11] -> greater_potentates_cookbook_11.png
+MISSING: [goods] Lord of Blood's Favor -> lord_of_bloods_favor.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] About the Revered Spirit Ash Blessing -> about_the_revered_spirit_ash_blessing.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] About Guidance of Grace -> about_guidance_of_grace.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] About Crouching -> about_crouching.png
+MISSING: [goods] Remembrance of a God and a Lord -> remembrance_of_a_god_and_a_lord.png
+MISSING: [goods] Moore's Bell Bearing -> moores_bell_bearing.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Warm Welcome -> warm_welcome.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Nomadic Warrior's Cookbook [21] -> nomadic_warriors_cookbook_21.png
+MISSING: [goods] Redmane Painting -> redmane_painting.png
+MISSING: [goods] About Adding Affinities -> about_adding_affinities.png
+MISSING: [goods] Triumphant Delight -> triumphant_delight.png
+MISSING: [goods] Forager Brood Cookbook [1] -> forager_brood_cookbook_1.png
+MISSING: [goods] Golden Order Principles -> golden_order_principles.png
+MISSING: [goods] Tarnished's Wizened Finger -> tarnisheds_wizened_finger.png
+MISSING: [goods] Fevor's Cookbook [3] -> fevors_cookbook_3.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Shadow Realm Rune [2] -> shadow_realm_rune_2.png
+MISSING: [goods] Ruins Map (3rd) -> ruins_map_3rd.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] About the Revered Spirit Ash Blessing -> about_the_revered_spirit_ash_blessing.png
+MISSING: [goods] Order's Blade -> orders_blade.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [1] -> nomadic_merchants_bell_bearing_1.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Dragon Communion Grease -> dragon_communion_grease.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Assassin's Approach -> assassins_approach.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Sorcerer Painting -> sorcerer_painting.png
+MISSING: [goods] Note: Flame Chariots -> note_flame_chariots.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Thiollier's Concoction -> thiolliers_concoction.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Homing Instinct Painting -> homing_instinct_painting.png
+MISSING: [goods] St. Trina Disciple's Cookbook [3] -> st._trina_disciples_cookbook_3.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] About Item Crafting -> about_item_crafting.png
+MISSING: [goods] About Birdseye Telescopes -> about_birdseye_telescopes.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [3] -> smithing_stone_miners_bell_bearing_3.png
+MISSING: [goods] Remembrance of the Dancing Lion -> remembrance_of_the_dancing_lion.png
+MISSING: [goods] Mad Craftsman's Cookbook [2] -> mad_craftsmans_cookbook_2.png
+MISSING: [goods] Fly Mold -> fly_mold.png
+MISSING: [goods] Dejection -> dejection.png
+MISSING: [goods] Battlefield Priest's Cookbook [1] -> battlefield_priests_cookbook_1.png
+MISSING: [goods] Note: Unseen Assassins -> note_unseen_assassins.png
+MISSING: [goods] Nomadic Warrior's Cookbook [5] -> nomadic_warriors_cookbook_5.png
+MISSING: [goods] Fire Serpent -> fire_serpent.png
+MISSING: [goods] Finger Severer (Base Alt) -> finger_severer_base_alt.png
+MISSING: [goods] About Materials -> about_materials.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Ancient Dragon Knight's Cookbook [2] -> ancient_dragon_knights_cookbook_2.png
+MISSING: [goods] Greater Potentate's Cookbook [6] -> greater_potentates_cookbook_6.png
+MISSING: [goods] Lucent Baldachin's Blessing -> lucent_baldachins_blessing.png
+MISSING: [goods] About New Inventory Features -> about_new_inventory_features.png
+MISSING: [goods] Congealed Putrescence -> congealed_putrescence.png
+MISSING: [goods] Greater Potentate's Cookbook [8] -> greater_potentates_cookbook_8.png
+MISSING: [goods] About Hunter Multiplayer -> about_hunter_multiplayer.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Ghost-Glovewort Picker's Bell Bearing [3] -> ghost_glovewort_pickers_bell_bearing_3.png
+MISSING: [goods] Nomadic Warrior's Cookbook [21] -> nomadic_warriors_cookbook_21.png
+MISSING: [goods] Midra's Flame of Frenzy -> midras_flame_of_frenzy.png
+MISSING: [goods] Imprisoned Merchant's Bell Bearing -> imprisoned_merchants_bell_bearing.png
+MISSING: [goods] Hero's Rune [4] -> heros_rune_4.png
+MISSING: [goods] Empyrean-Blood Burgeon -> empyrean_blood_burgeon.png
+MISSING: [goods] Note: Revenants -> note_revenants.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Spark Aromatic -> spark_aromatic.png
+MISSING: [goods] Nomadic Warrior's Cookbook [4] -> nomadic_warriors_cookbook_4.png
+MISSING: [goods] Keep Wall Key -> keep_wall_key.png
+MISSING: [goods] Seluvis's Potion -> seluviss_potion.png
+MISSING: [goods] About Pouch -> about_pouch.png
+MISSING: [goods] Hero's Rune [5] -> heros_rune_5.png
+MISSING: [goods] Asimi's Husk -> asimis_husk.png
+MISSING: [goods] About Sorceries and Incantations -> about_sorceries_and_incantations.png
+MISSING: [goods] Nomadic Warrior's Cookbook [16] -> nomadic_warriors_cookbook_16.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Hefty Frenzied Flame Pot -> hefty_frenzied_flame_pot.png
+MISSING: [goods] Miquella's Needle -> miquellas_needle.png
+MISSING: [goods] Nomadic Warrior's Cookbook [3] -> nomadic_warriors_cookbook_3.png
+MISSING: [goods] Nomadic Warrior's Cookbook [14] -> nomadic_warriors_cookbook_14.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Flightless Bird Painting -> flightless_bird_painting.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Note: Walking Mausoleum -> note_walking_mausoleum.png
+MISSING: [goods] About Stance-Breaking -> about_stance_breaking.png
+MISSING: [goods] Dragon Communion Flesh -> dragon_communion_flesh.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Fire Serpent -> fire_serpent.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Miriam's Vanishing -> miriams_vanishing.png
+MISSING: [goods] Rain of Fire -> rain_of_fire.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Greater Potentate's Cookbook [8] -> greater_potentates_cookbook_8.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Letter from Volcano Manor -> letter_from_volcano_manor.png
+MISSING: [goods] Glovewort Crystal Tear -> glovewort_crystal_tear.png
+MISSING: [goods] Blessing of Marika -> blessing_of_marika.png
+MISSING: [goods] Hefty Fire Pot -> hefty_fire_pot.png
+MISSING: [goods] Deathsbane Jerky -> deathsbane_jerky.png
+MISSING: [goods] Hero's Rune [2] -> heros_rune_2.png
+MISSING: [goods] Torn Diary Page -> torn_diary_page.png
+MISSING: [goods] Fevor's Cookbook [1] -> fevors_cookbook_1.png
+MISSING: [goods] Scorpion Stew -> scorpion_stew.png
+MISSING: [goods] Broken Rune -> broken_rune.png
+MISSING: [goods] Armorer's Cookbook (5) -> armorers_cookbook_5.png
+MISSING: [goods] Greater Potentate's Cookbook [9] -> greater_potentates_cookbook_9.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Mass of Putrescence -> mass_of_putrescence.png
+MISSING: [goods] Remembrance of the Saint of the Bud -> remembrance_of_the_saint_of_the_bud.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Dragon's Calorbloom -> dragons_calorbloom.png
+MISSING: [goods] Note: Waypoint Ruins -> note_waypoint_ruins.png
+MISSING: [goods] As You Wish -> as_you_wish.png
+MISSING: [goods] Hefty Rancor Pot -> hefty_rancor_pot.png
+MISSING: [goods] Well-Pickled Turtle Neck -> well_pickled_turtle_neck.png
+MISSING: [goods] Greater Potentate's Cookbook [1] -> greater_potentates_cookbook_1.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [5] -> somberstone_miners_bell_bearing_5.png
+MISSING: [goods] Perfumer's Cookbook (1) -> perfumers_cookbook_1.png
+MISSING: [goods] Sacred Bloody Flesh -> sacred_bloody_flesh.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Gourmet Scorpion Stew -> gourmet_scorpion_stew.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Secret Rite Scroll -> secret_rite_scroll.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Bow -> bow.png
+MISSING: [goods] Blessing's Boon -> blessings_boon.png
+MISSING: [goods] Flightless Bird Painting -> flightless_bird_painting.png
+MISSING: [goods] Gurranq's Beast Claw -> gurranqs_beast_claw.png
+MISSING: [goods] Armorer's Cookbook [1] -> armorers_cookbook_1.png
+MISSING: [goods] Spiritgrave Stone -> spiritgrave_stone.png
+MISSING: [goods] Remembrance of the Mother of Fingers -> remembrance_of_the_mother_of_fingers.png
+MISSING: [goods] Prattling Pate "Please help" -> prattling_pate_"please_help".png
+MISSING: [goods] Gold Sewing Needle -> gold_sewing_needle.png
+MISSING: [goods] Nomadic Warrior's Cookbook [11] -> nomadic_warriors_cookbook_11.png
+MISSING: [goods] Gravitational Missile -> gravitational_missile.png
+MISSING: [goods] Blessed Bone Shard -> blessed_bone_shard.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Taunter's Tongue -> taunters_tongue.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [10] -> nomadic_warriors_cookbook_10.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Grave Cricket -> grave_cricket.png
+MISSING: [goods] Tibia's Summons -> tibias_summons.png
+MISSING: [goods] Igon's Furled Finger -> igons_furled_finger.png
+MISSING: [goods] Armorer's Cookbook [2] -> armorers_cookbook_2.png
+MISSING: [goods] Grave Keeper's Brainpan -> grave_keepers_brainpan.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [2] -> smithing_stone_miners_bell_bearing_2.png
+MISSING: [goods] Curtsy -> curtsy.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Glintblade Trio -> glintblade_trio.png
+MISSING: [goods] Hefty Rock Pot -> hefty_rock_pot.png
+MISSING: [goods] Revered Spirit Ash -> revered_spirit_ash.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Ancient Dragon's Blessing -> ancient_dragons_blessing.png
+MISSING: [goods] Shadow Realm Rune [4] -> shadow_realm_rune_4.png
+MISSING: [goods] Lucent Baldachin's Blessing -> lucent_baldachins_blessing.png
+MISSING: [goods] Spread Out -> spread_out.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Ruins Map (2nd) -> ruins_map_2nd.png
+MISSING: [goods] Assassin's Prayerbook -> assassins_prayerbook.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Prayer -> prayer.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Gelmir's Fury -> gelmirs_fury.png
+MISSING: [goods] Missionary's Cookbook [4] -> missionarys_cookbook_4.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Bloodsucking Cracked Tear -> bloodsucking_cracked_tear.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Map: Abyss -> map_abyss.png
+MISSING: [goods] Rest -> rest.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Ruins Map -> ruins_map.png
+MISSING: [goods] Dancer's Castanets -> dancers_castanets.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Crossed Legs -> crossed_legs.png
+MISSING: [goods] Deep-Purple Lily -> deep_purple_lily.png
+MISSING: [goods] Armorer's Cookbook [6] -> armorers_cookbook_6.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Baldachin's Blessing -> baldachins_blessing.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Hero's Rune [1] -> heros_rune_1.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] By My Sword -> by_my_sword.png
+MISSING: [goods] Tarnished's Furled Finger -> tarnisheds_furled_finger.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Festive Grease -> festive_grease.png
+MISSING: [goods] Perfumer's Cookbook [4] -> perfumers_cookbook_4.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Point Downwards -> point_downwards.png
+MISSING: [goods] Hefty Volcano Pot -> hefty_volcano_pot.png
+MISSING: [goods] The Sacred Tower Painting -> the_sacred_tower_painting.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] About Stakes of Marika -> about_stakes_of_marika.png
+MISSING: [goods] Divine Bird Feathers -> divine_bird_feathers.png
+MISSING: [goods] Note: Flame Chariots -> note_flame_chariots.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Iji's Bell Bearing -> ijis_bell_bearing.png
+MISSING: [goods] Nomadic Warrior's Cookbook [13] -> nomadic_warriors_cookbook_13.png
+MISSING: [goods] Greater Potentate's Cookbook [1] -> greater_potentates_cookbook_1.png
+MISSING: [goods] About Spirit Calling Bell -> about_spirit_calling_bell.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] About Item Crafting -> about_item_crafting.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Prattling Pate "Lamentation" -> prattling_pate_"lamentation".png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Sharp Gravel Stone -> sharp_gravel_stone.png
+MISSING: [goods] About Flask of Wondrous Physick -> about_flask_of_wondrous_physick.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [3] -> somberstone_miners_bell_bearing_3.png
+MISSING: [goods] The Two Fingers -> the_two_fingers.png
+MISSING: [goods] Lansseax's Glaive -> lansseaxs_glaive.png
+MISSING: [goods] Valkyrie's Prosthesis -> valkyries_prosthesis.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Prayer -> prayer.png
+MISSING: [goods] Fevor's Cookbook [1] -> fevors_cookbook_1.png
+MISSING: [goods] Note: Flask of Wondrous Physick -> note_flask_of_wondrous_physick.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Smarag's Glintstone Breath -> smarags_glintstone_breath.png
+MISSING: [goods] Kalé's Bell Bearing -> kalés_bell_bearing.png
+MISSING: [goods] Glovewort Picker's Bell Bearing [3] -> glovewort_pickers_bell_bearing_3.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Casual Greeting -> casual_greeting.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Missionary's Cookbook (3) -> missionarys_cookbook_3.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Map: Scadu Altus -> map_scadu_altus.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Blessed Bone Shard -> blessed_bone_shard.png
+MISSING: [goods] Wait! -> wait.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Drawstring Eternal Sleep Grease -> drawstring_eternal_sleep_grease.png
+MISSING: [goods] About Map Gaps (Alt) -> about_map_gaps_alt.png
+MISSING: [goods] Seluvis's Bell Bearing -> seluviss_bell_bearing.png
+MISSING: [goods] Rune of an Unsung Hero -> rune_of_an_unsung_hero.png
+MISSING: [goods] Forager Brood Cookbook [2] -> forager_brood_cookbook_2.png
+MISSING: [goods] Sellen's Primal Glintstone -> sellens_primal_glintstone.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Isolated Merchant's Bell Bearing [1] -> isolated_merchants_bell_bearing_1.png
+MISSING: [goods] Hefty Freezing Pot -> hefty_freezing_pot.png
+MISSING: [goods] Pidia's Bell Bearing -> pidias_bell_bearing.png
+MISSING: [goods] Hefty Rock Pot -> hefty_rock_pot.png
+MISSING: [goods] Champion's Song Painting -> champions_song_painting.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Glovewort Picker's Bell Bearing [2] -> glovewort_pickers_bell_bearing_2.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Flask of Cerulean Tears1 -> flask_of_cerulean_tears1.png
+MISSING: [goods] Prattling Pate "Thank you" -> prattling_pate_"thank_you".png
+MISSING: [goods] Igon's Cookbook [1] -> igons_cookbook_1.png
+MISSING: [goods] Rings of Spectral Light -> rings_of_spectral_light.png
+MISSING: [goods] About Multiplayer -> about_multiplayer.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Lord's Rune -> lords_rune.png
+MISSING: [goods] Well Depths Key -> well_depths_key.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Assassin's Approach -> assassins_approach.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Nomadic Warrior's Cookbook [11] -> nomadic_warriors_cookbook_11.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] About Spiritspring Jumping -> about_spiritspring_jumping.png
+MISSING: [goods] Prattling Pate "You're beautiful" -> prattling_pate_"youre_beautiful".png
+MISSING: [goods] Royal Magic Grease -> royal_magic_grease.png
+MISSING: [goods] St. Trina Disciple's Cookbook [1] -> st._trina_disciples_cookbook_1.png
+MISSING: [goods] Bravo! -> bravo.png
+MISSING: [goods] Sanguine Amaryllis -> sanguine_amaryllis.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Golden Grease -> golden_grease.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Torn Diary Page -> torn_diary_page.png
+MISSING: [goods] Ember of Messmer -> ember_of_messmer.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Keep Wall Key -> keep_wall_key.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Fortissax's Lightning Spear -> fortissaxs_lightning_spear.png
+MISSING: [goods] Opaline Pickled Liver -> opaline_pickled_liver.png
+MISSING: [goods] Miquella's Great Rune -> miquellas_great_rune.png
+MISSING: [goods] Spiritgrave Stone -> spiritgrave_stone.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Gurranq's Beast Claw -> gurranqs_beast_claw.png
+MISSING: [goods] Erdtree Prayerbook -> erdtree_prayerbook.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [7] -> nomadic_merchants_bell_bearing_7.png
+MISSING: [goods] Nomadic Warrior's Cookbook [14] -> nomadic_warriors_cookbook_14.png
+MISSING: [goods] Radiant Baldachin's Blessing -> radiant_baldachins_blessing.png
+MISSING: [goods] Ghostflame Breath -> ghostflame_breath.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Ymir's Bell Bearing -> ymirs_bell_bearing.png
+MISSING: [goods] About Adding Skills -> about_adding_skills.png
+MISSING: [goods] Scholar's Armament -> scholars_armament.png
+MISSING: [goods] Forager Brood Cookbook [4] -> forager_brood_cookbook_4.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Ranni's Dark Moon -> rannis_dark_moon.png
+MISSING: [goods] Armorer's Cookbook [7] -> armorers_cookbook_7.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Margit's Shackle -> margits_shackle.png
+MISSING: [goods] Sellen's Bell Bearing -> sellens_bell_bearing.png
+MISSING: [goods] Mad Craftsman's Cookbook [2] -> mad_craftsmans_cookbook_2.png
+MISSING: [goods] Light of Miquella -> light_of_miquella.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Igon's Bell Bearing -> igons_bell_bearing.png
+MISSING: [goods] Armorer's Cookbook [1] -> armorers_cookbook_1.png
+MISSING: [goods] Black Pyrefly -> black_pyrefly.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] About Teardrop Scarabs -> about_teardrop_scarabs.png
+MISSING: [goods] Armorer's Cookbook [2] -> armorers_cookbook_2.png
+MISSING: [goods] Castle Cross Message -> castle_cross_message.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Heartening Cry -> heartening_cry.png
+MISSING: [goods] Mantle of Thorns -> mantle_of_thorns.png
+MISSING: [goods] Lord's Divine Fortification -> lords_divine_fortification.png
+MISSING: [goods] Greasemonger's Bell Bearing -> greasemongers_bell_bearing.png
+MISSING: [goods] Glovewort Crystal Tear -> glovewort_crystal_tear.png
+MISSING: [goods] Flask of Crimson Tears2 -> flask_of_crimson_tears2.png
+MISSING: [goods] Numen's Rune -> numens_rune.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Greater Potentate's Cookbook [2] -> greater_potentates_cookbook_2.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Mirage Riddle -> mirage_riddle.png
+MISSING: [goods] Greater Potentate's Cookbook [13] -> greater_potentates_cookbook_13.png
+MISSING: [goods] Fire Knight's Cookbook [1] -> fire_knights_cookbook_1.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Mimic's Veil -> mimics_veil.png
+MISSING: [goods] Loretta's Mastery -> lorettas_mastery.png
+MISSING: [goods] Giant's Prayerbook -> giants_prayerbook.png
+MISSING: [goods] Ghost-Glovewort Picker's Bell Bearing [2] -> ghost_glovewort_pickers_bell_bearing_2.png
+MISSING: [goods] Spirit Calculus -> spirit_calculus.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Shadow Realm Rune [5] -> shadow_realm_rune_5.png
+MISSING: [goods] Nectarblood Burgeon -> nectarblood_burgeon.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [20] -> nomadic_warriors_cookbook_20.png
+MISSING: [goods] Finger Snap -> finger_snap.png
+MISSING: [goods] Hefty Furnace Pot -> hefty_furnace_pot.png
+MISSING: [goods] Greater Potentate's Cookbook [9] -> greater_potentates_cookbook_9.png
+MISSING: [goods] Crimsonburst Dried Tear -> crimsonburst_dried_tear.png
+MISSING: [goods] Redmane Fire Pot -> redmane_fire_pot.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Bloodflame Blade -> bloodflame_blade.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [4] -> glintstone_craftsmans_cookbook_4.png
+MISSING: [goods] Furnace Keeper's Note -> furnace_keepers_note.png
+MISSING: [goods] About New Inventory Features -> about_new_inventory_features.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [3] -> nomadic_merchants_bell_bearing_3.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Hefty Fetid Pot -> hefty_fetid_pot.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [4] -> somberstone_miners_bell_bearing_4.png
+MISSING: [goods] Iji's Confession -> ijis_confession.png
+MISSING: [goods] Heal from Afar -> heal_from_afar.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Lord's Aid -> lords_aid.png
+MISSING: [goods] Mohg's Great Rune -> mohgs_great_rune.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Prattling Pate "Let's get to it" -> prattling_pate_"lets_get_to_it".png
+MISSING: [goods] Glintslab Firefly -> glintslab_firefly.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Letter to Patches -> letter_to_patches.png
+MISSING: [goods] Mass of Putrescence -> mass_of_putrescence.png
+MISSING: [goods] Curtsy -> curtsy.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Outer Order -> outer_order.png
+MISSING: [goods] Blackguard's Bell Bearing -> blackguards_bell_bearing.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Loretta's Greatbow -> lorettas_greatbow.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Isolated Merchant's Bell Bearing [2] -> isolated_merchants_bell_bearing_2.png
+MISSING: [goods] Bone Peddler's Bell Bearing -> bone_peddlers_bell_bearing.png
+MISSING: [goods] Mad Craftsman's Cookbook [1] -> mad_craftsmans_cookbook_1.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] The Ring -> the_ring.png
+MISSING: [goods] Nomadic Warrior's Cookbook [17] -> nomadic_warriors_cookbook_17.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [1] -> smithing_stone_miners_bell_bearing_1.png
+MISSING: [goods] Eternal Sleep Pot -> eternal_sleep_pot.png
+MISSING: [goods] About Stance-Breaking -> about_stance_breaking.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [5] -> nomadic_merchants_bell_bearing_5.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [5] -> glintstone_craftsmans_cookbook_5.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [2] -> somberstone_miners_bell_bearing_2.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Roped Frenzied Flame Pot -> roped_frenzied_flame_pot.png
+MISSING: [goods] About Sorceries and Incantations -> about_sorceries_and_incantations.png
+MISSING: [goods] Nomadic Warrior's Cookbook [16] -> nomadic_warriors_cookbook_16.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Messmer's Orb -> messmers_orb.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Polter Stone -> polter_stone.png
+MISSING: [goods] Vyke's Dragonbolt -> vykes_dragonbolt.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [1] -> nomadic_merchants_bell_bearing_1.png
+MISSING: [goods] Greater Potentate's Cookbook [6] -> greater_potentates_cookbook_6.png
+MISSING: [goods] Note: Great Coffins -> note_great_coffins.png
+MISSING: [goods] About the Map -> about_the_map.png
+MISSING: [goods] Patches' Bell Bearing -> patches_bell_bearing.png
+MISSING: [goods] Red Lightning Pot -> red_lightning_pot.png
+MISSING: [goods] About Containers -> about_containers.png
+MISSING: [goods] Fevor's Cookbook [2] -> fevors_cookbook_2.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Iris of Grace -> iris_of_grace.png
+MISSING: [goods] Mushroom-Seller's Bell Bearing [2] -> mushroom_sellers_bell_bearing_2.png
+MISSING: [goods] String-Seller's Bell Bearing -> string_sellers_bell_bearing.png
+MISSING: [goods] Tibia's Cookbook -> tibias_cookbook.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [10] -> nomadic_merchants_bell_bearing_10.png
+MISSING: [goods] Imprisoned Merchant's Bell Bearing -> imprisoned_merchants_bell_bearing.png
+MISSING: [goods] Terra Magicus -> terra_magicus.png
+MISSING: [goods] Impenetrable Thorns -> impenetrable_thorns.png
+MISSING: [goods] Greater Potentate's Cookbook [10] -> greater_potentates_cookbook_10.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [2] -> ancient_dragon_apostles_cookbook_2.png
+MISSING: [goods] Fire Knight's Cookbook [2] -> fire_knights_cookbook_2.png
+MISSING: [goods] Crimson-Sapping Cracked Tear -> crimson_sapping_cracked_tear.png
+MISSING: [goods] Furnace Visage -> furnace_visage.png
+MISSING: [goods] Asimi, Silver Tear -> asimi_silver_tear.png
+MISSING: [goods] Resurrection Painting -> resurrection_painting.png
+MISSING: [goods] Erdtree Codex -> erdtree_codex.png
+MISSING: [goods] Marika's Rune -> marikas_rune.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Gelmir's Fury -> gelmirs_fury.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Map: Gravesite Plain -> map_gravesite_plain.png
+MISSING: [goods] Flask of Crimson Tears1 -> flask_of_crimson_tears1.png
+MISSING: [goods] Missionary's Cookbook [5] -> missionarys_cookbook_5.png
+MISSING: [goods] Rotten Butterflies -> rotten_butterflies.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [2] -> glintstone_craftsmans_cookbook_2.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [5] -> somberstone_miners_bell_bearing_5.png
+MISSING: [goods] Point Forwards -> point_forwards.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Ancestral Infant's Head -> ancestral_infants_head.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Let Us Go Together -> let_us_go_together.png
+MISSING: [goods] Grave Keeper's Cookbook [1] -> grave_keepers_cookbook_1.png
+MISSING: [goods] Priestess Heart -> priestess_heart.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Godrick's Great Rune -> godricks_great_rune.png
+MISSING: [goods] Leda's Rune -> ledas_rune.png
+MISSING: [goods] Map: Abyss -> map_abyss.png
+MISSING: [goods] About Fast Travel -> about_fast_travel.png
+MISSING: [goods] About Cooperative Multiplayer -> about_cooperative_multiplayer.png
+MISSING: [goods] Black Flame Blade -> black_flame_blade.png
+MISSING: [goods] Ruins Map (2nd) -> ruins_map_2nd.png
+MISSING: [goods] Roped Fly Pot -> roped_fly_pot.png
+MISSING: [goods] Note: Imp Shades -> note_imp_shades.png
+MISSING: [goods] Lightningproof Pickled Liver -> lightningproof_pickled_liver.png
+MISSING: [goods] Fevor's Cookbook [2] -> fevors_cookbook_2.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Miranda's Prayer -> mirandas_prayer.png
+MISSING: [goods] Shadow Realm Rune [4] -> shadow_realm_rune_4.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Missionary's Cookbook [4] -> missionarys_cookbook_4.png
+MISSING: [goods] Prattling Pate "Hello" -> prattling_pate_"hello".png
+MISSING: [goods] Igon's Furled Finger -> igons_furled_finger.png
+MISSING: [goods] Ancient Dragon's Blessing -> ancient_dragons_blessing.png
+MISSING: [goods] Hermit Merchant's Bell Bearing [1] -> hermit_merchants_bell_bearing_1.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] Miquella's Lily -> miquellas_lily.png
+MISSING: [goods] Loyal Knight's Cookbook -> loyal_knights_cookbook.png
+MISSING: [goods] Mad Craftsman's Cookbook [3] -> mad_craftsmans_cookbook_3.png
+MISSING: [goods] What Do You Want? -> what_do_you_want?.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Greater Potentate's Cookbook [14] -> greater_potentates_cookbook_14.png
+MISSING: [goods] Zorayas's Letter -> zorayass_letter.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [1] -> ancient_dragon_apostles_cookbook_1.png
+MISSING: [goods] Herbalist's Bell Bearing -> herbalists_bell_bearing.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Blades of Stone -> blades_of_stone.png
+MISSING: [goods] Academy Scroll -> academy_scroll.png
+MISSING: [goods] Greater Potentate's Cookbook [5] -> greater_potentates_cookbook_5.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Beckon -> beckon.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Flask of Cerulean Tears2 -> flask_of_cerulean_tears2.png
+MISSING: [goods] Note: Miquella's Needle -> note_miquellas_needle.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Missionary's Cookbook [3] -> missionarys_cookbook_3.png
+MISSING: [goods] Sunwarmth Stone -> sunwarmth_stone.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Golden Horn Tender -> golden_horn_tender.png
+MISSING: [goods] Remembrance of the Mother of Fingers -> remembrance_of_the_mother_of_fingers.png
+MISSING: [goods] Whiteflesh Mushroom -> whiteflesh_mushroom.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] About Fast Travel to Sites of Grace -> about_fast_travel_to_sites_of_grace.png
+MISSING: [goods] Nomadic Warrior's Cookbook [22] -> nomadic_warriors_cookbook_22.png
+MISSING: [goods] Pest-Thread Spears -> pest_thread_spears.png
+MISSING: [goods] Missionary's Cookbook [7] -> missionarys_cookbook_7.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Hefty Rot Pot -> hefty_rot_pot.png
+MISSING: [goods] Priestess Heart -> priestess_heart.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Red Fulgurbloom -> red_fulgurbloom.png
+MISSING: [goods] Gravity Stone Peddler's Bell Bearing -> gravity_stone_peddlers_bell_bearing.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Red Fulgurbloom -> red_fulgurbloom.png
+MISSING: [goods] Meeting Place Map -> meeting_place_map.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Hefty Red Lightning Pot -> hefty_red_lightning_pot.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [4] -> smithing_stone_miners_bell_bearing_4.png
+MISSING: [goods] About Crouching -> about_crouching.png
+MISSING: [goods] Black Knight Captain Huw -> black_knight_captain_huw.png
+MISSING: [goods] About Pouches -> about_pouches.png
+MISSING: [goods] Shadow Sunflower -> shadow_sunflower.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Spread Out -> spread_out.png
+MISSING: [goods] Prayer Room Key -> prayer_room_key.png
+MISSING: [goods] Shadow Realm Rune [1] -> shadow_realm_rune_1.png
+MISSING: [goods] Glovewort Picker's Bell Bearing [2] -> glovewort_pickers_bell_bearing_2.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Fleeting Microcosm -> fleeting_microcosm.png
+MISSING: [goods] Hefty Magic Pot -> hefty_magic_pot.png
+MISSING: [goods] Finger Severer (Base) -> finger_severer_base.png
+MISSING: [goods] Nomadic Warrior's Cookbook [4] -> nomadic_warriors_cookbook_4.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Prayer Room Key -> prayer_room_key.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Nailstone -> nailstone.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [9] -> nomadic_merchants_bell_bearing_9.png
+MISSING: [goods] Frenzied Flame Pot -> frenzied_flame_pot.png
+MISSING: [goods] Grave Keeper's Cookbook [1] -> grave_keepers_cookbook_1.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Remembrance of the Lord of Frenzied Flame -> remembrance_of_the_lord_of_frenzied_flame.png
+MISSING: [goods] About Dodging -> about_dodging.png
+MISSING: [goods] Tarnished's Furled Finger (Alt) -> tarnisheds_furled_finger_alt.png
+MISSING: [goods] Hefty Fly Pot -> hefty_fly_pot.png
+MISSING: [goods] Swollen Grape -> swollen_grape.png
+MISSING: [goods] Nomadic Warrior's Cookbook [12] -> nomadic_warriors_cookbook_12.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Tarnished's Furled Finger (Base) -> tarnisheds_furled_finger_base.png
+MISSING: [goods] About Bird's-Eye Telescopes -> about_birds_eye_telescopes.png
+MISSING: [goods] Storeroom Key -> storeroom_key.png
+MISSING: [goods] Note: Hidden Cave -> note_hidden_cave.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Map: Rauh Ruins -> map_rauh_ruins.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [8] -> glintstone_craftsmans_cookbook_8.png
+MISSING: [goods] Miriel's Bell Bearing -> miriels_bell_bearing.png
+MISSING: [goods] Homing Instinct Painting -> homing_instinct_painting.png
+MISSING: [goods] Furious Blade of Ansbach -> furious_blade_of_ansbach.png
+MISSING: [goods] Fia's Mist -> fias_mist.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Drawstring Dragonbolt Grease -> drawstring_dragonbolt_grease.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [1] -> ancient_dragon_apostles_cookbook_1.png
+MISSING: [goods] Twiggy Cracked Tear -> twiggy_cracked_tear.png
+MISSING: [goods] Lands Between Rune -> lands_between_rune.png
+MISSING: [goods] Irina's Letter -> irinas_letter.png
+MISSING: [goods] About Sites of Grace -> about_sites_of_grace.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [5] -> nomadic_merchants_bell_bearing_5.png
+MISSING: [goods] Perfumer's Cookbook (13) -> perfumers_cookbook_13.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Balled Up -> balled_up.png
+MISSING: [goods] Shadow Realm Rune [6] -> shadow_realm_rune_6.png
+MISSING: [goods] About Stakes of Marika -> about_stakes_of_marika.png
+MISSING: [goods] Fire Coil -> fire_coil.png
+MISSING: [goods] Isolated Merchant's Bell Bearing [2] -> isolated_merchants_bell_bearing_2.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Dragon's Calorbloom -> dragons_calorbloom.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Hero's Rune [3] -> heros_rune_3.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Oil-Soaked Tear -> oil_soaked_tear.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Grovel For Mercy -> grovel_for_mercy.png
+MISSING: [goods] Roped Magic Pot -> roped_magic_pot.png
+MISSING: [goods] Missionary's Cookbook [3] -> missionarys_cookbook_3.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Holyproof Pickled Liver -> holyproof_pickled_liver.png
+MISSING: [goods] Broken Rune -> broken_rune.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Calm Down! -> calm_down.png
+MISSING: [goods] Golden Order Principles -> golden_order_principles.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Forager Brood Cookbook [3] -> forager_brood_cookbook_3.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Fireproof Pickled Liver -> fireproof_pickled_liver.png
+MISSING: [goods] Hefty Fly Pot -> hefty_fly_pot.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] About Summoning Spirits -> about_summoning_spirits.png
+MISSING: [goods] Nomadic Warrior's Cookbook [9] -> nomadic_warriors_cookbook_9.png
+MISSING: [goods] Red Lightning Pot -> red_lightning_pot.png
+MISSING: [goods] Baldachin's Blessing -> baldachins_blessing.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [9] -> nomadic_merchants_bell_bearing_9.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Frenzied Flame Pot -> frenzied_flame_pot.png
+MISSING: [goods] About Summoning Other Players -> about_summoning_other_players.png
+MISSING: [goods] Miquella's Lily -> miquellas_lily.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] Note: Hidden Cave -> note_hidden_cave.png
+MISSING: [goods] About Guarding -> about_guarding.png
+MISSING: [goods] Dancer's Castanets -> dancers_castanets.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Loyal Knight's Cookbook -> loyal_knights_cookbook.png
+MISSING: [goods] Perfumer's Cookbook [1] -> perfumers_cookbook_1.png
+MISSING: [goods] Spellmachinist's Bell Bearing -> spellmachinists_bell_bearing.png
+MISSING: [goods] Glovewort Picker's Bell Bearing [1] -> glovewort_pickers_bell_bearing_1.png
+MISSING: [goods] Sacred Bloody Flesh -> sacred_bloody_flesh.png
+MISSING: [goods] Note: Demi-human Mobs -> note_demi_human_mobs.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Note: Stonedigger Trolls -> note_stonedigger_trolls.png
+MISSING: [goods] About Adding to Pouch -> about_adding_to_pouch.png
+MISSING: [goods] Greater Potentate's Cookbook [14] -> greater_potentates_cookbook_14.png
+MISSING: [goods] Glintstone Nail -> glintstone_nail.png
+MISSING: [goods] Perfumer's Cookbook (2) -> perfumers_cookbook_2.png
+MISSING: [goods] Forager Brood Cookbook [4] -> forager_brood_cookbook_4.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] About Hunter Multiplayer -> about_hunter_multiplayer.png
+MISSING: [goods] Gravebird Ashes -> gravebird_ashes.png
+MISSING: [goods] Furious Blade of Ansbach -> furious_blade_of_ansbach.png
+MISSING: [goods] Ghost-Glovewort Picker's Bell Bearing [3] -> ghost_glovewort_pickers_bell_bearing_3.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Perfumer's Cookbook [3] -> perfumers_cookbook_3.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Bayle's Tyranny -> bayles_tyranny.png
+MISSING: [goods] Fireproof Pickled Liver -> fireproof_pickled_liver.png
+MISSING: [goods] Whiteflesh Mushroom -> whiteflesh_mushroom.png
+MISSING: [goods] Cherishing Fingers -> cherishing_fingers.png
+MISSING: [goods] Map: Rauh Ruins -> map_rauh_ruins.png
+MISSING: [goods] Perfumer's Cookbook (13) -> perfumers_cookbook_13.png
+MISSING: [goods] Glinting Nail -> glinting_nail.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Hermit Merchant's Bell Bearing [2] -> hermit_merchants_bell_bearing_2.png
+MISSING: [goods] Ancient Dragon Apostle's Cookbook [4] -> ancient_dragon_apostles_cookbook_4.png
+MISSING: [goods] Balled Up -> balled_up.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Fire Spritestone -> fire_spritestone.png
+MISSING: [goods] Oil-Soaked Tear -> oil_soaked_tear.png
+MISSING: [goods] Champion's Song Painting -> champions_song_painting.png
+MISSING: [goods] Nomadic Warrior's Cookbook [6] -> nomadic_warriors_cookbook_6.png
+MISSING: [goods] Greater Potentate's Cookbook [13] -> greater_potentates_cookbook_13.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Finger Mimic -> finger_mimic.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [7] -> nomadic_merchants_bell_bearing_7.png
+MISSING: [goods] About Materials -> about_materials.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] My Thanks -> my_thanks.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Moldmonger's Bell Bearing -> moldmongers_bell_bearing.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] About Horseback Riding -> about_horseback_riding.png
+MISSING: [goods] Curseblade Meera -> curseblade_meera.png
+MISSING: [goods] Spirit Calculus -> spirit_calculus.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [3] -> smithing_stone_miners_bell_bearing_3.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Nomadic Merchant's Bell Bearing [3] -> nomadic_merchants_bell_bearing_3.png
+MISSING: [goods] Battlefield Priest's Cookbook [2] -> battlefield_priests_cookbook_2.png
+MISSING: [goods] About Map Gaps (Alt 3) -> about_map_gaps_alt_3.png
+MISSING: [goods] Warm Welcome -> warm_welcome.png
+MISSING: [goods] Fleeting Microcosm -> fleeting_microcosm.png
+MISSING: [goods] Cross Map -> cross_map.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Rykard's Rancor -> rykards_rancor.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Demi-Human Swordsman Yosh -> demi_human_swordsman_yosh.png
+MISSING: [goods] Iris of Grace -> iris_of_grace.png
+MISSING: [goods] Shadow Sunflower -> shadow_sunflower.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Messmerfire Grease -> messmerfire_grease.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Greater Potentate's Cookbook [10] -> greater_potentates_cookbook_10.png
+MISSING: [goods] Deathsbane White Jerky -> deathsbane_white_jerky.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Empyrean-Blood Burgeon -> empyrean_blood_burgeon.png
+MISSING: [goods] Margit's Shackle -> margits_shackle.png
+MISSING: [goods] Note: The Lord of Frenzied Flame -> note_the_lord_of_frenzied_flame.png
+MISSING: [goods] Eternal Sleep Grease -> eternal_sleep_grease.png
+MISSING: [goods] Sorcerer Painting -> sorcerer_painting.png
+MISSING: [goods] Armorer's Cookbook [7] -> armorers_cookbook_7.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [5] -> glintstone_craftsmans_cookbook_5.png
+MISSING: [goods] Knot Resin -> knot_resin.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Fingerprint Nostrum -> fingerprint_nostrum.png
+MISSING: [goods] Theodorix's Magma -> theodorixs_magma.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Mohg's Great Rune -> mohgs_great_rune.png
+MISSING: [goods] Ghostflame Bloom -> ghostflame_bloom.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Fortissax's Lightning Spear -> fortissaxs_lightning_spear.png
+MISSING: [goods] About Item Crafting -> about_item_crafting.png
+MISSING: [goods] Map: Scadu Altus -> map_scadu_altus.png
+MISSING: [goods] Blessing's Boon -> blessings_boon.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Smithing-Stone Miner's Bell Bearing [1] -> smithing_stone_miners_bell_bearing_1.png
+MISSING: [goods] Furnace Keeper's Note -> furnace_keepers_note.png
+MISSING: [goods] O Mother -> o_mother.png
+MISSING: [goods] Vision of Grace -> vision_of_grace.png
+MISSING: [goods] Taunter's Tongue -> taunters_tongue.png
+MISSING: [goods] Watchful Spirit -> watchful_spirit.png
+MISSING: [goods] Wave -> wave.png
+MISSING: [goods] Flask of Crimson Tears2 -> flask_of_crimson_tears2.png
+MISSING: [goods] Numen's Rune -> numens_rune.png
+MISSING: [goods] Somberstone Miner's Bell Bearing [4] -> somberstone_miners_bell_bearing_4.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Spirit Raisin -> spirit_raisin.png
+MISSING: [goods] Tower of Shadow Message -> tower_of_shadow_message.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Forager Brood Cookbook [2] -> forager_brood_cookbook_2.png
+MISSING: [goods] Lord's Heal -> lords_heal.png
+MISSING: [goods] Mushroom-Seller's Bell Bearing [1] -> mushroom_sellers_bell_bearing_1.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Lord of Blood's Favor -> lord_of_bloods_favor.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Tower of Shadow Message -> tower_of_shadow_message.png
+MISSING: [goods] Dewgem -> dewgem.png
+MISSING: [goods] Roundrock -> roundrock.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Miquella's Great Rune -> miquellas_great_rune.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Taylew the Golem Smith -> taylew_the_golem_smith.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] The Ring -> the_ring.png
+MISSING: [goods] Battlefield Priest's Cookbook [1] -> battlefield_priests_cookbook_1.png
+MISSING: [goods] Rings of Spectral Light -> rings_of_spectral_light.png
+MISSING: [goods] Prattling Pate "Thank you" -> prattling_pate_"thank_you".png
+MISSING: [goods] Mad Craftsman's Cookbook [3] -> mad_craftsmans_cookbook_3.png
+MISSING: [goods] Tarnished's Wizened Finger -> tarnisheds_wizened_finger.png
+MISSING: [goods] Shadow Realm Rune [7] -> shadow_realm_rune_7.png
+MISSING: [goods] Iji's Bell Bearing -> ijis_bell_bearing.png
+MISSING: [goods] Dewgem -> dewgem.png
+MISSING: [goods] Missionary's Cookbook [7] -> missionarys_cookbook_7.png
+MISSING: [goods] Isolated Merchant's Bell Bearing [1] -> isolated_merchants_bell_bearing_1.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] About Spiritspring Jumping -> about_spiritspring_jumping.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Abandoned Merchant's Bell Bearing -> abandoned_merchants_bell_bearing.png
+MISSING: [goods] Point Downwards -> point_downwards.png
+MISSING: [goods] String-Seller's Bell Bearing -> string_sellers_bell_bearing.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Extreme Repentance -> extreme_repentance.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [4] -> glintstone_craftsmans_cookbook_4.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] About Adding Skills -> about_adding_skills.png
+MISSING: [goods] Bayle's Flame Lightning -> bayles_flame_lightning.png
+MISSING: [goods] Prattling Pate "Apologies" -> prattling_pate_"apologies".png
+MISSING: [goods] Rapture -> rapture.png
+MISSING: [goods] Shadow Realm Rune [5] -> shadow_realm_rune_5.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] About the Map -> about_the_map.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Forager Brood Cookbook [3] -> forager_brood_cookbook_3.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+MISSING: [goods] Burial Crow's Letter -> burial_crows_letter.png
+MISSING: [goods] Bayle's Flame Lightning -> bayles_flame_lightning.png
+MISSING: [goods] Bigmouth Imp Ashes -> bigmouth_imp_ashes.png
+MISSING: [goods] Note: Gravity's Advantage -> note_gravitys_advantage.png
+MISSING: [goods] Lansseax's Glaive -> lansseaxs_glaive.png
+MISSING: [goods] Glintstone Nails -> glintstone_nails.png
+MISSING: [goods] Terra Magicus -> terra_magicus.png
+MISSING: [goods] Battlemage Hugues -> battlemage_hugues.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Nomadic Warrior's Cookbook [17] -> nomadic_warriors_cookbook_17.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Gold Sewing Needle -> gold_sewing_needle.png
+MISSING: [goods] Nomadic Warrior's Cookbook [10] -> nomadic_warriors_cookbook_10.png
+MISSING: [goods] Remembrance of the Shadow Sunflower -> remembrance_of_the_shadow_sunflower.png
+MISSING: [goods] Gas Stone -> gas_stone.png
+MISSING: [goods] Placidusax's Ruin -> placidusaxs_ruin.png
+MISSING: [goods] Ancient Dragon Knight's Cookbook [1] -> ancient_dragon_knights_cookbook_1.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Scorpion Liver -> scorpion_liver.png
+MISSING: [goods] Nomadic Warrior's Cookbook [12] -> nomadic_warriors_cookbook_12.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Nomadic Warrior's Cookbook [7] -> nomadic_warriors_cookbook_7.png
+MISSING: [goods] Battlefield Priest's Cookbook [3] -> battlefield_priests_cookbook_3.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Asimi, Silver Chrysalid -> asimi_silver_chrysalid.png
+MISSING: [goods] Wait! -> wait.png
+MISSING: [goods] Spider Scorpion Ashes -> spider_scorpion_ashes.png
+MISSING: [goods] About Map Symbols -> about_map_symbols.png
+MISSING: [goods] Divine Bird Warrior Ornis -> divine_bird_warrior_ornis.png
+MISSING: [goods] Monk's Missive -> monks_missive.png
+MISSING: [goods] Jolán and Anna -> jolán_and_anna.png
+MISSING: [goods] Moldmonger's Bell Bearing -> moldmongers_bell_bearing.png
+MISSING: [goods] Congealed Putrescence -> congealed_putrescence.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Black Knight Commander Andreas -> black_knight_commander_andreas.png
+MISSING: [goods] Erudition -> erudition.png
+MISSING: [goods] Cleanrot Knight Finlay -> cleanrot_knight_finlay.png
+MISSING: [goods] Man-Fly Ashes -> man_fly_ashes.png
+MISSING: [goods] About Guard Counters -> about_guard_counters.png
+MISSING: [goods] Nomadic Warrior's Cookbook [2] -> nomadic_warriors_cookbook_2.png
+MISSING: [goods] Horned Warrior Ashes -> horned_warrior_ashes.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Perfumer's Cookbook [1] -> perfumers_cookbook_1.png
+MISSING: [goods] Banished Knight Engvall -> banished_knight_engvall.png
+MISSING: [goods] Message from Leda -> message_from_leda.png
+MISSING: [goods] Mushroom-Seller's Bell Bearing [2] -> mushroom_sellers_bell_bearing_2.png
+MISSING: [goods] Tibia's Cookbook -> tibias_cookbook.png
+MISSING: [goods] Valkyrie's Prosthesis -> valkyries_prosthesis.png
+MISSING: [goods] Minor Erdtree -> minor_erdtree.png
+MISSING: [goods] Sanguine Amaryllis -> sanguine_amaryllis.png
+MISSING: [goods] Prattling Pate "My beloved" -> prattling_pate_"my_beloved".png
+MISSING: [goods] Heart of Bayle -> heart_of_bayle.png
+MISSING: [goods] About the Scadutree Blessing -> about_the_scadutree_blessing.png
+MISSING: [goods] About Dodging -> about_dodging.png
+MISSING: [goods] Avionette Soldier Ashes -> avionette_soldier_ashes.png
+MISSING: [goods] Glintblade Trio -> glintblade_trio.png
+MISSING: [goods] May the Best Win -> may_the_best_win.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Cerulean-Sapping Cracked Tear -> cerulean_sapping_cracked_tear.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Crimsonburst Dried Tear -> crimsonburst_dried_tear.png
+MISSING: [goods] Blessing of Marika -> blessing_of_marika.png
+MISSING: [goods] Mimic's Veil -> mimics_veil.png
+MISSING: [goods] Depraved Perfumer Carmaan -> depraved_perfumer_carmaan.png
+MISSING: [goods] Redmane Knight Ogha -> redmane_knight_ogha.png
+MISSING: [goods] Sharp Gravel Stone -> sharp_gravel_stone.png
+MISSING: [goods] Hero's Rune [3] -> heros_rune_3.png
+MISSING: [goods] Igon's Cookbook [2] -> igons_cookbook_2.png
+MISSING: [goods] Ghostflame Bloom -> ghostflame_bloom.png
+MISSING: [goods] Roped Fly Pot -> roped_fly_pot.png
+MISSING: [goods] Electrocharge -> electrocharge.png
+MISSING: [goods] Festive Grease -> festive_grease.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Polite Bow -> polite_bow.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Fia's Mist -> fias_mist.png
+MISSING: [goods] Glintstone Craftsman's Cookbook [8] -> glintstone_craftsmans_cookbook_8.png
+MISSING: [goods] Prattling Pate "Wonderful" -> prattling_pate_"wonderful".png
+MISSING: [goods] Note: The Lord of Frenzied Flame -> note_the_lord_of_frenzied_flame.png
+MISSING: [goods] Prattling Pate "Lamentation" -> prattling_pate_"lamentation".png
+MISSING: [goods] Ancient Ruins Cross Message -> ancient_ruins_cross_message.png
+MISSING: [goods] Banished Knight Oleg -> banished_knight_oleg.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] About Stakes of Marika -> about_stakes_of_marika.png
+MISSING: [goods] Divine Bird Feathers -> divine_bird_feathers.png
+MISSING: [goods] The Sacred Tower Painting -> the_sacred_tower_painting.png
+MISSING: [goods] About Guard Counters -> about_guard_counters.png
+MISSING: [goods] Battlefield Priest's Cookbook [2] -> battlefield_priests_cookbook_2.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Hero's Rune [5] -> heros_rune_5.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] About Teardrop Scarabs -> about_teardrop_scarabs.png
+MISSING: [goods] Messmer Soldier Ashes -> messmer_soldier_ashes.png
+MISSING: [goods] Hero's Rune [1] -> heros_rune_1.png
+MISSING: [goods] Fevor's Cookbook [3] -> fevors_cookbook_3.png
+MISSING: [goods] Fire Knight Hilde -> fire_knight_hilde.png
+MISSING: [goods] Flask of Cerulean Tears1 -> flask_of_cerulean_tears1.png
+MISSING: [goods] Red Letter -> red_letter.png
+MISSING: [goods] Dozing Cross-Legged -> dozing_cross_legged.png
+MISSING: [goods] Ancient Dragon Knight Kristoff -> ancient_dragon_knight_kristoff.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Hefty Fire Pot -> hefty_fire_pot.png
+MISSING: [goods] Giant's Prayerbook -> giants_prayerbook.png
+MISSING: [goods] Calm Down! -> calm_down.png
+MISSING: [goods] Fugitive Warrior's Recipe [5] -> fugitive_warriors_recipe_5.png
+MISSING: [goods] Roundrock -> roundrock.png
+MISSING: [goods] Nomadic Warrior's Cookbook [19] -> nomadic_warriors_cookbook_19.png
+MISSING: [goods] Fire Knight Queelign -> fire_knight_queelign.png
+MISSING: [goods] Twiggy Cracked Tear -> twiggy_cracked_tear.png
+MISSING: [goods] Ancient Dragon Florissax -> ancient_dragon_florissax.png
+MISSING: [goods] Duelist's Furled Finger -> duelists_furled_finger.png
+MISSING: [goods] Fingercreeper Ashes -> fingercreeper_ashes.png
+MISSING: [goods] Giant Golden Arc -> giant_golden_arc.png
+MISSING: [goods] Lands Between Rune -> lands_between_rune.png
+MISSING: [goods] Armorer's Cookbook [4] -> armorers_cookbook_4.png
+MISSING: [goods] Trina's Lily -> trinas_lily.png
+MISSING: [goods] Dragon Communion Harpoon -> dragon_communion_harpoon.png
+MISSING: [goods] Inquisitor Ashes -> inquisitor_ashes.png
+MISSING: [goods] Note: Imp Shades -> note_imp_shades.png
+MISSING: [goods] Ember of Messmer -> ember_of_messmer.png
+MISSING: [goods] Finger-Weaver's Cookbook [2] -> finger_weavers_cookbook_2.png
+MISSING: [goods] Wandering Noble Ashes -> wandering_noble_ashes.png
+MISSING: [goods] Schwerthand der Nacht -> schwerthand_der_nacht.png
+MISSING: [goods] Bloodfiend Hexer's Ashes -> bloodfiend_hexers_ashes.png
+MISSING: [goods] Blackflame Monk Amon -> blackflame_monk_amon.png
+MISSING: [goods] Nightmaiden & Swordstress Puppets -> nightmaiden_&_swordstress_puppets.png
+Auditing category: talismans
+MISSING: [talismans] Lacerating Crossed-Tree -> lacerating_crossed_tree.png
+MISSING: [talismans] Pearl Shield Talisman -> pearl_shield_talisman.png
+MISSING: [talismans] Talisman of Lord's Bestowal -> talisman_of_lords_bestowal.png
+MISSING: [talismans] Dried Bouquet -> dried_bouquet.png
+MISSING: [talismans] Ailment Talisman -> ailment_talisman.png
+MISSING: [talismans] Talisman of All Crucibles -> talisman_of_all_crucibles.png
+MISSING: [talismans] Crusade Insignia -> crusade_insignia.png
+MISSING: [talismans] Outer God Heirloom -> outer_god_heirloom.png
+MISSING: [talismans] St. Trina's Smile -> st._trinas_smile.png
+MISSING: [talismans] Shattered Stone Talisman -> shattered_stone_talisman.png
+MISSING: [talismans] Two-Handed Sword Talisman -> two_handed_sword_talisman.png
+MISSING: [talismans] Smithing Talisman -> smithing_talisman.png
+MISSING: [talismans] Two-Headed Turtle Talisman -> two_headed_turtle_talisman.png
+MISSING: [talismans] Fine Crucible Feather Talisman -> fine_crucible_feather_talisman.png
+MISSING: [talismans] Aged One's Exultation -> aged_ones_exultation.png
+MISSING: [talismans] Arrow's Soaring Sting Talisman -> arrows_soaring_sting_talisman.png
+MISSING: [talismans] Ailment Talisman -> ailment_talisman.png
+MISSING: [talismans] Talisman of All Crucibles -> talisman_of_all_crucibles.png
+MISSING: [talismans] Arrow's Soaring Sting Talisman -> arrows_soaring_sting_talisman.png
+MISSING: [talismans] Enraged Divine Beast -> enraged_divine_beast.png
+MISSING: [talismans] Aged One's Exultation -> aged_ones_exultation.png
+MISSING: [talismans] Two-Headed Turtle Talisman -> two_headed_turtle_talisman.png
+MISSING: [talismans] Lacerating Crossed-Tree -> lacerating_crossed_tree.png
+MISSING: [talismans] Golden Braid -> golden_braid.png
+MISSING: [talismans] Outer God Heirloom -> outer_god_heirloom.png
+MISSING: [talismans] Golden Braid -> golden_braid.png
+MISSING: [talismans] Talisman of the Dread -> talisman_of_the_dread.png
+MISSING: [talismans] Blessed Blue Dew Talisman -> blessed_blue_dew_talisman.png
+MISSING: [talismans] Beloved Stardust -> beloved_stardust.png
+MISSING: [talismans] Blessed Blue Dew Talisman -> blessed_blue_dew_talisman.png
+MISSING: [talismans] Retaliatory Crossed-Tree -> retaliatory_crossed_tree.png
+MISSING: [talismans] Dried Bouquet -> dried_bouquet.png
+MISSING: [talismans] Smithing Talisman -> smithing_talisman.png
+MISSING: [talismans] Pearl Shield Talisman -> pearl_shield_talisman.png
+MISSING: [talismans] Fine Crucible Feather Talisman -> fine_crucible_feather_talisman.png
+MISSING: [talismans] Sharpshot Talisman -> sharpshot_talisman.png
+MISSING: [talismans] Enraged Divine Beast -> enraged_divine_beast.png
+MISSING: [talismans] Two-Handed Sword Talisman -> two_handed_sword_talisman.png
+MISSING: [talismans] Crusade Insignia -> crusade_insignia.png
+MISSING: [talismans] Talisman of Lord's Bestowal -> talisman_of_lords_bestowal.png
+MISSING: [talismans] Verdigris Discus -> verdigris_discus.png
+MISSING: [talismans] Rellana's Cameo -> rellanas_cameo.png
+MISSING: [talismans] Rellana's Cameo -> rellanas_cameo.png
+MISSING: [talismans] Verdigris Discus -> verdigris_discus.png
+MISSING: [talismans] Retaliatory Crossed-Tree -> retaliatory_crossed_tree.png
+MISSING: [talismans] Blade of Mercy -> blade_of_mercy.png
+MISSING: [talismans] Beloved Stardust -> beloved_stardust.png
+MISSING: [talismans] Sharpshot Talisman -> sharpshot_talisman.png
+MISSING: [talismans] Blade of Mercy -> blade_of_mercy.png
+MISSING: [talismans] St. Trina's Smile -> st._trinas_smile.png
+MISSING: [talismans] Shattered Stone Talisman -> shattered_stone_talisman.png
+MISSING: [talismans] Talisman of the Dread -> talisman_of_the_dread.png
+Auditing category: ashes
+MISSING: [ashes] Blinkbolt -> blinkbolt.png
+MISSING: [ashes] Divine Beast Frost Stomp -> divine_beast_frost_stomp.png
+MISSING: [ashes] Savage Claws -> savage_claws.png
+MISSING: [ashes] Carian Sovereignty -> carian_sovereignty.png
+MISSING: [ashes] Divine Beast Frost Stomp -> divine_beast_frost_stomp.png
+MISSING: [ashes] Wall of Sparks -> wall_of_sparks.png
+MISSING: [ashes] The Poison Flower Blooms Twice -> the_poison_flower_blooms_twice.png
+MISSING: [ashes] Raging Beast -> raging_beast.png
+MISSING: [ashes] Dryleaf Whirlwind -> dryleaf_whirlwind.png
+MISSING: [ashes] Spinning Gravity Thrust -> spinning_gravity_thrust.png
+MISSING: [ashes] Swift Slash -> swift_slash.png
+MISSING: [ashes] Swift Slash -> swift_slash.png
+MISSING: [ashes] Overhead Stance -> overhead_stance.png
+MISSING: [ashes] Savage Lion's Claw -> savage_lions_claw.png
+MISSING: [ashes] Blind Spot -> blind_spot.png
+MISSING: [ashes] Flame Spear -> flame_spear.png
+MISSING: [ashes] Spinning Gravity Thrust -> spinning_gravity_thrust.png
+MISSING: [ashes] Wing Stance -> wing_stance.png
+MISSING: [ashes] Shriek of Sorrow -> shriek_of_sorrow.png
+MISSING: [ashes] Flame Spear -> flame_spear.png
+MISSING: [ashes] Scattershot Throw -> scattershot_throw.png
+MISSING: [ashes] Flame Skewer -> flame_skewer.png
+MISSING: [ashes] Palm Blast -> palm_blast.png
+MISSING: [ashes] Flame Skewer -> flame_skewer.png
+MISSING: [ashes] The Poison Flower Blooms Twice -> the_poison_flower_blooms_twice.png
+MISSING: [ashes] Piercing Throw -> piercing_throw.png
+MISSING: [ashes] Savage Lion's Claw -> savage_lions_claw.png
+MISSING: [ashes] Shriek of Sorrow -> shriek_of_sorrow.png
+MISSING: [ashes] Blind Spot -> blind_spot.png
+MISSING: [ashes] Golden Vow -> ashes_of_war_golden_vow.png
+MISSING: [ashes] Igon's Drake Hunt -> igons_drake_hunt.png
+MISSING: [ashes] Ghostflame Call -> ghostflame_call.png
+MISSING: [ashes] Wing Stance -> wing_stance.png
+MISSING: [ashes] Dryleaf Whirlwind -> dryleaf_whirlwind.png
+MISSING: [ashes] Raging Beast -> raging_beast.png
+MISSING: [ashes] Palm Blast -> palm_blast.png
+MISSING: [ashes] Aspects of the Crucible: Wings -> aspects_of_the_crucible_wings.png
+MISSING: [ashes] Shield Strike -> shield_strike.png
+MISSING: [ashes] Wall of Sparks -> wall_of_sparks.png
+MISSING: [ashes] Savage Claws -> savage_claws.png
+MISSING: [ashes] Overhead Stance -> overhead_stance.png
+MISSING: [ashes] Rolling Sparks -> rolling_sparks.png
+MISSING: [ashes] Carian Sovereignty -> carian_sovereignty.png
+MISSING: [ashes] Shield Strike -> shield_strike.png
+MISSING: [ashes] Golden Vow -> ashes_of_war_golden_vow.png
+MISSING: [ashes] Igon's Drake Hunt -> igons_drake_hunt.png
+MISSING: [ashes] Piercing Throw -> piercing_throw.png
+MISSING: [ashes] Scattershot Throw -> scattershot_throw.png
+MISSING: [ashes] Ghostflame Call -> ghostflame_call.png
+MISSING: [ashes] Aspects of the Crucible: Wings -> aspects_of_the_crucible_wings.png
+MISSING: [ashes] Rolling Sparks -> rolling_sparks.png
+MISSING: [ashes] Blinkbolt -> blinkbolt.png
+Auditing category: weapons
+MISSING: [weapons] Red Bear's Claw -> red_bears_claw.png
+MISSING: [weapons] Rellana's Twin Blades -> rellanas_twin_blades.png
+MISSING: [weapons] Flowerstone Gavel -> flowerstone_gavel.png
+MISSING: [weapons] Pata -> pata.png
+MISSING: [weapons] Stone-Sheathed Sword -> stone_sheathed_sword.png
+MISSING: [weapons] Bandit's Curved Sword -> bandits_curved_sword.png
+MISSING: [weapons] Greatsword of Solitude -> greatsword_of_solitude.png
+MISSING: [weapons] Lamenting Visage -> lamenting_visage.png
+MISSING: [weapons] Maternal Staff -> maternal_staff.png
+MISSING: [weapons] Weathered Straight Sword (Alt) -> weathered_straight_sword_alt.png
+MISSING: [weapons] Rabbath's Greatbolt -> rabbaths_greatbolt.png
+MISSING: [weapons] Sword of Darkness -> sword_of_darkness.png
+MISSING: [weapons] Carian Thrusting Shield -> carian_thrusting_shield.png
+MISSING: [weapons] Moonrithyll's Knight Sword -> moonrithylls_knight_sword.png
+MISSING: [weapons] Dragon-Hunter's Great Katana -> dragon_hunters_great_katana.png
+MISSING: [weapons] Velvet Sword of St. Trina -> velvet_sword_of_st._trina.png
+MISSING: [weapons] Star-Lined Sword -> star_lined_sword.png
+MISSING: [weapons] Sword of Light -> sword_of_light.png
+MISSING: [weapons] Anvil Hammer -> anvil_hammer.png
+MISSING: [weapons] Messmer Soldier's Axe -> messmer_soldiers_axe.png
+MISSING: [weapons] Barbed Staff-Spear -> barbed_staff_spear.png
+MISSING: [weapons] Dryleaf Seal -> dryleaf_seal.png
+MISSING: [weapons] Forked-Tongue Hatchet -> forked_tongue_hatchet.png
+MISSING: [weapons] Great Katana -> great_katana.png
+MISSING: [weapons] Spear of the Impaler -> spear_of_the_impaler.png
+MISSING: [weapons] Chilling Perfume Bottle -> chilling_perfume_bottle.png
+MISSING: [weapons] Putrescence Cleaver -> putrescence_cleaver.png
+MISSING: [weapons] Smithscript Axe -> smithscript_axe.png
+MISSING: [weapons] Main-gauche -> main_gauche.png
+MISSING: [weapons] Greatsword of Radahn (Lord) -> greatsword_of_radahn_lord.png
+MISSING: [weapons] Unarmed -> unarmed.png
+MISSING: [weapons] Sword Lance -> sword_lance.png
+MISSING: [weapons] Piquebone Bolt -> piquebone_bolt.png
+MISSING: [weapons] Messmer Soldier's Spear -> messmer_soldiers_spear.png
+MISSING: [weapons] Gazing Finger -> gazing_finger.png
+MISSING: [weapons] Piquebone Arrow (Fletched) -> piquebone_arrow_fletched.png
+MISSING: [weapons] Frenzyflame Perfume Bottle -> frenzyflame_perfume_bottle.png
+MISSING: [weapons] Beast Claw -> beast_claw.png
+MISSING: [weapons] Staff of the Great Beyond -> staff_of_the_great_beyond.png
+MISSING: [weapons] Shield of Night -> shield_of_night.png
+MISSING: [weapons] St. Trina's Torch -> st._trinas_torch.png
+MISSING: [weapons] Piquebone Arrow -> piquebone_arrow.png
+MISSING: [weapons] Black Steel Greathammer -> black_steel_greathammer.png
+MISSING: [weapons] Poisoned Hand -> poisoned_hand.png
+MISSING: [weapons] Dueling Shield -> dueling_shield.png
+MISSING: [weapons] Black Steel Twinblade -> black_steel_twinblade.png
+MISSING: [weapons] Rakshasa's Great Katana -> rakshasas_great_katana.png
+MISSING: [weapons] Greatsword of Damnation -> greatsword_of_damnation.png
+MISSING: [weapons] Weathered Straight Sword (Alt 3) -> weathered_straight_sword_alt_3.png
+MISSING: [weapons] Death Knight's Longhaft Axe -> death_knights_longhaft_axe.png
+MISSING: [weapons] Igon's Greatbow -> igons_greatbow.png
+MISSING: [weapons] Sword of Night -> sword_of_night.png
+MISSING: [weapons] Spirit Sword -> spirit_sword.png
+MISSING: [weapons] Ancient Meteoric Ore Greatsword -> ancient_meteoric_ore_greatsword.png
+MISSING: [weapons] Verdigris Greatshield -> verdigris_greatshield.png
+MISSING: [weapons] Dryleaf Arts -> dryleaf_arts.png
+MISSING: [weapons] Deadly Poison Perfume Bottle -> deadly_poison_perfume_bottle.png
+MISSING: [weapons] Backhand Blade -> backhand_blade.png
+MISSING: [weapons] Dancing Blade of Ranah -> dancing_blade_of_ranah.png
+MISSING: [weapons] Serpent Crest Shield -> serpent_crest_shield.png
+MISSING: [weapons] Bone Bow -> bone_bow.png
+MISSING: [weapons] Messmer Soldier Shield -> messmer_soldier_shield.png
+MISSING: [weapons] Bloodfiend's Fork -> bloodfiends_fork.png
+MISSING: [weapons] Spirit Glaive -> spirit_glaive.png
+MISSING: [weapons] Weathered Straight Sword (Alt 2) -> weathered_straight_sword_alt_2.png
+MISSING: [weapons] Firespark Perfume Bottle -> firespark_perfume_bottle.png
+MISSING: [weapons] Golem Fist -> golem_fist.png
+MISSING: [weapons] Smithscript Spear -> smithscript_spear.png
+MISSING: [weapons] Milady -> milady.png
+MISSING: [weapons] Tooth Whip -> tooth_whip.png
+MISSING: [weapons] Horned Warrior's Greatsword -> horned_warriors_greatsword.png
+MISSING: [weapons] Falx -> falx.png
+MISSING: [weapons] Lizard Greatsword -> lizard_greatsword.png
+MISSING: [weapons] Swift Spear -> swift_spear.png
+MISSING: [weapons] Rabbath's Cannon -> rabbaths_cannon.png
+MISSING: [weapons] Madding Hand -> madding_hand.png
+MISSING: [weapons] Horned Warrior's Sword -> horned_warriors_sword.png
+MISSING: [weapons] Bonny Butchering Knife -> bonny_butchering_knife.png
+MISSING: [weapons] Carian Sorcery Sword -> carian_sorcery_sword.png
+MISSING: [weapons] Curseblade's Cirque -> curseblades_cirque.png
+MISSING: [weapons] Death Knight's Twin Axes -> death_knights_twin_axes.png
+MISSING: [weapons] Bloodfiend's Arm -> bloodfiends_arm.png
+MISSING: [weapons] Queelign's Greatsword -> queeligns_greatsword.png
+MISSING: [weapons] Nanaya's Torch -> nanayas_torch.png
+MISSING: [weapons] Wolf Crest Shield -> wolf_crest_shield.png
+MISSING: [weapons] Shadow Sunflower Blossom -> shadow_sunflower_blossom.png
+MISSING: [weapons] Black Steel Greatshield -> black_steel_greatshield.png
+MISSING: [weapons] Claws of Night -> claws_of_night.png
+MISSING: [weapons] Spiraltree Seal -> spiraltree_seal.png
+MISSING: [weapons] Ansbach's Longbow -> ansbachs_longbow.png
+MISSING: [weapons] Greatsword of Radahn (Light) -> greatsword_of_radahn_light.png
+MISSING: [weapons] Smithscript Dagger -> smithscript_dagger.png
+MISSING: [weapons] Freyja's Greatsword -> freyjas_greatsword.png
+MISSING: [weapons] Euporia -> euporia.png
+MISSING: [weapons] Spread Crossbow -> spread_crossbow.png
+MISSING: [weapons] Repeating Crossbow -> repeating_crossbow.png
+MISSING: [weapons] Smithscript Greathammer -> smithscript_greathammer.png
+MISSING: [weapons] Golden Lion Shield -> golden_lion_shield.png
+MISSING: [weapons] Thiollier's Hidden Needle -> thiolliers_hidden_needle.png
+MISSING: [weapons] Carian Knight's Bloody Shield -> carian_knights_bloody_shield.png
+MISSING: [weapons] Smithscript Shield -> smithscript_shield.png
+MISSING: [weapons] Obsidian Lamina -> obsidian_lamina.png
+MISSING: [weapons] Devonia's Hammer -> devonias_hammer.png
+MISSING: [weapons] Serpent Flail -> serpent_flail.png
+MISSING: [weapons] Leda's Sword -> ledas_sword.png
+MISSING: [weapons] Poleblade of the Bud -> poleblade_of_the_bud.png
+MISSING: [weapons] St. Trina's Arrow -> st._trinas_arrow.png
+MISSING: [weapons] Igon's Harpoon -> igons_harpoon.png
+MISSING: [weapons] Dane's Footwork -> danes_footwork.png
+MISSING: [weapons] Smithscript Cirque -> smithscript_cirque.png
+Auditing category: armor
+MISSING: [armor] Shadow Militiaman Armor -> shadow_militiaman_armor.png
+MISSING: [armor] Messmer's Helm -> messmers_helm.png
+MISSING: [armor] Naked (Legs) -> naked_legs.png
+MISSING: [armor] Leather Leg Wraps -> leather_leg_wraps.png
+MISSING: [armor] Messmer's Greaves -> messmers_greaves.png
+MISSING: [armor] Leda's Armor -> ledas_armor.png
+MISSING: [armor] Old Sorcerer's Legwraps -> old_sorcerers_legwraps.png
+MISSING: [armor] Fang Helm -> fang_helm.png
+MISSING: [armor] Death Knight Armor -> death_knight_armor.png
+MISSING: [armor] Rellana's Helm -> rellanas_helm.png
+MISSING: [armor] Divine Beast Warrior Armor -> divine_beast_warrior_armor.png
+MISSING: [armor] Verdigris Gauntlets -> verdigris_gauntlets.png
+MISSING: [armor] Divine Beast Helm -> divine_beast_helm.png
+MISSING: [armor] Gaius's Gauntlets -> gaiuss_gauntlets.png
+MISSING: [armor] Black Knight Greaves -> black_knight_greaves.png
+MISSING: [armor] Rakshasa Greaves -> rakshasa_greaves.png
+MISSING: [armor] St. Trina's Blossom -> st._trinas_blossom.png
+MISSING: [armor] Iron Rivet Greaves -> iron_rivet_greaves.png
+MISSING: [armor] Ansbach's Boots -> ansbachs_boots.png
+MISSING: [armor] Black Knight Gauntlets -> black_knight_gauntlets.png
+MISSING: [armor] Verdigris Gauntlets -> verdigris_gauntlets.png
+MISSING: [armor] Helm of Night -> helm_of_night.png
+MISSING: [armor] Dancer's Bracer -> dancers_bracer.png
+MISSING: [armor] Death Knight Armor -> death_knight_armor.png
+MISSING: [armor] Rellana's Helm -> rellanas_helm.png
+MISSING: [armor] Messmer Soldier Armor -> messmer_soldier_armor.png
+MISSING: [armor] Millicent's Robe -> millicents_robe.png
+MISSING: [armor] Greaves of Night -> greaves_of_night.png
+MISSING: [armor] Divine Beast Warrior Armor -> divine_beast_warrior_armor.png
+MISSING: [armor] Oathseeker Knight Greaves -> oathseeker_knight_greaves.png
+MISSING: [armor] Fire Knight Greaves -> fire_knight_greaves.png
+MISSING: [armor] Young Lion's Greaves -> young_lions_greaves.png
+MISSING: [armor] Rakshasa Gauntlets -> rakshasa_gauntlets.png
+MISSING: [armor] Gravebird's Blackquill Armor -> gravebirds_blackquill_armor.png
+MISSING: [armor] Dancer's Dress -> dancers_dress.png
+MISSING: [armor] Verdigris Greaves -> verdigris_greaves.png
+MISSING: [armor] High Priest Gloves -> high_priest_gloves.png
+MISSING: [armor] Igon's Helm (Altered) -> igons_helm_altered.png
+MISSING: [armor] Naked (Arms) -> naked_arms.png
+MISSING: [armor] Gravebird Armor -> gravebird_armor.png
+MISSING: [armor] Thiollier's Gloves -> thiolliers_gloves.png
+MISSING: [armor] Shadow Militiaman Greaves -> shadow_militiaman_greaves.png
+MISSING: [armor] High Priest Robe -> high_priest_robe.png
+MISSING: [armor] Messmer Soldier Helm -> messmer_soldier_helm.png
+MISSING: [armor] Black Knight Gauntlets -> black_knight_gauntlets.png
+MISSING: [armor] Shadow Militiaman Gauntlets -> shadow_militiaman_gauntlets.png
+MISSING: [armor] Ansbach's Boots -> ansbachs_boots.png
+MISSING: [armor] Death Knight Gauntlets -> death_knight_gauntlets.png
+MISSING: [armor] Freyja's Helm -> freyjas_helm.png
+MISSING: [armor] Black Knight Armor -> black_knight_armor.png
+MISSING: [armor] Gravebird Bracelets -> gravebird_bracelets.png
+MISSING: [armor] Soiled Loincloth -> soiled_loincloth.png
+MISSING: [armor] Common Soldier Helm -> common_soldier_helm.png
+MISSING: [armor] Young Lion's Armor (Altered) -> young_lions_armor_altered.png
+MISSING: [armor] Curseblade Mask -> curseblade_mask.png
+MISSING: [armor] Highland Attire -> highland_attire.png
+MISSING: [armor] Freyja's Gauntlets -> freyjas_gauntlets.png
+MISSING: [armor] Igon's Armor -> igons_armor.png
+MISSING: [armor] Highland Attire -> highland_attire.png
+MISSING: [armor] Gauntlets of Night -> gauntlets_of_night.png
+MISSING: [armor] Common Soldier Greaves -> common_soldier_greaves.png
+MISSING: [armor] Rakshasa Helm -> rakshasa_helm.png
+MISSING: [armor] Young Lion's Greaves -> young_lions_greaves.png
+MISSING: [armor] Oathseeker Knight Greaves -> oathseeker_knight_greaves.png
+MISSING: [armor] Rakshasa Gauntlets -> rakshasa_gauntlets.png
+MISSING: [armor] Gravebird Bracelets -> gravebird_bracelets.png
+MISSING: [armor] Dancer's Dress -> dancers_dress.png
+MISSING: [armor] Ansbach's Attire (Altered) -> ansbachs_attire_altered.png
+MISSING: [armor] Messmer Soldier Armor -> messmer_soldier_armor.png
+MISSING: [armor] Divine Bird Warrior Gauntlets -> divine_bird_warrior_gauntlets.png
+MISSING: [armor] Millicent's Boots -> millicents_boots.png
+MISSING: [armor] Young Lion's Helm -> young_lions_helm.png
+MISSING: [armor] Gaius's Armor -> gaiuss_armor.png
+MISSING: [armor] Rellana's Armor -> rellanas_armor.png
+MISSING: [armor] Oathseeker Knight Helm -> oathseeker_knight_helm.png
+MISSING: [armor] Finger Robe -> finger_robe.png
+MISSING: [armor] Horned Warrior Greaves -> horned_warrior_greaves.png
+MISSING: [armor] Pelt of Ralva -> pelt_of_ralva.png
+MISSING: [armor] Shadow Militiaman Greaves -> shadow_militiaman_greaves.png
+MISSING: [armor] Iron Rivet Gauntlets -> iron_rivet_gauntlets.png
+MISSING: [armor] Messmer Soldier Helm -> messmer_soldier_helm.png
+MISSING: [armor] Dryleaf Robe (Altered) -> dryleaf_robe_altered.png
+MISSING: [armor] Dancer's Dress (Altered) -> dancers_dress_altered.png
+MISSING: [armor] Divine Beast Head -> divine_beast_head.png
+MISSING: [armor] Rellana's Gloves -> rellanas_gloves.png
+MISSING: [armor] Divine Bird Helm -> divine_bird_helm.png
+MISSING: [armor] Crucible Hammer-Helm -> crucible_hammer_helm.png
+MISSING: [armor] Fia's Robe (Altered) -> fias_robe_altered.png
+MISSING: [armor] Divine Bird Warrior Greaves -> divine_bird_warrior_greaves.png
+MISSING: [armor] Wise Man's Mask -> wise_mans_mask.png
+MISSING: [armor] Armor of Solitude -> armor_of_solitude.png
+MISSING: [armor] Millicent's Boots -> millicents_boots.png
+MISSING: [armor] Finger Robe -> finger_robe.png
+MISSING: [armor] Black Knight Armor -> black_knight_armor.png
+MISSING: [armor] Fire Knight Helm -> fire_knight_helm.png
+MISSING: [armor] Death Knight Gauntlets -> death_knight_gauntlets.png
+MISSING: [armor] Dryleaf Robe -> dryleaf_robe.png
+MISSING: [armor] Death Mask Helm -> death_mask_helm.png
+MISSING: [armor] Leather Headband -> leather_headband.png
+MISSING: [armor] Shadow Militiaman Helm -> shadow_militiaman_helm.png
+MISSING: [armor] Rakshasa Armor -> rakshasa_armor.png
+MISSING: [armor] Dryleaf Robe -> dryleaf_robe.png
+MISSING: [armor] Oathseeker Knight Armor -> oathseeker_knight_armor.png
+MISSING: [armor] Armor of Night -> armor_of_night.png
+MISSING: [armor] Dryleaf Cuissardes -> dryleaf_cuissardes.png
+MISSING: [armor] Freyja's Armor (Altered) -> freyjas_armor_altered.png
+MISSING: [armor] Messmer's Helm (Altered) -> messmers_helm_altered.png
+MISSING: [armor] Igon's Gauntlets -> igons_gauntlets.png
+MISSING: [armor] Death Knight Helm -> death_knight_helm.png
+MISSING: [armor] Dancer's Trousers -> dancers_trousers.png
+MISSING: [armor] Leather Crown -> leather_crown.png
+MISSING: [armor] Divine Beast Helm -> divine_beast_helm.png
+MISSING: [armor] Messmer's Helm -> messmers_helm.png
+MISSING: [armor] Horned Warrior Helm -> horned_warrior_helm.png
+MISSING: [armor] Freyja's Armor (Altered) -> freyjas_armor_altered.png
+MISSING: [armor] Horned Warrior Armor -> horned_warrior_armor.png
+MISSING: [armor] Gauntlets of Solitude -> gauntlets_of_solitude.png
+MISSING: [armor] Armor of Solitude (Altered) -> armor_of_solitude_altered.png
+MISSING: [armor] Gaius's Greaves -> gaiuss_greaves.png
+MISSING: [armor] Iron Rivet Gauntlets -> iron_rivet_gauntlets.png
+MISSING: [armor] Messmer's Helm (Altered) -> messmers_helm_altered.png
+MISSING: [armor] Ansbach's Manchettes -> ansbachs_manchettes.png
+MISSING: [armor] Fire Knight Gauntlets -> fire_knight_gauntlets.png
+MISSING: [armor] Gaius's Helm -> gaiuss_helm.png
+MISSING: [armor] Leather Headband -> leather_headband.png
+MISSING: [armor] Dryleaf Arm Wraps -> dryleaf_arm_wraps.png
+MISSING: [armor] Thiollier's Trousers -> thiolliers_trousers.png
+MISSING: [armor] Death Knight Greaves -> death_knight_greaves.png
+MISSING: [armor] Gaius's Helm -> gaiuss_helm.png
+MISSING: [armor] Thiollier's Mask -> thiolliers_mask.png
+MISSING: [armor] Dancer's Trousers -> dancers_trousers.png
+MISSING: [armor] Armor of Night -> armor_of_night.png
+MISSING: [armor] Leather Arm Wraps -> leather_arm_wraps.png
+MISSING: [armor] Greaves of Solitude -> greaves_of_solitude.png
+MISSING: [armor] Horned Warrior Gauntlets -> horned_warrior_gauntlets.png
+MISSING: [armor] High Priest Undergarments -> high_priest_undergarments.png
+MISSING: [armor] Gauntlets of Solitude -> gauntlets_of_solitude.png
+MISSING: [armor] Messmer Soldier Greaves -> messmer_soldier_greaves.png
+MISSING: [armor] Death Knight Greaves -> death_knight_greaves.png
+MISSING: [armor] Thiollier's Garb (Altered) -> thiolliers_garb_altered.png
+MISSING: [armor] Freyja's Armor -> freyjas_armor.png
+MISSING: [armor] Igon's Armor -> igons_armor.png
+MISSING: [armor] Gaius's Greaves -> gaiuss_greaves.png
+MISSING: [armor] Ascetic's Ankle Guards -> ascetics_ankle_guards.png
+MISSING: [armor] Braided Cord Robe -> braided_cord_robe.png
+MISSING: [armor] Messmer's Gauntlets -> messmers_gauntlets.png
+MISSING: [armor] Thiollier's Garb (Altered) -> thiolliers_garb_altered.png
+MISSING: [armor] Igon's Loincloth -> igons_loincloth.png
+MISSING: [armor] Dryleaf Cuissardes -> dryleaf_cuissardes.png
+MISSING: [armor] Oathseeker Knight Armor -> oathseeker_knight_armor.png
+MISSING: [armor] Messmer Soldier Gauntlets -> messmer_soldier_gauntlets.png
+MISSING: [armor] Young Lion's Armor -> young_lions_armor.png
+MISSING: [armor] Rakshasa Greaves -> rakshasa_greaves.png
+MISSING: [armor] Iron Rivet Greaves -> iron_rivet_greaves.png
+MISSING: [armor] Winged Serpent Helm -> winged_serpent_helm.png
+MISSING: [armor] Horned Warrior Gauntlets -> horned_warrior_gauntlets.png
+MISSING: [armor] Crucible Hammer-Helm -> crucible_hammer_helm.png
+MISSING: [armor] Ansbach's Attire -> ansbachs_attire.png
+MISSING: [armor] High Priest Hat -> high_priest_hat.png
+MISSING: [armor] Dane's Hat -> danes_hat.png
+MISSING: [armor] Dryleaf Robe (Altered) -> dryleaf_robe_altered.png
+MISSING: [armor] Dancer's Dress (Altered) -> dancers_dress_altered.png
+MISSING: [armor] Common Soldier Gauntlets -> common_soldier_gauntlets.png
+MISSING: [armor] Fire Knight Armor -> fire_knight_armor.png
+MISSING: [armor] Verdigris Armor -> verdigris_armor.png
+MISSING: [armor] Black Knight Helm -> black_knight_helm.png
+MISSING: [armor] Horned Warrior Helm -> horned_warrior_helm.png
+MISSING: [armor] Leather Leg Wraps -> leather_leg_wraps.png
+MISSING: [armor] Millicent's Robe -> millicents_robe.png
+MISSING: [armor] High Priest Robe -> high_priest_robe.png
+MISSING: [armor] Leather Arm Wraps -> leather_arm_wraps.png
+MISSING: [armor] Ascetic's Loincloth -> ascetics_loincloth.png
+MISSING: [armor] Messmer Soldier Greaves -> messmer_soldier_greaves.png
+MISSING: [armor] Horned Warrior Greaves -> horned_warrior_greaves.png
+MISSING: [armor] Gloried Attire -> gloried_attire.png
+MISSING: [armor] Oathseeker Knight Helm -> oathseeker_knight_helm.png
+MISSING: [armor] Ansbach's Manchettes -> ansbachs_manchettes.png
+MISSING: [armor] Freyja's Armor -> freyjas_armor.png
+MISSING: [armor] Fire Knight Gauntlets -> fire_knight_gauntlets.png
+MISSING: [armor] Verdigris Greaves -> verdigris_greaves.png
+MISSING: [armor] Fang Helm -> fang_helm.png
+MISSING: [armor] Dancer's Bracer -> dancers_bracer.png
+MISSING: [armor] Greaves of Night -> greaves_of_night.png
+MISSING: [armor] Braided Arm Wraps -> braided_arm_wraps.png
+MISSING: [armor] Helm of Solitude -> helm_of_solitude.png
+MISSING: [armor] Fire Knight Armor -> fire_knight_armor.png
+MISSING: [armor] Gravebird Anklets -> gravebird_anklets.png
+MISSING: [armor] Fire Knight Armor (Altered) -> fire_knight_armor_altered.png
+MISSING: [armor] Gravebird's Blackquill Armor -> gravebirds_blackquill_armor.png
+MISSING: [armor] Oathseeker Knight Gauntlets -> oathseeker_knight_gauntlets.png
+MISSING: [armor] Greaves of Solitude -> greaves_of_solitude.png
+MISSING: [armor] Braided Arm Wraps -> braided_arm_wraps.png
+MISSING: [armor] Gravebird Anklets -> gravebird_anklets.png
+MISSING: [armor] Thiollier's Trousers -> thiolliers_trousers.png
+MISSING: [armor] Gauntlets of Night -> gauntlets_of_night.png
+MISSING: [armor] Caterpillar Mask -> caterpillar_mask.png
+MISSING: [armor] Verdigris Helm -> verdigris_helm.png
+MISSING: [armor] Rellana's Greaves -> rellanas_greaves.png
+MISSING: [armor] Young Lion's Helm -> young_lions_helm.png
+MISSING: [armor] Messmer's Armor -> messmers_armor.png
+MISSING: [armor] Black Knight Greaves -> black_knight_greaves.png
+MISSING: [armor] Gravebird Helm -> gravebird_helm.png
+MISSING: [armor] Fire Knight Armor (Altered) -> fire_knight_armor_altered.png
+MISSING: [armor] Old Sorcerer's Legwraps -> old_sorcerers_legwraps.png
+MISSING: [armor] Leda's Armor -> ledas_armor.png
+MISSING: [armor] Igon's Gauntlets -> igons_gauntlets.png
+MISSING: [armor] Igon's Armor (Altered) -> igons_armor_altered.png
+MISSING: [armor] Dryleaf Arm Wraps -> dryleaf_arm_wraps.png
+MISSING: [armor] Helm of Night -> helm_of_night.png
+MISSING: [armor] Ascetic's Wrist Guards -> ascetics_wrist_guards.png
+MISSING: [armor] Braided Cord Robe -> braided_cord_robe.png
+MISSING: [armor] Ascetic's Ankle Guards -> ascetics_ankle_guards.png
+MISSING: [armor] Death Knight Helm -> death_knight_helm.png
+MISSING: [armor] Imp Head (Lion) -> imp_head_lion.png
+MISSING: [armor] Ansbach's Attire (Altered) -> ansbachs_attire_altered.png
+MISSING: [armor] Common Soldier Greaves -> common_soldier_greaves.png
+MISSING: [armor] Freyja's Greaves -> freyjas_greaves.png
+MISSING: [armor] Divine Bird Warrior Armor -> divine_bird_warrior_armor.png
+MISSING: [armor] Greatjar -> greatjar.png
+MISSING: [armor] Fire Knight Greaves -> fire_knight_greaves.png
+MISSING: [armor] Young Lion's Armor (Altered) -> young_lions_armor_altered.png
+MISSING: [armor] Soiled Loincloth -> soiled_loincloth.png
+MISSING: [armor] Greatjar -> greatjar.png
+MISSING: [armor] Wise Man's Mask -> wise_mans_mask.png
+MISSING: [armor] Young Lion's Gauntlets -> young_lions_gauntlets.png
+MISSING: [armor] Messmer's Gauntlets -> messmers_gauntlets.png
+MISSING: [armor] Messmer Soldier Armor (Altered) -> messmer_soldier_armor_altered.png
+MISSING: [armor] Divine Bird Warrior Greaves -> divine_bird_warrior_greaves.png
+MISSING: [armor] Rellana's Gloves -> rellanas_gloves.png
+MISSING: [armor] Igon's Helm -> igons_helm.png
+MISSING: [armor] Rellana's Greaves -> rellanas_greaves.png
+MISSING: [armor] Salza's Hood -> salzas_hood.png
+MISSING: [armor] Verdigris Armor -> verdigris_armor.png
+MISSING: [armor] Millicent's Tunic -> millicents_tunic.png
+MISSING: [armor] Curseblade Mask -> curseblade_mask.png
+MISSING: [armor] Igon's Helm -> igons_helm.png
+MISSING: [armor] Shadow Militiaman Helm -> shadow_militiaman_helm.png
+MISSING: [armor] Death Mask Helm -> death_mask_helm.png
+MISSING: [armor] Freyja's Greaves -> freyjas_greaves.png
+MISSING: [armor] Messmer's Armor -> messmers_armor.png
+MISSING: [armor] Verdigris Helm -> verdigris_helm.png
+MISSING: [armor] Imp Head (Lion) -> imp_head_lion.png
+MISSING: [armor] Messmer Soldier Gauntlets -> messmer_soldier_gauntlets.png
+MISSING: [armor] Shadow Militiaman Gauntlets -> shadow_militiaman_gauntlets.png
+MISSING: [armor] Young Lion's Armor -> young_lions_armor.png
+MISSING: [armor] Thiollier's Mask -> thiolliers_mask.png
+MISSING: [armor] Dancer's Hood -> dancers_hood.png
+MISSING: [armor] Armor of Solitude (Altered) -> armor_of_solitude_altered.png
+MISSING: [armor] Horned Warrior Armor -> horned_warrior_armor.png
+MISSING: [armor] Freyja's Gauntlets -> freyjas_gauntlets.png
+MISSING: [armor] Igon's Helm (Altered) -> igons_helm_altered.png
+MISSING: [armor] Rellana's Armor -> rellanas_armor.png
+MISSING: [armor] High Priest Gloves -> high_priest_gloves.png
+MISSING: [armor] Black Knight Helm -> black_knight_helm.png
+MISSING: [armor] Thiollier's Garb -> thiolliers_garb.png
+MISSING: [armor] High Priest Hat -> high_priest_hat.png
+MISSING: [armor] Ansbach's Attire -> ansbachs_attire.png
+MISSING: [armor] Helm of Solitude -> helm_of_solitude.png
+MISSING: [armor] Circlet of Light -> circlet_of_light.png
+MISSING: [armor] Common Soldier Cloth Armor -> common_soldier_cloth_armor.png
+MISSING: [armor] Pelt of Ralva -> pelt_of_ralva.png
+MISSING: [armor] Salza's Hood -> salzas_hood.png
+MISSING: [armor] St. Trina's Blossom -> st._trinas_blossom.png
+MISSING: [armor] Rakshasa Armor -> rakshasa_armor.png
+MISSING: [armor] Winged Serpent Helm -> winged_serpent_helm.png
+MISSING: [armor] Ascetic's Wrist Guards -> ascetics_wrist_guards.png
+MISSING: [armor] Gravebird Helm -> gravebird_helm.png
+MISSING: [armor] Naked (Head) -> naked_head.png
+MISSING: [armor] Rakshasa Helm -> rakshasa_helm.png
+MISSING: [armor] Ascetic's Loincloth -> ascetics_loincloth.png
+MISSING: [armor] Circlet of Light -> circlet_of_light.png
+MISSING: [armor] Gaius's Armor -> gaiuss_armor.png
+MISSING: [armor] Divine Bird Warrior Armor -> divine_bird_warrior_armor.png
+MISSING: [armor] Fire Knight Helm -> fire_knight_helm.png
+MISSING: [armor] Freyja's Helm -> freyjas_helm.png
+MISSING: [armor] Thiollier's Garb -> thiolliers_garb.png
+MISSING: [armor] Young Lion's Gauntlets -> young_lions_gauntlets.png
+MISSING: [armor] Igon's Armor (Altered) -> igons_armor_altered.png
+MISSING: [armor] Common Soldier Gauntlets -> common_soldier_gauntlets.png
+MISSING: [armor] Messmer Soldier Armor (Altered) -> messmer_soldier_armor_altered.png
+MISSING: [armor] Caterpillar Mask -> caterpillar_mask.png
+MISSING: [armor] Gaius's Gauntlets -> gaiuss_gauntlets.png
+MISSING: [armor] Oathseeker Knight Gauntlets -> oathseeker_knight_gauntlets.png
+MISSING: [armor] Dancer's Hood -> dancers_hood.png
+MISSING: [armor] Millicent's Tunic -> millicents_tunic.png
+MISSING: [armor] Armor of Solitude -> armor_of_solitude.png
+MISSING: [armor] Iron Rivet Armor -> iron_rivet_armor.png
+MISSING: [armor] Naked (Body) -> naked_body.png
+MISSING: [armor] High Priest Undergarments -> high_priest_undergarments.png
+MISSING: [armor] Leather Crown -> leather_crown.png
+MISSING: [armor] Common Soldier Cloth Armor -> common_soldier_cloth_armor.png
+MISSING: [armor] Thiollier's Gloves -> thiolliers_gloves.png
+MISSING: [armor] Divine Bird Warrior Gauntlets -> divine_bird_warrior_gauntlets.png
+MISSING: [armor] Gravebird Armor -> gravebird_armor.png
+MISSING: [armor] Shadow Militiaman Armor -> shadow_militiaman_armor.png
+MISSING: [armor] Igon's Loincloth -> igons_loincloth.png
+MISSING: [armor] Divine Beast Head -> divine_beast_head.png
+MISSING: [armor] Gloried Attire -> gloried_attire.png
+MISSING: [armor] Messmer's Greaves -> messmers_greaves.png
+MISSING: [armor] Fia's Robe (Altered) -> fias_robe_altered.png
+MISSING: [armor] Divine Bird Helm -> divine_bird_helm.png
+MISSING: [armor] Common Soldier Helm -> common_soldier_helm.png
+MISSING: [armor] Dane's Hat -> danes_hat.png
+MISSING: [armor] Iron Rivet Armor -> iron_rivet_armor.png
+
+Audit finished.
+Total items checked: 6734
+Missing icons: 2512
