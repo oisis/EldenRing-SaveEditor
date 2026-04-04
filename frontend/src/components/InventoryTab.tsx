@@ -11,7 +11,7 @@ interface InventoryTabProps {
 }
 
 export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps) {
-    const [mode, setMode] = useState<'database' | 'character' | 'storage'>('character');
+    const [mode, setMode] = useState<'database' | 'character'>('character');
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
@@ -24,6 +24,61 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
+
+    // Merge inventory and storage items for display
+    const mergedOwnedItems = (() => {
+        const mergedMap = new Map<number, {
+            id: number,
+            handle: number,
+            name: string,
+            category: string,
+            invQty: number,
+            storageQty: number
+        }>();
+
+        charInventory.forEach(item => {
+            let cat = item.category.toLowerCase();
+            if (cat === 'weapon' || cat === 'weapons') cat = 'weapons';
+            else if (cat === 'armor' || cat === 'armors') cat = 'armor';
+            else if (cat === 'item' || cat === 'items' || cat === 'goods') cat = 'goods';
+            else if (cat === 'ash of war' || cat === 'aows' || cat === 'ashes') cat = 'ashes';
+            else if (cat === 'talisman' || cat === 'talismans') cat = 'talismans';
+
+            mergedMap.set(item.id, {
+                id: item.id,
+                handle: item.handle,
+                name: item.name,
+                category: cat,
+                invQty: item.quantity,
+                storageQty: 0
+            });
+        });
+
+        charStorage.forEach(item => {
+            let cat = item.category.toLowerCase();
+            if (cat === 'weapon' || cat === 'weapons') cat = 'weapons';
+            else if (cat === 'armor' || cat === 'armors') cat = 'armor';
+            else if (cat === 'item' || cat === 'items' || cat === 'goods') cat = 'goods';
+            else if (cat === 'ash of war' || cat === 'aows' || cat === 'ashes') cat = 'ashes';
+            else if (cat === 'talisman' || cat === 'talismans') cat = 'talismans';
+
+            const existing = mergedMap.get(item.id);
+            if (existing) {
+                existing.storageQty = item.quantity;
+            } else {
+                mergedMap.set(item.id, {
+                    id: item.id,
+                    handle: item.handle,
+                    name: item.name,
+                    category: cat,
+                    invQty: 0,
+                    storageQty: item.quantity
+                });
+            }
+        });
+
+        return Array.from(mergedMap.values());
+    })();
 
     const getItemIconPath = (name: string, category: string) => {
         let cleanName = name.toLowerCase();
@@ -74,22 +129,22 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
 
     useEffect(() => {
         setLoading(true);
+        
+        // Always fetch character data to keep Inv/Storage quantities updated
+        const charPromise = GetCharacter(charIndex).then(res => {
+            setCharInventory(res?.inventory || []);
+            setCharStorage(res?.storage || []);
+        });
+
         if (mode === 'database') {
-            // If mode is database and category is 'all', default to 'weapons'
             const fetchCat = category === 'all' ? 'weapons' : category;
-            GetItemList(fetchCat).then(res => {
+            const dbPromise = GetItemList(fetchCat).then(res => {
                 setDbItems(res || []);
-                setLoading(false);
             });
+            
+            Promise.all([charPromise, dbPromise]).finally(() => setLoading(false));
         } else {
-            GetCharacter(charIndex).then(res => {
-                setCharInventory(res?.inventory || []);
-                setCharStorage(res?.storage || []);
-                setLoading(false);
-            }).catch(err => {
-                console.error(err);
-                setLoading(false);
-            });
+            charPromise.finally(() => setLoading(false));
         }
     }, [mode, category, charIndex]);
 
@@ -123,21 +178,19 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         item.id.toString(16).toLowerCase().includes(search.toLowerCase())
     ));
 
-    const activeItems = mode === 'character' ? charInventory : charStorage;
-    const filteredOwnedItems = sortItems(activeItems.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
-                            item.category.toLowerCase().includes(search.toLowerCase()) ||
+    const filteredOwnedItems = sortItems(mergedOwnedItems.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
         
         if (category === 'all') return matchesSearch;
         
         // Map internal category names to selector values
         const itemCat = item.category.toLowerCase();
-        if (category === 'weapons' && itemCat === 'weapon') return matchesSearch;
+        if (category === 'weapons' && itemCat === 'weapons') return matchesSearch;
         if (category === 'armors' && itemCat === 'armor') return matchesSearch;
-        if (category === 'items' && itemCat === 'item') return matchesSearch;
-        if (category === 'talismans' && itemCat === 'talisman') return matchesSearch;
-        if (category === 'aows' && itemCat === 'ash of war') return matchesSearch;
+        if (category === 'items' && itemCat === 'goods') return matchesSearch;
+        if (category === 'talismans' && itemCat === 'talismans') return matchesSearch;
+        if (category === 'aows' && itemCat === 'ashes') return matchesSearch;
         
         return false;
     }));
@@ -182,12 +235,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'character' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
                     >
                         Inventory
-                    </button>
-                    <button 
-                        onClick={() => setMode('storage')}
-                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'storage' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
-                    >
-                        Storage
                     </button>
                     <button 
                         onClick={() => setMode('database')}
@@ -248,12 +295,18 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                         Category <SortIndicator col="category" />
                                     </th>
                                 )}
-                                {mode !== 'database' && (
-                                    <th className="px-6 py-4 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('quantity')}>
-                                        Qty <SortIndicator col="quantity" />
-                                    </th>
+                                {mode === 'character' ? (
+                                    <>
+                                        <th className="px-6 py-4 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('invQty')}>
+                                            Inv <SortIndicator col="invQty" />
+                                        </th>
+                                        <th className="px-6 py-4 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('storageQty')}>
+                                            Storage <SortIndicator col="storageQty" />
+                                        </th>
+                                    </>
+                                ) : (
+                                    <th className="px-6 py-4 text-right">Action</th>
                                 )}
-                                {mode === 'database' && <th className="px-6 py-4 text-right">Action</th>}
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
@@ -301,7 +354,10 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                 </td>
                                             )}
                                             <td className="px-6 py-4 text-right font-mono text-xs text-primary font-bold">
-                                                {item.quantity}
+                                                {item.invQty}
+                                            </td>
+                                            <td className="px-6 py-4 text-right font-mono text-xs text-muted-foreground font-bold">
+                                                {item.storageQty}
                                             </td>
                                         </tr>
                                     ))
@@ -338,7 +394,14 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                 </span>
                                             </div>
                                         </td>
-                                        <td colSpan={2} className="px-6 py-4 text-right">
+                                        {columnVisibility.category && (
+                                            <td className="px-6 py-4">
+                                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-muted/50 text-muted-foreground">
+                                                    {item.category}
+                                                </span>
+                                            </td>
+                                        )}
+                                        <td className="px-6 py-4 text-right">
                                             <button className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors px-3 py-1 border border-transparent hover:border-primary/30 rounded">
                                                 Add to bag
                                             </button>
