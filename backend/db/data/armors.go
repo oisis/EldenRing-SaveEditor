@@ -2,10 +2,6 @@ package data
 
 // Armors contains the map of item IDs to names.
 var Armors = map[uint32]string{
-	0x10002710: "Naked (Head)",
-	0x10002774: "Naked (Body)",
-	0x100027D8: "Naked (Arms)",
-	0x1000283C: "Naked (Legs)",
 	0x10009C40: "Iron Helmet",
 	0x10009CA4: "Scale Armor",
 	0x10009D08: "Iron Gauntlets",
