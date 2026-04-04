@@ -24,6 +24,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
+    const [addItemModal, setAddItemModal] = useState<db.ItemEntry | null>(null);
+    const [addInvMax, setAddInvMax] = useState(true);
+    const [addStorageMax, setAddStorageMax] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
 
     // Local state for edited quantities
@@ -38,6 +41,31 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             setEditedInv(prev => ({ ...prev, [handle]: safeQty }));
         } else {
             setEditedStorage(prev => ({ ...prev, [handle]: safeQty }));
+        }
+    };
+
+    const handleAddItem = async () => {
+        if (!addItemModal || isSaving) return;
+        setIsSaving(true);
+        try {
+            const char = await GetCharacter(charIndex);
+            if (!char) return;
+
+            // Logic to add item would go here. 
+            // For now, we'll simulate adding by updating the VM if the item exists, 
+            // or we'll need a backend AddItem function for new items.
+            
+            console.log(`Adding item ${addItemModal.name} (ID: ${addItemModal.id})`);
+            console.log(`Inv Max: ${addInvMax}, Storage Max: ${addStorageMax}`);
+
+            // Close modal
+            setAddItemModal(null);
+            setAddInvMax(true);
+            setAddStorageMax(false);
+        } catch (err) {
+            console.error("Failed to add item:", err);
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -259,6 +287,61 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
 
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Add Item Modal */}
+            {addItemModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="card p-8 flex flex-col space-y-6 max-w-sm w-full mx-4 shadow-2xl shadow-primary/20 border-primary/20 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden">
+                                <img 
+                                    src={getItemIconPath(addItemModal.name, addItemModal.category)} 
+                                    alt="" 
+                                    className="w-8 h-8 object-contain"
+                                    onError={handleImageError}
+                                />
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{addItemModal.name}</h3>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{addItemModal.category}</p>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4 py-2">
+                            <label className="flex items-center space-x-3 cursor-pointer group">
+                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${addInvMax ? 'bg-primary border-primary shadow-sm shadow-primary/40' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
+                                    {addInvMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
+                                </div>
+                                <input type="checkbox" className="hidden" checked={addInvMax} onChange={e => setAddInvMax(e.target.checked)} />
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Inventory Max ({addItemModal.maxInventory})</span>
+                            </label>
+
+                            <label className="flex items-center space-x-3 cursor-pointer group">
+                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${addStorageMax ? 'bg-primary border-primary shadow-sm shadow-primary/40' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
+                                    {addStorageMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
+                                </div>
+                                <input type="checkbox" className="hidden" checked={addStorageMax} onChange={e => setAddStorageMax(e.target.checked)} />
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Storage Max ({addItemModal.maxStorage})</span>
+                            </label>
+                        </div>
+
+                        <div className="flex space-x-3 pt-2">
+                            <button 
+                                onClick={handleAddItem}
+                                className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                            >
+                                Add
+                            </button>
+                            <button 
+                                onClick={() => setAddItemModal(null)}
+                                className="flex-1 px-4 py-2.5 bg-muted/30 text-muted-foreground rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:bg-muted/50 transition-all"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Icon Popover */}
             {selectedIcon && (
                 <div 
@@ -487,8 +570,11 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                             </td>
                                         )}
                                         <td className="px-6 py-4 text-right">
-                                            <button className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors px-3 py-1 border border-transparent hover:border-primary/30 rounded">
-                                                Add to bag
+                                            <button 
+                                                onClick={() => setAddItemModal(item)}
+                                                className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors px-3 py-1 border border-transparent hover:border-primary/30 rounded"
+                                            >
+                                                Add
                                             </button>
                                         </td>
                                     </tr>
