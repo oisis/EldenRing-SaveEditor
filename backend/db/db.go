@@ -146,7 +146,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 
 	items := make([]ItemEntry, 0, len(source))
 	for id, item := range source {
-		if item.Name == "" {
+		if item.Name == "" || item.Name == "Unarmed" {
 			continue
 		}
 		// For weapons, we only want base items (usually ending in 0)
