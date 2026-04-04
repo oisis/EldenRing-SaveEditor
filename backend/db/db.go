@@ -168,13 +168,9 @@ func GetAllGraces() []GraceEntry {
 		"Lake of Rot":                "Lake of Rot",
 		"Leyndell Ashen Capital":     "Leyndell, Royal Capital",
 		"Leyndell Royal Capital":     "Leyndell, Royal Capital",
-		"Limgrave":                   "Limgrave West",
-		"Liurnia of the Lakes":       "Liurnia North",
 		"Miquella's Haligtree":       "Miquella's Haligtree",
 		"Mohgwyn Palace":             "Mohgwyn Palace",
-		"Mountaintops of the Giants": "Mountaintops of the Giants East",
 		"Mt. Gelmir":                 "Mt. Gelmir",
-		"Roundtable Hold":            "Limgrave West",
 		"Shadow of the Erdtree":      "Shadow of the Erdtree",
 		"Siofra River":               "Siofra River",
 		"Weeping Peninsula":          "Weeping Peninsula",
@@ -184,9 +180,49 @@ func GetAllGraces() []GraceEntry {
 		parts := strings.Split(fullName, " (")
 		name := parts[0]
 		region := "Unknown"
+		
 		if len(parts) > 1 {
 			rawRegion := strings.TrimSuffix(parts[1], ")")
-			if mapped, ok := regionMap[rawRegion]; ok {
+			
+			// Detailed sub-region mapping
+			if rawRegion == "Limgrave" || rawRegion == "Roundtable Hold" {
+				region = "Limgrave West" // Default
+				eastKeywords := []string{"Mistwood", "Haight", "Siofra River Well", "Third Church of Marika", "Agheel Lake South"}
+				for _, kw := range eastKeywords {
+					if strings.Contains(name, kw) {
+						region = "Limgrave East"
+						break
+					}
+				}
+			} else if rawRegion == "Liurnia of the Lakes" {
+				region = "Liurnia North" // Default
+				eastKeywords := []string{"Eastern Liurnia", "Church of Vows", "Ainsel River Well", "Eastern Tableland", "Jarburg", "Liurnia Highway"}
+				westKeywords := []string{"Western Liurnia", "Carian Manor", "Four Belfries", "Revenger's Shack", "Temple Quarter", "Moongazing", "Caria Manor"}
+				
+				for _, kw := range eastKeywords {
+					if strings.Contains(name, kw) {
+						region = "Liurnia East"
+						break
+					}
+				}
+				if region == "Liurnia North" {
+					for _, kw := range westKeywords {
+						if strings.Contains(name, kw) {
+							region = "Liurnia West"
+							break
+						}
+					}
+				}
+			} else if rawRegion == "Mountaintops of the Giants" {
+				region = "Mountaintops of the Giants East" // Default
+				westKeywords := []string{"Castle Sol", "Snow Valley", "Freezing Lake", "Ancient Snow Valley", "First Church of Marika", "Whiteridge"}
+				for _, kw := range westKeywords {
+					if strings.Contains(name, kw) {
+						region = "Mountaintops of the Giants West"
+						break
+					}
+				}
+			} else if mapped, ok := regionMap[rawRegion]; ok {
 				region = mapped
 			} else {
 				region = rawRegion
