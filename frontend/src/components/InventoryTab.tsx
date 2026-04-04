@@ -49,7 +49,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             catDir = 'weapons';
         } else if (catDir === 'armor' || catDir === 'armors') {
             catDir = 'armor';
-        } else if (catDir === 'item' || catDir === 'items') {
+        } else if (catDir === 'item' || catDir === 'items' || catDir === 'goods') {
             catDir = 'goods';
         } else if (catDir === 'ash of war' || catDir === 'aows' || catDir === 'ashes') {
             catDir = 'ashes';
@@ -323,11 +323,11 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                         <td className="px-6 py-4 font-bold text-foreground text-xs">
                                             <div 
                                                 className="flex items-center space-x-3 cursor-pointer group/item"
-                                                onClick={() => setSelectedIcon({ name: item.name, path: getItemIconPath(item.name, category) })}
+                                                onClick={() => setSelectedIcon({ name: item.name, path: getItemIconPath(item.name, item.category) })}
                                             >
                                                 <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
                                                     <img 
-                                                        src={getItemIconPath(item.name, category)} 
+                                                        src={getItemIconPath(item.name, item.category)} 
                                                         alt="" 
                                                         className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
                                                         onError={handleImageError}

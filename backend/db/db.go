@@ -9,8 +9,9 @@ import (
 
 // ItemEntry represents a single item from the game database.
 type ItemEntry struct {
-	ID   uint32 `json:"id"`
-	Name string `json:"name"`
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"`
 }
 
 // GraceEntry represents a Site of Grace.
@@ -79,25 +80,35 @@ func GetItemCategoryFromHandle(handle uint32) string {
 
 // GetItemsByCategory returns a sorted list of items for a given category.
 func GetItemsByCategory(category string) []ItemEntry {
+	if category == "all" {
+		return GetAllItems()
+	}
+
 	var source map[uint32]string
 	var prefix uint32
+	var catName string
 
 	switch category {
 	case "weapons":
 		source = data.Weapons
 		prefix = 0x00000000
+		catName = "weapons"
 	case "armors":
 		source = data.Armors
 		prefix = 0x10000000
+		catName = "armor"
 	case "items":
 		source = data.Items
 		prefix = 0x40000000
+		catName = "goods"
 	case "talismans":
 		source = data.Talismans
 		prefix = 0x20000000
+		catName = "talismans"
 	case "aows":
 		source = data.Aows
 		prefix = 0xC0000000
+		catName = "ashes"
 	default:
 		return nil
 	}
@@ -115,7 +126,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 		if (id & 0xF0000000) != prefix && !(category == "weapons" && (id&0xF0000000) == 0) {
 			continue
 		}
-		items = append(items, ItemEntry{ID: id, Name: name})
+		items = append(items, ItemEntry{ID: id, Name: name, Category: catName})
 	}
 
 	sort.Slice(items, func(i, j int) bool {
@@ -123,6 +134,21 @@ func GetItemsByCategory(category string) []ItemEntry {
 	})
 
 	return items
+}
+
+// GetAllItems returns all items from all categories.
+func GetAllItems() []ItemEntry {
+	var all []ItemEntry
+	cats := []string{"weapons", "armors", "items", "talismans", "aows"}
+	for _, cat := range cats {
+		all = append(all, GetItemsByCategory(cat)...)
+	}
+	
+	sort.Slice(all, func(i, j int) bool {
+		return all[i].Name < all[j].Name
+	})
+	
+	return all
 }
 
 // GetAllGraces returns all Sites of Grace as a flat list.
