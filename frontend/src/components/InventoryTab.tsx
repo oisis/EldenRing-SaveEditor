@@ -24,7 +24,8 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
-    const [addItemModal, setAddItemModal] = useState<db.ItemEntry | null>(null);
+    const [addItemModal, setAddItemModal] = useState<db.ItemEntry[] | null>(null);
+    const [selectedDbItems, setSelectedDbItems] = useState<Set<number>>(new Set());
     const [addInvMax, setAddInvMax] = useState(true);
     const [addStorageMax, setAddStorageMax] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -32,6 +33,21 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     // Local state for edited quantities
     const [editedInv, setEditedInv] = useState<Record<number, number>>({});
     const [editedStorage, setEditedStorage] = useState<Record<number, number>>({});
+
+    const toggleDbItemSelection = (id: number) => {
+        const next = new Set(selectedDbItems);
+        if (next.has(id)) next.delete(id);
+        else next.add(id);
+        setSelectedDbItems(next);
+    };
+
+    const toggleAllDbItems = (items: db.ItemEntry[]) => {
+        if (selectedDbItems.size === items.length && items.length > 0) {
+            setSelectedDbItems(new Set());
+        } else {
+            setSelectedDbItems(new Set(items.map(i => i.id)));
+        }
+    };
 
     const handleQtyChange = (handle: number, value: string, type: 'inv' | 'storage', max: number) => {
         const qty = parseInt(value) || 0;
@@ -51,19 +67,19 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             const char = await GetCharacter(charIndex);
             if (!char) return;
 
-            // Logic to add item would go here. 
-            // For now, we'll simulate adding by updating the VM if the item exists, 
-            // or we'll need a backend AddItem function for new items.
-            
-            console.log(`Adding item ${addItemModal.name} (ID: ${addItemModal.id})`);
+            // Logic to add multiple items
+            addItemModal.forEach(item => {
+                console.log(`Adding item ${item.name} (ID: ${item.id})`);
+            });
             console.log(`Inv Max: ${addInvMax}, Storage Max: ${addStorageMax}`);
 
-            // Close modal
+            // Close modal and clear selection
             setAddItemModal(null);
+            setSelectedDbItems(new Set());
             setAddInvMax(true);
             setAddStorageMax(false);
         } catch (err) {
-            console.error("Failed to add item:", err);
+            console.error("Failed to add items:", err);
         } finally {
             setIsSaving(false);
         }
@@ -292,18 +308,32 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="card p-8 flex flex-col space-y-6 max-w-sm w-full mx-4 shadow-2xl shadow-primary/20 border-primary/20 animate-in zoom-in-95 duration-300">
                         <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden">
-                                <img 
-                                    src={getItemIconPath(addItemModal.name, addItemModal.category)} 
-                                    alt="" 
-                                    className="w-8 h-8 object-contain"
-                                    onError={handleImageError}
-                                />
-                            </div>
-                            <div>
-                                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{addItemModal.name}</h3>
-                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{addItemModal.category}</p>
-                            </div>
+                            {addItemModal.length === 1 ? (
+                                <>
+                                    <div className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden">
+                                        <img 
+                                            src={getItemIconPath(addItemModal[0].name, addItemModal[0].category)} 
+                                            alt="" 
+                                            className="w-8 h-8 object-contain"
+                                            onError={handleImageError}
+                                        />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{addItemModal[0].name}</h3>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{addItemModal[0].category}</p>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <div className="w-12 h-12 rounded bg-primary/10 border border-primary/30 flex items-center justify-center overflow-hidden">
+                                        <span className="text-lg font-black text-primary">{addItemModal.length}</span>
+                                    </div>
+                                    <div>
+                                        <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Add Multiple Items</h3>
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Bulk Action</p>
+                                    </div>
+                                </>
+                            )}
                         </div>
 
                         <div className="space-y-4 py-2">
@@ -312,7 +342,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                     {addInvMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
                                 </div>
                                 <input type="checkbox" className="hidden" checked={addInvMax} onChange={e => setAddInvMax(e.target.checked)} />
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Inventory Max ({addItemModal.maxInventory})</span>
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Inventory Max</span>
                             </label>
 
                             <label className="flex items-center space-x-3 cursor-pointer group">
@@ -320,7 +350,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                     {addStorageMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
                                 </div>
                                 <input type="checkbox" className="hidden" checked={addStorageMax} onChange={e => setAddStorageMax(e.target.checked)} />
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Storage Max ({addItemModal.maxStorage})</span>
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Storage Max</span>
                             </label>
                         </div>
 
@@ -401,8 +431,29 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>
                     </div>
                 </div>
+
+                {mode === 'database' && selectedDbItems.size > 0 && (
+                    <button 
+                        onClick={() => setAddItemModal(dbItems.filter(i => selectedDbItems.has(i.id)))}
+                        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all animate-in zoom-in-95 duration-300"
+                    >
+                        Add Selected ({selectedDbItems.size})
+                    </button>
+                )}
+
+                {mode === 'character' && (Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
+                    <button 
+                        onClick={saveChanges}
+                        disabled={isSaving}
+                        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                    >
+                        {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                )}
+
+                <div className="flex-1" />
                 
-                <div className="relative flex-1 w-full">
+                <div className="relative w-full max-w-xs">
                     <input 
                         type="text" 
                         placeholder={mode === 'database' ? "Search database..." : "Search owned items..."}
@@ -414,16 +465,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                     </div>
                 </div>
-
-                {mode === 'character' && (Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
-                    <button 
-                        onClick={saveChanges}
-                        disabled={isSaving}
-                        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
-                    >
-                        {isSaving ? 'Saving...' : 'Save Changes'}
-                    </button>
-                )}
             </div>
 
             {/* Table Card */}
@@ -432,6 +473,16 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
+                                {mode === 'database' && (
+                                    <th className="px-6 py-4 w-10">
+                                        <div 
+                                            onClick={() => toggleAllDbItems(filteredDbItems)}
+                                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.size === filteredDbItems.length && filteredDbItems.length > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                        >
+                                            {selectedDbItems.size === filteredDbItems.length && filteredDbItems.length > 0 && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
+                                        </div>
+                                    </th>
+                                )}
                                 {columnVisibility.id && (
                                     <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('id')}>
                                         ID (Hex) <SortIndicator col="id" />
@@ -464,7 +515,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         <tbody className="divide-y divide-border/30">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-24 text-center">
+                                    <td colSpan={7} className="px-6 py-24 text-center">
                                         <div className="flex flex-col items-center justify-center space-y-4">
                                             <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Accessing data...</p>
@@ -531,14 +582,22 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={6} className="px-6 py-24 text-center">
+                                        <td colSpan={7} className="px-6 py-24 text-center">
                                             <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                         </td>
                                     </tr>
                                 )
                             ) : filteredDbItems.length > 0 ? (
                                 filteredDbItems.map(item => (
-                                    <tr key={item.id} className="hover:bg-muted/20 transition-colors group">
+                                    <tr key={item.id} className={`hover:bg-muted/20 transition-colors group ${selectedDbItems.has(item.id) ? 'bg-primary/5' : ''}`}>
+                                        <td className="px-6 py-4">
+                                            <div 
+                                                onClick={() => toggleDbItemSelection(item.id)}
+                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.has(item.id) ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}
+                                            >
+                                                {selectedDbItems.has(item.id) && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
+                                            </div>
+                                        </td>
                                         {columnVisibility.id && (
                                             <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
                                                 {item.id.toString(16).toUpperCase().padStart(8, '0')}
@@ -581,7 +640,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={6} className="px-6 py-24 text-center">
+                                    <td colSpan={7} className="px-6 py-24 text-center">
                                         <p className="text-xs text-muted-foreground font-medium italic">No results found in the Lands Between.</p>
                                     </td>
                                 </tr>
