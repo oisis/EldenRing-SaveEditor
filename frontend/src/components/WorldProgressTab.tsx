@@ -31,8 +31,9 @@ export function WorldProgressTab() {
         const cleanName = region.toLowerCase()
             .replace(/'/g, '')
             .replace(/\s+/g, '_')
-            .replace(/,/g, '');
-        return `maps/${cleanName}.jpg`;
+            .replace(/,/g, '')
+            .replace(/\./g, '');
+        return `maps/${cleanName}.png`;
     };
 
     if (loading) return (
