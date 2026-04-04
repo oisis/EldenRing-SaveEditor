@@ -129,6 +129,25 @@ func getLimits(name, filename string) (uint32, uint32) {
 			}
 		}
 		
+		// Upgrade Materials (Smithing Stones, Gloveworts)
+		if strings.Contains(nameLower, "smithing stone") || strings.Contains(nameLower, "glovewort") {
+			return 999, 999
+		}
+
+		// Crafting Materials (Commonly found in the world)
+		craftingKeywords := []string{
+			"mushroom", "leaf", "flower", "fruit", "butterfly", "firefly", 
+			"root", "moss", "resin", "bone", "feather", "liver", "meat", 
+			"blood", "eye", "skin", "horn", "fang", "claw", "scale", 
+			"shell", "egg", "string", "crystal", "fragment", "shard",
+			"arteria", "starlight", "dew", "nectar", "mold", "calculus",
+		}
+		for _, kw := range craftingKeywords {
+			if strings.Contains(nameLower, kw) {
+				return 999, 999
+			}
+		}
+
 		// Ammo
 		if strings.Contains(nameLower, "arrow") || strings.Contains(nameLower, "bolt") {
 			return 99, 600
@@ -139,7 +158,7 @@ func getLimits(name, filename string) (uint32, uint32) {
 			return 99, 600
 		}
 		
-		// Consumables / Materials
+		// Consumables / Materials (Default)
 		return 99, 999
 	}
 	
