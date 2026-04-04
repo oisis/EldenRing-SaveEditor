@@ -14,6 +14,8 @@ type ItemEntry struct {
 	Category     string `json:"category"`
 	MaxInventory uint32 `json:"maxInventory"`
 	MaxStorage   uint32 `json:"maxStorage"`
+	MaxUpgrade   uint32 `json:"maxUpgrade"`
+	IconPath     string `json:"iconPath"`
 }
 
 // GraceEntry represents a Site of Grace.
@@ -118,11 +120,11 @@ func GetItemsByCategory(category string) []ItemEntry {
 	var catName string
 
 	switch category {
-	case "weapons":
+	case "weapons", "bows", "seals", "staffs", "shields":
 		source = data.Weapons
 		prefix = 0x00000000
 		catName = "weapons"
-	case "armors":
+	case "armors", "helms", "gauntlets", "leggings", "chest":
 		source = data.Armors
 		prefix = 0x10000000
 		catName = "armor"
@@ -148,16 +150,16 @@ func GetItemsByCategory(category string) []ItemEntry {
 			continue
 		}
 		// For weapons, we only want base items (usually ending in 0)
-		if category == "weapons" && id%100 != 0 {
+		if (category == "weapons" || category == "bows" || category == "seals" || category == "staffs" || category == "shields") && id%100 != 0 {
 			continue
 		}
 		// Filter by prefix
-		if (id & 0xF0000000) != prefix && !(category == "weapons" && (id&0xF0000000) == 0) {
+		if (id & 0xF0000000) != prefix && !(prefix == 0 && (id&0xF0000000) == 0) {
 			continue
 		}
 
-		// Sub-category filtering for items
-		if prefix == 0x40000000 && category != "items" {
+		// Sub-category filtering
+		if category != "weapons" && category != "armors" && category != "items" && category != "all" {
 			if !itemMatchesCategory(id, item.Name, category) {
 				continue
 			}
@@ -169,6 +171,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 			Category:     catName,
 			MaxInventory: item.MaxInventory,
 			MaxStorage:   item.MaxStorage,
+			MaxUpgrade:   item.MaxUpgrade,
+			IconPath:     item.IconPath,
 		})
 	}
 
@@ -182,9 +186,33 @@ func GetItemsByCategory(category string) []ItemEntry {
 // GetItemSubCategory returns the granular category string for an item.
 func GetItemSubCategory(id uint32, name string, broadCategory string) string {
 	if broadCategory == "Weapon" {
+		if itemMatchesCategory(id, name, "bows") {
+			return "bows"
+		}
+		if itemMatchesCategory(id, name, "seals") {
+			return "seals"
+		}
+		if itemMatchesCategory(id, name, "staffs") {
+			return "staffs"
+		}
+		if itemMatchesCategory(id, name, "shields") {
+			return "shields"
+		}
 		return "weapons"
 	}
 	if broadCategory == "Armor" {
+		if itemMatchesCategory(id, name, "helms") {
+			return "helms"
+		}
+		if itemMatchesCategory(id, name, "gauntlets") {
+			return "gauntlets"
+		}
+		if itemMatchesCategory(id, name, "leggings") {
+			return "leggings"
+		}
+		if itemMatchesCategory(id, name, "chest") {
+			return "chest"
+		}
 		return "armors"
 	}
 	if broadCategory == "Talisman" {
@@ -223,6 +251,32 @@ func GetItemSubCategory(id uint32, name string, broadCategory string) string {
 func itemMatchesCategory(id uint32, name string, category string) bool {
 	nameLower := strings.ToLower(name)
 	switch category {
+	case "bows":
+		return strings.Contains(nameLower, "bow") || strings.Contains(nameLower, "ballista")
+	case "seals":
+		return strings.Contains(nameLower, "seal")
+	case "staffs":
+		return strings.Contains(nameLower, "staff") || strings.Contains(nameLower, "scepter")
+	case "shields":
+		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler")
+	case "helms":
+		return strings.Contains(nameLower, "helm") || strings.Contains(nameLower, "hood") || 
+			strings.Contains(nameLower, "mask") || strings.Contains(nameLower, "crown") || 
+			strings.Contains(nameLower, "headband") || strings.Contains(nameLower, "hat") ||
+			strings.Contains(nameLower, "coif")
+	case "gauntlets":
+		return strings.Contains(nameLower, "gauntlets") || strings.Contains(nameLower, "gloves") || 
+			strings.Contains(nameLower, "bracers") || strings.Contains(nameLower, "manchettes") ||
+			strings.Contains(nameLower, "bracer")
+	case "leggings":
+		return strings.Contains(nameLower, "greaves") || strings.Contains(nameLower, "trousers") || 
+			strings.Contains(nameLower, "boots") || strings.Contains(nameLower, "leggings") ||
+			strings.Contains(nameLower, "gaiters") || strings.Contains(nameLower, "shoes") ||
+			strings.Contains(nameLower, "skirt")
+	case "chest":
+		return !itemMatchesCategory(id, name, "helms") && 
+			!itemMatchesCategory(id, name, "gauntlets") && 
+			!itemMatchesCategory(id, name, "leggings")
 	case "sorceries":
 		return id >= 0x40000FA0 && id <= 0x4000157C
 	case "incantations":

@@ -16,6 +16,8 @@ type ItemViewModel struct {
 	Quantity     uint32 `json:"quantity"`
 	MaxInventory uint32 `json:"maxInventory"`
 	MaxStorage   uint32 `json:"maxStorage"`
+	MaxUpgrade   uint32 `json:"maxUpgrade"`
+	IconPath     string `json:"iconPath"`
 }
 
 type CharacterViewModel struct {
@@ -120,6 +122,8 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				Quantity:     displayQuantity,
 				MaxInventory: itemData.MaxInventory,
 				MaxStorage:   itemData.MaxStorage,
+				MaxUpgrade:   itemData.MaxUpgrade,
+				IconPath:     itemData.IconPath,
 			})
 		}
 	}

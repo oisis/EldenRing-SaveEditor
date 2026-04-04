@@ -28,6 +28,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [selectedDbItems, setSelectedDbItems] = useState<Set<number>>(new Set());
     const [addInvMax, setAddInvMax] = useState(true);
     const [addStorageMax, setAddStorageMax] = useState(false);
+    const [addUpgradeLevel, setAddUpgradeLevel] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
 
     // Local state for edited quantities
@@ -69,7 +70,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
 
             // Logic to add multiple items
             addItemModal.forEach(item => {
-                console.log(`Adding item ${item.name} (ID: ${item.id})`);
+                console.log(`Adding item ${item.name} (ID: ${item.id}) at level +${addUpgradeLevel}`);
             });
             console.log(`Inv Max: ${addInvMax}, Storage Max: ${addStorageMax}`);
 
@@ -78,6 +79,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             setSelectedDbItems(new Set());
             setAddInvMax(true);
             setAddStorageMax(false);
+            setAddUpgradeLevel(0);
         } catch (err) {
             console.error("Failed to add items:", err);
         } finally {
@@ -131,7 +133,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             invQty: number,
             storageQty: number,
             maxInv: number,
-            maxStorage: number
+            maxStorage: number,
+            maxUpgrade: number,
+            iconPath: string
         }>();
 
         charInventory.forEach(item => {
@@ -144,7 +148,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                 invQty: item.quantity,
                 storageQty: 0,
                 maxInv: item.maxInventory,
-                maxStorage: item.maxStorage
+                maxStorage: item.maxStorage,
+                maxUpgrade: item.maxUpgrade,
+                iconPath: item.iconPath
             });
         });
 
@@ -162,48 +168,15 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     invQty: 0,
                     storageQty: item.quantity,
                     maxInv: item.maxInventory,
-                    maxStorage: item.maxStorage
+                    maxStorage: item.maxStorage,
+                    maxUpgrade: item.maxUpgrade,
+                    iconPath: item.iconPath
                 });
             }
         });
 
         return Array.from(mergedMap.values());
     })();
-
-    const getItemIconPath = (name: string, category: string) => {
-        let cleanName = name.toLowerCase();
-
-        // 1. Final character normalization (only letters, numbers, and underscores)
-        cleanName = cleanName
-            .replace(/'/g, '')
-            .replace(/\s+/g, '_')
-            .replace(/-/g, '_')
-            .replace(/[^\w]/g, '') // Remove everything except letters, numbers, and underscores
-            .replace(/_+/g, '_')   // Collapse multiple underscores
-            .replace(/^_+|_+$/g, ''); // Trim underscores from ends
-
-        // 2. Special cases
-        if (cleanName === 'golden_vow' && (category.toLowerCase() === 'ash of war' || category.toLowerCase() === 'aows' || category.toLowerCase() === 'ashes')) {
-            cleanName = 'ashes_of_war_golden_vow';
-        }
-        
-        let catDir = category.toLowerCase();
-        
-        // Map categories to folder names
-        if (catDir === 'weapon' || catDir === 'weapons') {
-            catDir = 'weapons';
-        } else if (catDir === 'armor' || catDir === 'armors') {
-            catDir = 'armor';
-        } else if (catDir === 'item' || catDir === 'items' || catDir === 'goods') {
-            catDir = 'goods';
-        } else if (catDir === 'ash of war' || catDir === 'aows' || catDir === 'ashes') {
-            catDir = 'ashes';
-        } else if (catDir === 'talisman' || catDir === 'talismans') {
-            catDir = 'talismans';
-        }
-        
-        return `items/${catDir}/${cleanName}.png`;
-    };
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
         const target = e.currentTarget;
@@ -293,7 +266,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                 <>
                                     <div className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden">
                                         <img 
-                                            src={getItemIconPath(addItemModal[0].name, addItemModal[0].category)} 
+                                            src={addItemModal[0].iconPath} 
                                             alt="" 
                                             className="w-8 h-8 object-contain"
                                             onError={handleImageError}
@@ -318,6 +291,27 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         </div>
 
                         <div className="space-y-4 py-2">
+                            {addItemModal.length === 1 && addItemModal[0].maxUpgrade > 0 && (
+                                <div className="space-y-2 pb-2 border-b border-border/30">
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Upgrade Level</span>
+                                        <span className="text-xs font-mono font-bold text-primary">+{addUpgradeLevel}</span>
+                                    </div>
+                                    <input 
+                                        type="range" 
+                                        min="0" 
+                                        max={addItemModal[0].maxUpgrade} 
+                                        value={addUpgradeLevel} 
+                                        onChange={e => setAddUpgradeLevel(parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                                    />
+                                    <div className="flex justify-between text-[8px] font-bold text-muted-foreground/50 uppercase tracking-tighter">
+                                        <span>+0</span>
+                                        <span>+{addItemModal[0].maxUpgrade}</span>
+                                    </div>
+                                </div>
+                            )}
+
                             <label className="flex items-center space-x-3 cursor-pointer group">
                                 <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${addInvMax ? 'bg-primary border-primary shadow-sm shadow-primary/40' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
                                     {addInvMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
@@ -404,9 +398,18 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         {mode !== 'database' && <option value="all">All Categories</option>}
                         <optgroup label="Equipment" className="bg-background text-foreground">
                             <option value="weapons">Weapons</option>
-                            <option value="armors">Armors</option>
+                            <option value="bows">Bows & Ballistae</option>
+                            <option value="shields">Shields</option>
+                            <option value="staffs">Glintstone Staffs</option>
+                            <option value="seals">Sacred Seals</option>
                             <option value="talismans">Talismans</option>
                             <option value="aows">Ashes of War</option>
+                        </optgroup>
+                        <optgroup label="Armor" className="bg-background text-foreground">
+                            <option value="helms">Helms</option>
+                            <option value="chest">Chest Armor</option>
+                            <option value="gauntlets">Gauntlets</option>
+                            <option value="leggings">Leggings</option>
                         </optgroup>
                         <optgroup label="Magic" className="bg-background text-foreground">
                             <option value="sorceries">Sorceries</option>
@@ -530,11 +533,11 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                             <td className="px-6 py-4 font-bold text-foreground text-xs">
                                                 <div 
                                                     className="flex items-center space-x-3 cursor-pointer group/item"
-                                                    onClick={() => setSelectedIcon({ name: item.name, path: getItemIconPath(item.name, item.category) })}
+                                                    onClick={() => setSelectedIcon({ name: item.name, path: item.iconPath })}
                                                 >
                                                     <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
                                                         <img 
-                                                            src={getItemIconPath(item.name, item.category)} 
+                                                            src={item.iconPath} 
                                                             alt="" 
                                                             className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
                                                             onError={handleImageError}
@@ -542,6 +545,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                     </div>
                                                     <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
                                                         {item.name}
+                                                        {item.maxUpgrade > 0 && (
+                                                            <span className="ml-2 text-[9px] font-black text-primary/40 uppercase tracking-tighter">Max +{item.maxUpgrade}</span>
+                                                        )}
                                                     </span>
                                                 </div>
                                             </td>
@@ -602,11 +608,11 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                         <td className="px-6 py-4 font-bold text-foreground text-xs">
                                             <div 
                                                 className="flex items-center space-x-3 cursor-pointer group/item"
-                                                onClick={() => setSelectedIcon({ name: item.name, path: getItemIconPath(item.name, item.category) })}
+                                                onClick={() => setSelectedIcon({ name: item.name, path: item.iconPath })}
                                             >
                                                 <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
                                                     <img 
-                                                        src={getItemIconPath(item.name, item.category)} 
+                                                        src={item.iconPath} 
                                                         alt="" 
                                                         className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
                                                         onError={handleImageError}
@@ -614,6 +620,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                 </div>
                                                 <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
                                                     {item.name}
+                                                    {item.maxUpgrade > 0 && (
+                                                        <span className="ml-2 text-[9px] font-black text-primary/40 uppercase tracking-tighter">Max +{item.maxUpgrade}</span>
+                                                    )}
                                                 </span>
                                             </div>
                                         </td>

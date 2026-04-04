@@ -5,4 +5,6 @@ type ItemData struct {
 	Name         string
 	MaxInventory uint32
 	MaxStorage   uint32
+	MaxUpgrade   uint32
+	IconPath     string
 }
