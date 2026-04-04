@@ -155,12 +155,42 @@ func GetAllItems() []ItemEntry {
 func GetAllGraces() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))
 	
+	// Map game regions to our specific map filenames
+	regionMap := map[string]string{
+		"Ainsel River":               "Ainsel River",
+		"Altus Plateau":              "Altus Plateau",
+		"Caelid":                     "Caelid",
+		"Consecrated Snowfield":      "Consecrated Snowfield",
+		"Crumbling Farum Azula":      "Crumbling Farum Azula",
+		"Deeproot Depths":            "Deeproot Depths",
+		"Dragonbarrow":               "Dragonbarrow",
+		"Forbidden Lands":            "Forbidden Lands",
+		"Lake of Rot":                "Lake of Rot",
+		"Leyndell Ashen Capital":     "Leyndell, Royal Capital",
+		"Leyndell Royal Capital":     "Leyndell, Royal Capital",
+		"Limgrave":                   "Limgrave West",
+		"Liurnia of the Lakes":       "Liurnia North",
+		"Miquella's Haligtree":       "Miquella's Haligtree",
+		"Mohgwyn Palace":             "Mohgwyn Palace",
+		"Mountaintops of the Giants": "Mountaintops of the Giants East",
+		"Mt. Gelmir":                 "Mt. Gelmir",
+		"Roundtable Hold":            "Limgrave West",
+		"Shadow of the Erdtree":      "Shadow of the Erdtree",
+		"Siofra River":               "Siofra River",
+		"Weeping Peninsula":          "Weeping Peninsula",
+	}
+
 	for id, fullName := range data.Graces {
 		parts := strings.Split(fullName, " (")
 		name := parts[0]
 		region := "Unknown"
 		if len(parts) > 1 {
-			region = strings.TrimSuffix(parts[1], ")")
+			rawRegion := strings.TrimSuffix(parts[1], ")")
+			if mapped, ok := regionMap[rawRegion]; ok {
+				region = mapped
+			} else {
+				region = rawRegion
+			}
 		}
 		
 		graces = append(graces, GraceEntry{
