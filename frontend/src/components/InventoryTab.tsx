@@ -225,7 +225,10 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             let valA = a[sortCol as keyof typeof a];
             let valB = b[sortCol as keyof typeof b];
 
-            if (typeof valA === 'string') {
+            if (sortCol === 'maxUpgrade') {
+                valA = a.maxUpgrade || 0;
+                valB = b.maxUpgrade || 0;
+            } else if (typeof valA === 'string') {
                 valA = valA.toLowerCase();
                 valB = valB.toLowerCase();
             }
@@ -490,6 +493,9 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                 <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('name')}>
                                     Designation <SortIndicator col="name" />
                                 </th>
+                                <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors text-center" onClick={() => handleSort('maxUpgrade')}>
+                                    Upgrade <SortIndicator col="maxUpgrade" />
+                                </th>
                                 {columnVisibility.category && (
                                     <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('category')}>
                                         Category <SortIndicator col="category" />
@@ -514,7 +520,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         <tbody className="divide-y divide-border/30">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-24 text-center">
+                                    <td colSpan={8} className="px-6 py-24 text-center">
                                         <div className="flex flex-col items-center justify-center space-y-4">
                                             <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Accessing data...</p>
@@ -545,11 +551,15 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                     </div>
                                                     <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
                                                         {item.name}
-                                                        {item.maxUpgrade > 0 && (
-                                                            <span className="ml-2 text-[9px] font-black text-primary/40 uppercase tracking-tighter">Max +{item.maxUpgrade}</span>
-                                                        )}
                                                     </span>
                                                 </div>
+                                            </td>
+                                            <td className="px-6 py-4 text-center">
+                                                {item.maxUpgrade > 0 ? (
+                                                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">+{item.maxUpgrade}</span>
+                                                ) : (
+                                                    <span className="text-[10px] font-bold text-muted-foreground/20">—</span>
+                                                )}
                                             </td>
                                             {columnVisibility.category && (
                                                 <td className="px-6 py-4">
@@ -584,7 +594,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan={7} className="px-6 py-24 text-center">
+                                        <td colSpan={8} className="px-6 py-24 text-center">
                                             <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                         </td>
                                     </tr>
@@ -620,11 +630,15 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                 </div>
                                                 <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
                                                     {item.name}
-                                                    {item.maxUpgrade > 0 && (
-                                                        <span className="ml-2 text-[9px] font-black text-primary/40 uppercase tracking-tighter">Max +{item.maxUpgrade}</span>
-                                                    )}
                                                 </span>
                                             </div>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            {item.maxUpgrade > 0 ? (
+                                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">+{item.maxUpgrade}</span>
+                                            ) : (
+                                                <span className="text-[10px] font-bold text-muted-foreground/20">—</span>
+                                            )}
                                         </td>
                                         {columnVisibility.category && (
                                             <td className="px-6 py-4">
@@ -645,7 +659,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-24 text-center">
+                                    <td colSpan={8} className="px-6 py-24 text-center">
                                         <p className="text-xs text-muted-foreground font-medium italic">No results found in the Lands Between.</p>
                                     </td>
                                 </tr>
