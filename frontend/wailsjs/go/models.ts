@@ -20,6 +20,8 @@ export namespace db {
 	    id: number;
 	    name: string;
 	    category: string;
+	    maxInventory: number;
+	    maxStorage: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemEntry(source);
@@ -30,6 +32,8 @@ export namespace db {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.category = source["category"];
+	        this.maxInventory = source["maxInventory"];
+	        this.maxStorage = source["maxStorage"];
 	    }
 	}
 
@@ -43,6 +47,8 @@ export namespace vm {
 	    name: string;
 	    category: string;
 	    quantity: number;
+	    maxInventory: number;
+	    maxStorage: number;
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemViewModel(source);
@@ -55,6 +61,8 @@ export namespace vm {
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.quantity = source["quantity"];
+	        this.maxInventory = source["maxInventory"];
+	        this.maxStorage = source["maxStorage"];
 	    }
 	}
 	export class CharacterViewModel {

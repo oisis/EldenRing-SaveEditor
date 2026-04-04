@@ -129,6 +129,7 @@
     - [x] Fix "Unknown Item" spam in Storage Box (stop reading at first empty slot and strict DB filtering)
     - [x] Fix Ash of War categorization and item mapping (100% Python parity)
     - [x] Fix incorrect quantities for non-stackable items (forced to 1 for Weapons, Armor, Talismans, AoW)
+    - [x] Implement quantity editing with `MaxInventory` and `MaxStorage` validation
 
 ---
 

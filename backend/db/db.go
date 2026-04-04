@@ -9,9 +9,11 @@ import (
 
 // ItemEntry represents a single item from the game database.
 type ItemEntry struct {
-	ID       uint32 `json:"id"`
-	Name     string `json:"name"`
-	Category string `json:"category"`
+	ID           uint32 `json:"id"`
+	Name         string `json:"name"`
+	Category     string `json:"category"`
+	MaxInventory uint32 `json:"maxInventory"`
+	MaxStorage   uint32 `json:"maxStorage"`
 }
 
 // GraceEntry represents a Site of Grace.
@@ -21,38 +23,65 @@ type GraceEntry struct {
 	Region string `json:"region"`
 }
 
+// GetItemData returns the full metadata of an item by its ID and category.
+func GetItemData(id uint32, category string) data.ItemData {
+	switch category {
+	case "Weapon":
+		if item, ok := data.Weapons[id]; ok {
+			return item
+		}
+	case "Armor":
+		if item, ok := data.Armors[id]; ok {
+			return item
+		}
+	case "Talisman":
+		if item, ok := data.Talismans[id]; ok {
+			return item
+		}
+	case "Item":
+		if item, ok := data.Items[id]; ok {
+			return item
+		}
+	case "Ash of War":
+		if item, ok := data.Aows[id]; ok {
+			return item
+		}
+	}
+	return data.ItemData{Name: GetItemName(id, category)}
+}
+
 // GetItemName returns the name of an item by its ID and category.
 func GetItemName(id uint32, category string) string {
 	switch category {
 	case "Weapon":
-		for baseID, name := range data.Weapons {
+		for baseID, item := range data.Weapons {
 			if (id & 0xFFFFFF00) == (baseID & 0xFFFFFF00) {
 				level := id - baseID
 				if level > 0 {
-					return fmt.Sprintf("%s +%d", name, level)
+					return fmt.Sprintf("%s +%d", item.Name, level)
 				}
-				return name
+				return item.Name
 			}
 		}
 		return fmt.Sprintf("Unknown Weapon (0x%X)", id)
 	case "Armor":
-		if name, ok := data.Armors[id]; ok && name != "" {
-			return name
+		if item, ok := data.Armors[id]; ok && item.Name != "" {
+			return item.Name
 		}
 		return fmt.Sprintf("Unknown Armor (0x%X)", id)
 	case "Talisman":
-		if name, ok := data.Talismans[id]; ok && name != "" {
-			return name
+		if item, ok := data.Talismans[id]; ok && item.Name != "" {
+			return item.Name
 		}
 		return fmt.Sprintf("Unknown Talisman (0x%X)", id)
 	case "Item":
-		if name, ok := data.Items[id]; ok && name != "" {
-			return name
+		if item, ok := data.Items[id]; ok && item.Name != "" {
+			return item.Name
 		}
 		return fmt.Sprintf("Unknown Item (0x%X)", id)
 	case "Ash of War":
-		if name, ok := data.Aows[id]; ok && name != "" {
-			return name
+		if item, ok := data.Aows[id]; ok && item.Name != "" {
+			return item.Name
 		}
 		return fmt.Sprintf("Unknown Ash of War (0x%X)", id)
 	default:
@@ -84,7 +113,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 		return GetAllItems()
 	}
 
-	var source map[uint32]string
+	var source map[uint32]data.ItemData
 	var prefix uint32
 	var catName string
 
@@ -114,8 +143,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 	}
 
 	items := make([]ItemEntry, 0, len(source))
-	for id, name := range source {
-		if name == "" {
+	for id, item := range source {
+		if item.Name == "" {
 			continue
 		}
 		// For weapons, we only want base items (usually ending in 0)
@@ -126,7 +155,13 @@ func GetItemsByCategory(category string) []ItemEntry {
 		if (id & 0xF0000000) != prefix && !(category == "weapons" && (id&0xF0000000) == 0) {
 			continue
 		}
-		items = append(items, ItemEntry{ID: id, Name: name, Category: catName})
+		items = append(items, ItemEntry{
+			ID:           id,
+			Name:         item.Name,
+			Category:     catName,
+			MaxInventory: item.MaxInventory,
+			MaxStorage:   item.MaxStorage,
+		})
 	}
 
 	sort.Slice(items, func(i, j int) bool {

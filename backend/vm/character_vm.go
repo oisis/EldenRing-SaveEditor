@@ -8,11 +8,13 @@ import (
 )
 
 type ItemViewModel struct {
-	Handle   uint32 `json:"handle"`
-	ID       uint32 `json:"id"`
-	Name     string `json:"name"`
-	Category string `json:"category"`
-	Quantity uint32 `json:"quantity"`
+	Handle       uint32 `json:"handle"`
+	ID           uint32 `json:"id"`
+	Name         string `json:"name"`
+	Category     string `json:"category"`
+	Quantity     uint32 `json:"quantity"`
+	MaxInventory uint32 `json:"maxInventory"`
+	MaxStorage   uint32 `json:"maxStorage"`
 }
 
 type CharacterViewModel struct {
@@ -86,7 +88,8 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				return
 			}
 
-			name := db.GetItemName(itemID, category)
+			itemData := db.GetItemData(itemID, category)
+			name := itemData.Name
 			
 			// Strict filtering: skip items that are not in our database (Unknown)
 			// to avoid garbage data from misaligned offsets.
@@ -108,11 +111,13 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			}
 
 			items = append(items, ItemViewModel{
-				Handle:   item.GaItemHandle,
-				ID:       itemID,
-				Name:     name,
-				Category: category,
-				Quantity: displayQuantity,
+				Handle:       item.GaItemHandle,
+				ID:           itemID,
+				Name:         name,
+				Category:     category,
+				Quantity:     displayQuantity,
+				MaxInventory: itemData.MaxInventory,
+				MaxStorage:   itemData.MaxStorage,
 			})
 		}
 	}
@@ -150,7 +155,53 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 			data.CharacterName[i] = 0
 		}
 	}
+
+	// Update Inventory
+	updateItems(vm.Inventory, &slot.Inventory)
+	
+	// Update Storage
+	updateItems(vm.Storage, &slot.Storage)
+
 	return nil
+}
+
+func updateItems(vmItems []ItemViewModel, data *core.EquipInventoryData) {
+	// Create a map for quick lookup of VM items by handle
+	vmMap := make(map[uint32]ItemViewModel)
+	for _, item := range vmItems {
+		vmMap[item.Handle] = item
+	}
+
+	// Update Common Items
+	for i := range data.CommonItems {
+		handle := data.CommonItems[i].GaItemHandle
+		if handle == 0 || handle == 0xFFFFFFFF {
+			continue
+		}
+		if vmItem, ok := vmMap[handle]; ok {
+			// Apply quantity limits if necessary (though UI should handle this)
+			qty := vmItem.Quantity
+			if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
+				qty = vmItem.MaxInventory
+			}
+			data.CommonItems[i].Quantity = qty
+		}
+	}
+
+	// Update Key Items
+	for i := range data.KeyItems {
+		handle := data.KeyItems[i].GaItemHandle
+		if handle == 0 || handle == 0xFFFFFFFF {
+			continue
+		}
+		if vmItem, ok := vmMap[handle]; ok {
+			qty := vmItem.Quantity
+			if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
+				qty = vmItem.MaxInventory
+			}
+			data.KeyItems[i].Quantity = qty
+		}
+	}
 }
 
 func MapSlotToVM(slotData []byte) (*CharacterViewModel, error) {
