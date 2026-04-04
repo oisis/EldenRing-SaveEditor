@@ -1,0 +1,822 @@
+ 
+
+
+
+
+<!DOCTYPE html>
+<html lang="en-US" prefix="og: https://ogp.me/ns#">
+<head>
+		
+
+	<meta charset="UTF-8">
+	<link rel="profile" href="https://gmpg.org/xfn/11">
+	<style type="text/css">div.heateor_sl_social_login_title,div.heateor_sl_login_container{text-align:center}ul.heateor_sl_login_ul{width:100%;text-align:center;}div.heateor_sl_login_container ul.heateor_sl_login_ul li{float:none!important;display:inline-block;}</style>		<script type="text/javascript">var heateorSlDefaultLang = 'en_US', heateorSlCloseIconPath = 'https://www.pureeldenring.com/wp-content/plugins/heateor-social-login/public/images/close.png';
+		 var heateorSlSiteUrl = 'https://www.pureeldenring.com', heateorSlVerified = 0, heateorSlEmailPopup = 0;
+		</script>
+					<script> var heateorSlLoadingImgPath = 'https://www.pureeldenring.com/wp-content/plugins/heateor-social-login/public/../images/ajax_loader.gif'; var heateorSlAjaxUrl = 'https://www.pureeldenring.com/wp-admin/admin-ajax.php'; var heateorSlRedirectionUrl = 'https://www.pureeldenring.com/wp-content/uploads/2022/03/bone_great_arrow_fletched.webp'; var heateorSlRegRedirectionUrl = 'https://www.pureeldenring.com/wp-content/uploads/2022/03/bone_great_arrow_fletched.webp'; </script>
+						<script> var heateorSlFBKey = '', heateorSlSameTabLogin = '1', heateorSlVerified = 0; var heateorSlAjaxUrl = 'https://www.pureeldenring.com/wp-admin/admin-ajax.php'; var heateorSlPopupTitle = ''; var heateorSlEmailPopup = 0; var heateorSlEmailAjaxUrl = 'https://www.pureeldenring.com/wp-admin/admin-ajax.php'; var heateorSlEmailPopupTitle = ''; var heateorSlEmailPopupErrorMsg = ''; var heateorSlEmailPopupUniqueId = ''; var heateorSlEmailPopupVerifyMessage = ''; var heateorSlSteamAuthUrl = ""; var heateorSlCurrentPageUrl = 'https%3A%2F%2Fwww.pureeldenring.com%2Fwp-content%2Fuploads%2F2022%2F03%2Fbone_great_arrow_fletched.webp';  var heateorMSEnabled = 0; var heateorSlTwitterAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=X&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlFacebookAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Facebook&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlGoogleAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Google&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlYoutubeAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Youtube&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlLineAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Line&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlLiveAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Live&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlVkontakteAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Vkontakte&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlLinkedinAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Linkedin&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlSpotifyAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Spotify&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlKakaoAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Kakao&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlGithubAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Github&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlWordpressAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Wordpress&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlYahooAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Yahoo&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlInstagramAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Instagram&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlDribbbleAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Dribbble&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlTwitchAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Twitch&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlRedditAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Reddit&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlDisqusAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Disqus&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlFoursquareAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Foursquare&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlDropboxAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Dropbox&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlAmazonAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Amazon&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlStackoverflowAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Stackoverflow&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlDiscordAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Discord&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlMailruAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Mailru&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl; var heateorSlYandexAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Yandex&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl ;var heateorSlOdnoklassnikiAuthUrl = heateorSlSiteUrl + "?HeateorSlAuth=Odnoklassniki&heateor_sl_redirect_to=" + heateorSlCurrentPageUrl;</script>
+					<script type="text/javascript">function heateorSlLoadEvent(e ) {var t=window.onload;if ( typeof window.onload!="function" ) {window.onload=e} else {window.onload=function() {t();e()}}}</script>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Search Engine Optimization by Rank Math PRO - https://rankmath.com/ -->
+<title>Page Not Found - Pure EldenRing</title>
+<meta name="robots" content="follow, noindex"/>
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Page Not Found - Pure EldenRing" />
+<meta property="og:site_name" content="PureEldenRing" />
+<meta property="article:publisher" content="https://www.facebook.com/puredmgcom" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Page Not Found - Pure EldenRing" />
+<meta name="twitter:site" content="@puredmgcom" />
+<script type="application/ld+json" class="rank-math-schema-pro">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://www.pureeldenring.com/#organization","name":"PureEldenRing","url":"https://eldenring.puredmg.com","sameAs":["https://www.facebook.com/puredmgcom","https://twitter.com/puredmgcom"],"email":"Rush","logo":{"@type":"ImageObject","@id":"https://www.pureeldenring.com/#logo","url":"https://www.pureeldenring.com/wp-content/uploads/2025/11/PureEldenRing-Social-Icon.png","contentUrl":"https://www.pureeldenring.com/wp-content/uploads/2025/11/PureEldenRing-Social-Icon.png","caption":"PureEldenRing","inLanguage":"en-US","width":"631","height":"631"},"description":"Elden Ring and Nightreign database, wiki, guides and interactive maps to help players. "},{"@type":"WebSite","@id":"https://www.pureeldenring.com/#website","url":"https://www.pureeldenring.com","name":"PureEldenRing","publisher":{"@id":"https://www.pureeldenring.com/#organization"},"inLanguage":"en-US"},{"@type":"BreadcrumbList","@id":"#breadcrumb","itemListElement":[{"@type":"ListItem","position":"1","item":{"@id":"https://www.pureeldenring.com","name":"Home"}}]},{"@type":"WebPage","@id":"#webpage","url":"","name":"Page Not Found - Pure EldenRing","isPartOf":{"@id":"https://www.pureeldenring.com/#website"},"inLanguage":"en-US","breadcrumb":{"@id":"#breadcrumb"}}]}</script>
+<!-- /Rank Math WordPress SEO plugin -->
+
+<link rel="alternate" type="application/rss+xml" title="Pure EldenRing &raquo; Feed" href="https://www.pureeldenring.com/feed" />
+<link rel="alternate" type="application/rss+xml" title="Pure EldenRing &raquo; Comments Feed" href="https://www.pureeldenring.com/comments/feed" />
+<style id='wp-img-auto-sizes-contain-inline-css'>
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<link rel='stylesheet' id='dashicons-css' href='https://www.pureeldenring.com/wp-includes/css/dashicons.min.css?ver=08d32883994d03ca9ce200c676fdb3cc' media='all' />
+<link rel='stylesheet' id='post-views-counter-frontend-css' href='https://www.pureeldenring.com/wp-content/plugins/post-views-counter/css/frontend.css?ver=1.7.3' media='all' />
+<link rel='stylesheet' id='lrm-modal-css' href='https://www.pureeldenring.com/wp-content/plugins/ajax-login-and-registration-modal-popup-pro/free/assets/lrm-core-compiled.css?ver=56' media='all' />
+<link rel='stylesheet' id='lrm-modal-skin-css' href='https://www.pureeldenring.com/wp-content/plugins/ajax-login-and-registration-modal-popup-pro/free/skins/default/skin.css?ver=56' media='all' />
+<style id='lrm-modal-skin-inline-css'>
+ .lrm-form a.button,.lrm-form button,.lrm-form button[type=submit],.lrm-form #buddypress input[type=submit],.lrm-form .gform_wrapper input.gform_button[type=submit],.lrm-form input[type=submit]{color: #ffffff;}  .lrm-form a.button,.lrm-form button,.lrm-form button[type=submit],.lrm-form #buddypress input[type=submit],.lrm-form .gform_wrapper input.gform_button[type=submit],.lrm-form input[type=submit]{background-color: #2f889a;}  .lrm-user-modal-container .lrm-switcher a{background-color: #d2d8d8;}  .lrm-user-modal-container .lrm-switcher a{color: #809191;}
+/*# sourceURL=lrm-modal-skin-inline-css */
+</style>
+<link rel='stylesheet' id='wp-block-library-css' href='https://www.pureeldenring.com/wp-includes/css/dist/block-library/style.min.css?ver=08d32883994d03ca9ce200c676fdb3cc' media='all' />
+<style id='classic-theme-styles-inline-css'>
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+<style id='global-styles-inline-css'>
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--color--contrast: var(--contrast);--wp--preset--color--contrast-2: var(--contrast-2);--wp--preset--color--contrast-3: var(--contrast-3);--wp--preset--color--base: var(--base);--wp--preset--color--base-2: var(--base-2);--wp--preset--color--base-3: var(--base-3);--wp--preset--color--accent: var(--accent);--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+:where(.wp-block-post-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-post-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-term-template.is-layout-flex){gap: 1.25em;}:where(.wp-block-term-template.is-layout-grid){gap: 1.25em;}
+:where(.wp-block-columns.is-layout-flex){gap: 2em;}:where(.wp-block-columns.is-layout-grid){gap: 2em;}
+:root :where(.wp-block-pullquote){font-size: 1.5em;line-height: 1.6;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+<link rel='stylesheet' id='user-registration-general-css' href='https://www.pureeldenring.com/wp-content/plugins/user-registration/assets/css/user-registration.css?ver=5.1.0' media='all' />
+<link rel='stylesheet' id='ez-toc-css' href='https://www.pureeldenring.com/wp-content/plugins/easy-table-of-contents/assets/css/screen.min.css?ver=2.0.80' media='all' />
+<style id='ez-toc-inline-css'>
+div#ez-toc-container .ez-toc-title {font-size: 120%;}div#ez-toc-container .ez-toc-title {font-weight: 500;}div#ez-toc-container ul li , div#ez-toc-container ul li a {font-size: 95%;}div#ez-toc-container ul li , div#ez-toc-container ul li a {font-weight: 500;}div#ez-toc-container nav ul ul li {font-size: 90%;}div#ez-toc-container {background: #081314;border: 1px solid #0a2f35;}div#ez-toc-container p.ez-toc-title , #ez-toc-container .ez_toc_custom_title_icon , #ez-toc-container .ez_toc_custom_toc_icon {color: #ffffff;}div#ez-toc-container ul.ez-toc-list a {color: #ddc249;}div#ez-toc-container ul.ez-toc-list a:hover {color: #ddb03e;}div#ez-toc-container ul.ez-toc-list a:visited {color: #ddc249;}.ez-toc-counter nav ul li a::before {color: ;}.ez-toc-box-title {font-weight: bold; margin-bottom: 10px; text-align: center; text-transform: uppercase; letter-spacing: 1px; color: #666; padding-bottom: 5px;position:absolute;top:-4%;left:5%;background-color: inherit;transition: top 0.3s ease;}.ez-toc-box-title.toc-closed {top:-25%;}
+.ez-toc-container-direction {direction: ltr;}.ez-toc-counter ul{counter-reset: item ;}.ez-toc-counter nav ul li a::before {content: counters(item, '.', decimal) '. ';display: inline-block;counter-increment: item;flex-grow: 0;flex-shrink: 0;margin-right: .2em; float: left; }.ez-toc-widget-direction {direction: ltr;}.ez-toc-widget-container ul{counter-reset: item ;}.ez-toc-widget-container nav ul li a::before {content: counters(item, '.', decimal) '. ';display: inline-block;counter-increment: item;flex-grow: 0;flex-shrink: 0;margin-right: .2em; float: left; }
+/*# sourceURL=ez-toc-inline-css */
+</style>
+<link rel='stylesheet' id='megamenu-css' href='https://www.pureeldenring.com/wp-content/uploads/maxmegamenu/style.css?ver=ef83b4' media='all' />
+<link rel='stylesheet' id='generate-style-css' href='https://www.pureeldenring.com/wp-content/themes/generatepress/assets/css/all.min.css?ver=3.6.1' media='all' />
+<style id='generate-style-inline-css'>
+body{background-color:#efefef;color:#3a3a3a;}a{color:#1e73be;}a:hover, a:focus, a:active{color:#000000;}body .grid-container{max-width:1400px;}.wp-block-group__inner-container{max-width:1400px;margin-left:auto;margin-right:auto;}.site-header .header-image{width:500px;}.generate-back-to-top{font-size:20px;border-radius:3px;position:fixed;bottom:30px;right:30px;line-height:40px;width:40px;text-align:center;z-index:10;transition:opacity 300ms ease-in-out;opacity:0.1;transform:translateY(1000px);}.generate-back-to-top__show{opacity:1;transform:translateY(0);}:root{--contrast:#222222;--contrast-2:#575760;--contrast-3:#b2b2be;--base:#f0f0f0;--base-2:#f7f8f9;--base-3:#ffffff;--accent:#1e73be;}:root .has-contrast-color{color:var(--contrast);}:root .has-contrast-background-color{background-color:var(--contrast);}:root .has-contrast-2-color{color:var(--contrast-2);}:root .has-contrast-2-background-color{background-color:var(--contrast-2);}:root .has-contrast-3-color{color:var(--contrast-3);}:root .has-contrast-3-background-color{background-color:var(--contrast-3);}:root .has-base-color{color:var(--base);}:root .has-base-background-color{background-color:var(--base);}:root .has-base-2-color{color:var(--base-2);}:root .has-base-2-background-color{background-color:var(--base-2);}:root .has-base-3-color{color:var(--base-3);}:root .has-base-3-background-color{background-color:var(--base-3);}:root .has-accent-color{color:var(--accent);}:root .has-accent-background-color{background-color:var(--accent);}.main-title{font-size:25px;}h1{font-weight:300;font-size:40px;}h2{font-weight:300;font-size:30px;}h3{font-size:20px;}.top-bar{background-color:#636363;color:#ffffff;}.top-bar a{color:#ffffff;}.top-bar a:hover{color:#303030;}.site-header{background-color:#ffffff;color:#3a3a3a;}.site-header a{color:#3a3a3a;}.main-title a,.main-title a:hover{color:#222222;}.site-description{color:#757575;}.main-navigation,.main-navigation ul ul{background-color:#222222;}.main-navigation .main-nav ul li a, .main-navigation .menu-toggle, .main-navigation .menu-bar-items{color:#ffffff;}.main-navigation .main-nav ul li:not([class*="current-menu-"]):hover > a, .main-navigation .main-nav ul li:not([class*="current-menu-"]):focus > a, .main-navigation .main-nav ul li.sfHover:not([class*="current-menu-"]) > a, .main-navigation .menu-bar-item:hover > a, .main-navigation .menu-bar-item.sfHover > a{color:#ffffff;background-color:#3f3f3f;}button.menu-toggle:hover,button.menu-toggle:focus,.main-navigation .mobile-bar-items a,.main-navigation .mobile-bar-items a:hover,.main-navigation .mobile-bar-items a:focus{color:#ffffff;}.main-navigation .main-nav ul li[class*="current-menu-"] > a{color:#ffffff;background-color:#3f3f3f;}.navigation-search input[type="search"],.navigation-search input[type="search"]:active, .navigation-search input[type="search"]:focus, .main-navigation .main-nav ul li.search-item.active > a, .main-navigation .menu-bar-items .search-item.active > a{color:#ffffff;background-color:#3f3f3f;}.main-navigation ul ul{background-color:#3f3f3f;}.main-navigation .main-nav ul ul li a{color:#ffffff;}.main-navigation .main-nav ul ul li:not([class*="current-menu-"]):hover > a,.main-navigation .main-nav ul ul li:not([class*="current-menu-"]):focus > a, .main-navigation .main-nav ul ul li.sfHover:not([class*="current-menu-"]) > a{color:#ffffff;background-color:#4f4f4f;}.main-navigation .main-nav ul ul li[class*="current-menu-"] > a{color:#ffffff;background-color:#4f4f4f;}.separate-containers .inside-article, .separate-containers .comments-area, .separate-containers .page-header, .one-container .container, .separate-containers .paging-navigation, .inside-page-header{background-color:#ffffff;}.entry-meta{color:#595959;}.entry-meta a{color:#595959;}.entry-meta a:hover{color:#1e73be;}.sidebar .widget{background-color:#ffffff;}.sidebar .widget .widget-title{color:#000000;}.footer-widgets{background-color:#ffffff;}.footer-widgets .widget-title{color:#000000;}.site-info{color:#ffffff;background-color:#222222;}.site-info a{color:#ffffff;}.site-info a:hover{color:#606060;}.footer-bar .widget_nav_menu .current-menu-item a{color:#606060;}input[type="text"],input[type="email"],input[type="url"],input[type="password"],input[type="search"],input[type="tel"],input[type="number"],textarea,select{color:#666666;background-color:#fafafa;border-color:#cccccc;}input[type="text"]:focus,input[type="email"]:focus,input[type="url"]:focus,input[type="password"]:focus,input[type="search"]:focus,input[type="tel"]:focus,input[type="number"]:focus,textarea:focus,select:focus{color:#666666;background-color:#ffffff;border-color:#bfbfbf;}button,html input[type="button"],input[type="reset"],input[type="submit"],a.button,a.wp-block-button__link:not(.has-background){color:#ffffff;background-color:#666666;}button:hover,html input[type="button"]:hover,input[type="reset"]:hover,input[type="submit"]:hover,a.button:hover,button:focus,html input[type="button"]:focus,input[type="reset"]:focus,input[type="submit"]:focus,a.button:focus,a.wp-block-button__link:not(.has-background):active,a.wp-block-button__link:not(.has-background):focus,a.wp-block-button__link:not(.has-background):hover{color:#ffffff;background-color:#3f3f3f;}a.generate-back-to-top{background-color:rgba( 0,0,0,0.4 );color:#ffffff;}a.generate-back-to-top:hover,a.generate-back-to-top:focus{background-color:rgba( 0,0,0,0.6 );color:#ffffff;}:root{--gp-search-modal-bg-color:var(--base-3);--gp-search-modal-text-color:var(--contrast);--gp-search-modal-overlay-bg-color:rgba(0,0,0,0.2);}@media (max-width:768px){.main-navigation .menu-bar-item:hover > a, .main-navigation .menu-bar-item.sfHover > a{background:none;color:#ffffff;}}.inside-top-bar{padding:10px;}.site-main .wp-block-group__inner-container{padding:40px;}.entry-content .alignwide, body:not(.no-sidebar) .entry-content .alignfull{margin-left:-40px;width:calc(100% + 80px);max-width:calc(100% + 80px);}.container.grid-container{max-width:1480px;}.rtl .menu-item-has-children .dropdown-menu-toggle{padding-left:20px;}.rtl .main-navigation .main-nav ul li.menu-item-has-children > a{padding-right:20px;}.site-info{padding:20px;}@media (max-width:768px){.separate-containers .inside-article, .separate-containers .comments-area, .separate-containers .page-header, .separate-containers .paging-navigation, .one-container .site-content, .inside-page-header{padding:30px;}.site-main .wp-block-group__inner-container{padding:30px;}.site-info{padding-right:10px;padding-left:10px;}.entry-content .alignwide, body:not(.no-sidebar) .entry-content .alignfull{margin-left:-30px;width:calc(100% + 60px);max-width:calc(100% + 60px);}}.one-container .sidebar .widget{padding:0px;}/* End cached CSS */@media (max-width:768px){.main-navigation .menu-toggle,.main-navigation .mobile-bar-items,.sidebar-nav-mobile:not(#sticky-placeholder){display:block;}.main-navigation ul,.gen-sidebar-nav{display:none;}[class*="nav-float-"] .site-header .inside-header > *{float:none;clear:both;}}
+.dynamic-author-image-rounded{border-radius:100%;}.dynamic-featured-image, .dynamic-author-image{vertical-align:middle;}.one-container.blog .dynamic-content-template:not(:last-child), .one-container.archive .dynamic-content-template:not(:last-child){padding-bottom:0px;}.dynamic-entry-excerpt > p:last-child{margin-bottom:0px;}
+/*# sourceURL=generate-style-inline-css */
+</style>
+<link rel='stylesheet' id='generate-child-css' href='https://www.pureeldenring.com/wp-content/themes/generatepress_child/style.css?ver=1750466561' media='all' />
+<link rel='stylesheet' id='heateor_sl_frontend_css-css' href='https://www.pureeldenring.com/wp-content/plugins/heateor-social-login/public/css/heateor-social-login-public.css?ver=1.1.39' media='all' />
+<link rel='stylesheet' id='thickbox-css' href='https://www.pureeldenring.com/wp-includes/js/thickbox/thickbox.css?ver=08d32883994d03ca9ce200c676fdb3cc' media='all' />
+<link rel='stylesheet' id='search-filter-flatpickr-css' href='https://www.pureeldenring.com/wp-content/plugins/search-filter/assets/css/vendor/flatpickr.min.css?ver=3.1.6' media='all' />
+<link rel='stylesheet' id='search-filter-css' href='https://www.pureeldenring.com/wp-content/plugins/search-filter-pro/assets/css/frontend/frontend.css?ver=3.1.6' media='all' />
+<link rel='stylesheet' id='search-filter-ugc-styles-css' href='https://www.pureeldenring.com/wp-content/uploads/search-filter/style.css?ver=124' media='all' />
+<link rel='stylesheet' id='jquery.lightbox.min.css-css' href='https://www.pureeldenring.com/wp-content/plugins/wp-jquery-lightbox/lightboxes/wp-jquery-lightbox/styles/lightbox.min.css?ver=2.3.4' media='all' />
+<link rel='stylesheet' id='jqlb-overrides-css' href='https://www.pureeldenring.com/wp-content/plugins/wp-jquery-lightbox/lightboxes/wp-jquery-lightbox/styles/overrides.css?ver=2.3.4' media='all' />
+<style id='jqlb-overrides-inline-css'>
+
+			#outerImageContainer {
+				box-shadow: none;
+			}
+			#imageContainer{
+				padding: 6px;
+			}
+			#imageDataContainer {
+				box-shadow: none;
+				z-index: auto;
+			}
+			#prevArrow,
+			#nextArrow{
+				background-color: rgba(255,255,255,.7;
+				color: #c0c0c0;
+			}
+/*# sourceURL=jqlb-overrides-inline-css */
+</style>
+<script type="text/javascript">
+		if ( ! Object.hasOwn( window, 'searchAndFilter' ) ) {
+			window.searchAndFilter = {};
+		}
+		</script><script src="https://www.pureeldenring.com/wp-includes/js/jquery/jquery.min.js?ver=3.7.1" id="jquery-core-js"></script>
+<script src="https://www.pureeldenring.com/wp-includes/js/jquery/jquery-migrate.min.js?ver=3.4.1" id="jquery-migrate-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/search-filter/assets/js/vendor/flatpickr.min.js?ver=3.1.6" id="search-filter-flatpickr-js"></script>
+<script id="search-filter-js-before">
+window.searchAndFilter.frontend = {"fields":{},"queries":{},"library":{"fields":{},"components":{}},"restNonce":"b9ce196885","homeUrl":"https:\/\/www.pureeldenring.com","isPro":true,"suggestionsNonce":"958e537d62"};
+//# sourceURL=search-filter-js-before
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/search-filter-pro/assets/js/frontend/frontend.js?ver=3.1.6" id="search-filter-js"></script>
+<link rel="https://api.w.org/" href="https://www.pureeldenring.com/wp-json/" /><link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.pureeldenring.com/xmlrpc.php?rsd" />
+
+			<style>
+				.e-con.e-parent:nth-of-type(n+4):not(.e-lazyloaded):not(.e-no-lazyload),
+				.e-con.e-parent:nth-of-type(n+4):not(.e-lazyloaded):not(.e-no-lazyload) * {
+					background-image: none !important;
+				}
+				@media screen and (max-height: 1024px) {
+					.e-con.e-parent:nth-of-type(n+3):not(.e-lazyloaded):not(.e-no-lazyload),
+					.e-con.e-parent:nth-of-type(n+3):not(.e-lazyloaded):not(.e-no-lazyload) * {
+						background-image: none !important;
+					}
+				}
+				@media screen and (max-height: 640px) {
+					.e-con.e-parent:nth-of-type(n+2):not(.e-lazyloaded):not(.e-no-lazyload),
+					.e-con.e-parent:nth-of-type(n+2):not(.e-lazyloaded):not(.e-no-lazyload) * {
+						background-image: none !important;
+					}
+				}
+			</style>
+			<script id="google_gtagjs" src="https://www.googletagmanager.com/gtag/js?id=G-07JWVY9S6Z" async></script>
+<script id="google_gtagjs-inline">
+window.dataLayer = window.dataLayer || [];function gtag(){dataLayer.push(arguments);}gtag('js', new Date());gtag('config', 'G-07JWVY9S6Z', {} );
+</script>
+<link rel="icon" href="https://www.pureeldenring.com/wp-content/uploads/2025/06/PureEldenRing-Icon-32.png" sizes="32x32" />
+<link rel="icon" href="https://www.pureeldenring.com/wp-content/uploads/2025/06/PureEldenRing-Icon-32.png" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://www.pureeldenring.com/wp-content/uploads/2025/06/PureEldenRing-Icon-32.png" />
+<meta name="msapplication-TileImage" content="https://www.pureeldenring.com/wp-content/uploads/2025/06/PureEldenRing-Icon-32.png" />
+<style id="ur-dynamic-colors">:root {
+	--ur-primary-color: #475bb2;
+	--ur-primary-dark: #4052a0;
+	--ur-primary-light: #ffffff;
+	--ur-button-text-normal-color: #FFFFFF;
+	--ur-button-text-hover-color: #FFFFFF;
+	--ur-button-background-normal-color: #475bb2;
+	--ur-button-background-hover-color: #38488e;
+}</style>		<style id="wp-custom-css">
+			body.archive .site-main{
+    display:flex;
+    flex-direction:column;
+}
+
+nav#nav-below {
+    order:1;
+}
+
+.header-wrap .main-navigation .site-logo {
+    display: block;
+}		</style>
+		
+
+<style>
+    .table-responsive table{
+        border-collapse: collapse;
+        border-spacing: 0;
+        table-layout: auto;
+        padding: 0;
+        width: 100%;
+        max-width: 100%;
+        margin: 0 auto 20px auto;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+        min-height: 0.01%;
+        margin-bottom: 20px;
+    }
+
+    .table-responsive::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+    .table-responsive::-webkit-scrollbar-thumb {
+        background: #dddddd;
+        border-radius: 2px;
+    }
+    .table-responsive::-webkit-scrollbar-track-piece {
+        background: #fff;
+    }
+
+    @media (max-width: 992px) {
+        .table-responsive table{
+            width: auto!important;
+            margin:0 auto 15px auto!important;
+        }
+    }
+
+    @media screen and (max-width: 767px) {
+        .table-responsive {
+            width: 100%;
+            margin-bottom: 15px;
+            overflow-y: hidden;
+            -ms-overflow-style: -ms-autohiding-scrollbar;
+        }
+        .table-responsive::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+    }
+
+</style>
+
+    <style type="text/css">/** Mega Menu CSS: fs **/</style>
+	
+	
+	<!-- Venatus Ad Manager - Install in <HEAD> of page -->
+
+
+
+
+<!-- / Venatus Ad Manager -->
+    
+	
+</head>
+
+<body class="error404 wp-custom-logo wp-embed-responsive wp-theme-generatepress wp-child-theme-generatepress_child post-image-below-header post-image-aligned-center user-registration-page ur-settings-sidebar-show mega-menu-primary mega-menu-network-menu mega-menu-overwolf-menu right-sidebar nav-below-header one-container fluid-header active-footer-widgets-3 nav-aligned-center header-aligned-left dropdown-hover elementor-default elementor-kit-5" itemtype="https://schema.org/WebPage" itemscope id="eldenring">
+
+
+
+	<a class="screen-reader-text skip-link" href="#content" title="Skip to content">Skip to content</a>		<header class="site-header" id="masthead" aria-label="Site"  itemtype="https://schema.org/WPHeader" itemscope>
+			<div class="inside-header grid-container grid-parent">
+							<div class="header-widget">
+				<aside id="codewidget-2" class="widget inner-padding widget_codewidget"><div class="code-widget">		<div data-elementor-type="section" data-elementor-id="2147" class="elementor elementor-2147" data-elementor-post-type="elementor_library">
+					<section class="elementor-section elementor-top-section elementor-element elementor-element-268332bc elementor-section-full_width elementor-section-height-default elementor-section-height-default" data-id="268332bc" data-element_type="section">
+						<div class="elementor-container elementor-column-gap-no">
+					<div class="elementor-column elementor-col-100 elementor-top-column elementor-element elementor-element-6dde4e70" data-id="6dde4e70" data-element_type="column">
+			<div class="elementor-widget-wrap elementor-element-populated">
+						<div class="elementor-element elementor-element-ad8ce13 elementor-search-form--skin-classic elementor-search-form--button-type-icon elementor-search-form--icon-search elementor-widget elementor-widget-search-form" data-id="ad8ce13" data-element_type="widget" data-settings="{&quot;skin&quot;:&quot;classic&quot;}" data-widget_type="search-form.default">
+							<search role="search">
+			<form class="elementor-search-form" action="https://www.pureeldenring.com" method="get">
+												<div class="elementor-search-form__container">
+					<label class="elementor-screen-only" for="elementor-search-form-ad8ce13">Search</label>
+
+					
+					<input id="elementor-search-form-ad8ce13" placeholder="Search..." class="elementor-search-form__input" type="search" name="s" value="">
+					
+											<button class="elementor-search-form__submit" type="submit" aria-label="Search">
+															<div class="e-font-icon-svg-container"><svg class="fa fa-search e-font-icon-svg e-fas-search" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg"><path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path></svg></div>													</button>
+					
+									</div>
+			</form>
+		</search>
+						</div>
+					</div>
+		</div>
+					</div>
+		</section>
+				</div>
+		</div></aside>			</div>
+			<div class="site-logo">
+			<a href="https://www.pureeldenring.com/" title="Pure EldenRing" rel="home">
+				<img width="600" height="127" class="header-image" src="https://www.pureeldenring.com/wp-content/uploads/2025/06/PureEldenRing-Nightrein.png" alt="Pure EldenRing" title="Pure EldenRing" />
+			</a>
+		</div>			</div>
+		</header>
+				<nav class="main-navigation sub-menu-right" id="site-navigation" aria-label="Primary"  itemtype="https://schema.org/SiteNavigationElement" itemscope>
+			<div class="inside-navigation grid-container grid-parent">
+								<button class="menu-toggle" aria-controls="primary-menu" aria-expanded="false">
+					<span class="gp-icon icon-menu-bars"><svg viewBox="0 0 512 512" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><path d="M0 96c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24zm0 160c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24zm0 160c0-13.255 10.745-24 24-24h464c13.255 0 24 10.745 24 24s-10.745 24-24 24H24c-13.255 0-24-10.745-24-24z" /></svg><svg viewBox="0 0 512 512" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em"><path d="M71.029 71.029c9.373-9.372 24.569-9.372 33.942 0L256 222.059l151.029-151.03c9.373-9.372 24.569-9.372 33.942 0 9.372 9.373 9.372 24.569 0 33.942L289.941 256l151.03 151.029c9.372 9.373 9.372 24.569 0 33.942-9.373 9.372-24.569 9.372-33.942 0L256 289.941l-151.029 151.03c-9.373 9.372-24.569 9.372-33.942 0-9.372-9.373-9.372-24.569 0-33.942L222.059 256 71.029 104.971c-9.372-9.373-9.372-24.569 0-33.942z" /></svg></span><span class="mobile-menu">Menu</span>				</button>
+				<div id="mega-menu-wrap-primary" class="mega-menu-wrap"><div class="mega-menu-toggle"><div class="mega-toggle-blocks-left"></div><div class="mega-toggle-blocks-center"></div><div class="mega-toggle-blocks-right"><div class='mega-toggle-block mega-menu-toggle-animated-block mega-toggle-block-0' id='mega-toggle-block-0'><button aria-label="Toggle Menu" class="mega-toggle-animated mega-toggle-animated-slider" type="button" aria-expanded="false">
+                  <span class="mega-toggle-animated-box">
+                    <span class="mega-toggle-animated-inner"></span>
+                  </span>
+                </button></div></div></div><ul id="mega-menu-primary" class="mega-menu max-mega-menu mega-menu-horizontal mega-no-js" data-event="hover_intent" data-effect="fade_up" data-effect-speed="200" data-effect-mobile="disabled" data-effect-speed-mobile="0" data-mobile-force-width="false" data-second-click="go" data-document-click="collapse" data-vertical-behaviour="standard" data-breakpoint="768" data-unbind="true" data-mobile-state="collapse_all" data-mobile-direction="vertical" data-hover-intent-timeout="300" data-hover-intent-interval="100"><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-home mega-align-bottom-left mega-menu-flyout mega-menu-item-19" id="mega-menu-item-19"><a class="mega-menu-link" href="https://www.pureeldenring.com" tabindex="0">Home</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-page mega-menu-item-has-children mega-align-bottom-left mega-menu-flyout mega-menu-item-61294" id="mega-menu-item-61294"><a class="mega-menu-link" href="https://www.pureeldenring.com/elden-ring-nightreign" aria-expanded="false" tabindex="0">Nightreign<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-63003" id="mega-menu-item-63003"><a class="mega-menu-link" href="https://www.pureeldenring.com/elden-ring-nightreign">NIghtreign Guide</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-63004" id="mega-menu-item-63004"><a class="mega-menu-link" href="https://www.pureeldenring.com/nightreign-weapons">Nightreign Weapons</a></li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-guidecats mega-menu-item-has-children mega-menu-megamenu mega-menu-grid mega-align-bottom-left mega-menu-grid mega-menu-item-790" id="mega-menu-item-790"><a class="mega-menu-link" href="https://www.pureeldenring.com/guidecats/classes" aria-expanded="false" tabindex="0">Classes<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu" role='presentation'>
+<li class="mega-menu-row" id="mega-menu-790-0">
+	<ul class="mega-sub-menu" style='--columns:12' role='presentation'>
+<li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-790-0-0">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-61164" id="mega-menu-item-61164"><a class="mega-menu-link" href="https://www.pureeldenring.com/elden-ring-build-calculator/">Character Build Planner</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2882" id="mega-menu-item-2882"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/elden-ring-classes">Elden Ring Classes Overview</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2886" id="mega-menu-item-2886"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/astrologer">Astrologer</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2887" id="mega-menu-item-2887"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/bandit">Bandit</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2888" id="mega-menu-item-2888"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/vagabond">Vagabond</a></li>		</ul>
+</li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-790-0-1">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2884" id="mega-menu-item-2884"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/confessor">Confessor</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2003" id="mega-menu-item-2003"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/hero/">Hero</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2002" id="mega-menu-item-2002"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/prisoner/">Prisoner</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2001" id="mega-menu-item-2001"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/prophet/">Prophet</a></li>		</ul>
+</li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-790-0-2">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2885" id="mega-menu-item-2885"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/samurai">Samurai</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-1999" id="mega-menu-item-1999"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/warrior/">Warrior</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-2883" id="mega-menu-item-2883"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/wretch">Wretch</a></li>		</ul>
+</li>	</ul>
+</li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-align-bottom-left mega-menu-flyout mega-menu-item-797" id="mega-menu-item-797"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/elden-ring-skills" tabindex="0">Skills</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-align-bottom-left mega-menu-flyout mega-menu-item-2004" id="mega-menu-item-2004"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/ashes-of-war" tabindex="0">Ashes of War</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-has-children mega-align-bottom-left mega-menu-flyout mega-menu-item-796" id="mega-menu-item-796"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/spells" aria-expanded="false" tabindex="0">Spells<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-spellscat mega-menu-item-3600" id="mega-menu-item-3600"><a class="mega-menu-link" href="https://www.pureeldenring.com/spellscat/sorcery">Sorcery</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-spellscat mega-menu-item-9167" id="mega-menu-item-9167"><a class="mega-menu-link" href="https://www.pureeldenring.com/spellscat/incantation">Incantation</a></li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-has-children mega-menu-megamenu mega-menu-grid mega-align-bottom-left mega-menu-grid mega-menu-item-2105" id="mega-menu-item-2105"><a class="mega-menu-link" href="https://eldenring.puredmg.com/items/" aria-expanded="false" tabindex="0">Items<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu" role='presentation'>
+<li class="mega-menu-row" id="mega-menu-2105-0">
+	<ul class="mega-sub-menu" style='--columns:12' role='presentation'>
+<li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-2105-0-0"></li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-2105-0-1">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20320" id="mega-menu-item-20320"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/books">Books</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20321" id="mega-menu-item-20321"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/consumables">Consumables</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20322" id="mega-menu-item-20322"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/craftable">Craftable</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20323" id="mega-menu-item-20323"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/crafting-materials">Crafting Materials</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20324" id="mega-menu-item-20324"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/key-items">Key Items</a></li>		</ul>
+</li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-2105-0-2">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20325" id="mega-menu-item-20325"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/multiplayer-items">Multiplayer Items</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20326" id="mega-menu-item-20326"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/prayerbook">Prayerbook</a></li><li class="mega-menu-item mega-menu-item-type-post_type_archive mega-menu-item-object-talisman mega-menu-item-60552" id="mega-menu-item-60552"><a class="mega-menu-link" href="https://www.pureeldenring.com/talisman">Talisman</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-itemscat mega-menu-item-20327" id="mega-menu-item-20327"><a class="mega-menu-link" href="https://www.pureeldenring.com/itemscat/upgrade-material">Upgrade Material</a></li>		</ul>
+</li>	</ul>
+</li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-has-children mega-menu-megamenu mega-menu-grid mega-align-bottom-left mega-menu-grid mega-menu-item-757" id="mega-menu-item-757"><a class="mega-menu-link" href="https://eldenring.puredmg.com/weapon/" aria-expanded="false" tabindex="0">Weapons<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu" role='presentation'>
+<li class="mega-menu-row" id="mega-menu-757-0">
+	<ul class="mega-sub-menu" style='--columns:12' role='presentation'>
+<li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-757-0-0">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-33090" id="mega-menu-item-33090"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponcalculator">Weapon Calculator Tool</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-has-children mega-menu-item-17833" id="mega-menu-item-17833"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/axes">Axes<span class="mega-indicator" aria-hidden="true"></span></a>
+			<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17834" id="mega-menu-item-17834"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/axe">Axe</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17835" id="mega-menu-item-17835"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/greataxe">Greataxe</a></li>			</ul>
+</li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-has-children mega-menu-item-17836" id="mega-menu-item-17836"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/bows">Bows<span class="mega-indicator" aria-hidden="true"></span></a>
+			<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17837" id="mega-menu-item-17837"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/ballista">Ballista</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17838" id="mega-menu-item-17838"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/bow">Bow</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17839" id="mega-menu-item-17839"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/crossbow">Crossbow</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17840" id="mega-menu-item-17840"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/greatbow">Greatbow</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17841" id="mega-menu-item-17841"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/light-bow">Light Bow</a></li>			</ul>
+</li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17843" id="mega-menu-item-17843"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/colossal-weapon">Colossal Weapon</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17842" id="mega-menu-item-17842"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/claw">Claw</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17844" id="mega-menu-item-17844"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/dagger">Dagger</a></li>		</ul>
+</li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-757-0-1">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17845" id="mega-menu-item-17845"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/fist">Fist</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17846" id="mega-menu-item-17846"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/flail">Flail</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-has-children mega-menu-item-17848" id="mega-menu-item-17848"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/hammers">Hammers<span class="mega-indicator" aria-hidden="true"></span></a>
+			<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17849" id="mega-menu-item-17849"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/hammer">Hammer</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17850" id="mega-menu-item-17850"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/warhammer">Warhammers</a></li>			</ul>
+</li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17847" id="mega-menu-item-17847"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/glintstone-staff">Glintstone Staff</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17851" id="mega-menu-item-17851"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/reaper">Reaper</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17852" id="mega-menu-item-17852"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/sacred-seal">Sacred Seal</a></li>		</ul>
+</li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-757-0-2">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-has-children mega-menu-item-17861" id="mega-menu-item-17861"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/swords">Swords<span class="mega-indicator" aria-hidden="true"></span></a>
+			<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17862" id="mega-menu-item-17862"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/colossal-sword">Colossal Sword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17863" id="mega-menu-item-17863"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/curved-greatsword">Curved Greatsword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17864" id="mega-menu-item-17864"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/curved-sword">Curved Sword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17866" id="mega-menu-item-17866"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/greatsword">Greatsword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17867" id="mega-menu-item-17867"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/heavy-thrusting-sword">Heavy Thrusting Sword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17868" id="mega-menu-item-17868"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/katana">Katana</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17869" id="mega-menu-item-17869"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/straight-sword">Straight Sword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17870" id="mega-menu-item-17870"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/thrusting-sword">Thrusting Sword</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17872" id="mega-menu-item-17872"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/twinblade">Twinblade</a></li>			</ul>
+</li>		</ul>
+</li><li class="mega-menu-column mega-menu-columns-3-of-12" style="--columns:12; --span:3" id="mega-menu-757-0-3">
+		<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-has-children mega-menu-item-17853" id="mega-menu-item-17853"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/shields">Shields<span class="mega-indicator" aria-hidden="true"></span></a>
+			<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17854" id="mega-menu-item-17854"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/greatshield">Greatshield</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17855" id="mega-menu-item-17855"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/medium-shield">Medium Shield</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17856" id="mega-menu-item-17856"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/small-shield">Small Shield</a></li>			</ul>
+</li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-has-children mega-menu-item-17857" id="mega-menu-item-17857"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/spears">Spears<span class="mega-indicator" aria-hidden="true"></span></a>
+			<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17858" id="mega-menu-item-17858"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/great-spear">Great Spear</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17859" id="mega-menu-item-17859"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/halberd">Halberd</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17860" id="mega-menu-item-17860"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/spear">Spear</a></li>			</ul>
+</li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17871" id="mega-menu-item-17871"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/torch">Torch</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-weaponclass mega-menu-item-17873" id="mega-menu-item-17873"><a class="mega-menu-link" href="https://www.pureeldenring.com/weaponclass/whip">Whip</a></li>		</ul>
+</li>	</ul>
+</li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-has-children mega-align-bottom-left mega-menu-flyout mega-menu-item-784" id="mega-menu-item-784"><a class="mega-menu-link" href="https://eldenring.puredmg.com/armor" aria-expanded="false" tabindex="0">Armor<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-armortype mega-menu-item-8834" id="mega-menu-item-8834"><a class="mega-menu-link" href="https://www.pureeldenring.com/armortype/body">Body</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-armortype mega-menu-item-8835" id="mega-menu-item-8835"><a class="mega-menu-link" href="https://www.pureeldenring.com/armortype/head">Head</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-armortype mega-menu-item-60443" id="mega-menu-item-60443"><a class="mega-menu-link" href="https://www.pureeldenring.com/armortype/legs">Legs</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-armortype mega-menu-item-60444" id="mega-menu-item-60444"><a class="mega-menu-link" href="https://www.pureeldenring.com/armortype/arms">Arms</a></li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-has-children mega-align-bottom-left mega-menu-flyout mega-menu-item-2113" id="mega-menu-item-2113"><a class="mega-menu-link" href="#" aria-expanded="false" tabindex="0">Guides<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2114" id="mega-menu-item-2114"><a class="mega-menu-link" href="https://www.pureeldenring.com/bosses">Bosses</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2286" id="mega-menu-item-2286"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/controls">Controls</a></li><li class="mega-menu-item mega-menu-item-type-post_type mega-menu-item-object-guides mega-menu-item-60541" id="mega-menu-item-60541"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/crafting-recipes">Crafting Recipes</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2961" id="mega-menu-item-2961"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/day-and-night-cycle">Day and Night</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2441" id="mega-menu-item-2441"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/enemies-and-creatures">Enemies & Creatures</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2115" id="mega-menu-item-2115"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/elden-ring-faq">FAQ</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2118" id="mega-menu-item-2118"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/elden-ring-multiplayer">Multiplayer</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2116" id="mega-menu-item-2116"><a class="mega-menu-link" href="https://eldenring.puredmg.com/npc">NPCs</a></li><li class="mega-menu-item mega-menu-item-type-taxonomy mega-menu-item-object-guidecats mega-menu-item-38184" id="mega-menu-item-38184"><a class="mega-menu-link" href="https://www.pureeldenring.com/guidecats/quests">Quest Walkthroughs</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2119" id="mega-menu-item-2119"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/gestures">Gestures</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2117" id="mega-menu-item-2117"><a class="mega-menu-link" href="https://eldenring.puredmg.com/guides/spirit-ashes">Spirit Ashes</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-18972" id="mega-menu-item-18972"><a class="mega-menu-link" href="https://www.pureeldenring.com/spiritashes">Spirit Ashes Full List</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-3046" id="mega-menu-item-3046"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/stats">Stats</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2936" id="mega-menu-item-2936"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/torrent">Torrent</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-2120" id="mega-menu-item-2120"><a class="mega-menu-link" href="https://www.pureeldenring.com/guides/weapon-upgrades">Weapon Upgrades</a></li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-has-children mega-align-bottom-left mega-menu-flyout mega-menu-item-3883" id="mega-menu-item-3883"><a class="mega-menu-link" href="https://www.pureeldenring.com/elden-ring-interactive-map" aria-expanded="false" tabindex="0">Maps<span class="mega-indicator" aria-hidden="true"></span></a>
+<ul class="mega-sub-menu">
+<li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-63133" id="mega-menu-item-63133"><a class="mega-menu-link" href="https://www.pureeldenring.com/nightreign-map/">Nightreign Map</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-57936" id="mega-menu-item-57936"><a class="mega-menu-link" href="https://www.pureeldenring.com/shadow-of-the-erdtree-interactive-map">Shadow of the Erdtree Map</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-57935" id="mega-menu-item-57935"><a class="mega-menu-link" href="https://www.pureeldenring.com/elden-ring-interactive-map">Lands Between Map</a></li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-menu-item-57937" id="mega-menu-item-57937"><a class="mega-menu-link" href="https://www.pureeldenring.com/elden-ring-interactive-map-underground">Underground Map</a></li></ul>
+</li><li class="mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-align-bottom-left mega-menu-flyout mega-menu-item-2005" id="mega-menu-item-2005"><a class="mega-menu-link" href="https://discord.gg/PFsCwTcY6C" tabindex="0">Discord</a></li><li class="mega-lrm-login mega-lrm-hide-if-logged-in mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-align-bottom-left mega-menu-flyout mega-has-icon mega-icon-left mega-menu-item-57403 lrm-login lrm-hide-if-logged-in" id="mega-menu-item-57403"><a class="dashicons-thumbs-up mega-menu-link" href="#login" tabindex="0">Login/Register</a></li><li class="mega-lrm-show-if-logged-in mega-menu-item mega-menu-item-type-custom mega-menu-item-object-custom mega-align-bottom-left mega-menu-flyout mega-has-icon mega-icon-left mega-menu-item-57404 lrm-show-if-logged-in" id="mega-menu-item-57404"><a class="dashicons-thumbs-up mega-menu-link" href="https://www.pureeldenring.com/?lrm_logout=1" tabindex="0">Log-out</a></li></ul></div>			</div>
+		</nav>
+			
+	
+	<div class="adalign" style="clear: both;">
+
+
+<!-- ER Leaderboard -->
+
+
+<!-- puredmg.com - 728x90 Dynamic (64c3e301bab7e94502ecf96a) - 728x90, 970x90, 970x250 - Place in <BODY> of page where ad should appear -->
+<div id="slot-9" style="max-width: 970px; margin: auto;"></div>
+<!-- / puredmg.com - 728x90 Dynamic (64c3e301bab7e94502ecf96a) -->
+
+
+</div>
+
+
+
+	
+	
+	
+
+	<div class="site grid-container container hfeed grid-parent" id="page">
+				<div class="site-content" id="content">
+			
+	<div class="content-area grid-parent mobile-grid-100 grid-75 tablet-grid-75" id="primary">
+		<main class="site-main" id="main">
+			<div class="inside-article">
+
+	
+	<header class="entry-header">
+				<h1 class="entry-title" itemprop="headline">Oops! That page can&rsquo;t be found.</h1>
+	</header>
+
+	
+	<div class="entry-content" itemprop="text">
+		<p>It looks like nothing was found at this location. Maybe try searching?</p><form method="get" class="search-form" action="https://www.pureeldenring.com/">
+	<label>
+		<span class="screen-reader-text">Search for:</span>
+		<input type="search" class="search-field" placeholder="Search &hellip;" value="" name="s" title="Search for:">
+	</label>
+	<input type="submit" class="search-submit" value="Search"></form>
+	</div>
+
+	
+</div>
+		</main>
+	</div>
+
+	<div class="widget-area sidebar is-right-sidebar grid-25 tablet-grid-25 grid-parent" id="right-sidebar">
+	<div class="inside-right-sidebar">
+		<aside id="codewidget-5" class="widget inner-padding widget_codewidget"><div class="code-widget">  <div id="slot-7"  style="height:  600px;"></div>
+</div></aside><aside id="block-15" class="widget inner-padding widget_block widget_media_image">
+<figure class="wp-block-image size-large"><a href="https://eldenring.puredmg.com/guidecats/quests/"><img fetchpriority="high" decoding="async" width="1024" height="576" src="https://eldenring.puredmg.com/wp-content/uploads/2022/05/Quest-Guides-1024x576.jpg" alt="Quest Guides" class="wp-image-55558" srcset="https://www.pureeldenring.com/wp-content/uploads/2022/05/Quest-Guides-1024x576.jpg 1024w, https://www.pureeldenring.com/wp-content/uploads/2022/05/Quest-Guides-680x383.jpg 680w, https://www.pureeldenring.com/wp-content/uploads/2022/05/Quest-Guides-350x197.jpg 350w, https://www.pureeldenring.com/wp-content/uploads/2022/05/Quest-Guides-768x432.jpg 768w, https://www.pureeldenring.com/wp-content/uploads/2022/05/Quest-Guides.jpg 1454w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+</aside><aside id="block-12" class="widget inner-padding widget_block widget_media_image">
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://eldenring.puredmg.com/weaponcalculator/"><img decoding="async" width="340" height="200" src="https://eldenring.puredmg.com/wp-content/uploads/2022/04/Elden-Ring-Weapon-Calculator.jpg" alt="Elden Ring Weapon Calculator" class="wp-image-41203"/></a></figure></div>
+</aside>	</div>
+</div>
+<div style="clear: both;"></div>
+	</div>
+</div>
+
+
+				 <div class="adalign">
+
+
+		<!-- Elden Anchor Footer -->
+		
+<div id="slot-3" style="margin: auto; max-width: 728"></div>
+		
+		
+					</div>
+
+
+
+
+
+<div class="site-footer footer-bar-active footer-bar-align-right">
+				<div id="footer-widgets" class="site footer-widgets">
+				<div class="footer-widgets-container grid-container grid-parent">
+					<div class="inside-footer-widgets">
+							<div class="footer-widget-1 grid-parent grid-33 tablet-grid-50 mobile-grid-100">
+			</div>
+		<div class="footer-widget-2 grid-parent grid-33 tablet-grid-50 mobile-grid-100">
+		<aside id="text-15" class="widget inner-padding widget_text"><h2 class="widget-title">Reach Out</h2>			<div class="textwidget"><p><a href="https://www.pureeldenring.com/contact">Contact</a></p>
+<p><a href="https://twitter.com/PureEldenRing" target="_blank" rel="noopener">Twitter</a></p>
+<p><a href="https://www.youtube.com/c/Puredmg" target="_blank" rel="noopener">Youtube</a></p>
+</div>
+		</aside>	</div>
+		<div class="footer-widget-3 grid-parent grid-33 tablet-grid-50 mobile-grid-100">
+		<aside id="text-16" class="widget inner-padding widget_text"><h2 class="widget-title">PureDMG Network</h2>			<div class="textwidget"><ul>
+<li><a href="https://www.purediablo.com">PureDiablo</a></li>
+<li><a href="https://www.pureeldenring.com" target="_blank" rel="noopener">PureEldenRing</a></li>
+<li><a href="https://cyberpunk.puredmg.com" target="_blank" rel="noopener">PureCyberpunk</a></li>
+<li><a href="https://www.puregamemaps.com">PureGameMaps</a></li>
+<li><a href="https://www.puredmg.com">PureDMG</a></li>
+<li><a href="https://www.vgassist.com">VGAssist</a></li>
+<li><a href="https://www.wraecast.com" target="_blank" rel="noopener">WraeCast</a></li>
+</ul>
+</div>
+		</aside>	</div>
+						</div>
+				</div>
+			</div>
+					<footer class="site-info" aria-label="Site"  itemtype="https://schema.org/WPFooter" itemscope>
+			<div class="inside-site-info grid-container grid-parent">
+						<div class="footer-bar">
+			<aside id="custom_html-2" class="widget_text widget inner-padding widget_custom_html"><div class="textwidget custom-html-widget"></div></aside>		</div>
+						<div class="copyright-bar">
+					Copyright PureEldenRing / PureDMG &copy; 2026				</div>
+			</div>
+		</footer>
+		</div>
+
+<a title="Scroll back to top" aria-label="Scroll back to top" rel="nofollow" href="#" class="generate-back-to-top" data-scroll-speed="400" data-start-scroll="300" role="button">
+					<span class="gp-icon icon-arrow-up"><svg viewBox="0 0 330 512" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="1.414"><path d="M305.863 314.916c0 2.266-1.133 4.815-2.832 6.514l-14.157 14.163c-1.699 1.7-3.964 2.832-6.513 2.832-2.265 0-4.813-1.133-6.512-2.832L164.572 224.276 53.295 335.593c-1.699 1.7-4.247 2.832-6.512 2.832-2.265 0-4.814-1.133-6.513-2.832L26.113 321.43c-1.699-1.7-2.831-4.248-2.831-6.514s1.132-4.816 2.831-6.515L158.06 176.408c1.699-1.7 4.247-2.833 6.512-2.833 2.265 0 4.814 1.133 6.513 2.833L303.03 308.4c1.7 1.7 2.832 4.249 2.832 6.515z" fill-rule="nonzero" /></svg></span>
+				</a><style>/* LRM */
+body.logged-in .lrm-hide-if-logged-in { display: none !important; }
+body.logged-in [class*='lrm-hide-if-logged-in'] { display: none !important; }
+body:not(.logged-in) .lrm-show-if-logged-in { display: none !important; }
+body:not(.logged-in) [class*='lrm-show-if-logged-in'] { display: none !important; }
+</style>
+<!-- LRMDD
+-->
+<div class="lrm-main lrm-font-svg lrm-user-modal lrm-btn-style--full-width" style="visibility: hidden;">
+    <!--<div class="lrm-user-modal" style="visibility: hidden;">  this is the entire modal form, including the background -->
+
+    <div class="lrm-user-modal-container"> <!-- this is the container wrapper -->
+        <div class="lrm-user-modal-container-inner"> <!-- this is the container wrapper -->
+
+            <div class="lrm-signin-section "> <!-- log in form -->
+	<form class="lrm-form js-lrm-form" action="#0" data-action="login">
+        <div class="lrm-fieldset-wrap">
+
+            <div class="lrm-integrations lrm-integrations--login">
+                <b>Don't have a PureEldenRing account? <a href="https://eldenring.puredmg.com/registration/">Register one now!</a>            </div>
+
+            <p class="lrm-form-message lrm-form-message--init"></p>
+
+            <div class="fieldset">
+                                <label class="image-replace lrm-email lrm-ficon-mail" title="Email or Username"></label>
+                <input name="username" class="full-width has-padding has-border" type="text" aria-label="Email or Username" placeholder="Email or Username" required value="" autocomplete="username" data-autofocus="1">
+                <span class="lrm-error-message"></span>
+            </div>
+
+            <div class="fieldset">
+                                <label class="image-replace lrm-password lrm-ficon-key" title="Password"></label>
+                <input name="password" class="full-width has-padding has-border" type="password" aria-label="Password" placeholder="Password" required value="">
+                <span class="lrm-error-message"></span>
+                                    <span class="hide-password lrm-ficon-eye" data-show="Show" data-hide="Hide" aria-label="Show"></span>
+                            </div>
+
+            <div class="fieldset">
+                                    <label class="lrm-nice-checkbox__label lrm-remember-me-checkbox">Remember me                        <input type="checkbox" class="lrm-nice-checkbox lrm-remember-me" name="remember-me" checked>
+                        <div class="lrm-nice-checkbox__indicator"></div>
+                    </label>
+                            </div>
+
+            <div class="lrm-integrations lrm-integrations--login lrm-integrations-before-btn">
+                                <div class="heateor_sl_outer_login_container"><div class="heateor_sl_title">Login with your Social ID</div><div class="heateor_sl_login_container"><ul class="heateor_sl_login_ul"><li><i id="heateorSlGoogleButton" class="heateorSlLogin heateorSlGoogleBackground heateorSlGoogleLogin" alt="Login with Google" title="Login with Google" onclick="heateorSlInitiateLogin( this, 'google' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlGoogleLoginSvg"></ss></i></li><li><i class="heateorSlLogin heateorSlYoutubeBackground heateorSlYoutubeLogin" alt="Login with Youtube" title="Login with Youtube" onclick="heateorSlInitiateLogin( this, 'youtube' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlYoutubeLoginSvg"></ss></i></li><li><i class="heateorSlLogin heateorSlDiscordBackground heateorSlDiscordLogin" alt="Login with Discord" title="Login with Discord" onclick="heateorSlInitiateLogin( this, 'discord' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlDiscordLoginSvg"></ss></i></li><li><i class="heateorSlLogin heateorSlRedditBackground heateorSlRedditLogin" alt="Login with Reddit" title="Login with Reddit" onclick="heateorSlInitiateLogin( this, 'reddit' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlRedditLoginSvg"></ss></i></li></ul></div></div><div style="clear:both; margin-bottom: 6px"></div><div class="lrm-grecaptcha"  data-sitekey="6LfzUworAAAAAAcBIa9l7K-4rfS6AlF-HphNDnWE"></div>            </div>
+
+            <div class="lrm-integrations-otp"></div>
+
+        </div>
+
+		<div class="fieldset fieldset--submit fieldset--full-width">
+			<button class="full-width has-padding" type="submit">
+				Log in			</button>
+		</div>
+
+        <div class="lrm-fieldset-wrap">
+            <div class="lrm-integrations lrm-integrations--login">
+                            </div>
+        </div>
+
+		<input type="hidden" name="redirect_to" value="">
+		<input type="hidden" name="lrm_action" value="login">
+		<input type="hidden" name="wp-submit" value="1">
+		<!-- Fix for Eduma WP theme-->
+		<input type="hidden" name="lp-ajax" value="login">
+
+		<input type="hidden" id="security-login" name="security-login" value="d2fe9e88da" /><input type="hidden" name="_wp_http_referer" value="/wp-content/uploads/2022/03/bone_great_arrow_fletched.webp" />
+		<!-- For Invisible Recaptcha plugin -->
+		<span class="wpcf7-submit" style="display: none;"></span>
+	</form>
+
+	<p class="lrm-form-bottom-message"><a href="#0" class="lrm-switch-to--reset-password">Forgot your password?</a></p>
+	<!-- <a href="#0" class="lrm-close-form">Close</a> -->
+</div> <!-- lrm-login -->
+	<div class="lrm-signup-section "> <!-- sign up form -->
+		
+			<form class="lrm-form js-lrm-form" action="#0" data-action="registration" data-lpignore="true" >
+
+                <div class="lrm-fieldset-wrap lrm-form-message-wrap">
+                    <p class="lrm-form-message lrm-form-message--init"></p>
+                </div>
+
+                <div class="lrm-fieldset-wrap">
+
+                    <div class="lrm-integrations lrm-integrations--register">
+                                            </div>
+
+                                                                        <div class="fieldset fieldset--username">
+                                                                <label class="image-replace lrm-username lrm-ficon-user" for="signup-username" title="Username*"></label>
+                                <input name="username" class="full-width has-padding has-border" id="signup-username" type="text" placeholder="Username*" required aria-label="Username*" autocomplete="off" data-lpignore="true">
+                                <span class="lrm-error-message"></span>
+                            </div>
+                        
+			                                        <div class="fieldset fieldset--login">
+                                <label class="image-replace lrm-username lrm-ficon-user" for="signup-login" title="Login"></label>
+                                <input name="login" class="full-width has-padding has-border" id="signup-login" type="text" autocomplete="off" data-lpignore="true">
+                            </div>
+	                    
+                        
+                        <div class="fieldset fieldset--email">
+                                                        <label class="image-replace lrm-email lrm-ficon-mail" for="signup-email" title="Email*"></label>
+                            <input name="email" class="full-width has-padding has-border" id="signup-email" type="email" placeholder="Email*" required autocomplete="off" aria-label="Email*">
+                            <span class="lrm-error-message"></span>
+                        </div>
+
+                        
+	                    	                                                <div class="fieldset">
+                                <div class="lrm-position-relative">
+                                    <label class="image-replace lrm-password lrm-ficon-key" for="signup-password" title="Password"></label>
+                                    <input name="password" class="full-width has-padding has-border" id="signup-password" type="password"  placeholder="Password" required value="" autocomplete="new-password" aria-label="Password">
+                                    <span class="lrm-error-message"></span>
+                                    <span class="hide-password lrm-ficon-eye" data-show="Show" data-hide="Hide"></span>
+                                </div>
+                                <span class="lrm-pass-strength-result"></span>
+                            </div>
+	                    	                                                <div class="fieldset">
+                                <div class="lrm-position-relative">
+                                    <label class="image-replace lrm-password lrm-ficon-key" for="signup-password-confirmation"></label>
+                                    <input name="password-confirmation" class="full-width has-padding has-border" id="signup-password-confirmation" type="password"  placeholder="Password confirmation" required value="" autocomplete="new-password">
+                                    <span class="lrm-error-message"></span>
+                                    <span class="hide-password lrm-ficon-eye" data-show="Show" data-hide="Hide"></span>
+                                </div>
+                            </div>
+	                    
+	                    
+	                    
+                        <div class="lrm-integrations lrm-integrations--register">
+		                    		                    <div class="heateor_sl_outer_login_container"><div class="heateor_sl_title">Login with your Social ID</div><div class="heateor_sl_login_container"><ul class="heateor_sl_login_ul"><li><i id="heateorSlGoogleButton" class="heateorSlLogin heateorSlGoogleBackground heateorSlGoogleLogin" alt="Login with Google" title="Login with Google" onclick="heateorSlInitiateLogin( this, 'google' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlGoogleLoginSvg"></ss></i></li><li><i class="heateorSlLogin heateorSlYoutubeBackground heateorSlYoutubeLogin" alt="Login with Youtube" title="Login with Youtube" onclick="heateorSlInitiateLogin( this, 'youtube' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlYoutubeLoginSvg"></ss></i></li><li><i class="heateorSlLogin heateorSlDiscordBackground heateorSlDiscordLogin" alt="Login with Discord" title="Login with Discord" onclick="heateorSlInitiateLogin( this, 'discord' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlDiscordLoginSvg"></ss></i></li><li><i class="heateorSlLogin heateorSlRedditBackground heateorSlRedditLogin" alt="Login with Reddit" title="Login with Reddit" onclick="heateorSlInitiateLogin( this, 'reddit' )" ><ss style="display:block" class="heateorSlLoginSvg heateorSlRedditLoginSvg"></ss></i></li></ul></div></div><div style="clear:both; margin-bottom: 6px"></div>                        </div>
+
+	                    
+                    
+                    <div class="lrm-integrations lrm-integrations--register lrm-info lrm-info--register">
+                        Already have an account? <a href="#0" class="lrm-switch-to--login">Login</a>.<div class="lrm-grecaptcha"  data-sitekey="6LfzUworAAAAAAcBIa9l7K-4rfS6AlF-HphNDnWE"></div>                    </div>
+
+				</div>
+
+				<div class="fieldset fieldset--submit fieldset--full-width">
+					<button class="full-width has-padding" type="submit">
+						Create account					</button>
+				</div>
+
+                <div class="lrm-fieldset-wrap">
+
+                    <div class="lrm-integrations lrm-integrations--register">
+                                            </div>
+
+                </div>
+
+				<input type="hidden" name="redirect_to" value="">
+				<input type="hidden" name="lrm_action" value="signup">
+				<input type="hidden" name="wp-submit" value="1">
+
+				<!-- Fix for Eduma WP theme-->
+				<input type="hidden" name="is_popup_register" value="1">
+				<input type="hidden" id="security-signup" name="security-signup" value="0bdd79f99c" /><input type="hidden" name="_wp_http_referer" value="/wp-content/uploads/2022/03/bone_great_arrow_fletched.webp" />				<!-- For Invisible Recaptcha plugin -->
+				<span class="wpcf7-submit" style="display: none;"></span>
+
+			</form>
+
+		
+		<!-- <a href="#0" class="lrm-close-form">Close</a> -->
+	</div> <!-- lrm-signup -->
+
+<div class="lrm-reset-password-section "> <!-- reset password form -->
+	<form class="lrm-form js-lrm-form" action="#0" data-action="lost-password">
+
+        <div class="lrm-fieldset-wrap">
+            <p class="lrm-form-message">Lost your password? Please enter your email address. You will receive mail with link to set new password.</p>
+
+            <div class="fieldset">
+                                <label class="image-replace lrm-email lrm-ficon-mail" title="Email or Username"></label>
+                <input class="full-width has-padding has-border" name="user_login" type="text" required placeholder="Email or Username" data-autofocus="1" aria-label="Email or Username">
+                <span class="lrm-error-message"></span>
+            </div>
+
+            <div class="lrm-integrations lrm-integrations--reset-pass">
+                <div class="lrm-grecaptcha"  data-sitekey="6LfzUworAAAAAAcBIa9l7K-4rfS6AlF-HphNDnWE"></div>            </div>
+
+            <input type="hidden" name="lrm_action" value="lostpassword">
+            <input type="hidden" name="wp-submit" value="1">
+            <input type="hidden" id="security-lostpassword" name="security-lostpassword" value="2e733342d6" /><input type="hidden" name="_wp_http_referer" value="/wp-content/uploads/2022/03/bone_great_arrow_fletched.webp" />
+        </div>
+
+		<div class="fieldset fieldset--submit fieldset--full-width">
+			<button class="full-width has-padding" type="submit">
+				Reset password			</button>
+		</div>
+		<!-- For Invisible Recaptcha plugin -->
+		<span class="wpcf7-submit" style="display: none;"></span>
+
+	</form>
+
+	<p class="lrm-form-bottom-message"><a href="#0" class="lrm-switch-to--login">Back to login</a></p>
+</div> <!-- lrm-reset-password -->
+        </div> <!-- lrm-user-modal-container -->
+        <a href="#0" class="lrm-close-form" title="close">
+            <span class="lrm-ficon-close"></span>
+        </a>
+
+    </div> <!-- lrm-user-modal-container -->
+
+</div> <!-- lrm-user-modal --><script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/generatepress_child/*","/wp-content/themes/generatepress/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<script id="generate-a11y">
+!function(){"use strict";if("querySelector"in document&&"addEventListener"in window){var e=document.body;e.addEventListener("pointerdown",(function(){e.classList.add("using-mouse")}),{passive:!0}),e.addEventListener("keydown",(function(){e.classList.remove("using-mouse")}),{passive:!0})}}();
+</script>
+			<script>
+				const lazyloadRunObserver = () => {
+					const lazyloadBackgrounds = document.querySelectorAll( `.e-con.e-parent:not(.e-lazyloaded)` );
+					const lazyloadBackgroundObserver = new IntersectionObserver( ( entries ) => {
+						entries.forEach( ( entry ) => {
+							if ( entry.isIntersecting ) {
+								let lazyloadBackground = entry.target;
+								if( lazyloadBackground ) {
+									lazyloadBackground.classList.add( 'e-lazyloaded' );
+								}
+								lazyloadBackgroundObserver.unobserve( entry.target );
+							}
+						});
+					}, { rootMargin: '200px 0px 200px 0px' } );
+					lazyloadBackgrounds.forEach( ( lazyloadBackground ) => {
+						lazyloadBackgroundObserver.observe( lazyloadBackground );
+					} );
+				};
+				const events = [
+					'DOMContentLoaded',
+					'elementor/lazyload/observe',
+				];
+				events.forEach( ( event ) => {
+					document.addEventListener( event, lazyloadRunObserver );
+				} );
+			</script>
+			<link rel='stylesheet' id='elementor-frontend-css' href='https://www.pureeldenring.com/wp-content/plugins/elementor/assets/css/frontend.min.css?ver=3.34.0' media='all' />
+<link rel='stylesheet' id='elementor-post-2147-css' href='https://www.pureeldenring.com/wp-content/uploads/elementor/css/post-2147.css?ver=1775060694' media='all' />
+<link rel='stylesheet' id='widget-search-form-css' href='https://www.pureeldenring.com/wp-content/plugins/elementor-pro/assets/css/widget-search-form.min.css?ver=3.34.0' media='all' />
+<link rel='stylesheet' id='elementor-post-5-css' href='https://www.pureeldenring.com/wp-content/uploads/elementor/css/post-5.css?ver=1775060694' media='all' />
+<script id="lrm-modal-js-extra">
+var LRM = {"home_url_arr":{"scheme":"https","host":"www.pureeldenring.com"},"home_url":"https://www.pureeldenring.com","validate_domain":"1","password_zxcvbn_js_src":"https://www.pureeldenring.com/wp-includes/js/zxcvbn.min.js","validate_password_strength":"yes","password_strength_lib":"lrm","redirect_url":"","ajax_url":"https://www.pureeldenring.com/?lrm=1","is_user_logged_in":"","reload_after_login":null,"selectors_mapping":{"login":"a[href*='wp-login']","register":""},"is_customize_preview":"","l10n":{"password_is_good":"Good Password","password_is_strong":"Strong Password","password_is_short":"Too Short Password","password_is_bad":"Bad Password","passwords_is_mismatch":"Passwords is mismatch!","passwords_is_weak":"Error: Your password is very weak!"}};
+//# sourceURL=lrm-modal-js-extra
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/ajax-login-and-registration-modal-popup-pro/free/assets/lrm-core.js?ver=56" id="lrm-modal-js"></script>
+<script id="lrm-modal-pro-js-extra">
+var LRM_Pro = {"hide_form_after_registration":"true","woo_add_to_cart_hook":"","woo_on_proceed_to_checkout":"","buddypress_integration_is_on":"","redirect_urls":{"after_login":null,"after_registration":null},"l10n":{"woo_must_register":"Please login or register before!","password_is_good":"Good Password","password_is_strong":"Strong Password","password_is_short":"Too Short Password","password_is_bad":"Bad Password","passwords_is_mismatch":"Passwords is mismatch!","recaptcha_error":"Wrong reCAPTCHA!"},"reCaptcha":{"is_active":true,"is_configured":true,"is_invisible":false}};
+//# sourceURL=lrm-modal-pro-js-extra
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/ajax-login-and-registration-modal-popup-pro/assets/lrm-core-pro.js?ver=2.18" id="lrm-modal-pro-js"></script>
+<script id="ez-toc-scroll-scriptjs-js-extra">
+var eztoc_smooth_local = {"scroll_offset":"30","add_request_uri":"","add_self_reference_link":""};
+//# sourceURL=ez-toc-scroll-scriptjs-js-extra
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/easy-table-of-contents/assets/js/smooth_scroll.min.js?ver=2.0.80" id="ez-toc-scroll-scriptjs-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/easy-table-of-contents/vendor/js-cookie/js.cookie.min.js?ver=2.2.1" id="ez-toc-js-cookie-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/easy-table-of-contents/vendor/sticky-kit/jquery.sticky-kit.min.js?ver=1.9.2" id="ez-toc-jquery-sticky-kit-js"></script>
+<script id="ez-toc-js-js-extra">
+var ezTOC = {"smooth_scroll":"1","visibility_hide_by_default":"","scroll_offset":"30","fallbackIcon":"\u003Cspan class=\"\"\u003E\u003Cspan class=\"eztoc-hide\" style=\"display:none;\"\u003EToggle\u003C/span\u003E\u003Cspan class=\"ez-toc-icon-toggle-span\"\u003E\u003Csvg style=\"fill: #ffffff;color:#ffffff\" xmlns=\"http://www.w3.org/2000/svg\" class=\"list-377408\" width=\"20px\" height=\"20px\" viewBox=\"0 0 24 24\" fill=\"none\"\u003E\u003Cpath d=\"M6 6H4v2h2V6zm14 0H8v2h12V6zM4 11h2v2H4v-2zm16 0H8v2h12v-2zM4 16h2v2H4v-2zm16 0H8v2h12v-2z\" fill=\"currentColor\"\u003E\u003C/path\u003E\u003C/svg\u003E\u003Csvg style=\"fill: #ffffff;color:#ffffff\" class=\"arrow-unsorted-368013\" xmlns=\"http://www.w3.org/2000/svg\" width=\"10px\" height=\"10px\" viewBox=\"0 0 24 24\" version=\"1.2\" baseProfile=\"tiny\"\u003E\u003Cpath d=\"M18.2 9.3l-6.2-6.3-6.2 6.3c-.2.2-.3.4-.3.7s.1.5.3.7c.2.2.4.3.7.3h11c.3 0 .5-.1.7-.3.2-.2.3-.5.3-.7s-.1-.5-.3-.7zM5.8 14.7l6.2 6.3 6.2-6.3c.2-.2.3-.5.3-.7s-.1-.5-.3-.7c-.2-.2-.4-.3-.7-.3h-11c-.3 0-.5.1-.7.3-.2.2-.3.5-.3.7s.1.5.3.7z\"/\u003E\u003C/svg\u003E\u003C/span\u003E\u003C/span\u003E","chamomile_theme_is_on":""};
+//# sourceURL=ez-toc-js-js-extra
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/easy-table-of-contents/assets/js/front.min.js?ver=2.0.80-1767743753" id="ez-toc-js-js"></script>
+<script id="generate-menu-js-before">
+var generatepressMenu = {"toggleOpenedSubMenus":true,"openSubMenuLabel":"Open Sub-Menu","closeSubMenuLabel":"Close Sub-Menu"};
+//# sourceURL=generate-menu-js-before
+</script>
+<script src="https://www.pureeldenring.com/wp-content/themes/generatepress/assets/js/menu.min.js?ver=3.6.1" id="generate-menu-js"></script>
+<script id="generate-back-to-top-js-before">
+var generatepressBackToTop = {"smooth":true};
+//# sourceURL=generate-back-to-top-js-before
+</script>
+<script src="https://www.pureeldenring.com/wp-content/themes/generatepress/assets/js/back-to-top.min.js?ver=3.6.1" id="generate-back-to-top-js"></script>
+<script id="thickbox-js-extra">
+var thickboxL10n = {"next":"Next \u003E","prev":"\u003C Prev","image":"Image","of":"of","close":"Close","noiframes":"This feature requires inline frames. You have iframes disabled or your browser does not support them.","loadingAnimation":"https://www.pureeldenring.com/wp-includes/js/thickbox/loadingAnimation.gif"};
+//# sourceURL=thickbox-js-extra
+</script>
+<script src="https://www.pureeldenring.com/wp-includes/js/thickbox/thickbox.js?ver=3.1-20121105" id="thickbox-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/heateor-social-login/public/js/heateor-social-login-public.js?ver=1.1.39" id="heateor-social-login-public-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/wp-responsive-table/assets/frontend/js/wprt-sort-script.js?ver=1.2.6" id="wprt-script-js"></script>
+<script src="https://www.pureeldenring.com/wp-includes/js/hoverIntent.min.js?ver=1.10.2" id="hoverIntent-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/megamenu/js/maxmegamenu.js?ver=3.7" id="megamenu-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/wp-jquery-lightbox/lightboxes/wp-jquery-lightbox/vendor/jquery.touchwipe.min.js?ver=2.3.4" id="wp-jquery-lightbox-swipe-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/wp-jquery-lightbox/inc/purify.min.js?ver=2.3.4" id="wp-jquery-lightbox-purify-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/wp-jquery-lightbox/lightboxes/wp-jquery-lightbox/vendor/panzoom.min.js?ver=2.3.4" id="wp-jquery-lightbox-panzoom-js"></script>
+<script id="wp-jquery-lightbox-js-extra">
+var JQLBSettings = {"showTitle":"","useAltForTitle":"1","showCaption":"1","showNumbers":"1","fitToScreen":"1","resizeSpeed":"400","showDownload":"","navbarOnTop":"","marginSize":"40","mobileMarginSize":"10","slideshowSpeed":"4000","allowPinchZoom":"1","borderSize":"6","borderColor":"#000000","overlayColor":"#000000","overlayOpacity":"0.7","newNavStyle":"1","fixedNav":"1","showInfoBar":"","prevLinkTitle":"previous image","nextLinkTitle":"next image","closeTitle":"close image gallery","image":"Image ","of":" of ","download":"Download","pause":"(Pause Slideshow)","play":"(Play Slideshow)"};
+//# sourceURL=wp-jquery-lightbox-js-extra
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/wp-jquery-lightbox/lightboxes/wp-jquery-lightbox/jquery.lightbox.js?ver=2.3.4" id="wp-jquery-lightbox-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/elementor/assets/js/webpack.runtime.min.js?ver=3.34.0" id="elementor-webpack-runtime-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/elementor/assets/js/frontend-modules.min.js?ver=3.34.0" id="elementor-frontend-modules-js"></script>
+<script src="https://www.pureeldenring.com/wp-includes/js/jquery/ui/core.min.js?ver=1.13.3" id="jquery-ui-core-js"></script>
+<script id="elementor-frontend-js-before">
+var elementorFrontendConfig = {"environmentMode":{"edit":false,"wpPreview":false,"isScriptDebug":false},"i18n":{"shareOnFacebook":"Share on Facebook","shareOnTwitter":"Share on Twitter","pinIt":"Pin it","download":"Download","downloadImage":"Download image","fullscreen":"Fullscreen","zoom":"Zoom","share":"Share","playVideo":"Play Video","previous":"Previous","next":"Next","close":"Close","a11yCarouselPrevSlideMessage":"Previous slide","a11yCarouselNextSlideMessage":"Next slide","a11yCarouselFirstSlideMessage":"This is the first slide","a11yCarouselLastSlideMessage":"This is the last slide","a11yCarouselPaginationBulletMessage":"Go to slide"},"is_rtl":false,"breakpoints":{"xs":0,"sm":480,"md":768,"lg":1025,"xl":1440,"xxl":1600},"responsive":{"breakpoints":{"mobile":{"label":"Mobile Portrait","value":767,"default_value":767,"direction":"max","is_enabled":true},"mobile_extra":{"label":"Mobile Landscape","value":880,"default_value":880,"direction":"max","is_enabled":false},"tablet":{"label":"Tablet Portrait","value":1024,"default_value":1024,"direction":"max","is_enabled":true},"tablet_extra":{"label":"Tablet Landscape","value":1200,"default_value":1200,"direction":"max","is_enabled":false},"laptop":{"label":"Laptop","value":1366,"default_value":1366,"direction":"max","is_enabled":false},"widescreen":{"label":"Widescreen","value":2400,"default_value":2400,"direction":"min","is_enabled":false}},"hasCustomBreakpoints":false},"version":"3.34.0","is_static":false,"experimentalFeatures":{"e_font_icon_svg":true,"additional_custom_breakpoints":true,"container":true,"e_optimized_markup":true,"theme_builder_v2":true,"nested-elements":true,"home_screen":true,"global_classes_should_enforce_capabilities":true,"e_variables":true,"cloud-library":true,"e_opt_in_v4_page":true,"e_interactions":true,"import-export-customization":true,"e_pro_variables":true},"urls":{"assets":"https:\/\/www.pureeldenring.com\/wp-content\/plugins\/elementor\/assets\/","ajaxurl":"https:\/\/www.pureeldenring.com\/wp-admin\/admin-ajax.php","uploadUrl":"https:\/\/www.pureeldenring.com\/wp-content\/uploads"},"nonces":{"floatingButtonsClickTracking":"eb535592df"},"swiperClass":"swiper","settings":{"editorPreferences":[]},"kit":{"active_breakpoints":["viewport_mobile","viewport_tablet"],"global_image_lightbox":"yes","lightbox_enable_counter":"yes","lightbox_enable_fullscreen":"yes","lightbox_enable_zoom":"yes","lightbox_enable_share":"yes","lightbox_title_src":"title","lightbox_description_src":"description"},"post":{"id":0,"title":"Page Not Found - Pure EldenRing","excerpt":""}};
+//# sourceURL=elementor-frontend-js-before
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/elementor/assets/js/frontend.min.js?ver=3.34.0" id="elementor-frontend-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/elementor-pro/assets/js/webpack-pro.runtime.min.js?ver=3.34.0" id="elementor-pro-webpack-runtime-js"></script>
+<script src="https://www.pureeldenring.com/wp-includes/js/dist/hooks.min.js?ver=dd5603f07f9220ed27f1" id="wp-hooks-js"></script>
+<script src="https://www.pureeldenring.com/wp-includes/js/dist/i18n.min.js?ver=c26c3dc7bed366793375" id="wp-i18n-js"></script>
+<script id="wp-i18n-js-after">
+wp.i18n.setLocaleData( { 'text direction\u0004ltr': [ 'ltr' ] } );
+//# sourceURL=wp-i18n-js-after
+</script>
+<script id="elementor-pro-frontend-js-before">
+var ElementorProFrontendConfig = {"ajaxurl":"https:\/\/www.pureeldenring.com\/wp-admin\/admin-ajax.php","nonce":"45779652c3","urls":{"assets":"https:\/\/www.pureeldenring.com\/wp-content\/plugins\/elementor-pro\/assets\/","rest":"https:\/\/www.pureeldenring.com\/wp-json\/"},"settings":{"lazy_load_background_images":true},"popup":{"hasPopUps":false},"shareButtonsNetworks":{"facebook":{"title":"Facebook","has_counter":true},"twitter":{"title":"Twitter"},"linkedin":{"title":"LinkedIn","has_counter":true},"pinterest":{"title":"Pinterest","has_counter":true},"reddit":{"title":"Reddit","has_counter":true},"vk":{"title":"VK","has_counter":true},"odnoklassniki":{"title":"OK","has_counter":true},"tumblr":{"title":"Tumblr"},"digg":{"title":"Digg"},"skype":{"title":"Skype"},"stumbleupon":{"title":"StumbleUpon","has_counter":true},"mix":{"title":"Mix"},"telegram":{"title":"Telegram"},"pocket":{"title":"Pocket","has_counter":true},"xing":{"title":"XING","has_counter":true},"whatsapp":{"title":"WhatsApp"},"email":{"title":"Email"},"print":{"title":"Print"},"x-twitter":{"title":"X"},"threads":{"title":"Threads"}},"facebook_sdk":{"lang":"en_US","app_id":""},"lottie":{"defaultAnimationUrl":"https:\/\/www.pureeldenring.com\/wp-content\/plugins\/elementor-pro\/modules\/lottie\/assets\/animations\/default.json"}};
+//# sourceURL=elementor-pro-frontend-js-before
+</script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/elementor-pro/assets/js/frontend.min.js?ver=3.34.0" id="elementor-pro-frontend-js"></script>
+<script src="https://www.pureeldenring.com/wp-content/plugins/elementor-pro/assets/js/elements-handlers.min.js?ver=3.34.0" id="pro-elements-handlers-js"></script>
+<div id="search-filter-svg-template" aria-hidden="true" style="clip: rect(1px, 1px, 1px, 1px); clip-path: inset(50%); height: 1px; margin: -1px; overflow: hidden; padding: 0; position: absolute;	width: 1px !important; word-wrap: normal !important;"><svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   style="background-color:red"
+   viewBox="0 0 24 24"
+   stroke="currentColor"
+   version="1.1"
+   id="sf-svg-spinner-circle"
+>
+  
+    <g fill="none">
+      <g>
+        <circle
+           stroke-opacity="0.5"
+           cx="12.000001"
+           cy="12.000001"
+           r="10.601227"
+           style="stroke-width:2.79755;stroke-miterlimit:4;stroke-dasharray:none" />
+        <path
+           d="M 22.601226,12.000001 C 22.601226,6.1457686 17.854233,1.398775 12,1.398775"
+           style="stroke-width:2.79755;stroke-miterlimit:4;stroke-dasharray:none">
+		    <animateTransform
+             attributeName="transform"
+             type="rotate"
+             from="0 12 12"
+             to="360 12 12"
+             dur="1s"
+             repeatCount="indefinite" />
+		   </path>
+      </g>
+    </g>
+</svg>
+</div>		<script type="text/javascript" id="search-filter-data-js">
+			window.searchAndFilterData = {"fields":[],"queries":[],"shouldMount":true};
+		</script>
+		<script type="text/javascript" id="search-filter-api-url-js">
+			window.searchAndFilterApiUrl = '';
+		</script>
+		
+
+
+</body>
+</html>
