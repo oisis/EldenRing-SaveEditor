@@ -46,6 +46,7 @@ export namespace vm {
 	    id: number;
 	    name: string;
 	    category: string;
+	    subCategory: string;
 	    quantity: number;
 	    maxInventory: number;
 	    maxStorage: number;
@@ -60,6 +61,7 @@ export namespace vm {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.category = source["category"];
+	        this.subCategory = source["subCategory"];
 	        this.quantity = source["quantity"];
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];

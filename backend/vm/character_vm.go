@@ -12,6 +12,7 @@ type ItemViewModel struct {
 	ID           uint32 `json:"id"`
 	Name         string `json:"name"`
 	Category     string `json:"category"`
+	SubCategory  string `json:"subCategory"`
 	Quantity     uint32 `json:"quantity"`
 	MaxInventory uint32 `json:"maxInventory"`
 	MaxStorage   uint32 `json:"maxStorage"`
@@ -115,6 +116,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				ID:           itemID,
 				Name:         name,
 				Category:     category,
+				SubCategory:  db.GetItemSubCategory(itemID, name, category),
 				Quantity:     displayQuantity,
 				MaxInventory: itemData.MaxInventory,
 				MaxStorage:   itemData.MaxStorage,

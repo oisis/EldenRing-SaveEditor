@@ -127,6 +127,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             handle: number,
             name: string,
             category: string,
+            subCategory: string,
             invQty: number,
             storageQty: number,
             maxInv: number,
@@ -134,18 +135,12 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         }>();
 
         charInventory.forEach(item => {
-            let cat = item.category.toLowerCase();
-            if (cat === 'weapon' || cat === 'weapons') cat = 'weapons';
-            else if (cat === 'armor' || cat === 'armors') cat = 'armor';
-            else if (cat === 'item' || cat === 'items' || cat === 'goods') cat = 'goods';
-            else if (cat === 'ash of war' || cat === 'aows' || cat === 'ashes') cat = 'ashes';
-            else if (cat === 'talisman' || cat === 'talismans') cat = 'talismans';
-
             mergedMap.set(item.id, {
                 id: item.id,
                 handle: item.handle,
                 name: item.name,
-                category: cat,
+                category: item.category,
+                subCategory: item.subCategory,
                 invQty: item.quantity,
                 storageQty: 0,
                 maxInv: item.maxInventory,
@@ -154,13 +149,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         });
 
         charStorage.forEach(item => {
-            let cat = item.category.toLowerCase();
-            if (cat === 'weapon' || cat === 'weapons') cat = 'weapons';
-            else if (cat === 'armor' || cat === 'armors') cat = 'armor';
-            else if (cat === 'item' || cat === 'items' || cat === 'goods') cat = 'goods';
-            else if (cat === 'ash of war' || cat === 'aows' || cat === 'ashes') cat = 'ashes';
-            else if (cat === 'talisman' || cat === 'talismans') cat = 'talismans';
-
             const existing = mergedMap.get(item.id);
             if (existing) {
                 existing.storageQty = item.quantity;
@@ -169,7 +157,8 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     id: item.id,
                     handle: item.handle,
                     name: item.name,
-                    category: cat,
+                    category: item.category,
+                    subCategory: item.subCategory,
                     invQty: 0,
                     storageQty: item.quantity,
                     maxInv: item.maxInventory,
@@ -285,15 +274,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         
         if (category === 'all') return matchesSearch;
         
-        // Map internal category names to selector values
-        const itemCat = item.category.toLowerCase();
-        if (category === 'weapons' && itemCat === 'weapons') return matchesSearch;
-        if (category === 'armors' && itemCat === 'armor') return matchesSearch;
-        if (category === 'items' && itemCat === 'goods') return matchesSearch;
-        if (category === 'talismans' && itemCat === 'talismans') return matchesSearch;
-        if (category === 'aows' && itemCat === 'ashes') return matchesSearch;
-        
-        return false;
+        return item.subCategory === category && matchesSearch;
     }));
 
     const SortIndicator = ({ col }: { col: string }) => {
@@ -414,18 +395,33 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     </button>
                 </div>
 
-                <div className="relative w-full md:w-48">
+                <div className="relative w-full md:w-56">
                     <select 
                         value={category}
                         onChange={e => setCategory(e.target.value)}
                         className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                     >
                         {mode !== 'database' && <option value="all">All Categories</option>}
-                        <option value="weapons">Weapons</option>
-                        <option value="armors">Armors</option>
-                        <option value="items">Items</option>
-                        <option value="talismans">Talismans</option>
-                        <option value="aows">Ashes of War</option>
+                        <optgroup label="Equipment" className="bg-background text-foreground">
+                            <option value="weapons">Weapons</option>
+                            <option value="armors">Armors</option>
+                            <option value="talismans">Talismans</option>
+                            <option value="aows">Ashes of War</option>
+                        </optgroup>
+                        <optgroup label="Magic" className="bg-background text-foreground">
+                            <option value="sorceries">Sorceries</option>
+                            <option value="incantations">Incantations</option>
+                            <option value="spiritashes">Spirit Ashes</option>
+                        </optgroup>
+                        <optgroup label="Items" className="bg-background text-foreground">
+                            <option value="consumables">Consumables</option>
+                            <option value="materials">Crafting Materials</option>
+                            <option value="upgrade">Upgrade Materials</option>
+                            <option value="ammo">Ammunition</option>
+                        </optgroup>
+                        <optgroup label="Progress" className="bg-background text-foreground">
+                            <option value="keyitems">Key Items</option>
+                        </optgroup>
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"></path></svg>

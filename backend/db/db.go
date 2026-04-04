@@ -126,7 +126,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 		source = data.Armors
 		prefix = 0x10000000
 		catName = "armor"
-	case "items":
+	case "items", "sorceries", "incantations", "materials", "upgrade", "ammo", "keyitems", "consumables", "spiritashes":
 		source = data.Items
 		prefix = 0x40000000
 		catName = "goods"
@@ -155,6 +155,14 @@ func GetItemsByCategory(category string) []ItemEntry {
 		if (id & 0xF0000000) != prefix && !(category == "weapons" && (id&0xF0000000) == 0) {
 			continue
 		}
+
+		// Sub-category filtering for items
+		if prefix == 0x40000000 && category != "items" {
+			if !itemMatchesCategory(id, item.Name, category) {
+				continue
+			}
+		}
+
 		items = append(items, ItemEntry{
 			ID:           id,
 			Name:         item.Name,
@@ -169,6 +177,102 @@ func GetItemsByCategory(category string) []ItemEntry {
 	})
 
 	return items
+}
+
+// GetItemSubCategory returns the granular category string for an item.
+func GetItemSubCategory(id uint32, name string, broadCategory string) string {
+	if broadCategory == "Weapon" {
+		return "weapons"
+	}
+	if broadCategory == "Armor" {
+		return "armors"
+	}
+	if broadCategory == "Talisman" {
+		return "talismans"
+	}
+	if broadCategory == "Ash of War" {
+		return "aows"
+	}
+
+	// For Items (Goods), check granular categories
+	if itemMatchesCategory(id, name, "sorceries") {
+		return "sorceries"
+	}
+	if itemMatchesCategory(id, name, "incantations") {
+		return "incantations"
+	}
+	if itemMatchesCategory(id, name, "spiritashes") {
+		return "spiritashes"
+	}
+	if itemMatchesCategory(id, name, "materials") {
+		return "materials"
+	}
+	if itemMatchesCategory(id, name, "upgrade") {
+		return "upgrade"
+	}
+	if itemMatchesCategory(id, name, "ammo") {
+		return "ammo"
+	}
+	if itemMatchesCategory(id, name, "keyitems") {
+		return "keyitems"
+	}
+
+	return "consumables"
+}
+
+func itemMatchesCategory(id uint32, name string, category string) bool {
+	nameLower := strings.ToLower(name)
+	switch category {
+	case "sorceries":
+		return id >= 0x40000FA0 && id <= 0x4000157C
+	case "incantations":
+		return id >= 0x40001770 && id <= 0x40002134
+	case "spiritashes":
+		return strings.Contains(nameLower, "ashes") && (id >= 0x40032898 || strings.Contains(nameLower, "spirit"))
+	case "materials":
+		craftingKeywords := []string{
+			"mushroom", "leaf", "flower", "fruit", "butterfly", "firefly",
+			"root", "moss", "resin", "bone", "feather", "liver", "meat",
+			"blood", "eye", "skin", "horn", "fang", "claw", "scale",
+			"shell", "egg", "string", "crystal", "fragment", "shard",
+			"arteria", "starlight", "dew", "nectar", "mold", "calculus",
+		}
+		for _, kw := range craftingKeywords {
+			if strings.Contains(nameLower, kw) {
+				return true
+			}
+		}
+		return false
+	case "upgrade":
+		return strings.Contains(nameLower, "smithing stone") || strings.Contains(nameLower, "glovewort") || strings.Contains(nameLower, "somber")
+	case "ammo":
+		return strings.Contains(nameLower, "arrow") || strings.Contains(nameLower, "bolt")
+	case "keyitems":
+		keyItemKeywords := []string{
+			"key", "map", "letter", "note", "painting", "bell bearing",
+			"crystal tear", "great rune", "mending rune", "remembrance",
+			"shackle", "whetblade", "cookbook", "scroll", "gesture",
+			"cracked pot", "ritual pot", "perfume bottle", "memory stone",
+			"talisman pouch", "withered finger", "furled finger", "severer",
+			"effigy", "cipher ring", "bloody finger", "recusant finger",
+			"whistle", "physick", "telescope", "lantern", "tonic",
+		}
+		for _, kw := range keyItemKeywords {
+			if strings.Contains(nameLower, kw) {
+				return true
+			}
+		}
+		return false
+	case "consumables":
+		return !itemMatchesCategory(id, name, "sorceries") &&
+			!itemMatchesCategory(id, name, "incantations") &&
+			!itemMatchesCategory(id, name, "materials") &&
+			!itemMatchesCategory(id, name, "upgrade") &&
+			!itemMatchesCategory(id, name, "ammo") &&
+			!itemMatchesCategory(id, name, "keyitems") &&
+			!itemMatchesCategory(id, name, "spiritashes")
+	}
+	return false
 }
 
 // GetAllItems returns all items from all categories.
