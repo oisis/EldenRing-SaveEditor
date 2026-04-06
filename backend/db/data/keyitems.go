@@ -212,4 +212,6 @@ var Keyitems = map[uint32]ItemData{
 	0xB0002313: {Name: "Beast Eye", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/keyitems/beast_eye.png"},
 	0xB0005104: {Name: "Eye of Yelough", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/keyitems/eye_of_yelough.png"},
 	0xB000082A: {Name: "Deathroot", Category: "keyitems", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/keyitems/deathroot.png"},
+	0x401EA749: {Name: "Greasemonger's Bell Bearing", Category: "keyitems", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/keyitems/greasemongers_bell_bearing.png"},
+	0xB01EA749: {Name: "Greasemonger's Bell Bearing", Category: "keyitems", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/keyitems/greasemongers_bell_bearing.png"},
 }
