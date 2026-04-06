@@ -33,7 +33,7 @@ func GetItemData(id uint32, category string) data.ItemData {
 		data.Helms, data.Chest, data.Gauntlets, data.Leggings,
 		data.Talismans, data.Aows, data.Gestures,
 		data.StandardAshes, data.RenownedAshes, data.LegendaryAshes, data.Puppets,
-		data.Sorceries, data.Incantations, data.BaseMaterials, data.DlcMaterials,
+		data.Sorceries, data.Incantations, data.CraftingMaterials,
 		data.BolsteringMaterials,
 		data.SacredFlasks, data.ThrowingPots, data.PerfumeArts, data.Throwables,
 		data.Grease, data.MiscTools, data.QuestTools, data.GoldenRunes,
@@ -170,10 +170,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 		processMap(data.Sorceries, "sorceries")
 	case "incantations":
 		processMap(data.Incantations, "incantations")
-	case "base_materials":
-		processMap(data.BaseMaterials, "base_materials")
-	case "dlc_materials":
-		processMap(data.DlcMaterials, "dlc_materials")
+	case "crafting_materials":
+		processMap(data.CraftingMaterials, "crafting_materials")
 	case "bolstering_materials":
 		processMap(data.BolsteringMaterials, "bolstering_materials")
 	case "arrows_and_bolts":
@@ -240,7 +238,7 @@ func GetAllItems() []ItemEntry {
 		"helms", "chest", "gauntlets", "leggings",
 		"talismans", "aows", "gestures",
 		"standard_ashes", "renowned_ashes", "legendary_ashes", "puppets",
-		"sorceries", "incantations", "base_materials", "dlc_materials",
+		"sorceries", "incantations", "crafting_materials",
 		"bolstering_materials",
 		"sacred_flasks", "throwing_pots", "perfume_arts", "throwables",
 		"grease", "misc_tools", "quest_tools", "golden_runes",

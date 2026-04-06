@@ -293,4 +293,11 @@ var Incantations = map[uint32]ItemData{
 	0xB000193C: {Name: "Magic Fortification", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/magic_fortification.png"},
 	0xB0001B58: {Name: "Dragonfire", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/dragonfire.png"},
 	0xB01EA0AA: {Name: "Pest-Thread Spears", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/pest_thread_spears.png"},
+	0xB000189C: {Name: "Bloodflame Talons", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/incantations/bloodflame_talons.png"},
+	0xB00018B0: {Name: "Bloodflame Blade", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/incantations/bloodflame_blade.png"},
+	0xB0001AA4: {Name: "Beast Claw", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/incantations/beast_claw.png"},
+	0xB0001AAE: {Name: "Gurranq's Beast Claw", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/incantations/gurranqs_beast_claw.png"},
+	0xB0001D56: {Name: "Aspects of the Crucible: Horns", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/incantations/aspects_of_the_crucible_horns.png"},
+	0xB0002299: {Name: "Godskin Prayerbook", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/godskin_prayerbook.png"},
+	0xB0000820: {Name: "Blasphemous Claw", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/incantations/blasphemous_claw.png"},
 }

@@ -268,8 +268,7 @@ export function DatabaseTab({ columnVisibility, platform, charIndex }: DatabaseT
                             <option value="incantations">Incantations</option>
                         </optgroup>
                         <optgroup label="Items" className="bg-background text-foreground">
-                            <option value="base_materials">Base Game Materials</option>
-                            <option value="dlc_materials">DLC Materials</option>
+                            <option value="crafting_materials">Crafting Materials</option>
                             <option value="bolstering_materials">Bolstering Materials</option>
                             <option value="ammo">Ammunition</option>
                         </optgroup>

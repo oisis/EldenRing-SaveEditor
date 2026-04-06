@@ -83,4 +83,10 @@ var MiscTools = map[uint32]ItemData{
 	0xB0000834: {Name: "Soft Cotton", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/soft_cotton.png"},
 	0x400000A6: {Name: "Vision of Grace", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/consumables/vision_of_grace.png"},
 	0x40000073: {Name: "Memory of Grace", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/consumables/memory_of_grace.png"},
+	0xB01E90BA: {Name: "Horned Bairn", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/misc_tools/horned_bairn.png"},
+	0xB01EAFAA: {Name: "Bloodsucking Cracked Tear", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/misc_tools/bloodsucking_cracked_tear.png"},
+	0xB01ED2A5: {Name: "Dewgem", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/misc_tools/dewgem.png"},
+	0xB0000852: {Name: "Celestial Dew", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/misc_tools/celestial_dew.png"},
+	0xB0002B05: {Name: "Thorny Cracked Tear", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/misc_tools/thorny_cracked_tear.png"},
+	0xB00050E6: {Name: "Dewkissed Herba", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/misc_tools/dewkissed_herba.png"},
 }

@@ -207,4 +207,9 @@ var Keyitems = map[uint32]ItemData{
 	0xB0002000: {Name: "Asimi's Husk", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/asimis_husk.png"},
 	0xB0002003: {Name: "Asimi, Silver Chrysalid", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/asimi_silver_chrysalid.png"},
 	0xB0001FE6: {Name: "Amber Draught", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/amber_draught.png"},
+	0xB0000870: {Name: "Pureblood Knight's Medal", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/keyitems/pureblood_knights_medal.png"},
+	0xB0001FDB: {Name: "Lord of Blood's Favor", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/keyitems/lord_of_bloods_favor.png"},
+	0xB0002313: {Name: "Beast Eye", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/keyitems/beast_eye.png"},
+	0xB0005104: {Name: "Eye of Yelough", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/keyitems/eye_of_yelough.png"},
+	0xB000082A: {Name: "Deathroot", Category: "keyitems", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/keyitems/deathroot.png"},
 }
