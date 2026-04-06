@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
-import {GetItemList, GetCharacter} from '../../wailsjs/go/main/App';
-import {db, vm} from '../../wailsjs/go/models';
+import {GetCharacter} from '../../wailsjs/go/main/App';
+import {vm} from '../../wailsjs/go/models';
 
 interface InventoryTabProps {
     charIndex: number;
@@ -11,10 +11,8 @@ interface InventoryTabProps {
 }
 
 export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps) {
-    const [mode, setMode] = useState<'database' | 'character'>('character');
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
-    const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
     const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
     const [loading, setLoading] = useState(false);
@@ -24,31 +22,11 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
     const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
 
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
-    const [addItemModal, setAddItemModal] = useState<db.ItemEntry[] | null>(null);
-    const [selectedDbItems, setSelectedDbItems] = useState<Set<number>>(new Set());
-    const [addInvMax, setAddInvMax] = useState(true);
-    const [addStorageMax, setAddStorageMax] = useState(false);
-    const [addUpgradeLevel, setAddUpgradeLevel] = useState(0);
     const [isSaving, setIsSaving] = useState(false);
 
     // Local state for edited quantities
     const [editedInv, setEditedInv] = useState<Record<number, number>>({});
     const [editedStorage, setEditedStorage] = useState<Record<number, number>>({});
-
-    const toggleDbItemSelection = (id: number) => {
-        const next = new Set(selectedDbItems);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        setSelectedDbItems(next);
-    };
-
-    const toggleAllDbItems = (items: db.ItemEntry[]) => {
-        if (selectedDbItems.size === items.length && items.length > 0) {
-            setSelectedDbItems(new Set());
-        } else {
-            setSelectedDbItems(new Set(items.map(i => i.id)));
-        }
-    };
 
     const handleQtyChange = (handle: number, value: string, type: 'inv' | 'storage', max: number) => {
         const qty = parseInt(value) || 0;
@@ -58,32 +36,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             setEditedInv(prev => ({ ...prev, [handle]: safeQty }));
         } else {
             setEditedStorage(prev => ({ ...prev, [handle]: safeQty }));
-        }
-    };
-
-    const handleAddItem = async () => {
-        if (!addItemModal || isSaving) return;
-        setIsSaving(true);
-        try {
-            const char = await GetCharacter(charIndex);
-            if (!char) return;
-
-            // Logic to add multiple items
-            addItemModal.forEach(item => {
-                console.log(`Adding item ${item.name} (ID: ${item.id}) at level +${addUpgradeLevel}`);
-            });
-            console.log(`Inv Max: ${addInvMax}, Storage Max: ${addStorageMax}`);
-
-            // Close modal and clear selection
-            setAddItemModal(null);
-            setSelectedDbItems(new Set());
-            setAddInvMax(true);
-            setAddStorageMax(false);
-            setAddUpgradeLevel(0);
-        } catch (err) {
-            console.error("Failed to add items:", err);
-        } finally {
-            setIsSaving(false);
         }
     };
 
@@ -114,7 +66,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             setEditedInv({});
             setEditedStorage({});
             
-            // Show success (could add a toast here)
         } catch (err) {
             console.error("Failed to save inventory changes:", err);
         } finally {
@@ -192,24 +143,11 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
 
     useEffect(() => {
         setLoading(true);
-        
-        // Always fetch character data to keep Inv/Storage quantities updated
-        const charPromise = GetCharacter(charIndex).then(res => {
+        GetCharacter(charIndex).then(res => {
             setCharInventory(res?.inventory || []);
             setCharStorage(res?.storage || []);
-        });
-
-        if (mode === 'database') {
-            const fetchCat = category === 'all' ? 'weapons' : category;
-            const dbPromise = GetItemList(fetchCat).then(res => {
-                setDbItems(res || []);
-            });
-            
-            Promise.all([charPromise, dbPromise]).finally(() => setLoading(false));
-        } else {
-            charPromise.finally(() => setLoading(false));
-        }
-    }, [mode, category, charIndex]);
+        }).finally(() => setLoading(false));
+    }, [charIndex]);
 
     const handleSort = (col: string) => {
         if (sortCol === col) {
@@ -239,11 +177,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
         });
     };
 
-    const filteredDbItems = sortItems(dbItems.filter(item => 
-        item.name.toLowerCase().includes(search.toLowerCase()) ||
-        item.id.toString(16).toLowerCase().includes(search.toLowerCase())
-    ));
-
     const filteredOwnedItems = sortItems(mergedOwnedItems.filter(item => {
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
@@ -260,96 +193,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
 
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Add Item Modal */}
-            {addItemModal && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
-                    <div className="card p-8 flex flex-col space-y-6 max-w-sm w-full mx-4 shadow-2xl shadow-primary/20 border-primary/20 animate-in zoom-in-95 duration-300">
-                        <div className="flex items-center space-x-4">
-                            {addItemModal.length === 1 ? (
-                                <>
-                                    <div className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden">
-                                        <img 
-                                            src={addItemModal[0].iconPath} 
-                                            alt="" 
-                                            className="w-8 h-8 object-contain"
-                                            onError={handleImageError}
-                                        />
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{addItemModal[0].name}</h3>
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{addItemModal[0].category}</p>
-                                    </div>
-                                </>
-                            ) : (
-                                <>
-                                    <div className="w-12 h-12 rounded bg-primary/10 border border-primary/30 flex items-center justify-center overflow-hidden">
-                                        <span className="text-lg font-black text-primary">{addItemModal.length}</span>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Add Multiple Items</h3>
-                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Bulk Action</p>
-                                    </div>
-                                </>
-                            )}
-                        </div>
-
-                        <div className="space-y-4 py-2">
-                            {addItemModal.length === 1 && addItemModal[0].maxUpgrade > 0 && (
-                                <div className="space-y-2 pb-2 border-b border-border/30">
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Upgrade Level</span>
-                                        <span className="text-xs font-mono font-bold text-primary">+{addUpgradeLevel}</span>
-                                    </div>
-                                    <input 
-                                        type="range" 
-                                        min="0" 
-                                        max={addItemModal[0].maxUpgrade} 
-                                        value={addUpgradeLevel} 
-                                        onChange={e => setAddUpgradeLevel(parseInt(e.target.value))}
-                                        className="w-full h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-                                    />
-                                    <div className="flex justify-between text-[8px] font-bold text-muted-foreground/50 uppercase tracking-tighter">
-                                        <span>+0</span>
-                                        <span>+{addItemModal[0].maxUpgrade}</span>
-                                    </div>
-                                </div>
-                            )}
-
-                            <label className="flex items-center space-x-3 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${addInvMax ? 'bg-primary border-primary shadow-sm shadow-primary/40' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
-                                    {addInvMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
-                                </div>
-                                <input type="checkbox" className="hidden" checked={addInvMax} onChange={e => setAddInvMax(e.target.checked)} />
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Inventory Max</span>
-                            </label>
-
-                            <label className="flex items-center space-x-3 cursor-pointer group">
-                                <div className={`w-5 h-5 rounded border flex items-center justify-center transition-all ${addStorageMax ? 'bg-primary border-primary shadow-sm shadow-primary/40' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
-                                    {addStorageMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
-                                </div>
-                                <input type="checkbox" className="hidden" checked={addStorageMax} onChange={e => setAddStorageMax(e.target.checked)} />
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Storage Max</span>
-                            </label>
-                        </div>
-
-                        <div className="flex space-x-3 pt-2">
-                            <button 
-                                onClick={handleAddItem}
-                                className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                            >
-                                Add
-                            </button>
-                            <button 
-                                onClick={() => setAddItemModal(null)}
-                                className="flex-1 px-4 py-2.5 bg-muted/30 text-muted-foreground rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:bg-muted/50 transition-all"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             {/* Icon Popover */}
             {selectedIcon && (
                 <div 
@@ -375,30 +218,15 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                 </div>
             )}
 
-            {/* Mode Toggle & Search Bar */}
+            {/* Search Bar & Actions */}
             <div className="flex flex-col md:flex-row gap-4 shrink-0 items-center">
-                <div className="flex bg-muted/30 p-1 rounded-lg border border-border w-full md:w-auto">
-                    <button 
-                        onClick={() => setMode('character')}
-                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'character' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
-                    >
-                        Inventory
-                    </button>
-                    <button 
-                        onClick={() => setMode('database')}
-                        className={`px-4 py-2 rounded-md text-[10px] font-black uppercase tracking-widest transition-all ${mode === 'database' ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20' : 'text-muted-foreground hover:text-foreground'}`}
-                    >
-                        Database
-                    </button>
-                </div>
-
                 <div className="relative w-full md:w-56">
                     <select 
                         value={category}
                         onChange={e => setCategory(e.target.value)}
                         className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                     >
-                        {mode !== 'database' && <option value="all">All Categories</option>}
+                        <option value="all">All Categories</option>
                         <optgroup label="Equipment" className="bg-background text-foreground">
                             <option value="weapons">Weapons</option>
                             <option value="bows">Bows & Ballistae</option>
@@ -453,16 +281,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     </div>
                 </div>
 
-                {mode === 'database' && selectedDbItems.size > 0 && (
-                    <button 
-                        onClick={() => setAddItemModal(dbItems.filter(i => selectedDbItems.has(i.id)))}
-                        className="px-6 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all animate-in zoom-in-95 duration-300"
-                    >
-                        Add Selected ({selectedDbItems.size})
-                    </button>
-                )}
-
-                {mode === 'character' && (Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
+                {(Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
                     <button 
                         onClick={saveChanges}
                         disabled={isSaving}
@@ -477,7 +296,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                 <div className="relative w-full max-w-xs">
                     <input 
                         type="text" 
-                        placeholder={mode === 'database' ? "Search database..." : "Search owned items..."}
+                        placeholder="Search owned items..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                         className="w-full bg-muted/30 border border-border rounded-md px-10 py-2.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
@@ -494,46 +313,25 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
-                                {mode === 'database' && (
-                                    <th className="px-6 py-4 w-10">
-                                        <div 
-                                            onClick={() => toggleAllDbItems(filteredDbItems)}
-                                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.size === filteredDbItems.length && filteredDbItems.length > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
-                                        >
-                                            {selectedDbItems.size === filteredDbItems.length && filteredDbItems.length > 0 && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
-                                        </div>
-                                    </th>
-                                )}
+                                <th className="px-6 py-4 w-16">Icon</th>
+                                <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('name')}>
+                                    Name <SortIndicator col="name" />
+                                </th>
                                 {columnVisibility.id && (
-                                    <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('id')}>
-                                        ID (Hex) <SortIndicator col="id" />
+                                    <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('id')}>
+                                        ID <SortIndicator col="id" />
                                     </th>
                                 )}
-                                <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('name')}>
-                                    Designation <SortIndicator col="name" />
-                                </th>
-                                <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors text-center" onClick={() => handleSort('maxUpgrade')}>
-                                    Upgrade <SortIndicator col="maxUpgrade" />
-                                </th>
                                 {columnVisibility.category && (
-                                    <th className="px-6 py-4 cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('category')}>
+                                    <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('category')}>
                                         Category <SortIndicator col="category" />
                                     </th>
                                 )}
-                                {mode === 'character' ? (
-                                    <>
-                                        <th className="px-6 py-4 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('invQty')}>
-                                            Inv / Max <SortIndicator col="invQty" />
-                                        </th>
-                                        <th className="px-6 py-4 text-right cursor-pointer hover:text-foreground transition-colors" onClick={() => handleSort('storageQty')}>
-                                            Storage / Max <SortIndicator col="storageQty" />
-                                        </th>
-                                    </>
-                                ) : (
-                                    <>
-                                        <th className="px-6 py-4 text-right">Action</th>
-                                    </>
-                                )}
+                                <th className="px-6 py-4 text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('maxUpgrade')}>
+                                    Upgrade <SortIndicator col="maxUpgrade" />
+                                </th>
+                                <th className="px-6 py-4 text-center w-32">Inventory</th>
+                                <th className="px-6 py-4 text-center w-32">Storage</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
@@ -546,153 +344,76 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                         </div>
                                     </td>
                                 </tr>
-                            ) : mode !== 'database' ? (
-                                filteredOwnedItems.length > 0 ? (
-                                    filteredOwnedItems.map((item, idx) => (
-                                        <tr key={`${item.handle}-${idx}`} className="hover:bg-muted/20 transition-colors group">
-                                            {columnVisibility.id && (
-                                                <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
-                                                    {item.id.toString(16).toUpperCase().padStart(8, '0')}
-                                                </td>
-                                            )}
-                                            <td className="px-6 py-4 font-bold text-foreground text-xs">
-                                                <div 
-                                                    className="flex items-center space-x-3 cursor-pointer group/item"
-                                                    onClick={() => setSelectedIcon({ name: item.name, path: item.iconPath })}
-                                                >
-                                                    <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
-                                                        <img 
-                                                            src={item.iconPath} 
-                                                            alt="" 
-                                                            className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
-                                                            onError={handleImageError}
-                                                        />
-                                                    </div>
-                                                    <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
-                                                        {item.name}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-center">
-                                                {item.maxUpgrade > 0 ? (
-                                                    <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">+{item.maxUpgrade}</span>
-                                                ) : (
-                                                    <span className="text-[10px] font-bold text-muted-foreground/20">—</span>
-                                                )}
-                                            </td>
-                                            {columnVisibility.category && (
-                                                <td className="px-6 py-4">
-                                                    <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-muted/50 text-muted-foreground">
-                                                        {item.category}
-                                                    </span>
-                                                </td>
-                                            )}
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end space-x-2">
-                                                    <input 
-                                                        type="number"
-                                                        value={editedInv[item.handle] !== undefined ? editedInv[item.handle] : item.invQty}
-                                                        onChange={e => handleQtyChange(item.handle, e.target.value, 'inv', item.maxInv)}
-                                                        className={`w-14 bg-muted/30 border ${editedInv[item.handle] !== undefined ? 'border-primary/50 text-primary' : 'border-border/50 text-foreground'} rounded px-2 py-1 text-right font-mono text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/30`}
-                                                    />
-                                                    <span className="text-[10px] font-bold text-muted-foreground/50 w-8 text-left">/ {item.maxInv}</span>
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex items-center justify-end space-x-2">
-                                                    <input 
-                                                        type="number"
-                                                        value={editedStorage[item.handle] !== undefined ? editedStorage[item.handle] : item.storageQty}
-                                                        onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
-                                                        className={`w-14 bg-muted/30 border ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary' : 'border-border/50 text-foreground'} rounded px-2 py-1 text-right font-mono text-xs font-bold focus:outline-none focus:ring-1 focus:ring-primary/30`}
-                                                    />
-                                                    <span className="text-[10px] font-bold text-muted-foreground/50 w-8 text-left">/ {item.maxStorage}</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
-                                ) : (
-                                    <tr>
-                                        <td colSpan={8} className="px-6 py-24 text-center">
-                                            <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
-                                        </td>
-                                    </tr>
-                                )
-                            ) : filteredDbItems.length > 0 ? (
-                                filteredDbItems.map(item => (
-                                    <tr key={item.id} className={`hover:bg-muted/20 transition-colors group ${selectedDbItems.has(item.id) ? 'bg-primary/5' : ''}`}>
-                                        <td className="px-6 py-4">
+                            ) : filteredOwnedItems.length > 0 ? (
+                                filteredOwnedItems.map((item) => (
+                                    <tr key={item.handle} className="group hover:bg-primary/[0.02] transition-colors">
+                                        <td className="px-6 py-3">
                                             <div 
-                                                onClick={() => toggleDbItemSelection(item.id)}
-                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.has(item.id) ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}
+                                                className="w-10 h-10 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
+                                                onClick={() => setSelectedIcon({name: item.name, path: item.iconPath})}
                                             >
-                                                {selectedDbItems.has(item.id) && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
+                                                <img 
+                                                    src={item.iconPath} 
+                                                    alt="" 
+                                                    className="w-8 h-8 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
+                                                    onError={handleImageError}
+                                                />
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex flex-col">
+                                                <span className="font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                                <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tighter">0x{item.id.toString(16).toUpperCase()}</span>
                                             </div>
                                         </td>
                                         {columnVisibility.id && (
-                                            <td className="px-6 py-4 font-mono text-[11px] text-muted-foreground tracking-tighter">
-                                                {item.id.toString(16).toUpperCase().padStart(8, '0')}
-                                            </td>
+                                            <td className="px-6 py-4 font-mono text-[10px] text-muted-foreground">0x{item.id.toString(16).toUpperCase()}</td>
                                         )}
-                                        <td className="px-6 py-4 font-bold text-foreground text-xs">
-                                            <div 
-                                                className="flex items-center space-x-3 cursor-pointer group/item"
-                                                onClick={() => setSelectedIcon({ name: item.name, path: item.iconPath })}
-                                            >
-                                                <div className="w-8 h-8 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover/item:border-primary/50 transition-all">
-                                                    <img 
-                                                        src={item.iconPath} 
-                                                        alt="" 
-                                                        className="w-6 h-6 object-contain opacity-80 group-hover/item:opacity-100 group-hover/item:scale-110 transition-all"
-                                                        onError={handleImageError}
-                                                    />
-                                                </div>
-                                                <span className={item.name.startsWith('Unknown Item') ? 'text-muted-foreground italic font-medium opacity-60' : ''}>
-                                                    {item.name}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 text-center">
-                                            {item.maxUpgrade > 0 ? (
-                                                <span className="text-[10px] font-black text-blue-600 uppercase tracking-tighter">+{item.maxUpgrade}</span>
-                                            ) : (
-                                                <span className="text-[10px] font-bold text-muted-foreground/20">—</span>
-                                            )}
-                                        </td>
                                         {columnVisibility.category && (
                                             <td className="px-6 py-4">
-                                                <span className="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded bg-muted/50 text-muted-foreground">
-                                                    {item.category}
+                                                <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/50 rounded border border-border/50 text-muted-foreground">
+                                                    {item.subCategory.replace('_', ' ')}
                                                 </span>
                                             </td>
                                         )}
-                                        <td className="px-6 py-4 text-right">
-                                            <button 
-                                                onClick={() => setAddItemModal(item)}
-                                                className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground hover:text-primary transition-colors px-3 py-1 border border-transparent hover:border-primary/30 rounded"
-                                            >
-                                                Add
-                                            </button>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded border border-primary/10">
+                                                {item.maxUpgrade > 0 ? `+${item.maxUpgrade}` : '—'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-center space-x-2">
+                                                <input 
+                                                    type="number" 
+                                                    value={editedInv[item.handle] !== undefined ? editedInv[item.handle] : item.invQty}
+                                                    onChange={e => handleQtyChange(item.handle, e.target.value, 'inv', item.maxInv)}
+                                                    className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedInv[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
+                                                />
+                                                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxInv}</span>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-4">
+                                            <div className="flex items-center justify-center space-x-2">
+                                                <input 
+                                                    type="number" 
+                                                    value={editedStorage[item.handle] !== undefined ? editedStorage[item.handle] : item.storageQty}
+                                                    onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
+                                                    className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
+                                                />
+                                                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxStorage}</span>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
                                     <td colSpan={8} className="px-6 py-24 text-center">
-                                        <p className="text-xs text-muted-foreground font-medium italic">No results found in the Lands Between.</p>
+                                        <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                     </td>
                                 </tr>
                             )}
                         </tbody>
                     </table>
-                </div>
-                <div className="px-6 py-3 bg-muted/10 text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] border-t border-border flex justify-between items-center">
-                    <div className="flex items-center space-x-4">
-                        <span>Total: {mode === 'database' ? filteredDbItems.length : filteredOwnedItems.length}</span>
-                        <span className="w-1 h-1 bg-border rounded-full" />
-                        <span>Mode: {mode}</span>
-                    </div>
-                    <span className="opacity-50">Verified Integrity</span>
                 </div>
             </div>
         </div>

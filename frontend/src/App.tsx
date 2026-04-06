@@ -5,6 +5,7 @@ import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
 import {CharacterImporter} from './components/CharacterImporter';
 import {SettingsTab} from './components/SettingsTab';
+import {DatabaseTab} from './components/DatabaseTab';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -13,14 +14,14 @@ function App() {
     const [activeSlots, setActiveSlots] = useState<boolean[]>([]);
     const [charNames, setCharacterNames] = useState<string[]>([]);
     const [selectedChar, setSelectedChar] = useState<number>(0);
-    const [activeTab, setActiveTab] = useState('character');
+    const [activeTab, setActiveTab] = useState('database');
     const [theme, setTheme] = useState<Theme>('light');
     const [columnVisibility, setColumnVisibility] = useState({
         id: false,
         category: true
     });
 
-    const tabs = ['character', 'inventory', 'world progress', 'importer', 'settings'];
+    const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
 
     useEffect(() => {
         const root = document.documentElement;
@@ -145,7 +146,15 @@ function App() {
 
                 <div className="flex-1 flex flex-col min-h-0 relative">
                     <div className="w-full h-full p-6 flex flex-col min-h-0">
-                        {activeTab === 'settings' ? (
+                        {activeTab === 'database' ? (
+                            <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <DatabaseTab 
+                                    columnVisibility={columnVisibility} 
+                                    platform={platform} 
+                                    charIndex={selectedChar} 
+                                />
+                            </div>
+                        ) : activeTab === 'settings' ? (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-y-auto custom-scrollbar pr-2">
                                 <SettingsTab 
                                     theme={theme} 

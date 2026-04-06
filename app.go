@@ -142,6 +142,19 @@ func (a *App) GetItemList(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category)
 }
 
+// AddItemsToCharacter adds multiple items from the database to a character slot
+func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgradeLevel int, invMax, storageMax bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= 10 {
+		return fmt.Errorf("invalid character index")
+	}
+
+	slot := &a.save.Slots[charIdx]
+	return core.AddItemsToSlot(slot, itemIDs, upgradeLevel, invMax, storageMax)
+}
+
 // GetAllGraces returns all Sites of Grace
 func (a *App) GetAllGraces() []db.GraceEntry {
 	return db.GetAllGraces()

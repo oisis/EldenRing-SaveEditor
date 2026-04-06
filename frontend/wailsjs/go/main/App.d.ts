@@ -3,6 +3,8 @@
 import {db} from '../models';
 import {vm} from '../models';
 
+export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,arg4:boolean,arg5:boolean):Promise<void>;
+
 export function GetActiveSlots():Promise<Array<boolean>>;
 
 export function GetAllGraces():Promise<Array<db.GraceEntry>>;
