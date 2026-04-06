@@ -18,13 +18,13 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "ER Save Editor",
+		Title:         "ER Save Editor",
 		Width:         1280,
 		Height:        800,
 		MinWidth:      1024,
 		MinHeight:     768,
 		DisableResize: false,
-		AssetServer:   &assetserver.Options{
+		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},

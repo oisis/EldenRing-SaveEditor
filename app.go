@@ -83,7 +83,7 @@ func (a *App) GetCharacter(index int) (*vm.CharacterViewModel, error) {
 	if index < 0 || index >= 10 {
 		return nil, fmt.Errorf("invalid slot index")
 	}
-	
+
 	slot := a.save.Slots[index]
 	return vm.MapParsedSlotToVM(&slot)
 }

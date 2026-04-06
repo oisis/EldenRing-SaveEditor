@@ -44,6 +44,13 @@ func GetItemData(id uint32, category string) data.ItemData {
 		if item, ok := data.Items[id]; ok {
 			return item
 		}
+		if item, ok := data.SpiritAshes[id]; ok {
+			return item
+		}
+	case "Spirit Ash":
+		if item, ok := data.SpiritAshes[id]; ok {
+			return item
+		}
 	case "Ash of War":
 		if item, ok := data.Aows[id]; ok {
 			return item
@@ -80,7 +87,15 @@ func GetItemName(id uint32, category string) string {
 		if item, ok := data.Items[id]; ok && item.Name != "" {
 			return item.Name
 		}
+		if item, ok := data.SpiritAshes[id]; ok && item.Name != "" {
+			return item.Name
+		}
 		return fmt.Sprintf("Unknown Item (0x%X)", id)
+	case "Spirit Ash":
+		if item, ok := data.SpiritAshes[id]; ok && item.Name != "" {
+			return item.Name
+		}
+		return fmt.Sprintf("Unknown Spirit Ash (0x%X)", id)
 	case "Ash of War":
 		if item, ok := data.Aows[id]; ok && item.Name != "" {
 			return item.Name
@@ -123,6 +138,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 	searchItems := false
 	searchTalismans := false
 	searchAows := false
+	searchSpiritAshes := false
 
 	switch category {
 	case "weapons":
@@ -131,8 +147,10 @@ func GetItemsByCategory(category string) []ItemEntry {
 		searchWeapons = true
 	case "armors", "helms", "gauntlets", "leggings", "chest":
 		searchArmors = true
-	case "items", "sorceries", "incantations", "materials", "upgrade", "keyitems", "consumables", "spiritashes":
+	case "items", "sorceries", "incantations", "materials", "upgrade", "keyitems", "consumables":
 		searchItems = true
+	case "spiritashes":
+		searchSpiritAshes = true
 	case "ammo":
 		searchItems = true
 		searchWeapons = true // Arrows/Bolts can be in both
@@ -149,7 +167,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 			}
 
 			// Filter by prefix
-			if (id & 0xF0000000) != prefix && !(prefix == 0 && (id&0xF0000000) == 0) {
+			if (id&0xF0000000) != prefix && !(prefix == 0 && (id&0xF0000000) == 0) {
 				continue
 			}
 
@@ -159,8 +177,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 			}
 
 			// Sub-category filtering
-			itemSubCat := GetItemSubCategory(id, item.Name, getBroadCategory(prefix))
-			
+			itemSubCat := GetItemSubCategory(id, item, getBroadCategory(prefix))
+
 			if category != "all" {
 				if category == "weapons" {
 					// "weapons" category should only show actual weapons, not bows, shields, etc.
@@ -168,7 +186,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 						continue
 					}
 				} else if category == "armors" {
-					// "armors" category should only show full sets/chest pieces if we want, 
+					// "armors" category should only show full sets/chest pieces if we want,
 					// but usually it's a catch-all. Let's make it only show "chest" or "armors".
 					if itemSubCat != "armors" && itemSubCat != "chest" {
 						continue
@@ -214,6 +232,9 @@ func GetItemsByCategory(category string) []ItemEntry {
 	if searchAows {
 		processMap(data.Aows, 0xC0000000, "ashes")
 	}
+	if searchSpiritAshes {
+		processMap(data.SpiritAshes, 0x40000000, "spiritashes")
+	}
 
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Name < items[j].Name
@@ -240,36 +261,36 @@ func getBroadCategory(prefix uint32) string {
 }
 
 // GetItemSubCategory returns the granular category string for an item.
-func GetItemSubCategory(id uint32, name string, broadCategory string) string {
+func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) string {
 	if broadCategory == "Weapon" {
-		if itemMatchesCategory(id, name, "ammo") {
+		if itemMatchesCategory(id, item, "ammo") {
 			return "ammo"
 		}
-		if itemMatchesCategory(id, name, "bows") {
+		if itemMatchesCategory(id, item, "bows") {
 			return "bows"
 		}
-		if itemMatchesCategory(id, name, "seals") {
+		if itemMatchesCategory(id, item, "seals") {
 			return "seals"
 		}
-		if itemMatchesCategory(id, name, "staffs") {
+		if itemMatchesCategory(id, item, "staffs") {
 			return "staffs"
 		}
-		if itemMatchesCategory(id, name, "shields") {
+		if itemMatchesCategory(id, item, "shields") {
 			return "shields"
 		}
 		return "weapons"
 	}
 	if broadCategory == "Armor" {
-		if itemMatchesCategory(id, name, "helms") {
+		if itemMatchesCategory(id, item, "helms") {
 			return "helms"
 		}
-		if itemMatchesCategory(id, name, "gauntlets") {
+		if itemMatchesCategory(id, item, "gauntlets") {
 			return "gauntlets"
 		}
-		if itemMatchesCategory(id, name, "leggings") {
+		if itemMatchesCategory(id, item, "leggings") {
 			return "leggings"
 		}
-		if itemMatchesCategory(id, name, "chest") {
+		if itemMatchesCategory(id, item, "chest") {
 			return "chest"
 		}
 		return "armors"
@@ -282,33 +303,33 @@ func GetItemSubCategory(id uint32, name string, broadCategory string) string {
 	}
 
 	// For Items (Goods), check granular categories
-	if itemMatchesCategory(id, name, "sorceries") {
+	if itemMatchesCategory(id, item, "sorceries") {
 		return "sorceries"
 	}
-	if itemMatchesCategory(id, name, "incantations") {
+	if itemMatchesCategory(id, item, "incantations") {
 		return "incantations"
 	}
-	if itemMatchesCategory(id, name, "spiritashes") {
+	if itemMatchesCategory(id, item, "spiritashes") {
 		return "spiritashes"
 	}
-	if itemMatchesCategory(id, name, "materials") {
+	if itemMatchesCategory(id, item, "materials") {
 		return "materials"
 	}
-	if itemMatchesCategory(id, name, "upgrade") {
+	if itemMatchesCategory(id, item, "upgrade") {
 		return "upgrade"
 	}
-	if itemMatchesCategory(id, name, "ammo") {
+	if itemMatchesCategory(id, item, "ammo") {
 		return "ammo"
 	}
-	if itemMatchesCategory(id, name, "keyitems") {
+	if itemMatchesCategory(id, item, "keyitems") {
 		return "keyitems"
 	}
 
 	return "consumables"
 }
 
-func itemMatchesCategory(id uint32, name string, category string) bool {
-	nameLower := strings.ToLower(name)
+func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
+	nameLower := strings.ToLower(item.Name)
 	switch category {
 	case "bows":
 		return strings.Contains(nameLower, "bow") || strings.Contains(nameLower, "ballista") || strings.Contains(nameLower, "crossbow")
@@ -317,33 +338,33 @@ func itemMatchesCategory(id uint32, name string, category string) bool {
 	case "staffs":
 		return strings.Contains(nameLower, "staff") || strings.Contains(nameLower, "scepter")
 	case "shields":
-		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler") || 
+		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler") ||
 			strings.Contains(nameLower, "roundshield") || strings.Contains(nameLower, "greatshield") ||
 			strings.Contains(nameLower, "towershield") || strings.Contains(nameLower, "mirrorshield")
 	case "helms":
-		return strings.Contains(nameLower, "helm") || strings.Contains(nameLower, "hood") || 
-			strings.Contains(nameLower, "mask") || strings.Contains(nameLower, "crown") || 
+		return strings.Contains(nameLower, "helm") || strings.Contains(nameLower, "hood") ||
+			strings.Contains(nameLower, "mask") || strings.Contains(nameLower, "crown") ||
 			strings.Contains(nameLower, "headband") || strings.Contains(nameLower, "hat") ||
 			strings.Contains(nameLower, "coif")
 	case "gauntlets":
-		return strings.Contains(nameLower, "gauntlets") || strings.Contains(nameLower, "gloves") || 
+		return strings.Contains(nameLower, "gauntlets") || strings.Contains(nameLower, "gloves") ||
 			strings.Contains(nameLower, "bracers") || strings.Contains(nameLower, "manchettes") ||
 			strings.Contains(nameLower, "bracer")
 	case "leggings":
-		return strings.Contains(nameLower, "greaves") || strings.Contains(nameLower, "trousers") || 
+		return strings.Contains(nameLower, "greaves") || strings.Contains(nameLower, "trousers") ||
 			strings.Contains(nameLower, "boots") || strings.Contains(nameLower, "leggings") ||
 			strings.Contains(nameLower, "gaiters") || strings.Contains(nameLower, "shoes") ||
 			strings.Contains(nameLower, "skirt")
 	case "chest":
-		return !itemMatchesCategory(id, name, "helms") && 
-			!itemMatchesCategory(id, name, "gauntlets") && 
-			!itemMatchesCategory(id, name, "leggings")
+		return !itemMatchesCategory(id, item, "helms") &&
+			!itemMatchesCategory(id, item, "gauntlets") &&
+			!itemMatchesCategory(id, item, "leggings")
 	case "sorceries":
 		return id >= 0x40000FA0 && id <= 0x4000157C
 	case "incantations":
 		return id >= 0x40001770 && id <= 0x40002134
 	case "spiritashes":
-		return strings.Contains(nameLower, "ashes") && (id >= 0x40032898 || strings.Contains(nameLower, "spirit"))
+		return item.MaxUpgrade == 10 || strings.Contains(item.IconPath, "spirit_ashes")
 	case "materials":
 		craftingKeywords := []string{
 			"mushroom", "leaf", "flower", "fruit", "butterfly", "firefly",
@@ -382,13 +403,13 @@ func itemMatchesCategory(id uint32, name string, category string) bool {
 		}
 		return false
 	case "consumables":
-		return !itemMatchesCategory(id, name, "sorceries") &&
-			!itemMatchesCategory(id, name, "incantations") &&
-			!itemMatchesCategory(id, name, "materials") &&
-			!itemMatchesCategory(id, name, "upgrade") &&
-			!itemMatchesCategory(id, name, "ammo") &&
-			!itemMatchesCategory(id, name, "keyitems") &&
-			!itemMatchesCategory(id, name, "spiritashes")
+		return !itemMatchesCategory(id, item, "sorceries") &&
+			!itemMatchesCategory(id, item, "incantations") &&
+			!itemMatchesCategory(id, item, "materials") &&
+			!itemMatchesCategory(id, item, "upgrade") &&
+			!itemMatchesCategory(id, item, "ammo") &&
+			!itemMatchesCategory(id, item, "keyitems") &&
+			!itemMatchesCategory(id, item, "spiritashes")
 	}
 	return false
 }
@@ -396,51 +417,51 @@ func itemMatchesCategory(id uint32, name string, category string) bool {
 // GetAllItems returns all items from all categories.
 func GetAllItems() []ItemEntry {
 	var all []ItemEntry
-	cats := []string{"weapons", "armors", "items", "talismans", "aows"}
+	cats := []string{"weapons", "armors", "items", "talismans", "aows", "spiritashes"}
 	for _, cat := range cats {
 		all = append(all, GetItemsByCategory(cat)...)
 	}
-	
+
 	sort.Slice(all, func(i, j int) bool {
 		return all[i].Name < all[j].Name
 	})
-	
+
 	return all
 }
 
 // GetAllGraces returns all Sites of Grace as a flat list.
 func GetAllGraces() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))
-	
+
 	// Map game regions to our specific map filenames
 	regionMap := map[string]string{
-		"Ainsel River":               "Ainsel River",
-		"Altus Plateau":              "Altus Plateau",
-		"Caelid":                     "Caelid",
-		"Consecrated Snowfield":      "Consecrated Snowfield",
-		"Crumbling Farum Azula":      "Crumbling Farum Azula",
-		"Deeproot Depths":            "Deeproot Depths",
-		"Dragonbarrow":               "Dragonbarrow",
-		"Forbidden Lands":            "Forbidden Lands",
-		"Lake of Rot":                "Lake of Rot",
-		"Leyndell Ashen Capital":     "Leyndell, Royal Capital",
-		"Leyndell Royal Capital":     "Leyndell, Royal Capital",
-		"Miquella's Haligtree":       "Miquella's Haligtree",
-		"Mohgwyn Palace":             "Mohgwyn Palace",
-		"Mt. Gelmir":                 "Mt. Gelmir",
-		"Shadow of the Erdtree":      "Shadow of the Erdtree",
-		"Siofra River":               "Siofra River",
-		"Weeping Peninsula":          "Weeping Peninsula",
+		"Ainsel River":           "Ainsel River",
+		"Altus Plateau":          "Altus Plateau",
+		"Caelid":                 "Caelid",
+		"Consecrated Snowfield":  "Consecrated Snowfield",
+		"Crumbling Farum Azula":  "Crumbling Farum Azula",
+		"Deeproot Depths":        "Deeproot Depths",
+		"Dragonbarrow":           "Dragonbarrow",
+		"Forbidden Lands":        "Forbidden Lands",
+		"Lake of Rot":            "Lake of Rot",
+		"Leyndell Ashen Capital": "Leyndell, Royal Capital",
+		"Leyndell Royal Capital": "Leyndell, Royal Capital",
+		"Miquella's Haligtree":   "Miquella's Haligtree",
+		"Mohgwyn Palace":         "Mohgwyn Palace",
+		"Mt. Gelmir":             "Mt. Gelmir",
+		"Shadow of the Erdtree":  "Shadow of the Erdtree",
+		"Siofra River":           "Siofra River",
+		"Weeping Peninsula":      "Weeping Peninsula",
 	}
 
 	for id, fullName := range data.Graces {
 		parts := strings.Split(fullName, " (")
 		name := parts[0]
 		region := "Unknown"
-		
+
 		if len(parts) > 1 {
 			rawRegion := strings.TrimSuffix(parts[1], ")")
-			
+
 			// Detailed sub-region mapping
 			if rawRegion == "Limgrave" || rawRegion == "Roundtable Hold" {
 				region = "Limgrave West" // Default
@@ -455,7 +476,7 @@ func GetAllGraces() []GraceEntry {
 				region = "Liurnia North" // Default
 				eastKeywords := []string{"Eastern Liurnia", "Church of Vows", "Ainsel River Well", "Eastern Tableland", "Jarburg", "Liurnia Highway"}
 				westKeywords := []string{"Western Liurnia", "Carian Manor", "Four Belfries", "Revenger's Shack", "Temple Quarter", "Moongazing", "Caria Manor"}
-				
+
 				for _, kw := range eastKeywords {
 					if strings.Contains(name, kw) {
 						region = "Liurnia East"
@@ -485,7 +506,7 @@ func GetAllGraces() []GraceEntry {
 				region = rawRegion
 			}
 		}
-		
+
 		graces = append(graces, GraceEntry{
 			ID:     id,
 			Name:   name,
@@ -512,7 +533,7 @@ func GetEventFlag(flags []byte, id uint32) bool {
 	if int(info.Byte) >= len(flags) {
 		return false
 	}
-	
+
 	return (flags[info.Byte] & (1 << info.Bit)) != 0
 }
 
@@ -525,7 +546,7 @@ func SetEventFlag(flags []byte, id uint32, value bool) {
 	if int(info.Byte) >= len(flags) {
 		return
 	}
-	
+
 	if value {
 		flags[info.Byte] |= (1 << info.Bit)
 	} else {

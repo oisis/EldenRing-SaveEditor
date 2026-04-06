@@ -20,11 +20,11 @@ func TestSteamIDModification(t *testing.T) {
 	mockData := make([]byte, totalSize)
 	// Set some dummy SteamID in UD10 (offset 0x300 + 10*0x280010 + 0x10 + 4 = 0x19003C4?)
 	// Let's use the parser to load it from a file.
-	
+
 	// Create a dummy encrypted file
 	iv := make([]byte, 16)
 	copy(iv, "MOCK_IV_12345678")
-	
+
 	encrypted, _ := core.EncryptSave(mockData, iv)
 	tmpFile := "tmp_mock_save.sl2"
 	os.WriteFile(tmpFile, encrypted, 0644)
@@ -52,7 +52,7 @@ func TestSteamIDModification(t *testing.T) {
 	outputFile := "tmp_output_save.sl2"
 	// Create the file first so Write can back it up
 	os.WriteFile(outputFile, []byte("original content"), 0644)
-	
+
 	if err := save.Write(outputFile); err != nil {
 		t.Fatalf("Failed to write save: %v", err)
 	}

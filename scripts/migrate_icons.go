@@ -12,34 +12,34 @@ import (
 func normalize(name string) string {
 	ext := filepath.Ext(name)
 	base := strings.TrimSuffix(name, ext)
-	
+
 	// Remove " - MENU_Knowledge..." suffix
 	if idx := strings.Index(base, " - MENU_Knowledge"); idx != -1 {
 		base = base[:idx]
 	}
-	
+
 	// Lowercase
 	res := strings.ToLower(base)
-	
+
 	// Handle possessive 's that was often replaced by _s in source filenames
 	res = strings.ReplaceAll(res, "_s ", "s ")
 	res = strings.ReplaceAll(res, "_s_", "s_")
-	
+
 	// Replace spaces and hyphens with underscores
 	res = strings.ReplaceAll(res, " ", "_")
 	res = strings.ReplaceAll(res, "-", "_")
-	
+
 	// Remove special characters
 	reg := regexp.MustCompile(`[^a-z0-9_]`)
 	res = reg.ReplaceAllString(res, "")
-	
+
 	// Collapse multiple underscores
 	regMulti := regexp.MustCompile(`_+`)
 	res = regMulti.ReplaceAllString(res, "_")
-	
+
 	// Trim underscores from ends
 	res = strings.Trim(res, "_")
-	
+
 	return res + ".png"
 }
 

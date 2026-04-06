@@ -14,6 +14,7 @@ func main() {
 		"backend/db/data/aows.go",
 		"backend/db/data/armors.go",
 		"backend/db/data/items.go",
+		"backend/db/data/spirit_ashes.go",
 		"backend/db/data/talismans.go",
 		"backend/db/data/weapons.go",
 	}
@@ -34,10 +35,10 @@ func processFile(path string) error {
 
 	var lines []string
 	scanner := bufio.NewScanner(file)
-	
+
 	// Match entries like: 0x000F4240: {Name: "Dagger", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25},
 	reEntry := regexp.MustCompile(`\t(0x[0-9A-Fa-f]+): \{Name: "(.*)", MaxInventory: (\d+), MaxStorage: (\d+), MaxUpgrade: (\d+)\},`)
-	
+
 	category := filepath.Base(path)
 	catDir := ""
 	switch category {
@@ -55,24 +56,24 @@ func processFile(path string) error {
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		
+
 		if match := reEntry.FindStringSubmatch(line); match != nil {
 			idStr := match[1]
 			name := match[2]
 			maxInv := match[3]
 			maxStorage := match[4]
 			maxUpgrade := match[5]
-			
+
 			iconPath := getItemIconPath(name, catDir)
-			
+
 			// Escape double quotes in name if any
 			escapedName := strings.ReplaceAll(name, "\"", "\\\"")
-			
+
 			newLine := fmt.Sprintf("\t%s: {Name: \"%s\", MaxInventory: %s, MaxStorage: %s, MaxUpgrade: %s, IconPath: \"%s\"},", idStr, escapedName, maxInv, maxStorage, maxUpgrade, iconPath)
 			lines = append(lines, newLine)
 			continue
 		}
-		
+
 		lines = append(lines, line)
 	}
 
@@ -92,15 +93,15 @@ func getItemIconPath(name string, catDir string) string {
 	// Replace spaces and hyphens with underscores
 	cleanName = strings.ReplaceAll(cleanName, " ", "_")
 	cleanName = strings.ReplaceAll(cleanName, "-", "_")
-	
+
 	// Remove everything except letters, numbers, and underscores
 	reg := regexp.MustCompile(`[^\w]`)
 	cleanName = reg.ReplaceAllString(cleanName, "")
-	
+
 	// Collapse multiple underscores
 	reg2 := regexp.MustCompile(`_+`)
 	cleanName = reg2.ReplaceAllString(cleanName, "_")
-	
+
 	// Trim underscores from ends
 	cleanName = strings.Trim(cleanName, "_")
 
@@ -108,6 +109,6 @@ func getItemIconPath(name string, catDir string) string {
 	if cleanName == "golden_vow" && catDir == "ashes" {
 		cleanName = "ashes_of_war_golden_vow"
 	}
-	
+
 	return fmt.Sprintf("items/%s/%s.png", catDir, cleanName)
 }

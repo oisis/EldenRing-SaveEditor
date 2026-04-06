@@ -46,29 +46,33 @@ func restoreIcons(filename string) {
 	// 3. Process line by line and restore/generate icons
 	var newLines []string
 	scanner := bufio.NewScanner(strings.NewReader(string(currentContent)))
-	
+
 	// Determine category for new icons
 	category := "goods"
 	switch filename {
-	case "weapons.go": category = "weapons"
-	case "armors.go": category = "armor"
-	case "talismans.go": category = "talismans"
-	case "aows.go": category = "ashes"
+	case "weapons.go":
+		category = "weapons"
+	case "armors.go":
+		category = "armor"
+	case "talismans.go":
+		category = "talismans"
+	case "aows.go":
+		category = "ashes"
 	}
 
 	reLine := regexp.MustCompile(`(\t(0x[0-9A-Fa-f]+): \{Name: "(.*)", MaxInventory: (\d+), MaxStorage: (\d+), MaxUpgrade: (\d+), IconPath: ""\},)`)
-	
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		matches := reLine.FindStringSubmatch(line)
-		
+
 		if len(matches) == 7 {
 			id := matches[2]
 			name := matches[3]
 			inv := matches[4]
 			storage := matches[5]
 			upgrade := matches[6]
-			
+
 			iconPath := ""
 			if oldPath, ok := oldIcons[id]; ok && oldPath != "" {
 				iconPath = oldPath
@@ -79,9 +83,9 @@ func restoreIcons(filename string) {
 				cleanName = strings.Trim(cleanName, "_")
 				iconPath = fmt.Sprintf("items/%s/%s.png", category, cleanName)
 			}
-			
+
 			// Reconstruct line EXACTLY as it was, only changing IconPath
-			newLine := fmt.Sprintf("\t%s: {Name: \"%s\", MaxInventory: %s, MaxStorage: %s, MaxUpgrade: %s, IconPath: \"%s\"},", 
+			newLine := fmt.Sprintf("\t%s: {Name: \"%s\", MaxInventory: %s, MaxStorage: %s, MaxUpgrade: %s, IconPath: \"%s\"},",
 				id, name, inv, storage, upgrade, iconPath)
 			newLines = append(newLines, newLine)
 		} else {

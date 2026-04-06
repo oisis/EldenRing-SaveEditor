@@ -54,7 +54,7 @@ func main() {
 	missingCount := 0
 	for targetPath := range iconPaths {
 		fullTargetPath := filepath.Join("frontend/public", targetPath)
-		
+
 		// If file already exists at target path, skip
 		if _, err := os.Stat(fullTargetPath); err == nil {
 			continue
@@ -68,7 +68,7 @@ func main() {
 		if sourcePath, ok := existingFiles[normTarget]; ok {
 			// Ensure target directory exists
 			os.MkdirAll(filepath.Dir(fullTargetPath), 0755)
-			
+
 			fmt.Printf("🚚 Renaming: %s -> %s\n", sourcePath, fullTargetPath)
 			err := os.Rename(sourcePath, fullTargetPath)
 			if err != nil {

@@ -38,7 +38,7 @@ func TestRoundTripPS4(t *testing.T) {
 
 	if !bytes.Equal(originalData, newData) {
 		t.Errorf("Byte mismatch! Round-trip failed to preserve data integrity.")
-		
+
 		// Find first mismatch for debugging
 		for i := 0; i < len(originalData); i++ {
 			if i >= len(newData) {
@@ -85,7 +85,7 @@ func TestRoundTripPC(t *testing.T) {
 
 	if !bytes.Equal(originalData, newData) {
 		t.Errorf("Byte mismatch! Round-trip failed to preserve data integrity.")
-		
+
 		// Find first mismatch for debugging
 		for i := 0; i < len(originalData); i++ {
 			if i >= len(newData) {

@@ -75,10 +75,10 @@ func rebuildFromJSON(filename, varName string) {
 		}
 
 		baseID := rawID & 0x0FFFFFFF
-		
+
 		// Determine limits
 		inv, storage, upgrade := getLimits(name, varName, baseID)
-		
+
 		item := ItemData{
 			Name:         name,
 			MaxInventory: inv,
@@ -142,7 +142,7 @@ func getLimits(name, category string, id uint32) (inv, storage, upgrade uint32) 
 		} else if isSpiritAsh(name) {
 			inv, storage, upgrade = 1, 1, 10
 		}
-		
+
 		switch {
 		case strings.Contains(name, "Starlight Shards"):
 			inv = 10
@@ -319,7 +319,9 @@ func extractClasses(filename string) {
 		name := m[1]
 		statsRaw := m[2]
 		id, ok := archeTypeIDs[name]
-		if !ok { continue }
+		if !ok {
+			continue
+		}
 		stats := make(map[string]string)
 		statLines := strings.Split(statsRaw, ",")
 		for _, line := range statLines {
@@ -343,15 +345,24 @@ func extractEventFlags(filename string) {
 	fmt.Fprintf(out, "var EventFlags = map[uint32]EventFlagInfo{\n")
 	re := regexp.MustCompile(`\((\d+),\s*\((0x[0-9A-Fa-f]+|\d+),\s*(\d+)\)\)`)
 	matches := re.FindAllStringSubmatch(string(content), -1)
-	type eventFlagInfoHolder struct { Byte uint32; Bit uint8 }
+	type eventFlagInfoHolder struct {
+		Byte uint32
+		Bit  uint8
+	}
 	uniqueFlags := make(map[uint32]eventFlagInfoHolder)
 	for _, m := range matches {
-		var id uint32; var byteIdx uint32; var bitIdx uint8
-		fmt.Sscanf(m[1], "%d", &id); fmt.Sscanf(m[2], "%v", &byteIdx); fmt.Sscanf(m[3], "%d", &bitIdx)
+		var id uint32
+		var byteIdx uint32
+		var bitIdx uint8
+		fmt.Sscanf(m[1], "%d", &id)
+		fmt.Sscanf(m[2], "%v", &byteIdx)
+		fmt.Sscanf(m[3], "%d", &bitIdx)
 		uniqueFlags[id] = eventFlagInfoHolder{Byte: byteIdx, Bit: bitIdx}
 	}
 	ids := make([]uint32, 0, len(uniqueFlags))
-	for id := range uniqueFlags { ids = append(ids, id) }
+	for id := range uniqueFlags {
+		ids = append(ids, id)
+	}
 	sort.Slice(ids, func(i, j int) bool { return ids[i] < ids[j] })
 	for _, id := range ids {
 		info := uniqueFlags[id]

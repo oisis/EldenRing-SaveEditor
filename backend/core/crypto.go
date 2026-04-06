@@ -27,7 +27,7 @@ func DecryptSave(data []byte) ([]byte, error) {
 
 	iv := data[:16]
 	encrypted := data[16:]
-	
+
 	// CBC mode works on blocks of 16 bytes
 	if len(encrypted)%16 != 0 {
 		return nil, fmt.Errorf("encrypted data is not a multiple of block size")
@@ -63,7 +63,7 @@ func EncryptSave(data []byte, iv []byte) ([]byte, error) {
 	result := make([]byte, 0, len(iv)+len(encrypted))
 	result = append(result, iv...)
 	result = append(result, encrypted...)
-	
+
 	return result, nil
 }
 

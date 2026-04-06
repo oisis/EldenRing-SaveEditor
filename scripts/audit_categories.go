@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db/data"
+	"strings"
 )
 
 func main() {
@@ -13,28 +13,28 @@ func main() {
 		if id%100 != 0 {
 			continue
 		}
-		subCat := GetItemSubCategory(id, item.Name, "Weapon")
+		subCat := GetItemSubCategory(id, item, "Weapon")
 		if subCat != "weapons" {
 			fmt.Printf("ID: 0x%08X, Name: %-30s, SubCat: %s\n", id, item.Name, subCat)
 		}
 	}
 }
 
-func GetItemSubCategory(id uint32, name string, broadCategory string) string {
+func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) string {
 	if broadCategory == "Weapon" {
-		if itemMatchesCategory(id, name, "ammo") {
+		if itemMatchesCategory(id, item, "ammo") {
 			return "ammo"
 		}
-		if itemMatchesCategory(id, name, "bows") {
+		if itemMatchesCategory(id, item, "bows") {
 			return "bows"
 		}
-		if itemMatchesCategory(id, name, "seals") {
+		if itemMatchesCategory(id, item, "seals") {
 			return "seals"
 		}
-		if itemMatchesCategory(id, name, "staffs") {
+		if itemMatchesCategory(id, item, "staffs") {
 			return "staffs"
 		}
-		if itemMatchesCategory(id, name, "shields") {
+		if itemMatchesCategory(id, item, "shields") {
 			return "shields"
 		}
 		return "weapons"
@@ -42,8 +42,8 @@ func GetItemSubCategory(id uint32, name string, broadCategory string) string {
 	return "unknown"
 }
 
-func itemMatchesCategory(id uint32, name string, category string) bool {
-	nameLower := strings.ToLower(name)
+func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
+	nameLower := strings.ToLower(item.Name)
 	switch category {
 	case "bows":
 		return strings.Contains(nameLower, "bow") || strings.Contains(nameLower, "ballista") || strings.Contains(nameLower, "crossbow")

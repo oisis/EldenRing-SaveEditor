@@ -2,9 +2,9 @@ package vm
 
 import (
 	"fmt"
-	"unicode/utf16"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
+	"unicode/utf16"
 )
 
 type ItemViewModel struct {
@@ -57,7 +57,7 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 
 	// Map Inventory
 	vm.Inventory = mapItems(slot.Inventory, slot.GaMap)
-	
+
 	// Map Storage
 	vm.Storage = mapItems(slot.Storage, slot.GaMap)
 
@@ -93,14 +93,14 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 
 			itemData := db.GetItemData(itemID, category)
 			name := itemData.Name
-			
+
 			// Strict filtering: skip items that are not in our database (Unknown)
 			// to avoid garbage data from misaligned offsets.
-			if name == "" || name == fmt.Sprintf("Unknown Item (0x%X)", itemID) || 
-			   name == fmt.Sprintf("Unknown Weapon (0x%X)", itemID) ||
-			   name == fmt.Sprintf("Unknown Armor (0x%X)", itemID) ||
-			   name == fmt.Sprintf("Unknown Talisman (0x%X)", itemID) ||
-			   name == fmt.Sprintf("Unknown Ash of War (0x%X)", itemID) {
+			if name == "" || name == fmt.Sprintf("Unknown Item (0x%X)", itemID) ||
+				name == fmt.Sprintf("Unknown Weapon (0x%X)", itemID) ||
+				name == fmt.Sprintf("Unknown Armor (0x%X)", itemID) ||
+				name == fmt.Sprintf("Unknown Talisman (0x%X)", itemID) ||
+				name == fmt.Sprintf("Unknown Ash of War (0x%X)", itemID) {
 				return
 			}
 
@@ -118,7 +118,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				ID:           itemID,
 				Name:         name,
 				Category:     category,
-				SubCategory:  db.GetItemSubCategory(itemID, name, category),
+				SubCategory:  db.GetItemSubCategory(itemID, itemData, category),
 				Quantity:     displayQuantity,
 				MaxInventory: itemData.MaxInventory,
 				MaxStorage:   itemData.MaxStorage,
@@ -164,7 +164,7 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 
 	// Update Inventory
 	updateItems(vm.Inventory, &slot.Inventory)
-	
+
 	// Update Storage
 	updateItems(vm.Storage, &slot.Storage)
 

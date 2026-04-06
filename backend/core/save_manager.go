@@ -14,16 +14,16 @@ const (
 )
 
 type SaveFile struct {
-	Platform          Platform
-	Encrypted         bool
-	IV                []byte
-	Header            []byte
-	Slots             [10]SaveSlot
-	SteamID           uint64
-	UserData10        CSMenuSystemSaveLoad
-	ActiveSlots       [10]bool
-	ProfileSummaries  [10]ProfileSummary
-	UserData11        []byte
+	Platform         Platform
+	Encrypted        bool
+	IV               []byte
+	Header           []byte
+	Slots            [10]SaveSlot
+	SteamID          uint64
+	UserData10       CSMenuSystemSaveLoad
+	ActiveSlots      [10]bool
+	ProfileSummaries [10]ProfileSummary
+	UserData11       []byte
 }
 
 func LoadSave(path string) (*SaveFile, error) {
@@ -68,9 +68,9 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	udStart := r.Pos()
 	r.ReadBytes(0x10) // MD5
 	save.UserData10.Data, _ = r.ReadBytes(0x60000)
-	
+
 	udReader := NewReader(save.UserData10.Data)
-	
+
 	// SteamID is at the beginning of UserData10 data on PC
 	save.SteamID, _ = udReader.ReadU64()
 
@@ -80,7 +80,7 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		b, _ := udReader.ReadU8()
 		save.ActiveSlots[i] = b == 1
 	}
-	
+
 	// Profile Summaries start at 0x31A (ActiveSlots + 10 bytes)
 	// Each summary is 0x100 bytes
 	for i := 0; i < 10; i++ {
@@ -109,7 +109,7 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 	save.UserData10.Data, _ = r.ReadBytes(0x60000)
 	udReader := NewReader(save.UserData10.Data)
-	
+
 	// PS4: Active Slots are at 0x300, Summaries at 0x30A
 	udReader.Seek(0x300, 0)
 	for i := 0; i < 10; i++ {
@@ -140,7 +140,7 @@ func (s *SaveFile) SaveFile(path string) error {
 			w.WriteBytes(checksum[:])
 			w.WriteBytes(slotData)
 		}
-		
+
 		udData := s.UserData10.Data
 		checksum := ComputeMD5(udData)
 		w.WriteBytes(checksum[:])

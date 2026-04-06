@@ -19,7 +19,7 @@ func (vm *CharacterViewModel) RecalculateLevel() {
 // Located at PlayerGameDataOffset + 0x93 (0x154B3).
 func UpdateMatchmakingLevel(slotData []byte, maxUpgrade uint8) {
 	const MatchmakingLvlOffset = PlayerGameDataOffset + 0x93
-	
+
 	// If the current matchmaking level in the save is lower than the found max upgrade, update it.
 	currentLvl := slotData[MatchmakingLvlOffset]
 	if maxUpgrade > currentLvl {
@@ -30,8 +30,12 @@ func UpdateMatchmakingLevel(slotData []byte, maxUpgrade uint8) {
 // ValidateStats ensures all attributes are within legal game limits (1-99).
 func (vm *CharacterViewModel) ValidateStats() {
 	limit := func(val *uint32) {
-		if *val > 99 { *val = 99 }
-		if *val < 1 { *val = 1 }
+		if *val > 99 {
+			*val = 99
+		}
+		if *val < 1 {
+			*val = 1
+		}
 	}
 	limit(&vm.Vigor)
 	limit(&vm.Mind)

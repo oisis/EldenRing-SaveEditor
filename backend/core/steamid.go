@@ -36,7 +36,7 @@ func UpdateSlotSteamID(slotData []byte, newID uint64, isPC bool) error {
 	// Based on Rust analysis, SteamID is located near the end of the 0x280000 block.
 	// Offset calculation: 0x280000 - 0x80 (padding) - 0x32 (dlc) - 0x20 (ps5) - 8 (steam_id) = 0x27FF2A
 	offset := 0x27FF2A
-	
+
 	if len(slotData) < offset+8 {
 		return fmt.Errorf("slot data buffer too small for SteamID update")
 	}

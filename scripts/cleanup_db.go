@@ -27,13 +27,13 @@ func cleanupWeapons() {
 	for scanner.Scan() {
 		line := scanner.Text()
 		isAffinity := false
-		
+
 		if strings.Contains(line, ": \"") {
-			isAmmo := strings.Contains(line, "Arrow") || 
-					  strings.Contains(line, "Bolt") || 
-					  strings.Contains(line, "Great Arrow") || 
-					  strings.Contains(line, "Great Bolt") ||
-					  strings.Contains(line, "Harpoon")
+			isAmmo := strings.Contains(line, "Arrow") ||
+				strings.Contains(line, "Bolt") ||
+				strings.Contains(line, "Great Arrow") ||
+				strings.Contains(line, "Great Bolt") ||
+				strings.Contains(line, "Harpoon")
 
 			if !isAmmo {
 				for _, affix := range affixes {
@@ -44,7 +44,7 @@ func cleanupWeapons() {
 							continue
 						}
 						namePart := line[idxStart:idxEnd]
-						
+
 						if strings.HasPrefix(namePart, affix) || strings.Contains(namePart, "'s "+affix) {
 							isAffinity = true
 							break
@@ -81,7 +81,7 @@ func cleanupItems() {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
-		
+
 		if strings.Contains(line, " +") {
 			for i := 10; i >= 1; i-- {
 				suffix := fmt.Sprintf(" +%d", i)
@@ -91,7 +91,7 @@ func cleanupItems() {
 				}
 			}
 		}
-		
+
 		lines = append(lines, line)
 	}
 
@@ -111,10 +111,10 @@ func cleanupAows() {
 		fmt.Printf("Error reading aows: %v\n", err)
 		return
 	}
-	
+
 	content := string(data)
 	content = strings.ReplaceAll(content, "Ash of War: ", "")
-	
+
 	err = os.WriteFile(path, []byte(content), 0644)
 	if err != nil {
 		fmt.Printf("Error writing aows: %v\n", err)

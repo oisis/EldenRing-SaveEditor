@@ -71,28 +71,30 @@ type PlayerGameData struct {
 }
 
 type SaveSlot struct {
-	Data    []byte
-	Player  PlayerGameData
-	GaMap   map[uint32]uint32
+	Data      []byte
+	Player    PlayerGameData
+	GaMap     map[uint32]uint32
 	Inventory EquipInventoryData
 	Storage   EquipInventoryData
-	SteamID uint64
-	
+	SteamID   uint64
+
 	MagicOffset      int
 	InventoryEnd     int
 	EventFlagsOffset int
 
 	// Dynamic offsets from Python logic
-	PlayerDataOffset   int
-	FaceDataOffset     int
-	StorageBoxOffset   int
-	IngameTimerOffset  int
+	PlayerDataOffset  int
+	FaceDataOffset    int
+	StorageBoxOffset  int
+	IngameTimerOffset int
 }
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
 	var err error
 	s.Data, err = r.ReadBytes(0x280000)
-	if err != nil { return err }
+	if err != nil {
+		return err
+	}
 
 	s.MagicOffset = NewReader(s.Data).FindPattern(MagicPattern)
 	if s.MagicOffset == -1 {
@@ -114,7 +116,7 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 
 func (s *SaveSlot) calculateDynamicOffsets() {
 	s.PlayerDataOffset = s.InventoryEnd + 0x1B0
-	
+
 	spEffect := s.PlayerDataOffset + 0xD0
 	equipedItemIndex := spEffect + 0x58
 	activeEquipedItems := equipedItemIndex + 0x1c
@@ -124,7 +126,7 @@ func (s *SaveSlot) calculateDynamicOffsets() {
 	equipedSpells := inventoryHeld + 0x74
 	equipedItems := equipedSpells + 0x8c
 	equipedGestures := equipedItems + 0x18
-	
+
 	equipedProjcSize := binary.LittleEndian.Uint32(s.Data[equipedGestures:])
 	equipedProjectile := equipedGestures + int(equipedProjcSize*8+4)
 	equipedArmaments := equipedProjectile + 0x9C
@@ -157,15 +159,15 @@ func (s *SaveSlot) mapStats() {
 func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
-	
+
 	lastEnd := start
 	for curr+8 <= s.MagicOffset {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
-		
+
 		if handle != 0 && handle != 0xFFFFFFFF {
 			s.GaMap[handle] = itemID
-			
+
 			typeBits := handle & 0xF0000000
 			if typeBits == ItemTypeWeapon {
 				curr += 21
@@ -190,7 +192,7 @@ func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
 		handle, _ := r.ReadU32()
 		quantity, _ := r.ReadU32()
 		index, _ := r.ReadU32()
-		
+
 		if handle == 0 || handle == 0xFFFFFFFF {
 			// Stop reading at the first empty slot to avoid garbage data
 			// Note: We don't break because we need to maintain the reader position if needed,
@@ -198,7 +200,7 @@ func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
 			// Actually, breaking is safer here to avoid "Unknown Items".
 			break
 		}
-		
+
 		e.CommonItems = append(e.CommonItems, InventoryItem{
 			GaItemHandle: handle,
 			Quantity:     quantity,
@@ -262,7 +264,7 @@ func (p *ProfileSummary) Read(r *Reader) error {
 		p.CharacterName[i], _ = r.ReadU16()
 	}
 	p.Level, _ = r.ReadU32()
-	r.Seek(int64(start + 0x100), 0)
+	r.Seek(int64(start+0x100), 0)
 	return nil
 }
 
