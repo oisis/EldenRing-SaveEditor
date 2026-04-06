@@ -1,6 +1,9 @@
 package data
 
 var Incantations = map[uint32]ItemData{
+	0xB0001B12: {Name: "Honed Bolt", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/magic/honed_bolt.png"},
+	0xB0001B3A: {Name: "Vyke.s Dragonbolt", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/magic/vykes_dragonbolt.png"},
+	0xB0001B3B: {Name: "Dragonbolt Blessing", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/magic/dragonbolt_blessing.png"},
 	0x40001770: {Name: "Catch Flame", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/catch_flame.png"},
 	0x40001771: {Name: "O, Flame!", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/o_flame.png"},
 	0x4000177A: {Name: "Flame Sling", Category: "incantations", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/flame_sling.png"},

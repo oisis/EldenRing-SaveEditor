@@ -26,7 +26,7 @@ func main() {
 		"backend/db/data/shields.go",
 		"backend/db/data/staffs.go",
 		"backend/db/data/seals.go",
-		"backend/db/data/ammo.go",
+		"backend/db/data/arrows_and_bolts.go",
 		"backend/db/data/helms.go",
 		"backend/db/data/chest.go",
 		"backend/db/data/gauntlets.go",
@@ -142,7 +142,7 @@ func getLimits(name, filename string) (uint32, uint32) {
 		return 99, 600
 	case "base_materials.go", "dlc_materials.go", "smithing_stones.go", "gloveworts.go":
 		return 999, 999
-	case "ammo.go":
+	case "arrows_and_bolts.go":
 		return 99, 600
 	case "golden_runes.go":
 		return 99, 600

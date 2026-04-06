@@ -1,6 +1,8 @@
 package data
 
 var ThrowingPots = map[uint32]ItemData{
+	0x40000141: {Name: "Ancient Dragonbolt Pot", Category: "consumables", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/ancient_dragonbolt_pot.png"},
+	0xB0000141: {Name: "Ancient Dragonbolt Pot", Category: "consumables", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/ancient_dragonbolt_pot.png"},
 	0x4000012C: {Name: "Fire Pot", Category: "throwing_pots", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/pots/fire_pot.png"},
 	0x4000012D: {Name: "Redmane Fire Pot", Category: "throwing_pots", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/pots/redmane_fire_pot.png"},
 	0x4000012E: {Name: "Giantsflame Fire Pot", Category: "throwing_pots", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/pots/giantsflame_fire_pot.png"},

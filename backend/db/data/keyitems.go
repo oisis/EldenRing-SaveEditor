@@ -1,6 +1,8 @@
 package data
 
 var Keyitems = map[uint32]ItemData{
+	0x400021A2: {Name: "Map: Dragonbarrow", Category: "keyitems", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/progress/map_dragonbarrow.png"},
+	0xB00021A2: {Name: "Map: Dragonbarrow", Category: "keyitems", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/progress/map_dragonbarrow.png"},
 	0x4000230A: {Name: "Iron Whetblade", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/progress/keyitems/iron_whetblade.png"},
 	0x4000230B: {Name: "Red-Hot Whetblade", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/progress/keyitems/red_hot_whetblade.png"},
 	0x4000230C: {Name: "Sanctified Whetblade", Category: "keyitems", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/progress/keyitems/sanctified_whetblade.png"},

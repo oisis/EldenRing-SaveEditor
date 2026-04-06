@@ -18,6 +18,7 @@
 3. **Implementation**: Backend logic first, then Wails bindings, then Frontend UI.
 4. **Testing**: Use save files from `tmp/save` (contains 2x PS4 and 1x PC saves) for manual and automated verification.
 5. **Build Check**: Always run `make` to ensure cross-platform compatibility and build integrity.
+6. **Agents**: Use agents to do tasks as much as it is possible.
 
 # 📋 TASK MANAGEMENT
 1. Select next task from `ROADMAP.md`.

@@ -22,8 +22,8 @@ func main() {
 
 func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) string {
 	if broadCategory == "Weapon" {
-		if itemMatchesCategory(id, item, "ammo") {
-			return "ammo"
+		if itemMatchesCategory(id, item, "arrows_and_bolts") {
+			return "arrows_and_bolts"
 		}
 		if itemMatchesCategory(id, item, "bows") {
 			return "bows"
@@ -53,7 +53,7 @@ func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
 		return strings.Contains(nameLower, "staff") || strings.Contains(nameLower, "scepter")
 	case "shields":
 		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler")
-	case "ammo":
+	case "arrows_and_bolts":
 		if strings.Contains(nameLower, "bolt of gransax") {
 			return false
 		}

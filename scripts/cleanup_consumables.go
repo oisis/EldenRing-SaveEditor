@@ -13,7 +13,7 @@ func main() {
 	
 	// List of all maps EXCEPT Consumables
 	maps := map[string]map[uint32]data.ItemData{
-		"ammo": data.Ammo,
+		"arrows_and_bolts": data.ArrowsAndBolts,
 		"aows": data.Aows,
 		"base_materials": data.BaseMaterials,
 		"bows": data.Bows,

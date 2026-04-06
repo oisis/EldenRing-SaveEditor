@@ -22,14 +22,14 @@ type ItemEntry struct {
 type GraceEntry struct {
 	ID     uint32 `json:"id"`
 	Name   string `json:"name"`
-	Region string `json:"region"`
+	Region string `region"`
 }
 
 // GetItemData returns the full metadata of an item by its ID and category.
 func GetItemData(id uint32, category string) data.ItemData {
 	// Search in all relevant maps
 	allMaps := []map[uint32]data.ItemData{
-		data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals, data.Ammo,
+		data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals, data.ArrowsAndBolts,
 		data.Helms, data.Chest, data.Gauntlets, data.Leggings,
 		data.Talismans, data.Aows, data.Gestures,
 		data.StandardAshes, data.RenownedAshes, data.LegendaryAshes, data.Puppets,
@@ -178,8 +178,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 		processMap(data.SmithingStones, "smithing_stones")
 	case "gloveworts":
 		processMap(data.Gloveworts, "gloveworts")
-	case "ammo":
-		processMap(data.Ammo, "ammo")
+	case "arrows_and_bolts":
+		processMap(data.ArrowsAndBolts, "arrows_and_bolts")
 	case "sacred_flasks":
 		processMap(data.SacredFlasks, "sacred_flasks")
 	case "throwing_pots":
@@ -238,7 +238,7 @@ func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) str
 func GetAllItems() []ItemEntry {
 	var all []ItemEntry
 	cats := []string{
-		"weapons", "bows", "shields", "staffs", "seals", "ammo",
+		"weapons", "bows", "shields", "staffs", "seals", "arrows_and_bolts",
 		"helms", "chest", "gauntlets", "leggings",
 		"talismans", "aows", "gestures",
 		"standard_ashes", "renowned_ashes", "legendary_ashes", "puppets",

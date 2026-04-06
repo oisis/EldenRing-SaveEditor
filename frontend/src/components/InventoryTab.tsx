@@ -228,13 +228,14 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                     >
                         <option value="all">All Categories</option>
                         <optgroup label="Equipment" className="bg-background text-foreground">
-                            <option value="weapons">Weapons</option>
+                            <option value="weapons">Melee Weapons</option>
                             <option value="bows">Bows & Ballistae</option>
                             <option value="shields">Shields</option>
                             <option value="staffs">Glintstone Staffs</option>
                             <option value="seals">Sacred Seals</option>
-                            <option value="talismans">Talismans</option>
+                            <option value="arrows_and_bolts">Arrows And Bolts</option>
                             <option value="aows">Ashes of War</option>
+                            <option value="talismans">Talismans</option>
                         </optgroup>
                         <optgroup label="Armor" className="bg-background text-foreground">
                             <option value="helms">Helms</option>
@@ -270,7 +271,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                             <option value="dlc_materials">DLC Materials</option>
                             <option value="smithing_stones">Smithing Stones</option>
                             <option value="gloveworts">Gloveworts</option>
-                            <option value="ammo">Ammunition</option>
                         </optgroup>
                         <optgroup label="Progress" className="bg-background text-foreground">
                             <option value="keyitems">Key Items</option>
@@ -400,7 +400,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                     onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
                                                     className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
                                                 />
-                                                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxStorage}</span>
+                                                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.storageQty}</span>
                                             </div>
                                         </td>
                                     </tr>

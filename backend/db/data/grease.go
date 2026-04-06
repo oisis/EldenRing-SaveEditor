@@ -1,6 +1,12 @@
 package data
 
 var Grease = map[uint32]ItemData{
+	0x401E8A02: {Name: "Dragonbolt Grease", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/dragonbolt_grease.png"},
+	0x401E8A66: {Name: "Drawstring Dragonbolt Grease", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/drawstring_dragonbolt_grease.png"},
+	0x401E9F7E: {Name: "Dragonbolt of Florissax", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/dragonbolt_of_florissax.png"},
+	0xB01E8A02: {Name: "Dragonbolt Grease", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/dragonbolt_grease.png"},
+	0xB01E8A66: {Name: "Drawstring Dragonbolt Grease", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/drawstring_dragonbolt_grease.png"},
+	0xB01E9F7E: {Name: "Dragonbolt of Florissax", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/dragonbolt_of_florissax.png"},
 	0x40000578: {Name: "Fire Grease", Category: "grease", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/grease/fire_grease.png"},
 	0x40000582: {Name: "Lightning Grease", Category: "grease", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/grease/lightning_grease.png"},
 	0x4000058C: {Name: "Magic Grease", Category: "grease", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/grease/magic_grease.png"},
