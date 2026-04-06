@@ -116,4 +116,10 @@ var Throwables = map[uint32]ItemData{
 	0xB01ED2BC: {Name: "Spiritgrave Stone", Category: "throwables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/throwables/spiritgrave_stone.png"},
 	0xB01ED2C1: {Name: "Nailstone", Category: "throwables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/throwables/nailstone.png"},
 	0xB01ED2C2: {Name: "Sharp Gravel Stone", Category: "throwables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/throwables/sharp_gravel_stone.png"},
+	0x400006A4: {Name: "Throwing Dagger", Category: "throwables", MaxInventory: 40, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/throwing_dagger.png"},
+	0x401E8B2E: {Name: "Dragon Communion Harpoon", Category: "throwables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/dragon_communion_harpoon.png"},
+	0x401E90EC: {Name: "Fire Coil", Category: "throwables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/fire_coil.png"},
+	0xB00006A4: {Name: "Throwing Dagger", Category: "throwables", MaxInventory: 40, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/throwing_dagger.png"},
+	0xB01E8B2E: {Name: "Dragon Communion Harpoon", Category: "throwables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/dragon_communion_harpoon.png"},
+	0xB01E90EC: {Name: "Fire Coil", Category: "throwables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/fire_coil.png"},
 }
