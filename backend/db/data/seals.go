@@ -1,0 +1,28 @@
+package data
+
+var Seals = map[uint32]ItemData{
+	0x0206CC80: {Name: "Finger Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/finger_seal.png"},
+	0x0206F390: {Name: "Godslayer's Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/godslayers_seal.png"},
+	0x02071AA0: {Name: "Giant's Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/giants_seal.png"},
+	0x020741B0: {Name: "Gravel Stone Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/gravel_stone_seal.png"},
+	0x020768C0: {Name: "Clawmark Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/clawmark_seal.png"},
+	0x0207B6E0: {Name: "Golden Order Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/golden_order_seal.png"},
+	0x0207DDF0: {Name: "Erdtree Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/erdtree_seal.png"},
+	0x02080500: {Name: "Dragon Communion Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dragon_communion_seal.png"},
+	0x02082C10: {Name: "Frenzied Flame Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/frenzied_flame_seal.png"},
+	0x020E6DA0: {Name: "Dryleaf Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dryleaf_seal.png"},
+	0x020E94B0: {Name: "Fire Knight's Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/fire_knight_s_seal.png"},
+	0x020EBBC0: {Name: "Spiraltree Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/spiraltree_seal.png"},
+	0x8206CC80: {Name: "Finger Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/finger_seal.png"},
+	0x8206F390: {Name: "Godslayer's Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/godslayers_seal.png"},
+	0x82071AA0: {Name: "Giant's Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/giants_seal.png"},
+	0x820741B0: {Name: "Gravel Stone Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/gravel_stone_seal.png"},
+	0x820768C0: {Name: "Clawmark Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/clawmark_seal.png"},
+	0x8207B6E0: {Name: "Golden Order Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/golden_order_seal.png"},
+	0x8207DDF0: {Name: "Erdtree Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/erdtree_seal.png"},
+	0x82080500: {Name: "Dragon Communion Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dragon_communion_seal.png"},
+	0x82082C10: {Name: "Frenzied Flame Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/frenzied_flame_seal.png"},
+	0x820E6DA0: {Name: "Dryleaf Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dryleaf_seal.png"},
+	0x820E94B0: {Name: "Fire Knight's Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/fire_knight_s_seal.png"},
+	0x820EBBC0: {Name: "Spiraltree Seal", Category: "seals", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/spiraltree_seal.png"},
+}

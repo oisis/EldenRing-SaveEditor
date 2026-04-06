@@ -414,15 +414,34 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                             <option value="gauntlets">Gauntlets</option>
                             <option value="leggings">Leggings</option>
                         </optgroup>
+                        <optgroup label="Tools" className="bg-background text-foreground">
+                            <option value="sacred_flasks">Sacred Flasks</option>
+                            <option value="consumables">Consumables</option>
+                            <option value="throwing_pots">Throwing Pots</option>
+                            <option value="perfume_arts">Perfume Arts</option>
+                            <option value="throwables">Throwables</option>
+                            <option value="grease">Grease</option>
+                            <option value="misc_tools">Miscellaneous Tools</option>
+                            <option value="quest_tools">Quest Tools</option>
+                            <option value="golden_runes">Golden Runes</option>
+                            <option value="remembrances">Remembrances</option>
+                            <option value="multiplayer">Multiplayer Items</option>
+                        </optgroup>
+                        <optgroup label="Ashes" className="bg-background text-foreground">
+                            <option value="standard_ashes">Standard Spirit Ashes</option>
+                            <option value="renowned_ashes">Renowned Spirit Ashes</option>
+                            <option value="legendary_ashes">Legendary Spirit Ashes</option>
+                            <option value="puppets">Puppet Spirit Ashes</option>
+                        </optgroup>
                         <optgroup label="Magic" className="bg-background text-foreground">
                             <option value="sorceries">Sorceries</option>
                             <option value="incantations">Incantations</option>
-                            <option value="spiritashes">Spirit Ashes</option>
                         </optgroup>
                         <optgroup label="Items" className="bg-background text-foreground">
-                            <option value="consumables">Consumables</option>
-                            <option value="materials">Crafting Materials</option>
-                            <option value="upgrade">Upgrade Materials</option>
+                            <option value="base_materials">Base Game Materials</option>
+                            <option value="dlc_materials">DLC Materials</option>
+                            <option value="smithing_stones">Smithing Stones</option>
+                            <option value="gloveworts">Gloveworts</option>
                             <option value="ammo">Ammunition</option>
                         </optgroup>
                         <optgroup label="Progress" className="bg-background text-foreground">

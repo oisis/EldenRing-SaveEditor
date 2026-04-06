@@ -27,50 +27,44 @@ type GraceEntry struct {
 
 // GetItemData returns the full metadata of an item by its ID and category.
 func GetItemData(id uint32, category string) data.ItemData {
-	switch category {
-	case "Weapon":
-		if item, ok := data.Weapons[id]; ok {
-			return item
-		}
-	case "Armor":
-		if item, ok := data.Armors[id]; ok {
-			return item
-		}
-	case "Talisman":
-		if item, ok := data.Talismans[id]; ok {
-			return item
-		}
-	case "Item":
-		if item, ok := data.Items[id]; ok {
-			return item
-		}
-		if item, ok := data.SpiritAshes[id]; ok {
-			return item
-		}
-		if item, ok := data.Gestures[id]; ok {
-			return item
-		}
-	case "Spirit Ash":
-		if item, ok := data.SpiritAshes[id]; ok {
-			return item
-		}
-	case "Gesture":
-		if item, ok := data.Gestures[id]; ok {
-			return item
-		}
-	case "Ash of War":
-		if item, ok := data.Aows[id]; ok {
+	// Search in all relevant maps
+	allMaps := []map[uint32]data.ItemData{
+		data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals, data.Ammo,
+		data.Helms, data.Chest, data.Gauntlets, data.Leggings,
+		data.Talismans, data.Aows, data.Gestures,
+		data.StandardAshes, data.RenownedAshes, data.LegendaryAshes, data.Puppets,
+		data.Sorceries, data.Incantations, data.BaseMaterials, data.DlcMaterials,
+		data.SmithingStones, data.Gloveworts,
+		data.SacredFlasks, data.ThrowingPots, data.PerfumeArts, data.Throwables,
+		data.Grease, data.MiscTools, data.QuestTools, data.GoldenRunes,
+		data.Remembrances, data.Multiplayer, data.Consumables, data.Keyitems,
+	}
+
+	for _, m := range allMaps {
+		if item, ok := m[id]; ok {
 			return item
 		}
 	}
+
 	return data.ItemData{Name: GetItemName(id, category)}
 }
 
 // GetItemName returns the name of an item by its ID and category.
 func GetItemName(id uint32, category string) string {
-	switch category {
-	case "Weapon":
-		for baseID, item := range data.Weapons {
+	// Special handling for weapons with levels
+	for baseID, item := range data.Weapons {
+		if (id & 0xFFFFFF00) == (baseID & 0xFFFFFF00) {
+			level := id - baseID
+			if level > 0 {
+				return fmt.Sprintf("%s +%d", item.Name, level)
+			}
+			return item.Name
+		}
+	}
+	// Check other weapon-like categories for levels
+	weaponMaps := []map[uint32]data.ItemData{data.Bows, data.Shields, data.Staffs, data.Seals}
+	for _, m := range weaponMaps {
+		for baseID, item := range m {
 			if (id & 0xFFFFFF00) == (baseID & 0xFFFFFF00) {
 				level := id - baseID
 				if level > 0 {
@@ -79,46 +73,14 @@ func GetItemName(id uint32, category string) string {
 				return item.Name
 			}
 		}
-		return fmt.Sprintf("Unknown Weapon (0x%X)", id)
-	case "Armor":
-		if item, ok := data.Armors[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		return fmt.Sprintf("Unknown Armor (0x%X)", id)
-	case "Talisman":
-		if item, ok := data.Talismans[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		return fmt.Sprintf("Unknown Talisman (0x%X)", id)
-	case "Item":
-		if item, ok := data.Items[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		if item, ok := data.SpiritAshes[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		if item, ok := data.Gestures[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		return fmt.Sprintf("Unknown Item (0x%X)", id)
-	case "Spirit Ash":
-		if item, ok := data.SpiritAshes[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		return fmt.Sprintf("Unknown Spirit Ash (0x%X)", id)
-	case "Gesture":
-		if item, ok := data.Gestures[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		return fmt.Sprintf("Unknown Gesture (0x%X)", id)
-	case "Ash of War":
-		if item, ok := data.Aows[id]; ok && item.Name != "" {
-			return item.Name
-		}
-		return fmt.Sprintf("Unknown Ash of War (0x%X)", id)
-	default:
-		return fmt.Sprintf("Unknown Item (0x%X)", id)
 	}
+
+	itemData := GetItemData(id, category)
+	if itemData.Name != "" {
+		return itemData.Name
+	}
+
+	return fmt.Sprintf("Unknown Item (0x%X)", id)
 }
 
 // GetItemCategoryFromHandle returns the category string based on the GaItemHandle prefix.
@@ -147,80 +109,16 @@ func GetItemsByCategory(category string) []ItemEntry {
 
 	var items []ItemEntry
 
-	// Define which maps to search based on category
-	searchWeapons := false
-	searchArmors := false
-	searchItems := false
-	searchTalismans := false
-	searchAows := false
-	searchSpiritAshes := false
-	searchGestures := false
-
-	switch category {
-	case "weapons":
-		searchWeapons = true
-	case "bows", "seals", "staffs", "shields":
-		searchWeapons = true
-	case "armors", "helms", "gauntlets", "leggings", "chest":
-		searchArmors = true
-	case "items", "sorceries", "incantations", "materials", "upgrade", "keyitems", "consumables":
-		searchItems = true
-	case "spiritashes":
-		searchSpiritAshes = true
-	case "gestures":
-		searchGestures = true
-	case "ammo":
-		searchItems = true
-		searchWeapons = true // Arrows/Bolts can be in both
-	case "talismans":
-		searchTalismans = true
-	case "aows":
-		searchAows = true
-	}
-
-	processMap := func(source map[uint32]data.ItemData, prefix uint32, catName string) {
+	processMap := func(source map[uint32]data.ItemData, catName string) {
 		for id, item := range source {
 			if item.Name == "" || item.Name == "Unarmed" {
 				continue
 			}
 
-			// Filter by prefix
-			if (id&0xF0000000) != prefix && !(prefix == 0 && (id&0xF0000000) == 0) {
-				continue
-			}
-
 			// For weapons/bows/etc, we only want base items (usually ending in 0)
+			prefix := id & 0xF0000000
 			if prefix == 0 && id%100 != 0 {
 				continue
-			}
-
-			// Sub-category filtering
-			itemSubCat := GetItemSubCategory(id, item, getBroadCategory(prefix))
-
-			if category != "all" {
-				if category == "weapons" {
-					// "weapons" category should only show actual weapons, not bows, shields, etc.
-					if itemSubCat != "weapons" {
-						continue
-					}
-				} else if category == "armors" {
-					// "armors" category should only show full sets/chest pieces if we want,
-					// but usually it's a catch-all. Let's make it only show "chest" or "armors".
-					if itemSubCat != "armors" && itemSubCat != "chest" {
-						continue
-					}
-				} else if category == "items" {
-					// "items" is a catch-all for goods, but let's exclude specific sub-cats if needed.
-					// For now, keep it as is or filter to "consumables".
-					if itemSubCat != "consumables" && itemSubCat != "items" {
-						continue
-					}
-				} else {
-					// Specific sub-category requested (e.g., "shields", "bows")
-					if itemSubCat != category {
-						continue
-					}
-				}
 			}
 
 			items = append(items, ItemEntry{
@@ -235,26 +133,77 @@ func GetItemsByCategory(category string) []ItemEntry {
 		}
 	}
 
-	if searchWeapons {
-		processMap(data.Weapons, 0x00000000, "weapons")
-	}
-	if searchArmors {
-		processMap(data.Armors, 0x10000000, "armor")
-	}
-	if searchItems {
-		processMap(data.Items, 0x40000000, "goods")
-	}
-	if searchTalismans {
-		processMap(data.Talismans, 0x20000000, "talismans")
-	}
-	if searchAows {
-		processMap(data.Aows, 0xC0000000, "ashes")
-	}
-	if searchSpiritAshes {
-		processMap(data.SpiritAshes, 0x40000000, "spiritashes")
-	}
-	if searchGestures {
-		processMap(data.Gestures, 0x40000000, "gestures")
+	switch category {
+	case "weapons":
+		processMap(data.Weapons, "weapons")
+	case "bows":
+		processMap(data.Bows, "bows")
+	case "seals":
+		processMap(data.Seals, "seals")
+	case "staffs":
+		processMap(data.Staffs, "staffs")
+	case "shields":
+		processMap(data.Shields, "shields")
+	case "helms":
+		processMap(data.Helms, "helms")
+	case "gauntlets":
+		processMap(data.Gauntlets, "gauntlets")
+	case "leggings":
+		processMap(data.Leggings, "leggings")
+	case "chest":
+		processMap(data.Chest, "chest")
+	case "talismans":
+		processMap(data.Talismans, "talismans")
+	case "aows":
+		processMap(data.Aows, "ashes")
+	case "standard_ashes":
+		processMap(data.StandardAshes, "standard_ashes")
+	case "renowned_ashes":
+		processMap(data.RenownedAshes, "renowned_ashes")
+	case "legendary_ashes":
+		processMap(data.LegendaryAshes, "legendary_ashes")
+	case "puppets":
+		processMap(data.Puppets, "puppets")
+	case "gestures":
+		processMap(data.Gestures, "gestures")
+	case "sorceries":
+		processMap(data.Sorceries, "sorceries")
+	case "incantations":
+		processMap(data.Incantations, "incantations")
+	case "base_materials":
+		processMap(data.BaseMaterials, "base_materials")
+	case "dlc_materials":
+		processMap(data.DlcMaterials, "dlc_materials")
+	case "smithing_stones":
+		processMap(data.SmithingStones, "smithing_stones")
+	case "gloveworts":
+		processMap(data.Gloveworts, "gloveworts")
+	case "ammo":
+		processMap(data.Ammo, "ammo")
+	case "sacred_flasks":
+		processMap(data.SacredFlasks, "sacred_flasks")
+	case "throwing_pots":
+		processMap(data.ThrowingPots, "throwing_pots")
+	case "perfume_arts":
+		processMap(data.PerfumeArts, "perfume_arts")
+	case "throwables":
+		processMap(data.Throwables, "throwables")
+	case "grease":
+		processMap(data.Grease, "grease")
+	case "misc_tools":
+		processMap(data.MiscTools, "misc_tools")
+	case "quest_tools":
+		processMap(data.QuestTools, "quest_tools")
+	case "golden_runes":
+		processMap(data.GoldenRunes, "golden_runes")
+	case "remembrances":
+		processMap(data.Remembrances, "remembrances")
+	case "multiplayer":
+		processMap(data.Multiplayer, "multiplayer")
+	case "consumables":
+		processMap(data.Consumables, "consumables")
+	case "keyitems":
+		processMap(data.Keyitems, "keyitems")
 	}
 
 	sort.Slice(items, func(i, j int) bool {
@@ -264,187 +213,41 @@ func GetItemsByCategory(category string) []ItemEntry {
 	return items
 }
 
-func getBroadCategory(prefix uint32) string {
-	switch prefix {
-	case 0x00000000:
-		return "Weapon"
-	case 0x10000000:
-		return "Armor"
-	case 0x20000000:
-		return "Talisman"
-	case 0x40000000:
-		return "Item"
-	case 0xC0000000:
-		return "Ash of War"
-	default:
-		return "Unknown"
-	}
-}
-
 // GetItemSubCategory returns the granular category string for an item.
 func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) string {
-	if broadCategory == "Weapon" {
-		if itemMatchesCategory(id, item, "ammo") {
-			return "ammo"
-		}
-		if itemMatchesCategory(id, item, "bows") {
-			return "bows"
-		}
-		if itemMatchesCategory(id, item, "seals") {
-			return "seals"
-		}
-		if itemMatchesCategory(id, item, "staffs") {
-			return "staffs"
-		}
-		if itemMatchesCategory(id, item, "shields") {
-			return "shields"
-		}
+	if item.Category != "" {
+		return item.Category
+	}
+
+	// Fallback for items without category
+	switch broadCategory {
+	case "Weapon":
 		return "weapons"
-	}
-	if broadCategory == "Armor" {
-		if itemMatchesCategory(id, item, "helms") {
-			return "helms"
-		}
-		if itemMatchesCategory(id, item, "gauntlets") {
-			return "gauntlets"
-		}
-		if itemMatchesCategory(id, item, "leggings") {
-			return "leggings"
-		}
-		if itemMatchesCategory(id, item, "chest") {
-			return "chest"
-		}
-		return "armors"
-	}
-	if broadCategory == "Talisman" {
+	case "Armor":
+		return "chest"
+	case "Talisman":
 		return "talismans"
-	}
-	if broadCategory == "Ash of War" {
+	case "Ash of War":
 		return "aows"
+	default:
+		return "consumables"
 	}
-
-	// For Items (Goods), check granular categories
-	if itemMatchesCategory(id, item, "sorceries") {
-		return "sorceries"
-	}
-	if itemMatchesCategory(id, item, "incantations") {
-		return "incantations"
-	}
-	if itemMatchesCategory(id, item, "spiritashes") {
-		return "spiritashes"
-	}
-	if itemMatchesCategory(id, item, "gestures") {
-		return "gestures"
-	}
-	if itemMatchesCategory(id, item, "materials") {
-		return "materials"
-	}
-	if itemMatchesCategory(id, item, "upgrade") {
-		return "upgrade"
-	}
-	if itemMatchesCategory(id, item, "ammo") {
-		return "ammo"
-	}
-	if itemMatchesCategory(id, item, "keyitems") {
-		return "keyitems"
-	}
-
-	return "consumables"
-}
-
-func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
-	nameLower := strings.ToLower(item.Name)
-	switch category {
-	case "bows":
-		return strings.Contains(nameLower, "bow") || strings.Contains(nameLower, "ballista") || strings.Contains(nameLower, "crossbow")
-	case "seals":
-		return strings.Contains(nameLower, "seal")
-	case "staffs":
-		return strings.Contains(nameLower, "staff") || strings.Contains(nameLower, "scepter")
-	case "shields":
-		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler") ||
-			strings.Contains(nameLower, "roundshield") || strings.Contains(nameLower, "greatshield") ||
-			strings.Contains(nameLower, "towershield") || strings.Contains(nameLower, "mirrorshield")
-	case "helms":
-		return strings.Contains(nameLower, "helm") || strings.Contains(nameLower, "hood") ||
-			strings.Contains(nameLower, "mask") || strings.Contains(nameLower, "crown") ||
-			strings.Contains(nameLower, "headband") || strings.Contains(nameLower, "hat") ||
-			strings.Contains(nameLower, "coif")
-	case "gauntlets":
-		return strings.Contains(nameLower, "gauntlets") || strings.Contains(nameLower, "gloves") ||
-			strings.Contains(nameLower, "bracers") || strings.Contains(nameLower, "manchettes") ||
-			strings.Contains(nameLower, "bracer")
-	case "leggings":
-		return strings.Contains(nameLower, "greaves") || strings.Contains(nameLower, "trousers") ||
-			strings.Contains(nameLower, "boots") || strings.Contains(nameLower, "leggings") ||
-			strings.Contains(nameLower, "gaiters") || strings.Contains(nameLower, "shoes") ||
-			strings.Contains(nameLower, "skirt")
-	case "chest":
-		return !itemMatchesCategory(id, item, "helms") &&
-			!itemMatchesCategory(id, item, "gauntlets") &&
-			!itemMatchesCategory(id, item, "leggings")
-	case "sorceries":
-		return id >= 0x40000FA0 && id <= 0x4000157C
-	case "incantations":
-		return id >= 0x40001770 && id <= 0x40002134
-	case "spiritashes":
-		return item.MaxUpgrade == 10 || strings.Contains(item.IconPath, "spirit_ashes")
-	case "gestures":
-		return strings.Contains(item.IconPath, "gestures")
-	case "materials":
-		craftingKeywords := []string{
-			"mushroom", "leaf", "flower", "fruit", "butterfly", "firefly",
-			"root", "moss", "resin", "bone", "feather", "liver", "meat",
-			"blood", "eye", "skin", "horn", "fang", "claw", "scale",
-			"shell", "egg", "string", "crystal", "fragment", "shard",
-			"arteria", "starlight", "dew", "nectar", "mold", "calculus",
-		}
-		for _, kw := range craftingKeywords {
-			if strings.Contains(nameLower, kw) {
-				return true
-			}
-		}
-		return false
-	case "upgrade":
-		return strings.Contains(nameLower, "smithing stone") || strings.Contains(nameLower, "glovewort") || strings.Contains(nameLower, "somber")
-	case "ammo":
-		if strings.Contains(nameLower, "bolt of gransax") {
-			return false
-		}
-		return strings.Contains(nameLower, "arrow") || strings.Contains(nameLower, "bolt")
-	case "keyitems":
-		keyItemKeywords := []string{
-			"key", "map", "letter", "note", "painting", "bell bearing",
-			"crystal tear", "great rune", "mending rune", "remembrance",
-			"shackle", "whetblade", "cookbook", "scroll",
-			"cracked pot", "ritual pot", "perfume bottle", "memory stone",
-			"talisman pouch", "withered finger", "furled finger", "severer",
-			"effigy", "cipher ring", "bloody finger", "recusant finger",
-			"whistle", "physick", "telescope", "lantern", "tonic",
-		}
-		for _, kw := range keyItemKeywords {
-			if strings.Contains(nameLower, kw) {
-				return true
-			}
-		}
-		return false
-	case "consumables":
-		return !itemMatchesCategory(id, item, "sorceries") &&
-			!itemMatchesCategory(id, item, "incantations") &&
-			!itemMatchesCategory(id, item, "materials") &&
-			!itemMatchesCategory(id, item, "upgrade") &&
-			!itemMatchesCategory(id, item, "ammo") &&
-			!itemMatchesCategory(id, item, "keyitems") &&
-			!itemMatchesCategory(id, item, "spiritashes") &&
-			!itemMatchesCategory(id, item, "gestures")
-	}
-	return false
 }
 
 // GetAllItems returns all items from all categories.
 func GetAllItems() []ItemEntry {
 	var all []ItemEntry
-	cats := []string{"weapons", "armors", "items", "talismans", "aows", "spiritashes", "gestures"}
+	cats := []string{
+		"weapons", "bows", "shields", "staffs", "seals", "ammo",
+		"helms", "chest", "gauntlets", "leggings",
+		"talismans", "aows", "gestures",
+		"standard_ashes", "renowned_ashes", "legendary_ashes", "puppets",
+		"sorceries", "incantations", "base_materials", "dlc_materials",
+		"smithing_stones", "gloveworts",
+		"sacred_flasks", "throwing_pots", "perfume_arts", "throwables",
+		"grease", "misc_tools", "quest_tools", "golden_runes",
+		"remembrances", "multiplayer", "consumables", "keyitems",
+	}
 	for _, cat := range cats {
 		all = append(all, GetItemsByCategory(cat)...)
 	}

@@ -13,14 +13,47 @@ func main() {
 	files := []string{
 		"backend/db/data/aows.go",
 		"backend/db/data/armors.go",
-		"backend/db/data/items.go",
-		"backend/db/data/spirit_ashes.go",
+		"backend/db/data/consumables.go",
+		"backend/db/data/standard_ashes.go",
+		"backend/db/data/renowned_ashes.go",
+		"backend/db/data/legendary_ashes.go",
+		"backend/db/data/puppets.go",
+		"backend/db/data/special_ashes.go",
 		"backend/db/data/gestures.go",
 		"backend/db/data/talismans.go",
 		"backend/db/data/weapons.go",
+		"backend/db/data/bows.go",
+		"backend/db/data/shields.go",
+		"backend/db/data/staffs.go",
+		"backend/db/data/seals.go",
+		"backend/db/data/ammo.go",
+		"backend/db/data/helms.go",
+		"backend/db/data/chest.go",
+		"backend/db/data/gauntlets.go",
+		"backend/db/data/leggings.go",
+		"backend/db/data/sorceries.go",
+		"backend/db/data/incantations.go",
+		"backend/db/data/base_materials.go",
+		"backend/db/data/dlc_materials.go",
+		"backend/db/data/smithing_stones.go",
+		"backend/db/data/gloveworts.go",
+		"backend/db/data/sacred_flasks.go",
+		"backend/db/data/throwing_pots.go",
+		"backend/db/data/perfume_arts.go",
+		"backend/db/data/throwables.go",
+		"backend/db/data/grease.go",
+		"backend/db/data/misc_tools.go",
+		"backend/db/data/quest_tools.go",
+		"backend/db/data/golden_runes.go",
+		"backend/db/data/remembrances.go",
+		"backend/db/data/multiplayer.go",
+		"backend/db/data/keyitems.go",
 	}
 
 	for _, file := range files {
+		if _, err := os.Stat(file); os.IsNotExist(err) {
+			continue
+		}
 		if err := processFile(file); err != nil {
 			fmt.Printf("Error processing %s: %v\n", file, err)
 		}
@@ -38,44 +71,31 @@ func processFile(path string) error {
 	scanner := bufio.NewScanner(file)
 
 	reMapStart := regexp.MustCompile(`var (\w+) = map\[uint32\]ItemData\{`)
-	// Also handle the old format if it was already converted but we want to re-run with better rules
-	reMapStartOld := regexp.MustCompile(`var (\w+) = map\[uint32\]string\{`)
+	reEntry := regexp.MustCompile(`\t(0x[0-9A-Fa-f]+): \{Name: "([^"]+)", Category: "([^"]*)", MaxInventory: (\d+), MaxStorage: (\d+), MaxUpgrade: (\d+), IconPath: "([^"]*)"\},`)
 
-	reEntry := regexp.MustCompile(`\t(0x[0-9A-Fa-f]+): \{(Name: )?"(.*)", (MaxInventory: \d+, MaxStorage: \d+)?\},`)
-	reEntryOld := regexp.MustCompile(`\t(0x[0-9A-Fa-f]+): "(.*)",`)
-
-	var mapName string
-	category := filepath.Base(path)
+	filename := filepath.Base(path)
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
 		if match := reMapStart.FindStringSubmatch(line); match != nil {
-			mapName = match[1]
-			lines = append(lines, fmt.Sprintf("var %s = map[uint32]ItemData{", mapName))
-			continue
-		}
-		if match := reMapStartOld.FindStringSubmatch(line); match != nil {
-			mapName = match[1]
-			lines = append(lines, fmt.Sprintf("var %s = map[uint32]ItemData{", mapName))
+			lines = append(lines, line)
 			continue
 		}
 
 		if match := reEntry.FindStringSubmatch(line); match != nil {
-			id := match[1]
-			name := match[3]
-			maxInv, maxStorage := getLimits(name, category)
-			escapedName := strings.ReplaceAll(name, "\"", "\\\"")
-			newLine := fmt.Sprintf("\t%s: {Name: \"%s\", MaxInventory: %d, MaxStorage: %d},", id, escapedName, maxInv, maxStorage)
-			lines = append(lines, newLine)
-			continue
-		}
-		if match := reEntryOld.FindStringSubmatch(line); match != nil {
-			id := match[1]
+			idStr := match[1]
 			name := match[2]
-			maxInv, maxStorage := getLimits(name, category)
+			
+			maxInv, maxStorage := getLimits(name, filename)
+			category := determineCategory(name, filename)
+			
+			maxUpgrade := match[6]
+			iconPath := match[7]
+
 			escapedName := strings.ReplaceAll(name, "\"", "\\\"")
-			newLine := fmt.Sprintf("\t%s: {Name: \"%s\", MaxInventory: %d, MaxStorage: %d},", id, escapedName, maxInv, maxStorage)
+			newLine := fmt.Sprintf("\t%s: {Name: \"%s\", Category: \"%s\", MaxInventory: %d, MaxStorage: %d, MaxUpgrade: %s, IconPath: \"%s\"},", 
+				idStr, escapedName, category, maxInv, maxStorage, maxUpgrade, iconPath)
 			lines = append(lines, newLine)
 			continue
 		}
@@ -90,78 +110,44 @@ func processFile(path string) error {
 	return os.WriteFile(path, []byte(strings.Join(lines, "\n")+"\n"), 0644)
 }
 
+func determineCategory(name, filename string) string {
+	cat := strings.TrimSuffix(filename, ".go")
+	if cat == "spirit_ashes" {
+		return "spiritashes"
+	}
+	return cat
+}
+
 func getLimits(name, filename string) (uint32, uint32) {
 	nameLower := strings.ToLower(name)
 
-	// Default for equipment
-	if filename == "weapons.go" || filename == "armors.go" || filename == "talismans.go" || filename == "aows.go" {
+	// Equipment
+	if filename == "weapons.go" || filename == "bows.go" || filename == "shields.go" || 
+	   filename == "staffs.go" || filename == "seals.go" || filename == "talismans.go" || 
+	   filename == "aows.go" || filename == "helms.go" || filename == "chest.go" || 
+	   filename == "gauntlets.go" || filename == "leggings.go" {
 		return 1, 1
 	}
 
-	// Items (goods)
-	if filename == "items.go" {
-		// Flasks
-		if strings.Contains(nameLower, "flask of") {
-			return 1, 0
-		}
+	// Ashes
+	if strings.HasSuffix(filename, "_ashes.go") || filename == "puppets.go" {
+		return 1, 1
+	}
 
-		// Pots (Consumable versions)
-		if strings.Contains(nameLower, " pot") && !strings.Contains(nameLower, "cracked") && !strings.Contains(nameLower, "ritual") {
-			return 20, 600
-		}
-
-		// Perfume Bottles (Consumable versions)
-		if strings.Contains(nameLower, "perfume") && !strings.Contains(nameLower, "bottle") {
-			return 10, 600
-		}
-
-		// Key Items / Tools
-		keyItemKeywords := []string{
-			"key", "map", "letter", "note", "painting", "bell bearing",
-			"crystal tear", "great rune", "mending rune", "remembrance",
-			"shackle", "whetblade", "cookbook", "scroll", "gesture",
-			"cracked pot", "ritual pot", "perfume bottle", "memory stone",
-			"talisman pouch", "withered finger", "furled finger", "severer",
-			"effigy", "cipher ring", "bloody finger", "recusant finger",
-			"whistle", "physick", "telescope", "lantern", "tonic",
-		}
-		for _, kw := range keyItemKeywords {
-			if strings.Contains(nameLower, kw) {
-				return 1, 0
-			}
-		}
-
-		// Upgrade Materials (Smithing Stones, Gloveworts)
-		if strings.Contains(nameLower, "smithing stone") || strings.Contains(nameLower, "glovewort") {
-			return 999, 999
-		}
-
-		// Crafting Materials (Commonly found in the world)
-		craftingKeywords := []string{
-			"mushroom", "leaf", "flower", "fruit", "butterfly", "firefly",
-			"root", "moss", "resin", "bone", "feather", "liver", "meat",
-			"blood", "eye", "skin", "horn", "fang", "claw", "scale",
-			"shell", "egg", "string", "crystal", "fragment", "shard",
-			"arteria", "starlight", "dew", "nectar", "mold", "calculus",
-		}
-		for _, kw := range craftingKeywords {
-			if strings.Contains(nameLower, kw) {
-				return 999, 999
-			}
-		}
-
-		// Ammo
-		if strings.Contains(nameLower, "arrow") || strings.Contains(nameLower, "bolt") {
-			return 99, 600
-		}
-
-		// Runes
-		if strings.Contains(nameLower, "rune") && (strings.Contains(nameLower, "golden") || strings.Contains(nameLower, "hero's") || strings.Contains(nameLower, "lord's") || strings.Contains(nameLower, "numen's")) {
-			return 99, 600
-		}
-
-		// Consumables / Materials (Default)
-		return 99, 999
+	// Tools & Items
+	switch filename {
+	case "sacred_flasks.go":
+		return 1, 0
+	case "throwing_pots.go", "perfume_arts.go", "grease.go", "throwables.go", "consumables.go":
+		return 99, 600
+	case "base_materials.go", "dlc_materials.go", "smithing_stones.go", "gloveworts.go":
+		return 999, 999
+	case "ammo.go":
+		return 99, 600
+	case "golden_runes.go":
+		return 99, 600
+	case "remembrances.go", "multiplayer.go", "misc_tools.go", "quest_tools.go", "keyitems.go":
+		return 1, 0
 	}
 
 	return 1, 1

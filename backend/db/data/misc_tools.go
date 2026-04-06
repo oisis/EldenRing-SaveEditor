@@ -1,0 +1,26 @@
+package data
+
+var MiscTools = map[uint32]ItemData{
+	0x400000B5: {Name: "Spectral Steed Whistle", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/spectral_steed_whistle.png"},
+	0x400007F8: {Name: "Telescope", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/telescope.png"},
+	0x40000816: {Name: "Lantern", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/lantern.png"},
+	0x40000BE0: {Name: "Mimic's Veil", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/mimics_veil.png"},
+	0x40002007: {Name: "Discarded Palace Key", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/discarded_palace_key.png"},
+	0x4000239D: {Name: "About Birdseye Telescopes", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/about_birdseye_telescopes.png"},
+	0x4000251C: {Name: "Cracked Pot", Category: "misc_tools", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/cracked_pot.png"},
+	0x4000251D: {Name: "Ritual Pot", Category: "misc_tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/ritual_pot.png"},
+	0x40002526: {Name: "Perfume Bottle", Category: "misc_tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/perfume_bottle.png"},
+	0x401EA99C: {Name: "Hefty Cracked Pot", Category: "misc_tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/hefty_cracked_pot.png"},
+	0x401ED2B0: {Name: "Winter-Lantern Fly", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/winter_lantern_fly.png"},
+	0xB00000B5: {Name: "Spectral Steed Whistle", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/spectral_steed_whistle.png"},
+	0xB00007F8: {Name: "Telescope", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/telescope.png"},
+	0xB0000816: {Name: "Lantern", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/lantern.png"},
+	0xB0000BE0: {Name: "Mimic's Veil", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/mimics_veil.png"},
+	0xB0002007: {Name: "Discarded Palace Key", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/discarded_palace_key.png"},
+	0xB000239D: {Name: "About Birdseye Telescopes", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/about_birdseye_telescopes.png"},
+	0xB000251C: {Name: "Cracked Pot", Category: "misc_tools", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/cracked_pot.png"},
+	0xB000251D: {Name: "Ritual Pot", Category: "misc_tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/ritual_pot.png"},
+	0xB0002526: {Name: "Perfume Bottle", Category: "misc_tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/perfume_bottle.png"},
+	0xB01EA99C: {Name: "Hefty Cracked Pot", Category: "misc_tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/goods/hefty_cracked_pot.png"},
+	0xB01ED2B0: {Name: "Winter-Lantern Fly", Category: "misc_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/goods/winter_lantern_fly.png"},
+}
