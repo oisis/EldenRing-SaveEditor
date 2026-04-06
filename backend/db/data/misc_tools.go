@@ -75,4 +75,12 @@ var MiscTools = map[uint32]ItemData{
 	0xB0002B00: {Name: "Opaline Bubbletear", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/misc/opaline_bubbletear.png"},
 	0xB0002AFE: {Name: "Speckled Hardtear", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/misc/speckled_hardtear.png"},
 	0x40002AFF: {Name: "Crimson Bubbletear", Category: "misc_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/misc/crimson_bubbletear.png"},
+	0x40000802: {Name: "Grace Mimic", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/grace_mimic.png"},
+	0x40000848: {Name: "Soap", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/soap.png"},
+	0xB0000DFC: {Name: "Poison Spraymist", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/poison_spraymist.png"},
+	0xB0001FE3: {Name: "Tailoring Tools", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/tailoring_tools.png"},
+	0xB0000E1A: {Name: "Acid Spraymist", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/acid_spraymist.png"},
+	0xB0000834: {Name: "Soft Cotton", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/soft_cotton.png"},
+	0x400000A6: {Name: "Vision of Grace", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/consumables/vision_of_grace.png"},
+	0x40000073: {Name: "Memory of Grace", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/consumables/memory_of_grace.png"},
 }
