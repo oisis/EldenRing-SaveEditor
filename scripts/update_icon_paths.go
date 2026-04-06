@@ -15,6 +15,7 @@ func main() {
 		"backend/db/data/armors.go",
 		"backend/db/data/items.go",
 		"backend/db/data/spirit_ashes.go",
+		"backend/db/data/gestures.go",
 		"backend/db/data/talismans.go",
 		"backend/db/data/weapons.go",
 	}

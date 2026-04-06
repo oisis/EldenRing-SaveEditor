@@ -13,6 +13,7 @@ func main() {
 		"backend/db/data/weapons.go",
 		"backend/db/data/items.go",
 		"backend/db/data/spirit_ashes.go",
+		"backend/db/data/gestures.go",
 	}
 
 	for _, file := range files {

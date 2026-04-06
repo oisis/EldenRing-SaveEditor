@@ -47,8 +47,15 @@ func GetItemData(id uint32, category string) data.ItemData {
 		if item, ok := data.SpiritAshes[id]; ok {
 			return item
 		}
+		if item, ok := data.Gestures[id]; ok {
+			return item
+		}
 	case "Spirit Ash":
 		if item, ok := data.SpiritAshes[id]; ok {
+			return item
+		}
+	case "Gesture":
+		if item, ok := data.Gestures[id]; ok {
 			return item
 		}
 	case "Ash of War":
@@ -90,12 +97,20 @@ func GetItemName(id uint32, category string) string {
 		if item, ok := data.SpiritAshes[id]; ok && item.Name != "" {
 			return item.Name
 		}
+		if item, ok := data.Gestures[id]; ok && item.Name != "" {
+			return item.Name
+		}
 		return fmt.Sprintf("Unknown Item (0x%X)", id)
 	case "Spirit Ash":
 		if item, ok := data.SpiritAshes[id]; ok && item.Name != "" {
 			return item.Name
 		}
 		return fmt.Sprintf("Unknown Spirit Ash (0x%X)", id)
+	case "Gesture":
+		if item, ok := data.Gestures[id]; ok && item.Name != "" {
+			return item.Name
+		}
+		return fmt.Sprintf("Unknown Gesture (0x%X)", id)
 	case "Ash of War":
 		if item, ok := data.Aows[id]; ok && item.Name != "" {
 			return item.Name
@@ -139,6 +154,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 	searchTalismans := false
 	searchAows := false
 	searchSpiritAshes := false
+	searchGestures := false
 
 	switch category {
 	case "weapons":
@@ -151,6 +167,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 		searchItems = true
 	case "spiritashes":
 		searchSpiritAshes = true
+	case "gestures":
+		searchGestures = true
 	case "ammo":
 		searchItems = true
 		searchWeapons = true // Arrows/Bolts can be in both
@@ -235,6 +253,9 @@ func GetItemsByCategory(category string) []ItemEntry {
 	if searchSpiritAshes {
 		processMap(data.SpiritAshes, 0x40000000, "spiritashes")
 	}
+	if searchGestures {
+		processMap(data.Gestures, 0x40000000, "gestures")
+	}
 
 	sort.Slice(items, func(i, j int) bool {
 		return items[i].Name < items[j].Name
@@ -312,6 +333,9 @@ func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) str
 	if itemMatchesCategory(id, item, "spiritashes") {
 		return "spiritashes"
 	}
+	if itemMatchesCategory(id, item, "gestures") {
+		return "gestures"
+	}
 	if itemMatchesCategory(id, item, "materials") {
 		return "materials"
 	}
@@ -365,6 +389,8 @@ func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
 		return id >= 0x40001770 && id <= 0x40002134
 	case "spiritashes":
 		return item.MaxUpgrade == 10 || strings.Contains(item.IconPath, "spirit_ashes")
+	case "gestures":
+		return strings.Contains(item.IconPath, "gestures")
 	case "materials":
 		craftingKeywords := []string{
 			"mushroom", "leaf", "flower", "fruit", "butterfly", "firefly",
@@ -390,7 +416,7 @@ func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
 		keyItemKeywords := []string{
 			"key", "map", "letter", "note", "painting", "bell bearing",
 			"crystal tear", "great rune", "mending rune", "remembrance",
-			"shackle", "whetblade", "cookbook", "scroll", "gesture",
+			"shackle", "whetblade", "cookbook", "scroll",
 			"cracked pot", "ritual pot", "perfume bottle", "memory stone",
 			"talisman pouch", "withered finger", "furled finger", "severer",
 			"effigy", "cipher ring", "bloody finger", "recusant finger",
@@ -409,7 +435,8 @@ func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
 			!itemMatchesCategory(id, item, "upgrade") &&
 			!itemMatchesCategory(id, item, "ammo") &&
 			!itemMatchesCategory(id, item, "keyitems") &&
-			!itemMatchesCategory(id, item, "spiritashes")
+			!itemMatchesCategory(id, item, "spiritashes") &&
+			!itemMatchesCategory(id, item, "gestures")
 	}
 	return false
 }
@@ -417,7 +444,7 @@ func itemMatchesCategory(id uint32, item data.ItemData, category string) bool {
 // GetAllItems returns all items from all categories.
 func GetAllItems() []ItemEntry {
 	var all []ItemEntry
-	cats := []string{"weapons", "armors", "items", "talismans", "aows", "spiritashes"}
+	cats := []string{"weapons", "armors", "items", "talismans", "aows", "spiritashes", "gestures"}
 	for _, cat := range cats {
 		all = append(all, GetItemsByCategory(cat)...)
 	}

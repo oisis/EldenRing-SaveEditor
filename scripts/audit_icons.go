@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	dbFiles := []string{"items.go", "spirit_ashes.go", "weapons.go", "armors.go", "talismans.go", "aows.go"}
+	dbFiles := []string{"items.go", "spirit_ashes.go", "gestures.go", "weapons.go", "armors.go", "talismans.go", "aows.go"}
 	missing := []string{}
 
 	reIcon := regexp.MustCompile(`IconPath: "(.*)"`)
