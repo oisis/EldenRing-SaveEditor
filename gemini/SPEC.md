@@ -124,6 +124,27 @@ Aby uniknąć bana przez Easy Anti-Cheat (EAC), należy przestrzegać zasad:
 
 ---
 
-## 9. Technical Reference (PC Encryption)
-- **AES Key**: `99 AD 2D 50 ED F2 FB 01 C5 F3 EC 3A 2B CA B6 9D`
-- **IV**: Pierwsze 16 bajtów pliku `.sl2`.
+## 10. Item Metadata & Database
+Baza danych przedmiotów (`backend/db/data`) została rozszerzona o metadane niezbędne do walidacji i poprawnego wyświetlania w UI.
+
+### 10.1. Metadata Structure
+Każdy przedmiot w bazie posiada następujące atrybuty:
+- **MaxInventory**: Maksymalna ilość w inwentarzu postaci (np. 999 dla materiałów, 99 dla amunicji, 1 dla sprzętu).
+- **MaxStorage**: Maksymalna ilość w skrzyni (Storage Box).
+- **MaxUpgrade**: Maksymalny poziom ulepszenia (+25 dla broni zwykłych, +10 dla unikalnych i prochów duchów).
+- **IconPath**: Statyczna ścieżka do pliku ikony (np. `items/weapons/dagger.png`).
+
+### 10.2. Granular Categorization
+Aplikacja implementuje precyzyjny podział na kategorie w celu ułatwienia nawigacji:
+- **Equipment**: Weapons, Bows & Ballistae, Shields, Glintstone Staffs, Sacred Seals, Talismans, Ashes of War.
+- **Armor**: Helms, Chest Armor, Gauntlets, Leggings.
+- **Magic**: Sorceries, Incantations, Spirit Ashes.
+- **Items**: Consumables, Crafting Materials, Upgrade Materials, Ammunition.
+- **Progress**: Key Items.
+
+### 10.3. Validation Rules (EAC Safety)
+- **Materials**: Limit 999/999.
+- **Ammo**: Limit 99/600.
+- **Consumables**: Zazwyczaj 10-99 w inwentarzu.
+- **Key Items**: Zawsze 1/0 (brak możliwości przechowywania w skrzyni).
+- **Upgrades**: Blokada ulepszania przedmiotów nieulepszalnych (MaxUpgrade: 0).

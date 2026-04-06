@@ -115,65 +115,104 @@ func GetItemsByCategory(category string) []ItemEntry {
 		return GetAllItems()
 	}
 
-	var source map[uint32]data.ItemData
-	var prefix uint32
-	var catName string
+	var items []ItemEntry
+
+	// Define which maps to search based on category
+	searchWeapons := false
+	searchArmors := false
+	searchItems := false
+	searchTalismans := false
+	searchAows := false
 
 	switch category {
-	case "weapons", "bows", "seals", "staffs", "shields":
-		source = data.Weapons
-		prefix = 0x00000000
-		catName = "weapons"
+	case "weapons":
+		searchWeapons = true
+	case "bows", "seals", "staffs", "shields":
+		searchWeapons = true
 	case "armors", "helms", "gauntlets", "leggings", "chest":
-		source = data.Armors
-		prefix = 0x10000000
-		catName = "armor"
-	case "items", "sorceries", "incantations", "materials", "upgrade", "ammo", "keyitems", "consumables", "spiritashes":
-		source = data.Items
-		prefix = 0x40000000
-		catName = "goods"
+		searchArmors = true
+	case "items", "sorceries", "incantations", "materials", "upgrade", "keyitems", "consumables", "spiritashes":
+		searchItems = true
+	case "ammo":
+		searchItems = true
+		searchWeapons = true // Arrows/Bolts can be in both
 	case "talismans":
-		source = data.Talismans
-		prefix = 0x20000000
-		catName = "talismans"
+		searchTalismans = true
 	case "aows":
-		source = data.Aows
-		prefix = 0xC0000000
-		catName = "ashes"
-	default:
-		return nil
+		searchAows = true
 	}
 
-	items := make([]ItemEntry, 0, len(source))
-	for id, item := range source {
-		if item.Name == "" || item.Name == "Unarmed" {
-			continue
-		}
-		// For weapons, we only want base items (usually ending in 0)
-		if (category == "weapons" || category == "bows" || category == "seals" || category == "staffs" || category == "shields") && id%100 != 0 {
-			continue
-		}
-		// Filter by prefix
-		if (id & 0xF0000000) != prefix && !(prefix == 0 && (id&0xF0000000) == 0) {
-			continue
-		}
-
-		// Sub-category filtering
-		if category != "weapons" && category != "armors" && category != "items" && category != "all" {
-			if !itemMatchesCategory(id, item.Name, category) {
+	processMap := func(source map[uint32]data.ItemData, prefix uint32, catName string) {
+		for id, item := range source {
+			if item.Name == "" || item.Name == "Unarmed" {
 				continue
 			}
-		}
 
-		items = append(items, ItemEntry{
-			ID:           id,
-			Name:         item.Name,
-			Category:     catName,
-			MaxInventory: item.MaxInventory,
-			MaxStorage:   item.MaxStorage,
-			MaxUpgrade:   item.MaxUpgrade,
-			IconPath:     item.IconPath,
-		})
+			// Filter by prefix
+			if (id & 0xF0000000) != prefix && !(prefix == 0 && (id&0xF0000000) == 0) {
+				continue
+			}
+
+			// For weapons/bows/etc, we only want base items (usually ending in 0)
+			if prefix == 0 && id%100 != 0 {
+				continue
+			}
+
+			// Sub-category filtering
+			itemSubCat := GetItemSubCategory(id, item.Name, getBroadCategory(prefix))
+			
+			if category != "all" {
+				if category == "weapons" {
+					// "weapons" category should only show actual weapons, not bows, shields, etc.
+					if itemSubCat != "weapons" {
+						continue
+					}
+				} else if category == "armors" {
+					// "armors" category should only show full sets/chest pieces if we want, 
+					// but usually it's a catch-all. Let's make it only show "chest" or "armors".
+					if itemSubCat != "armors" && itemSubCat != "chest" {
+						continue
+					}
+				} else if category == "items" {
+					// "items" is a catch-all for goods, but let's exclude specific sub-cats if needed.
+					// For now, keep it as is or filter to "consumables".
+					if itemSubCat != "consumables" && itemSubCat != "items" {
+						continue
+					}
+				} else {
+					// Specific sub-category requested (e.g., "shields", "bows")
+					if itemSubCat != category {
+						continue
+					}
+				}
+			}
+
+			items = append(items, ItemEntry{
+				ID:           id,
+				Name:         item.Name,
+				Category:     catName,
+				MaxInventory: item.MaxInventory,
+				MaxStorage:   item.MaxStorage,
+				MaxUpgrade:   item.MaxUpgrade,
+				IconPath:     item.IconPath,
+			})
+		}
+	}
+
+	if searchWeapons {
+		processMap(data.Weapons, 0x00000000, "weapons")
+	}
+	if searchArmors {
+		processMap(data.Armors, 0x10000000, "armor")
+	}
+	if searchItems {
+		processMap(data.Items, 0x40000000, "goods")
+	}
+	if searchTalismans {
+		processMap(data.Talismans, 0x20000000, "talismans")
+	}
+	if searchAows {
+		processMap(data.Aows, 0xC0000000, "ashes")
 	}
 
 	sort.Slice(items, func(i, j int) bool {
@@ -183,9 +222,29 @@ func GetItemsByCategory(category string) []ItemEntry {
 	return items
 }
 
+func getBroadCategory(prefix uint32) string {
+	switch prefix {
+	case 0x00000000:
+		return "Weapon"
+	case 0x10000000:
+		return "Armor"
+	case 0x20000000:
+		return "Talisman"
+	case 0x40000000:
+		return "Item"
+	case 0xC0000000:
+		return "Ash of War"
+	default:
+		return "Unknown"
+	}
+}
+
 // GetItemSubCategory returns the granular category string for an item.
 func GetItemSubCategory(id uint32, name string, broadCategory string) string {
 	if broadCategory == "Weapon" {
+		if itemMatchesCategory(id, name, "ammo") {
+			return "ammo"
+		}
 		if itemMatchesCategory(id, name, "bows") {
 			return "bows"
 		}
@@ -252,13 +311,15 @@ func itemMatchesCategory(id uint32, name string, category string) bool {
 	nameLower := strings.ToLower(name)
 	switch category {
 	case "bows":
-		return strings.Contains(nameLower, "bow") || strings.Contains(nameLower, "ballista")
+		return strings.Contains(nameLower, "bow") || strings.Contains(nameLower, "ballista") || strings.Contains(nameLower, "crossbow")
 	case "seals":
 		return strings.Contains(nameLower, "seal")
 	case "staffs":
 		return strings.Contains(nameLower, "staff") || strings.Contains(nameLower, "scepter")
 	case "shields":
-		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler")
+		return strings.Contains(nameLower, "shield") || strings.Contains(nameLower, "buckler") || 
+			strings.Contains(nameLower, "roundshield") || strings.Contains(nameLower, "greatshield") ||
+			strings.Contains(nameLower, "towershield") || strings.Contains(nameLower, "mirrorshield")
 	case "helms":
 		return strings.Contains(nameLower, "helm") || strings.Contains(nameLower, "hood") || 
 			strings.Contains(nameLower, "mask") || strings.Contains(nameLower, "crown") || 
@@ -300,6 +361,9 @@ func itemMatchesCategory(id uint32, name string, category string) bool {
 	case "upgrade":
 		return strings.Contains(nameLower, "smithing stone") || strings.Contains(nameLower, "glovewort") || strings.Contains(nameLower, "somber")
 	case "ammo":
+		if strings.Contains(nameLower, "bolt of gransax") {
+			return false
+		}
 		return strings.Contains(nameLower, "arrow") || strings.Contains(nameLower, "bolt")
 	case "keyitems":
 		keyItemKeywords := []string{

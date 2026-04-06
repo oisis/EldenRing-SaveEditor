@@ -89,7 +89,9 @@
     - [x] Expose `Inventory` list in `CharacterViewModel`
 - [x] **8.3. UI Implementation**
     - [x] Create searchable inventory list in `InventoryTab.tsx`
-    - [x] Add category filters (Weapons, Armor, Talismans, Goods)
+    - [x] Add granular category filters (Bows, Shields, Staffs, Seals, Armor parts, etc.)
+    - [x] Implement quantity editing with `MaxInventory` and `MaxStorage` validation
+    - [x] Implement multi-selection and bulk "Add Selected" action
 
 ## Phase 9: PvP Optimization & Advanced Tweaks (In Progress) 🛠
 - [ ] **9.1. Faster Invasions (Meliodas Method)**
@@ -107,22 +109,20 @@
     - [ ] Implement Weapon Level scanner and "Safe De-leveling" logic
     - [ ] Add "Global Weapon Level" setting for bulk item addition (Future)
 
-## Phase 10: Item Icons & Visual Assets (In Progress) 🛠
+## Phase 10: Item Icons & Visual Assets ✅
 - [x] **10.1. Icon Directory Structure**
     - [x] Setup `frontend/public/items/` with subdirectories for categories
-- [x] **10.2. Name Normalization Logic**
-    - [x] Implement `getItemIconPath` in `InventoryTab.tsx`
-    - [x] Fix edge cases for special characters (apostrophes, hyphens, dots)
-    - [x] Handle "Altered" armor variants mapping (e.g., "Banished Knight Armor (Altered)")
-    - [ ] Support for DLC item name normalization
+- [x] **10.2. Database Integration**
+    - [x] Add static `IconPath` to database for all 4000+ items
+    - [x] Implement `MaxUpgrade` metadata for weapons and spirit ashes
 - [x] **10.3. Asset Coverage & Validation**
-    - [ ] Audit missing icons for DLC items
+    - [x] Audit missing icons for DLC items
     - [x] Implement fallback icon (placeholder) for missing assets
-    - [x] Fix broken links for items with non-standard filenames (e.g. "All-Knowing" vs "all_knowing")
 - [x] **10.4. UI Integration**
-    - [x] Display icons in Inventory, Storage, and Database tables
+    - [x] Display icons in Inventory, Storage, and Database tables using static paths
     - [x] Implement "Icon Popover" for high-resolution preview
-    - [x] Add icons to Character Importer and Stats tabs
+    - [x] Add "Upgrade" column with sorting capability
+    - [x] Implement "Add Item" modal with upgrade level selection (+0 to +25/+10)
     - [x] Fix UI scaling issues (removed max-w-5xl and fixed heights for full-width/height support)
     - [x] Improve scrollbar visibility and fix nested scrolling conflicts
     - [x] Enable window maximization on macOS (explicitly set DisableResize: false and added Mac options)
