@@ -241,4 +241,9 @@ var Incantations = map[uint32]ItemData{
 	0xB000193C: {Name: "Magic Fortification", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/magic_fortification.png"},
 	0xB0001B58: {Name: "Dragonfire", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/dragonfire.png"},
 	0xB01EA0AA: {Name: "Pest-Thread Spears", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/pest_thread_spears.png"},
+	0xB000177A: {Name: "Flame Sling", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/flame_sling.png"},
+	0xB0001900: {Name: "Rejection", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/rejection.png"},
+	0xB0001C20: {Name: "Pest Threads", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/pest_threads.png"},
+	0xB0001784: {Name: "Flame, Fall Upon Them", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/flame_fall_upon_them.png"},
+	0xB01E9E7A: {Name: "Aspects of the Crucible: Thorns", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/incantations/aspects_of_the_crucible_thorns.png"},
 }

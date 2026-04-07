@@ -1,12 +1,14 @@
 package data
 
 var Leggings = map[uint32]ItemData{
-	0x104F329C: {Name: "Leather Leg Wraps", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/leather_leg_wraps.png"},
-	0x904F329C: {Name: "Leather Leg Wraps", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/leather_leg_wraps.png"},
+	0x104F329C: {Name: "Leather Leg Wraps", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/leather_leg_wraps.png"},
+	0x904F329C: {Name: "Leather Leg Wraps", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/leather_leg_wraps.png"},
 	0x104F80BC: {Name: "Ascetic's Ankle Guards", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/ascetic_s_ankle_guards.png"},
 	0x904F80BC: {Name: "Ascetic's Ankle Guards", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/ascetic_s_ankle_guards.png"},
-	0x104D36CC: {Name: "High Priest Undergarments", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/high_priest_undergarments.png"},
-	0x904D36CC: {Name: "High Priest Undergarments", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/high_priest_undergarments.png"},
+	0x104D36CC: {Name: "High Priest Undergarments", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/high_priest_undergarments.png"},
+	0x904D36CC: {Name: "High Priest Undergarments", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/high_priest_undergarments.png"},
+	0x100E590C: {Name: "Eccentric's Breeches", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/eccentric_s_breeches.png"},
+	0x900E590C: {Name: "Eccentric's Breeches", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/eccentric_s_breeches.png"},
 	0x100160BC: {Name: "Perfumer Sarong", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/perfumer_sarong.png"},
 	0x100187CC: {Name: "Traveler's Slops", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/traveler_s_slops.png"},
 	0x1008DACC: {Name: "Old Sorcerer's Legwraps", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/old_sorcerer_s_legwraps.png"},

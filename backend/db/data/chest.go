@@ -141,7 +141,6 @@ var Chest = map[uint32]ItemData{
 	0x100E3134: {Name: "Raptor's Black Feathers", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/raptor_s_black_feathers.png"},
 	0x100E351C: {Name: "Bandit Garb", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/bandit_garb.png"},
 	0x100E5844: {Name: "Eccentric's Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/eccentric_s_armor.png"},
-	0x100E590C: {Name: "Eccentric's Breeches", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/eccentric_s_breeches.png"},
 	0x100E7F54: {Name: "Fingerprint Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/fingerprint_armor.png"},
 	0x100E833C: {Name: "Fingerprint Armor (Altered)", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/fingerprint_armor_altered.png"},
 	0x100EA664: {Name: "Consort's Robe", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/consort_s_robe.png"},

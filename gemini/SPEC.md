@@ -132,15 +132,16 @@ Każdy przedmiot w bazie posiada następujące atrybuty:
 - **MaxInventory**: Maksymalna ilość w inwentarzu postaci (np. 999 dla materiałów, 99 dla amunicji, 1 dla sprzętu).
 - **MaxStorage**: Maksymalna ilość w skrzyni (Storage Box).
 - **MaxUpgrade**: Maksymalny poziom ulepszenia (+25 dla broni zwykłych, +10 dla unikalnych i prochów duchów).
-- **IconPath**: Statyczna ścieżka do pliku ikony (np. `items/weapons/dagger.png`).
+- **IconPath**: Statyczna ścieżka do pliku ikony w płaskiej strukturze (np. `items/weapons/dagger.png`, `items/shields/buckler.png`).
 
 ### 10.2. Granular Categorization
-Aplikacja implementuje precyzyjny podział na kategorie w celu ułatwienia nawigacji:
-- **Equipment**: Weapons, Bows & Ballistae, Shields, Glintstone Staffs, Sacred Seals, Talismans, Ashes of War.
-- **Armor**: Helms, Chest Armor, Gauntlets, Leggings.
-- **Magic**: Sorceries, Incantations, Spirit Ashes.
-- **Items**: Consumables, Crafting Materials, Upgrade Materials, Ammunition.
-- **Progress**: Key Items.
+Aplikacja implementuje precyzyjny podział na kategorie w celu ułatwienia nawigacji i mapowania zasobów:
+- **Equipment**: Weapons (`items/weapons/`), Bows (`items/bows/`), Shields (`items/shields/`), Staffs (`items/staffs/`), Seals (`items/seals/`), Talismans (`items/talismans/`), Ashes of War (`items/aow/`).
+- **Armor**: Helms, Chest Armor, Gauntlets, Leggings (zachowują podział `items/armor/[typ]/`).
+- **Magic**: Sorceries (`items/sorceries/`), Incantations (`items/incantations/`), Spirit Ashes (`items/ashes/`).
+- **Items**: Consumables (`items/consumables/`), Crafting Materials (`items/crafting_materials/`), Bolstering Materials (`items/bolstering/`), Ammunition (`items/arrows_and_bolts/`).
+- **Progress**: Key Items (`items/keyitems/`).
+- **Tools**: Misc Tools (`items/misc_tools/`), Runes (`items/tools/runes/`).
 
 ### 10.3. Validation Rules (EAC Safety)
 - **Materials**: Limit 999/999.

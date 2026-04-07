@@ -111,13 +111,15 @@
 
 ## Phase 10: Item Icons & Visual Assets ✅
 - [x] **10.1. Icon Directory Structure**
-    - [x] Setup `frontend/public/items/` with subdirectories for categories
+    - [x] Setup `frontend/public/items/` with flat subdirectories for categories
 - [x] **10.2. Database Integration**
     - [x] Add static `IconPath` to database for all 4000+ items
     - [x] Implement `MaxUpgrade` metadata for weapons and spirit ashes
+    - [x] Unify `MaxInventory` and `MaxStorage` across all categories
 - [x] **10.3. Asset Coverage & Validation**
     - [x] Audit missing icons for DLC items
     - [x] Implement fallback icon (placeholder) for missing assets
+    - [x] Migrate all icons to flat structure and remove legacy folders
 - [x] **10.4. UI Integration**
     - [x] Display icons in Inventory, Storage, and Database tables using static paths
     - [x] Implement "Icon Popover" for high-resolution preview
