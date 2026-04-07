@@ -133,6 +133,26 @@
     - [x] Fix incorrect quantities for non-stackable items (forced to 1 for Weapons, Armor, Talismans, AoW)
     - [x] Implement quantity editing with `MaxInventory` and `MaxStorage` validation
 
+## Phase 11: Compatibility & Integrity Fixes (Critical) 🛠
+- [ ] **11.1. UserData10 Data Range Validation**
+    - [ ] **Research:** Verify `UserData10` size in `Final.py` and compare with actual `ER0000.sl2` bytes (0x60000 vs 0x600000).
+    - [ ] **Fix:** Update `save_manager.go` and `structures.go` to use the correct data range for PC metadata.
+- [ ] **11.2. DLC Stats Implementation**
+    - [ ] **Research:** Verify Scadutree (-187) and Shadow Realm (-186) offsets in `Final.py`.
+    - [ ] **Fix:** Add `ScadutreeBlessing` and `ShadowRealmBlessing` to `PlayerGameData` and update mapping logic.
+- [ ] **11.3. ProfileSummary Expansion**
+    - [ ] **Research:** Analyze how `Final.py` handles character summaries and if it exceeds 0x100 bytes.
+    - [ ] **Fix:** Expand `ProfileSummary` struct to prevent data shifting and preserve equipment previews.
+- [ ] **11.4. SteamID Logic Unification**
+    - [ ] **Research:** Audit `save_manager.go` and `steamid.go` to resolve offset inconsistencies (0x00 vs 0x14).
+    - [ ] **Fix:** Standardize SteamID reading/writing across all modules.
+- [ ] **11.5. Inventory Write Integration**
+    - [ ] **Research:** Verify if `AddItemsToSlot` in `writer.go` correctly follows Python's insertion logic.
+    - [ ] **Fix:** Integrate inventory writing into the main `SaveFile()` workflow.
+- [ ] **11.6. Backup System Robustness**
+    - [ ] **Research:** Audit `app.go` and `save_manager.go` for conflicting backup logic. Verify if `CreateBackup` is called *before* any write operation.
+    - [ ] **Fix:** Implement retention policy (max 10 versions) in `backup.go`. Remove redundant/broken backup logic from `save_manager.go`. Ensure `SaveFile` fails if backup fails.
+
 ---
 
 ### Technical Note: Faster Invasions (Meliodas Method)
