@@ -270,7 +270,7 @@ export function DatabaseTab({ columnVisibility, platform, charIndex }: DatabaseT
                         <optgroup label="Items" className="bg-background text-foreground">
                             <option value="crafting_materials">Crafting Materials</option>
                             <option value="bolstering_materials">Bolstering Materials</option>
-                            <option value="ammo">Ammunition</option>
+                            <option value="arrows_and_bolts">Arrows & Bolts</option>
                         </optgroup>
                         <optgroup label="Progress" className="bg-background text-foreground">
                             <option value="keyitems">Key Items</option>
