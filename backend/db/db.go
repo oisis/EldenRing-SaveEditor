@@ -157,13 +157,13 @@ func GetItemsByCategory(category string) []ItemEntry {
 	case "aows":
 		processMap(data.Aows, "ashes")
 	case "standard_ashes":
-		processMap(data.StandardAshes, "standard_ashes")
+		processMap(data.StandardAshes, "ashes")
 	case "renowned_ashes":
-		processMap(data.RenownedAshes, "renowned_ashes")
+		processMap(data.RenownedAshes, "ashes")
 	case "legendary_ashes":
-		processMap(data.LegendaryAshes, "legendary_ashes")
+		processMap(data.LegendaryAshes, "ashes")
 	case "puppets":
-		processMap(data.Puppets, "puppets")
+		processMap(data.Puppets, "ashes")
 	case "gestures":
 		processMap(data.Gestures, "gestures")
 	case "sorceries":
