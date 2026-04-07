@@ -21,8 +21,6 @@ var Multiplayer = map[uint32]ItemData{
 	0x401E88D6: {Name: "Fingerprint Nostrum", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/fingerprint_nostrum.png"},
 	0x401EA17C: {Name: "Cherishing Fingers", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/cherishing_fingers.png"},
 	0x401EA3C3: {Name: "Igon's Furled Finger", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/igons_furled_finger.png"},
-	0x401EA8DC: {Name: "Finger-Weaver's Cookbook [2]", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_weavers_cookbook_2.png"},
-	0x401EA8FE: {Name: "Finger-Weaver's Cookbook [1]", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_weavers_cookbook_1.png"},
 	0x401ED2B8: {Name: "Finger Mimic", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_mimic.png"},
 	0xB000006A: {Name: "Tarnished's Wizened Finger", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/tarnisheds_wizened_finger.png"},
 	0xB0000071: {Name: "Phantom Bloody Finger", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/phantom_bloody_finger.png"},
@@ -46,7 +44,5 @@ var Multiplayer = map[uint32]ItemData{
 	0xB01E88D6: {Name: "Fingerprint Nostrum", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/fingerprint_nostrum.png"},
 	0xB01EA17C: {Name: "Cherishing Fingers", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/cherishing_fingers.png"},
 	0xB01EA3C3: {Name: "Igon's Furled Finger", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/igons_furled_finger.png"},
-	0xB01EA8DC: {Name: "Finger-Weaver's Cookbook [2]", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_weavers_cookbook_2.png"},
-	0xB01EA8FE: {Name: "Finger-Weaver's Cookbook [1]", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_weavers_cookbook_1.png"},
 	0xB01ED2B8: {Name: "Finger Mimic", Category: "multiplayer", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_mimic.png"},
 }
