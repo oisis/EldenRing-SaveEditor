@@ -17,7 +17,7 @@ export function WorldProgressTab() {
     }, []);
 
     const regions = graces.reduce((acc, grace) => {
-        const region = grace.region || 'Unknown';
+        const region = grace.Region || 'Unknown';
         if (!acc[region]) acc[region] = [];
         acc[region].push(grace);
         return acc;
