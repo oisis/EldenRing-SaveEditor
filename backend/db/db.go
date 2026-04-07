@@ -32,7 +32,7 @@ func GetItemData(id uint32, category string) data.ItemData {
 		data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals, data.ArrowsAndBolts,
 		data.Helms, data.Chest, data.Gauntlets, data.Leggings,
 		data.Talismans, data.Aows, data.Gestures,
-		data.StandardAshes, data.RenownedAshes, data.LegendaryAshes, data.Puppets,
+		data.StandardAshes,
 		data.Sorceries, data.Incantations, data.CraftingMaterials,
 		data.BolsteringMaterials,
 		data.SacredFlasks, data.ThrowingPots, data.PerfumeArts, data.Throwables,
@@ -109,18 +109,31 @@ func GetItemsByCategory(category string) []ItemEntry {
 
 	var items []ItemEntry
 
+	// isHandleID returns true when the ID uses the inventory-handle prefix
+	// (high nibble >= 8 and not a raw game-table ID).
+	// Each item exists twice in the data: once with the raw prefix (0x0–0x4)
+	// and once with the handle prefix (raw | 0x80000000 mapped per category):
+	//   weapons/armor: 0x0→0x8, 0x1→0x9
+	//   talismans:     0x2→0xA
+	//   items/goods:   0x4→0xB
+	//   aows:          0x8→0xC
+	// We keep only the handle-prefix variant to avoid duplicates in the UI.
+	isHandleID := func(id uint32) bool {
+		switch id & 0xF0000000 {
+		case 0x80000000, 0x90000000, 0xA0000000, 0xB0000000, 0xC0000000:
+			return true
+		}
+		return false
+	}
+
 	processMap := func(source map[uint32]data.ItemData, catName string) {
 		for id, item := range source {
 			if item.Name == "" || item.Name == "Unarmed" {
 				continue
 			}
-
-			// For weapons/bows/etc, we only want base items (usually ending in 0)
-			prefix := id & 0xF0000000
-			if prefix == 0 && id%100 != 0 {
+			if !isHandleID(id) {
 				continue
 			}
-
 			items = append(items, ItemEntry{
 				ID:           id,
 				Name:         item.Name,
@@ -156,14 +169,8 @@ func GetItemsByCategory(category string) []ItemEntry {
 		processMap(data.Talismans, "talismans")
 	case "aows":
 		processMap(data.Aows, "ashes")
-	case "standard_ashes":
+	case "ashes":
 		processMap(data.StandardAshes, "ashes")
-	case "renowned_ashes":
-		processMap(data.RenownedAshes, "ashes")
-	case "legendary_ashes":
-		processMap(data.LegendaryAshes, "ashes")
-	case "puppets":
-		processMap(data.Puppets, "ashes")
 	case "gestures":
 		processMap(data.Gestures, "gestures")
 	case "sorceries":
@@ -237,7 +244,7 @@ func GetAllItems() []ItemEntry {
 		"weapons", "bows", "shields", "staffs", "seals", "arrows_and_bolts",
 		"helms", "chest", "gauntlets", "leggings",
 		"talismans", "aows", "gestures",
-		"standard_ashes", "renowned_ashes", "legendary_ashes", "puppets",
+		"ashes",
 		"sorceries", "incantations", "crafting_materials",
 		"bolstering_materials",
 		"sacred_flasks", "throwing_pots", "perfume_arts", "throwables",
