@@ -1,7 +1,6 @@
 package data
 
 var QuestTools = map[uint32]ItemData{
-	0x0291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "quest_tools", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/crepuss_black_key_crossbow.png"},
 	0x0319EA30: {Name: "Black-Key Bolt", Category: "quest_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/quest/black_key_bolt.png"},
 	0x40001F4A: {Name: "Rusty Key", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/rusty_key.png"},
 	0x40001FC3: {Name: "Irina's Letter", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/irinas_letter.png"},
@@ -208,7 +207,6 @@ var QuestTools = map[uint32]ItemData{
 	0x401EA8FF: {Name: "Battlefield Priest's Cookbook [4]", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/battlefield_priests_cookbook_4.png"},
 	0x401EA900: {Name: "Grave Keeper's Cookbook [1]", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/grave_keepers_cookbook_1.png"},
 	0x401EA901: {Name: "St. Trina Disciple's Cookbook [2]", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/st_trina_disciples_cookbook_2.png"},
-	0x8291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "quest_tools", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/crepuss_black_key_crossbow.png"},
 	0x8319EA30: {Name: "Black-Key Bolt", Category: "quest_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/quest/black_key_bolt.png"},
 	0xB0001F4A: {Name: "Rusty Key", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/rusty_key.png"},
 	0xB0001FC3: {Name: "Irina's Letter", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/irinas_letter.png"},
