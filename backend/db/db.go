@@ -46,7 +46,7 @@ func GetItemData(id uint32, category string) data.ItemData {
 		}
 	}
 
-	return data.ItemData{Name: GetItemName(id, category)}
+	return data.ItemData{}
 }
 
 // GetItemName returns the name of an item by its ID and category.
@@ -73,11 +73,6 @@ func GetItemName(id uint32, category string) string {
 				return item.Name
 			}
 		}
-	}
-
-	itemData := GetItemData(id, category)
-	if itemData.Name != "" {
-		return itemData.Name
 	}
 
 	return fmt.Sprintf("Unknown Item (0x%X)", id)
@@ -109,30 +104,28 @@ func GetItemsByCategory(category string) []ItemEntry {
 
 	var items []ItemEntry
 
-	// isHandleID returns true when the ID uses the inventory-handle prefix
-	// (high nibble >= 8 and not a raw game-table ID).
-	// Each item exists twice in the data: once with the raw prefix (0x0–0x4)
-	// and once with the handle prefix (raw | 0x80000000 mapped per category):
-	//   weapons/armor: 0x0→0x8, 0x1→0x9
-	//   talismans:     0x2→0xA
-	//   items/goods:   0x4→0xB
-	//   aows:          0x8→0xC
-	// We keep only the handle-prefix variant to avoid duplicates in the UI.
-	isHandleID := func(id uint32) bool {
-		switch id & 0xF0000000 {
-		case 0x80000000, 0x90000000, 0xA0000000, 0xB0000000, 0xC0000000:
-			return true
-		}
-		return false
-	}
-
-	processMap := func(source map[uint32]data.ItemData, catName string) {
+	// processMap adds items from source to the result list.
+	// keepPrefix, when non-zero, accepts only IDs with that exact upper nibble mask.
+	// When zero, it falls back to accepting any "handle" prefix (0x8–0xC range),
+	// which covers weapons (0x8), armor (0x9), talismans (0xA), goods (0xB).
+	// AoWs must pass keepPrefix=0xC0000000 explicitly because 0x8 is ambiguous
+	// (it is both the weapon handle AND the AoW weapon-slot representation).
+	processMap := func(source map[uint32]data.ItemData, catName string, keepPrefix uint32) {
 		for id, item := range source {
 			if item.Name == "" || item.Name == "Unarmed" {
 				continue
 			}
-			if !isHandleID(id) {
-				continue
+			idPrefix := id & 0xF0000000
+			if keepPrefix != 0 {
+				if idPrefix != keepPrefix {
+					continue
+				}
+			} else {
+				switch idPrefix {
+				case 0x80000000, 0x90000000, 0xA0000000, 0xB0000000, 0xC0000000:
+				default:
+					continue
+				}
 			}
 			items = append(items, ItemEntry{
 				ID:           id,
@@ -148,65 +141,65 @@ func GetItemsByCategory(category string) []ItemEntry {
 
 	switch category {
 	case "weapons":
-		processMap(data.Weapons, "weapons")
+		processMap(data.Weapons, "weapons", 0)
 	case "bows":
-		processMap(data.Bows, "bows")
+		processMap(data.Bows, "bows", 0)
 	case "seals":
-		processMap(data.Seals, "seals")
+		processMap(data.Seals, "seals", 0)
 	case "staffs":
-		processMap(data.Staffs, "staffs")
+		processMap(data.Staffs, "staffs", 0)
 	case "shields":
-		processMap(data.Shields, "shields")
+		processMap(data.Shields, "shields", 0)
 	case "helms":
-		processMap(data.Helms, "helms")
+		processMap(data.Helms, "helms", 0)
 	case "gauntlets":
-		processMap(data.Gauntlets, "gauntlets")
+		processMap(data.Gauntlets, "gauntlets", 0)
 	case "leggings":
-		processMap(data.Leggings, "leggings")
+		processMap(data.Leggings, "leggings", 0)
 	case "chest":
-		processMap(data.Chest, "chest")
+		processMap(data.Chest, "chest", 0)
 	case "talismans":
-		processMap(data.Talismans, "talismans")
+		processMap(data.Talismans, "talismans", 0)
 	case "aows":
-		processMap(data.Aows, "ashes")
+		processMap(data.Aows, "aows", 0xC0000000)
 	case "ashes":
-		processMap(data.StandardAshes, "ashes")
+		processMap(data.StandardAshes, "ashes", 0)
 	case "gestures":
-		processMap(data.Gestures, "gestures")
+		processMap(data.Gestures, "gestures", 0)
 	case "sorceries":
-		processMap(data.Sorceries, "sorceries")
+		processMap(data.Sorceries, "sorceries", 0)
 	case "incantations":
-		processMap(data.Incantations, "incantations")
+		processMap(data.Incantations, "incantations", 0)
 	case "crafting_materials":
-		processMap(data.CraftingMaterials, "crafting_materials")
+		processMap(data.CraftingMaterials, "crafting_materials", 0)
 	case "bolstering_materials":
-		processMap(data.BolsteringMaterials, "bolstering_materials")
+		processMap(data.BolsteringMaterials, "bolstering_materials", 0)
 	case "arrows_and_bolts":
-		processMap(data.ArrowsAndBolts, "arrows_and_bolts")
+		processMap(data.ArrowsAndBolts, "arrows_and_bolts", 0)
 	case "sacred_flasks":
-		processMap(data.SacredFlasks, "sacred_flasks")
+		processMap(data.SacredFlasks, "sacred_flasks", 0)
 	case "throwing_pots":
-		processMap(data.ThrowingPots, "throwing_pots")
+		processMap(data.ThrowingPots, "throwing_pots", 0)
 	case "perfume_arts":
-		processMap(data.PerfumeArts, "perfume_arts")
+		processMap(data.PerfumeArts, "perfume_arts", 0)
 	case "throwables":
-		processMap(data.Throwables, "throwables")
+		processMap(data.Throwables, "throwables", 0)
 	case "grease":
-		processMap(data.Grease, "grease")
+		processMap(data.Grease, "grease", 0)
 	case "misc_tools":
-		processMap(data.MiscTools, "misc_tools")
+		processMap(data.MiscTools, "misc_tools", 0)
 	case "quest_tools":
-		processMap(data.QuestTools, "quest_tools")
+		processMap(data.QuestTools, "quest_tools", 0)
 	case "golden_runes":
-		processMap(data.GoldenRunes, "golden_runes")
+		processMap(data.GoldenRunes, "golden_runes", 0)
 	case "remembrances":
-		processMap(data.Remembrances, "remembrances")
+		processMap(data.Remembrances, "remembrances", 0)
 	case "multiplayer":
-		processMap(data.Multiplayer, "multiplayer")
+		processMap(data.Multiplayer, "multiplayer", 0)
 	case "consumables":
-		processMap(data.Consumables, "consumables")
+		processMap(data.Consumables, "consumables", 0)
 	case "keyitems":
-		processMap(data.Keyitems, "keyitems")
+		processMap(data.Keyitems, "keyitems", 0)
 	}
 
 	sort.Slice(items, func(i, j int) bool {
