@@ -230,8 +230,9 @@ export function DatabaseTab({ columnVisibility, platform, charIndex }: DatabaseT
                     >
                         <option value="all">All Items</option>
                         <optgroup label="Equipment" className="bg-background text-foreground">
-                            <option value="weapons">Weapons</option>
+                            <option value="weapons">Melee Weapons</option>
                             <option value="bows">Bows & Ballistae</option>
+                            <option value="arrows_and_bolts">Arrows & Bolts</option>
                             <option value="shields">Shields</option>
                             <option value="staffs">Glintstone Staffs</option>
                             <option value="seals">Sacred Seals</option>
@@ -244,33 +245,27 @@ export function DatabaseTab({ columnVisibility, platform, charIndex }: DatabaseT
                             <option value="gauntlets">Gauntlets</option>
                             <option value="leggings">Leggings</option>
                         </optgroup>
+                        <optgroup label="Magic & Ashes" className="bg-background text-foreground">
+                            <option value="sorceries">Sorceries</option>
+                            <option value="incantations">Incantations</option>
+                            <option value="ashes">Spirit Ashes</option>
+                        </optgroup>
+                        <optgroup label="Items & Materials" className="bg-background text-foreground">
+                            <option value="crafting_materials">Crafting Materials</option>
+                            <option value="bolstering_materials">Bolstering Materials</option>
+                            <option value="consumables">Consumables</option>
+                        </optgroup>
                         <optgroup label="Tools" className="bg-background text-foreground">
                             <option value="sacred_flasks">Sacred Flasks</option>
                             <option value="throwing_pots">Throwing Pots</option>
                             <option value="perfume_arts">Perfume Arts</option>
                             <option value="throwables">Throwables</option>
                             <option value="grease">Grease</option>
-                            <option value="misc_tools">Misc Tools</option>
+                            <option value="misc_tools">Miscellaneous Tools</option>
                             <option value="quest_tools">Quest Tools</option>
                             <option value="golden_runes">Golden Runes</option>
                             <option value="remembrances">Remembrances</option>
                             <option value="multiplayer">Multiplayer Items</option>
-                            <option value="consumables">Consumables</option>
-                        </optgroup>
-                        <optgroup label="Ashes" className="bg-background text-foreground">
-                            <option value="standard_ashes">Standard Spirit Ashes</option>
-                            <option value="renowned_ashes">Renowned Spirit Ashes</option>
-                            <option value="legendary_ashes">Legendary Spirit Ashes</option>
-                            <option value="puppets">Puppet Spirit Ashes</option>
-                        </optgroup>
-                        <optgroup label="Magic" className="bg-background text-foreground">
-                            <option value="sorceries">Sorceries</option>
-                            <option value="incantations">Incantations</option>
-                        </optgroup>
-                        <optgroup label="Items" className="bg-background text-foreground">
-                            <option value="crafting_materials">Crafting Materials</option>
-                            <option value="bolstering_materials">Bolstering Materials</option>
-                            <option value="arrows_and_bolts">Arrows & Bolts</option>
                         </optgroup>
                         <optgroup label="Progress" className="bg-background text-foreground">
                             <option value="keyitems">Key Items</option>

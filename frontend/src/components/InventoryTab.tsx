@@ -230,12 +230,12 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                         <optgroup label="Equipment" className="bg-background text-foreground">
                             <option value="weapons">Melee Weapons</option>
                             <option value="bows">Bows & Ballistae</option>
+                            <option value="arrows_and_bolts">Arrows & Bolts</option>
                             <option value="shields">Shields</option>
                             <option value="staffs">Glintstone Staffs</option>
                             <option value="seals">Sacred Seals</option>
-                            <option value="arrows_and_bolts">Arrows And Bolts</option>
-                            <option value="aows">Ashes of War</option>
                             <option value="talismans">Talismans</option>
+                            <option value="aows">Ashes of War</option>
                         </optgroup>
                         <optgroup label="Armor" className="bg-background text-foreground">
                             <option value="helms">Helms</option>
@@ -243,9 +243,18 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                             <option value="gauntlets">Gauntlets</option>
                             <option value="leggings">Leggings</option>
                         </optgroup>
+                        <optgroup label="Magic & Ashes" className="bg-background text-foreground">
+                            <option value="sorceries">Sorceries</option>
+                            <option value="incantations">Incantations</option>
+                            <option value="ashes">Spirit Ashes</option>
+                        </optgroup>
+                        <optgroup label="Items & Materials" className="bg-background text-foreground">
+                            <option value="crafting_materials">Crafting Materials</option>
+                            <option value="bolstering_materials">Bolstering Materials</option>
+                            <option value="consumables">Consumables</option>
+                        </optgroup>
                         <optgroup label="Tools" className="bg-background text-foreground">
                             <option value="sacred_flasks">Sacred Flasks</option>
-                            <option value="consumables">Consumables</option>
                             <option value="throwing_pots">Throwing Pots</option>
                             <option value="perfume_arts">Perfume Arts</option>
                             <option value="throwables">Throwables</option>
@@ -255,22 +264,6 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                             <option value="golden_runes">Golden Runes</option>
                             <option value="remembrances">Remembrances</option>
                             <option value="multiplayer">Multiplayer Items</option>
-                        </optgroup>
-                        <optgroup label="Ashes" className="bg-background text-foreground">
-                            <option value="standard_ashes">Standard Spirit Ashes</option>
-                            <option value="renowned_ashes">Renowned Spirit Ashes</option>
-                            <option value="legendary_ashes">Legendary Spirit Ashes</option>
-                            <option value="puppets">Puppet Spirit Ashes</option>
-                        </optgroup>
-                        <optgroup label="Magic" className="bg-background text-foreground">
-                            <option value="sorceries">Sorceries</option>
-                            <option value="incantations">Incantations</option>
-                        </optgroup>
-                        <optgroup label="Items" className="bg-background text-foreground">
-                            <option value="base_materials">Base Game Materials</option>
-                            <option value="dlc_materials">DLC Materials</option>
-                            <option value="smithing_stones">Smithing Stones</option>
-                            <option value="gloveworts">Gloveworts</option>
                         </optgroup>
                         <optgroup label="Progress" className="bg-background text-foreground">
                             <option value="keyitems">Key Items</option>
