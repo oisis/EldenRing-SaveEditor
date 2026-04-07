@@ -343,7 +343,7 @@ export function DatabaseTab({ columnVisibility, platform, charIndex }: DatabaseT
                                             {selectedDbItems.has(item.id) && <svg className="w-3 h-3 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"></path></svg>}
                                         </div>
                                     </td>
-                                    <td className="px-4 py-1">
+                                    <td className="px-4 py-0.5">
                                         <div 
                                             className="w-12 h-12 bg-muted/20 rounded-lg border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
                                             onClick={() => setSelectedIcon({name: item.name, path: item.iconPath})}
@@ -351,7 +351,7 @@ export function DatabaseTab({ columnVisibility, platform, charIndex }: DatabaseT
                                             <img 
                                                 src={item.iconPath} 
                                                 alt={item.name} 
-                                                className="w-11 h-11 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+                                                className="w-full h-full p-0.5 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
                                                 onError={handleImageError}
                                             />
                                         </div>

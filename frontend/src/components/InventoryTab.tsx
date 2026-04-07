@@ -340,7 +340,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                             ) : filteredOwnedItems.length > 0 ? (
                                 filteredOwnedItems.map((item) => (
                                     <tr key={item.handle} className="group hover:bg-primary/[0.02] transition-colors">
-                                        <td className="px-6 py-1">
+                                        <td className="px-6 py-0.5">
                                             <div 
                                                 className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
                                                 onClick={() => setSelectedIcon({name: item.name, path: item.iconPath})}
@@ -348,7 +348,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
                                                 <img 
                                                     src={item.iconPath} 
                                                     alt="" 
-                                                    className="w-11 h-11 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
+                                                    className="w-full h-full p-0.5 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
                                                     onError={handleImageError}
                                                 />
                                             </div>
