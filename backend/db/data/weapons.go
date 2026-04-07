@@ -553,7 +553,7 @@ var Weapons = map[uint32]ItemData{
 	0x02915940: {Name: "Arbalest", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/arbalest.png"},
 	0x029F8A10: {Name: "Jar Cannon", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/jar_cannon.png"},
 	0x02A70420: {Name: "Rabbath's Cannon", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/weapons/rabbaths_cannon.png"},
-	0x030ACF00: {Name: "Radahn's Spear", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/radahns_spear.png"},
+
 	0x0311D3E0: {Name: "Igon's Harpoon", Category: "weapons", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/weapons/igons_harpoon.png"},
 	0x039B2820: {Name: "Dryleaf Arts", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dryleaf_arts.png"},
 	0x039B2884: {Name: "Heavy Dryleaf Arts", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/heavy_dryleaf_arts.png"},
@@ -1220,7 +1220,7 @@ var Weapons = map[uint32]ItemData{
 	0x82915940: {Name: "Arbalest", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/arbalest.png"},
 	0x829F8A10: {Name: "Jar Cannon", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/jar_cannon.png"},
 	0x82A70420: {Name: "Rabbath's Cannon", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/weapons/rabbaths_cannon.png"},
-	0x830ACF00: {Name: "Radahn's Spear", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/radahns_spear.png"},
+
 	0x8311D3E0: {Name: "Igon's Harpoon", Category: "weapons", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/weapons/igons_harpoon.png"},
 	0x839B2820: {Name: "Dryleaf Arts", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dryleaf_arts.png"},
 	0x839B2884: {Name: "Heavy Dryleaf Arts", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/heavy_dryleaf_arts.png"},
