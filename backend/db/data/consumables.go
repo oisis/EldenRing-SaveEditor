@@ -45,7 +45,6 @@ var Consumables = map[uint32]ItemData{
 	0xB01E894E: {Name: "Golden Horn Tender", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/golden_horn_tender.png"},
 	0xB0000488: {Name: "Fireproof Dried Liver", Category: "consumables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/consumables/fireproof_dried_liver.png"},
 	0xB0000528: {Name: "Invigorating White Cured Meat", Category: "consumables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/consumables/invigorating_white_cured_meat.png"},
-	0xB00022F2: {Name: "Meat Peddler's Bell Bearing", Category: "consumables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/consumables/meat_peddlers_bell_bearing.png"},
 	0xB01E88D1: {Name: "Dragonscale Flesh", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/dragonscale_flesh.png"},
 	0xB01E8944: {Name: "Silver Horn Tender", Category: "consumables", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/consumables/silver_horn_tender.png"},
 	0xB000053C: {Name: "Dappled White Cured Meat", Category: "consumables", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/consumables/dappled_white_cured_meat.png"},
