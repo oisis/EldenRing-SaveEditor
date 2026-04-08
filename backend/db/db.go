@@ -465,16 +465,23 @@ func GetAllGraces() []GraceEntry {
 }
 
 // GetEventFlag checks if a specific event flag is set in the bit array.
+// For IDs in the lookup table, uses the precomputed byte/bit offsets.
+// For all other IDs (e.g. Sites of Grace), uses the standard formula:
+// byte = id / 8, bit = 7 - (id % 8).
 func GetEventFlag(flags []byte, id uint32) bool {
-	info, ok := data.EventFlags[id]
-	if !ok {
+	var byteIdx uint32
+	var bitIdx uint8
+	if info, ok := data.EventFlags[id]; ok {
+		byteIdx = info.Byte
+		bitIdx = info.Bit
+	} else {
+		byteIdx = id / 8
+		bitIdx = uint8(7 - (id % 8))
+	}
+	if int(byteIdx) >= len(flags) {
 		return false
 	}
-	if int(info.Byte) >= len(flags) {
-		return false
-	}
-
-	return (flags[info.Byte] & (1 << info.Bit)) != 0
+	return (flags[byteIdx] & (1 << bitIdx)) != 0
 }
 
 // filterInfuseVariants removes infuse-variant entries from a weapon item list.
@@ -514,18 +521,25 @@ func GetInfuseTypes() []InfuseType {
 }
 
 // SetEventFlag sets or clears a specific event flag in the bit array.
+// For IDs in the lookup table, uses the precomputed byte/bit offsets.
+// For all other IDs (e.g. Sites of Grace), uses the standard formula:
+// byte = id / 8, bit = 7 - (id % 8).
 func SetEventFlag(flags []byte, id uint32, value bool) {
-	info, ok := data.EventFlags[id]
-	if !ok {
-		return
-	}
-	if int(info.Byte) >= len(flags) {
-		return
-	}
-
-	if value {
-		flags[info.Byte] |= (1 << info.Bit)
+	var byteIdx uint32
+	var bitIdx uint8
+	if info, ok := data.EventFlags[id]; ok {
+		byteIdx = info.Byte
+		bitIdx = info.Bit
 	} else {
-		flags[info.Byte] &= ^(1 << info.Bit)
+		byteIdx = id / 8
+		bitIdx = uint8(7 - (id % 8))
+	}
+	if int(byteIdx) >= len(flags) {
+		return
+	}
+	if value {
+		flags[byteIdx] |= (1 << bitIdx)
+	} else {
+		flags[byteIdx] &= ^(1 << bitIdx)
 	}
 }
