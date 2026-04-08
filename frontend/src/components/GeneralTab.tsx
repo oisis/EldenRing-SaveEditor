@@ -1,15 +1,24 @@
 import {useEffect, useState} from 'react';
-import {GetCharacter, SaveCharacter} from '../../wailsjs/go/main/App';
-import {vm} from '../../wailsjs/go/models';
+import {GetCharacter, SaveCharacter, GetInfuseTypes} from '../../wailsjs/go/main/App';
+import {vm, db} from '../../wailsjs/go/models';
 
 interface Props {
     charIndex: number;
     onNameChange?: () => void;
+    upgrade25: number;
+    setUpgrade25: (v: number) => void;
+    upgrade10: number;
+    setUpgrade10: (v: number) => void;
+    infuseOffset: number;
+    setInfuseOffset: (v: number) => void;
+    upgradeAsh: number;
+    setUpgradeAsh: (v: number) => void;
 }
 
-export function GeneralTab({charIndex, onNameChange}: Props) {
+export function GeneralTab({charIndex, onNameChange, upgrade25, setUpgrade25, upgrade10, setUpgrade10, infuseOffset, setInfuseOffset, upgradeAsh, setUpgradeAsh}: Props) {
     const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
     const [loading, setLoading] = useState(false);
+    const [infuseTypes, setInfuseTypes] = useState<db.InfuseType[]>([]);
 
     const attributes = [
         { id: 'vigor', label: 'Vigor' },
@@ -21,6 +30,10 @@ export function GeneralTab({charIndex, onNameChange}: Props) {
         { id: 'faith', label: 'Faith' },
         { id: 'arcane', label: 'Arcane' }
     ];
+
+    useEffect(() => {
+        GetInfuseTypes().then(res => setInfuseTypes(res || []));
+    }, []);
 
     useEffect(() => {
         setLoading(true);
@@ -70,7 +83,7 @@ export function GeneralTab({charIndex, onNameChange}: Props) {
     );
 
     return (
-        <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto">
+        <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto overflow-y-auto custom-scrollbar">
             <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
                 {/* Left Column: Identity & Level */}
                 <div className="md:col-span-4 space-y-6">
@@ -143,6 +156,64 @@ export function GeneralTab({charIndex, onNameChange}: Props) {
                         >
                             Apply Changes
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Add Settings */}
+            <div className="card p-5 space-y-4">
+                <div className="flex items-center space-x-2">
+                    <div className="w-1 h-3 bg-primary/60 rounded-full" />
+                    <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Add Settings</h3>
+                    <span className="text-[8px] font-bold text-muted-foreground/50 uppercase tracking-widest">— applied when adding items from Database</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 pt-1">
+                    {/* Weapon +25 */}
+                    <div className="flex items-center space-x-3">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +25</span>
+                        <input
+                            type="range" min={0} max={25} value={upgrade25}
+                            onChange={e => setUpgrade25(parseInt(e.target.value))}
+                            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                        <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{upgrade25}</span>
+                    </div>
+
+                    {/* Weapon +10 */}
+                    <div className="flex items-center space-x-3">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +10</span>
+                        <input
+                            type="range" min={0} max={10} value={upgrade10}
+                            onChange={e => setUpgrade10(parseInt(e.target.value))}
+                            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                        <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgrade10}</span>
+                    </div>
+
+                    {/* Infuse */}
+                    <div className="flex items-center space-x-3">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Infuse</span>
+                        <select
+                            value={infuseOffset}
+                            onChange={e => setInfuseOffset(parseInt(e.target.value))}
+                            className="flex-1 bg-muted/20 border border-border rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer"
+                        >
+                            {infuseTypes.map(t => (
+                                <option key={t.offset} value={t.offset}>{t.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Spirit Ash */}
+                    <div className="flex items-center space-x-3">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Spirit Ash</span>
+                        <input
+                            type="range" min={0} max={10} value={upgradeAsh}
+                            onChange={e => setUpgradeAsh(parseInt(e.target.value))}
+                            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                        />
+                        <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgradeAsh}</span>
                     </div>
                 </div>
             </div>

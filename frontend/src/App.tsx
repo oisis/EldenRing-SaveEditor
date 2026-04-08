@@ -18,6 +18,10 @@ function App() {
     const [inventoryVersion, setInventoryVersion] = useState(0);
     const [theme, setTheme] = useState<Theme>('light');
     const [cloneModal, setCloneModal] = useState<{srcIdx: number} | null>(null);
+    const [upgrade25, setUpgrade25] = useState(0);
+    const [upgrade10, setUpgrade10] = useState(0);
+    const [infuseOffset, setInfuseOffset] = useState(0);
+    const [upgradeAsh, setUpgradeAsh] = useState(0);
     const [columnVisibility, setColumnVisibility] = useState({
         id: false,
         category: true
@@ -198,6 +202,10 @@ function App() {
                                     platform={platform}
                                     charIndex={selectedChar}
                                     onItemsAdded={() => setInventoryVersion(v => v + 1)}
+                                    upgrade25={upgrade25}
+                                    upgrade10={upgrade10}
+                                    infuseOffset={infuseOffset}
+                                    upgradeAsh={upgradeAsh}
                                 />
                             </div>
                         ) : activeTab === 'settings' ? (
@@ -227,7 +235,7 @@ function App() {
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} />}
+                                {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} upgrade25={upgrade25} setUpgrade25={setUpgrade25} upgrade10={upgrade10} setUpgrade10={setUpgrade10} infuseOffset={infuseOffset} setInfuseOffset={setInfuseOffset} upgradeAsh={upgradeAsh} setUpgradeAsh={setUpgradeAsh} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}

@@ -10,19 +10,18 @@ interface DatabaseTabProps {
     platform: string | null;
     charIndex: number;
     onItemsAdded?: () => void;
+    upgrade25: number;
+    upgrade10: number;
+    infuseOffset: number;
+    upgradeAsh: number;
 }
-
-// Categories that support upgradeable weapons (+25 / +10)
-const WEAPON_CATS = new Set(['weapons', 'bows', 'shields', 'staffs', 'seals', 'all']);
-// Categories that support spirit ash levels
-const ASH_CATS = new Set(['ashes', 'all']);
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
 function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, upgrade25, upgrade10, infuseOffset, upgradeAsh}: DatabaseTabProps) {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
@@ -35,12 +34,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
 
     // Selection
     const [selectedDbItems, setSelectedDbItems] = useState<Set<number>>(new Set());
-
-    // Global add controls
-    const [upgrade25, setUpgrade25] = useState(0);
-    const [upgrade10, setUpgrade10] = useState(0);
-    const [infuseOffset, setInfuseOffset] = useState(0);
-    const [upgradeAsh, setUpgradeAsh] = useState(0);
 
     // Modal state
     const [confirmModal, setConfirmModal] = useState<db.ItemEntry[] | null>(null);
@@ -146,10 +139,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
             parent.appendChild(ph);
         }
     };
-
-    const showWeaponControls = WEAPON_CATS.has(category);
-    const showAshControls = ASH_CATS.has(category);
-    const showGlobalBar = showWeaponControls || showAshControls;
 
     const selectedInfuseName = infuseTypes.find(t => t.offset === infuseOffset)?.name ?? 'Standard';
 
@@ -361,65 +350,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                     </span>
                 </div>
             </div>
-
-            {/* Global Add Controls */}
-            {showGlobalBar && (
-                <div className="flex flex-wrap items-center gap-x-6 gap-y-3 bg-muted/10 px-5 py-3 rounded-xl border border-border/50 backdrop-blur-sm sticky top-[68px] z-10">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Add Settings</span>
-
-                    {showWeaponControls && (
-                        <>
-                            {/* Weapon +25 level */}
-                            <div className="flex items-center space-x-3 min-w-[180px]">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Weapon +25</span>
-                                <input
-                                    type="range" min={0} max={25} value={upgrade25}
-                                    onChange={e => setUpgrade25(parseInt(e.target.value))}
-                                    className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-                                />
-                                <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{upgrade25}</span>
-                            </div>
-
-                            {/* Weapon +10 level */}
-                            <div className="flex items-center space-x-3 min-w-[160px]">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Weapon +10</span>
-                                <input
-                                    type="range" min={0} max={10} value={upgrade10}
-                                    onChange={e => setUpgrade10(parseInt(e.target.value))}
-                                    className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-                                />
-                                <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgrade10}</span>
-                            </div>
-
-                            {/* Infuse */}
-                            <div className="flex items-center space-x-2">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Infuse</span>
-                                <select
-                                    value={infuseOffset}
-                                    onChange={e => setInfuseOffset(parseInt(e.target.value))}
-                                    className="bg-background border border-border/50 rounded-md py-1 px-2 text-[10px] font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
-                                >
-                                    {infuseTypes.map(t => (
-                                        <option key={t.offset} value={t.offset}>{t.name}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </>
-                    )}
-
-                    {showAshControls && (
-                        <div className="flex items-center space-x-3 min-w-[160px]">
-                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Spirit Ash</span>
-                            <input
-                                type="range" min={0} max={10} value={upgradeAsh}
-                                onChange={e => setUpgradeAsh(parseInt(e.target.value))}
-                                className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-                            />
-                            <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgradeAsh}</span>
-                        </div>
-                    )}
-                </div>
-            )}
 
             {/* Table */}
             <div className="flex-1 bg-muted/5 rounded-xl border border-border/50 overflow-hidden flex flex-col relative">
