@@ -183,7 +183,7 @@ function App() {
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} columnVisibility={columnVisibility} />}
-                                {activeTab === 'world progress' && <WorldProgressTab />}
+                                {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>
                         )}
