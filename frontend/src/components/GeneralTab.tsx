@@ -4,9 +4,10 @@ import {vm} from '../../wailsjs/go/models';
 
 interface Props {
     charIndex: number;
+    onNameChange?: () => void;
 }
 
-export function GeneralTab({charIndex}: Props) {
+export function GeneralTab({charIndex, onNameChange}: Props) {
     const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -47,7 +48,10 @@ export function GeneralTab({charIndex}: Props) {
     const handleSave = () => {
         if (char) {
             SaveCharacter(charIndex, char)
-                .then(() => alert('Character data updated in memory'))
+                .then(() => {
+                    alert('Character data updated in memory');
+                    onNameChange?.();
+                })
                 .catch(err => alert('Error: ' + err));
         }
     };
