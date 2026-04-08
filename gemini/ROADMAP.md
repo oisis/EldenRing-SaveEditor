@@ -476,6 +476,48 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
+---
+
+## Phase 18: Character Slot Management — Clone & Delete
+
+> **Scope:** Zarządzanie slotami postaci bezpośrednio w edytorze bez wychodzenia do gry.
+> Klonowanie kopiuje cały slot binarnie (0x280000 B) + metadata. Usuwanie przesuwa pozostałe
+> sloty w dół eliminując luki. Brak potrzeby zewnętrznego szablonu — operacje wyłącznie na
+> istniejących danych save file.
+
+---
+
+- [x] **18.1. Backend: `CloneSlot(srcIdx, destIdx int) error` (`app.go`)**
+    - [x] Walidacja: `src` aktywny, `dest` nieaktywny, `src != dest`, oba 0–9.
+    - [x] Głęboka kopia: `make([]byte, 0x280000)` + `copy` dla `Slots[src].Data`.
+    - [x] `ActiveSlots[dest] = true`, `ProfileSummaries[dest] = ProfileSummaries[src]`.
+    - [x] Wails bindings zaktualizowane ręcznie (App.js + App.d.ts).
+
+- [x] **18.2. Backend: `DeleteSlot(idx int) error` (`app.go`)**
+    - [x] Walidacja: `idx` 0–9, slot aktywny.
+    - [x] Shift w dół: `for i := idx; i < 9; i++` →
+        `Slots[i] = Slots[i+1]`, `ActiveSlots[i] = ActiveSlots[i+1]`, `ProfileSummaries[i] = ProfileSummaries[i+1]`.
+    - [x] Zerowanie ostatniego slotu: `Slots[9].Data = make([]byte, 0x280000)`,
+        `ActiveSlots[9] = false`, `ProfileSummaries[9] = ProfileSummary{}`.
+    - [x] `MagicOffset` ustawiony na fallback (0x15420+432) — zapobiega panice w `Write()`.
+
+- [x] **18.3. Frontend: przycisk Clone w sidebarze (`App.tsx`)**
+    - [x] Ikona clone przy każdym aktywnym slocie (widoczna on-hover).
+    - [x] Klik → modal z listą wolnych slotów (nieaktywnych).
+    - [x] Potwierdzenie → `CloneSlot(src, dest)` → `refreshSlots()`.
+
+- [x] **18.4. Frontend: przycisk Delete w sidebarze (`App.tsx`)**
+    - [x] Ikona kosza przy każdym aktywnym slocie (widoczna on-hover).
+    - [x] Dialog potwierdzenia: `"Delete [name]? This cannot be undone."`.
+    - [x] Potwierdzenie → `DeleteSlot(idx)` → `refreshSlots()`.
+
+- [x] **18.5. Walidacja**
+    - [x] `go test -v ./tests/roundtrip_test.go` — 4/4 PASS.
+    - [x] `cd frontend && npx tsc --noEmit` — 0 błędów.
+    - [ ] `make build`.
+
+---
+
 ### Technical Note: Faster Invasions (Meliodas Method)
 A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
 - **Refresh Interval**: Reduced from 20s to 4s.

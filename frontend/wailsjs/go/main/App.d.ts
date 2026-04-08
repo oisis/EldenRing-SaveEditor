@@ -5,6 +5,10 @@ import {vm} from '../models';
 
 export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,arg4:number,arg5:number,arg6:number,arg7:number,arg8:number):Promise<void>;
 
+export function CloneSlot(arg1:number,arg2:number):Promise<void>;
+
+export function DeleteSlot(arg1:number):Promise<void>;
+
 export function GetActiveSlots():Promise<Array<boolean>>;
 
 export function GetAllGraces():Promise<Array<db.GraceEntry>>;

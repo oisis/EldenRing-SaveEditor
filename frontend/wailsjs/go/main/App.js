@@ -6,6 +6,14 @@ export function AddItemsToCharacter(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
   return window['go']['main']['App']['AddItemsToCharacter'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
+export function CloneSlot(arg1, arg2) {
+  return window['go']['main']['App']['CloneSlot'](arg1, arg2);
+}
+
+export function DeleteSlot(arg1) {
+  return window['go']['main']['App']['DeleteSlot'](arg1);
+}
+
 export function GetActiveSlots() {
   return window['go']['main']['App']['GetActiveSlots']();
 }

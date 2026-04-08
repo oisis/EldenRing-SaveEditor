@@ -275,6 +275,78 @@ func (a *App) ImportCharacter(srcIdx, destIdx int) error {
 	return fmt.Errorf("ImportCharacter is temporarily disabled during architecture refactor")
 }
 
+// CloneSlot copies an existing character slot to an empty destination slot within the same save.
+func (a *App) CloneSlot(srcIdx, destIdx int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if srcIdx < 0 || srcIdx >= 10 || destIdx < 0 || destIdx >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	if srcIdx == destIdx {
+		return fmt.Errorf("source and destination must differ")
+	}
+	srcName := core.UTF16ToString(a.save.Slots[srcIdx].Player.CharacterName[:])
+	if srcName == "" {
+		return fmt.Errorf("source slot %d is empty", srcIdx)
+	}
+	destName := core.UTF16ToString(a.save.Slots[destIdx].Player.CharacterName[:])
+	if destName != "" {
+		return fmt.Errorf("destination slot %d is not empty", destIdx)
+	}
+
+	src := a.save.Slots[srcIdx]
+
+	// Deep copy Data
+	newData := make([]byte, len(src.Data))
+	copy(newData, src.Data)
+	src.Data = newData
+
+	// Deep copy GaMap
+	newGaMap := make(map[uint32]uint32, len(src.GaMap))
+	for k, v := range src.GaMap {
+		newGaMap[k] = v
+	}
+	src.GaMap = newGaMap
+
+	a.save.Slots[destIdx] = src
+	a.save.ActiveSlots[destIdx] = true
+	a.save.ProfileSummaries[destIdx] = a.save.ProfileSummaries[srcIdx]
+
+	return nil
+}
+
+// DeleteSlot removes a character from a slot and shifts all subsequent slots down by one.
+func (a *App) DeleteSlot(idx int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if idx < 0 || idx >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	name := core.UTF16ToString(a.save.Slots[idx].Player.CharacterName[:])
+	if name == "" {
+		return fmt.Errorf("slot %d is already empty", idx)
+	}
+
+	for i := idx; i < 9; i++ {
+		a.save.Slots[i] = a.save.Slots[i+1]
+		a.save.ActiveSlots[i] = a.save.ActiveSlots[i+1]
+		a.save.ProfileSummaries[i] = a.save.ProfileSummaries[i+1]
+	}
+
+	// Zero out the last slot with a valid MagicOffset to prevent Write() from panicking
+	a.save.Slots[9] = core.SaveSlot{
+		Data:        make([]byte, 0x280000),
+		GaMap:       make(map[uint32]uint32),
+		MagicOffset: 0x15420 + 432,
+	}
+	a.save.ActiveSlots[9] = false
+	a.save.ProfileSummaries[9] = core.ProfileSummary{}
+
+	return nil
+}
+
 // GetActiveSlots returns the activity status of all 10 slots
 func (a *App) GetActiveSlots() []bool {
 	active := make([]bool, 10)
