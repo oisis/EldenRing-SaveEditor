@@ -22,6 +22,10 @@ export function GetCharacterNames() {
   return window['go']['main']['App']['GetCharacterNames']();
 }
 
+export function GetGraces(arg1) {
+  return window['go']['main']['App']['GetGraces'](arg1);
+}
+
 export function GetItemList(arg1) {
   return window['go']['main']['App']['GetItemList'](arg1);
 }
@@ -48,6 +52,10 @@ export function SelectAndOpenSave() {
 
 export function SelectAndOpenSourceSave() {
   return window['go']['main']['App']['SelectAndOpenSourceSave']();
+}
+
+export function SetGraceVisited(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetGraceVisited'](arg1, arg2, arg3);
 }
 
 export function SetSlotActivity(arg1, arg2) {

@@ -158,9 +158,50 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgradeLevel in
 	return core.AddItemsToSlot(slot, itemIDs, upgradeLevel, invMax, storageMax)
 }
 
-// GetAllGraces returns all Sites of Grace
+// GetAllGraces returns all Sites of Grace (no visited state)
 func (a *App) GetAllGraces() []db.GraceEntry {
 	return db.GetAllGraces()
+}
+
+// GetGraces returns all Sites of Grace with visited state from the specified character slot
+func (a *App) GetGraces(slotIndex int) ([]db.GraceEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	graces := db.GetAllGraces()
+
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range graces {
+			graces[i].Visited = db.GetEventFlag(flags, graces[i].ID)
+		}
+	}
+
+	return graces, nil
+}
+
+// SetGraceVisited sets or clears the visited flag for a Site of Grace in the specified character slot
+func (a *App) SetGraceVisited(slotIndex int, graceID uint32, visited bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	db.SetEventFlag(flags, graceID, visited)
+	return nil
 }
 
 // ImportCharacter copies a slot from the source save file to the destination save file

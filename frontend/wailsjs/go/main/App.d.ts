@@ -13,6 +13,8 @@ export function GetCharacter(arg1:number):Promise<vm.CharacterViewModel>;
 
 export function GetCharacterNames():Promise<Array<string>>;
 
+export function GetGraces(arg1:number):Promise<Array<db.GraceEntry>>;
+
 export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 
 export function GetSourceActiveSlots():Promise<Array<boolean>>;
@@ -26,6 +28,8 @@ export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<vo
 export function SelectAndOpenSave():Promise<string>;
 
 export function SelectAndOpenSourceSave():Promise<string>;
+
+export function SetGraceVisited(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
 

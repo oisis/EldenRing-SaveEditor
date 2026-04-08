@@ -20,9 +20,10 @@ type ItemEntry struct {
 
 // GraceEntry represents a Site of Grace.
 type GraceEntry struct {
-	ID     uint32 `json:"id"`
-	Name   string `json:"name"`
-	Region string `json:"region"`
+	ID      uint32 `json:"id"`
+	Name    string `json:"name"`
+	Region  string `json:"region"`
+	Visited bool   `json:"visited"`
 }
 
 // GetItemData returns the full metadata of an item by its ID and category.

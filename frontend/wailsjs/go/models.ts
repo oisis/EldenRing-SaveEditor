@@ -4,6 +4,7 @@ export namespace db {
 	    id: number;
 	    name: string;
 	    region: string;
+	    visited: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new GraceEntry(source);
@@ -14,6 +15,7 @@ export namespace db {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.region = source["region"];
+	        this.visited = source["visited"];
 	    }
 	}
 	export class ItemEntry {
