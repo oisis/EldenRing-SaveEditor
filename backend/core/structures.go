@@ -135,6 +135,20 @@ func (s *SaveSlot) calculateDynamicOffsets() {
 	equipePhysics := equipedArmaments + 0xC
 	s.FaceDataOffset = equipePhysics + 0x12f
 	s.StorageBoxOffset = s.FaceDataOffset + 0x6010
+
+	// EventFlags offset chain (mirrors Python save_struct())
+	gesturesOff := s.StorageBoxOffset + 0x100
+	if gesturesOff+4 <= len(s.Data) {
+		unlockedRegSz := int(binary.LittleEndian.Uint32(s.Data[gesturesOff:]))
+		unlockedRegion := gesturesOff + unlockedRegSz*4 + 4
+		horse := unlockedRegion + 0x29
+		bloodStain := horse + 0x4C
+		menuProfile := bloodStain + 0x103C
+		gaItemsOther := menuProfile + 0x1B588
+		tutorialData := gaItemsOther + 0x40B
+		s.IngameTimerOffset = tutorialData + 0x1A
+		s.EventFlagsOffset = s.IngameTimerOffset + 0x1C0000
+	}
 }
 
 func (s *SaveSlot) mapStats() {
