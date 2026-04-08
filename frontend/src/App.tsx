@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot} from '../wailsjs/go/main/App';
+import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
@@ -8,6 +8,15 @@ import {SettingsTab} from './components/SettingsTab';
 import {DatabaseTab} from './components/DatabaseTab';
 
 type Theme = 'light' | 'dark' | 'system';
+
+export type AddSettings = {
+    upgrade25: number;
+    upgrade10: number;
+    infuseOffset: number;
+    upgradeAsh: number;
+};
+
+const DEFAULT_ADD_SETTINGS: AddSettings = { upgrade25: 0, upgrade10: 0, infuseOffset: 0, upgradeAsh: 0 };
 
 function App() {
     const [platform, setPlatform] = useState<string | null>(null);
@@ -18,10 +27,7 @@ function App() {
     const [inventoryVersion, setInventoryVersion] = useState(0);
     const [theme, setTheme] = useState<Theme>('light');
     const [cloneModal, setCloneModal] = useState<{srcIdx: number} | null>(null);
-    const [upgrade25, setUpgrade25] = useState(0);
-    const [upgrade10, setUpgrade10] = useState(0);
-    const [infuseOffset, setInfuseOffset] = useState(0);
-    const [upgradeAsh, setUpgradeAsh] = useState(0);
+    const [charAddSettings, setCharAddSettings] = useState<Record<number, AddSettings>>({});
     const [columnVisibility, setColumnVisibility] = useState({
         id: false,
         category: true
@@ -38,6 +44,26 @@ function App() {
             root.classList.toggle('dark', theme === 'dark');
         }
     }, [theme]);
+
+    useEffect(() => {
+        if (!platform) return;
+        if (charAddSettings[selectedChar] !== undefined) return;
+        GetCharacter(selectedChar).then(char => {
+            if (!char) return;
+            const all = [...(char.inventory || []), ...(char.storage || [])];
+            const maxOf = (pred: (i: any) => boolean) =>
+                all.filter(pred).reduce((m, i) => Math.max(m, i.currentUpgrade ?? 0), 0);
+            setCharAddSettings(prev => ({
+                ...prev,
+                [selectedChar]: {
+                    upgrade25: maxOf(i => i.maxUpgrade === 25),
+                    upgrade10: maxOf(i => i.maxUpgrade === 10 && i.category === 'Weapon'),
+                    infuseOffset: 0,
+                    upgradeAsh: maxOf(i => i.subCategory === 'ashes'),
+                },
+            }));
+        }).catch(() => {});
+    }, [selectedChar, platform]);
 
     const handleOpenSave = async () => {
         try {
@@ -202,10 +228,7 @@ function App() {
                                     platform={platform}
                                     charIndex={selectedChar}
                                     onItemsAdded={() => setInventoryVersion(v => v + 1)}
-                                    upgrade25={upgrade25}
-                                    upgrade10={upgrade10}
-                                    infuseOffset={infuseOffset}
-                                    upgradeAsh={upgradeAsh}
+                                    addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
                                 />
                             </div>
                         ) : activeTab === 'settings' ? (
@@ -235,7 +258,7 @@ function App() {
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} upgrade25={upgrade25} setUpgrade25={setUpgrade25} upgrade10={upgrade10} setUpgrade10={setUpgrade10} infuseOffset={infuseOffset} setInfuseOffset={setInfuseOffset} upgradeAsh={upgradeAsh} setUpgradeAsh={setUpgradeAsh} />}
+                                {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}

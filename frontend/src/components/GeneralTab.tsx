@@ -1,21 +1,21 @@
 import {useEffect, useState} from 'react';
 import {GetCharacter, SaveCharacter, GetInfuseTypes} from '../../wailsjs/go/main/App';
 import {vm, db} from '../../wailsjs/go/models';
+import type {AddSettings} from '../App';
 
 interface Props {
     charIndex: number;
     onNameChange?: () => void;
-    upgrade25: number;
-    setUpgrade25: (v: number) => void;
-    upgrade10: number;
-    setUpgrade10: (v: number) => void;
-    infuseOffset: number;
-    setInfuseOffset: (v: number) => void;
-    upgradeAsh: number;
-    setUpgradeAsh: (v: number) => void;
+    addSettings: AddSettings;
+    setAddSettings: (s: AddSettings) => void;
 }
 
-export function GeneralTab({charIndex, onNameChange, upgrade25, setUpgrade25, upgrade10, setUpgrade10, infuseOffset, setInfuseOffset, upgradeAsh, setUpgradeAsh}: Props) {
+export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings}: Props) {
+    const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
+    const setUpgrade25 = (v: number) => setAddSettings({...addSettings, upgrade25: v});
+    const setUpgrade10 = (v: number) => setAddSettings({...addSettings, upgrade10: v});
+    const setInfuseOffset = (v: number) => setAddSettings({...addSettings, infuseOffset: v});
+    const setUpgradeAsh = (v: number) => setAddSettings({...addSettings, upgradeAsh: v});
     const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
     const [loading, setLoading] = useState(false);
     const [infuseTypes, setInfuseTypes] = useState<db.InfuseType[]>([]);

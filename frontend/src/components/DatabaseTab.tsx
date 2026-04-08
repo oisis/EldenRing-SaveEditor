@@ -1,6 +1,7 @@
 import {useEffect, useState} from 'react';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
+import type {AddSettings} from '../App';
 
 interface DatabaseTabProps {
     columnVisibility: {
@@ -10,10 +11,7 @@ interface DatabaseTabProps {
     platform: string | null;
     charIndex: number;
     onItemsAdded?: () => void;
-    upgrade25: number;
-    upgrade10: number;
-    infuseOffset: number;
-    upgradeAsh: number;
+    addSettings: AddSettings;
 }
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
@@ -21,7 +19,8 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, upgrade25, upgrade10, infuseOffset, upgradeAsh}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings}: DatabaseTabProps) {
+    const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
