@@ -169,6 +169,14 @@ func GetItemName(id uint32, category string) string {
 	return fmt.Sprintf("Unknown Item (0x%X)", id)
 }
 
+// IsArrowID returns true if the given item ID corresponds to an arrow or bolt.
+// Arrows/bolts have 0x82... prefix (PS4) or 0x02... prefix (PC) and are stackable despite
+// appearing weapon-like in the GaItems type system.
+func IsArrowID(id uint32) bool {
+	_, ok := data.ArrowsAndBolts[id]
+	return ok
+}
+
 // GetItemCategoryFromHandle returns the category string based on the GaItemHandle prefix.
 func GetItemCategoryFromHandle(handle uint32) string {
 	switch handle & 0xF0000000 {
@@ -289,7 +297,25 @@ func GetItemsByCategory(category string) []ItemEntry {
 	case "bolstering_materials":
 		processMap(data.BolsteringMaterials, "bolstering_materials", 0)
 	case "arrows_and_bolts":
-		processMap(data.ArrowsAndBolts, "arrows_and_bolts", 0)
+		// ArrowsAndBolts has both PC (0x02...) and PS4 (0x82...) entries with identical names.
+		// Show only PS4 (0x82... = 0x80000000 prefix) to avoid duplicates in the database.
+		for id, item := range data.ArrowsAndBolts {
+			if item.Name == "" {
+				continue
+			}
+			if id&0xF0000000 != 0x80000000 {
+				continue // skip PC (0x02...) variants
+			}
+			items = append(items, ItemEntry{
+				ID:           id,
+				Name:         item.Name,
+				Category:     "arrows_and_bolts",
+				MaxInventory: item.MaxInventory,
+				MaxStorage:   item.MaxStorage,
+				MaxUpgrade:   item.MaxUpgrade,
+				IconPath:     item.IconPath,
+			})
+		}
 	case "sacred_flasks":
 		processMap(data.SacredFlasks, "sacred_flasks", 0)
 	case "throwing_pots":

@@ -115,7 +115,9 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 
 			displayQuantity := item.Quantity
 			// For non-stackable items, force quantity to 1.
-			if category == "Weapon" || category == "Armor" || category == "Talisman" || category == "Ash of War" {
+			// Exception: arrows/bolts have weapon-like handles (0x82...) but are stackable.
+			isArrow := itemData.Category == "arrows_and_bolts"
+			if (category == "Weapon" || category == "Armor" || category == "Talisman" || category == "Ash of War") && !isArrow {
 				displayQuantity = 1
 			} else {
 				// For stackable items, mask the high bit which is often used by the engine

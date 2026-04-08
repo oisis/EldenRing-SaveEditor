@@ -40,7 +40,9 @@ func (w *Writer) WriteBytes(v []byte) error {
 
 // AddItemsToSlot adds multiple items to a specific save slot.
 // invQty and storageQty control quantities: 0 = skip, -1 = use provided max from caller, >0 = exact qty.
-func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int) error {
+// forceStackable treats items as stackable goods (handle=id, 21-byte record) regardless of ID prefix.
+// Used for arrows/bolts which have weapon-like 0x8x... IDs but are stackable in inventory.
+func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, forceStackable bool) error {
 	for _, id := range itemIDs {
 		// 1. Determine item type and handle prefix from upper nibble
 		var prefix uint32
@@ -67,9 +69,9 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int) er
 		}
 
 		// 2. Generate a unique handle.
-		// For stackable items, reuse existing handle if item already in GaMap.
+		// For stackable items (goods, talismans, arrows), reuse existing handle if item already in GaMap.
 		handle := uint32(0)
-		if prefix == ItemTypeItem || prefix == ItemTypeAccessory || prefix == ItemTypeAow {
+		if prefix == ItemTypeItem || prefix == ItemTypeAccessory || prefix == ItemTypeAow || forceStackable {
 			for h, i := range slot.GaMap {
 				if i == id {
 					handle = h
@@ -82,8 +84,9 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int) er
 			// For stackable goods (0xB0) and talismans (0xA0), the game convention
 			// is handle == ID (no indirection). character_vm.go reads these back as
 			// itemID = item.GaItemHandle, so the handle must equal the item ID.
+			// Arrows (forceStackable) also use handle == ID for stacking.
 			// Weapons, armor, and AoW use separate handle→ID indirection via GaMap.
-			if prefix == ItemTypeItem || prefix == ItemTypeAccessory {
+			if prefix == ItemTypeItem || prefix == ItemTypeAccessory || forceStackable {
 				handle = id
 			} else {
 				handle = generateUniqueHandle(slot, prefix)
@@ -159,12 +162,13 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		maxItems = 0xa80
 	}
 
-	// Check if already in inventory (for stackable items)
+	// Check if already in inventory (for stackable items).
+	// SET quantity to the desired value (not ADD) — qty represents the target total,
+	// not a delta. Prevents 10 existing + 99 max = 109 instead of 99.
 	for i, item := range *items {
 		if item.GaItemHandle == handle {
-			// Update quantity in memory and Data
-			(*items)[i].Quantity += qty
-			binary.LittleEndian.PutUint32(slot.Data[startOffset+i*12+4:], (*items)[i].Quantity)
+			(*items)[i].Quantity = qty
+			binary.LittleEndian.PutUint32(slot.Data[startOffset+i*12+4:], qty)
 			return nil
 		}
 	}
