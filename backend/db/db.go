@@ -259,10 +259,12 @@ func GetItemsByCategory(category string) []ItemEntry {
 	case "aows":
 		processMap(data.Aows, "aows", 0xC0000000)
 	case "ashes":
-		// StandardAshes uses PC goods IDs (0x40...) with one entry per upgrade level.
-		// Return only base (+0) entries remapped to PS4 goods IDs (0xB0...) so they can
-		// be added to PS4 saves and round-trip correctly through GetItemDataFuzzy.
+		// StandardAshes has both 0x40... (PC) and 0xB0... (PS4) entries for each upgrade level.
+		// Iterate only 0x40... base (+0) entries and remap to PS4 IDs (0xB0...) to avoid duplicates.
 		for id, item := range data.StandardAshes {
+			if id&0xF0000000 != 0x40000000 {
+				continue // skip PS4 (0xB0...) entries — same ashes, different prefix
+			}
 			if item.Name == "" || strings.Contains(item.Name, " +") {
 				continue
 			}
