@@ -50,13 +50,32 @@ export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
         setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: true} : g));
     };
 
-    const getRegionMapPath = (region: string) => {
+    const REGION_MAP_ALIASES: Record<string, string | null> = {
+        'limgrave': 'limgrave',
+        'limgrave, west': 'limgrave',
+        'limgrave, east': 'limgrave',
+        'liurnia of the lakes': 'liurnia_of_the_lakes',
+        'liurnia, north': 'liurnia_of_the_lakes',
+        'liurnia, east': 'liurnia_of_the_lakes',
+        'liurnia, west': 'liurnia_of_the_lakes',
+        'weeping peninsula': null,
+        'crumbling farum azula': null,
+        "miquella's haligtree": null,
+        'shadow of the erdtree': null,
+    };
+
+    const getRegionMapPath = (region: string): string | null => {
+        const keyNorm = region.toLowerCase();
+        if (keyNorm in REGION_MAP_ALIASES) {
+            const val = REGION_MAP_ALIASES[keyNorm];
+            return val ? `maps/${val}.jpg` : null;
+        }
+        // Generic: keep period before underscore (e.g. "Mt. Gelmir" → "mt._gelmir")
         const cleanName = region.toLowerCase()
             .replace(/'/g, '')
-            .replace(/\s+/g, '_')
             .replace(/,/g, '')
-            .replace(/\./g, '');
-        return `maps/${cleanName}.png`;
+            .replace(/\s+/g, '_');
+        return `maps/${cleanName}.jpg`;
     };
 
     if (loading) return (
@@ -125,21 +144,27 @@ export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
                                             Unlock All
                                         </button>
                                     )}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            setSelectedMap({ name: region, path: getRegionMapPath(region) });
-                                        }}
-                                        className="w-10 h-10 rounded bg-muted/50 border border-border/50 flex items-center justify-center overflow-hidden hover:border-primary/50 hover:scale-110 transition-all group"
-                                        title={`View ${region} Map`}
-                                    >
-                                        <img
-                                            src={getRegionMapPath(region)}
-                                            alt="Map"
-                                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                                            onError={(e) => (e.currentTarget.style.display = 'none')}
-                                        />
-                                    </button>
+                                    {(() => {
+                                        const mapPath = getRegionMapPath(region);
+                                        if (!mapPath) return null;
+                                        return (
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedMap({ name: region, path: mapPath });
+                                                }}
+                                                className="w-10 h-10 rounded bg-muted/50 border border-border/50 flex items-center justify-center overflow-hidden hover:border-primary/50 hover:scale-110 transition-all group"
+                                                title={`View ${region} Map`}
+                                            >
+                                                <img
+                                                    src={mapPath}
+                                                    alt="Map"
+                                                    className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
+                                                    onError={(e) => (e.currentTarget.style.display = 'none')}
+                                                />
+                                            </button>
+                                        );
+                                    })()}
                                     <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${allVisited ? 'text-primary border-primary/50 bg-primary/10' : 'text-muted-foreground bg-muted/50 border-border'}`}>
                                         {visitedCount}/{total}
                                     </span>
