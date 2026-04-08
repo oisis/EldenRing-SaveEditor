@@ -7,6 +7,81 @@ import (
 	"os"
 )
 
+// ps4HeaderTemplate is the canonical 0x70-byte PS4 save header.
+// Identical across all saves (verified against two different PS4 saves).
+var ps4HeaderTemplate = [0x70]byte{
+	0xCB, 0x01, 0x9C, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x00, 0x00, 0x00, 0x00,
+	0x07, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x08, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F,
+	0x09, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x0A, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F,
+	0x0B, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x0C, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F,
+	0x0D, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x0E, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F,
+	0x0F, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x10, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F,
+	0x11, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F, 0x12, 0x00, 0x00, 0x00, 0x7F, 0x7F, 0x7F, 0x7F,
+}
+
+// buildPCBND4Header constructs the canonical 0x300-byte BND4 container header for PC saves.
+// The only variable field is UserData11 (regulation) size; all slot and UserData10 offsets
+// are fixed because each slot is always 0x280000 bytes and UserData10 is always 0x60000 bytes.
+func buildPCBND4Header(userData11Len int) []byte {
+	le := binary.LittleEndian
+	h := make([]byte, 0x300)
+
+	// BND4 outer header (0x00–0x3F)
+	copy(h[0x00:], []byte("BND4"))
+	le.PutUint32(h[0x08:], 0x00010000)
+	le.PutUint32(h[0x0C:], 12) // 12 entries
+	le.PutUint64(h[0x10:], 0x40)
+	copy(h[0x18:], []byte("00000001"))
+	le.PutUint64(h[0x20:], 0x20) // entry size
+	le.PutUint64(h[0x28:], 0x300)
+	le.PutUint64(h[0x30:], 0x2001)
+
+	// Entry table (12 × 0x20 bytes starting at 0x40).
+	// Slot entries: [0x10 MD5 + 0x280000 data] each.
+	// UserData10:   [0x10 MD5 + 0x60000 data].
+	// UserData11:   no MD5 prefix, variable size.
+	const slotBlock = uint32(0x280010) // 0x10 MD5 + 0x280000 data
+	const ud10Block = uint32(0x60010)  // 0x10 MD5 + 0x60000 data
+	const nameStride = uint32(0x1A)    // 12 chars UTF-16LE + 2-byte null = 26 bytes
+
+	for i := 0; i < 12; i++ {
+		off := 0x40 + i*0x20
+		var size, dataOff, nameOff uint32
+
+		switch {
+		case i < 10:
+			size = slotBlock
+			dataOff = 0x300 + uint32(i)*slotBlock
+			nameOff = 0x1C0 + uint32(i)*nameStride
+		case i == 10:
+			size = ud10Block
+			dataOff = 0x300 + 10*slotBlock
+			nameOff = 0x1C0 + 10*nameStride
+		default: // i == 11: UserData11 (regulation)
+			size = uint32(userData11Len)
+			dataOff = 0x300 + 10*slotBlock + ud10Block
+			nameOff = 0x1C0 + 11*nameStride
+		}
+
+		le.PutUint32(h[off+0x00:], 0x50)
+		le.PutUint32(h[off+0x04:], 0xFFFFFFFF)
+		le.PutUint32(h[off+0x08:], size)
+		le.PutUint32(h[off+0x10:], dataOff)
+		le.PutUint32(h[off+0x14:], nameOff)
+	}
+
+	// Name table: "USER_DATAxxx\0" in UTF-16LE starting at 0x1C0.
+	for i := 0; i < 12; i++ {
+		nameOff := 0x1C0 + i*int(nameStride)
+		name := fmt.Sprintf("USER_DATA%03d", i)
+		for j := 0; j < len(name); j++ {
+			h[nameOff+j*2] = name[j] // high byte stays 0 (ASCII-safe)
+		}
+	}
+
+	return h
+}
+
 type Platform string
 
 const (
@@ -161,11 +236,25 @@ func (s *SaveFile) flushMetadata() {
 func (s *SaveFile) SaveFile(path string) error {
 	s.flushMetadata()
 
+	// Resolve the header for the target platform, handling cross-platform conversions.
+	header := s.Header
+	if s.Platform == PlatformPC {
+		if len(header) < 4 || !bytes.HasPrefix(header, []byte("BND4")) {
+			// PS4→PC conversion: original header is 0x70 PS4 bytes, rebuild BND4.
+			header = buildPCBND4Header(len(s.UserData11))
+		}
+	} else {
+		if len(header) != 0x70 || bytes.HasPrefix(header, []byte("BND4")) {
+			// PC→PS4 conversion: replace BND4 header with canonical PS4 header.
+			header = ps4HeaderTemplate[:]
+		}
+	}
+
 	var buf bytes.Buffer
 	w := NewWriter(&buf)
 
 	if s.Platform == PlatformPC {
-		w.WriteBytes(s.Header)
+		w.WriteBytes(header)
 		for i := 0; i < 10; i++ {
 			slotData := s.Slots[i].Write("PC")
 			checksum := ComputeMD5(slotData)
@@ -179,7 +268,7 @@ func (s *SaveFile) SaveFile(path string) error {
 		w.WriteBytes(udData)
 		w.WriteBytes(s.UserData11)
 	} else {
-		w.WriteBytes(s.Header)
+		w.WriteBytes(header)
 		for i := 0; i < 10; i++ {
 			w.WriteBytes(s.Slots[i].Write("PS4"))
 		}
@@ -196,5 +285,16 @@ func (s *SaveFile) SaveFile(path string) error {
 		}
 	}
 
-	return os.WriteFile(path, finalData, 0644)
+	// Atomic write: write to a temp file first, then rename into place.
+	// os.Rename is atomic on POSIX — prevents partial writes from corrupting the target.
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, finalData, 0644); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to write save data: %w", err)
+	}
+	if err := os.Rename(tmpPath, path); err != nil {
+		os.Remove(tmpPath)
+		return fmt.Errorf("failed to finalize save file: %w", err)
+	}
+	return nil
 }

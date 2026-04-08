@@ -340,6 +340,69 @@
 
 ---
 
+## Phase 15: Save/Backup/Write Pipeline — Naprawa krytycznych błędów ✅
+
+> **Audyt przeprowadzony 2026-04-08. Znalezione problemy:**
+
+### Bug #1 — KRYTYCZNY: Zapis do nowego pliku zawsze kończy się błędem (save aborted)
+
+`WriteSave` w `app.go` wywołuje `CreateBackup(path)` gdzie `path` to ścieżka DOCELOWA wybrana przez
+użytkownika w `SaveFileDialog`. `CreateBackup` próbuje otworzyć ten plik przez `os.Open`. Jeśli
+plik nie istnieje (użytkownik zapisuje do nowego pliku) → `os.Open` zwraca `ENOENT` → `CreateBackup`
+zwraca błąd → `WriteSave` zwraca `"backup failed, save aborted"` → **zapis jest anulowany**.
+Użytkownik może zapisywać TYLKO nadpisując istniejący plik.
+
+### Bug #2 — KRYTYCZNY: Parametr `platform` w `WriteSave` jest ignorowany → konwersja zepsuta
+
+Frontend wywołuje `WriteSave(targetPlatform)` gdzie `targetPlatform ∈ {"PC", "PS4"}`. Ale `app.go`:
+```go
+func (a *App) WriteSave(platform string) error {
+    ...
+    return a.save.SaveFile(path)  // ignoruje `platform`, używa a.save.Platform z LoadSave
+}
+```
+`SaveFile()` używa `s.Platform` ustawionego przy wczytaniu pliku. Konwersja PS4→PC i PC→PS4
+jest całkowicie zepsuta — zawsze zapisuje w formacie oryginalnym. Dodatkowo: przy konwersji
+PS4→PC należy ustawić `s.Encrypted = true` i wygenerować losowe IV (PC save jest szyfrowany AES).
+
+### Bug #3 — ISTOTNY: Zapis nieatomowy — ryzyko uszkodzenia pliku
+
+`os.WriteFile(path, finalData, 0644)` w `SaveFile()` nie jest atomowy. Przerwanie zapisu
+(brak prądu, pełny dysk, kill procesu) zostawia plik w uszkodzonym stanie. Backup chroni
+przed nadpisaniem, ale nie przed częściowym zapisem do celu.
+
+### Bug #4 — DO WERYFIKACJI: BND4 header SHA256 po edycji może być nieaktualny
+
+Header 0x300 bajtów jest zachowywany verbatim z wczytanego pliku. Jeśli bajty 0x10–0x2F
+zawierają SHA256 zaszyfrowanego lub odszyfrowanego payloadu (jak w Python `Final.py`),
+to po edycji (zmiana danych slotów → nowe MD5 → inny payload) hash w headerze jest stary.
+Wymaga weryfikacji z `Final.py`.
+
+---
+
+- [x] **15.1. Naprawa `CreateBackup` / `WriteSave` — backup tylko gdy plik docelowy istnieje**
+    - [x] W `app.go` `WriteSave`: przed `CreateBackup` sprawdzić `os.Stat(path)`.
+        Jeśli plik nie istnieje → pomiń backup. Jeśli istnieje → backup jak dotychczas.
+
+- [x] **15.2. Naprawa `WriteSave` — zastosowanie parametru `platform`**
+    - [x] W `app.go` przed `SaveFile(path)` ustawić `a.save.Platform = core.Platform(platform)`.
+    - [x] PS4→PC: generowanie losowego IV + `Encrypted=true` (`crypto/rand`).
+    - [x] PC→PS4: `Encrypted=false`.
+    - [x] Naprawa headerów przy konwersji (`save_manager.go`):
+        - PS4→PC: `buildPCBND4Header()` — programatyczne generowanie 0x300-bajtowego BND4 headera.
+        - PC→PS4: `ps4HeaderTemplate` — stały 0x70-bajtowy header PS4.
+    - [x] Wszystkie 5 testów round-trip i konwersji przechodzą (`go test ./tests/...`).
+
+- [x] **15.3. Atomowy zapis — write-then-rename**
+    - [x] W `SaveFile()` (`backend/core/save_manager.go`): zapis do `.tmp` + `os.Rename` (POSIX atomic).
+    - [x] Cleanup `.tmp` przy błędzie zapisu.
+
+- [x] **15.4. Weryfikacja BND4 header SHA256 — N/A**
+    - [x] `Final.py` używa wyłącznie MD5 per-slot (nie SHA256 w BND4 headerze).
+        MD5 jest już przeliczany w `SaveFile()`. Brak action required.
+
+---
+
 ### Technical Note: Faster Invasions (Meliodas Method)
 A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
 - **Refresh Interval**: Reduced from 20s to 4s.

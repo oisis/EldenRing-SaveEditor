@@ -2,7 +2,10 @@ package main
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
+	"os"
+
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 	"github.com/oisis/EldenRing-SaveEditor/backend/vm"
@@ -129,12 +132,29 @@ func (a *App) WriteSave(platform string) error {
 		return fmt.Errorf("no file selected")
 	}
 
-	// Backup must succeed before writing; abort on failure to protect the original.
-	if _, err := core.CreateBackup(path); err != nil {
-		return fmt.Errorf("backup failed, save aborted: %w", err)
+	// Backup only when the target file already exists (nothing to protect otherwise).
+	if _, statErr := os.Stat(path); statErr == nil {
+		if _, err := core.CreateBackup(path); err != nil {
+			return fmt.Errorf("backup failed, save aborted: %w", err)
+		}
+		if err := core.PruneBackups(path, 10); err != nil {
+			fmt.Printf("Warning: failed to prune old backups: %v\n", err)
+		}
 	}
-	if err := core.PruneBackups(path, 10); err != nil {
-		fmt.Printf("Warning: failed to prune old backups: %v\n", err)
+
+	// Apply target platform — enables cross-platform conversion.
+	a.save.Platform = core.Platform(platform)
+	if platform == "PC" && !a.save.Encrypted {
+		// PS4 → PC: enable AES encryption with a fresh random IV.
+		iv := make([]byte, 16)
+		if _, err := rand.Read(iv); err != nil {
+			return fmt.Errorf("failed to generate IV for encryption: %w", err)
+		}
+		a.save.IV = iv
+		a.save.Encrypted = true
+	}
+	if platform == "PS4" {
+		a.save.Encrypted = false
 	}
 
 	return a.save.SaveFile(path)
