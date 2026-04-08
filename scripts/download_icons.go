@@ -27,7 +27,7 @@ func main() {
 
 	scanner := bufio.NewScanner(f)
 	count := 0
-	limit := 500
+	limit := 1000
 	consecutiveFailures := 0
 	maxConsecutiveFailures := 50
 
@@ -59,7 +59,21 @@ func main() {
 		wikiName := toWikiName(cleanName)
 
 		// Remove Affinities for weapons
-		if strings.Contains(iconPath, "weapons/") {
+		isWeapon := strings.Contains(iconPath, "melee_armaments/") || strings.Contains(iconPath, "weapons/")
+		isArmor := strings.Contains(iconPath, "/head/") || strings.Contains(iconPath, "/chest/") ||
+			strings.Contains(iconPath, "/arms/") || strings.Contains(iconPath, "/legs/") ||
+			strings.Contains(iconPath, "armor/")
+		isRanged := strings.Contains(iconPath, "ranged_and_catalysts/")
+		isShield := strings.Contains(iconPath, "shields/")
+		isTalisman := strings.Contains(iconPath, "talismans/")
+		isAoW := strings.Contains(iconPath, "ashes_of_war/") || strings.Contains(iconPath, "/ashes/")
+		isSpiritAsh := strings.Contains(iconPath, "/ashes/") && !strings.Contains(iconPath, "ashes_of_war/")
+		isTools := strings.Contains(iconPath, "tools/") || strings.Contains(iconPath, "key_items/") || strings.Contains(iconPath, "goods/")
+		isCrafting := strings.Contains(iconPath, "crafting_materials/") || strings.Contains(iconPath, "bolstering_materials/")
+		isSorcery := strings.Contains(iconPath, "sorceries/")
+		isIncantation := strings.Contains(iconPath, "incantations/")
+
+		if isWeapon || isRanged || isShield {
 			for _, aff := range affinities {
 				if strings.HasPrefix(wikiName, aff+"_") {
 					wikiName = strings.TrimPrefix(wikiName, aff+"_")
@@ -70,22 +84,28 @@ func main() {
 
 		// Determine prefix based on category
 		var prefixes []string
-		if strings.Contains(iconPath, "weapons/") {
+		if isWeapon {
 			prefixes = []string{"ER_Icon_Weapon_"}
-		} else if strings.Contains(iconPath, "armor/") {
+		} else if isRanged {
+			prefixes = []string{"ER_Icon_Weapon_"}
+		} else if isShield {
+			prefixes = []string{"ER_Icon_Weapon_"}
+		} else if isArmor {
 			prefixes = []string{"ER_Icon_Armor_"}
-		} else if strings.Contains(iconPath, "talismans/") {
+		} else if isTalisman {
 			prefixes = []string{"ER_Icon_Talisman_"}
-		} else if strings.Contains(iconPath, "goods/") {
-			// Check if it's an Ash (Spirit Ash)
-			if strings.Contains(nameOnly, "ashes") || strings.Contains(nameOnly, "puppet") {
-				prefixes = []string{"ER_Icon_Ash_", "ER_Icon_Tool_", "ER_Icon_Item_"}
-			} else {
-				prefixes = []string{"ER_Icon_Tool_", "ER_Icon_Item_"}
-			}
-		} else if strings.Contains(iconPath, "ashes/") {
+		} else if isSpiritAsh {
+			prefixes = []string{"ER_Icon_Ash_", "ER_Icon_Tool_", "ER_Icon_Item_"}
+		} else if isAoW {
 			prefixes = []string{"ER_Icon_Ash_of_War_", "ER_Icon_ash_of_war_"}
+		} else if isTools {
+			prefixes = []string{"ER_Icon_Tool_", "ER_Icon_Item_"}
+		} else if isCrafting {
+			prefixes = []string{"ER_Icon_Item_", "ER_Icon_Tool_"}
+		} else if isSorcery || isIncantation {
+			prefixes = []string{"ER_Icon_Spell_"}
 		}
+		_ = isSpiritAsh
 
 		success := false
 		for _, prefix := range prefixes {
