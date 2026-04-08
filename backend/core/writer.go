@@ -41,19 +41,26 @@ func (w *Writer) WriteBytes(v []byte) error {
 // AddItemsToSlot adds multiple items to a specific save slot.
 func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, upgradeLevel int, invMax, storageMax bool) error {
 	for _, id := range itemIDs {
-		// 1. Determine item type and handle prefix
-		prefix := uint32(ItemTypeItem)
-		recordSize := 8
-		if (id & 0x80000000) != 0 {
-			prefix = ItemTypeAow
-			recordSize = 8
-		} else if (id & 0x10000000) != 0 {
+		// 1. Determine item type and handle prefix from upper nibble
+		var prefix uint32
+		var recordSize int
+		switch id & 0xF0000000 {
+		case ItemTypeWeapon:
+			prefix = ItemTypeWeapon
+			recordSize = 21
+		case ItemTypeArmor:
 			prefix = ItemTypeArmor
 			recordSize = 16
-		} else if (id & 0x20000000) != 0 {
+		case ItemTypeAccessory:
 			prefix = ItemTypeAccessory
 			recordSize = 8
-		} else if (id & 0x0FFFFFFF) == id { // Weapons usually don't have high bits set in DB
+		case ItemTypeItem:
+			prefix = ItemTypeItem
+			recordSize = 8
+		case ItemTypeAow:
+			prefix = ItemTypeAow
+			recordSize = 8
+		default:
 			prefix = ItemTypeWeapon
 			recordSize = 21
 		}
@@ -160,25 +167,36 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		}
 	}
 
-	// Find first empty slot
-	if len(*items) >= maxItems {
-		return io.ErrShortBuffer // Inventory full
+	if isStorage {
+		// Storage uses a dynamic list — append at current length if capacity allows
+		if len(*items) >= maxItems {
+			return io.ErrShortBuffer
+		}
+		newIdx := uint32(len(*items))
+		newItem := InventoryItem{GaItemHandle: handle, Quantity: qty, Index: newIdx}
+		*items = append(*items, newItem)
+		off := startOffset + int(newIdx)*12
+		binary.LittleEndian.PutUint32(slot.Data[off:], newItem.GaItemHandle)
+		binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
+		binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
+	} else {
+		// Inventory is fully pre-allocated — find first empty slot (handle == 0 or 0xFFFFFFFF)
+		emptyIdx := -1
+		for i, item := range *items {
+			if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+				emptyIdx = i
+				break
+			}
+		}
+		if emptyIdx < 0 {
+			return io.ErrShortBuffer // All slots occupied
+		}
+		(*items)[emptyIdx] = InventoryItem{GaItemHandle: handle, Quantity: qty, Index: uint32(emptyIdx)}
+		off := startOffset + emptyIdx*12
+		binary.LittleEndian.PutUint32(slot.Data[off:], handle)
+		binary.LittleEndian.PutUint32(slot.Data[off+4:], qty)
+		binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(emptyIdx))
 	}
-
-	newIdx := uint32(len(*items))
-	newItem := InventoryItem{
-		GaItemHandle: handle,
-		Quantity:     qty,
-		Index:        newIdx,
-	}
-
-	*items = append(*items, newItem)
-	
-	// Write to Data
-	off := startOffset + int(newIdx)*12
-	binary.LittleEndian.PutUint32(slot.Data[off:], newItem.GaItemHandle)
-	binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
-	binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
 
 	return nil
 }
