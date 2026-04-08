@@ -281,6 +281,9 @@ EquipedGestures         = EquipedItems + 0x18
 
 projSize                = read_u32(data[EquipedGestures])  // dynamiczny rozmiar
 EquipedProjectile       = EquipedGestures + projSize*8 + 4
+// ⚠️ PS4: jeśli EquipedProjectile >= 0x280000, traktuj projSize=0
+//    (garbage w danych PS4 może dać absurdalny projSize)
+if EquipedProjectile >= len(data): EquipedProjectile = EquipedGestures + 4
 EquipedArmaments        = EquipedProjectile + 0x9C
 EquipePhysics           = EquipedArmaments + 0xC
 FaceDataOffset          = EquipePhysics + 0x12F
@@ -292,6 +295,9 @@ StorageBoxOffset        = FaceDataOffset + 0x6010
 gesturesOff             = StorageBoxOffset + 0x100
 unlockedRegSz           = read_u32(data[gesturesOff])  // dynamiczny!
 unlockedRegion          = gesturesOff + unlockedRegSz*4 + 4
+// ⚠️ PS4: jeśli unlockedRegion >= 0x280000, traktuj unlockedRegSz=0
+//    (ten sam problem co projSize — garbage bytes w PS4 saves)
+if unlockedRegion <= 0 or unlockedRegion >= len(data): unlockedRegion = gesturesOff + 4
 horse                   = unlockedRegion + 0x29
 bloodStain              = horse + 0x4C
 menuProfile             = bloodStain + 0x103C
@@ -475,18 +481,28 @@ ProfileSummary jest wyświetlana w menu "Load Game" bez wczytywania pełnego slo
 Event Flags to bitowa tablica flag stanu świata (odblokowane gracje, pokonani bossowie, aktywne baseny przywoływania).
 
 ```
-bit = EventFlagsOffset w slot.Data  (wyliczony dynamicznie — patrz §5.4)
-flaga ID X jest ustawiona jeśli:
-    flags[info.Byte] & (1 << info.Bit) != 0
+flags = slot.Data[EventFlagsOffset:]   // wyliczony dynamicznie — patrz §5.4
 ```
 
-`info.Byte` i `info.Bit` to predefiniowane wartości per ID — pobierane z bazy danych (`data.EventFlags`).
+**Lokalizacja flagi dla danego ID:**
+
+1. Jeśli ID istnieje w predefiniowanej tabeli `data.EventFlags` → użyj `info.Byte` i `info.Bit` z tabeli.
+2. W przeciwnym razie (np. Sites of Grace, ID 0x11558–0x12CA0) → **formuła:**
+```
+byteIdx = id / 8
+bitIdx  = 7 - (id % 8)
+```
+
+Flaga jest ustawiona jeśli: `flags[byteIdx] & (1 << bitIdx) != 0`
+
+> Tabela `data.EventFlags` zawiera prekalkulowane wartości dla bossów, baseń, etc.
+> Grace IDs **nie są** w tabeli — zawsze używają formuły.
 
 ### 10.2. Ustawianie flagi
 
 ```
-set:   flags[info.Byte] |=  (1 << info.Bit)
-clear: flags[info.Byte] &= ^(1 << info.Bit)
+set:   flags[byteIdx] |=  (1 << bitIdx)
+clear: flags[byteIdx] &= ^(1 << bitIdx)
 ```
 
 Modyfikacja odbywa się **in-place** w `slot.Data` — nie wymaga osobnego write-back.
