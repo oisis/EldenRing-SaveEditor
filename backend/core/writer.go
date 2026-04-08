@@ -79,7 +79,15 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int) er
 		}
 
 		if handle == 0 {
-			handle = generateUniqueHandle(slot, prefix)
+			// For stackable goods (0xB0) and talismans (0xA0), the game convention
+			// is handle == ID (no indirection). character_vm.go reads these back as
+			// itemID = item.GaItemHandle, so the handle must equal the item ID.
+			// Weapons, armor, and AoW use separate handle→ID indirection via GaMap.
+			if prefix == ItemTypeItem || prefix == ItemTypeAccessory {
+				handle = id
+			} else {
+				handle = generateUniqueHandle(slot, prefix)
+			}
 			if err := writeGaItem(slot, handle, id, recordSize); err != nil {
 				return err
 			}
