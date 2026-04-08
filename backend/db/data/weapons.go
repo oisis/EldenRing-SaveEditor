@@ -1,8 +1,8 @@
 package data
 
 var Weapons = map[uint32]ItemData{
-	0x00F58390: {Name: "Bolt of Gransax", Category: "weapons", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 10, IconPath: "items/weapons/bolt_of_gransax.png"},
-	0x80F58390: {Name: "Bolt of Gransax", Category: "weapons", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 10, IconPath: "items/weapons/bolt_of_gransax.png"},
+	0x00F58390: {Name: "Bolt of Gransax", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/weapons/bolt_of_gransax.png"},
+	0x80F58390: {Name: "Bolt of Gransax", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/weapons/bolt_of_gransax.png"},
 	0x0001ADB0: {Name: "Unarmed", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/weapons/unarmed.png"},
 	0x000F4240: {Name: "Dagger", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/dagger.png"},
 	0x000F6950: {Name: "Black Knife", Category: "weapons", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/weapons/black_knife.png"},
