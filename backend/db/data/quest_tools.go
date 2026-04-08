@@ -1,7 +1,6 @@
 package data
 
 var QuestTools = map[uint32]ItemData{
-	0x0319EA30: {Name: "Black-Key Bolt", Category: "quest_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/quest/black_key_bolt.png"},
 	0x40001F4A: {Name: "Rusty Key", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/rusty_key.png"},
 	0x40001FC3: {Name: "Irina's Letter", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/irinas_letter.png"},
 	0x40001FC4: {Name: "Letter from Volcano Manor", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/letter_from_volcano_manor.png"},
@@ -73,7 +72,6 @@ var QuestTools = map[uint32]ItemData{
 	0x401EA61A: {Name: "Map: Southern Shore", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_southern_shore.png"},
 	0x401EA61B: {Name: "Map: Rauh Ruins", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_rauh_ruins.png"},
 	0x401EA61C: {Name: "Map: Abyss", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_abyss.png"},
-	0x8319EA30: {Name: "Black-Key Bolt", Category: "quest_tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/quest/black_key_bolt.png"},
 	0xB0001F4A: {Name: "Rusty Key", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/rusty_key.png"},
 	0xB0001FC3: {Name: "Irina's Letter", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/irinas_letter.png"},
 	0xB0001FC4: {Name: "Letter from Volcano Manor", Category: "quest_tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/letter_from_volcano_manor.png"},

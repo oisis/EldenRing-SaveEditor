@@ -269,7 +269,6 @@ var Leggings = map[uint32]ItemData{
 	0x9050440C: {Name: "Rellana's Greaves", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/rellana_s_greaves.png"},
 	0x90506B1C: {Name: "Young Lion's Greaves", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/young_lion_s_greaves.png"},
 	0x9050922C: {Name: "Shadow Militiaman Greaves", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/shadow_militiaman_greaves.png"},
-	0x1000283C: {Name: "Naked (Legs)", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/naked_legs.png"},
 	0x1004E32C: {Name: "Sanguine Noble Waistcloth", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/sanguine_noble_waistcloth.png"},
 	0x100FDFAC: {Name: "Gold Waistwrap", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/gold_waistwrap.png"},
 	0x10113F3C: {Name: "Mushroom Legs", Category: "leggings", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/leggings/mushroom_legs.png"},

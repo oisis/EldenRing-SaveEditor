@@ -223,7 +223,6 @@ var Gauntlets = map[uint32]ItemData{
 	0x905043A8: {Name: "Rellana's Gloves", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/rellana_s_gloves.png"},
 	0x90506AB8: {Name: "Young Lion's Gauntlets", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/young_lion_s_gauntlets.png"},
 	0x905091C8: {Name: "Shadow Militiaman Gauntlets", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/shadow_militiaman_gauntlets.png"},
-	0x100027D8: {Name: "Naked (Arms)", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/naked_arms.png"},
 	0x1003AA48: {Name: "Blue Silver Bracelets", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/blue_silver_bracelets.png"},
 	0x10046D98: {Name: "Nox Monk Bracelets", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/nox_monk_bracelets.png"},
 	0x1007C8F8: {Name: "Queen's Bracelets", Category: "gauntlets", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/gauntlets/queen_s_bracelets.png"},

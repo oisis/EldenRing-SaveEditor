@@ -1,7 +1,6 @@
 package data
 
 var Chest = map[uint32]ItemData{
-	0x10002774: {Name: "Naked (Body)", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/naked_body.png"},
 	0x10009CA4: {Name: "Scale Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/scale_armor.png"},
 	0x1000C3B4: {Name: "Kaiden Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/kaiden_armor.png"},
 	0x1000EAC4: {Name: "Drake Knight Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/chest/drake_knight_armor.png"},

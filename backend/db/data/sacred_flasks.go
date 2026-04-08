@@ -29,7 +29,6 @@ var SacredFlasks = map[uint32]ItemData{
 	0x40000431: {Name: "Flask of Cerulean Tears +11", Category: "sacred_flasks", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_cerulean_tears_11.png"},
 	0x40000433: {Name: "Flask of Cerulean Tears +12", Category: "sacred_flasks", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_cerulean_tears_12.png"},
 	0x40002230: {Name: "Note: Flask of Wondrous Physick", Category: "sacred_flasks", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/note_flask_of_wondrous_physick.png"},
-	0x4000239B: {Name: "About Flask of Wondrous Physick", Category: "sacred_flasks", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/about_flask_of_wondrous_physick.png"},
 	0xB00000FB: {Name: "Flask of Wondrous Physick", Category: "sacred_flasks", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_wondrous_physick.png"},
 	0xB00003E9: {Name: "Flask of Crimson Tears", Category: "sacred_flasks", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_crimson_tears.png"},
 	0xB00003EB: {Name: "Flask of Crimson Tears +1", Category: "sacred_flasks", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_crimson_tears_1.png"},
@@ -58,5 +57,4 @@ var SacredFlasks = map[uint32]ItemData{
 	0xB0000431: {Name: "Flask of Cerulean Tears +11", Category: "sacred_flasks", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_cerulean_tears_11.png"},
 	0xB0000433: {Name: "Flask of Cerulean Tears +12", Category: "sacred_flasks", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/flask_of_cerulean_tears_12.png"},
 	0xB0002230: {Name: "Note: Flask of Wondrous Physick", Category: "sacred_flasks", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/note_flask_of_wondrous_physick.png"},
-	0xB000239B: {Name: "About Flask of Wondrous Physick", Category: "sacred_flasks", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/sacred_flasks/about_flask_of_wondrous_physick.png"},
 }

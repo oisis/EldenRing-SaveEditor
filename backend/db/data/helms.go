@@ -395,7 +395,6 @@ var Helms = map[uint32]ItemData{
 	0x905069F0: {Name: "Young Lion's Helm", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/young_lion_s_helm.png"},
 	0x90509100: {Name: "Shadow Militiaman Helm", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/shadow_militiaman_helm.png"},
 	0x90510630: {Name: "Crucible Hammer-Helm", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/crucible_hammer_helm.png"},
-	0x10002710: {Name: "Naked (Head)", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/naked_head.png"},
 	0x10083D60: {Name: "Depraved Perfumer Headscarf", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/depraved_perfumer_headscarf.png"},
 	0x10107AC0: {Name: "Imp Head (Cat)", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/imp_head_cat.png"},
 	0x10107EA8: {Name: "Imp Head (Fanged)", Category: "helms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/armor/helms/imp_head_fanged.png"},

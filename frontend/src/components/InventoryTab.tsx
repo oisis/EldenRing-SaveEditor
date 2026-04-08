@@ -196,8 +196,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
         
-        if (category === 'all') return matchesSearch;
-        
+        if (category === 'all') return matchesSearch && item.subCategory !== 'keyitems';
+
         return item.subCategory === category && matchesSearch;
     }));
 
@@ -383,7 +383,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                                         {columnVisibility.category && (
                                             <td className="px-6 py-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/50 rounded border border-border/50 text-muted-foreground">
-                                                    {item.subCategory.replace('_', ' ')}
+                                                    {item.subCategory === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.subCategory.replace(/_/g, ' ')}
                                                 </span>
                                             </td>
                                         )}

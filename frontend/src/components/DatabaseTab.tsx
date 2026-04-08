@@ -464,7 +464,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                         {columnVisibility.category && (
                                             <td className="p-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/30 rounded-md text-muted-foreground border border-border/20">
-                                                    {item.category.replace(/_/g, ' ')}
+                                                    {item.category === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.category.replace(/_/g, ' ')}
                                                 </span>
                                             </td>
                                         )}
