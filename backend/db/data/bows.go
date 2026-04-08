@@ -55,6 +55,8 @@ var Bows = map[uint32]ItemData{
 	0x8297C1E0: {Name: "Repeating Crossbow", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/repeating_crossbow.png"},
 	0x8297E8F0: {Name: "Spread Crossbow", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/spread_crossbow.png"},
 	0x829F6300: {Name: "Hand Ballista", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/hand_ballista.png"},
-	0x0291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/crepuss_black_key_crossbow.png"},
-	0x8291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/weapons/crepuss_black_key_crossbow.png"},
+	0x0291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/crepuss_black_key_crossbow.png"},
+	0x8291CE70: {Name: "Crepus's Black-Key Crossbow", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/crepuss_black_key_crossbow.png"},
+	0x029F8A10: {Name: "Jar Cannon", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/jar_cannon.png"},
+	0x829F8A10: {Name: "Jar Cannon", Category: "bows", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/bows/jar_cannon.png"},
 }
