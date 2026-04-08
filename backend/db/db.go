@@ -53,15 +53,13 @@ type GraceEntry struct {
 func GetItemData(id uint32, category string) data.ItemData {
 	// Search in all relevant maps
 	allMaps := []map[uint32]data.ItemData{
-		data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals, data.ArrowsAndBolts,
-		data.Helms, data.Chest, data.Gauntlets, data.Leggings,
+		data.Weapons, data.RangedAndCatalysts, data.Shields, data.ArrowsAndBolts,
+		data.Helms, data.Chest, data.Arms, data.Legs,
 		data.Talismans, data.Aows, data.Gestures,
 		data.StandardAshes,
 		data.Sorceries, data.Incantations, data.CraftingMaterials,
-		data.BolsteringMaterials,
-		data.SacredFlasks, data.ThrowingPots, data.PerfumeArts, data.Throwables,
-		data.Grease, data.MiscTools, data.QuestTools, data.GoldenRunes,
-		data.Remembrances, data.Multiplayer, data.Consumables, data.Keyitems,
+		data.BolsteringMaterials, data.KeyItems,
+		data.Tools,
 	}
 
 	for _, m := range allMaps {
@@ -126,7 +124,7 @@ func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
 	// Uses a byte-masked comparison (id & 0xFFFFFF00) which is accurate for standard upgrades
 	// (offset 0–25). Heavily infused weapons (offset > 255) are not matched here.
 	if prefix == 0x80000000 || prefix == 0 {
-		weaponMaps := []map[uint32]data.ItemData{data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals}
+		weaponMaps := []map[uint32]data.ItemData{data.Weapons, data.RangedAndCatalysts, data.Shields}
 		masked := id & 0xFFFFFF00
 		for _, m := range weaponMaps {
 			for baseID, item := range m {
@@ -153,7 +151,7 @@ func GetItemName(id uint32, category string) string {
 		}
 	}
 	// Check other weapon-like categories for levels
-	weaponMaps := []map[uint32]data.ItemData{data.Bows, data.Shields, data.Staffs, data.Seals}
+	weaponMaps := []map[uint32]data.ItemData{data.RangedAndCatalysts, data.Shields}
 	for _, m := range weaponMaps {
 		for baseID, item := range m {
 			if (id & 0xFFFFFF00) == (baseID & 0xFFFFFF00) {
@@ -239,33 +237,27 @@ func GetItemsByCategory(category string) []ItemEntry {
 	}
 
 	switch category {
-	case "weapons":
-		processMap(data.Weapons, "weapons", 0)
+	case "melee_armaments":
+		processMap(data.Weapons, "melee_armaments", 0)
 		items = filterInfuseVariants(items)
-	case "bows":
-		processMap(data.Bows, "bows", 0)
-		items = filterInfuseVariants(items)
-	case "seals":
-		processMap(data.Seals, "seals", 0)
-		items = filterInfuseVariants(items)
-	case "staffs":
-		processMap(data.Staffs, "staffs", 0)
+	case "ranged_and_catalysts":
+		processMap(data.RangedAndCatalysts, "ranged_and_catalysts", 0)
 		items = filterInfuseVariants(items)
 	case "shields":
 		processMap(data.Shields, "shields", 0)
 		items = filterInfuseVariants(items)
-	case "helms":
-		processMap(data.Helms, "helms", 0)
-	case "gauntlets":
-		processMap(data.Gauntlets, "gauntlets", 0)
-	case "leggings":
-		processMap(data.Leggings, "leggings", 0)
+	case "head":
+		processMap(data.Helms, "head", 0)
+	case "arms":
+		processMap(data.Arms, "arms", 0)
+	case "legs":
+		processMap(data.Legs, "legs", 0)
 	case "chest":
 		processMap(data.Chest, "chest", 0)
 	case "talismans":
 		processMap(data.Talismans, "talismans", 0)
-	case "aows":
-		processMap(data.Aows, "aows", 0xC0000000)
+	case "ashes_of_war":
+		processMap(data.Aows, "ashes_of_war", 0xC0000000)
 	case "ashes":
 		// StandardAshes has both 0x40... (PC) and 0xB0... (PS4) entries for each upgrade level.
 		// Iterate only 0x40... base (+0) entries and remap to PS4 IDs (0xB0...) to avoid duplicates.
@@ -316,30 +308,10 @@ func GetItemsByCategory(category string) []ItemEntry {
 				IconPath:     item.IconPath,
 			})
 		}
-	case "sacred_flasks":
-		processMap(data.SacredFlasks, "sacred_flasks", 0)
-	case "throwing_pots":
-		processMap(data.ThrowingPots, "throwing_pots", 0)
-	case "perfume_arts":
-		processMap(data.PerfumeArts, "perfume_arts", 0)
-	case "throwables":
-		processMap(data.Throwables, "throwables", 0)
-	case "grease":
-		processMap(data.Grease, "grease", 0)
-	case "misc_tools":
-		processMap(data.MiscTools, "misc_tools", 0)
-	case "quest_tools":
-		processMap(data.QuestTools, "quest_tools", 0)
-	case "golden_runes":
-		processMap(data.GoldenRunes, "golden_runes", 0)
-	case "remembrances":
-		processMap(data.Remembrances, "remembrances", 0)
-	case "multiplayer":
-		processMap(data.Multiplayer, "multiplayer", 0)
-	case "consumables":
-		processMap(data.Consumables, "consumables", 0)
-	case "keyitems":
-		processMap(data.Keyitems, "keyitems", 0)
+	case "tools":
+		processMap(data.Tools, "tools", 0)
+	case "key_items":
+		processMap(data.KeyItems, "key_items", 0)
 	}
 
 	sort.Slice(items, func(i, j int) bool {
@@ -364,9 +336,9 @@ func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) str
 	case "Talisman":
 		return "talismans"
 	case "Ash of War":
-		return "aows"
+		return "ashes_of_war"
 	default:
-		return "consumables"
+		return "tools"
 	}
 }
 
@@ -374,15 +346,13 @@ func GetItemSubCategory(id uint32, item data.ItemData, broadCategory string) str
 func GetAllItems() []ItemEntry {
 	var all []ItemEntry
 	cats := []string{
-		"weapons", "bows", "shields", "staffs", "seals", "arrows_and_bolts",
-		"helms", "chest", "gauntlets", "leggings",
-		"talismans", "aows", "gestures",
+		"melee_armaments", "ranged_and_catalysts", "shields", "arrows_and_bolts",
+		"head", "chest", "arms", "legs",
+		"talismans", "ashes_of_war", "gestures",
 		"ashes",
 		"sorceries", "incantations", "crafting_materials",
-		"bolstering_materials",
-		"sacred_flasks", "throwing_pots", "perfume_arts", "throwables",
-		"grease", "misc_tools", "quest_tools", "golden_runes",
-		"remembrances", "multiplayer", "consumables", "keyitems",
+		"bolstering_materials", "key_items",
+		"tools",
 	}
 	for _, cat := range cats {
 		all = append(all, GetItemsByCategory(cat)...)

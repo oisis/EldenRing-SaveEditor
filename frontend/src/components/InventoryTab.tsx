@@ -202,7 +202,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
         
-        if (category === 'all') return matchesSearch && item.subCategory !== 'keyitems';
+        if (category === 'all') return matchesSearch && item.subCategory !== 'key_items';
 
         return item.subCategory === category && matchesSearch;
     }));
@@ -248,46 +248,32 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                     >
                         <option value="all">All Categories</option>
-                        <optgroup label="Equipment" className="bg-background text-foreground">
-                            <option value="weapons">Melee Weapons</option>
-                            <option value="bows">Bows & Ballistae</option>
-                            <option value="arrows_and_bolts">Arrows & Bolts</option>
+                        <optgroup label="Armaments" className="bg-background text-foreground">
+                            <option value="melee_armaments">Melee Armaments</option>
+                            <option value="ranged_and_catalysts">Ranged Weapons &amp; Catalysts</option>
+                            <option value="arrows_and_bolts">Arrows &amp; Bolts</option>
                             <option value="shields">Shields</option>
-                            <option value="staffs">Glintstone Staffs</option>
-                            <option value="seals">Sacred Seals</option>
-                            <option value="talismans">Talismans</option>
-                            <option value="aows">Ashes of War</option>
+                            <option value="ashes_of_war">Ashes of War</option>
                         </optgroup>
                         <optgroup label="Armor" className="bg-background text-foreground">
-                            <option value="helms">Helms</option>
-                            <option value="chest">Chest Armor</option>
-                            <option value="gauntlets">Gauntlets</option>
-                            <option value="leggings">Leggings</option>
+                            <option value="head">Head</option>
+                            <option value="chest">Chest</option>
+                            <option value="arms">Arms</option>
+                            <option value="legs">Legs</option>
                         </optgroup>
-                        <optgroup label="Magic & Ashes" className="bg-background text-foreground">
+                        <optgroup label="Accessories" className="bg-background text-foreground">
+                            <option value="talismans">Talismans</option>
+                        </optgroup>
+                        <optgroup label="Magic" className="bg-background text-foreground">
                             <option value="sorceries">Sorceries</option>
                             <option value="incantations">Incantations</option>
-                            <option value="ashes">Spirit Ashes</option>
                         </optgroup>
-                        <optgroup label="Items & Materials" className="bg-background text-foreground">
+                        <optgroup label="Items" className="bg-background text-foreground">
+                            <option value="ashes">Spirit Ashes</option>
+                            <option value="tools">Tools</option>
                             <option value="crafting_materials">Crafting Materials</option>
                             <option value="bolstering_materials">Bolstering Materials</option>
-                            <option value="consumables">Consumables</option>
-                        </optgroup>
-                        <optgroup label="Tools" className="bg-background text-foreground">
-                            <option value="sacred_flasks">Sacred Flasks</option>
-                            <option value="throwing_pots">Throwing Pots</option>
-                            <option value="perfume_arts">Perfume Arts</option>
-                            <option value="throwables">Throwables</option>
-                            <option value="grease">Grease</option>
-                            <option value="misc_tools">Miscellaneous Tools</option>
-                            <option value="quest_tools">Quest Tools</option>
-                            <option value="golden_runes">Golden Runes</option>
-                            <option value="remembrances">Remembrances</option>
-                            <option value="multiplayer">Multiplayer Items</option>
-                        </optgroup>
-                        <optgroup label="Progress" className="bg-background text-foreground">
-                            <option value="keyitems">Key Items</option>
+                            <option value="key_items">Key Items</option>
                         </optgroup>
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
