@@ -182,7 +182,7 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 	slot := &a.save.Slots[charIdx]
 
 	for _, id := range itemIDs {
-		itemData := db.GetItemData(id, "")
+		itemData, _ := db.GetItemDataFuzzy(id)
 		finalID := id
 		switch {
 		case itemData.Category == "ashes":

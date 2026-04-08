@@ -73,15 +73,59 @@ func GetItemData(id uint32, category string) data.ItemData {
 	return data.ItemData{}
 }
 
-// GetItemDataFuzzy returns item metadata for an exact ID, or falls back to a base weapon lookup
-// for upgraded/infused weapon IDs (upper nibble 0x8). The returned ItemData.Name is not modified
-// (caller should append "+N" based on the difference between id and the base ID).
+// findAshBase searches StandardAshes for the base (+0) entry matching the given name prefix.
+// baseName must already have any " +N" suffix stripped. Returns (entry, baseID) or zero values.
+func findAshBase(baseName string, idPrefix uint32) (data.ItemData, uint32) {
+	for ashID, ashEntry := range data.StandardAshes {
+		if ashEntry.Name == baseName {
+			return ashEntry, (ashID&0x0FFFFFFF)|idPrefix
+		}
+	}
+	return data.ItemData{}, 0
+}
+
+// GetItemDataFuzzy returns item metadata for an exact ID, or falls back to a base lookup for:
+//   - Spirit ashes (0x40... PC or 0xB0... PS4): each upgrade level is a separate DB entry;
+//     this finds the base (+0) entry so currentUpgrade can be computed from the ID difference.
+//   - Upgraded/infused weapons: PS4 (0x80...) and PC (0x00...) via byte-masked base search.
+//
+// The returned ItemData.Name is the base name without "+N" (caller appends "+N" if needed).
 func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
 	exact := GetItemData(id, "")
 	if exact.Name != "" {
+		// Spirit ashes store each upgrade level as a separate DB entry with "+N" in the name.
+		// Find the base (+0) entry so currentUpgrade = id - baseID is computed correctly.
+		if exact.Category == "ashes" && strings.Contains(exact.Name, " +") {
+			baseName := exact.Name[:strings.Index(exact.Name, " +")]
+			if entry, baseID := findAshBase(baseName, id&0xF0000000); baseID != 0 {
+				return entry, baseID
+			}
+		}
 		return exact, id
 	}
-	if id&0xF0000000 == 0x80000000 {
+
+	prefix := id & 0xF0000000
+
+	// PS4 spirit ashes use 0xB0... goods IDs; the DB stores them as 0x40... PC IDs.
+	if prefix == 0xB0000000 {
+		pcID := (id & 0x0FFFFFFF) | 0x40000000
+		pcEntry := GetItemData(pcID, "")
+		if pcEntry.Name != "" && pcEntry.Category == "ashes" {
+			baseName := pcEntry.Name
+			if idx := strings.Index(baseName, " +"); idx >= 0 {
+				baseName = baseName[:idx]
+			}
+			if entry, baseID := findAshBase(baseName, 0xB0000000); baseID != 0 {
+				return entry, baseID
+			}
+			return pcEntry, id
+		}
+	}
+
+	// Weapon fuzzy search: handles PS4 (0x80...) and PC (0x00...) upgraded/infused weapons.
+	// Uses a byte-masked comparison (id & 0xFFFFFF00) which is accurate for standard upgrades
+	// (offset 0–25). Heavily infused weapons (offset > 255) are not matched here.
+	if prefix == 0x80000000 || prefix == 0 {
 		weaponMaps := []map[uint32]data.ItemData{data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals}
 		masked := id & 0xFFFFFF00
 		for _, m := range weaponMaps {
@@ -92,6 +136,7 @@ func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
 			}
 		}
 	}
+
 	return data.ItemData{}, id
 }
 
@@ -214,15 +259,23 @@ func GetItemsByCategory(category string) []ItemEntry {
 	case "aows":
 		processMap(data.Aows, "aows", 0xC0000000)
 	case "ashes":
-		processMap(data.StandardAshes, "ashes", 0)
-		// Keep only base entries (no " +" suffix) — level is applied globally at add time.
-		var baseAshes []ItemEntry
-		for _, item := range items {
-			if !strings.Contains(item.Name, " +") {
-				baseAshes = append(baseAshes, item)
+		// StandardAshes uses PC goods IDs (0x40...) with one entry per upgrade level.
+		// Return only base (+0) entries remapped to PS4 goods IDs (0xB0...) so they can
+		// be added to PS4 saves and round-trip correctly through GetItemDataFuzzy.
+		for id, item := range data.StandardAshes {
+			if item.Name == "" || strings.Contains(item.Name, " +") {
+				continue
 			}
+			items = append(items, ItemEntry{
+				ID:           (id & 0x0FFFFFFF) | 0xB0000000,
+				Name:         item.Name,
+				Category:     "ashes",
+				MaxInventory: item.MaxInventory,
+				MaxStorage:   item.MaxStorage,
+				MaxUpgrade:   item.MaxUpgrade,
+				IconPath:     item.IconPath,
+			})
 		}
-		items = baseAshes
 	case "gestures":
 		processMap(data.Gestures, "gestures", 0)
 	case "sorceries":
