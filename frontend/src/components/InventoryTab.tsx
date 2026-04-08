@@ -74,60 +74,71 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
         }
     };
 
-    // Merge inventory and storage items for display
+    type MergedItem = {
+        id: number; handle: number; name: string; category: string; subCategory: string;
+        nonStackable: boolean; inInventory: boolean; inStorage: boolean;
+        invQty: number; storageQty: number;
+        maxInv: number; maxStorage: number; maxUpgrade: number; iconPath: string;
+    };
+
+    // Merge inventory and storage items for display.
+    // Non-stackable (maxInventory <= 1): one row per handle — each copy shown separately.
+    // Stackable (maxInventory > 1): one row per id — qty merged from both locations.
     const mergedOwnedItems = (() => {
-        const mergedMap = new Map<number, {
-            id: number,
-            handle: number,
-            name: string,
-            category: string,
-            subCategory: string,
-            invQty: number,
-            storageQty: number,
-            maxInv: number,
-            maxStorage: number,
-            maxUpgrade: number,
-            iconPath: string
-        }>();
+        const rows: MergedItem[] = [];
+        const stackableMap = new Map<number, MergedItem>();
 
         charInventory.forEach(item => {
-            mergedMap.set(item.id, {
-                id: item.id,
-                handle: item.handle,
-                name: item.name,
-                category: item.category,
-                subCategory: item.subCategory,
-                invQty: item.quantity,
-                storageQty: 0,
-                maxInv: item.maxInventory,
-                maxStorage: item.maxStorage,
-                maxUpgrade: item.maxUpgrade,
-                iconPath: item.iconPath
-            });
-        });
-
-        charStorage.forEach(item => {
-            const existing = mergedMap.get(item.id);
-            if (existing) {
-                existing.storageQty = item.quantity;
+            if (item.maxInventory <= 1) {
+                rows.push({
+                    id: item.id, handle: item.handle, name: item.name,
+                    category: item.category, subCategory: item.subCategory,
+                    nonStackable: true, inInventory: true, inStorage: false,
+                    invQty: 1, storageQty: 0,
+                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                });
             } else {
-                mergedMap.set(item.id, {
-                    id: item.id,
-                    handle: item.handle,
-                    name: item.name,
-                    category: item.category,
-                    subCategory: item.subCategory,
-                    invQty: 0,
-                    storageQty: item.quantity,
-                    maxInv: item.maxInventory,
-                    maxStorage: item.maxStorage,
-                    maxUpgrade: item.maxUpgrade,
-                    iconPath: item.iconPath
+                stackableMap.set(item.id, {
+                    id: item.id, handle: item.handle, name: item.name,
+                    category: item.category, subCategory: item.subCategory,
+                    nonStackable: false, inInventory: true, inStorage: false,
+                    invQty: item.quantity, storageQty: 0,
+                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
                 });
             }
         });
 
-        return Array.from(mergedMap.values());
+        charStorage.forEach(item => {
+            if (item.maxInventory <= 1) {
+                rows.push({
+                    id: item.id, handle: item.handle, name: item.name,
+                    category: item.category, subCategory: item.subCategory,
+                    nonStackable: true, inInventory: false, inStorage: true,
+                    invQty: 0, storageQty: 1,
+                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                });
+            } else {
+                const existing = stackableMap.get(item.id);
+                if (existing) {
+                    existing.inStorage = true;
+                    existing.storageQty = item.quantity;
+                } else {
+                    stackableMap.set(item.id, {
+                        id: item.id, handle: item.handle, name: item.name,
+                        category: item.category, subCategory: item.subCategory,
+                        nonStackable: false, inInventory: false, inStorage: true,
+                        invQty: 0, storageQty: item.quantity,
+                        maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                        maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                    });
+                }
+            }
+        });
+
+        return [...rows, ...Array.from(stackableMap.values())];
     })();
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -375,27 +386,39 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                                                 {item.maxUpgrade > 0 ? `+${item.maxUpgrade}` : '—'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-center space-x-2">
-                                                <input 
-                                                    type="number" 
-                                                    value={editedInv[item.handle] !== undefined ? editedInv[item.handle] : item.invQty}
-                                                    onChange={e => handleQtyChange(item.handle, e.target.value, 'inv', item.maxInv)}
-                                                    className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedInv[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
-                                                />
-                                                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxInv}</span>
-                                            </div>
+                                        <td className="px-6 py-4 text-center">
+                                            {item.nonStackable ? (
+                                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inInventory ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/30'}`}>
+                                                    {item.inInventory ? '✓' : '—'}
+                                                </span>
+                                            ) : (
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <input
+                                                        type="number"
+                                                        value={editedInv[item.handle] !== undefined ? editedInv[item.handle] : item.invQty}
+                                                        onChange={e => handleQtyChange(item.handle, e.target.value, 'inv', item.maxInv)}
+                                                        className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedInv[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
+                                                    />
+                                                    <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxInv}</span>
+                                                </div>
+                                            )}
                                         </td>
-                                        <td className="px-6 py-4">
-                                            <div className="flex items-center justify-center space-x-2">
-                                                <input 
-                                                    type="number" 
-                                                    value={editedStorage[item.handle] !== undefined ? editedStorage[item.handle] : item.storageQty}
-                                                    onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
-                                                    className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
-                                                />
-                                                <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.storageQty}</span>
-                                            </div>
+                                        <td className="px-6 py-4 text-center">
+                                            {item.nonStackable ? (
+                                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inStorage ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/30'}`}>
+                                                    {item.inStorage ? '✓' : '—'}
+                                                </span>
+                                            ) : (
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <input
+                                                        type="number"
+                                                        value={editedStorage[item.handle] !== undefined ? editedStorage[item.handle] : item.storageQty}
+                                                        onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
+                                                        className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
+                                                    />
+                                                    <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxStorage}</span>
+                                                </div>
+                                            )}
                                         </td>
                                     </tr>
                                 ))

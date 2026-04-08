@@ -46,6 +46,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     const [addToStorage, setAddToStorage] = useState(false);
     const [storageMax, setStorageMax] = useState(false);
     const [storageQtyVal, setStorageQtyVal] = useState(1);
+    const [copies, setCopies] = useState(1);
 
     // Icon preview
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
@@ -97,13 +98,17 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         if (!confirmModal || isSaving) return;
         setIsSaving(true);
         try {
-            // invQty: 0=skip, -1=max, >0=exact
             const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
             const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
 
+            // For non-stackable items, repeat each id `copies` times to add multiple copies.
+            const ids = modalNonStackable && copies > 1
+                ? confirmModal.flatMap(i => Array<number>(copies).fill(i.id))
+                : confirmModal.map(i => i.id);
+
             await AddItemsToCharacter(
                 charIndex,
-                confirmModal.map(i => i.id),
+                ids,
                 upgrade25, upgrade10, infuseOffset, upgradeAsh,
                 invQty, storQty
             );
@@ -118,13 +123,13 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     };
 
     const openModal = (items: db.ItemEntry[]) => {
-        // Reset quantity state before opening
         setAddToInv(true);
         setInvMax(false);
         setInvQtyVal(1);
         setAddToStorage(false);
         setStorageMax(false);
         setStorageQtyVal(1);
+        setCopies(1);
         setConfirmModal(items);
     };
 
@@ -249,6 +254,20 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 )}
                             </div>
                         </div>
+
+                        {modalNonStackable && (
+                            <div className="flex items-center space-x-3 pt-1">
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Copies</span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={99}
+                                    value={copies}
+                                    onChange={e => setCopies(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
+                                    className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                />
+                            </div>
+                        )}
 
                         <div className="flex space-x-3 pt-2">
                             <button onClick={handleAdd} disabled={isSaving || (!addToInv && !addToStorage)} className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
