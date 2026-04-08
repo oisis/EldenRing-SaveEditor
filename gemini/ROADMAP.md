@@ -153,7 +153,7 @@
     - [x] **Research:** Audit `app.go` and `save_manager.go` for conflicting backup logic. Verify if `CreateBackup` is called *before* any write operation.
     - [x] **Fix:** Implement retention policy (max 10 versions) in `backup.go`. Remove redundant/broken backup logic from `save_manager.go`. Ensure `SaveFile` fails if backup fails.
 
-## Phase 12: World Progress Tab — Full Implementation 🛠
+## Phase 12: World Progress Tab — Full Implementation ✅
 
 > **Root cause analysis (pre-implementation research completed 2026-04-08):**
 > - ~120 grace entries in `graces.go` lack `(Region)` annotation → all fall under "Unknown" region.
@@ -165,7 +165,7 @@
 
 ---
 
-- [ ] **12.1. Grace Data Cleanup (`backend/db/data/graces.go`)**
+- [x] **12.1. Grace Data Cleanup (`backend/db/data/graces.go`)**
     - [ ] Fix typo at ID `0x00011642`: `"The Nameless Eternal Cityssssssssssssssssssssssssssssssss"` → `"The Nameless Eternal City"`.
     - [ ] Fix `GraceEntry.Region` JSON tag in `db.go`: `region"` → `"region"`.
     - [ ] Annotate all ~120 entries missing `(Region)` suffix. Grouping:
@@ -198,7 +198,7 @@
     - [ ] **DLC sub-region mapping** — Shadow of the Erdtree graces (0x00011940+, 0x00012C00+) need to be split into: `Shadow Realm — Gravesite Plain`, `Shadow Realm — Scadu Altus`, `Shadow Realm — Abyssal Woods`, `Shadow Realm — Stone Coffin Fissure`, etc. Cross-reference with in-game map.
     - [ ] **Verify**: Run `GetAllGraces()` — confirm 0 graces in "Unknown" region after annotation.
 
-- [ ] **12.2. EventFlagsOffset Calculation (`backend/core/structures.go`)**
+- [x] **12.2. EventFlagsOffset Calculation (`backend/core/structures.go`)**
     - [ ] Extend `calculateDynamicOffsets()` to compute `IngameTimerOffset` and `EventFlagsOffset` following `Final.py: save_struct()` chain (see reference below).
     - [ ] The full chain from `StorageBoxOffset`:
         ```
@@ -216,7 +216,7 @@
     - [ ] Assign `s.IngameTimerOffset = ingameTimer` and `s.EventFlagsOffset = eventFlags`.
     - [ ] **Validate** against PS4 test save: print EventFlagsOffset, check if known grace IDs (e.g., `0x00012945` = "The First Step") are toggled correctly via `GetEventFlag`.
 
-- [ ] **12.3. Grace State API (`app.go`, `backend/db/db.go`)**
+- [x] **12.3. Grace State API (`app.go`, `backend/db/db.go`)**
     - [ ] Add `Visited bool` field to `GraceEntry` struct in `db.go`.
     - [ ] Add `GetGraces(slotIndex int) ([]db.GraceEntry, error)` to `app.go`:
         - Reads `slot.Data[slot.EventFlagsOffset:]` as the event flags byte array.
@@ -227,7 +227,7 @@
         - **Note**: modifies `slot.Data` in-place (write-back already handled by `slot.Write()`).
     - [ ] Regenerate Wails bindings: `wails generate module`.
 
-- [ ] **12.4. WorldProgressTab — Interactive Checkboxes (`frontend/src/components/WorldProgressTab.tsx`)**
+- [x] **12.4. WorldProgressTab — Interactive Checkboxes (`frontend/src/components/WorldProgressTab.tsx`)**
     - [ ] Add `charIdx: number` prop. Receive it from the parent tab router (same pattern as `GeneralTab`, `InventoryTab`).
     - [ ] Replace `GetAllGraces()` call with `GetGraces(charIdx)` — load visited state per character.
     - [ ] Re-fetch graces when `charIdx` changes (`useEffect` dependency).
@@ -244,7 +244,7 @@
     - [ ] Add "Unlock All" button per region (calls `SetGraceVisited` for each unvisited grace in the region).
     - [ ] Add global "Unlock All Graces" button at the top of the tab.
 
-- [ ] **12.5. Map Thumbnail Assignment Verification**
+- [x] **12.5. Map Thumbnail Assignment Verification**
     - [ ] Verify `getRegionMapPath()` generates correct filenames for ALL regions after 12.1 data cleanup.
     - [ ] Add missing map PNGs for any new sub-regions introduced (e.g., Shadow of the Erdtree sub-regions may need individual maps or share one `shadow_of_the_erdtree.png`).
     - [ ] Current map files (23): confirm all post-cleanup region names resolve to existing PNGs.
