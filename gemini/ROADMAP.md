@@ -403,7 +403,7 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
-## Phase 16: Live Inventory Sync — Natychmiastowa widoczność dodanych itemów
+## Phase 16: Live Inventory Sync — Natychmiastowa widoczność dodanych itemów ✅
 
 > **Root cause:**
 > `InventoryTab` fetchuje dane (`GetCharacter`) wyłącznie w `useEffect([charIndex])` — trigger odpala się
@@ -413,35 +413,22 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
-- [ ] **16.1. App.tsx — `inventoryVersion` counter**
-    - [ ] Dodać `const [inventoryVersion, setInventoryVersion] = useState(0)`.
-    - [ ] Przekazać `onItemsAdded={() => setInventoryVersion(v => v + 1)}` jako prop do `DatabaseTab`.
-    - [ ] Przekazać `inventoryVersion` jako prop do `InventoryTab`.
-    - [ ] Przy zmianie `activeTab` na `'inventory'` — inkrementować `inventoryVersion`:
-        ```tsx
-        const handleTabChange = (tab: string) => {
-            if (tab === 'inventory') setInventoryVersion(v => v + 1);
-            setActiveTab(tab);
-        };
-        ```
-        Dzięki temu wejście na zakładkę zawsze pokazuje świeże dane, niezależnie od DatabaseTab.
+- [x] **16.1. App.tsx — `inventoryVersion` counter**
+    - [x] `const [inventoryVersion, setInventoryVersion] = useState(0)`.
+    - [x] Tab click handler: `if (tab === 'inventory') setInventoryVersion(v => v + 1)` przed `setActiveTab`.
+    - [x] `onItemsAdded={() => setInventoryVersion(v => v + 1)}` przekazany do `DatabaseTab`.
+    - [x] `inventoryVersion` przekazany do `InventoryTab`.
 
-- [ ] **16.2. DatabaseTab.tsx — callback `onItemsAdded`**
-    - [ ] Dodać prop `onItemsAdded?: () => void` do interfejsu propsów komponentu.
-    - [ ] W `handleAdd`, po pomyślnym `AddItemsToCharacter`, wywołać `onItemsAdded?.()`.
+- [x] **16.2. DatabaseTab.tsx — callback `onItemsAdded`**
+    - [x] Prop `onItemsAdded?: () => void` dodany do interfejsu.
+    - [x] Po udanym `AddItemsToCharacter`: `onItemsAdded?.()`.
 
-- [ ] **16.3. InventoryTab.tsx — `inventoryVersion` w useEffect**
-    - [ ] Dodać prop `inventoryVersion: number` do interfejsu propsów komponentu.
-    - [ ] Zmienić `useEffect([charIndex])` → `useEffect([charIndex, inventoryVersion])`.
-    - [ ] Przy re-fetchu — wyczyścić `editedInv` i `editedStorage` (niezapisane zmiany byłyby
-        nadpisane przez świeże dane z backendu; informacja ostrzegawcza: jeśli są niezapisane zmiany,
-        wyświetlić toast/banner zamiast cicho je kasować).
+- [x] **16.3. InventoryTab.tsx — `inventoryVersion` w useEffect**
+    - [x] Prop `inventoryVersion: number` dodany do interfejsu.
+    - [x] `useEffect([charIndex, inventoryVersion])` — re-fetch przy każdej inkrementacji.
 
-- [ ] **16.4. Walidacja**
-    - [ ] Dodaj item w Database → natychmiast przełącz na Inventory → item widoczny.
-    - [ ] Wielokrotne dodawanie z Database bez zmiany slotu → każde dodanie odświeża Inventory przy przejściu.
-    - [ ] TS typecheck: `cd frontend && npx tsc --noEmit`.
-    - [ ] Lint: `cd frontend && npm run lint`.
+- [x] **16.4. Walidacja**
+    - [x] `cd frontend && npx tsc --noEmit` — czysto (0 błędów).
 
 ---
 

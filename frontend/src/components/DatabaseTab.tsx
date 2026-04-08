@@ -9,6 +9,7 @@ interface DatabaseTabProps {
     };
     platform: string | null;
     charIndex: number;
+    onItemsAdded?: () => void;
 }
 
 // Categories that support upgradeable weapons (+25 / +10)
@@ -16,7 +17,7 @@ const WEAPON_CATS = new Set(['weapons', 'bows', 'shields', 'staffs', 'seals', 'a
 // Categories that support spirit ash levels
 const ASH_CATS = new Set(['ashes', 'all']);
 
-export function DatabaseTab({columnVisibility, platform, charIndex}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded}: DatabaseTabProps) {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
@@ -100,6 +101,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex}: DatabaseTab
             );
             setConfirmModal(null);
             setSelectedDbItems(new Set());
+            onItemsAdded?.();
         } catch (err) {
             alert('Failed to add items: ' + err);
         } finally {

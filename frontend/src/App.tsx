@@ -15,6 +15,7 @@ function App() {
     const [charNames, setCharacterNames] = useState<string[]>([]);
     const [selectedChar, setSelectedChar] = useState<number>(0);
     const [activeTab, setActiveTab] = useState('database');
+    const [inventoryVersion, setInventoryVersion] = useState(0);
     const [theme, setTheme] = useState<Theme>('light');
     const [columnVisibility, setColumnVisibility] = useState({
         id: false,
@@ -125,7 +126,10 @@ function App() {
                         {tabs.map(tab => (
                             <button
                                 key={tab}
-                                onClick={() => setActiveTab(tab)}
+                                onClick={() => {
+                                    if (tab === 'inventory') setInventoryVersion(v => v + 1);
+                                    setActiveTab(tab);
+                                }}
                                 className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all ${activeTab === tab ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}
                             >
                                 {tab}
@@ -148,10 +152,11 @@ function App() {
                     <div className="w-full h-full p-6 flex flex-col min-h-0">
                         {activeTab === 'database' ? (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <DatabaseTab 
-                                    columnVisibility={columnVisibility} 
-                                    platform={platform} 
-                                    charIndex={selectedChar} 
+                                <DatabaseTab
+                                    columnVisibility={columnVisibility}
+                                    platform={platform}
+                                    charIndex={selectedChar}
+                                    onItemsAdded={() => setInventoryVersion(v => v + 1)}
                                 />
                             </div>
                         ) : activeTab === 'settings' ? (
@@ -182,7 +187,7 @@ function App() {
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} columnVisibility={columnVisibility} />}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>

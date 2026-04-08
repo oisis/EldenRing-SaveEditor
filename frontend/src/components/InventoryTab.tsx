@@ -4,13 +4,14 @@ import {vm} from '../../wailsjs/go/models';
 
 interface InventoryTabProps {
     charIndex: number;
+    inventoryVersion: number;
     columnVisibility: {
         id: boolean;
         category: boolean;
     };
 }
 
-export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps) {
+export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: InventoryTabProps) {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
@@ -147,7 +148,7 @@ export function InventoryTab({ charIndex, columnVisibility }: InventoryTabProps)
             setCharInventory(res?.inventory || []);
             setCharStorage(res?.storage || []);
         }).finally(() => setLoading(false));
-    }, [charIndex]);
+    }, [charIndex, inventoryVersion]);
 
     const handleSort = (col: string) => {
         if (sortCol === col) {
