@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"encoding/binary"
 	"fmt"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
@@ -21,36 +22,40 @@ type ItemViewModel struct {
 }
 
 type CharacterViewModel struct {
-	Name         string          `json:"name"`
-	Level        uint32          `json:"level"`
-	Souls        uint32          `json:"souls"`
-	Vigor        uint32          `json:"vigor"`
-	Mind         uint32          `json:"mind"`
-	Endurance    uint32          `json:"endurance"`
-	Strength     uint32          `json:"strength"`
-	Dexterity    uint32          `json:"dexterity"`
-	Intelligence uint32          `json:"intelligence"`
-	Faith        uint32          `json:"faith"`
-	Arcane       uint32          `json:"arcane"`
-	Inventory    []ItemViewModel `json:"inventory"`
-	Storage      []ItemViewModel `json:"storage"`
+	Name                string          `json:"name"`
+	Level               uint32          `json:"level"`
+	Souls               uint32          `json:"souls"`
+	Vigor               uint32          `json:"vigor"`
+	Mind                uint32          `json:"mind"`
+	Endurance           uint32          `json:"endurance"`
+	Strength            uint32          `json:"strength"`
+	Dexterity           uint32          `json:"dexterity"`
+	Intelligence        uint32          `json:"intelligence"`
+	Faith               uint32          `json:"faith"`
+	Arcane              uint32          `json:"arcane"`
+	ScadutreeBlessing   uint8           `json:"scadutreeBlessing"`
+	ShadowRealmBlessing uint8           `json:"shadowRealmBlessing"`
+	Inventory           []ItemViewModel `json:"inventory"`
+	Storage             []ItemViewModel `json:"storage"`
 }
 
 func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	data := slot.Player
 	vm := &CharacterViewModel{
-		Level:        data.Level,
-		Souls:        data.Souls,
-		Vigor:        data.Vigor,
-		Mind:         data.Mind,
-		Endurance:    data.Endurance,
-		Strength:     data.Strength,
-		Dexterity:    data.Dexterity,
-		Intelligence: data.Intelligence,
-		Faith:        data.Faith,
-		Arcane:       data.Arcane,
-		Inventory:    []ItemViewModel{},
-		Storage:      []ItemViewModel{},
+		Level:               data.Level,
+		Souls:               data.Souls,
+		Vigor:               data.Vigor,
+		Mind:                data.Mind,
+		Endurance:           data.Endurance,
+		Strength:            data.Strength,
+		Dexterity:           data.Dexterity,
+		Intelligence:        data.Intelligence,
+		Faith:               data.Faith,
+		Arcane:              data.Arcane,
+		ScadutreeBlessing:   data.ScadutreeBlessing,
+		ShadowRealmBlessing: data.ShadowRealmBlessing,
+		Inventory:           []ItemViewModel{},
+		Storage:             []ItemViewModel{},
 	}
 
 	vm.Name = core.UTF16ToString(data.CharacterName[:])
@@ -152,6 +157,8 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	data.Intelligence = vm.Intelligence
 	data.Faith = vm.Faith
 	data.Arcane = vm.Arcane
+	data.ScadutreeBlessing = vm.ScadutreeBlessing
+	data.ShadowRealmBlessing = vm.ShadowRealmBlessing
 
 	u16 := utf16.Encode([]rune(vm.Name))
 	for i := 0; i < 16; i++ {
@@ -162,50 +169,65 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 		}
 	}
 
-	// Update Inventory
-	updateItems(vm.Inventory, &slot.Inventory)
+	// Update Inventory (with write-back to slot.Data)
+	updateItemsAndSync(vm.Inventory, &slot.Inventory, slot, false)
 
-	// Update Storage
-	updateItems(vm.Storage, &slot.Storage)
+	// Update Storage (with write-back to slot.Data)
+	updateItemsAndSync(vm.Storage, &slot.Storage, slot, true)
 
 	return nil
 }
 
-func updateItems(vmItems []ItemViewModel, data *core.EquipInventoryData) {
-	// Create a map for quick lookup of VM items by handle
+func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, slot *core.SaveSlot, isStorage bool) {
 	vmMap := make(map[uint32]ItemViewModel)
 	for _, item := range vmItems {
 		vmMap[item.Handle] = item
 	}
 
-	// Update Common Items
+	var commonStart int
+	if isStorage {
+		commonStart = slot.StorageBoxOffset + 4
+	} else {
+		commonStart = slot.MagicOffset + 505
+	}
+
 	for i := range data.CommonItems {
 		handle := data.CommonItems[i].GaItemHandle
 		if handle == 0 || handle == 0xFFFFFFFF {
 			continue
 		}
 		if vmItem, ok := vmMap[handle]; ok {
-			// Apply quantity limits if necessary (though UI should handle this)
 			qty := vmItem.Quantity
 			if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
 				qty = vmItem.MaxInventory
 			}
 			data.CommonItems[i].Quantity = qty
+			off := commonStart + i*12 + 4
+			if off+4 <= len(slot.Data) {
+				binary.LittleEndian.PutUint32(slot.Data[off:], qty)
+			}
 		}
 	}
 
-	// Update Key Items
-	for i := range data.KeyItems {
-		handle := data.KeyItems[i].GaItemHandle
-		if handle == 0 || handle == 0xFFFFFFFF {
-			continue
-		}
-		if vmItem, ok := vmMap[handle]; ok {
-			qty := vmItem.Quantity
-			if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
-				qty = vmItem.MaxInventory
+	// Key Items are only in main inventory (not storage), stored after common items
+	if !isStorage {
+		keyStart := commonStart + 0xa80*12
+		for i := range data.KeyItems {
+			handle := data.KeyItems[i].GaItemHandle
+			if handle == 0 || handle == 0xFFFFFFFF {
+				continue
 			}
-			data.KeyItems[i].Quantity = qty
+			if vmItem, ok := vmMap[handle]; ok {
+				qty := vmItem.Quantity
+				if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
+					qty = vmItem.MaxInventory
+				}
+				data.KeyItems[i].Quantity = qty
+				off := keyStart + i*12 + 4
+				if off+4 <= len(slot.Data) {
+					binary.LittleEndian.PutUint32(slot.Data[off:], qty)
+				}
+			}
 		}
 	}
 }

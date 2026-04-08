@@ -87,6 +87,8 @@ export namespace vm {
 	    intelligence: number;
 	    faith: number;
 	    arcane: number;
+	    scadutreeBlessing: number;
+	    shadowRealmBlessing: number;
 	    inventory: ItemViewModel[];
 	    storage: ItemViewModel[];
 	
@@ -107,6 +109,8 @@ export namespace vm {
 	        this.intelligence = source["intelligence"];
 	        this.faith = source["faith"];
 	        this.arcane = source["arcane"];
+	        this.scadutreeBlessing = source["scadutreeBlessing"];
+	        this.shadowRealmBlessing = source["shadowRealmBlessing"];
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
 	        this.storage = this.convertValues(source["storage"], ItemViewModel);
 	    }

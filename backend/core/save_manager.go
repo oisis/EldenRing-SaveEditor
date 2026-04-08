@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"os"
 )
@@ -128,7 +129,38 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	return save, nil
 }
 
+// flushMetadata writes in-memory SteamID, ActiveSlots, and ProfileSummaries
+// back to UserData10.Data before serialization.
+func (s *SaveFile) flushMetadata() {
+	if s.Platform == PlatformPC {
+		binary.LittleEndian.PutUint64(s.UserData10.Data[0:], s.SteamID)
+		for i := 0; i < 10; i++ {
+			if s.ActiveSlots[i] {
+				s.UserData10.Data[0x310+i] = 1
+			} else {
+				s.UserData10.Data[0x310+i] = 0
+			}
+		}
+		for i := 0; i < 10; i++ {
+			s.ProfileSummaries[i].Serialize(s.UserData10.Data, 0x31A+i*0x100)
+		}
+	} else {
+		for i := 0; i < 10; i++ {
+			if s.ActiveSlots[i] {
+				s.UserData10.Data[0x300+i] = 1
+			} else {
+				s.UserData10.Data[0x300+i] = 0
+			}
+		}
+		for i := 0; i < 10; i++ {
+			s.ProfileSummaries[i].Serialize(s.UserData10.Data, 0x30A+i*0x100)
+		}
+	}
+}
+
 func (s *SaveFile) SaveFile(path string) error {
+	s.flushMetadata()
+
 	var buf bytes.Buffer
 	w := NewWriter(&buf)
 
@@ -162,11 +194,6 @@ func (s *SaveFile) SaveFile(path string) error {
 		if err != nil {
 			return fmt.Errorf("failed to encrypt save: %w", err)
 		}
-	}
-
-	if _, err := os.Stat(path); err == nil {
-		backupPath := path + ".bak"
-		_ = os.WriteFile(backupPath, finalData, 0644)
 	}
 
 	return os.WriteFile(path, finalData, 0644)

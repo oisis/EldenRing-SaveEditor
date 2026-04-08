@@ -55,19 +55,21 @@ func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
 }
 
 type PlayerGameData struct {
-	Level         uint32
-	Vigor         uint32
-	Mind          uint32
-	Endurance     uint32
-	Strength      uint32
-	Dexterity     uint32
-	Intelligence  uint32
-	Faith         uint32
-	Arcane        uint32
-	Souls         uint32
-	CharacterName [16]uint16
-	Gender        uint8
-	Class         uint8
+	Level               uint32
+	Vigor               uint32
+	Mind                uint32
+	Endurance           uint32
+	Strength            uint32
+	Dexterity           uint32
+	Intelligence        uint32
+	Faith               uint32
+	Arcane              uint32
+	Souls               uint32
+	CharacterName       [16]uint16
+	Gender              uint8
+	Class               uint8
+	ScadutreeBlessing   uint8
+	ShadowRealmBlessing uint8
 }
 
 type SaveSlot struct {
@@ -149,6 +151,8 @@ func (s *SaveSlot) mapStats() {
 	s.Player.Souls = binary.LittleEndian.Uint32(s.Data[mo-331:])
 	s.Player.Gender = s.Data[mo-249]
 	s.Player.Class = s.Data[mo-248]
+	s.Player.ScadutreeBlessing = s.Data[mo-187]
+	s.Player.ShadowRealmBlessing = s.Data[mo-186]
 
 	nameOff := mo - 0x11b
 	for i := 0; i < 16; i++ {
@@ -243,6 +247,8 @@ func (s *SaveSlot) Write(platform string) []byte {
 	binary.LittleEndian.PutUint32(s.Data[mo-331:], s.Player.Souls)
 	s.Data[mo-249] = s.Player.Gender
 	s.Data[mo-248] = s.Player.Class
+	s.Data[mo-187] = s.Player.ScadutreeBlessing
+	s.Data[mo-186] = s.Player.ShadowRealmBlessing
 	nameOff := mo - 0x11b
 	for i := 0; i < 16; i++ {
 		binary.LittleEndian.PutUint16(s.Data[nameOff+i*2:], s.Player.CharacterName[i])
@@ -266,6 +272,13 @@ func (p *ProfileSummary) Read(r *Reader) error {
 	p.Level, _ = r.ReadU32()
 	r.Seek(int64(start+0x100), 0)
 	return nil
+}
+
+func (p *ProfileSummary) Serialize(data []byte, offset int) {
+	for i := 0; i < 16; i++ {
+		binary.LittleEndian.PutUint16(data[offset+i*2:], p.CharacterName[i])
+	}
+	binary.LittleEndian.PutUint32(data[offset+32:], p.Level)
 }
 
 type CSMenuSystemSaveLoad struct {

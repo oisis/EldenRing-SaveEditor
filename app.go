@@ -129,9 +129,12 @@ func (a *App) WriteSave(platform string) error {
 		return fmt.Errorf("no file selected")
 	}
 
-	// Create backup before writing
+	// Backup must succeed before writing; abort on failure to protect the original.
 	if _, err := core.CreateBackup(path); err != nil {
-		fmt.Printf("Warning: failed to create backup: %v\n", err)
+		return fmt.Errorf("backup failed, save aborted: %w", err)
+	}
+	if err := core.PruneBackups(path, 10); err != nil {
+		fmt.Printf("Warning: failed to prune old backups: %v\n", err)
 	}
 
 	return a.save.SaveFile(path)
