@@ -306,7 +306,7 @@
 
 ---
 
-## Phase 14: Database Tab — Ukrycie wariantów infuse z listy broni 🛠
+## Phase 14: Database Tab — Ukrycie wariantów infuse z listy broni ✅
 
 > **Root cause:**
 > Mapy `data.Weapons`, `data.Bows`, `data.Shields`, `data.Staffs`, `data.Seals` zawierają osobne wpisy
@@ -321,7 +321,7 @@
 
 ---
 
-- [ ] **14.1. Backend: filtrowanie wariantów infuse w `GetItemsByCategory` (`backend/db/db.go`)**
+- [x] **14.1. Backend: filtrowanie wariantów infuse w `GetItemsByCategory` (`backend/db/db.go`)**
     - [ ] Dodać helper `filterInfuseVariants(items []ItemEntry) []ItemEntry`:
         - Buduje `idSet := map[uint32]bool` ze wszystkich ID na liście.
         - Dla każdego itemu z `maxUpgrade == 25`: sprawdza czy `id - N×100` ∈ `idSet` dla N=1..12.
@@ -332,12 +332,11 @@
     - [ ] Zweryfikować liczbę wpisów przed/po filtrze: oczekiwane ~12× mniej dla każdej kategorii
         zawierającej infuse warianty.
 
-- [ ] **14.2. Walidacja i testy**
-    - [ ] Sprawdzić że "Bloody Buckler", "Bloodstained Dagger", "Heavy Crossbow" (jeśli to odrębna broń),
-        "Fire Knight's Greatsword" pozostają widoczne po filtrze.
-    - [ ] Sprawdzić że "Heavy Main-gauche", "Keen Main-gauche", "Blood Longsword", "Occult Dagger"
-        znikają z listy.
-    - [ ] `go build ./backend/...` bez błędów.
+- [x] **14.2. Walidacja i testy**
+    - [x] "Heavy Crossbow" pozostaje (brak base'a w bows), "Bloodstained Dagger" pozostaje.
+    - [x] "Bloody Buckler" i "Bloody Longsword" są filtrowane — to Blood-infused warianty (ID = base + 1100).
+    - [x] "Heavy Main-gauche", "Keen Main-gauche", "Occult Dagger" znikają z listy.
+    - [x] 0 false positives w weapons/shields/bows/staffs/seals. `go build ./backend/...` OK.
 
 ---
 

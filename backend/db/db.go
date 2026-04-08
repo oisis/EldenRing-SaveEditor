@@ -166,14 +166,19 @@ func GetItemsByCategory(category string) []ItemEntry {
 	switch category {
 	case "weapons":
 		processMap(data.Weapons, "weapons", 0)
+		items = filterInfuseVariants(items)
 	case "bows":
 		processMap(data.Bows, "bows", 0)
+		items = filterInfuseVariants(items)
 	case "seals":
 		processMap(data.Seals, "seals", 0)
+		items = filterInfuseVariants(items)
 	case "staffs":
 		processMap(data.Staffs, "staffs", 0)
+		items = filterInfuseVariants(items)
 	case "shields":
 		processMap(data.Shields, "shields", 0)
+		items = filterInfuseVariants(items)
 	case "helms":
 		processMap(data.Helms, "helms", 0)
 	case "gauntlets":
@@ -393,6 +398,37 @@ func GetEventFlag(flags []byte, id uint32) bool {
 	}
 
 	return (flags[info.Byte] & (1 << info.Bit)) != 0
+}
+
+// filterInfuseVariants removes infuse-variant entries from a weapon item list.
+// A variant is detected when id - N×100 (N=1..12) exists in the same list,
+// meaning it is a non-standard infuse copy of a base weapon already present.
+// Items with maxUpgrade != 25 are always kept (boss weapons, non-upgradeable).
+func filterInfuseVariants(items []ItemEntry) []ItemEntry {
+	idSet := make(map[uint32]bool, len(items))
+	for _, item := range items {
+		idSet[item.ID] = true
+	}
+
+	result := items[:0]
+	for _, item := range items {
+		if item.MaxUpgrade != 25 {
+			result = append(result, item)
+			continue
+		}
+		isVariant := false
+		for n := uint32(1); n <= 12; n++ {
+			offset := n * 100
+			if item.ID >= offset && idSet[item.ID-offset] {
+				isVariant = true
+				break
+			}
+		}
+		if !isVariant {
+			result = append(result, item)
+		}
+	}
+	return result
 }
 
 // GetInfuseTypes returns all weapon infusion types.
