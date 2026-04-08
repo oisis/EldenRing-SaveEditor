@@ -131,6 +131,11 @@ func (s *SaveSlot) calculateDynamicOffsets() {
 
 	equipedProjcSize := binary.LittleEndian.Uint32(s.Data[equipedGestures:])
 	equipedProjectile := equipedGestures + int(equipedProjcSize*8+4)
+	// PS4 saves can have a corrupted/unexpected equipedProjcSize that lands outside the slot.
+	// Fall back to size=0 (no projectile slots) to keep the chain valid.
+	if equipedProjectile >= len(s.Data) {
+		equipedProjectile = equipedGestures + 4
+	}
 	equipedArmaments := equipedProjectile + 0x9C
 	equipePhysics := equipedArmaments + 0xC
 	s.FaceDataOffset = equipePhysics + 0x12f
@@ -141,6 +146,10 @@ func (s *SaveSlot) calculateDynamicOffsets() {
 	if gesturesOff+4 <= len(s.Data) {
 		unlockedRegSz := int(binary.LittleEndian.Uint32(s.Data[gesturesOff:]))
 		unlockedRegion := gesturesOff + unlockedRegSz*4 + 4
+		// PS4 saves can produce an out-of-range unlockedRegion; treat as 0 unlocked regions.
+		if unlockedRegion <= 0 || unlockedRegion >= len(s.Data) {
+			unlockedRegion = gesturesOff + 4
+		}
 		horse := unlockedRegion + 0x29
 		bloodStain := horse + 0x4C
 		menuProfile := bloodStain + 0x103C
