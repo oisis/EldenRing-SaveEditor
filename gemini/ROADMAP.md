@@ -306,6 +306,41 @@
 
 ---
 
+## Phase 14: Database Tab — Ukrycie wariantów infuse z listy broni 🛠
+
+> **Root cause:**
+> Mapy `data.Weapons`, `data.Bows`, `data.Shields`, `data.Staffs`, `data.Seals` zawierają osobne wpisy
+> dla każdego wariantu infuse (`Heavy X`, `Keen X`, `Blood X`, …). IDs wariantów mają ścisłą zależność:
+> `variantID = baseID + N×100` (N=1..12, odpowiadające offsetom infuse).
+> `GetItemsByCategory` zwraca wszystkie wpisy — stąd "Heavy Main-gauche", "Keen Main-gauche" itd. są widoczne.
+>
+> **Metoda filtrowania:** Dla każdego wpisu z `maxUpgrade == 25` sprawdzić, czy
+> `id - N×100` (N=1..12) istnieje w tej samej mapie. Jeśli tak → to wariant infuse → pominąć.
+> Bezpieczne dla broni o nazwach zawierających słowa infuse: "Bloody Buckler", "Bloodstained Dagger" itp.
+> nie mają odpowiadającego base'a w mapie i zostaną zachowane.
+
+---
+
+- [ ] **14.1. Backend: filtrowanie wariantów infuse w `GetItemsByCategory` (`backend/db/db.go`)**
+    - [ ] Dodać helper `filterInfuseVariants(items []ItemEntry) []ItemEntry`:
+        - Buduje `idSet := map[uint32]bool` ze wszystkich ID na liście.
+        - Dla każdego itemu z `maxUpgrade == 25`: sprawdza czy `id - N×100` ∈ `idSet` dla N=1..12.
+        - Jeśli tak → pomija (to wariant); jeśli nie → zachowuje.
+        - Itemy z `maxUpgrade != 25` (boss weapons, nieupgradeable) są zawsze zachowywane.
+    - [ ] Wywołać `filterInfuseVariants` po `processMap` dla kategorii:
+        `weapons`, `bows`, `shields`, `staffs`, `seals` — oraz dla `all` (przez `GetAllItems`).
+    - [ ] Zweryfikować liczbę wpisów przed/po filtrze: oczekiwane ~12× mniej dla każdej kategorii
+        zawierającej infuse warianty.
+
+- [ ] **14.2. Walidacja i testy**
+    - [ ] Sprawdzić że "Bloody Buckler", "Bloodstained Dagger", "Heavy Crossbow" (jeśli to odrębna broń),
+        "Fire Knight's Greatsword" pozostają widoczne po filtrze.
+    - [ ] Sprawdzić że "Heavy Main-gauche", "Keen Main-gauche", "Blood Longsword", "Occult Dagger"
+        znikają z listy.
+    - [ ] `go build ./backend/...` bez błędów.
+
+---
+
 ### Technical Note: Faster Invasions (Meliodas Method)
 A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
 - **Refresh Interval**: Reduced from 20s to 4s.
