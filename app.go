@@ -145,8 +145,12 @@ func (a *App) GetItemList(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category)
 }
 
-// AddItemsToCharacter adds multiple items from the database to a character slot
-func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgradeLevel int, invMax, storageMax bool) error {
+// AddItemsToCharacter adds multiple items from the database to a character slot.
+// upgrade25 applies to weapons/bows/shields/staffs/seals with maxUpgrade=25.
+// upgrade10 applies to weapons with maxUpgrade=10 (boss weapons, cannot be infused).
+// infuseOffset is added to infusable weapons (maxUpgrade=25) as a weapon affinity offset.
+// upgradeAsh applies to spirit ashes (category="ashes").
+func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh int, invMax, storageMax bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
 	}
@@ -154,8 +158,28 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgradeLevel in
 		return fmt.Errorf("invalid character index")
 	}
 
+	finalIDs := make([]uint32, len(itemIDs))
+	for i, id := range itemIDs {
+		itemData := db.GetItemData(id, "")
+		finalID := id
+		switch {
+		case itemData.Category == "ashes":
+			finalID = id + uint32(upgradeAsh)
+		case itemData.MaxUpgrade == 25:
+			finalID = id + uint32(infuseOffset) + uint32(upgrade25)
+		case itemData.MaxUpgrade == 10:
+			finalID = id + uint32(upgrade10)
+		}
+		finalIDs[i] = finalID
+	}
+
 	slot := &a.save.Slots[charIdx]
-	return core.AddItemsToSlot(slot, itemIDs, upgradeLevel, invMax, storageMax)
+	return core.AddItemsToSlot(slot, finalIDs, 0, invMax, storageMax)
+}
+
+// GetInfuseTypes returns all weapon infusion types with their ID offsets
+func (a *App) GetInfuseTypes() []db.InfuseType {
+	return db.GetInfuseTypes()
 }
 
 // GetAllGraces returns all Sites of Grace (no visited state)

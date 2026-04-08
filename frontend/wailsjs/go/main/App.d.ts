@@ -3,7 +3,7 @@
 import {db} from '../models';
 import {vm} from '../models';
 
-export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,arg4:boolean,arg5:boolean):Promise<void>;
+export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,arg4:number,arg5:number,arg6:number,arg7:boolean,arg8:boolean):Promise<void>;
 
 export function GetActiveSlots():Promise<Array<boolean>>;
 
@@ -14,6 +14,8 @@ export function GetCharacter(arg1:number):Promise<vm.CharacterViewModel>;
 export function GetCharacterNames():Promise<Array<string>>;
 
 export function GetGraces(arg1:number):Promise<Array<db.GraceEntry>>;
+
+export function GetInfuseTypes():Promise<Array<db.InfuseType>>;
 
 export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 

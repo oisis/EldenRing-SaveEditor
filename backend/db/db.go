@@ -18,6 +18,29 @@ type ItemEntry struct {
 	IconPath     string `json:"iconPath"`
 }
 
+// InfuseType represents a weapon infusion type and its ID offset.
+type InfuseType struct {
+	Name   string `json:"name"`
+	Offset int    `json:"offset"`
+}
+
+// InfuseTypes lists all weapon infusion types in Elden Ring order.
+var InfuseTypes = []InfuseType{
+	{"Standard", 0},
+	{"Heavy", 100},
+	{"Keen", 200},
+	{"Quality", 300},
+	{"Fire", 400},
+	{"Flame Art", 500},
+	{"Lightning", 600},
+	{"Sacred", 700},
+	{"Magic", 800},
+	{"Cold", 900},
+	{"Poison", 1000},
+	{"Blood", 1100},
+	{"Occult", 1200},
+}
+
 // GraceEntry represents a Site of Grace.
 type GraceEntry struct {
 	ID      uint32 `json:"id"`
@@ -165,6 +188,14 @@ func GetItemsByCategory(category string) []ItemEntry {
 		processMap(data.Aows, "aows", 0xC0000000)
 	case "ashes":
 		processMap(data.StandardAshes, "ashes", 0)
+		// Keep only base entries (no " +" suffix) — level is applied globally at add time.
+		var baseAshes []ItemEntry
+		for _, item := range items {
+			if !strings.Contains(item.Name, " +") {
+				baseAshes = append(baseAshes, item)
+			}
+		}
+		items = baseAshes
 	case "gestures":
 		processMap(data.Gestures, "gestures", 0)
 	case "sorceries":
@@ -362,6 +393,11 @@ func GetEventFlag(flags []byte, id uint32) bool {
 	}
 
 	return (flags[info.Byte] & (1 << info.Bit)) != 0
+}
+
+// GetInfuseTypes returns all weapon infusion types.
+func GetInfuseTypes() []InfuseType {
+	return InfuseTypes
 }
 
 // SetEventFlag sets or clears a specific event flag in the bit array.

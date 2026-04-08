@@ -18,6 +18,20 @@ export namespace db {
 	        this.visited = source["visited"];
 	    }
 	}
+	export class InfuseType {
+	    name: string;
+	    offset: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new InfuseType(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.offset = source["offset"];
+	    }
+	}
 	export class ItemEntry {
 	    id: number;
 	    name: string;
