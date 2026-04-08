@@ -22,7 +22,7 @@ type ItemEntry struct {
 type GraceEntry struct {
 	ID     uint32 `json:"id"`
 	Name   string `json:"name"`
-	Region string `region"`
+	Region string `json:"region"`
 }
 
 // GetItemData returns the full metadata of an item by its ID and category.

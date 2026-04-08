@@ -3,7 +3,7 @@ export namespace db {
 	export class GraceEntry {
 	    id: number;
 	    name: string;
-	    Region: string;
+	    region: string;
 	
 	    static createFrom(source: any = {}) {
 	        return new GraceEntry(source);
@@ -13,7 +13,7 @@ export namespace db {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.id = source["id"];
 	        this.name = source["name"];
-	        this.Region = source["Region"];
+	        this.region = source["region"];
 	    }
 	}
 	export class ItemEntry {
