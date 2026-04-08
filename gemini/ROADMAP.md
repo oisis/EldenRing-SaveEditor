@@ -95,19 +95,19 @@
 
 ## Phase 9: PvP Optimization & Advanced Tweaks (In Progress) 🛠
 - [ ] **9.1. Faster Invasions (Meliodas Method)**
-    - [ ] Research exact offsets for `NetworkParam` in `UserData11` (Regulation block)
-    - [ ] Implement matchmaking interval reduction (20s -> 4s)
-    - [ ] Implement search scope expansion (Global region polling)
-    - [ ] Add "Enable Faster Invasions" toggle in Settings tab
+    - [x] Research exact offsets for `NetworkParam` in `UserData11` (Regulation block)
+    - [x] Implement matchmaking interval reduction (20s -> 4s)
+    - [x] Implement search scope expansion (Global region polling)
+    - [x] Add "Enable Faster Invasions" toggle in Settings tab
 - [x] **9.2. World Progress Automation**
     - [x] Group Sites of Grace by region (Limgrave, Liurnia, Caelid, etc.)
     - [x] Fix scrolling issue on World Progress tab
     - [x] Add interactive map thumbnails for each region
-    - [ ] Add "Unlock All Invasion Regions" button
-    - [ ] Add "Activate All Summoning Pools" button
+    - [x] Add "Unlock All Invasion Regions" button
+    - [x] Add "Activate All Summoning Pools" button
 - [ ] **9.3. Matchmaking Safety Tools**
-    - [ ] Implement Weapon Level scanner and "Safe De-leveling" logic
-    - [ ] Add "Global Weapon Level" setting for bulk item addition (Future)
+    - [x] Implement Weapon Level scanner and "Safe De-leveling" logic
+    - [x] Add "Global Weapon Level" setting for bulk item addition (Future)
 
 ## Phase 10: Item Icons & Visual Assets ✅
 - [x] **10.1. Icon Directory Structure**
@@ -242,7 +242,7 @@
 
 ---
 
-## Phase 13: Database Tab — Global Add Controls & Infuse Support 🛠
+## Phase 13: Database Tab — Global Add Controls & Infuse Support ✅
 
 > **Root cause analysis:**
 > - `AddItemsToCharacter` ma jeden `upgradeLevel int` dla wszystkich itemów — brak rozróżnienia +25/+10/Spirit Ash.
@@ -253,8 +253,8 @@
 
 ---
 
-- [ ] **13.1. Backend: infuse offset constants + nowa sygnatura `AddItemsToCharacter`**
-    - [ ] Dodać w `backend/db/db.go` typ i slice `InfuseType`:
+- [x] **13.1. Backend: infuse offset constants + nowa sygnatura `AddItemsToCharacter`**
+    - [x] Dodać w `backend/db/db.go` typ i slice `InfuseType`:
         ```go
         type InfuseType struct {
             Name   string `json:"name"`
@@ -266,8 +266,8 @@
             {"Magic", 800}, {"Cold", 900}, {"Poison", 1000}, {"Blood", 1100}, {"Occult", 1200},
         }
         ```
-    - [ ] Dodać `GetInfuseTypes() []db.InfuseType` do `app.go` — eksponuje listę infuse do frontendu.
-    - [ ] Zmienić sygnaturę `AddItemsToCharacter` w `app.go`:
+    - [x] Dodać `GetInfuseTypes() []db.InfuseType` do `app.go` — eksponuje listę infuse do frontendu.
+    - [x] Zmienić sygnaturę `AddItemsToCharacter` w `app.go`:
         ```go
         func (a *App) AddItemsToCharacter(
             charIdx int, itemIDs []uint32,
@@ -275,34 +275,34 @@
             invMax bool, storageMax bool,
         ) error
         ```
-    - [ ] W `app.go` pre-obliczać `finalID` per item korzystając z `db.GetItemData(id, "")`:
+    - [x] W `app.go` pre-obliczać `finalID` per item korzystając z `db.GetItemData(id, "")`:
         - `maxUpgrade == 25` → `finalID = id + uint32(infuseOffset) + uint32(upgrade25)`
         - `maxUpgrade == 10` → `finalID = id + uint32(upgrade10)`
         - `category == "ashes"` → `finalID = id + uint32(upgradeAsh)`
         - pozostałe → `finalID = id` (bez zmian)
-    - [ ] Wywołać `core.AddItemsToSlot(slot, finalIDs, 0, invMax, storageMax)` — `upgradeLevel=0` bo ID już zawierają offset.
-    - [ ] Regenerować Wails bindings: `wails generate module`.
+    - [x] Wywołać `core.AddItemsToSlot(slot, finalIDs, 0, invMax, storageMax)` — `upgradeLevel=0` bo ID już zawierają offset.
+    - [x] Regenerować Wails bindings: `wails generate module`.
 
-- [ ] **13.2. Frontend: globalny pasek kontrolny w `DatabaseTab`**
-    - [ ] Wywołać `GetInfuseTypes()` przy inicjalizacji komponentu — załadować listę infuse.
-    - [ ] Dodać pod paskiem search/category drugi pasek "Global Add Settings" (sticky, widoczny zawsze gdy kategoria zawiera upgradeable items):
+- [x] **13.2. Frontend: globalny pasek kontrolny w `DatabaseTab`**
+    - [x] Wywołać `GetInfuseTypes()` przy inicjalizacji komponentu — załadować listę infuse.
+    - [x] Dodać pod paskiem search/category drugi pasek "Global Add Settings" (sticky, widoczny zawsze gdy kategoria zawiera upgradeable items):
         - **Weapon Level (+25)**: `<input type="range" min=0 max=25>` z etykietą `+{val}` — dla weapons/bows/shields/staffs/seals z `maxUpgrade=25`.
         - **Boss Weapon Level (+10)**: `<input type="range" min=0 max=10>` — dla weapons z `maxUpgrade=10` (np. miecze bossów).
         - **Infuse Type**: `<select>` z opcjami z `InfuseTypes` — tylko dla `maxUpgrade=25`.
         - **Spirit Ash Level**: `<input type="range" min=0 max=10>` — dla kategorii `ashes`.
-    - [ ] Kontrolki widoczne kontekstowo: przy kategorii `ashes` pokazać tylko Spirit Ash Level; przy `weapons/bows/shields/staffs/seals` pokazać Weapon Level + Infuse; przy `all` pokazać wszystkie; przy pozostałych kategoriach ukryć cały pasek.
-    - [ ] State: `upgrade25`, `upgrade10`, `infuseOffset`, `upgradeAsh` — persystować między zmianami kategorii.
+    - [x] Kontrolki widoczne kontekstowo: przy kategorii `ashes` pokazać tylko Spirit Ash Level; przy `weapons/bows/shields/staffs/seals` pokazać Weapon Level + Infuse; przy `all` pokazać wszystkie; przy pozostałych kategoriach ukryć cały pasek.
+    - [x] State: `upgrade25`, `upgrade10`, `infuseOffset`, `upgradeAsh` — persystować między zmianami kategorii.
 
-- [ ] **13.3. Frontend: uproszczenie tabeli i modalu**
-    - [ ] Usunąć kolumny `Max Upgrade`, `Max Inv`, `Max Storage` z tabeli — lista jest czystsza.
-    - [ ] Usunąć slider upgrade level z modalu (był tylko dla single-item add z `maxUpgrade > 0`).
-    - [ ] Modal zachować tylko dla potwierdzenia: pokazuje liczbę itemów + checkboxy `Inventory Max` / `Storage Max`.
-    - [ ] Przycisk "Add Selected" wywołuje `AddItemsToCharacter` z globalnymi wartościami upgrade25/10/infuse/ash.
-    - [ ] Alternatywnie: usunąć modal całkowicie — "Add Selected" dodaje bezpośrednio z globalnymi ustawieniami + toastem potwierdzenia.
+- [x] **13.3. Frontend: uproszczenie tabeli i modalu**
+    - [x] Usunąć kolumny `Max Upgrade`, `Max Inv`, `Max Storage` z tabeli — lista jest czystsza.
+    - [x] Usunąć slider upgrade level z modalu (był tylko dla single-item add z `maxUpgrade > 0`).
+    - [x] Modal zachować tylko dla potwierdzenia: pokazuje liczbę itemów + checkboxy `Inventory Max` / `Storage Max`.
+    - [x] Przycisk "Add Selected" wywołuje `AddItemsToCharacter` z globalnymi wartościami upgrade25/10/infuse/ash.
+    - [x] Alternatywnie: usunąć modal całkowicie — "Add Selected" dodaje bezpośrednio z globalnymi ustawieniami + toastem potwierdzenia.
 
-- [ ] **13.4. Frontend: preview nazwy infuse/level w tabeli (opcjonalne)**
-    - [ ] W kolumnie `Name` pod nazwą wyświetlać małym tekstem podgląd: np. `"Heavy +15"` jeśli globalny infuse ≠ Standard lub level > 0.
-    - [ ] Dotyczy tylko itemów z `maxUpgrade > 0`.
+- [x] **13.4. Frontend: preview nazwy infuse/level w tabeli (opcjonalne)**
+    - [x] W kolumnie `Name` pod nazwą wyświetlać małym tekstem podgląd: np. `"Heavy +15"` jeśli globalny infuse ≠ Standard lub level > 0.
+    - [x] Dotyczy tylko itemów z `maxUpgrade > 0`.
 
 ---
 
