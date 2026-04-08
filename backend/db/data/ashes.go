@@ -1337,9 +1337,9 @@ var StandardAshes = map[uint32]ItemData{
 	0x40035F48: {Name: "Battlemage Hugues", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/ashes/battlemage_hugues.png"},
 	0x4021C488: {Name: "Divine Bird Warrior Ornis", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/ashes/divine_bird_warrior_ornis.png"},
 	0x4021CC58: {Name: "Ancient Dragon Florissax", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/ashes/ancient_dragon_florissax.png"},
-	0x4021A930: {Name: "Demi-Human Swordsman Yosh", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/demi_human_swordsman_yosh.png"},
-	0x4003A1B0: {Name: "Stormhawk Deenh", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/stormhawk_deenh.png"},
-	0x4021DBF8: {Name: "Schwerthand der Nacht", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/schwerthand_der_nacht.png"},
+	0x4021A930: {Name: "Demi-Human Swordsman Yosh", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/ashes/demi_human_swordsman_yosh.png"},
+	0x4003A1B0: {Name: "Stormhawk Deenh", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/ashes/stormhawk_deenh.png"},
+	0x4021DBF8: {Name: "Schwerthand der Nacht", Category: "ashes", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/ashes/schwerthand_der_nacht.png"},
 
 	// renowned_ashes
 	0x40036EE8: {Name: "Marionette Soldier Ashes", Category: "ashes", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/ashes/marionette_soldier_ashes.png"},
