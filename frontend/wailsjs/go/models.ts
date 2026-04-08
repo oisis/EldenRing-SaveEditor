@@ -71,6 +71,7 @@ export namespace vm {
 	    maxInventory: number;
 	    maxStorage: number;
 	    maxUpgrade: number;
+	    currentUpgrade: number;
 	    iconPath: string;
 	
 	    static createFrom(source: any = {}) {
@@ -88,6 +89,7 @@ export namespace vm {
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];
 	        this.maxUpgrade = source["maxUpgrade"];
+	        this.currentUpgrade = source["currentUpgrade"];
 	        this.iconPath = source["iconPath"];
 	    }
 	}

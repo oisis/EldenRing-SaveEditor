@@ -17,8 +17,9 @@ type ItemViewModel struct {
 	Quantity     uint32 `json:"quantity"`
 	MaxInventory uint32 `json:"maxInventory"`
 	MaxStorage   uint32 `json:"maxStorage"`
-	MaxUpgrade   uint32 `json:"maxUpgrade"`
-	IconPath     string `json:"iconPath"`
+	MaxUpgrade     uint32 `json:"maxUpgrade"`
+	CurrentUpgrade uint32 `json:"currentUpgrade"`
+	IconPath       string `json:"iconPath"`
 }
 
 type CharacterViewModel struct {
@@ -106,8 +107,10 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			}
 
 			// Append upgrade suffix for upgraded/infused weapons
+			var currentUpgrade uint32
 			if baseID != itemID && itemID > baseID {
-				name = fmt.Sprintf("%s +%d", name, itemID-baseID)
+				currentUpgrade = itemID - baseID
+				name = fmt.Sprintf("%s +%d", name, currentUpgrade)
 			}
 
 			displayQuantity := item.Quantity
@@ -120,16 +123,17 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			}
 
 			items = append(items, ItemViewModel{
-				Handle:       item.GaItemHandle,
-				ID:           itemID,
-				Name:         name,
-				Category:     category,
-				SubCategory:  db.GetItemSubCategory(itemID, itemData, category),
-				Quantity:     displayQuantity,
-				MaxInventory: itemData.MaxInventory,
-				MaxStorage:   itemData.MaxStorage,
-				MaxUpgrade:   itemData.MaxUpgrade,
-				IconPath:     itemData.IconPath,
+				Handle:         item.GaItemHandle,
+				ID:             itemID,
+				Name:           name,
+				Category:       category,
+				SubCategory:    db.GetItemSubCategory(itemID, itemData, category),
+				Quantity:       displayQuantity,
+				MaxInventory:   itemData.MaxInventory,
+				MaxStorage:     itemData.MaxStorage,
+				MaxUpgrade:     itemData.MaxUpgrade,
+				CurrentUpgrade: currentUpgrade,
+				IconPath:       itemData.IconPath,
 			})
 		}
 	}

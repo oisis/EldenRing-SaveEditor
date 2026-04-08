@@ -78,7 +78,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
         id: number; handle: number; name: string; category: string; subCategory: string;
         nonStackable: boolean; inInventory: boolean; inStorage: boolean;
         invQty: number; storageQty: number;
-        maxInv: number; maxStorage: number; maxUpgrade: number; iconPath: string;
+        maxInv: number; maxStorage: number; maxUpgrade: number; currentUpgrade: number; iconPath: string;
     };
 
     // Merge inventory and storage items for display.
@@ -96,7 +96,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     nonStackable: true, inInventory: true, inStorage: false,
                     invQty: 1, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                    maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                    maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                 });
             } else {
                 stackableMap.set(item.id, {
@@ -105,7 +105,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     nonStackable: false, inInventory: true, inStorage: false,
                     invQty: item.quantity, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                    maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                    maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                 });
             }
         });
@@ -118,7 +118,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     nonStackable: true, inInventory: false, inStorage: true,
                     invQty: 0, storageQty: 1,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                    maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                    maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                 });
             } else {
                 const existing = stackableMap.get(item.id);
@@ -132,7 +132,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         nonStackable: false, inInventory: false, inStorage: true,
                         invQty: 0, storageQty: item.quantity,
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                        maxUpgrade: item.maxUpgrade, iconPath: item.iconPath,
+                        maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     });
                 }
             }
@@ -178,6 +178,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
             if (sortCol === 'maxUpgrade') {
                 valA = a.maxUpgrade || 0;
                 valB = b.maxUpgrade || 0;
+            } else if (sortCol === 'currentUpgrade') {
+                valA = a.currentUpgrade || 0;
+                valB = b.currentUpgrade || 0;
             } else if (typeof valA === 'string') {
                 valA = valA.toLowerCase();
                 valB = valB.toLowerCase();
@@ -332,8 +335,11 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                                         Category <SortIndicator col="category" />
                                     </th>
                                 )}
+                                <th className="px-6 py-4 text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('currentUpgrade')}>
+                                    Upgrade <SortIndicator col="currentUpgrade" />
+                                </th>
                                 <th className="px-6 py-4 text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('maxUpgrade')}>
-                                    Upgrade <SortIndicator col="maxUpgrade" />
+                                    Max Up <SortIndicator col="maxUpgrade" />
                                 </th>
                                 <th className="px-6 py-4 text-center w-32">Inventory</th>
                                 <th className="px-6 py-4 text-center w-32">Storage</th>
@@ -383,6 +389,11 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                                         )}
                                         <td className="px-6 py-4 text-center">
                                             <span className="text-[10px] font-black text-primary bg-primary/5 px-2 py-1 rounded border border-primary/10">
+                                                {item.maxUpgrade > 0 ? `+${item.currentUpgrade}` : '—'}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 text-center">
+                                            <span className="text-[10px] font-black text-muted-foreground bg-muted/20 px-2 py-1 rounded border border-border/30">
                                                 {item.maxUpgrade > 0 ? `+${item.maxUpgrade}` : '—'}
                                             </span>
                                         </td>
