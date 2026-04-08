@@ -134,24 +134,120 @@
     - [x] Implement quantity editing with `MaxInventory` and `MaxStorage` validation
 
 ## Phase 11: Compatibility & Integrity Fixes (Critical) 🛠
-- [ ] **11.1. UserData10 Data Range Validation**
-    - [ ] **Research:** Verify `UserData10` size in `Final.py` and compare with actual `ER0000.sl2` bytes (0x60000 vs 0x600000).
-    - [ ] **Fix:** Update `save_manager.go` and `structures.go` to use the correct data range for PC metadata.
-- [ ] **11.2. DLC Stats Implementation**
-    - [ ] **Research:** Verify Scadutree (-187) and Shadow Realm (-186) offsets in `Final.py`.
-    - [ ] **Fix:** Add `ScadutreeBlessing` and `ShadowRealmBlessing` to `PlayerGameData` and update mapping logic.
-- [ ] **11.3. ProfileSummary Expansion**
-    - [ ] **Research:** Analyze how `Final.py` handles character summaries and if it exceeds 0x100 bytes.
-    - [ ] **Fix:** Expand `ProfileSummary` struct to prevent data shifting and preserve equipment previews.
-- [ ] **11.4. SteamID Logic Unification**
-    - [ ] **Research:** Audit `save_manager.go` and `steamid.go` to resolve offset inconsistencies (0x00 vs 0x14).
-    - [ ] **Fix:** Standardize SteamID reading/writing across all modules.
-- [ ] **11.5. Inventory Write Integration**
-    - [ ] **Research:** Verify if `AddItemsToSlot` in `writer.go` correctly follows Python's insertion logic.
-    - [ ] **Fix:** Integrate inventory writing into the main `SaveFile()` workflow.
-- [ ] **11.6. Backup System Robustness**
-    - [ ] **Research:** Audit `app.go` and `save_manager.go` for conflicting backup logic. Verify if `CreateBackup` is called *before* any write operation.
-    - [ ] **Fix:** Implement retention policy (max 10 versions) in `backup.go`. Remove redundant/broken backup logic from `save_manager.go`. Ensure `SaveFile` fails if backup fails.
+- [x] **11.1. UserData10 Data Range Validation**
+    - [x] **Research:** Verify `UserData10` size in `Final.py` and compare with actual `ER0000.sl2` bytes (0x60000 vs 0x600000).
+    - [x] **Fix:** Update `save_manager.go` and `structures.go` to use the correct data range for PC metadata.
+- [x] **11.2. DLC Stats Implementation**
+    - [x] **Research:** Verify Scadutree (-187) and Shadow Realm (-186) offsets in `Final.py`.
+    - [x] **Fix:** Add `ScadutreeBlessing` and `ShadowRealmBlessing` to `PlayerGameData` and update mapping logic.
+- [x] **11.3. ProfileSummary Expansion**
+    - [x] **Research:** Analyze how `Final.py` handles character summaries and if it exceeds 0x100 bytes.
+    - [x] **Fix:** Expand `ProfileSummary` struct to prevent data shifting and preserve equipment previews.
+- [x] **11.4. SteamID Logic Unification**
+    - [x] **Research:** Audit `save_manager.go` and `steamid.go` to resolve offset inconsistencies (0x00 vs 0x14).
+    - [x] **Fix:** Standardize SteamID reading/writing across all modules.
+- [x] **11.5. Inventory Write Integration**
+    - [x] **Research:** Verify if `AddItemsToSlot` in `writer.go` correctly follows Python's insertion logic.
+    - [x] **Fix:** Integrate inventory writing into the main `SaveFile()` workflow.
+- [x] **11.6. Backup System Robustness**
+    - [x] **Research:** Audit `app.go` and `save_manager.go` for conflicting backup logic. Verify if `CreateBackup` is called *before* any write operation.
+    - [x] **Fix:** Implement retention policy (max 10 versions) in `backup.go`. Remove redundant/broken backup logic from `save_manager.go`. Ensure `SaveFile` fails if backup fails.
+
+## Phase 12: World Progress Tab — Full Implementation 🛠
+
+> **Root cause analysis (pre-implementation research completed 2026-04-08):**
+> - ~120 grace entries in `graces.go` lack `(Region)` annotation → all fall under "Unknown" region.
+> - `EventFlagsOffset` / `IngameTimerOffset` declared in `SaveSlot` but never computed in `calculateDynamicOffsets()` — always 0.
+> - `GraceEntry.Region` has a broken JSON tag (`region"` missing opening quote).
+> - `WorldProgressTab` checkboxes are purely visual — no `checked` prop, no `onChange`, no slot context.
+> - No API methods `GetGraces(slotIdx)` or `SetGraceVisited(slotIdx, graceID, visited)` exist.
+> - Map thumbnail system (23 PNG files) is structurally correct; coverage gaps caused by missing data annotations.
+
+---
+
+- [ ] **12.1. Grace Data Cleanup (`backend/db/data/graces.go`)**
+    - [ ] Fix typo at ID `0x00011642`: `"The Nameless Eternal Cityssssssssssssssssssssssssssssssss"` → `"The Nameless Eternal City"`.
+    - [ ] Fix `GraceEntry.Region` JSON tag in `db.go`: `region"` → `"region"`.
+    - [ ] Annotate all ~120 entries missing `(Region)` suffix. Grouping:
+        - `0x00011558–0x00011560` → `(Stormveil Castle)`
+        - `0x000115BC–0x000115C5` → `(Leyndell Royal Capital)`
+        - `0x000115D0–0x000115D5` → `(Leyndell Ashen Capital)`
+        - `0x00011616` → `(Roundtable Hold)`
+        - `0x0001162A–0x0001163B` → Ainsel River / Siofra River / Lake of Rot (per sub-area)
+        - `0x0001163E–0x00011648` → `(Deeproot Depths)` / `(Mohgwyn Palace)`
+        - `0x00011652–0x00011655` → `(Mohgwyn Palace)`
+        - `0x00011666–0x00011667` → `(Siofra River)`
+        - `0x00011684–0x0001168E` → `(Crumbling Farum Azula)`
+        - `0x000116E8–0x000116EB` → `(Liurnia of the Lakes)` (Raya Lucaria Academy)
+        - `0x0001174C–0x00011754` → `(Miquella's Haligtree)`
+        - `0x000117B0–0x000117B7` → `(Mt. Gelmir)` (Volcano Manor)
+        - `0x00011878–0x00011879` → `(Limgrave West)` (Tutorial / Stranded Graveyard)
+        - `0x000118DC` → `(Leyndell Ashen Capital)` (Fractured Marika)
+        - `0x00011940–0x00011C62` → Shadow of the Erdtree sub-regions (see note below)
+        - `0x00011D28–0x00011D3C` → Catacombs — per-entry region (Limgrave, Liurnia, Altus, Caelid, etc.)
+        - `0x00011D8C–0x00011DA2` → Caves — per-entry region
+        - `0x00011DF0–0x00011E29` → Mining Tunnels — per-entry region
+        - `0x00011EC2–0x00011EF4` → Divine Towers — per-entry region
+        - `0x00011F1C–0x00011F20` → `(Leyndell Royal Capital)` (Underground / Frenzied Flame)
+        - `0x000120AC–0x000120AE` → `(Altus Plateau)` (Ruin-Strewn Precipice)
+        - `0x00012110–0x00012176` → Shadow of the Erdtree dungeons
+        - `0x000121D8–0x0001226F` → Shadow of the Erdtree forges / caves
+        - `0x00012B06–0x00012B07` → `(Consecrated Snowfield)`
+        - `0x00012B6C–0x00012B6D` → `(Consecrated Snowfield)` (Ordina / Apostate Derelict)
+        - `0x00012C00–0x00012CA0` → Shadow of the Erdtree open world sub-regions
+    - [ ] **DLC sub-region mapping** — Shadow of the Erdtree graces (0x00011940+, 0x00012C00+) need to be split into: `Shadow Realm — Gravesite Plain`, `Shadow Realm — Scadu Altus`, `Shadow Realm — Abyssal Woods`, `Shadow Realm — Stone Coffin Fissure`, etc. Cross-reference with in-game map.
+    - [ ] **Verify**: Run `GetAllGraces()` — confirm 0 graces in "Unknown" region after annotation.
+
+- [ ] **12.2. EventFlagsOffset Calculation (`backend/core/structures.go`)**
+    - [ ] Extend `calculateDynamicOffsets()` to compute `IngameTimerOffset` and `EventFlagsOffset` following `Final.py: save_struct()` chain (see reference below).
+    - [ ] The full chain from `StorageBoxOffset`:
+        ```
+        gesturesOff    = StorageBoxOffset + 0x100
+        unlockedRegSz  = read_u32(Data[gesturesOff])
+        unlockedRegion = gesturesOff + unlockedRegSz*4 + 4
+        horse          = unlockedRegion + 0x29
+        bloodStain     = horse + 0x4C
+        menuProfile    = bloodStain + 0x103C
+        gaItemsOther   = menuProfile + 0x1B588
+        tutorialData   = gaItemsOther + 0x40B
+        ingameTimer    = tutorialData + 0x4+0x4+0x1+0x4+0x4+0x1+0x8  (= +0x1A)
+        eventFlags     = ingameTimer + 0x1C0000
+        ```
+    - [ ] Assign `s.IngameTimerOffset = ingameTimer` and `s.EventFlagsOffset = eventFlags`.
+    - [ ] **Validate** against PS4 test save: print EventFlagsOffset, check if known grace IDs (e.g., `0x00012945` = "The First Step") are toggled correctly via `GetEventFlag`.
+
+- [ ] **12.3. Grace State API (`app.go`, `backend/db/db.go`)**
+    - [ ] Add `Visited bool` field to `GraceEntry` struct in `db.go`.
+    - [ ] Add `GetGraces(slotIndex int) ([]db.GraceEntry, error)` to `app.go`:
+        - Reads `slot.Data[slot.EventFlagsOffset:]` as the event flags byte array.
+        - Calls `db.GetEventFlag(flags, graceID)` for each grace.
+        - Returns populated `GraceEntry` list with `Visited` set.
+    - [ ] Add `SetGraceVisited(slotIndex int, graceID uint32, visited bool) error` to `app.go`:
+        - Calls `db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], graceID, visited)`.
+        - **Note**: modifies `slot.Data` in-place (write-back already handled by `slot.Write()`).
+    - [ ] Regenerate Wails bindings: `wails generate module`.
+
+- [ ] **12.4. WorldProgressTab — Interactive Checkboxes (`frontend/src/components/WorldProgressTab.tsx`)**
+    - [ ] Add `charIdx: number` prop. Receive it from the parent tab router (same pattern as `GeneralTab`, `InventoryTab`).
+    - [ ] Replace `GetAllGraces()` call with `GetGraces(charIdx)` — load visited state per character.
+    - [ ] Re-fetch graces when `charIdx` changes (`useEffect` dependency).
+    - [ ] Add `checked={grace.visited}` and `onChange` to each checkbox:
+        ```tsx
+        onChange={(e) => {
+            SetGraceVisited(charIdx, grace.id, e.target.checked)
+                .then(() => setGraces(prev => prev.map(g =>
+                    g.id === grace.id ? { ...g, visited: e.target.checked } : g
+                )));
+        }}
+        ```
+    - [ ] Add per-region progress counter: `"X / Y visited"` badge in the region header row.
+    - [ ] Add "Unlock All" button per region (calls `SetGraceVisited` for each unvisited grace in the region).
+    - [ ] Add global "Unlock All Graces" button at the top of the tab.
+
+- [ ] **12.5. Map Thumbnail Assignment Verification**
+    - [ ] Verify `getRegionMapPath()` generates correct filenames for ALL regions after 12.1 data cleanup.
+    - [ ] Add missing map PNGs for any new sub-regions introduced (e.g., Shadow of the Erdtree sub-regions may need individual maps or share one `shadow_of_the_erdtree.png`).
+    - [ ] Current map files (23): confirm all post-cleanup region names resolve to existing PNGs.
 
 ---
 
