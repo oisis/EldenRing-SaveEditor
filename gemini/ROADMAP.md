@@ -518,6 +518,127 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
+## Phase 19: Category Refactor — Wyrównanie do wiki.gg/Inventory 📋
+
+> **Cel:** Zastąpić obecne 24 granularne filtry UI przez 17 kategorii zgodnych z podziałem
+> ekwipunku w grze (https://eldenring.wiki.gg/wiki/Inventory). Wiąże się to z połączeniem
+> plików Go w `backend/db/data/`, reorganizacją katalogów ikon i aktualizacją `Category`/`IconPath`
+> we wszystkich wpisach bazy danych.
+
+### Mapa kategorii (obecne → nowe)
+
+| Obecne pliki / kategorie | Nowa kategoria | Akcja |
+|---|---|---|
+| `weapons.go` — `"weapons"` | `"melee_armaments"` | rename Category + IconPath dir |
+| `bows.go` + `staffs.go` + `seals.go` | `"ranged_and_catalysts"` | merge 3 pliki → 1, rename dir |
+| `arrows_and_bolts.go` | bez zmian | — |
+| `shields.go` | bez zmian | — |
+| `helms.go` — `"helms"` | `"head"` | rename Category + move icons `armor/helms/` → `head/` |
+| `chest.go` | `"chest"` | move icons `armor/chest/` → `chest/` |
+| `gauntlets.go` — `"gauntlets"` | `"arms"` | rename Category + move icons `armor/gauntlets/` → `arms/` |
+| `leggings.go` — `"leggings"` | `"legs"` | rename Category + move icons `armor/leggings/` → `legs/` |
+| `talismans.go` | bez zmian | — |
+| `aows.go` — `"aows"` | `"ashes_of_war"` | rename Category + rename icon dir `aow/` → `ashes_of_war/` |
+| `ashes.go` | bez zmian | — |
+| `sorceries.go` | bez zmian | — |
+| `incantations.go` | bez zmian | — |
+| `crafting_materials.go` | bez zmian | — |
+| `bolstering_materials.go` + `golden_runes.go` | `"bolstering_materials"` | merge 2 pliki → 1, rename icon dir `bolstering/` → `bolstering_materials/` |
+| `keyitems.go` + `remembrances.go` | `"key_items"` | merge 2 pliki → 1, rename icon dir `keyitems/` → `key_items/` |
+| `consumables.go` + `sacred_flasks.go` + `throwing_pots.go` + `perfume_arts.go` + `throwables.go` + `grease.go` + `misc_tools.go` + `quest_tools.go` | `"tools"` | merge 8 pliki → 1, merge icon dirs → `tools/` |
+
+> `gestures.go` — nie jest kategorią ekwipunku w UI; plik pozostaje bez zmian (używany wewnętrznie).
+
+---
+
+- [ ] **19.1. Reorganizacja katalogów ikon (`frontend/public/items/`)**
+    - [ ] Rename `items/aow/` → `items/ashes_of_war/`
+    - [ ] Rename `items/bows/` → `items/ranged_and_catalysts/`, przenieś tam zawartość `items/staffs/` i `items/seals/`
+    - [ ] Rename `items/armor/helms/` → `items/head/`
+    - [ ] Rename `items/armor/chest/` → `items/chest/`
+    - [ ] Rename `items/armor/gauntlets/` → `items/arms/`
+    - [ ] Rename `items/armor/leggings/` → `items/legs/`
+    - [ ] Usuń pusty katalog `items/armor/`
+    - [ ] Rename `items/bolstering/` → `items/bolstering_materials/`
+    - [ ] Rename `items/keyitems/` → `items/key_items/`
+    - [ ] Rename `items/weapons/` → `items/melee_armaments/`
+    - [ ] Merge `items/consumables/` + `items/grease/` + `items/misc_tools/` → `items/tools/` (przenieś wszystkie pliki)
+    - [ ] Usuń opustoszałe katalogi: `items/staffs/`, `items/seals/`, `items/bows/`, `items/consumables/`, `items/grease/`, `items/misc_tools/`
+
+- [ ] **19.2. Merge plików Go w `backend/db/data/`**
+    - [ ] Połącz `bows.go` + `staffs.go` + `seals.go` → `ranged_and_catalysts.go`
+        - Zmień `Category` wszystkich wpisów na `"ranged_and_catalysts"`
+        - Zmień `IconPath`: `items/bows/` → `items/ranged_and_catalysts/`, `items/staffs/` → `items/ranged_and_catalysts/`, `items/seals/` → `items/ranged_and_catalysts/`
+        - Usuń stare pliki `bows.go`, `staffs.go`, `seals.go`
+    - [ ] Zmień `Category` w `weapons.go` z `"weapons"` → `"melee_armaments"`, `IconPath`: `items/weapons/` → `items/melee_armaments/`
+    - [ ] Zmień `Category` w `helms.go` z `"helms"` → `"head"`, `IconPath`: `items/armor/helms/` → `items/head/`
+    - [ ] Zmień `Category` w `chest.go` z `"chest"` (bez zmian), `IconPath`: `items/armor/chest/` → `items/chest/`
+    - [ ] Zmień `Category` w `gauntlets.go` z `"gauntlets"` → `"arms"`, `IconPath`: `items/armor/gauntlets/` → `items/arms/`; rename plik na `arms.go`
+    - [ ] Zmień `Category` w `leggings.go` z `"leggings"` → `"legs"`, `IconPath`: `items/armor/leggings/` → `items/legs/`; rename plik na `legs.go`
+    - [ ] Zmień `Category` w `aows.go` z `"aows"` → `"ashes_of_war"`, `IconPath`: `items/aow/` → `items/ashes_of_war/`
+    - [ ] Połącz `bolstering_materials.go` + `golden_runes.go` → `bolstering_materials.go`
+        - Zmień `IconPath` golden_runes: `items/bolstering/` → `items/bolstering_materials/`
+        - Usuń `golden_runes.go`
+    - [ ] Połącz `keyitems.go` + `remembrances.go` → `key_items.go`
+        - Ujednolić `Category` → `"key_items"`, `IconPath`: `items/keyitems/` → `items/key_items/`
+        - Usuń `remembrances.go`; rename `keyitems.go` → `key_items.go`
+    - [ ] Połącz `consumables.go` + `sacred_flasks.go` + `throwing_pots.go` + `perfume_arts.go` + `throwables.go` + `grease.go` + `misc_tools.go` + `quest_tools.go` → `tools.go`
+        - Zmień `Category` wszystkich wpisów na `"tools"`, `IconPath`: każdy stary prefix → `items/tools/`
+        - Usuń 8 starych plików
+
+- [ ] **19.3. Aktualizacja `backend/db/db.go`**
+    - [ ] W `GetItemsByCategory()`: zaktualizuj `switch category` — zastąp stare case'y nowymi:
+        - `case "melee_armaments"` (zamiast `"weapons"`)
+        - `case "ranged_and_catalysts"` (zamiast osobnych bows/staffs/seals — jeden case, jedna mapa)
+        - `case "head"`, `"chest"`, `"arms"`, `"legs"` (zamiast helms/chest/gauntlets/leggings)
+        - `case "ashes_of_war"` (zamiast `"aows"`)
+        - `case "key_items"` (zamiast `"keyitems"` + `"remembrances"`)
+        - `case "tools"` (zamiast 8 osobnych case'ów)
+    - [ ] W `GetItemCategoryFromHandle()`: zaktualizuj mapowanie handle prefix → category string
+    - [ ] Usuń nieużywane importy map (stare nazwy zmiennych np. `data.Bows`, `data.Staffs`, `data.Seals` → `data.RangedAndCatalysts`)
+    - [ ] Aktualizuj `GetAllItems()` — upewnij się że iteruje po nowych kategoriach
+
+- [ ] **19.4. Aktualizacja `frontend/src/components/DatabaseTab.tsx`**
+    - [ ] Zastąp `<select>` z 24+ opcjami przez 17 wiki-aligned kategorii:
+        ```
+        All Items
+        ── Armaments ──
+          Melee Armaments
+          Ranged Weapons & Catalysts
+          Arrows & Bolts
+          Shields
+          Ashes of War
+        ── Armor ──
+          Head
+          Chest
+          Arms
+          Legs
+        ── Accessories ──
+          Talismans
+        ── Magic ──
+          Sorceries
+          Incantations
+        ── Items ──
+          Tools
+          Crafting Materials
+          Bolstering Materials
+          Key Items
+          Spirit Ashes
+        ```
+    - [ ] Zaktualizuj logikę kontrolek "Global Add Settings" (upgrade/infuse sliders):
+        - Slider Weapon Level i Infuse: widoczny dla `"melee_armaments"`, `"ranged_and_catalysts"`, `"shields"`
+        - Spirit Ash Level: dla `"ashes"` (bez zmian)
+        - `isAsh` check: bez zmian (`item.category === "ashes"`)
+
+- [ ] **19.5. Walidacja**
+    - [ ] `go build ./backend/...` — 0 błędów
+    - [ ] `go test -v ./tests/...` — wszystkie PASS
+    - [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
+    - [ ] `cd frontend && npm run lint` — 0 błędów
+    - [ ] Ręczna weryfikacja UI: każda kategoria wyświetla itemy z ikonami
+
+---
+
 ### Technical Note: Faster Invasions (Meliodas Method)
 A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
 - **Refresh Interval**: Reduced from 20s to 4s.
