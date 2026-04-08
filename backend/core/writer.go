@@ -39,7 +39,8 @@ func (w *Writer) WriteBytes(v []byte) error {
 }
 
 // AddItemsToSlot adds multiple items to a specific save slot.
-func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, upgradeLevel int, invMax, storageMax bool) error {
+// invQty and storageQty control quantities: 0 = skip, -1 = use provided max from caller, >0 = exact qty.
+func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int) error {
 	for _, id := range itemIDs {
 		// 1. Determine item type and handle prefix from upper nibble
 		var prefix uint32
@@ -65,20 +66,12 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, upgradeLevel int, invMax, 
 			recordSize = 21
 		}
 
-		// Normalize ID for weapons (add upgrade level)
-		finalID := id
-		if prefix == ItemTypeWeapon && upgradeLevel > 0 {
-			finalID += uint32(upgradeLevel)
-		}
-
-		// 2. Generate a unique handle
-		// For stackable items, we might want to find existing one, but for simplicity
-		// and to match Python logic, we'll just add a new one if it's a weapon/armor.
-		// For others, we check if it already exists in GaMap.
+		// 2. Generate a unique handle.
+		// For stackable items, reuse existing handle if item already in GaMap.
 		handle := uint32(0)
 		if prefix == ItemTypeItem || prefix == ItemTypeAccessory || prefix == ItemTypeAow {
 			for h, i := range slot.GaMap {
-				if i == finalID {
+				if i == id {
 					handle = h
 					break
 				}
@@ -87,23 +80,24 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, upgradeLevel int, invMax, 
 
 		if handle == 0 {
 			handle = generateUniqueHandle(slot, prefix)
-			// Add to GaItems section in s.Data
-			if err := writeGaItem(slot, handle, finalID, recordSize); err != nil {
+			if err := writeGaItem(slot, handle, id, recordSize); err != nil {
 				return err
 			}
-			slot.GaMap[handle] = finalID
+			slot.GaMap[handle] = id
 		}
 
 		// 3. Add to Inventory
-		if invMax {
-			if err := addToInventory(slot, handle, 1, false); err != nil {
+		if invQty != 0 {
+			qty := uint32(invQty)
+			if err := addToInventory(slot, handle, qty, false); err != nil {
 				return err
 			}
 		}
 
 		// 4. Add to Storage
-		if storageMax {
-			if err := addToInventory(slot, handle, 1, true); err != nil {
+		if storageQty != 0 {
+			qty := uint32(storageQty)
+			if err := addToInventory(slot, handle, qty, true); err != nil {
 				return err
 			}
 		}

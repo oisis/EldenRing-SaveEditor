@@ -96,17 +96,18 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				return
 			}
 
-			itemData := db.GetItemData(itemID, category)
+			itemData, baseID := db.GetItemDataFuzzy(itemID)
 			name := itemData.Name
 
 			// Strict filtering: skip items that are not in our database (Unknown)
 			// to avoid garbage data from misaligned offsets.
-			if name == "" || name == fmt.Sprintf("Unknown Item (0x%X)", itemID) ||
-				name == fmt.Sprintf("Unknown Weapon (0x%X)", itemID) ||
-				name == fmt.Sprintf("Unknown Armor (0x%X)", itemID) ||
-				name == fmt.Sprintf("Unknown Talisman (0x%X)", itemID) ||
-				name == fmt.Sprintf("Unknown Ash of War (0x%X)", itemID) {
+			if name == "" {
 				return
+			}
+
+			// Append upgrade suffix for upgraded/infused weapons
+			if baseID != itemID && itemID > baseID {
+				name = fmt.Sprintf("%s +%d", name, itemID-baseID)
 			}
 
 			displayQuantity := item.Quantity

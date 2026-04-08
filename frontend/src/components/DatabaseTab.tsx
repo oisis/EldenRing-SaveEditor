@@ -17,6 +17,11 @@ const WEAPON_CATS = new Set(['weapons', 'bows', 'shields', 'staffs', 'seals', 'a
 // Categories that support spirit ash levels
 const ASH_CATS = new Set(['ashes', 'all']);
 
+// Determine if ALL selected items are non-stackable (max qty == 1)
+function allNonStackable(items: db.ItemEntry[]): boolean {
+    return items.every(i => i.maxInventory <= 1);
+}
+
 export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded}: DatabaseTabProps) {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
@@ -36,12 +41,18 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     const [upgrade10, setUpgrade10] = useState(0);
     const [infuseOffset, setInfuseOffset] = useState(0);
     const [upgradeAsh, setUpgradeAsh] = useState(0);
-    const [addInvMax, setAddInvMax] = useState(true);
-    const [addStorageMax, setAddStorageMax] = useState(false);
 
-    // Modal / saving
+    // Modal state
     const [confirmModal, setConfirmModal] = useState<db.ItemEntry[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+
+    // Quantity state for modal
+    const [addToInv, setAddToInv] = useState(true);
+    const [invMax, setInvMax] = useState(false);
+    const [invQtyVal, setInvQtyVal] = useState(1);
+    const [addToStorage, setAddToStorage] = useState(false);
+    const [storageMax, setStorageMax] = useState(false);
+    const [storageQtyVal, setStorageQtyVal] = useState(1);
 
     // Icon preview
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
@@ -93,11 +104,15 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         if (!confirmModal || isSaving) return;
         setIsSaving(true);
         try {
+            // invQty: 0=skip, -1=max, >0=exact
+            const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
+            const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
+
             await AddItemsToCharacter(
                 charIndex,
                 confirmModal.map(i => i.id),
                 upgrade25, upgrade10, infuseOffset, upgradeAsh,
-                addInvMax, addStorageMax
+                invQty, storQty
             );
             setConfirmModal(null);
             setSelectedDbItems(new Set());
@@ -107,6 +122,17 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         } finally {
             setIsSaving(false);
         }
+    };
+
+    const openModal = (items: db.ItemEntry[]) => {
+        // Reset quantity state before opening
+        setAddToInv(true);
+        setInvMax(false);
+        setInvQtyVal(1);
+        setAddToStorage(false);
+        setStorageMax(false);
+        setStorageQtyVal(1);
+        setConfirmModal(items);
     };
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -127,12 +153,18 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
 
     const selectedInfuseName = infuseTypes.find(t => t.offset === infuseOffset)?.name ?? 'Standard';
 
+    // Whether the modal items are all non-stackable (weapons/armor/talismans)
+    const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
+    const modalMaxInv = confirmModal ? Math.max(...confirmModal.map(i => i.maxInventory)) : 1;
+    const modalMaxStorage = confirmModal ? Math.max(...confirmModal.map(i => i.maxStorage)) : 1;
+
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-3">
             {/* Confirm Modal */}
             {confirmModal && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
                     <div className="bg-card p-8 rounded-2xl border border-primary/20 flex flex-col space-y-6 max-w-sm w-full mx-4 shadow-2xl shadow-primary/20 animate-in zoom-in-95 duration-300">
+                        {/* Header */}
                         <div className="flex items-center space-x-4">
                             {confirmModal.length === 1 ? (
                                 <>
@@ -157,23 +189,80 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                             )}
                         </div>
 
-                        <div className="space-y-3 py-1">
-                            <label className="flex items-center space-x-3 cursor-pointer group">
-                                <div onClick={() => setAddInvMax(!addInvMax)} className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer ${addInvMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
-                                    {addInvMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                        {/* Inventory row */}
+                        <div className="space-y-3">
+                            <div className="flex items-center space-x-3">
+                                {/* Checkbox: Add to Inventory */}
+                                <div
+                                    onClick={() => setAddToInv(!addToInv)}
+                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToInv ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                >
+                                    {addToInv && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Inventory Max</span>
-                            </label>
-                            <label className="flex items-center space-x-3 cursor-pointer group">
-                                <div onClick={() => setAddStorageMax(!addStorageMax)} className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer ${addStorageMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
-                                    {addStorageMax && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Inventory</span>
+
+                                {/* Qty input — only for stackable */}
+                                {!modalNonStackable && (
+                                    <>
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            max={modalMaxInv}
+                                            value={invMax ? modalMaxInv : invQtyVal}
+                                            disabled={!addToInv || invMax}
+                                            onChange={e => setInvQtyVal(Math.max(1, Math.min(modalMaxInv, parseInt(e.target.value) || 1)))}
+                                            className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
+                                        />
+                                        <div
+                                            onClick={() => addToInv && setInvMax(!invMax)}
+                                            className={`flex items-center space-x-1.5 cursor-pointer group ${!addToInv ? 'opacity-40 pointer-events-none' : ''}`}
+                                        >
+                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${invMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
+                                                {invMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                            </div>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max</span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+
+                            {/* Storage row */}
+                            <div className="flex items-center space-x-3">
+                                <div
+                                    onClick={() => setAddToStorage(!addToStorage)}
+                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                >
+                                    {addToStorage && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80">Storage Max</span>
-                            </label>
+                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Storage</span>
+
+                                {!modalNonStackable && (
+                                    <>
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            max={modalMaxStorage}
+                                            value={storageMax ? modalMaxStorage : storageQtyVal}
+                                            disabled={!addToStorage || storageMax}
+                                            onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalMaxStorage, parseInt(e.target.value) || 1)))}
+                                            className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
+                                        />
+                                        <div
+                                            onClick={() => addToStorage && setStorageMax(!storageMax)}
+                                            className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}
+                                        >
+                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${storageMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
+                                                {storageMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                            </div>
+                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max</span>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
 
                         <div className="flex space-x-3 pt-2">
-                            <button onClick={handleAdd} disabled={isSaving} className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
+                            <button onClick={handleAdd} disabled={isSaving || (!addToInv && !addToStorage)} className="flex-1 px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50">
                                 {isSaving ? 'Adding...' : 'Add'}
                             </button>
                             <button onClick={() => setConfirmModal(null)} className="flex-1 px-4 py-2.5 bg-muted/30 text-muted-foreground rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:bg-muted/50 transition-all">
@@ -184,9 +273,65 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                 </div>
             )}
 
-            {/* Search / Category bar */}
+            {/* Search / Category bar — filter BEFORE search */}
             <div className="flex items-center justify-between bg-muted/10 p-4 rounded-xl border border-border/50 backdrop-blur-sm sticky top-0 z-20">
                 <div className="flex items-center space-x-4 flex-1">
+                    {/* Filter (first) */}
+                    <div className="relative w-56 shrink-0">
+                        <select
+                            value={category}
+                            onChange={e => setCategory(e.target.value)}
+                            className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
+                        >
+                            <option value="all">All Items</option>
+                            <optgroup label="Equipment" className="bg-background text-foreground">
+                                <option value="weapons">Melee Weapons</option>
+                                <option value="bows">Bows & Ballistae</option>
+                                <option value="arrows_and_bolts">Arrows & Bolts</option>
+                                <option value="shields">Shields</option>
+                                <option value="staffs">Glintstone Staffs</option>
+                                <option value="seals">Sacred Seals</option>
+                                <option value="talismans">Talismans</option>
+                                <option value="aows">Ashes of War</option>
+                            </optgroup>
+                            <optgroup label="Armor" className="bg-background text-foreground">
+                                <option value="helms">Helms</option>
+                                <option value="chest">Chest Armor</option>
+                                <option value="gauntlets">Gauntlets</option>
+                                <option value="leggings">Leggings</option>
+                            </optgroup>
+                            <optgroup label="Magic & Ashes" className="bg-background text-foreground">
+                                <option value="sorceries">Sorceries</option>
+                                <option value="incantations">Incantations</option>
+                                <option value="ashes">Spirit Ashes</option>
+                            </optgroup>
+                            <optgroup label="Items & Materials" className="bg-background text-foreground">
+                                <option value="crafting_materials">Crafting Materials</option>
+                                <option value="bolstering_materials">Bolstering Materials</option>
+                                <option value="consumables">Consumables</option>
+                            </optgroup>
+                            <optgroup label="Tools" className="bg-background text-foreground">
+                                <option value="sacred_flasks">Sacred Flasks</option>
+                                <option value="throwing_pots">Throwing Pots</option>
+                                <option value="perfume_arts">Perfume Arts</option>
+                                <option value="throwables">Throwables</option>
+                                <option value="grease">Grease</option>
+                                <option value="misc_tools">Miscellaneous Tools</option>
+                                <option value="quest_tools">Quest Tools</option>
+                                <option value="golden_runes">Golden Runes</option>
+                                <option value="remembrances">Remembrances</option>
+                                <option value="multiplayer">Multiplayer Items</option>
+                            </optgroup>
+                            <optgroup label="Progress" className="bg-background text-foreground">
+                                <option value="keyitems">Key Items</option>
+                            </optgroup>
+                        </select>
+                        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
+                            <svg className="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
+                        </div>
+                    </div>
+
+                    {/* Search (second) */}
                     <div className="relative flex-1 max-w-md group">
                         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                             <svg className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -200,58 +345,9 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                         />
                     </div>
 
-                    <select
-                        value={category}
-                        onChange={e => setCategory(e.target.value)}
-                        className="bg-background border border-border/50 rounded-lg py-2 px-4 text-[10px] font-bold uppercase tracking-wider focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
-                    >
-                        <option value="all">All Items</option>
-                        <optgroup label="Equipment" className="bg-background text-foreground">
-                            <option value="weapons">Melee Weapons</option>
-                            <option value="bows">Bows & Ballistae</option>
-                            <option value="arrows_and_bolts">Arrows & Bolts</option>
-                            <option value="shields">Shields</option>
-                            <option value="staffs">Glintstone Staffs</option>
-                            <option value="seals">Sacred Seals</option>
-                            <option value="talismans">Talismans</option>
-                            <option value="aows">Ashes of War</option>
-                        </optgroup>
-                        <optgroup label="Armor" className="bg-background text-foreground">
-                            <option value="helms">Helms</option>
-                            <option value="chest">Chest Armor</option>
-                            <option value="gauntlets">Gauntlets</option>
-                            <option value="leggings">Leggings</option>
-                        </optgroup>
-                        <optgroup label="Magic & Ashes" className="bg-background text-foreground">
-                            <option value="sorceries">Sorceries</option>
-                            <option value="incantations">Incantations</option>
-                            <option value="ashes">Spirit Ashes</option>
-                        </optgroup>
-                        <optgroup label="Items & Materials" className="bg-background text-foreground">
-                            <option value="crafting_materials">Crafting Materials</option>
-                            <option value="bolstering_materials">Bolstering Materials</option>
-                            <option value="consumables">Consumables</option>
-                        </optgroup>
-                        <optgroup label="Tools" className="bg-background text-foreground">
-                            <option value="sacred_flasks">Sacred Flasks</option>
-                            <option value="throwing_pots">Throwing Pots</option>
-                            <option value="perfume_arts">Perfume Arts</option>
-                            <option value="throwables">Throwables</option>
-                            <option value="grease">Grease</option>
-                            <option value="misc_tools">Miscellaneous Tools</option>
-                            <option value="quest_tools">Quest Tools</option>
-                            <option value="golden_runes">Golden Runes</option>
-                            <option value="remembrances">Remembrances</option>
-                            <option value="multiplayer">Multiplayer Items</option>
-                        </optgroup>
-                        <optgroup label="Progress" className="bg-background text-foreground">
-                            <option value="keyitems">Key Items</option>
-                        </optgroup>
-                    </select>
-
                     {selectedDbItems.size > 0 && (
                         <button
-                            onClick={() => setConfirmModal(dbItems.filter(i => selectedDbItems.has(i.id)))}
+                            onClick={() => openModal(dbItems.filter(i => selectedDbItems.has(i.id)))}
                             disabled={!platform}
                             className="px-6 py-2 bg-primary text-primary-foreground rounded-lg text-[9px] font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:brightness-110 active:scale-95 transition-all animate-in zoom-in-95 duration-300 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
                         >
@@ -284,9 +380,9 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{upgrade25}</span>
                             </div>
 
-                            {/* Boss weapon +10 level */}
+                            {/* Weapon +10 level */}
                             <div className="flex items-center space-x-3 min-w-[160px]">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Boss +10</span>
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Weapon +10</span>
                                 <input
                                     type="range" min={0} max={10} value={upgrade10}
                                     onChange={e => setUpgrade10(parseInt(e.target.value))}

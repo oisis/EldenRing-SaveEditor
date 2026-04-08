@@ -432,6 +432,50 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
+## Phase 17: Database Tab — Fix Upgraded Items + UI Polish + Modal Redesign
+
+> **Root causes:**
+> - `mapItems` w `character_vm.go` filtruje itemy, których ID nie ma w DB (upgraded ID np. `0x802ED835`
+>   nie istnieje — tylko base `0x802ED830`). `GetItemName` w `db.go` już robi fuzzy lookup
+>   (`id & 0xFFFFFF00 == baseID & 0xFFFFFF00`) ale `mapItems` jej nie używa.
+> - Label "Boss +10" jest mylący — wszystkie bronie z maxUpgrade=10 to boss weapons, ale slider powinien
+>   mówić "Weapon +10".
+> - Search bar i filter są w odwrotnej kolejności; filter ma inny styl niż w InventoryTab.
+> - Modal pokazuje tylko checkboxy bez możliwości podania ilości.
+
+---
+
+- [x] **17.1. Fix: upgraded weapons niewidoczne w Inventory (`backend/vm/character_vm.go`)**
+    - [x] Dodać `GetItemDataFuzzy(id uint32) (data.ItemData, uint32)` w `backend/db/db.go`:
+        - Próbuje exact match (`GetItemData`).
+        - Dla upper nibble 0x8 (Weapon): iteruje po `Weapons, Bows, Shields, Staffs, Seals`;
+          sprawdza `id & 0xFFFFFF00 == baseID & 0xFFFFFF00`; jeśli match → zwraca base ItemData + baseID.
+    - [x] W `mapItems` (`backend/vm/character_vm.go`): zastąpić `GetItemData(itemID)` przez `GetItemDataFuzzy(itemID)`.
+    - [x] Dla wyświetlania nazwy: jeśli `itemID != baseID`, append `" +N"` gdzie N = `itemID - baseID`.
+    - [x] `go build ./backend/... && go build .` — OK.
+
+- [x] **17.2. Rename "Boss +10" → "Weapon +10" (`frontend/src/components/DatabaseTab.tsx`)**
+    - [x] Zmieniono label suwaka `upgrade10` z `"Boss +10"` na `"Weapon +10"`.
+
+- [x] **17.3. Swap search/filter + resize filter (`frontend/src/components/DatabaseTab.tsx`)**
+    - [x] `<select>` kategorii przeniesiony PRZED `<input>` wyszukiwarki.
+    - [x] Styl filtra: `w-56 appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest` — zgodny z InventoryTab.
+
+- [x] **17.4. Modal redesign — qty inputs + max checkboxes**
+    - [x] **Backend `app.go`**: sygnatura `AddItemsToCharacter` zmieniona:
+        `invMax, storageMax bool` → `invQty, storageQty int`; `resolveQty()` helper.
+    - [x] **Backend `writer.go`**: `AddItemsToSlot` zmienione:
+        `invMax, storageMax bool` → `invQty, storageQty int`; qty przekazane do `addToInventory`.
+    - [x] Wails bindings zregenerowane: `wails generate module`.
+    - [x] **Frontend `DatabaseTab.tsx`**: stany `addToInv`, `invMax`, `invQtyVal`, `addToStorage`, `storageMax`, `storageQtyVal`.
+    - [x] Modal — dwa wiersze (Inventory / Storage):
+        - Dla niestack. (maxInventory == 1): tylko checkbox.
+        - Dla stack. (maxInventory > 1): `[qty input] [x Max]` — Max checked → input disabled, wysyłane -1.
+    - [x] `cd frontend && npx tsc --noEmit` — 0 błędów.
+    - [x] Round-trip testy: 4/4 PASS.
+
+---
+
 ### Technical Note: Faster Invasions (Meliodas Method)
 A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
 - **Refresh Interval**: Reduced from 20s to 4s.

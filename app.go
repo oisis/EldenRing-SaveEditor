@@ -170,7 +170,8 @@ func (a *App) GetItemList(category string) []db.ItemEntry {
 // upgrade10 applies to weapons with maxUpgrade=10 (boss weapons, cannot be infused).
 // infuseOffset is added to infusable weapons (maxUpgrade=25) as a weapon affinity offset.
 // upgradeAsh applies to spirit ashes (category="ashes").
-func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh int, invMax, storageMax bool) error {
+// invQty / storageQty: 0 = skip, -1 = item's MaxInventory/MaxStorage, >0 = exact qty (capped to max).
+func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storageQty int) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
 	}
@@ -178,8 +179,9 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		return fmt.Errorf("invalid character index")
 	}
 
-	finalIDs := make([]uint32, len(itemIDs))
-	for i, id := range itemIDs {
+	slot := &a.save.Slots[charIdx]
+
+	for _, id := range itemIDs {
 		itemData := db.GetItemData(id, "")
 		finalID := id
 		switch {
@@ -190,11 +192,31 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		case itemData.MaxUpgrade == 10:
 			finalID = id + uint32(upgrade10)
 		}
-		finalIDs[i] = finalID
-	}
 
-	slot := &a.save.Slots[charIdx]
-	return core.AddItemsToSlot(slot, finalIDs, 0, invMax, storageMax)
+		// Resolve actual quantities for this item
+		actualInv := resolveQty(invQty, int(itemData.MaxInventory))
+		actualStorage := resolveQty(storageQty, int(itemData.MaxStorage))
+
+		if err := core.AddItemsToSlot(slot, []uint32{finalID}, actualInv, actualStorage); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// resolveQty converts a qty directive into an actual quantity.
+// qty=0 → 0 (skip); qty=-1 → max; qty>0 → min(qty, max).
+func resolveQty(qty, max int) int {
+	if qty == 0 || max == 0 {
+		return 0
+	}
+	if qty < 0 {
+		return max
+	}
+	if qty > max {
+		return max
+	}
+	return qty
 }
 
 // GetInfuseTypes returns all weapon infusion types with their ID offsets

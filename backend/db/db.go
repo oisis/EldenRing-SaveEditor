@@ -73,6 +73,28 @@ func GetItemData(id uint32, category string) data.ItemData {
 	return data.ItemData{}
 }
 
+// GetItemDataFuzzy returns item metadata for an exact ID, or falls back to a base weapon lookup
+// for upgraded/infused weapon IDs (upper nibble 0x8). The returned ItemData.Name is not modified
+// (caller should append "+N" based on the difference between id and the base ID).
+func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
+	exact := GetItemData(id, "")
+	if exact.Name != "" {
+		return exact, id
+	}
+	if id&0xF0000000 == 0x80000000 {
+		weaponMaps := []map[uint32]data.ItemData{data.Weapons, data.Bows, data.Shields, data.Staffs, data.Seals}
+		masked := id & 0xFFFFFF00
+		for _, m := range weaponMaps {
+			for baseID, item := range m {
+				if baseID&0xFFFFFF00 == masked && item.Name != "" {
+					return item, baseID
+				}
+			}
+		}
+	}
+	return data.ItemData{}, id
+}
+
 // GetItemName returns the name of an item by its ID and category.
 func GetItemName(id uint32, category string) string {
 	// Special handling for weapons with levels
