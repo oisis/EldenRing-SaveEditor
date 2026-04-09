@@ -33,29 +33,30 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const [editedStorage, setEditedStorage] = useState<Record<number, number>>({});
 
     // Selection + remove
-    const [selectedHandles, setSelectedHandles] = useState<Set<number>>(new Set());
+    const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
     const [removeModal, setRemoveModal] = useState<{handles: number[], names: string[]} | null>(null);
     const [isRemoving, setIsRemoving] = useState(false);
 
-    const toggleSelect = (handle: number) => {
-        setSelectedHandles(prev => {
+    const toggleSelect = (key: string) => {
+        setSelectedKeys(prev => {
             const next = new Set(prev);
-            if (next.has(handle)) next.delete(handle); else next.add(handle);
+            if (next.has(key)) next.delete(key); else next.add(key);
             return next;
         });
     };
 
     const toggleSelectAll = () => {
-        if (selectedHandles.size === filteredOwnedItems.length && filteredOwnedItems.length > 0) {
-            setSelectedHandles(new Set());
+        if (selectedKeys.size === filteredOwnedItems.length && filteredOwnedItems.length > 0) {
+            setSelectedKeys(new Set());
         } else {
-            setSelectedHandles(new Set(filteredOwnedItems.map(i => i.handle)));
+            setSelectedKeys(new Set(filteredOwnedItems.map(i => rowKey(i))));
         }
     };
 
     const handleRemoveSelected = () => {
-        const items = filteredOwnedItems.filter(i => selectedHandles.has(i.handle));
-        setRemoveModal({ handles: items.map(i => i.handle), names: items.map(i => i.name) });
+        const items = filteredOwnedItems.filter(i => selectedKeys.has(rowKey(i)));
+        const handles = items.flatMap(i => [i.invHandle, i.storageHandle].filter(h => h !== 0));
+        setRemoveModal({ handles, names: items.map(i => i.name) });
     };
 
     const confirmRemove = async (fromInventory: boolean, fromStorage: boolean) => {
@@ -63,7 +64,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         setIsRemoving(true);
         try {
             await RemoveItemsFromCharacter(charIndex, removeModal.handles, fromInventory, fromStorage);
-            setSelectedHandles(new Set());
+            setSelectedKeys(new Set());
             setRemoveModal(null);
             // Reload inventory
             const char = await GetCharacter(charIndex);
@@ -121,36 +122,41 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     };
 
     type MergedItem = {
-        id: number; handle: number; name: string; category: string; subCategory: string;
+        id: number; name: string; category: string; subCategory: string;
         nonStackable: boolean; inInventory: boolean; inStorage: boolean;
+        invHandle: number; storageHandle: number;
         invQty: number; storageQty: number;
         maxInv: number; maxStorage: number; maxUpgrade: number; currentUpgrade: number; iconPath: string;
         flags: string[];
     };
 
+    const rowKey = (item: MergedItem) => item.nonStackable ? `h-${item.invHandle || item.storageHandle}` : `s-${item.id}`;
+
     // Build item list for display.
     // Non-stackable (maxInventory <= 1): one row per handle — consolidated across both locations.
-    // Stackable (maxInventory > 1): separate rows for inventory and storage entries.
+    // Stackable (maxInventory > 1): merged by item ID — one row with both inv and storage qty.
     const mergedOwnedItems = (() => {
         const nonStackableMap = new Map<number, MergedItem>();
-        const stackableItems: MergedItem[] = [];
+        const stackableMap = new Map<number, MergedItem>();
 
         charInventory.forEach(item => {
             if (item.maxInventory <= 1) {
                 nonStackableMap.set(item.handle, {
-                    id: item.id, handle: item.handle, name: item.name,
+                    id: item.id, name: item.name,
                     category: item.category, subCategory: item.subCategory,
                     nonStackable: true, inInventory: true, inStorage: false,
+                    invHandle: item.handle, storageHandle: 0,
                     invQty: 1, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
                 });
             } else {
-                stackableItems.push({
-                    id: item.id, handle: item.handle, name: item.name,
+                stackableMap.set(item.id, {
+                    id: item.id, name: item.name,
                     category: item.category, subCategory: item.subCategory,
                     nonStackable: false, inInventory: true, inStorage: false,
+                    invHandle: item.handle, storageHandle: 0,
                     invQty: item.quantity, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
@@ -167,9 +173,10 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     existing.storageQty = 1;
                 } else {
                     nonStackableMap.set(item.handle, {
-                        id: item.id, handle: item.handle, name: item.name,
+                        id: item.id, name: item.name,
                         category: item.category, subCategory: item.subCategory,
                         nonStackable: true, inInventory: false, inStorage: true,
+                        invHandle: 0, storageHandle: item.handle,
                         invQty: 0, storageQty: 1,
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
@@ -177,19 +184,27 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     });
                 }
             } else {
-                stackableItems.push({
-                    id: item.id, handle: item.handle, name: item.name,
-                    category: item.category, subCategory: item.subCategory,
-                    nonStackable: false, inInventory: false, inStorage: true,
-                    invQty: 0, storageQty: item.quantity,
-                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                    maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
-                    flags: item.flags ?? [],
-                });
+                const existing = stackableMap.get(item.id);
+                if (existing) {
+                    existing.inStorage = true;
+                    existing.storageHandle = item.handle;
+                    existing.storageQty = item.quantity;
+                } else {
+                    stackableMap.set(item.id, {
+                        id: item.id, name: item.name,
+                        category: item.category, subCategory: item.subCategory,
+                        nonStackable: false, inInventory: false, inStorage: true,
+                        invHandle: 0, storageHandle: item.handle,
+                        invQty: 0, storageQty: item.quantity,
+                        maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                        maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                        flags: item.flags ?? [],
+                    });
+                }
             }
         });
 
-        return [...Array.from(nonStackableMap.values()), ...stackableItems];
+        return [...Array.from(nonStackableMap.values()), ...Array.from(stackableMap.values())];
     })();
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -336,12 +351,12 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                         {isSaving ? 'Saving...' : 'Save Changes'}
                     </button>
                 )}
-                {selectedHandles.size > 0 && (
+                {selectedKeys.size > 0 && (
                     <button
                         onClick={handleRemoveSelected}
                         className="px-6 py-2.5 bg-red-500/10 text-red-400 border border-red-500/30 rounded-md text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 active:scale-95 transition-all animate-in zoom-in-95 duration-200"
                     >
-                        Remove ({selectedHandles.size})
+                        Remove ({selectedKeys.size})
                     </button>
                 )}
 
@@ -370,9 +385,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                 <th className="px-4 py-4 w-10">
                                     <div
                                         onClick={toggleSelectAll}
-                                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedHandles.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border hover:border-red-400/50'}`}
+                                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedKeys.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border hover:border-red-400/50'}`}
                                     >
-                                        {selectedHandles.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 &&
+                                        {selectedKeys.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 &&
                                             <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                     </div>
                                 </th>
@@ -411,14 +426,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                     </td>
                                 </tr>
                             ) : filteredOwnedItems.length > 0 ? (
-                                filteredOwnedItems.map((item) => (
-                                    <tr key={item.handle} className={`group hover:bg-primary/[0.02] transition-colors ${selectedHandles.has(item.handle) ? 'bg-red-500/[0.03]' : ''}`}>
+                                filteredOwnedItems.map((item) => {
+                                    const key = rowKey(item);
+                                    return (
+                                    <tr key={key} className={`group hover:bg-primary/[0.02] transition-colors ${selectedKeys.has(key) ? 'bg-red-500/[0.03]' : ''}`}>
                                         <td className="px-4 py-0.5">
                                             <div
-                                                onClick={() => toggleSelect(item.handle)}
-                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedHandles.has(item.handle) ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border group-hover:border-red-400/50'}`}
+                                                onClick={() => toggleSelect(key)}
+                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedKeys.has(key) ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border group-hover:border-red-400/50'}`}
                                             >
-                                                {selectedHandles.has(item.handle) &&
+                                                {selectedKeys.has(key) &&
                                                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                             </div>
                                         </td>
@@ -480,9 +497,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                         type="number"
                                                         min={0}
                                                         max={item.maxInv}
-                                                        value={editedInv[item.handle] !== undefined ? editedInv[item.handle] : item.invQty}
-                                                        onChange={e => handleQtyChange(item.handle, e.target.value, 'inv', item.maxInv)}
-                                                        className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedInv[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
+                                                        value={editedInv[item.invHandle] !== undefined ? editedInv[item.invHandle] : item.invQty}
+                                                        onChange={e => handleQtyChange(item.invHandle, e.target.value, 'inv', item.maxInv)}
+                                                        className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedInv[item.invHandle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
                                                     />
                                                     <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxInv}</span>
                                                 </div>
@@ -501,9 +518,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                         type="number"
                                                         min={0}
                                                         max={item.maxStorage}
-                                                        value={editedStorage[item.handle] !== undefined ? editedStorage[item.handle] : item.storageQty}
-                                                        onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
-                                                        className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
+                                                        value={editedStorage[item.storageHandle] !== undefined ? editedStorage[item.storageHandle] : item.storageQty}
+                                                        onChange={e => handleQtyChange(item.storageHandle, e.target.value, 'storage', item.maxStorage)}
+                                                        className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.storageHandle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
                                                     />
                                                     <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxStorage}</span>
                                                 </div>
@@ -512,7 +529,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                             )}
                                         </td>
                                     </tr>
-                                ))
+                                    );})
                             ) : (
                                 <tr>
                                     <td colSpan={9} className="px-6 py-24 text-center">

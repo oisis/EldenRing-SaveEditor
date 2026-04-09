@@ -58,6 +58,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
 
     useEffect(() => {
         setLoading(true);
+        setSelectedDbItems(new Set());
         GetItemList(category).then(res => {
             setDbItems(res || []);
             setLoading(false);
@@ -66,10 +67,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
 
     const filteredItems = dbItems.filter(item => {
         if (!showFlaggedItems && item.flags?.length > 0) return false;
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
+        return item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
-        if (category === 'all') return matchesSearch;
-        return item.category === category && matchesSearch;
     }).sort((a, b) => {
         const aVal = a[sortCol as keyof db.ItemEntry];
         const bVal = b[sortCol as keyof db.ItemEntry];
