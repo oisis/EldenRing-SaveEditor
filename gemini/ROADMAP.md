@@ -667,11 +667,11 @@ Wymaga weryfikacji z `Final.py`.
 
 ### Walidacja końcowa
 
-- [ ] `go test -v ./backend/core/...` — PASS
-- [ ] `go test -v ./tests/roundtrip_test.go` — 4/4 PASS (PS4, PC, PS4→PC, PC→PS4)
-- [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
-- [ ] `cd frontend && npm run lint` — 0 błędów
-- [ ] `make build` — OK
+- [x] `go test -v ./backend/core/...` — PASS
+- [x] `go test -v ./tests/roundtrip_test.go` — 4/4 PASS (PS4, PC, PS4→PC, PC→PS4)
+- [x] `cd frontend && npx tsc --noEmit` — 0 błędów
+- [x] `cd frontend && npm run lint` — N/A (brak skryptu w projekcie)
+- [x] `make build` — OK
 
 ---
 
