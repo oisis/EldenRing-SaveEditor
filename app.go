@@ -161,9 +161,13 @@ func (a *App) WriteSave(platform string) error {
 	return a.save.SaveFile(path)
 }
 
-// GetItemList returns a list of items for a given category
+// GetItemList returns a list of items for a given category, filtered by the loaded save's platform.
 func (a *App) GetItemList(category string) []db.ItemEntry {
-	return db.GetItemsByCategory(category)
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetItemsByCategory(category, platform)
 }
 
 // AddItemsToCharacter adds multiple items from the database to a character slot.
