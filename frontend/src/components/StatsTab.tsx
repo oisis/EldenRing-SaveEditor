@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import toast from 'react-hot-toast';
 import {GetCharacter, SaveCharacter} from '../../wailsjs/go/main/App';
 import {vm} from '../../wailsjs/go/models';
 
@@ -47,8 +48,8 @@ export function StatsTab({charIndex}: Props) {
     const handleSave = () => {
         if (char) {
             SaveCharacter(charIndex, char)
-                .then(() => alert('Attributes updated in memory'))
-                .catch(err => alert('Error: ' + err));
+                .then(() => toast.success('Attributes updated in memory'))
+                .catch(err => toast.error('Error: ' + err));
         }
     };
 

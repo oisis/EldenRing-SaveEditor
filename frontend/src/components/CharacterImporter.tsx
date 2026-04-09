@@ -1,4 +1,5 @@
 import {useState} from 'react';
+import toast from 'react-hot-toast';
 import {SelectAndOpenSourceSave, GetSourceActiveSlots, ImportCharacter} from '../../wailsjs/go/main/App';
 
 interface Props {
@@ -21,7 +22,7 @@ export function CharacterImporter({destSlot, onComplete}: Props) {
                 setSourceLoaded(true);
             }
         } catch (e) {
-            alert("Error: " + e);
+            toast.error("Error: " + e);
         }
     };
 
@@ -30,10 +31,10 @@ export function CharacterImporter({destSlot, onComplete}: Props) {
         setLoading(true);
         try {
             await ImportCharacter(selectedSourceSlot, destSlot);
-            alert("Character imported successfully!");
+            toast.success("Character imported successfully!");
             onComplete();
         } catch (e) {
-            alert("Import failed: " + e);
+            toast.error("Import failed: " + e);
         } finally {
             setLoading(false);
         }

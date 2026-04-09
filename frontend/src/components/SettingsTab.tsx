@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import toast from 'react-hot-toast';
 import {SelectAndOpenSave, WriteSave, GetSteamIDString, SetSteamIDFromString} from '../../wailsjs/go/main/App';
 
 interface SettingsTabProps {
@@ -68,9 +69,9 @@ export function SettingsTab({
             const plat = await SelectAndOpenSave();
             setPlatform(plat);
             refreshSlots();
-            alert("Save imported successfully!");
+            toast.success("Save imported successfully!");
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         } finally {
             setImporting(false);
         }
@@ -80,9 +81,9 @@ export function SettingsTab({
         setExporting(true);
         try {
             await WriteSave(targetPlatform);
-            alert(`Save exported successfully as ${targetPlatform}!`);
+            toast.success(`Save exported successfully as ${targetPlatform}!`);
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         } finally {
             setExporting(false);
         }

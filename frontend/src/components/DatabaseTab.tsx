@@ -1,4 +1,5 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
+import toast from 'react-hot-toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
@@ -131,7 +132,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
             setSelectedDbItems(new Set());
             onItemsAdded?.();
         } catch (err) {
-            alert('Failed to add items: ' + err);
+            toast.error('Failed to add items: ' + err);
         } finally {
             setIsSaving(false);
         }

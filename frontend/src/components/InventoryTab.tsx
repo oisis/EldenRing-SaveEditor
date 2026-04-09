@@ -1,4 +1,5 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
+import toast from 'react-hot-toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter} from '../../wailsjs/go/main/App';
 import {vm} from '../../wailsjs/go/models';
@@ -72,7 +73,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             const char = await GetCharacter(charIndex);
             if (char) { setCharInventory(char.inventory || []); setCharStorage(char.storage || []); }
         } catch (err) {
-            alert('Remove failed: ' + err);
+            toast.error('Remove failed: ' + err);
         } finally {
             setIsRemoving(false);
         }

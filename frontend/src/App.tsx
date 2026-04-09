@@ -1,4 +1,5 @@
 import {useState, useEffect} from 'react';
+import toast, {Toaster} from 'react-hot-toast';
 import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
@@ -92,7 +93,7 @@ function App() {
             setPlatform(plat);
             refreshSlots();
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         }
     };
 
@@ -114,7 +115,7 @@ function App() {
             refreshSlots();
             setCloneModal(null);
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         }
     };
 
@@ -126,12 +127,16 @@ function App() {
             if (selectedChar > 0 && selectedChar >= idx) setSelectedChar(selectedChar - 1);
             refreshSlots();
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         }
     };
 
     return (
         <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-300">
+            <Toaster position="top-right" toastOptions={{
+                duration: 3000,
+                style: { background: 'var(--color-card)', color: 'var(--color-foreground)', border: '1px solid var(--color-border)' },
+            }} />
             {/* Sidebar */}
             <aside className="w-64 border-r border-border bg-muted/5 flex flex-col z-20">
                 <div className="p-5 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
