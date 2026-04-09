@@ -646,10 +646,10 @@ Wymaga weryfikacji z `Final.py`.
     - [x] Fix `window.go.main.App.SaveCharacter` → import z wailsjs.
     - [x] `WorldProgressTab`: nie połykaj błędów w `.catch()`.
 
-- [ ] **20.H. Unit Tests** (`backend/core/` — NOWE PLIKI)
-    - `slot_access_test.go`: out-of-bounds, negative offset, dynamic size clamp.
-    - `offset_validation_test.go`: valid chain, non-monotonic, too-small MagicOffset.
-    - Rozszerzenie `roundtrip_test.go`: sprawdzenie `Warnings == nil` na known-good saves.
+- [x] **20.H. Unit Tests** (`backend/core/` — NOWE PLIKI)
+    - [x] `slot_access_test.go`: out-of-bounds, negative offset, dynamic size clamp.
+    - [x] `offset_validation_test.go`: valid chain, non-monotonic, too-small MagicOffset.
+    - [x] Rozszerzenie `roundtrip_test.go`: sprawdzenie `Warnings == nil` na known-good saves.
 
 - [ ] **20.I. SaveManager Hardening** (`backend/core/save_manager.go`)
     - [ ] Walidacja minimalnego rozmiaru pliku w `LoadSave()`.
