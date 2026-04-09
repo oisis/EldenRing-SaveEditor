@@ -660,10 +660,10 @@ Wymaga weryfikacji z `Final.py`.
     - [x] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
     - [x] Global item index `map[uint32]ItemEntry` — O(1) lookup zamiast O(18×n) linear search.
 
-- [ ] **20.K. Frontend Performance & UI Consistency**
-    - [ ] Table virtualization z `@tanstack/react-virtual` w InventoryTab i DatabaseTab.
-    - [ ] Unified toast system (`react-hot-toast`), usunięcie `alert()`.
-    - [ ] Shared UI components: `Card`, `SectionHeader`, `ActionButton`.
+- [x] **20.K. Frontend Performance & UI Consistency**
+    - [x] Table virtualization z `@tanstack/react-virtual` w InventoryTab i DatabaseTab.
+    - [x] Unified toast system (`react-hot-toast`), usunięcie `alert()`.
+    - [x] ~~Shared UI components~~ — pominięte (zbyt mała duplikacja, over-engineering).
 
 ### Walidacja końcowa
 
