@@ -12,6 +12,8 @@ interface SettingsTabProps {
     setColumnVisibility: (visibility: { id: boolean; category: boolean }) => void;
     showFlaggedItems: boolean;
     setShowFlaggedItems: (value: boolean) => void;
+    debugMode: boolean;
+    setDebugMode: (value: boolean) => void;
     platform: string | null;
     setPlatform: (platform: string | null) => void;
     refreshSlots: () => void;
@@ -24,6 +26,8 @@ export function SettingsTab({
     setColumnVisibility,
     showFlaggedItems,
     setShowFlaggedItems,
+    debugMode,
+    setDebugMode,
     platform,
     setPlatform,
     refreshSlots
@@ -271,6 +275,22 @@ export function SettingsTab({
                                 type="checkbox"
                                 checked={showFlaggedItems}
                                 onChange={e => setShowFlaggedItems(e.target.checked)}
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-4"
+                            />
+                        </label>
+                    </div>
+
+                    <div className="space-y-4 border-t border-border/40 pt-6">
+                        <p className="text-xs font-bold text-foreground">Debug</p>
+                        <label className="flex items-center justify-between p-4 rounded-lg bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
+                                <p className="text-[9px] text-muted-foreground/60 font-medium">Show all parser warnings including non-critical diagnostic messages (e.g. PS4 dynamic size clamps).</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={debugMode}
+                                onChange={e => setDebugMode(e.target.checked)}
                                 className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-4"
                             />
                         </label>
