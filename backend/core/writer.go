@@ -2,7 +2,10 @@ package core
 
 import (
 	"encoding/binary"
+	"fmt"
 	"io"
+
+	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 )
 
 type Writer struct {
@@ -40,38 +43,39 @@ func (w *Writer) WriteBytes(v []byte) error {
 
 // AddItemsToSlot adds multiple items to a specific save slot.
 // invQty and storageQty control quantities: 0 = skip, -1 = use provided max from caller, >0 = exact qty.
-// forceStackable treats items as stackable goods (handle=id, 21-byte record) regardless of ID prefix.
-// Used for arrows/bolts which have weapon-like 0x8x... IDs but are stackable in inventory.
+// forceStackable treats items as stackable (reuse existing GaMap handle) regardless of type.
+// Used for arrows/bolts which have weapon-like IDs but are stackable in inventory.
 func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, forceStackable bool) error {
 	for _, id := range itemIDs {
-		// 1. Determine item type and handle prefix from upper nibble
-		var prefix uint32
+		// 1. Convert item ID prefix to handle prefix and determine record size.
+		// DB stores PC-style item IDs (0x00=weapon, 0x10=armor, 0x20=talisman, 0x40=goods, 0x80=AoW).
+		// Handles always use GaItem prefixes (0x80=weapon, 0x90=armor, 0xA0=talisman, 0xB0=goods, 0xC0=AoW).
+		handlePrefix := db.ItemIDToHandlePrefix(id)
 		var recordSize int
-		switch id & 0xF0000000 {
+		switch handlePrefix {
 		case ItemTypeWeapon:
-			prefix = ItemTypeWeapon
-			recordSize = 21
+			recordSize = GaRecordWeapon
 		case ItemTypeArmor:
-			prefix = ItemTypeArmor
-			recordSize = 16
+			recordSize = GaRecordArmor
 		case ItemTypeAccessory:
-			prefix = ItemTypeAccessory
-			recordSize = 8
+			recordSize = GaRecordAccessory
 		case ItemTypeItem:
-			prefix = ItemTypeItem
-			recordSize = 8
+			recordSize = GaRecordItem
 		case ItemTypeAow:
-			prefix = ItemTypeAow
-			recordSize = 8
+			recordSize = GaRecordAoW
 		default:
-			prefix = ItemTypeWeapon
-			recordSize = 21
+			recordSize = GaRecordWeapon
 		}
 
-		// 2. Generate a unique handle.
-		// For stackable items (goods, talismans, arrows), reuse existing handle if item already in GaMap.
+		// 2. Determine if item is stackable (handle=id pattern).
+		// Stackable: talismans (0xA0), goods (0xB0). Handle = handlePrefix | lower bits of item ID.
+		// Non-stackable: weapons (0x80), armor (0x90), AoW (0xC0). Handle = unique, GaMap indirection.
+		// forceStackable: arrows — weapon-type but stackable; reuse GaMap handle if found.
+		isStackable := handlePrefix == ItemTypeItem || handlePrefix == ItemTypeAccessory
+
+		// 3. Search for existing handle in GaMap (for stackable reuse).
 		handle := uint32(0)
-		if prefix == ItemTypeItem || prefix == ItemTypeAccessory || prefix == ItemTypeAow || forceStackable {
+		if isStackable || forceStackable {
 			for h, i := range slot.GaMap {
 				if i == id {
 					handle = h
@@ -81,15 +85,17 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		}
 
 		if handle == 0 {
-			// For stackable goods (0xB0) and talismans (0xA0), the game convention
-			// is handle == ID (no indirection). character_vm.go reads these back as
-			// itemID = item.GaItemHandle, so the handle must equal the item ID.
-			// Arrows (forceStackable) also use handle == ID for stacking.
-			// Weapons, armor, and AoW use separate handle→ID indirection via GaMap.
-			if prefix == ItemTypeItem || prefix == ItemTypeAccessory || forceStackable {
-				handle = id
+			if isStackable {
+				// Stackable goods/talismans: handle = handlePrefix | lower bits of item ID.
+				// The game reads these as: itemID = HandleToItemID(handle).
+				handle = (id & 0x0FFFFFFF) | handlePrefix
 			} else {
-				handle = generateUniqueHandle(slot, prefix)
+				// Weapons, armor, AoW, and arrows: generate unique handle with GaMap indirection.
+				var err error
+				handle, err = generateUniqueHandle(slot, handlePrefix)
+				if err != nil {
+					return err
+				}
 			}
 			if err := writeGaItem(slot, handle, id, recordSize); err != nil {
 				return err
@@ -97,7 +103,7 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			slot.GaMap[handle] = id
 		}
 
-		// 3. Add to Inventory
+		// 4. Add to Inventory
 		if invQty != 0 {
 			qty := uint32(invQty)
 			if err := addToInventory(slot, handle, qty, false); err != nil {
@@ -105,7 +111,7 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			}
 		}
 
-		// 4. Add to Storage
+		// 5. Add to Storage
 		if storageQty != 0 {
 			qty := uint32(storageQty)
 			if err := addToInventory(slot, handle, qty, true); err != nil {
@@ -116,33 +122,46 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 	return nil
 }
 
-func generateUniqueHandle(slot *SaveSlot, prefix uint32) uint32 {
-	// Start with a base handle and increment until unique
-	// Python uses a similar approach or random, but sequential is safer for parity.
-	h := prefix | 0x00010000
-	for {
+func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
+	h := prefix | GaHandleBase
+	for i := 0; i < MaxHandleAttempts; i++ {
 		if _, ok := slot.GaMap[h]; !ok {
-			return h
+			return h, nil
 		}
 		h++
 	}
+	return 0, fmt.Errorf("failed to generate unique handle after %d attempts (prefix 0x%X)",
+		MaxHandleAttempts, prefix)
 }
 
 func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
-	// Find the first empty space in GaItems section (usually after InventoryEnd)
-	// For simplicity, we'll append at InventoryEnd if it doesn't exceed MagicOffset
-	if slot.InventoryEnd+size >= slot.MagicOffset {
-		return io.ErrShortBuffer // No space in GaItems section
+	sa := NewSlotAccessor(slot.Data)
+
+	// Check BOTH constraints: GaItems must not overflow into Magic section,
+	// AND must not exceed the physical buffer.
+	if err := sa.CheckBounds(slot.InventoryEnd, size, "writeGaItem"); err != nil {
+		return err
+	}
+	gaLimit := slot.MagicOffset - DynPlayerData
+	if slot.InventoryEnd+size > gaLimit {
+		return fmt.Errorf("writeGaItem: no space in GaItems section "+
+			"(InventoryEnd=0x%X + size=%d > gaLimit=0x%X)",
+			slot.InventoryEnd, size, gaLimit)
 	}
 
-	binary.LittleEndian.PutUint32(slot.Data[slot.InventoryEnd:], handle)
-	binary.LittleEndian.PutUint32(slot.Data[slot.InventoryEnd+4:], itemID)
-	
-	// Zero out the rest of the record if it's larger than 8 bytes
+	// Write handle and itemID
+	if err := sa.WriteU32(slot.InventoryEnd, handle); err != nil {
+		return err
+	}
+	if err := sa.WriteU32(slot.InventoryEnd+4, itemID); err != nil {
+		return err
+	}
+	// Zero remaining bytes (weapon=13 extra, armor=8 extra, others=0)
 	for i := 8; i < size; i++ {
-		slot.Data[slot.InventoryEnd+i] = 0
+		if err := sa.WriteU8(slot.InventoryEnd+i, 0); err != nil {
+			return err
+		}
 	}
-
 	slot.InventoryEnd += size
 	return nil
 }
@@ -152,12 +171,17 @@ func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 // Storage: dynamic list — zero the matching slot(s); game stops reading at handle==0.
 // GaMap entry is removed only when the handle is absent from both lists after removal.
 func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorage bool) error {
+	sa := NewSlotAccessor(slot.Data)
+
 	if fromInventory {
-		invStart := slot.MagicOffset + 505
+		invStart := slot.MagicOffset + InvStartFromMagic
 		for i, item := range slot.Inventory.CommonItems {
 			if item.GaItemHandle == handle {
 				slot.Inventory.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: uint32(i)}
-				off := invStart + i*12
+				off := invStart + i*InvRecordLen
+				if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/common"); err != nil {
+					return err
+				}
 				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(i))
@@ -165,9 +189,12 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 		}
 		for i, item := range slot.Inventory.KeyItems {
 			if item.GaItemHandle == handle {
-				keyStart := invStart + 0xa80*12
+				keyStart := invStart + CommonItemCount*InvRecordLen
 				slot.Inventory.KeyItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: uint32(i)}
-				off := keyStart + i*12
+				off := keyStart + i*InvRecordLen
+				if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/key"); err != nil {
+					return err
+				}
 				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(i))
@@ -175,11 +202,14 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 		}
 	}
 	if fromStorage {
-		storageStart := slot.StorageBoxOffset + 4
+		storageStart := slot.StorageBoxOffset + StorageHeaderSkip
 		for i, item := range slot.Storage.CommonItems {
 			if item.GaItemHandle == handle {
 				slot.Storage.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: 0}
-				off := storageStart + i*12
+				off := storageStart + i*InvRecordLen
+				if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/storage"); err != nil {
+					return err
+				}
 				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+8:], 0)
@@ -217,18 +247,19 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 }
 
 func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) error {
+	sa := NewSlotAccessor(slot.Data)
 	var items *[]InventoryItem
 	var startOffset int
 	var maxItems int
 
 	if isStorage {
 		items = &slot.Storage.CommonItems
-		startOffset = slot.StorageBoxOffset + 4
-		maxItems = 2048
+		startOffset = slot.StorageBoxOffset + StorageHeaderSkip
+		maxItems = StorageItemCount
 	} else {
 		items = &slot.Inventory.CommonItems
-		startOffset = slot.MagicOffset + 505
-		maxItems = 0xa80
+		startOffset = slot.MagicOffset + InvStartFromMagic
+		maxItems = CommonItemCount
 	}
 
 	// Check if already in inventory (for stackable items).
@@ -237,7 +268,11 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	for i, item := range *items {
 		if item.GaItemHandle == handle {
 			(*items)[i].Quantity = qty
-			binary.LittleEndian.PutUint32(slot.Data[startOffset+i*12+4:], qty)
+			off := startOffset + i*InvRecordLen + 4
+			if err := sa.CheckBounds(off, 4, "addToInventory/update"); err != nil {
+				return err
+			}
+			binary.LittleEndian.PutUint32(slot.Data[off:], qty)
 			return nil
 		}
 	}
@@ -250,7 +285,10 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		newIdx := uint32(len(*items))
 		newItem := InventoryItem{GaItemHandle: handle, Quantity: qty, Index: newIdx}
 		*items = append(*items, newItem)
-		off := startOffset + int(newIdx)*12
+		off := startOffset + int(newIdx)*InvRecordLen
+		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/storage-append"); err != nil {
+			return err
+		}
 		binary.LittleEndian.PutUint32(slot.Data[off:], newItem.GaItemHandle)
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
@@ -258,7 +296,7 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		// Inventory is fully pre-allocated — find first empty slot (handle == 0 or 0xFFFFFFFF)
 		emptyIdx := -1
 		for i, item := range *items {
-			if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
 				emptyIdx = i
 				break
 			}
@@ -267,7 +305,10 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			return io.ErrShortBuffer // All slots occupied
 		}
 		(*items)[emptyIdx] = InventoryItem{GaItemHandle: handle, Quantity: qty, Index: uint32(emptyIdx)}
-		off := startOffset + emptyIdx*12
+		off := startOffset + emptyIdx*InvRecordLen
+		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/inv-insert"); err != nil {
+			return err
+		}
 		binary.LittleEndian.PutUint32(slot.Data[off:], handle)
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], qty)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(emptyIdx))

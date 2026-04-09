@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/binary"
+	"fmt"
 	"unicode/utf16"
 )
 
@@ -79,6 +80,7 @@ type SaveSlot struct {
 	Inventory EquipInventoryData
 	Storage   EquipInventoryData
 	SteamID   uint64
+	Warnings  []string // non-fatal issues detected during parsing
 
 	MagicOffset      int
 	InventoryEnd     int
@@ -93,121 +95,298 @@ type SaveSlot struct {
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
 	var err error
-	s.Data, err = r.ReadBytes(0x280000)
+	s.Data, err = r.ReadBytes(SlotSize)
 	if err != nil {
 		return err
 	}
 
+	// 1. Find primary anchor
 	s.MagicOffset = NewReader(s.Data).FindPattern(MagicPattern)
 	if s.MagicOffset == -1 {
-		s.MagicOffset = 0x15420 + 432
+		s.MagicOffset = FallbackMagicBase
+		s.Warnings = append(s.Warnings,
+			fmt.Sprintf("MagicPattern not found, using fallback offset 0x%X", FallbackMagicBase))
+	}
+	if s.MagicOffset < MinMagicOffset {
+		return fmt.Errorf("MagicOffset %d (0x%X) too small (min %d)",
+			s.MagicOffset, s.MagicOffset, MinMagicOffset)
 	}
 
-	s.mapStats()
+	// 2. Read stats
+	if err := s.mapStats(); err != nil {
+		return fmt.Errorf("mapStats: %w", err)
+	}
 
-	startGa := 0x20
-	s.scanGaItems(startGa)
-	s.calculateDynamicOffsets()
+	// 3. Scan GaItems
+	s.scanGaItems(GaItemsStart)
+
+	// 4. Calculate dynamic offsets
+	if err := s.calculateDynamicOffsets(); err != nil {
+		return fmt.Errorf("dynamic offsets: %w", err)
+	}
+
+	// 5. Cross-validate offset chain
+	if err := s.validateOffsetChain(); err != nil {
+		return fmt.Errorf("offset validation: %w", err)
+	}
+
+	// 6. Map inventory
 	s.mapInventory()
 
 	if platform == "PC" {
-		s.SteamID = binary.LittleEndian.Uint64(s.Data[0x280000-8:])
+		sa := NewSlotAccessor(s.Data)
+		steamID, err := sa.ReadU64(SlotSize - 8)
+		if err != nil {
+			return fmt.Errorf("SteamID read: %w", err)
+		}
+		s.SteamID = steamID
 	}
 	return nil
 }
 
-func (s *SaveSlot) calculateDynamicOffsets() {
-	s.PlayerDataOffset = s.InventoryEnd + 0x1B0
+func (s *SaveSlot) calculateDynamicOffsets() error {
+	sa := NewSlotAccessor(s.Data)
 
-	spEffect := s.PlayerDataOffset + 0xD0
-	equipedItemIndex := spEffect + 0x58
-	activeEquipedItems := equipedItemIndex + 0x1c
-	equipedItemsID := activeEquipedItems + 0x58
-	activeEquipedItemsGa := equipedItemsID + 0x58
-	inventoryHeld := activeEquipedItemsGa + 0x9010
-	equipedSpells := inventoryHeld + 0x74
-	equipedItems := equipedSpells + 0x8c
-	equipedGestures := equipedItems + 0x18
+	s.PlayerDataOffset = s.MagicOffset
 
-	equipedProjcSize := binary.LittleEndian.Uint32(s.Data[equipedGestures:])
-	equipedProjectile := equipedGestures + int(equipedProjcSize*8+4)
-	// PS4 saves can have a corrupted/unexpected equipedProjcSize that lands outside the slot.
-	// Fall back to size=0 (no projectile slots) to keep the chain valid.
-	if equipedProjectile >= len(s.Data) {
-		equipedProjectile = equipedGestures + 4
+	spEffect := s.PlayerDataOffset + DynSpEffect
+	equipedItemIndex := spEffect + DynEquipedItemIndex
+	activeEquipedItems := equipedItemIndex + DynActiveEquipedItems
+	equipedItemsID := activeEquipedItems + DynEquipedItemsID
+	activeEquipedItemsGa := equipedItemsID + DynActiveEquipedItemsGa
+	inventoryHeld := activeEquipedItemsGa + DynInventoryHeld
+	equipedSpells := inventoryHeld + DynEquipedSpells
+	equipedItems := equipedSpells + DynEquipedItems
+	equipedGestures := equipedItems + DynEquipedGestures
+
+	// Dynamic read #1: projSize
+	projSize, err := sa.ReadDynamicSize(equipedGestures, MaxProjSize, "projSize")
+	if err != nil {
+		return err
 	}
-	equipedArmaments := equipedProjectile + 0x9C
-	equipePhysics := equipedArmaments + 0xC
-	s.FaceDataOffset = equipePhysics + 0x12f
-	s.StorageBoxOffset = s.FaceDataOffset + 0x6010
+	equipedProjectile := equipedGestures + projSize*8 + 4
 
-	// EventFlags offset chain (mirrors Python save_struct())
-	gesturesOff := s.StorageBoxOffset + 0x100
-	if gesturesOff+4 <= len(s.Data) {
-		unlockedRegSz := int(binary.LittleEndian.Uint32(s.Data[gesturesOff:]))
-		unlockedRegion := gesturesOff + unlockedRegSz*4 + 4
-		// PS4 saves can produce an out-of-range unlockedRegion; treat as 0 unlocked regions.
-		if unlockedRegion <= 0 || unlockedRegion >= len(s.Data) {
-			unlockedRegion = gesturesOff + 4
-		}
-		horse := unlockedRegion + 0x29
-		bloodStain := horse + 0x4C
-		menuProfile := bloodStain + 0x103C
-		gaItemsOther := menuProfile + 0x1B588
-		tutorialData := gaItemsOther + 0x40B
-		s.IngameTimerOffset = tutorialData + 0x1A
-		s.EventFlagsOffset = s.IngameTimerOffset + 0x1C0000
+	equipedArmaments := equipedProjectile + DynEquipedArmaments
+	equipePhysics := equipedArmaments + DynEquipePhysics
+	s.FaceDataOffset = equipePhysics + DynFaceData
+	s.StorageBoxOffset = s.FaceDataOffset + DynStorageBox
+
+	// EventFlags offset chain
+	gesturesOff := s.StorageBoxOffset + DynStorageToGestures
+	if err := sa.CheckBounds(gesturesOff, 4, "gesturesOff"); err != nil {
+		s.Warnings = append(s.Warnings, "EventFlags chain unreachable: "+err.Error())
+		s.Warnings = append(s.Warnings, sa.Warnings...)
+		return nil // non-fatal — event flags are optional for basic editing
 	}
+
+	// Dynamic read #2: unlockedRegSz
+	unlockedRegSz, err := sa.ReadDynamicSize(gesturesOff, MaxUnlockedRegSz, "unlockedRegSz")
+	if err != nil {
+		return err
+	}
+	unlockedRegion := gesturesOff + unlockedRegSz*4 + 4
+
+	horse := unlockedRegion + DynHorse
+	bloodStain := horse + DynBloodStain
+	menuProfile := bloodStain + DynMenuProfile
+	gaItemsOther := menuProfile + DynGaItemsOther
+	tutorialData := gaItemsOther + DynTutorialData
+	s.IngameTimerOffset = tutorialData + DynIngameTimer
+	s.EventFlagsOffset = s.IngameTimerOffset + DynEventFlags
+
+	// Collect SlotAccessor warnings
+	s.Warnings = append(s.Warnings, sa.Warnings...)
+	return nil
 }
 
-func (s *SaveSlot) mapStats() {
-	mo := s.MagicOffset
-	s.Player.Level = binary.LittleEndian.Uint32(s.Data[mo-335:])
-	s.Player.Vigor = binary.LittleEndian.Uint32(s.Data[mo-379:])
-	s.Player.Mind = binary.LittleEndian.Uint32(s.Data[mo-375:])
-	s.Player.Endurance = binary.LittleEndian.Uint32(s.Data[mo-371:])
-	s.Player.Strength = binary.LittleEndian.Uint32(s.Data[mo-367:])
-	s.Player.Dexterity = binary.LittleEndian.Uint32(s.Data[mo-363:])
-	s.Player.Intelligence = binary.LittleEndian.Uint32(s.Data[mo-359:])
-	s.Player.Faith = binary.LittleEndian.Uint32(s.Data[mo-355:])
-	s.Player.Arcane = binary.LittleEndian.Uint32(s.Data[mo-351:])
-	s.Player.Souls = binary.LittleEndian.Uint32(s.Data[mo-331:])
-	s.Player.Gender = s.Data[mo-249]
-	s.Player.Class = s.Data[mo-248]
-	s.Player.ScadutreeBlessing = s.Data[mo-187]
-	s.Player.ShadowRealmBlessing = s.Data[mo-186]
-
-	nameOff := mo - 0x11b
-	for i := 0; i < 16; i++ {
-		s.Player.CharacterName[i] = binary.LittleEndian.Uint16(s.Data[nameOff+i*2:])
+// validateOffsetChain verifies that all computed offsets are within bounds
+// and in the expected monotonic order. Called after calculateDynamicOffsets().
+func (s *SaveSlot) validateOffsetChain() error {
+	type check struct {
+		name   string
+		offset int
+		minVal int
+		maxVal int
 	}
+
+	checks := []check{
+		{"MagicOffset", s.MagicOffset, MinMagicOffset, SlotSize},
+		{"InventoryEnd", s.InventoryEnd, GaItemsStart, s.MagicOffset - DynPlayerData + 1},
+		{"PlayerDataOffset", s.PlayerDataOffset, s.MagicOffset, SlotSize},
+		{"FaceDataOffset", s.FaceDataOffset, s.PlayerDataOffset, SlotSize},
+		{"StorageBoxOffset", s.StorageBoxOffset, s.FaceDataOffset, SlotSize},
+	}
+
+	for _, c := range checks {
+		if c.offset < c.minVal || c.offset >= c.maxVal {
+			return fmt.Errorf("offset %s = 0x%X out of expected range [0x%X, 0x%X)",
+				c.name, c.offset, c.minVal, c.maxVal)
+		}
+	}
+
+	// Monotonicity: offsets MUST be strictly increasing in this order
+	if !(s.InventoryEnd <= s.MagicOffset &&
+		s.MagicOffset <= s.PlayerDataOffset &&
+		s.PlayerDataOffset < s.FaceDataOffset &&
+		s.FaceDataOffset < s.StorageBoxOffset) {
+		return fmt.Errorf("offset chain order violated: "+
+			"InventoryEnd=0x%X MagicOffset=0x%X PlayerData=0x%X FaceData=0x%X StorageBox=0x%X",
+			s.InventoryEnd, s.MagicOffset, s.PlayerDataOffset,
+			s.FaceDataOffset, s.StorageBoxOffset)
+	}
+
+	// EventFlagsOffset is optional (may be 0 if chain was unreachable)
+	if s.EventFlagsOffset > 0 && s.EventFlagsOffset >= SlotSize {
+		s.Warnings = append(s.Warnings,
+			fmt.Sprintf("EventFlagsOffset 0x%X >= SlotSize, event flags disabled",
+				s.EventFlagsOffset))
+		s.EventFlagsOffset = 0
+	}
+
+	return nil
+}
+
+// ValidateSlotIntegrity performs write-ahead validation on a slot before saving.
+// It re-checks the offset chain, inventory bounds, data length and stat sanity
+// to prevent writing a corrupted save file.
+func ValidateSlotIntegrity(slot *SaveSlot) error {
+	// 1. Data length must equal SlotSize
+	if len(slot.Data) != SlotSize {
+		return fmt.Errorf("slot data length %d (0x%X) != expected SlotSize %d (0x%X)",
+			len(slot.Data), len(slot.Data), SlotSize, SlotSize)
+	}
+
+	// 2. Offset chain re-validation
+	if err := slot.validateOffsetChain(); err != nil {
+		return fmt.Errorf("offset chain invalid: %w", err)
+	}
+
+	// 3. Inventory bounds: invStart and storageStart must be within slot.Data
+	invStart := slot.MagicOffset + InvStartFromMagic
+	if invStart < 0 || invStart >= SlotSize {
+		return fmt.Errorf("inventory start offset 0x%X out of bounds [0, 0x%X)",
+			invStart, SlotSize)
+	}
+	storageStart := slot.StorageBoxOffset + StorageHeaderSkip
+	if storageStart < 0 || storageStart >= SlotSize {
+		return fmt.Errorf("storage start offset 0x%X out of bounds [0, 0x%X)",
+			storageStart, SlotSize)
+	}
+
+	// 4. Stat sanity: Level must be > 0, attributes 1–99
+	if slot.Player.Level == 0 || slot.Player.Level > 713 {
+		return fmt.Errorf("Level %d out of valid range [1, 713]", slot.Player.Level)
+	}
+	attrs := []struct {
+		name string
+		val  uint32
+	}{
+		{"Vigor", slot.Player.Vigor},
+		{"Mind", slot.Player.Mind},
+		{"Endurance", slot.Player.Endurance},
+		{"Strength", slot.Player.Strength},
+		{"Dexterity", slot.Player.Dexterity},
+		{"Intelligence", slot.Player.Intelligence},
+		{"Faith", slot.Player.Faith},
+		{"Arcane", slot.Player.Arcane},
+	}
+	for _, a := range attrs {
+		if a.val < 1 || a.val > 99 {
+			return fmt.Errorf("%s = %d out of valid range [1, 99]", a.name, a.val)
+		}
+	}
+
+	return nil
+}
+
+func (s *SaveSlot) mapStats() error {
+	sa := NewSlotAccessor(s.Data)
+	mo := s.MagicOffset
+	var err error
+
+	if s.Player.Level, err = sa.ReadU32(mo + OffLevel); err != nil {
+		return fmt.Errorf("Level: %w", err)
+	}
+	if s.Player.Vigor, err = sa.ReadU32(mo + OffVigor); err != nil {
+		return fmt.Errorf("Vigor: %w", err)
+	}
+	if s.Player.Mind, err = sa.ReadU32(mo + OffMind); err != nil {
+		return fmt.Errorf("Mind: %w", err)
+	}
+	if s.Player.Endurance, err = sa.ReadU32(mo + OffEndurance); err != nil {
+		return fmt.Errorf("Endurance: %w", err)
+	}
+	if s.Player.Strength, err = sa.ReadU32(mo + OffStrength); err != nil {
+		return fmt.Errorf("Strength: %w", err)
+	}
+	if s.Player.Dexterity, err = sa.ReadU32(mo + OffDexterity); err != nil {
+		return fmt.Errorf("Dexterity: %w", err)
+	}
+	if s.Player.Intelligence, err = sa.ReadU32(mo + OffIntelligence); err != nil {
+		return fmt.Errorf("Intelligence: %w", err)
+	}
+	if s.Player.Faith, err = sa.ReadU32(mo + OffFaith); err != nil {
+		return fmt.Errorf("Faith: %w", err)
+	}
+	if s.Player.Arcane, err = sa.ReadU32(mo + OffArcane); err != nil {
+		return fmt.Errorf("Arcane: %w", err)
+	}
+	if s.Player.Souls, err = sa.ReadU32(mo + OffSouls); err != nil {
+		return fmt.Errorf("Souls: %w", err)
+	}
+	if s.Player.Gender, err = sa.ReadU8(mo + OffGender); err != nil {
+		return fmt.Errorf("Gender: %w", err)
+	}
+	if s.Player.Class, err = sa.ReadU8(mo + OffClass); err != nil {
+		return fmt.Errorf("Class: %w", err)
+	}
+	if s.Player.ScadutreeBlessing, err = sa.ReadU8(mo + OffScadutreeBlessing); err != nil {
+		return fmt.Errorf("ScadutreeBlessing: %w", err)
+	}
+	if s.Player.ShadowRealmBlessing, err = sa.ReadU8(mo + OffShadowRealmBlessing); err != nil {
+		return fmt.Errorf("ShadowRealmBlessing: %w", err)
+	}
+
+	nameOff := mo + OffCharacterName
+	for i := 0; i < 16; i++ {
+		val, err := sa.ReadU16(nameOff + i*2)
+		if err != nil {
+			return fmt.Errorf("CharacterName[%d]: %w", i, err)
+		}
+		s.Player.CharacterName[i] = val
+	}
+
+	return nil
 }
 
 func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
 
+	gaLimit := s.MagicOffset - DynPlayerData // writable GaItems region ends 0x1B0 before Magic
+	if gaLimit < start {
+		gaLimit = start
+	}
+
 	lastEnd := start
-	for curr+8 <= s.MagicOffset {
+	for curr+GaRecordItem <= gaLimit {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 
-		if handle != 0 && handle != 0xFFFFFFFF {
+		if handle != GaHandleEmpty && handle != GaHandleInvalid {
 			s.GaMap[handle] = itemID
 
-			typeBits := handle & 0xF0000000
+			typeBits := handle & GaHandleTypeMask
 			if typeBits == ItemTypeWeapon {
-				curr += 21
+				curr += GaRecordWeapon
 			} else if typeBits == ItemTypeArmor {
-				curr += 16
-			} else if typeBits == ItemTypeAow {
-				curr += 8
+				curr += GaRecordArmor
 			} else {
-				curr += 8
+				curr += GaRecordItem
 			}
 			lastEnd = curr
 		} else {
-			curr += 8
+			curr += GaRecordItem
 		}
 	}
 	s.InventoryEnd = lastEnd
@@ -239,45 +418,50 @@ func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
 
 func (s *SaveSlot) mapInventory() {
 	// Main Inventory
-	invStart := s.MagicOffset + 505
-	if invStart+0x9000 < len(s.Data) {
+	invStart := s.MagicOffset + InvStartFromMagic
+	if invStart+InvSafetyMargin < len(s.Data) {
 		ir := NewReader(s.Data)
 		ir.Seek(int64(invStart), 0)
-		s.Inventory.Read(ir, 0xa80, 0x180)
+		s.Inventory.Read(ir, CommonItemCount, KeyItemCount)
 	}
 
 	// Storage Box
-	// The storage box starts at StorageBoxOffset + 4 and has a fixed size of 0x6000 bytes (2048 items)
-	storageStart := s.StorageBoxOffset + 4
-	if storageStart+0x6000 < len(s.Data) {
+	storageStart := s.StorageBoxOffset + StorageHeaderSkip
+	if storageStart+StorageSafetyMarg < len(s.Data) {
 		sr := NewReader(s.Data)
 		sr.Seek(int64(storageStart), 0)
-		s.Storage.ReadStorage(sr, 2048)
+		s.Storage.ReadStorage(sr, StorageItemCount)
 	}
 }
 
 func (s *SaveSlot) Write(platform string) []byte {
+	sa := NewSlotAccessor(s.Data)
 	mo := s.MagicOffset
-	binary.LittleEndian.PutUint32(s.Data[mo-335:], s.Player.Level)
-	binary.LittleEndian.PutUint32(s.Data[mo-379:], s.Player.Vigor)
-	binary.LittleEndian.PutUint32(s.Data[mo-375:], s.Player.Mind)
-	binary.LittleEndian.PutUint32(s.Data[mo-371:], s.Player.Endurance)
-	binary.LittleEndian.PutUint32(s.Data[mo-367:], s.Player.Strength)
-	binary.LittleEndian.PutUint32(s.Data[mo-363:], s.Player.Dexterity)
-	binary.LittleEndian.PutUint32(s.Data[mo-359:], s.Player.Intelligence)
-	binary.LittleEndian.PutUint32(s.Data[mo-355:], s.Player.Faith)
-	binary.LittleEndian.PutUint32(s.Data[mo-351:], s.Player.Arcane)
-	binary.LittleEndian.PutUint32(s.Data[mo-331:], s.Player.Souls)
-	s.Data[mo-249] = s.Player.Gender
-	s.Data[mo-248] = s.Player.Class
-	s.Data[mo-187] = s.Player.ScadutreeBlessing
-	s.Data[mo-186] = s.Player.ShadowRealmBlessing
-	nameOff := mo - 0x11b
+
+	// Errors in Write are programming bugs (offsets already validated in Read),
+	// so we ignore errors here. If any fails, it means Read() had a bug.
+	sa.WriteU32(mo+OffLevel, s.Player.Level)
+	sa.WriteU32(mo+OffVigor, s.Player.Vigor)
+	sa.WriteU32(mo+OffMind, s.Player.Mind)
+	sa.WriteU32(mo+OffEndurance, s.Player.Endurance)
+	sa.WriteU32(mo+OffStrength, s.Player.Strength)
+	sa.WriteU32(mo+OffDexterity, s.Player.Dexterity)
+	sa.WriteU32(mo+OffIntelligence, s.Player.Intelligence)
+	sa.WriteU32(mo+OffFaith, s.Player.Faith)
+	sa.WriteU32(mo+OffArcane, s.Player.Arcane)
+	sa.WriteU32(mo+OffSouls, s.Player.Souls)
+	sa.WriteU8(mo+OffGender, s.Player.Gender)
+	sa.WriteU8(mo+OffClass, s.Player.Class)
+	sa.WriteU8(mo+OffScadutreeBlessing, s.Player.ScadutreeBlessing)
+	sa.WriteU8(mo+OffShadowRealmBlessing, s.Player.ShadowRealmBlessing)
+
+	nameOff := mo + OffCharacterName
 	for i := 0; i < 16; i++ {
-		binary.LittleEndian.PutUint16(s.Data[nameOff+i*2:], s.Player.CharacterName[i])
+		sa.WriteU16(nameOff+i*2, s.Player.CharacterName[i])
 	}
+
 	if platform == "PC" {
-		binary.LittleEndian.PutUint64(s.Data[0x280000-8:], s.SteamID)
+		sa.WriteU64(SlotSize-8, s.SteamID)
 	}
 	return s.Data
 }

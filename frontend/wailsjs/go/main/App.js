@@ -42,6 +42,14 @@ export function GetItemList(arg1) {
   return window['go']['main']['App']['GetItemList'](arg1);
 }
 
+export function GetSaveDiffSummary() {
+  return window['go']['main']['App']['GetSaveDiffSummary']();
+}
+
+export function GetSlotDiff(arg1) {
+  return window['go']['main']['App']['GetSlotDiff'](arg1);
+}
+
 export function GetSourceActiveSlots() {
   return window['go']['main']['App']['GetSourceActiveSlots']();
 }
@@ -54,12 +62,20 @@ export function GetSteamIDString() {
   return window['go']['main']['App']['GetSteamIDString']();
 }
 
+export function GetUndoDepth(arg1) {
+  return window['go']['main']['App']['GetUndoDepth'](arg1);
+}
+
 export function ImportCharacter(arg1, arg2) {
   return window['go']['main']['App']['ImportCharacter'](arg1, arg2);
 }
 
 export function RemoveItemsFromCharacter(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['RemoveItemsFromCharacter'](arg1, arg2, arg3, arg4);
+}
+
+export function RevertSlot(arg1) {
+  return window['go']['main']['App']['RevertSlot'](arg1);
 }
 
 export function SaveCharacter(arg1, arg2) {

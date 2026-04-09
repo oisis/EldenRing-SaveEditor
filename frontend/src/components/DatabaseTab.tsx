@@ -1,4 +1,6 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo, useRef} from 'react';
+import toast from 'react-hot-toast';
+import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
@@ -63,10 +65,13 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         GetItemList(category).then(res => {
             setDbItems(res || []);
             setLoading(false);
-        }).catch(() => setLoading(false));
+        }).catch(err => {
+            console.error("Failed to load items:", err);
+            setLoading(false);
+        });
     }, [category]);
 
-    const filteredItems = dbItems.filter(item => {
+    const filteredItems = useMemo(() => dbItems.filter(item => {
         if (!showFlaggedItems && item.flags?.length > 0) return false;
         return item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
@@ -76,7 +81,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
         return 0;
-    });
+    }), [dbItems, search, sortCol, sortDir, showFlaggedItems]);
 
     const handleSort = (col: string) => {
         if (sortCol === col) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -127,7 +132,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
             setSelectedDbItems(new Set());
             onItemsAdded?.();
         } catch (err) {
-            alert('Failed to add items: ' + err);
+            toast.error('Failed to add items: ' + err);
         } finally {
             setIsSaving(false);
         }
@@ -148,6 +153,14 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     };
 
     const selectedInfuseName = infuseTypes.find(t => t.offset === infuseOffset)?.name ?? 'Standard';
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const rowVirtualizer = useVirtualizer({
+        count: filteredItems.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => 52,
+        overscan: 20,
+    });
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
@@ -327,7 +340,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                     </div>
                 )}
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead className="sticky top-0 z-20 bg-muted/80 backdrop-blur-md border-b border-border shadow-sm">
                             <tr className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground">
@@ -357,7 +370,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
-                            {filteredItems.map(item => {
+                            {rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getVirtualItems()[0].start > 0 && (
+                                <tr><td colSpan={5} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
+                            )}
+                            {rowVirtualizer.getVirtualItems().map(virtualRow => {
+                                const item = filteredItems[virtualRow.index];
                                 const isUpgradeable = item.maxUpgrade > 0;
                                 const isAsh = item.category === 'ashes';
                                 const hasInfuse = item.maxUpgrade === 25 && infuseOffset !== 0;
@@ -368,7 +385,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 if (levelVal > 0) previewParts.push(`+${levelVal}`);
 
                                 return (
-                                    <tr key={item.id} className={`group hover:bg-primary/[0.03] transition-colors ${selectedDbItems.has(item.id) ? 'bg-primary/[0.02]' : ''}`}>
+                                    <tr key={item.id} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.03] transition-colors ${selectedDbItems.has(item.id) ? 'bg-primary/[0.02]' : ''}`}>
                                         <td className="p-4">
                                             <div
                                                 onClick={() => toggleItem(item.id)}
@@ -430,6 +447,13 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                     </tr>
                                 );
                             })}
+                            {(() => {
+                                const virtualItems = rowVirtualizer.getVirtualItems();
+                                const paddingBottom = virtualItems.length > 0
+                                    ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
+                                    : 0;
+                                return paddingBottom > 0 ? <tr><td colSpan={5} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
+                            })()}
                         </tbody>
                     </table>
                 </div>

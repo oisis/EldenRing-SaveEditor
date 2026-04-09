@@ -1,0 +1,103 @@
+package core
+
+// SlotSize is the fixed size of each save slot in bytes (2,621,440 = 0x280000).
+// Source: SPEC.md §3.1 BND4 Container.
+const SlotSize = 0x280000
+
+// FallbackMagicBase is the hardcoded base used when MagicPattern is not found.
+const FallbackMagicBase = 0x15420 + 432
+
+// Offsets relative to MagicOffset (negative = before the pattern).
+// Source: SPEC.md §5.2 PlayerGameData.
+const (
+	OffLevel               = -335
+	OffVigor               = -379
+	OffMind                = -375
+	OffEndurance           = -371
+	OffStrength            = -367
+	OffDexterity           = -363
+	OffIntelligence        = -359
+	OffFaith               = -355
+	OffArcane              = -351
+	OffSouls               = -331
+	OffGender              = -249
+	OffClass               = -248
+	OffScadutreeBlessing   = -187
+	OffShadowRealmBlessing = -186
+	OffCharacterName       = -0x11B // 16 x uint16 UTF-16LE
+
+	// MagicOffset must be at least this value; otherwise negative stat offsets
+	// would access memory before the start of the slot buffer.
+	MinMagicOffset = 400 // abs(OffVigor) + margin
+)
+
+// GaItems section.
+// Source: SPEC.md §5.3 GaItems.
+const (
+	GaItemsStart = 0x20 // scan starts here
+)
+
+// GaItem record sizes by handle type prefix (upper nibble).
+// Source: SPEC.md §5.3 GaItems.
+const (
+	GaRecordWeapon    = 21
+	GaRecordArmor     = 16
+	GaRecordAccessory = 8
+	GaRecordItem      = 8
+	GaRecordAoW       = 8
+)
+
+// GaItem handle constants.
+const (
+	GaHandleEmpty    = 0x00000000
+	GaHandleInvalid  = 0xFFFFFFFF
+	GaHandleTypeMask = 0xF0000000 // upper nibble = item type
+	GaHandleBase     = 0x00010000 // base value for generated handles
+)
+
+// Inventory layout (relative to MagicOffset).
+// Source: SPEC.md §5.4 Dynamic Offsets.
+const (
+	InvStartFromMagic = 505       // MagicOffset + 505
+	CommonItemCount   = 0xA80     // 2688 common item slots
+	KeyItemCount      = 0x180     // 384 key item slots
+	StorageItemCount  = 2048      // storage box capacity
+	InvRecordLen      = 12        // bytes per inventory record (handle + qty + index)
+	InvSafetyMargin   = 0x9000    // max distance from invStart to validate section
+	StorageSafetyMarg = 0x6000    // max distance from storageStart to validate section
+	StorageHeaderSkip = 4         // skip 4-byte header at StorageBoxOffset
+)
+
+// Dynamic offset chain constants (relative to InventoryEnd).
+// Source: SPEC.md §5.4 Dynamic Offsets.
+const (
+	DynPlayerData           = 0x1B0
+	DynSpEffect             = 0xD0
+	DynEquipedItemIndex     = 0x58
+	DynActiveEquipedItems   = 0x1C
+	DynEquipedItemsID       = 0x58
+	DynActiveEquipedItemsGa = 0x58
+	DynInventoryHeld        = 0x9010
+	DynEquipedSpells        = 0x74
+	DynEquipedItems         = 0x8C
+	DynEquipedGestures      = 0x18
+	DynEquipedArmaments     = 0x9C
+	DynEquipePhysics        = 0x0C
+	DynFaceData             = 0x12F
+	DynStorageBox           = 0x6010
+	DynStorageToGestures    = 0x100
+	DynHorse                = 0x29
+	DynBloodStain           = 0x4C
+	DynMenuProfile          = 0x103C
+	DynGaItemsOther         = 0x1B588
+	DynTutorialData         = 0x40B
+	DynIngameTimer          = 0x1A
+	DynEventFlags           = 0x1C0000
+)
+
+// Sanity limits for dynamic size reads from untrusted save data.
+const (
+	MaxProjSize       = 256   // max projectile slots (read from save, PS4 can have garbage)
+	MaxUnlockedRegSz  = 1024  // max unlocked region entries
+	MaxHandleAttempts = 10000 // max iterations for generateUniqueHandle
+)

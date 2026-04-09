@@ -317,8 +317,6 @@ var Shields = map[uint32]ItemData{
 	0x01EBA360: {Name: "Ant's Skull Plate", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/ants_skull_plate.png"},
 	0x81EBA360: {Name: "Ant's Skull Plate", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/ants_skull_plate.png"},
 	// Torches (left-hand slot, categorized with shields)
-	0x00F55C80: {Name: "Torchpole", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/torchpole.png"},
-	0x80F55C80: {Name: "Torchpole", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/torchpole.png"},
 	0x016E3600: {Name: "Torch", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/torch.png"},
 	0x816E3600: {Name: "Torch", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/torch.png"},
 	0x016E8420: {Name: "Steel-Wire Torch", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/steel_wire_torch.png"},

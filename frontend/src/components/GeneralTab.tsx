@@ -1,4 +1,5 @@
 import {useEffect, useState} from 'react';
+import toast from 'react-hot-toast';
 import {GetCharacter, SaveCharacter, GetInfuseTypes} from '../../wailsjs/go/main/App';
 import {vm, db} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
@@ -62,10 +63,10 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
         if (char) {
             SaveCharacter(charIndex, char)
                 .then(() => {
-                    alert('Character data updated in memory');
+                    toast.success('Character data updated in memory');
                     onNameChange?.();
                 })
-                .catch(err => alert('Error: ' + err));
+                .catch(err => toast.error('Error: ' + err));
         }
     };
 

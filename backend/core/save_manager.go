@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 // ps4HeaderTemplate is the canonical 0x70-byte PS4 save header.
@@ -102,10 +103,16 @@ type SaveFile struct {
 	UserData11       []byte
 }
 
+// MinSaveFileSize is the minimum valid save file size: 10 slots × 0x280000 + UserData10 (0x60000).
+const MinSaveFileSize = 10*SlotSize + 0x60000
+
 func LoadSave(path string) (*SaveFile, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+	if len(data) < MinSaveFileSize {
+		return nil, fmt.Errorf("file too small (%d bytes, minimum %d) — not a valid save", len(data), MinSaveFileSize)
 	}
 
 	save := &SaveFile{}
@@ -129,11 +136,17 @@ func LoadSave(path string) (*SaveFile, error) {
 }
 
 func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	save.Header, _ = r.ReadBytes(0x300)
+	var err error
+	save.Header, err = r.ReadBytes(0x300)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PC header: %w", err)
+	}
 
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
-		r.ReadBytes(0x10) // MD5
+		if _, err := r.ReadBytes(0x10); err != nil {
+			return nil, fmt.Errorf("failed to read MD5 for slot %d: %w", i, err)
+		}
 		if err := save.Slots[i].Read(r, "PC"); err != nil {
 			fmt.Printf("Warning: failed to parse slot %d: %v\n", i, err)
 		}
@@ -142,18 +155,29 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 	// UserData10
 	udStart := r.Pos()
-	r.ReadBytes(0x10) // MD5
-	save.UserData10.Data, _ = r.ReadBytes(0x60000)
+	if _, err := r.ReadBytes(0x10); err != nil {
+		return nil, fmt.Errorf("failed to read UserData10 MD5: %w", err)
+	}
+	save.UserData10.Data, err = r.ReadBytes(0x60000)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read UserData10: %w", err)
+	}
 
 	udReader := NewReader(save.UserData10.Data)
 
 	// SteamID is at the beginning of UserData10 data on PC
-	save.SteamID, _ = udReader.ReadU64()
+	save.SteamID, err = udReader.ReadU64()
+	if err != nil {
+		return nil, fmt.Errorf("failed to read SteamID: %w", err)
+	}
 
 	// Active Slots are at 0x310
 	udReader.Seek(0x310, 0)
 	for i := 0; i < 10; i++ {
-		b, _ := udReader.ReadU8()
+		b, err := udReader.ReadU8()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read ActiveSlot %d: %w", i, err)
+		}
 		save.ActiveSlots[i] = b == 1
 	}
 
@@ -166,14 +190,21 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	r.Seek(int64(udStart+0x10+0x60000), 0)
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
-		save.UserData11, _ = r.ReadBytes(int(remaining))
+		save.UserData11, err = r.ReadBytes(int(remaining))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read UserData11: %w", err)
+		}
 	}
 
 	return save, nil
 }
 
 func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	save.Header, _ = r.ReadBytes(0x70)
+	var err error
+	save.Header, err = r.ReadBytes(0x70)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PS4 header: %w", err)
+	}
 
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
@@ -183,13 +214,19 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		r.Seek(int64(slotStart+0x280000), 0)
 	}
 
-	save.UserData10.Data, _ = r.ReadBytes(0x60000)
+	save.UserData10.Data, err = r.ReadBytes(0x60000)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PS4 UserData10: %w", err)
+	}
 	udReader := NewReader(save.UserData10.Data)
 
 	// PS4: Active Slots are at 0x300, Summaries at 0x30A
 	udReader.Seek(0x300, 0)
 	for i := 0; i < 10; i++ {
-		b, _ := udReader.ReadU8()
+		b, err := udReader.ReadU8()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read PS4 ActiveSlot %d: %w", i, err)
+		}
 		save.ActiveSlots[i] = b == 1
 	}
 	for i := 0; i < 10; i++ {
@@ -198,7 +235,10 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
-		save.UserData11, _ = r.ReadBytes(int(remaining))
+		save.UserData11, err = r.ReadBytes(int(remaining))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read PS4 UserData11: %w", err)
+		}
 	}
 
 	return save, nil
@@ -234,6 +274,16 @@ func (s *SaveFile) flushMetadata() {
 }
 
 func (s *SaveFile) SaveFile(path string) error {
+	// Write-ahead validation: check all active slots before writing anything.
+	for i := 0; i < 10; i++ {
+		if !s.ActiveSlots[i] {
+			continue
+		}
+		if err := ValidateSlotIntegrity(&s.Slots[i]); err != nil {
+			return fmt.Errorf("slot %d integrity check failed: %w", i, err)
+		}
+	}
+
 	s.flushMetadata()
 
 	// Resolve the header for the target platform, handling cross-platform conversions.
@@ -286,15 +336,20 @@ func (s *SaveFile) SaveFile(path string) error {
 	}
 
 	// Atomic write: write to a temp file first, then rename into place.
-	// os.Rename is atomic on POSIX — prevents partial writes from corrupting the target.
+	// On failure, preserve .tmp — it contains the user's data.
 	tmpPath := path + ".tmp"
 	if err := os.WriteFile(tmpPath, finalData, 0644); err != nil {
-		os.Remove(tmpPath)
 		return fmt.Errorf("failed to write save data: %w", err)
 	}
+
+	// Windows: os.Rename cannot overwrite an existing file — remove target first.
+	if runtime.GOOS == "windows" {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("cannot remove old file for atomic write: %w (new data preserved in %s)", err, tmpPath)
+		}
+	}
 	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("failed to finalize save file: %w", err)
+		return fmt.Errorf("rename failed: %w (new data preserved in %s)", err, tmpPath)
 	}
 	return nil
 }

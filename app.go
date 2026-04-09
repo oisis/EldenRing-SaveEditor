@@ -13,11 +13,31 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+const maxUndoDepth = 5
+
+// slotSnapshot holds a deep copy of a SaveSlot for undo purposes.
+type slotSnapshot struct {
+	Data              []byte
+	Player            core.PlayerGameData
+	GaMap             map[uint32]uint32
+	Inventory         core.EquipInventoryData
+	Storage           core.EquipInventoryData
+	Warnings          []string
+	MagicOffset       int
+	InventoryEnd      int
+	EventFlagsOffset  int
+	PlayerDataOffset  int
+	FaceDataOffset    int
+	StorageBoxOffset  int
+	IngameTimerOffset int
+}
+
 // App struct
 type App struct {
 	ctx        context.Context
 	save       *core.SaveFile
 	sourceSave *core.SaveFile
+	undoStacks [10][]slotSnapshot
 }
 
 // NewApp creates a new App struct
@@ -52,6 +72,7 @@ func (a *App) SelectAndOpenSave() (string, error) {
 		return "", err
 	}
 	a.save = save
+	a.clearAllUndoStacks()
 	return string(save.Platform), nil
 }
 
@@ -100,6 +121,8 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 	if index < 0 || index >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
+
+	a.pushUndo(index)
 
 	// 1. Update the slot data
 	if err := vm.ApplyVMToParsedSlot(&charVM, &a.save.Slots[index]); err != nil {
@@ -158,7 +181,11 @@ func (a *App) WriteSave(platform string) error {
 		a.save.Encrypted = false
 	}
 
-	return a.save.SaveFile(path)
+	if err := a.save.SaveFile(path); err != nil {
+		return err
+	}
+	a.clearAllUndoStacks()
+	return nil
 }
 
 // GetItemList returns a list of items for a given category, filtered by the loaded save's platform.
@@ -184,6 +211,8 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		return fmt.Errorf("invalid character index")
 	}
 
+	a.pushUndo(charIdx)
+
 	slot := &a.save.Slots[charIdx]
 
 	for _, id := range itemIDs {
@@ -202,7 +231,7 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		actualInv := resolveQty(invQty, int(itemData.MaxInventory))
 		actualStorage := resolveQty(storageQty, int(itemData.MaxStorage))
 
-		// Arrows/bolts are stackable despite weapon-like 0x82... IDs.
+		// Arrows/bolts are stackable despite weapon-like IDs (0x02.../0x03...).
 		forceStackable := db.IsArrowID(finalID)
 
 		if err := core.AddItemsToSlot(slot, []uint32{finalID}, actualInv, actualStorage, forceStackable); err != nil {
@@ -220,6 +249,8 @@ func (a *App) RemoveItemsFromCharacter(charIdx int, handles []uint32, fromInvent
 	if charIdx < 0 || charIdx >= 10 {
 		return fmt.Errorf("invalid character index")
 	}
+	a.pushUndo(charIdx)
+
 	slot := &a.save.Slots[charIdx]
 	for _, handle := range handles {
 		if err := core.RemoveItemFromSlot(slot, handle, fromInventory, fromStorage); err != nil {
@@ -269,7 +300,12 @@ func (a *App) GetGraces(slotIndex int) ([]db.GraceEntry, error) {
 	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
 		flags := slot.Data[slot.EventFlagsOffset:]
 		for i := range graces {
-			graces[i].Visited = db.GetEventFlag(flags, graces[i].ID)
+			visited, err := db.GetEventFlag(flags, graces[i].ID)
+			if err != nil {
+				fmt.Printf("Warning: grace %d (%s): %v\n", graces[i].ID, graces[i].Name, err)
+				continue
+			}
+			graces[i].Visited = visited
 		}
 	}
 
@@ -285,13 +321,17 @@ func (a *App) SetGraceVisited(slotIndex int, graceID uint32, visited bool) error
 		return fmt.Errorf("invalid slot index")
 	}
 
+	a.pushUndo(slotIndex)
+
 	slot := &a.save.Slots[slotIndex]
 	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
 		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
 	}
 
 	flags := slot.Data[slot.EventFlagsOffset:]
-	db.SetEventFlag(flags, graceID, visited)
+	if err := db.SetEventFlag(flags, graceID, visited); err != nil {
+		return fmt.Errorf("failed to set grace %d: %w", graceID, err)
+	}
 	return nil
 }
 
@@ -319,6 +359,8 @@ func (a *App) CloneSlot(srcIdx, destIdx int) error {
 	if destName != "" {
 		return fmt.Errorf("destination slot %d is not empty", destIdx)
 	}
+
+	a.pushUndo(destIdx)
 
 	src := a.save.Slots[srcIdx]
 
@@ -352,6 +394,11 @@ func (a *App) DeleteSlot(idx int) error {
 	name := core.UTF16ToString(a.save.Slots[idx].Player.CharacterName[:])
 	if name == "" {
 		return fmt.Errorf("slot %d is already empty", idx)
+	}
+
+	// Snapshot all affected slots (idx..9) since delete shifts them down
+	for i := idx; i < 10; i++ {
+		a.pushUndo(i)
 	}
 
 	for i := idx; i < 9; i++ {
@@ -467,7 +514,336 @@ func (a *App) SetSteamIDFromString(s string) error {
 	return nil
 }
 
+// pushUndo takes a deep-copy snapshot of the given slot and pushes it onto the undo stack.
+func (a *App) pushUndo(idx int) {
+	slot := &a.save.Slots[idx]
+
+	// Deep copy Data
+	dataCopy := make([]byte, len(slot.Data))
+	copy(dataCopy, slot.Data)
+
+	// Deep copy GaMap
+	gaMapCopy := make(map[uint32]uint32, len(slot.GaMap))
+	for k, v := range slot.GaMap {
+		gaMapCopy[k] = v
+	}
+
+	// Deep copy Inventory CommonItems & KeyItems
+	invCommon := make([]core.InventoryItem, len(slot.Inventory.CommonItems))
+	copy(invCommon, slot.Inventory.CommonItems)
+	invKey := make([]core.InventoryItem, len(slot.Inventory.KeyItems))
+	copy(invKey, slot.Inventory.KeyItems)
+
+	// Deep copy Storage CommonItems & KeyItems
+	storCommon := make([]core.InventoryItem, len(slot.Storage.CommonItems))
+	copy(storCommon, slot.Storage.CommonItems)
+	storKey := make([]core.InventoryItem, len(slot.Storage.KeyItems))
+	copy(storKey, slot.Storage.KeyItems)
+
+	snap := slotSnapshot{
+		Data:   dataCopy,
+		Player: slot.Player,
+		GaMap:  gaMapCopy,
+		Inventory: core.EquipInventoryData{
+			CommonItems: invCommon,
+			KeyItems:    invKey,
+		},
+		Storage: core.EquipInventoryData{
+			CommonItems: storCommon,
+			KeyItems:    storKey,
+		},
+		Warnings:          append([]string{}, slot.Warnings...),
+		MagicOffset:       slot.MagicOffset,
+		InventoryEnd:      slot.InventoryEnd,
+		EventFlagsOffset:  slot.EventFlagsOffset,
+		PlayerDataOffset:  slot.PlayerDataOffset,
+		FaceDataOffset:    slot.FaceDataOffset,
+		StorageBoxOffset:  slot.StorageBoxOffset,
+		IngameTimerOffset: slot.IngameTimerOffset,
+	}
+
+	stack := a.undoStacks[idx]
+	if len(stack) >= maxUndoDepth {
+		stack = stack[1:] // drop oldest
+	}
+	a.undoStacks[idx] = append(stack, snap)
+}
+
+// RevertSlot pops the last snapshot from the undo stack and restores the slot.
+func (a *App) RevertSlot(idx int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if idx < 0 || idx >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	stack := a.undoStacks[idx]
+	if len(stack) == 0 {
+		return fmt.Errorf("nothing to undo for slot %d", idx)
+	}
+
+	snap := stack[len(stack)-1]
+	a.undoStacks[idx] = stack[:len(stack)-1]
+
+	slot := &a.save.Slots[idx]
+	slot.Data = snap.Data
+	slot.Player = snap.Player
+	slot.GaMap = snap.GaMap
+	slot.Inventory = snap.Inventory
+	slot.Storage = snap.Storage
+	slot.Warnings = snap.Warnings
+	slot.MagicOffset = snap.MagicOffset
+	slot.InventoryEnd = snap.InventoryEnd
+	slot.EventFlagsOffset = snap.EventFlagsOffset
+	slot.PlayerDataOffset = snap.PlayerDataOffset
+	slot.FaceDataOffset = snap.FaceDataOffset
+	slot.StorageBoxOffset = snap.StorageBoxOffset
+	slot.IngameTimerOffset = snap.IngameTimerOffset
+
+	return nil
+}
+
+// GetUndoDepth returns the number of undo snapshots available for a slot.
+func (a *App) GetUndoDepth(idx int) int {
+	if a.save == nil || idx < 0 || idx >= 10 {
+		return 0
+	}
+	return len(a.undoStacks[idx])
+}
+
+// clearAllUndoStacks resets all undo history (called on file load/save).
+func (a *App) clearAllUndoStacks() {
+	for i := range a.undoStacks {
+		a.undoStacks[i] = nil
+	}
+}
+
+// ---------- 21.4 Save file diffing ----------
+
+// DiffEntry represents a single change between original and current save state.
+type DiffEntry struct {
+	Category string `json:"category"` // "stat", "item", "storage", "grace"
+	Action   string `json:"action"`   // "changed", "added", "removed"
+	Field    string `json:"field"`    // field or item name
+	OldValue string `json:"oldValue"`
+	NewValue string `json:"newValue"`
+}
+
+// SlotDiffSummary is a quick overview for one slot.
+type SlotDiffSummary struct {
+	SlotIndex  int    `json:"slotIndex"`
+	CharName   string `json:"charName"`
+	ChangeCount int   `json:"changeCount"`
+}
+
+// GetSlotDiff compares the current state of a slot against the original loaded state.
+func (a *App) GetSlotDiff(idx int) ([]DiffEntry, error) {
+	if a.save == nil || a.sourceSave == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if idx < 0 || idx >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	cur := &a.save.Slots[idx]
+	orig := &a.sourceSave.Slots[idx]
+	var diffs []DiffEntry
+
+	// --- Stats ---
+	type statField struct {
+		name string
+		cur  uint32
+		orig uint32
+	}
+	stats := []statField{
+		{"Level", cur.Player.Level, orig.Player.Level},
+		{"Vigor", cur.Player.Vigor, orig.Player.Vigor},
+		{"Mind", cur.Player.Mind, orig.Player.Mind},
+		{"Endurance", cur.Player.Endurance, orig.Player.Endurance},
+		{"Strength", cur.Player.Strength, orig.Player.Strength},
+		{"Dexterity", cur.Player.Dexterity, orig.Player.Dexterity},
+		{"Intelligence", cur.Player.Intelligence, orig.Player.Intelligence},
+		{"Faith", cur.Player.Faith, orig.Player.Faith},
+		{"Arcane", cur.Player.Arcane, orig.Player.Arcane},
+		{"Souls", cur.Player.Souls, orig.Player.Souls},
+	}
+	for _, s := range stats {
+		if s.cur != s.orig {
+			diffs = append(diffs, DiffEntry{
+				Category: "stat",
+				Action:   "changed",
+				Field:    s.name,
+				OldValue: strconv.FormatUint(uint64(s.orig), 10),
+				NewValue: strconv.FormatUint(uint64(s.cur), 10),
+			})
+		}
+	}
+
+	curName := core.UTF16ToString(cur.Player.CharacterName[:])
+	origName := core.UTF16ToString(orig.Player.CharacterName[:])
+	if curName != origName {
+		diffs = append(diffs, DiffEntry{
+			Category: "stat",
+			Action:   "changed",
+			Field:    "Name",
+			OldValue: origName,
+			NewValue: curName,
+		})
+	}
+
+	// --- Inventory diff ---
+	diffs = append(diffs, diffInventory("item", cur.Inventory, orig.Inventory)...)
+
+	// --- Storage diff ---
+	diffs = append(diffs, diffInventory("storage", cur.Storage, orig.Storage)...)
+
+	// --- Graces diff ---
+	diffs = append(diffs, a.diffGraces(idx)...)
+
+	return diffs, nil
+}
+
+// diffInventory compares two EquipInventoryData and returns DiffEntries.
+func diffInventory(category string, cur, orig core.EquipInventoryData) []DiffEntry {
+	var diffs []DiffEntry
+
+	// Build maps: GaItemHandle → item for quick lookup
+	type itemInfo struct {
+		qty   uint32
+		name  string
+	}
+	buildMap := func(items []core.InventoryItem) map[uint32]itemInfo {
+		m := make(map[uint32]itemInfo, len(items))
+		for _, it := range items {
+			if it.GaItemHandle == 0 {
+				continue
+			}
+			name := resolveItemName(it.GaItemHandle)
+			existing, ok := m[it.GaItemHandle]
+			if ok {
+				existing.qty += it.Quantity
+				m[it.GaItemHandle] = existing
+			} else {
+				m[it.GaItemHandle] = itemInfo{qty: it.Quantity, name: name}
+			}
+		}
+		return m
+	}
+
+	origAll := append(orig.CommonItems, orig.KeyItems...)
+	curAll := append(cur.CommonItems, cur.KeyItems...)
+	origMap := buildMap(origAll)
+	curMap := buildMap(curAll)
+
+	// Added or changed
+	for handle, ci := range curMap {
+		oi, existed := origMap[handle]
+		if !existed {
+			diffs = append(diffs, DiffEntry{
+				Category: category,
+				Action:   "added",
+				Field:    ci.name,
+				NewValue: "×" + strconv.FormatUint(uint64(ci.qty), 10),
+			})
+		} else if ci.qty != oi.qty {
+			diffs = append(diffs, DiffEntry{
+				Category: category,
+				Action:   "changed",
+				Field:    ci.name,
+				OldValue: "×" + strconv.FormatUint(uint64(oi.qty), 10),
+				NewValue: "×" + strconv.FormatUint(uint64(ci.qty), 10),
+			})
+		}
+	}
+
+	// Removed
+	for handle, oi := range origMap {
+		if _, exists := curMap[handle]; !exists {
+			diffs = append(diffs, DiffEntry{
+				Category: category,
+				Action:   "removed",
+				Field:    oi.name,
+				OldValue: "×" + strconv.FormatUint(uint64(oi.qty), 10),
+			})
+		}
+	}
+
+	return diffs
+}
+
+// resolveItemName tries to get a human-readable name for an inventory item handle.
+func resolveItemName(gaItemHandle uint32) string {
+	entry, _ := db.GetItemDataFuzzy(gaItemHandle)
+	if entry.Name != "" {
+		return entry.Name
+	}
+	return fmt.Sprintf("Item 0x%X", gaItemHandle)
+}
+
+// diffGraces compares grace event flags between source and current save.
+func (a *App) diffGraces(idx int) []DiffEntry {
+	cur := &a.save.Slots[idx]
+	orig := &a.sourceSave.Slots[idx]
+
+	if cur.EventFlagsOffset <= 0 || orig.EventFlagsOffset <= 0 {
+		return nil
+	}
+	if cur.EventFlagsOffset >= len(cur.Data) || orig.EventFlagsOffset >= len(orig.Data) {
+		return nil
+	}
+
+	curFlags := cur.Data[cur.EventFlagsOffset:]
+	origFlags := orig.Data[orig.EventFlagsOffset:]
+	graces := db.GetAllGraces()
+
+	var diffs []DiffEntry
+	for _, g := range graces {
+		curVisited, err1 := db.GetEventFlag(curFlags, g.ID)
+		origVisited, err2 := db.GetEventFlag(origFlags, g.ID)
+		if err1 != nil || err2 != nil {
+			continue
+		}
+		if curVisited != origVisited {
+			action := "added"
+			if !curVisited {
+				action = "removed"
+			}
+			diffs = append(diffs, DiffEntry{
+				Category: "grace",
+				Action:   action,
+				Field:    g.Name,
+			})
+		}
+	}
+	return diffs
+}
+
+// GetSaveDiffSummary returns a quick change-count overview for all active slots.
+func (a *App) GetSaveDiffSummary() ([]SlotDiffSummary, error) {
+	if a.save == nil || a.sourceSave == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+
+	var summaries []SlotDiffSummary
+	for i := 0; i < 10; i++ {
+		if !a.save.ActiveSlots[i] {
+			continue
+		}
+		diffs, err := a.GetSlotDiff(i)
+		if err != nil {
+			continue
+		}
+		name := core.UTF16ToString(a.save.Slots[i].Player.CharacterName[:])
+		summaries = append(summaries, SlotDiffSummary{
+			SlotIndex:   i,
+			CharName:    name,
+			ChangeCount: len(diffs),
+		})
+	}
+	return summaries, nil
+}
+
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.ItemEntry) {
-	return db.GraceEntry{}, db.ItemEntry{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.ItemEntry, DiffEntry, SlotDiffSummary) {
+	return db.GraceEntry{}, db.ItemEntry{}, DiffEntry{}, SlotDiffSummary{}
 }

@@ -1,10 +1,11 @@
 package vm
 
 import (
-	"encoding/binary"
+	"fmt"
+	"unicode/utf16"
+
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
-	"unicode/utf16"
 )
 
 type ItemViewModel struct {
@@ -38,6 +39,8 @@ type CharacterViewModel struct {
 	ShadowRealmBlessing uint8           `json:"shadowRealmBlessing"`
 	Inventory           []ItemViewModel `json:"inventory"`
 	Storage             []ItemViewModel `json:"storage"`
+	Warnings            []string        `json:"warnings"`
+	EventFlagsAvailable bool            `json:"eventFlagsAvailable"`
 }
 
 func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
@@ -60,6 +63,8 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	}
 
 	vm.Name = core.UTF16ToString(data.CharacterName[:])
+	vm.Warnings = slot.Warnings
+	vm.EventFlagsAvailable = slot.EventFlagsOffset > 0
 
 	// Map Inventory
 	vm.Inventory = mapItems(slot.Inventory, slot.GaMap)
@@ -86,8 +91,10 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			// For Weapons, Armor, and AoW, we MUST use the GaMap to find the real ItemID.
 			itemID, ok = gaMap[item.GaItemHandle]
 		} else if category != "Unknown" {
-			// For others (Talisman, Item), the handle IS the ID.
-			itemID = item.GaItemHandle
+			// For stackable items (Talisman=0xA0, Goods=0xB0), handle encodes the item ID
+			// with handle prefix. Convert back to DB-compatible item ID prefix:
+			// 0xA0→0x20 (talisman), 0xB0→0x40 (goods).
+			itemID = db.HandleToItemID(item.GaItemHandle)
 			ok = true
 		}
 
@@ -176,15 +183,22 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	}
 
 	// Update Inventory (with write-back to slot.Data)
-	updateItemsAndSync(vm.Inventory, &slot.Inventory, slot, false)
+	if err := updateItemsAndSync(vm.Inventory, &slot.Inventory, slot, false); err != nil {
+		return fmt.Errorf("inventory sync failed: %w", err)
+	}
 
 	// Update Storage (with write-back to slot.Data)
-	updateItemsAndSync(vm.Storage, &slot.Storage, slot, true)
+	if err := updateItemsAndSync(vm.Storage, &slot.Storage, slot, true); err != nil {
+		return fmt.Errorf("storage sync failed: %w", err)
+	}
 
 	return nil
 }
 
-func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, slot *core.SaveSlot, isStorage bool) {
+// updateItemsAndSync writes quantity changes from VM items back to slot.Data.
+// It operates on a snapshot of slot.Data: if any write fails, the original is preserved (rollback).
+// Uses SlotAccessor for bounds-checked writes instead of raw binary.LittleEndian.
+func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, slot *core.SaveSlot, isStorage bool) error {
 	vmMap := make(map[uint32]ItemViewModel)
 	for _, item := range vmItems {
 		vmMap[item.Handle] = item
@@ -196,6 +210,41 @@ func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, 
 	} else {
 		commonStart = slot.MagicOffset + 505
 	}
+
+	// Phase 1: pre-validate all write offsets before modifying anything.
+	sa := core.NewSlotAccessor(slot.Data)
+	for i := range data.CommonItems {
+		handle := data.CommonItems[i].GaItemHandle
+		if handle == 0 || handle == 0xFFFFFFFF {
+			continue
+		}
+		if _, ok := vmMap[handle]; ok {
+			off := commonStart + i*12 + 4
+			if err := sa.CheckBounds(off, 4, "common item qty"); err != nil {
+				return err
+			}
+		}
+	}
+	if !isStorage {
+		keyStart := commonStart + 0xa80*12
+		for i := range data.KeyItems {
+			handle := data.KeyItems[i].GaItemHandle
+			if handle == 0 || handle == 0xFFFFFFFF {
+				continue
+			}
+			if _, ok := vmMap[handle]; ok {
+				off := keyStart + i*12 + 4
+				if err := sa.CheckBounds(off, 4, "key item qty"); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	// Phase 2: snapshot slot.Data, apply writes to the copy.
+	snapshot := make([]byte, len(slot.Data))
+	copy(snapshot, slot.Data)
+	ssa := core.NewSlotAccessor(snapshot)
 
 	for i := range data.CommonItems {
 		handle := data.CommonItems[i].GaItemHandle
@@ -215,13 +264,12 @@ func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, 
 			}
 			data.CommonItems[i].Quantity = qty
 			off := commonStart + i*12 + 4
-			if off+4 <= len(slot.Data) {
-				binary.LittleEndian.PutUint32(slot.Data[off:], qty)
+			if err := ssa.WriteU32(off, qty); err != nil {
+				return fmt.Errorf("common item %d write failed: %w", i, err)
 			}
 		}
 	}
 
-	// Key Items are only in main inventory (not storage), stored after common items
 	if !isStorage {
 		keyStart := commonStart + 0xa80*12
 		for i := range data.KeyItems {
@@ -236,12 +284,16 @@ func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, 
 				}
 				data.KeyItems[i].Quantity = qty
 				off := keyStart + i*12 + 4
-				if off+4 <= len(slot.Data) {
-					binary.LittleEndian.PutUint32(slot.Data[off:], qty)
+				if err := ssa.WriteU32(off, qty); err != nil {
+					return fmt.Errorf("key item %d write failed: %w", i, err)
 				}
 			}
 		}
 	}
+
+	// Phase 3: all writes succeeded — commit snapshot to slot.Data.
+	copy(slot.Data, snapshot)
+	return nil
 }
 
 func MapSlotToVM(slotData []byte) (*CharacterViewModel, error) {

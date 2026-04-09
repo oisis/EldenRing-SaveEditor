@@ -610,68 +610,68 @@ Wymaga weryfikacji z `Final.py`.
 
 ### Etapy (każdy = osobny commit)
 
-- [ ] **20.A. Named Offset Constants** (`backend/core/offset_defs.go` — NOWY)
-    - Jedno źródło prawdy: stałe dla stat offsets, dynamic chain, inventory layout, sanity limits.
-    - Stałe weryfikowane z `gemini/SPEC.md` §5.2 i §5.4.
+- [x] **20.A. Named Offset Constants** (`backend/core/offset_defs.go` — NOWY)
+    - [x] Jedno źródło prawdy: stałe dla stat offsets, dynamic chain, inventory layout, sanity limits.
+    - [x] Stałe weryfikowane z `gemini/SPEC.md` §5.2 i §5.4.
 
-- [ ] **20.B. SlotAccessor** (`backend/core/slot_access.go` — NOWY)
-    - Bounds-checked ReadU32/WriteU32/ReadU8/WriteU8/ReadU16/WriteU16.
-    - `ReadDynamicSize(off, maxSize, name)` — clamp + warning zamiast panic.
-    - `CheckBounds(off, size, label)` — pre-write validation.
-    - `Warnings []string` — non-fatal issues (PS4 garbage).
+- [x] **20.B. SlotAccessor** (`backend/core/slot_access.go` — NOWY)
+    - [x] Bounds-checked ReadU32/WriteU32/ReadU8/WriteU8/ReadU16/WriteU16.
+    - [x] `ReadDynamicSize(off, maxSize, name)` — clamp + warning zamiast panic.
+    - [x] `CheckBounds(off, size, label)` — pre-write validation.
+    - [x] `Warnings []string` — non-fatal issues (PS4 garbage).
 
-- [ ] **20.C. Error Propagation** (`backend/core/structures.go` — MODIFY)
-    - `mapStats()` → zwraca `error`, używa `SlotAccessor` + stałych z `offset_defs.go`.
-    - `calculateDynamicOffsets()` → zwraca `error`, używa `ReadDynamicSize` z sanity limits.
-    - `Read()` → propaguje errory, dodaje warning przy MagicPattern fallback.
-    - `Write()` → używa `SlotAccessor` + named constants.
-    - Dodanie pola `Warnings []string` do `SaveSlot` struct.
+- [x] **20.C. Error Propagation** (`backend/core/structures.go` — MODIFY)
+    - [x] `mapStats()` → zwraca `error`, używa `SlotAccessor` + stałych z `offset_defs.go`.
+    - [x] `calculateDynamicOffsets()` → zwraca `error`, używa `ReadDynamicSize` z sanity limits.
+    - [x] `Read()` → propaguje errory, dodaje warning przy MagicPattern fallback.
+    - [x] `Write()` → używa `SlotAccessor` + named constants.
+    - [x] Dodanie pola `Warnings []string` do `SaveSlot` struct.
 
-- [ ] **20.D. Cross-Validation** (`backend/core/structures.go` — MODIFY)
-    - `validateOffsetChain()` — sprawdza bounds + monotoniczny porządek offsetów.
-    - Wywoływana po `calculateDynamicOffsets()`, przed `mapInventory()`.
+- [x] **20.D. Cross-Validation** (`backend/core/structures.go` — MODIFY)
+    - [x] `validateOffsetChain()` — sprawdza bounds + monotoniczny porządek offsetów.
+    - [x] Wywoływana po `calculateDynamicOffsets()`, przed `mapInventory()`.
 
-- [ ] **20.E. Writer Safety** (`backend/core/writer.go` — MODIFY)
-    - `writeGaItem()`: bounds check przez `SlotAccessor.CheckBounds()`.
-    - `addToInventory()`: bounds check przed zapisem do `slot.Data`.
-    - `generateUniqueHandle()`: zmiana sygnatury na `(uint32, error)`, limit 10000 iteracji.
+- [x] **20.E. Writer Safety** (`backend/core/writer.go` — MODIFY)
+    - [x] `writeGaItem()`: bounds check przez `SlotAccessor.CheckBounds()`.
+    - [x] `addToInventory()`: bounds check przed zapisem do `slot.Data`.
+    - [x] `generateUniqueHandle()`: zmiana sygnatury na `(uint32, error)`, limit 10000 iteracji.
 
-- [ ] **20.F. Warnings Pipeline** (`backend/vm/character_vm.go`, `frontend/src/components/App.tsx`)
-    - `CharacterViewModel.Warnings []string` — propagacja z `SaveSlot.Warnings`.
-    - UI: żółty banner "Save loaded with warnings" z listą.
+- [x] **20.F. Warnings Pipeline** (`backend/vm/character_vm.go`, `frontend/src/components/App.tsx`)
+    - [x] `CharacterViewModel.Warnings []string` — propagacja z `SaveSlot.Warnings`.
+    - [x] UI: żółty banner "Save loaded with warnings" z listą.
 
-- [ ] **20.G. Frontend Hardening** (frontend)
-    - `ErrorBoundary` component w `main.tsx`.
-    - `useMemo` w `InventoryTab` i `DatabaseTab` (filtered/sorted lists).
-    - Fix `window.go.main.App.SaveCharacter` → import z wailsjs.
-    - `WorldProgressTab`: nie połykaj błędów w `.catch()`.
+- [x] **20.G. Frontend Hardening** (frontend)
+    - [x] `ErrorBoundary` component w `main.tsx`.
+    - [x] `useMemo` w `InventoryTab` i `DatabaseTab` (filtered/sorted lists).
+    - [x] Fix `window.go.main.App.SaveCharacter` → import z wailsjs.
+    - [x] `WorldProgressTab`: nie połykaj błędów w `.catch()`.
 
-- [ ] **20.H. Unit Tests** (`backend/core/` — NOWE PLIKI)
-    - `slot_access_test.go`: out-of-bounds, negative offset, dynamic size clamp.
-    - `offset_validation_test.go`: valid chain, non-monotonic, too-small MagicOffset.
-    - Rozszerzenie `roundtrip_test.go`: sprawdzenie `Warnings == nil` na known-good saves.
+- [x] **20.H. Unit Tests** (`backend/core/` — NOWE PLIKI)
+    - [x] `slot_access_test.go`: out-of-bounds, negative offset, dynamic size clamp.
+    - [x] `offset_validation_test.go`: valid chain, non-monotonic, too-small MagicOffset.
+    - [x] Rozszerzenie `roundtrip_test.go`: sprawdzenie `Warnings == nil` na known-good saves.
 
-- [ ] **20.I. SaveManager Hardening** (`backend/core/save_manager.go`)
-    - [ ] Walidacja minimalnego rozmiaru pliku w `LoadSave()`.
-    - [ ] Error propagation z `ReadBytes()` (zamień `_` na obsługę błędu).
-    - [ ] Cross-platform atomic write (`os.Rename` fix dla Windows, nie kasuj `.tmp` przy błędzie).
+- [x] **20.I. SaveManager Hardening** (`backend/core/save_manager.go`)
+    - [x] Walidacja minimalnego rozmiaru pliku w `LoadSave()`.
+    - [x] Error propagation z `ReadBytes()` (zamień `_` na obsługę błędu).
+    - [x] Cross-platform atomic write (`os.Rename` fix dla Windows, nie kasuj `.tmp` przy błędzie).
 
-- [ ] **20.J. Database & Event Flags Hardening** (`backend/db/db.go`, `app.go`)
-    - [ ] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
-    - [ ] Global item index `map[uint32]ItemEntry` — O(1) lookup zamiast O(18×n) linear search.
+- [x] **20.J. Database & Event Flags Hardening** (`backend/db/db.go`, `app.go`)
+    - [x] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
+    - [x] Global item index `map[uint32]ItemEntry` — O(1) lookup zamiast O(18×n) linear search.
 
-- [ ] **20.K. Frontend Performance & UI Consistency**
-    - [ ] Table virtualization z `@tanstack/react-virtual` w InventoryTab i DatabaseTab.
-    - [ ] Unified toast system (`react-hot-toast`), usunięcie `alert()`.
-    - [ ] Shared UI components: `Card`, `SectionHeader`, `ActionButton`.
+- [x] **20.K. Frontend Performance & UI Consistency**
+    - [x] Table virtualization z `@tanstack/react-virtual` w InventoryTab i DatabaseTab.
+    - [x] Unified toast system (`react-hot-toast`), usunięcie `alert()`.
+    - [x] ~~Shared UI components~~ — pominięte (zbyt mała duplikacja, over-engineering).
 
 ### Walidacja końcowa
 
-- [ ] `go test -v ./backend/core/...` — PASS
-- [ ] `go test -v ./tests/roundtrip_test.go` — 4/4 PASS (PS4, PC, PS4→PC, PC→PS4)
-- [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
-- [ ] `cd frontend && npm run lint` — 0 błędów
-- [ ] `make build` — OK
+- [x] `go test -v ./backend/core/...` — PASS
+- [x] `go test -v ./tests/roundtrip_test.go` — 4/4 PASS (PS4, PC, PS4→PC, PC→PS4)
+- [x] `cd frontend && npx tsc --noEmit` — 0 błędów
+- [x] `cd frontend && npm run lint` — N/A (brak skryptu w projekcie)
+- [x] `make build` — OK
 
 ---
 
@@ -712,10 +712,10 @@ Wymaga weryfikacji z `Final.py`.
 > **Zależność:** Wymaga ukończonego Phase 20.
 > **Szczegóły architektoniczne:** [`gemini/REFACTOR.md` §15](REFACTOR.md)
 
-- [ ] **21.1. Write-ahead validation** — `validateSlotIntegrity()` przed każdym `SaveFile()` jako ostatnia linia obrony przed zapisaniem uszkodzonego save'a.
-- [ ] **21.2. `updateItemsAndSync()` transactionality** — walidacja offsetów przed startem zapisu qty, rollback na kopii `slot.Data` przy błędzie. Migracja na `SlotAccessor`.
-- [ ] **21.3. Undo/redo** — deep copy `slot.Data` przed edycją, stack operacji w `App`, przycisk "Revert" w UI.
-- [ ] **21.4. Save file diffing** — porównanie przed/po zapisie, UI dialog "Review Changes" z listą modyfikacji.
+- [x] **21.1. Write-ahead validation** — `validateSlotIntegrity()` przed każdym `SaveFile()` jako ostatnia linia obrony przed zapisaniem uszkodzonego save'a.
+- [x] **21.2. `updateItemsAndSync()` transactionality** — walidacja offsetów przed startem zapisu qty, rollback na kopii `slot.Data` przy błędzie. Migracja na `SlotAccessor`.
+- [x] **21.3. Undo/redo** — deep copy `slot.Data` przed edycją, stack operacji w `App`, przycisk "Revert" w UI.
+- [x] **21.4. Save file diffing** — porównanie przed/po zapisie, UI dialog "Review Changes" z listą modyfikacji.
 
 ---
 

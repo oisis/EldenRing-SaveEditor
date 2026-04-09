@@ -85,8 +85,6 @@ var RangedAndCatalysts = map[uint32]ItemData{
 	0x01FBD000: {Name: "Staff of Loss", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/staff_of_loss.png"},
 	0x01FF5270: {Name: "Staff of the Great Beyond", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/staff_of_the_great_beyond.png"},
 	0x01FF7980: {Name: "Maternal Staff", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/maternal_staff.png"},
-	0x80A98670: {Name: "Scepter of the All-Knowing", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/scepter_of_the_all_knowing.png"},
-	0x80BA2840: {Name: "Devourer's Scepter", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/devourers_scepter.png"},
 	0x810B5580: {Name: "Barbed Staff-Spear", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/barbed_staff_spear.png"},
 	0x815F1AD0: {Name: "Watchdog's Staff", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/watchdogs_staff.png"},
 	0x81600530: {Name: "Staff of the Avatar", Category: "ranged_and_catalysts", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/ranged_and_catalysts/staff_of_the_avatar.png"},

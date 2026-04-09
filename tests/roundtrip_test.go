@@ -24,6 +24,13 @@ func TestRoundTripPS4(t *testing.T) {
 		t.Fatalf("Expected PS4 platform, got %s", save.Platform)
 	}
 
+	// Verify known-good save produces no warnings on active slots
+	for i := 0; i < 10; i++ {
+		if save.ActiveSlots[i] && len(save.Slots[i].Warnings) > 0 {
+			t.Errorf("Slot %d has unexpected warnings: %v", i, save.Slots[i].Warnings)
+		}
+	}
+
 	// 2. Write to a temporary file
 	tmpPath := "data/ps4/roundtrip_test.dat"
 	os.MkdirAll("data/ps4", 0755)
@@ -69,6 +76,13 @@ func TestRoundTripPC(t *testing.T) {
 
 	if save.Platform != core.PlatformPC {
 		t.Fatalf("Expected PC platform, got %s", save.Platform)
+	}
+
+	// Verify known-good save produces no warnings on active slots
+	for i := 0; i < 10; i++ {
+		if save.ActiveSlots[i] && len(save.Slots[i].Warnings) > 0 {
+			t.Errorf("Slot %d has unexpected warnings: %v", i, save.Slots[i].Warnings)
+		}
 	}
 
 	// 2. Write to a temporary file

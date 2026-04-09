@@ -4,9 +4,10 @@ import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
     charIdx: number;
+    onMutate?: () => void;
 }
 
-export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
+export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [graces, setGraces] = useState<db.GraceEntry[]>([]);
     const [loading, setLoading] = useState(false);
     const [expandedRegions, setExpandedRegions] = useState<Record<string, boolean>>({});
@@ -17,7 +18,10 @@ export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
         GetGraces(charIdx).then(res => {
             setGraces(res || []);
             setLoading(false);
-        }).catch(() => setLoading(false));
+        }).catch(err => {
+            console.error("Failed to load graces:", err);
+            setLoading(false);
+        });
     };
 
     useEffect(() => {
@@ -38,6 +42,7 @@ export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
     const handleGraceToggle = async (grace: db.GraceEntry, visited: boolean) => {
         await SetGraceVisited(charIdx, grace.id, visited);
         setGraces(prev => prev.map(g => g.id === grace.id ? {...g, visited} : g));
+        onMutate?.();
     };
 
     const handleUnlockAll = async (regionGraces: db.GraceEntry[]) => {
@@ -48,6 +53,7 @@ export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
         );
         const ids = new Set(regionGraces.map(g => g.id));
         setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: true} : g));
+        onMutate?.();
     };
 
     const REGION_MAP_ALIASES: Record<string, string | null> = {

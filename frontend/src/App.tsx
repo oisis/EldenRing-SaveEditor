@@ -1,5 +1,7 @@
-import {useState, useEffect} from 'react';
-import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter} from '../wailsjs/go/main/App';
+import {useState, useEffect, useCallback} from 'react';
+import toast, {Toaster} from 'react-hot-toast';
+import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetSlotDiff, GetSaveDiffSummary} from '../wailsjs/go/main/App';
+import {main} from '../wailsjs/go/models';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
@@ -41,6 +43,19 @@ function App() {
         return saved === null ? true : saved === 'true';
     });
     const [category, setCategory] = useState('all');
+    const [charWarnings, setCharWarnings] = useState<string[]>([]);
+    const [undoDepth, setUndoDepth] = useState(0);
+    const [diffModal, setDiffModal] = useState(false);
+    const [diffSummary, setDiffSummary] = useState<main.SlotDiffSummary[]>([]);
+    const [diffDetails, setDiffDetails] = useState<Record<number, main.DiffEntry[]>>({});
+    const [diffExpanded, setDiffExpanded] = useState<Record<number, boolean>>({});
+
+    const refreshUndoDepth = useCallback(() => {
+        if (!platform) { setUndoDepth(0); return; }
+        GetUndoDepth(selectedChar).then(setUndoDepth).catch(() => setUndoDepth(0));
+    }, [platform, selectedChar]);
+
+    useEffect(() => { refreshUndoDepth(); }, [refreshUndoDepth, inventoryVersion]);
 
     const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
 
@@ -78,13 +93,20 @@ function App() {
         }).catch(() => {});
     }, [selectedChar, platform]);
 
+    useEffect(() => {
+        if (!platform) return;
+        GetCharacter(selectedChar).then(char => {
+            setCharWarnings(char?.warnings || []);
+        }).catch(() => setCharWarnings([]));
+    }, [selectedChar, platform]);
+
     const handleOpenSave = async () => {
         try {
             const plat = await SelectAndOpenSave();
             setPlatform(plat);
             refreshSlots();
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         }
     };
 
@@ -93,6 +115,7 @@ function App() {
         const names = await GetCharacterNames();
         setActiveSlots(slots);
         setCharacterNames(names);
+        refreshUndoDepth();
     };
 
     const toggleSlot = async (idx: number) => {
@@ -106,7 +129,44 @@ function App() {
             refreshSlots();
             setCloneModal(null);
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
+        }
+    };
+
+    const handleRevert = async () => {
+        try {
+            await RevertSlot(selectedChar);
+            refreshUndoDepth();
+            setInventoryVersion(v => v + 1);
+            toast.success('Reverted to previous state');
+        } catch (err) {
+            toast.error(String(err));
+        }
+    };
+
+    const handleReviewChanges = async () => {
+        try {
+            const summary = await GetSaveDiffSummary();
+            setDiffSummary(summary || []);
+            setDiffDetails({});
+            setDiffExpanded({});
+            setDiffModal(true);
+        } catch (err) {
+            toast.error(String(err));
+        }
+    };
+
+    const loadSlotDiff = async (slotIdx: number) => {
+        if (diffDetails[slotIdx]) {
+            setDiffExpanded(prev => ({...prev, [slotIdx]: !prev[slotIdx]}));
+            return;
+        }
+        try {
+            const diffs = await GetSlotDiff(slotIdx);
+            setDiffDetails(prev => ({...prev, [slotIdx]: diffs || []}));
+            setDiffExpanded(prev => ({...prev, [slotIdx]: true}));
+        } catch (err) {
+            toast.error(String(err));
         }
     };
 
@@ -118,12 +178,16 @@ function App() {
             if (selectedChar > 0 && selectedChar >= idx) setSelectedChar(selectedChar - 1);
             refreshSlots();
         } catch (err) {
-            alert(err);
+            toast.error(String(err));
         }
     };
 
     return (
         <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-300">
+            <Toaster position="top-right" toastOptions={{
+                duration: 3000,
+                style: { background: 'var(--color-card)', color: 'var(--color-foreground)', border: '1px solid var(--color-border)' },
+            }} />
             {/* Sidebar */}
             <aside className="w-64 border-r border-border bg-muted/5 flex flex-col z-20">
                 <div className="p-5 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -221,14 +285,26 @@ function App() {
                         ))}
                     </nav>
                     <div className="flex items-center space-x-4">
-                        <div className="text-right">
-                            <p className="text-[9px] font-black uppercase tracking-widest text-foreground leading-none mb-1">
-                                {charNames[selectedChar] || 'No Slot'}
-                            </p>
-                            <p className="text-[7px] font-bold text-muted-foreground uppercase tracking-[0.2em]">
-                                Slot {selectedChar + 1}
-                            </p>
-                        </div>
+                        {platform && (
+                            <button
+                                onClick={handleReviewChanges}
+                                title="Review all pending changes before saving"
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-cyan-500/40 bg-cyan-500/10 text-cyan-600 hover:bg-cyan-500/20 transition-all text-[9px] font-black uppercase tracking-widest"
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                                <span>Review</span>
+                            </button>
+                        )}
+                        {undoDepth > 0 && (
+                            <button
+                                onClick={handleRevert}
+                                title={`Undo last change (${undoDepth} left)`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-yellow-500/40 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 transition-all text-[9px] font-black uppercase tracking-widest"
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 10h10a5 5 0 015 5v2M3 10l4-4m-4 4l4 4" /></svg>
+                                <span>Undo ({undoDepth})</span>
+                            </button>
+                        )}
                     </div>
                 </header>
 
@@ -276,15 +352,109 @@ function App() {
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                {charWarnings.length > 0 && (
+                                    <div className="mx-4 mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg relative">
+                                        <button onClick={() => setCharWarnings([])} className="absolute top-2 right-2 text-yellow-600/60 hover:text-yellow-600 transition-colors">
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                        </button>
+                                        <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest">Save loaded with warnings</p>
+                                        <ul className="mt-1 text-[9px] text-yellow-600/80 list-disc list-inside">
+                                            {charWarnings.map((w, i) => <li key={i}>{w}</li>)}
+                                        </ul>
+                                    </div>
+                                )}
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} />}
-                                {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
+                                {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>
                         )}
                     </div>
                 </div>
             </main>
+        {diffModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setDiffModal(false)}>
+                <div className="bg-background border border-border rounded-xl p-6 w-[560px] max-h-[80vh] flex flex-col shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2">
+                            <div className="w-1 h-4 bg-cyan-500 rounded-full" />
+                            <h3 className="text-[10px] font-black uppercase tracking-widest">Review Changes</h3>
+                        </div>
+                        <button onClick={() => setDiffModal(false)} className="text-muted-foreground hover:text-foreground transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto custom-scrollbar space-y-2">
+                        {diffSummary.length === 0 || diffSummary.every(s => s.changeCount === 0) ? (
+                            <div className="py-12 text-center">
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">No changes detected</p>
+                                <p className="text-[9px] text-muted-foreground mt-1">Save file matches the original</p>
+                            </div>
+                        ) : (
+                            diffSummary.filter(s => s.changeCount > 0).map(slot => (
+                                <div key={slot.slotIndex} className="border border-border rounded-lg overflow-hidden">
+                                    <button
+                                        onClick={() => loadSlotDiff(slot.slotIndex)}
+                                        className="w-full px-4 py-3 flex items-center justify-between hover:bg-muted/20 transition-all"
+                                    >
+                                        <div className="flex items-center space-x-3">
+                                            <div className={`transition-transform duration-300 ${diffExpanded[slot.slotIndex] ? 'rotate-90 text-cyan-500' : 'text-muted-foreground'}`}>
+                                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                                            </div>
+                                            <span className="text-[10px] font-black uppercase tracking-widest">{slot.charName || `Slot ${slot.slotIndex + 1}`}</span>
+                                        </div>
+                                        <span className="text-[9px] font-black text-cyan-500 bg-cyan-500/10 border border-cyan-500/30 px-2 py-0.5 rounded">
+                                            {slot.changeCount} {slot.changeCount === 1 ? 'change' : 'changes'}
+                                        </span>
+                                    </button>
+
+                                    {diffExpanded[slot.slotIndex] && diffDetails[slot.slotIndex] && (
+                                        <div className="border-t border-border px-4 py-3 space-y-1 bg-muted/5">
+                                            {(['stat', 'item', 'storage', 'grace'] as const).map(cat => {
+                                                const entries = diffDetails[slot.slotIndex].filter(d => d.category === cat);
+                                                if (entries.length === 0) return null;
+                                                const catLabel = {stat: 'Stats', item: 'Inventory', storage: 'Storage', grace: 'Graces'}[cat];
+                                                return (
+                                                    <div key={cat} className="mb-2">
+                                                        <p className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.3em] mb-1">{catLabel}</p>
+                                                        {entries.map((d, i) => (
+                                                            <div key={i} className="flex items-center justify-between py-1 px-2 rounded hover:bg-muted/20">
+                                                                <div className="flex items-center space-x-2">
+                                                                    <span className={`w-1.5 h-1.5 rounded-full ${d.action === 'added' ? 'bg-green-500' : d.action === 'removed' ? 'bg-red-500' : 'bg-yellow-500'}`} />
+                                                                    <span className="text-[10px] font-semibold">{d.field}</span>
+                                                                </div>
+                                                                <div className="text-[9px] font-mono">
+                                                                    {d.action === 'changed' && (
+                                                                        <span><span className="text-red-400 line-through">{d.oldValue}</span> <span className="text-muted-foreground mx-1">&rarr;</span> <span className="text-green-400">{d.newValue}</span></span>
+                                                                    )}
+                                                                    {d.action === 'added' && <span className="text-green-400">+ {d.newValue}</span>}
+                                                                    {d.action === 'removed' && <span className="text-red-400">- {d.oldValue}</span>}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                </div>
+                            ))
+                        )}
+                    </div>
+
+                    <div className="mt-4 pt-3 border-t border-border">
+                        <button
+                            onClick={() => setDiffModal(false)}
+                            className="w-full py-2 text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         {cloneModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setCloneModal(null)}>
                 <div className="bg-background border border-border rounded-xl p-6 w-72 space-y-4 shadow-2xl" onClick={(e) => e.stopPropagation()}>
