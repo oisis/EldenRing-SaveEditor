@@ -29,7 +29,7 @@ func main() {
 	count := 0
 	limit := 1000
 	consecutiveFailures := 0
-	maxConsecutiveFailures := 50
+	maxConsecutiveFailures := 200
 
 	for scanner.Scan() && count < limit {
 		if consecutiveFailures >= maxConsecutiveFailures {
@@ -40,6 +40,14 @@ func main() {
 		iconPath := scanner.Text()
 		fullLocalPath := filepath.Join("frontend/public", iconPath)
 		filename := filepath.Base(iconPath)
+
+		// Skip already downloaded files
+		if _, err := os.Stat(fullLocalPath); err == nil {
+			fmt.Printf("⏭️  Skip (exists): %s\n", filename)
+			count++
+			consecutiveFailures = 0
+			continue
+		}
 		nameOnly := strings.TrimSuffix(filename, ".png")
 
 		// 1. Clean up the name
@@ -63,6 +71,7 @@ func main() {
 		isArmor := strings.Contains(iconPath, "/head/") || strings.Contains(iconPath, "/chest/") ||
 			strings.Contains(iconPath, "/arms/") || strings.Contains(iconPath, "/legs/") ||
 			strings.Contains(iconPath, "armor/")
+		isArrow := strings.Contains(iconPath, "arrows_and_bolts/")
 		isRanged := strings.Contains(iconPath, "ranged_and_catalysts/")
 		isShield := strings.Contains(iconPath, "shields/")
 		isTalisman := strings.Contains(iconPath, "talismans/")
@@ -73,7 +82,7 @@ func main() {
 		isSorcery := strings.Contains(iconPath, "sorceries/")
 		isIncantation := strings.Contains(iconPath, "incantations/")
 
-		if isWeapon || isRanged || isShield {
+		if isWeapon || isRanged || isShield || isArrow {
 			for _, aff := range affinities {
 				if strings.HasPrefix(wikiName, aff+"_") {
 					wikiName = strings.TrimPrefix(wikiName, aff+"_")
@@ -85,6 +94,8 @@ func main() {
 		// Determine prefix based on category
 		var prefixes []string
 		if isWeapon {
+			prefixes = []string{"ER_Icon_Weapon_"}
+		} else if isArrow {
 			prefixes = []string{"ER_Icon_Weapon_"}
 		} else if isRanged {
 			prefixes = []string{"ER_Icon_Weapon_"}
@@ -133,6 +144,24 @@ func main() {
 				success = true
 				consecutiveFailures = 0
 				break
+			}
+		}
+
+		// Try with original numbered suffix (e.g. Cookbook_1 instead of Cookbook)
+		wikiNameWithNum := toWikiName(nameOnly)
+		if !success && wikiNameWithNum != wikiName {
+			for _, prefix := range prefixes {
+				fullWikiName := prefix + wikiNameWithNum + ".png"
+				remoteURL := "https://eldenring.wiki.gg/images/" + fullWikiName
+				fmt.Printf("📥 [%d] Trying (numbered) %s\n", count+1, remoteURL)
+				err := downloadFile(remoteURL, fullLocalPath)
+				if err == nil {
+					fmt.Printf("✅ Success (Numbered): %s\n", filename)
+					count++
+					success = true
+					consecutiveFailures = 0
+					break
+				}
 			}
 		}
 
