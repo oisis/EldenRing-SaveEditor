@@ -1,0 +1,155 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+    branches: [main]
+
+jobs:
+  # Gate: only run on merged PRs or commits with [build] prefix
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      should_build: ${{ steps.decide.outputs.should_build }}
+    steps:
+      - name: Decide whether to build
+        id: decide
+        run: |
+          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            echo "should_build=true" >> "$GITHUB_OUTPUT"
+          elif [[ "${{ github.event_name }}" == "push" ]]; then
+            MSG="${{ github.event.head_commit.message }}"
+            if [[ "$MSG" == \[build\]* ]]; then
+              echo "should_build=true" >> "$GITHUB_OUTPUT"
+            else
+              echo "should_build=false" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            echo "should_build=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  test:
+    needs: check
+    if: needs.check.outputs.should_build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Run tests
+        run: go test -v ./backend/... ./tests/...
+
+  build:
+    needs: [check, test]
+    if: needs.check.outputs.should_build == 'true'
+    strategy:
+      matrix:
+        include:
+          - os: macos-latest
+            platform: darwin
+            arch: arm64
+            artifact: ER-Save-Editor-macos-arm64
+          - os: macos-13
+            platform: darwin
+            arch: amd64
+            artifact: ER-Save-Editor-macos-amd64
+          - os: windows-latest
+            platform: windows
+            arch: amd64
+            artifact: ER-Save-Editor-windows-amd64
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Wails CLI
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+
+      # macOS: install webkit2gtk equivalent (not needed, WebKit is built-in)
+      # Windows: WebView2 is pre-installed on GitHub runners
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build (macOS)
+        if: matrix.platform == 'darwin'
+        env:
+          GOARCH: ${{ matrix.arch }}
+          CGO_ENABLED: 1
+        run: wails build -platform darwin/${{ matrix.arch }} -o ER-Save-Editor
+
+      - name: Build (Windows)
+        if: matrix.platform == 'windows'
+        run: wails build -platform windows/amd64 -o ER-Save-Editor.exe
+
+      - name: Package macOS app
+        if: matrix.platform == 'darwin'
+        run: |
+          cd build/bin
+          zip -r ${{ matrix.artifact }}.zip ER-Save-Editor.app
+
+      - name: Upload artifact (macOS)
+        if: matrix.platform == 'darwin'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: build/bin/${{ matrix.artifact }}.zip
+
+      - name: Upload artifact (Windows)
+        if: matrix.platform == 'windows'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: build/bin/ER-Save-Editor.exe
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from Makefile
+        id: version
+        run: |
+          VER=$(grep '^VERSION=' Makefile | head -1 | cut -d= -f2)
+          echo "version=${VER}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VER}" >> "$GITHUB_OUTPUT"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "ER Save Editor ${{ steps.version.outputs.tag }}"
+          draft: true
+          generate_release_notes: true
+          files: |
+            artifacts/ER-Save-Editor-macos-arm64/*.zip
+            artifacts/ER-Save-Editor-macos-amd64/*.zip
+            artifacts/ER-Save-Editor-windows-amd64/*.exe

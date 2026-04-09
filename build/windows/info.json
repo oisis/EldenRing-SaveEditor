@@ -1,0 +1,15 @@
+{
+  "fixed": {
+    "file_version": "0.1.0.0"
+  },
+  "info": {
+    "0000": {
+      "ProductVersion": "0.1.0.0",
+      "CompanyName": "OiSiS",
+      "FileDescription": "Elden Ring Save Editor",
+      "LegalCopyright": "Copyright (c) 2024-2026 OiSiS",
+      "ProductName": "ER-Save-Editor",
+      "Comments": "Elden Ring save file editor for PC and PS4"
+    }
+  }
+}

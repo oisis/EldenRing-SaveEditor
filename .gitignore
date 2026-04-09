@@ -165,5 +165,10 @@ data/
 # Custom dirs
 org-src/
 save/
-build/
+build/bin/
+# Keep Wails platform config (manifests, plists, info.json)
+!build/darwin/
+!build/windows/
+!build/appicon.png
 EldenRing-SaveEditor
+main
