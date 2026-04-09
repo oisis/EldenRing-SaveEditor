@@ -127,7 +127,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         setAddToInv(true);
         setInvMax(false);
         setInvQtyVal(1);
-        setAddToStorage(false);
+        setAddToStorage(true);
         setStorageMax(false);
         setStorageQtyVal(1);
         setCopies(1);
@@ -189,7 +189,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                         {/* Inventory row */}
                         <div className="space-y-3">
                             <div className="flex items-center space-x-3">
-                                {/* Checkbox: Add to Inventory */}
                                 <div
                                     onClick={() => setAddToInv(!addToInv)}
                                     className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToInv ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
@@ -197,29 +196,25 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                     {addToInv && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
                                 <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Inventory</span>
-
-                                {/* Qty input — only for stackable */}
-                                {!modalNonStackable && (
-                                    <>
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            max={modalMaxInv}
-                                            value={invMax ? modalMaxInv : invQtyVal}
-                                            disabled={!addToInv || invMax}
-                                            onChange={e => setInvQtyVal(Math.max(1, Math.min(modalMaxInv, parseInt(e.target.value) || 1)))}
-                                            className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
-                                        />
-                                        <div
-                                            onClick={() => addToInv && setInvMax(!invMax)}
-                                            className={`flex items-center space-x-1.5 cursor-pointer group ${!addToInv ? 'opacity-40 pointer-events-none' : ''}`}
-                                        >
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${invMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
-                                                {invMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
-                                            </div>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max</span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={modalNonStackable ? copies : modalMaxInv}
+                                    value={modalNonStackable ? copies : (invMax ? modalMaxInv : invQtyVal)}
+                                    disabled={!addToInv || invMax || modalNonStackable}
+                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalMaxInv, parseInt(e.target.value) || 1)))}
+                                    className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
+                                />
+                                {!modalNonStackable && modalMaxInv > 1 && (
+                                    <div
+                                        onClick={() => addToInv && setInvMax(!invMax)}
+                                        className={`flex items-center space-x-1.5 cursor-pointer group ${!addToInv ? 'opacity-40 pointer-events-none' : ''}`}
+                                    >
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${invMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
+                                            {invMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                         </div>
-                                    </>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max ({modalMaxInv})</span>
+                                    </div>
                                 )}
                             </div>
 
@@ -232,28 +227,25 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                     {addToStorage && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
                                 <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Storage</span>
-
-                                {!modalNonStackable && (
-                                    <>
-                                        <input
-                                            type="number"
-                                            min={1}
-                                            max={modalMaxStorage}
-                                            value={storageMax ? modalMaxStorage : storageQtyVal}
-                                            disabled={!addToStorage || storageMax}
-                                            onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalMaxStorage, parseInt(e.target.value) || 1)))}
-                                            className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
-                                        />
-                                        <div
-                                            onClick={() => addToStorage && setStorageMax(!storageMax)}
-                                            className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}
-                                        >
-                                            <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${storageMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
-                                                {storageMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
-                                            </div>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max</span>
+                                <input
+                                    type="number"
+                                    min={1}
+                                    max={modalNonStackable ? copies : modalMaxStorage}
+                                    value={modalNonStackable ? copies : (storageMax ? modalMaxStorage : storageQtyVal)}
+                                    disabled={!addToStorage || storageMax || modalNonStackable}
+                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalMaxStorage, parseInt(e.target.value) || 1)))}
+                                    className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
+                                />
+                                {!modalNonStackable && modalMaxStorage > 1 && (
+                                    <div
+                                        onClick={() => addToStorage && setStorageMax(!storageMax)}
+                                        className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}
+                                    >
+                                        <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${storageMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
+                                            {storageMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                         </div>
-                                    </>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max ({modalMaxStorage})</span>
+                                    </div>
                                 )}
                             </div>
                         </div>
