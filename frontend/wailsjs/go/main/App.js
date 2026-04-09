@@ -42,6 +42,14 @@ export function GetItemList(arg1) {
   return window['go']['main']['App']['GetItemList'](arg1);
 }
 
+export function GetSaveDiffSummary() {
+  return window['go']['main']['App']['GetSaveDiffSummary']();
+}
+
+export function GetSlotDiff(arg1) {
+  return window['go']['main']['App']['GetSlotDiff'](arg1);
+}
+
 export function GetSourceActiveSlots() {
   return window['go']['main']['App']['GetSourceActiveSlots']();
 }
