@@ -246,6 +246,59 @@ func (s *SaveSlot) validateOffsetChain() error {
 	return nil
 }
 
+// ValidateSlotIntegrity performs write-ahead validation on a slot before saving.
+// It re-checks the offset chain, inventory bounds, data length and stat sanity
+// to prevent writing a corrupted save file.
+func ValidateSlotIntegrity(slot *SaveSlot) error {
+	// 1. Data length must equal SlotSize
+	if len(slot.Data) != SlotSize {
+		return fmt.Errorf("slot data length %d (0x%X) != expected SlotSize %d (0x%X)",
+			len(slot.Data), len(slot.Data), SlotSize, SlotSize)
+	}
+
+	// 2. Offset chain re-validation
+	if err := slot.validateOffsetChain(); err != nil {
+		return fmt.Errorf("offset chain invalid: %w", err)
+	}
+
+	// 3. Inventory bounds: invStart and storageStart must be within slot.Data
+	invStart := slot.MagicOffset + InvStartFromMagic
+	if invStart < 0 || invStart >= SlotSize {
+		return fmt.Errorf("inventory start offset 0x%X out of bounds [0, 0x%X)",
+			invStart, SlotSize)
+	}
+	storageStart := slot.StorageBoxOffset + StorageHeaderSkip
+	if storageStart < 0 || storageStart >= SlotSize {
+		return fmt.Errorf("storage start offset 0x%X out of bounds [0, 0x%X)",
+			storageStart, SlotSize)
+	}
+
+	// 4. Stat sanity: Level must be > 0, attributes 1–99
+	if slot.Player.Level == 0 || slot.Player.Level > 713 {
+		return fmt.Errorf("Level %d out of valid range [1, 713]", slot.Player.Level)
+	}
+	attrs := []struct {
+		name string
+		val  uint32
+	}{
+		{"Vigor", slot.Player.Vigor},
+		{"Mind", slot.Player.Mind},
+		{"Endurance", slot.Player.Endurance},
+		{"Strength", slot.Player.Strength},
+		{"Dexterity", slot.Player.Dexterity},
+		{"Intelligence", slot.Player.Intelligence},
+		{"Faith", slot.Player.Faith},
+		{"Arcane", slot.Player.Arcane},
+	}
+	for _, a := range attrs {
+		if a.val < 1 || a.val > 99 {
+			return fmt.Errorf("%s = %d out of valid range [1, 99]", a.name, a.val)
+		}
+	}
+
+	return nil
+}
+
 func (s *SaveSlot) mapStats() error {
 	sa := NewSlotAccessor(s.Data)
 	mo := s.MagicOffset

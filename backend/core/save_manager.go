@@ -274,6 +274,16 @@ func (s *SaveFile) flushMetadata() {
 }
 
 func (s *SaveFile) SaveFile(path string) error {
+	// Write-ahead validation: check all active slots before writing anything.
+	for i := 0; i < 10; i++ {
+		if !s.ActiveSlots[i] {
+			continue
+		}
+		if err := ValidateSlotIntegrity(&s.Slots[i]); err != nil {
+			return fmt.Errorf("slot %d integrity check failed: %w", i, err)
+		}
+	}
+
 	s.flushMetadata()
 
 	// Resolve the header for the target platform, handling cross-platform conversions.
