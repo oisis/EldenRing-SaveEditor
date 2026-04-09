@@ -1,4 +1,5 @@
-import {useEffect, useState, useMemo} from 'react';
+import {useEffect, useState, useMemo, useRef} from 'react';
+import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter} from '../../wailsjs/go/main/App';
 import {vm} from '../../wailsjs/go/models';
 import {CategorySelect} from './CategorySelect';
@@ -272,6 +273,14 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         return <span className="ml-1 text-primary">{sortDir === 'asc' ? '↑' : '↓'}</span>;
     };
 
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const rowVirtualizer = useVirtualizer({
+        count: filteredOwnedItems.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => 52,
+        overscan: 20,
+    });
+
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Remove Confirm Modal */}
@@ -377,7 +386,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
 
             {/* Table Card */}
             <div className="card overflow-hidden flex flex-col flex-1 min-h-0">
-                <div className="overflow-y-auto flex-1 custom-scrollbar">
+                <div ref={scrollRef} className="overflow-y-auto flex-1 custom-scrollbar">
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
@@ -425,10 +434,15 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                     </td>
                                 </tr>
                             ) : filteredOwnedItems.length > 0 ? (
-                                filteredOwnedItems.map((item) => {
+                                <>
+                                {rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getVirtualItems()[0].start > 0 && (
+                                    <tr><td colSpan={9} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
+                                )}
+                                {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                                    const item = filteredOwnedItems[virtualRow.index];
                                     const key = rowKey(item);
                                     return (
-                                    <tr key={key} className={`group hover:bg-primary/[0.02] transition-colors ${selectedKeys.has(key) ? 'bg-red-500/[0.03]' : ''}`}>
+                                    <tr key={key} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.02] transition-colors ${selectedKeys.has(key) ? 'bg-red-500/[0.03]' : ''}`}>
                                         <td className="px-4 py-0.5">
                                             <div
                                                 onClick={() => toggleSelect(key)}
@@ -532,7 +546,15 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                             )}
                                         </td>
                                     </tr>
-                                    );})
+                                    );})}
+                                {(() => {
+                                    const virtualItems = rowVirtualizer.getVirtualItems();
+                                    const paddingBottom = virtualItems.length > 0
+                                        ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
+                                        : 0;
+                                    return paddingBottom > 0 ? <tr><td colSpan={9} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
+                                })()}
+                                </>
                             ) : (
                                 <tr>
                                     <td colSpan={9} className="px-6 py-24 text-center">

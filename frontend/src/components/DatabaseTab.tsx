@@ -1,4 +1,5 @@
-import {useEffect, useState, useMemo} from 'react';
+import {useEffect, useState, useMemo, useRef} from 'react';
+import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
@@ -151,6 +152,14 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     };
 
     const selectedInfuseName = infuseTypes.find(t => t.offset === infuseOffset)?.name ?? 'Standard';
+
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const rowVirtualizer = useVirtualizer({
+        count: filteredItems.length,
+        getScrollElement: () => scrollRef.current,
+        estimateSize: () => 52,
+        overscan: 20,
+    });
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
@@ -330,7 +339,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                     </div>
                 )}
 
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div ref={scrollRef} className="flex-1 overflow-y-auto custom-scrollbar">
                     <table className="w-full text-left border-collapse">
                         <thead className="sticky top-0 z-20 bg-muted/80 backdrop-blur-md border-b border-border shadow-sm">
                             <tr className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground">
@@ -360,7 +369,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
-                            {filteredItems.map(item => {
+                            {rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getVirtualItems()[0].start > 0 && (
+                                <tr><td colSpan={5} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
+                            )}
+                            {rowVirtualizer.getVirtualItems().map(virtualRow => {
+                                const item = filteredItems[virtualRow.index];
                                 const isUpgradeable = item.maxUpgrade > 0;
                                 const isAsh = item.category === 'ashes';
                                 const hasInfuse = item.maxUpgrade === 25 && infuseOffset !== 0;
@@ -371,7 +384,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 if (levelVal > 0) previewParts.push(`+${levelVal}`);
 
                                 return (
-                                    <tr key={item.id} className={`group hover:bg-primary/[0.03] transition-colors ${selectedDbItems.has(item.id) ? 'bg-primary/[0.02]' : ''}`}>
+                                    <tr key={item.id} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.03] transition-colors ${selectedDbItems.has(item.id) ? 'bg-primary/[0.02]' : ''}`}>
                                         <td className="p-4">
                                             <div
                                                 onClick={() => toggleItem(item.id)}
@@ -433,6 +446,13 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                     </tr>
                                 );
                             })}
+                            {(() => {
+                                const virtualItems = rowVirtualizer.getVirtualItems();
+                                const paddingBottom = virtualItems.length > 0
+                                    ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
+                                    : 0;
+                                return paddingBottom > 0 ? <tr><td colSpan={5} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
+                            })()}
                         </tbody>
                     </table>
                 </div>
