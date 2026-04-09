@@ -651,10 +651,10 @@ Wymaga weryfikacji z `Final.py`.
     - [x] `offset_validation_test.go`: valid chain, non-monotonic, too-small MagicOffset.
     - [x] Rozszerzenie `roundtrip_test.go`: sprawdzenie `Warnings == nil` na known-good saves.
 
-- [ ] **20.I. SaveManager Hardening** (`backend/core/save_manager.go`)
-    - [ ] Walidacja minimalnego rozmiaru pliku w `LoadSave()`.
-    - [ ] Error propagation z `ReadBytes()` (zamień `_` na obsługę błędu).
-    - [ ] Cross-platform atomic write (`os.Rename` fix dla Windows, nie kasuj `.tmp` przy błędzie).
+- [x] **20.I. SaveManager Hardening** (`backend/core/save_manager.go`)
+    - [x] Walidacja minimalnego rozmiaru pliku w `LoadSave()`.
+    - [x] Error propagation z `ReadBytes()` (zamień `_` na obsługę błędu).
+    - [x] Cross-platform atomic write (`os.Rename` fix dla Windows, nie kasuj `.tmp` przy błędzie).
 
 - [ ] **20.J. Database & Event Flags Hardening** (`backend/db/db.go`, `app.go`)
     - [ ] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
