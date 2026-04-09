@@ -150,8 +150,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
-    const modalMaxInv = confirmModal ? Math.max(...confirmModal.map(i => i.maxInventory)) : 1;
-    const modalMaxStorage = confirmModal ? Math.max(...confirmModal.map(i => i.maxStorage)) : 1;
+    const modalMaxInv = confirmModal ? Math.min(...confirmModal.map(i => i.maxInventory)) : 1;
+    const modalMaxStorage = confirmModal ? Math.min(...confirmModal.map(i => i.maxStorage)) : 1;
+    const modalMixedMaxes = confirmModal && confirmModal.length > 1 && !modalNonStackable &&
+        (new Set(confirmModal.map(i => i.maxInventory)).size > 1 || new Set(confirmModal.map(i => i.maxStorage)).size > 1);
 
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-3">
@@ -268,6 +270,12 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
                                 />
                             </div>
+                        )}
+
+                        {modalMixedMaxes && (
+                            <p className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5">
+                                Qty capped to lowest max: Inv {modalMaxInv}, Storage {modalMaxStorage}
+                            </p>
                         )}
 
                         <div className="flex space-x-3 pt-2">

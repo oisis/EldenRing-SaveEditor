@@ -639,6 +639,38 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
+## Phase 20: Quantity Hard Cap Enforcement ✅
+
+> **Cel:** Uniemożliwić ustawienie większej ilości itemów niż dozwolone w bazie danych (MaxInventory / MaxStorage).
+> Przekroczenie limitów ilościowych jest wykrywane przez serwery FromSoftware i grozi banem konta.
+> Enforcement na 3 warstwach: backend save-write, frontend add-modal, frontend inventory edit.
+
+---
+
+- [x] **20.1. Backend: fix storage cap w `updateItemsAndSync` (`backend/vm/character_vm.go`)**
+    - [x] Bug: `updateItemsAndSync` używał `MaxInventory` zarówno dla inventory jak i storage.
+    - [x] Fix: rozdzielenie — `isStorage=true` → cap do `MaxStorage`; `isStorage=false` → cap do `MaxInventory`.
+
+- [x] **20.2. Frontend DatabaseTab: `Math.min` zamiast `Math.max` w modalu (`DatabaseTab.tsx`)**
+    - [x] `modalMaxInv` i `modalMaxStorage` zmienione z `Math.max(...)` na `Math.min(...)`.
+    - [x] Przy bulk-add mieszanych itemów (np. arrow max=99 + shard max=999) qty jest ograniczone do najniższego limitu.
+    - [x] Dodany info label (amber) gdy zaznaczone itemy mają różne maxy: `"Qty capped to lowest max: Inv N, Storage M"`.
+
+- [x] **20.3. Frontend InventoryTab: atrybuty `min`/`max` na inputach qty (`InventoryTab.tsx`)**
+    - [x] Dodane `min={0}` i `max={item.maxInv}` na inventory qty input.
+    - [x] Dodane `min={0}` i `max={item.maxStorage}` na storage qty input.
+    - [x] Dodatkowy guardrail do istniejącego `handleQtyChange` (który już clampuje programatycznie).
+
+- [x] **20.4. Backend `resolveQty` (`app.go`) — bez zmian**
+    - [x] Istniejąca logika już poprawnie clampuje per-item: `qty > max → max`. Brak potrzeby zmian.
+
+- [x] **20.5. Walidacja**
+    - [ ] `go build ./backend/... && go build .` — 0 błędów
+    - [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
+    - [ ] `cd frontend && npm run lint` — 0 błędów
+
+---
+
 ### Technical Note: Faster Invasions (Meliodas Method)
 A recent discovery (popularized by Steelovsky and Meliodas) allows for significantly faster matchmaking by modifying the `NetworkParam` structure within the `Regulation` block of the save file.
 - **Refresh Interval**: Reduced from 20s to 4s.

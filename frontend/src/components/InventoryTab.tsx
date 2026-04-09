@@ -520,6 +520,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
                                                         type="number"
+                                                        min={0}
+                                                        max={item.maxInv}
                                                         value={editedInv[item.handle] !== undefined ? editedInv[item.handle] : item.invQty}
                                                         onChange={e => handleQtyChange(item.handle, e.target.value, 'inv', item.maxInv)}
                                                         className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedInv[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}
@@ -537,6 +539,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
                                                         type="number"
+                                                        min={0}
+                                                        max={item.maxStorage}
                                                         value={editedStorage[item.handle] !== undefined ? editedStorage[item.handle] : item.storageQty}
                                                         onChange={e => handleQtyChange(item.handle, e.target.value, 'storage', item.maxStorage)}
                                                         className={`w-16 bg-muted/20 border rounded px-2 py-1 text-center text-xs font-bold outline-none focus:ring-1 focus:ring-primary/30 transition-all ${editedStorage[item.handle] !== undefined ? 'border-primary/50 text-primary bg-primary/5' : 'border-border/50 text-foreground'}`}

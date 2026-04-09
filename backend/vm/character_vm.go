@@ -207,8 +207,14 @@ func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, 
 		}
 		if vmItem, ok := vmMap[handle]; ok {
 			qty := vmItem.Quantity
-			if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
-				qty = vmItem.MaxInventory
+			if isStorage {
+				if vmItem.MaxStorage > 0 && qty > vmItem.MaxStorage {
+					qty = vmItem.MaxStorage
+				}
+			} else {
+				if vmItem.MaxInventory > 0 && qty > vmItem.MaxInventory {
+					qty = vmItem.MaxInventory
+				}
 			}
 			data.CommonItems[i].Quantity = qty
 			off := commonStart + i*12 + 4
