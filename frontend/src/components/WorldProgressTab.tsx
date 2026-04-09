@@ -17,7 +17,10 @@ export function WorldProgressTab({charIdx}: WorldProgressTabProps) {
         GetGraces(charIdx).then(res => {
             setGraces(res || []);
             setLoading(false);
-        }).catch(() => setLoading(false));
+        }).catch(err => {
+            console.error("Failed to load graces:", err);
+            setLoading(false);
+        });
     };
 
     useEffect(() => {

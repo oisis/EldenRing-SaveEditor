@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useMemo} from 'react';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
@@ -63,10 +63,13 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         GetItemList(category).then(res => {
             setDbItems(res || []);
             setLoading(false);
-        }).catch(() => setLoading(false));
+        }).catch(err => {
+            console.error("Failed to load items:", err);
+            setLoading(false);
+        });
     }, [category]);
 
-    const filteredItems = dbItems.filter(item => {
+    const filteredItems = useMemo(() => dbItems.filter(item => {
         if (!showFlaggedItems && item.flags?.length > 0) return false;
         return item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
@@ -76,7 +79,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
         return 0;
-    });
+    }), [dbItems, search, sortCol, sortDir, showFlaggedItems]);
 
     const handleSort = (col: string) => {
         if (sortCol === col) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
