@@ -518,7 +518,8 @@ func GetAllGraces() []GraceEntry {
 // For IDs in the lookup table, uses the precomputed byte/bit offsets.
 // For all other IDs (e.g. Sites of Grace), uses the standard formula:
 // byte = id / 8, bit = 7 - (id % 8).
-func GetEventFlag(flags []byte, id uint32) bool {
+// Returns error if the computed byte offset is out of bounds.
+func GetEventFlag(flags []byte, id uint32) (bool, error) {
 	var byteIdx uint32
 	var bitIdx uint8
 	if info, ok := data.EventFlags[id]; ok {
@@ -529,9 +530,9 @@ func GetEventFlag(flags []byte, id uint32) bool {
 		bitIdx = uint8(7 - (id % 8))
 	}
 	if int(byteIdx) >= len(flags) {
-		return false
+		return false, fmt.Errorf("event flag %d (byte %d) out of bounds (flags len %d)", id, byteIdx, len(flags))
 	}
-	return (flags[byteIdx] & (1 << bitIdx)) != 0
+	return (flags[byteIdx] & (1 << bitIdx)) != 0, nil
 }
 
 // filterInfuseVariants removes infuse-variant entries from a weapon item list.
@@ -574,7 +575,8 @@ func GetInfuseTypes() []InfuseType {
 // For IDs in the lookup table, uses the precomputed byte/bit offsets.
 // For all other IDs (e.g. Sites of Grace), uses the standard formula:
 // byte = id / 8, bit = 7 - (id % 8).
-func SetEventFlag(flags []byte, id uint32, value bool) {
+// Returns error if the computed byte offset is out of bounds.
+func SetEventFlag(flags []byte, id uint32, value bool) error {
 	var byteIdx uint32
 	var bitIdx uint8
 	if info, ok := data.EventFlags[id]; ok {
@@ -585,11 +587,12 @@ func SetEventFlag(flags []byte, id uint32, value bool) {
 		bitIdx = uint8(7 - (id % 8))
 	}
 	if int(byteIdx) >= len(flags) {
-		return
+		return fmt.Errorf("event flag %d (byte %d) out of bounds (flags len %d)", id, byteIdx, len(flags))
 	}
 	if value {
 		flags[byteIdx] |= (1 << bitIdx)
 	} else {
 		flags[byteIdx] &= ^(1 << bitIdx)
 	}
+	return nil
 }

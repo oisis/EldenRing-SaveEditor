@@ -269,7 +269,12 @@ func (a *App) GetGraces(slotIndex int) ([]db.GraceEntry, error) {
 	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
 		flags := slot.Data[slot.EventFlagsOffset:]
 		for i := range graces {
-			graces[i].Visited = db.GetEventFlag(flags, graces[i].ID)
+			visited, err := db.GetEventFlag(flags, graces[i].ID)
+			if err != nil {
+				fmt.Printf("Warning: grace %d (%s): %v\n", graces[i].ID, graces[i].Name, err)
+				continue
+			}
+			graces[i].Visited = visited
 		}
 	}
 
@@ -291,7 +296,9 @@ func (a *App) SetGraceVisited(slotIndex int, graceID uint32, visited bool) error
 	}
 
 	flags := slot.Data[slot.EventFlagsOffset:]
-	db.SetEventFlag(flags, graceID, visited)
+	if err := db.SetEventFlag(flags, graceID, visited); err != nil {
+		return fmt.Errorf("failed to set grace %d: %w", graceID, err)
+	}
 	return nil
 }
 
