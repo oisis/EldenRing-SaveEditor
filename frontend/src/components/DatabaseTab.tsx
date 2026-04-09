@@ -40,6 +40,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     // Modal state
     const [confirmModal, setConfirmModal] = useState<db.ItemEntry[] | null>(null);
     const [isSaving, setIsSaving] = useState(false);
+    const [brokenIcons, setBrokenIcons] = useState<Set<string>>(new Set());
 
     // Quantity state for modal
     const [addToInv, setAddToInv] = useState(true);
@@ -142,16 +143,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         setConfirmModal(items);
     };
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-        const target = e.currentTarget;
-        target.style.display = 'none';
-        const parent = target.parentElement;
-        if (parent) {
-            const ph = document.createElement('div');
-            ph.className = 'text-[10px] font-black text-muted-foreground/30 select-none';
-            ph.innerText = '?';
-            parent.appendChild(ph);
-        }
+    const handleImageError = (iconPath: string) => {
+        setBrokenIcons(prev => new Set(prev).add(iconPath));
     };
 
     const selectedInfuseName = infuseTypes.find(t => t.offset === infuseOffset)?.name ?? 'Standard';
@@ -174,7 +167,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                             {confirmModal.length === 1 ? (
                                 <>
                                     <div className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden">
-                                        <img src={confirmModal[0].iconPath} alt="" className="w-8 h-8 object-contain" onError={handleImageError} />
+                                        {brokenIcons.has(confirmModal[0].iconPath) ? (
+                                            <span className="text-[10px] font-black text-muted-foreground/30 select-none">?</span>
+                                        ) : (
+                                            <img src={confirmModal[0].iconPath} alt="" className="w-8 h-8 object-contain" onError={() => handleImageError(confirmModal[0].iconPath)} />
+                                        )}
                                     </div>
                                     <div>
                                         <h3 className="text-sm font-black uppercase tracking-widest text-foreground">{confirmModal[0].name}</h3>
@@ -386,12 +383,16 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                                 className="w-12 h-12 bg-muted/20 rounded-lg border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
                                                 onClick={() => setSelectedIcon({name: item.name, path: item.iconPath})}
                                             >
-                                                <img
-                                                    src={item.iconPath}
-                                                    alt={item.name}
-                                                    className="w-full h-full p-0.5 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
-                                                    onError={handleImageError}
-                                                />
+                                                {brokenIcons.has(item.iconPath) ? (
+                                                    <span className="text-[10px] font-black text-muted-foreground/30 select-none">?</span>
+                                                ) : (
+                                                    <img
+                                                        src={item.iconPath}
+                                                        alt={item.name}
+                                                        className="w-full h-full p-0.5 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
+                                                        onError={() => handleImageError(item.iconPath)}
+                                                    />
+                                                )}
                                             </div>
                                         </td>
                                         <td className="p-4">
@@ -443,7 +444,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                     <div className="relative max-w-2xl w-full flex flex-col items-center space-y-8 animate-in zoom-in-95 duration-300">
                         <div className="w-64 h-64 bg-muted/20 rounded-3xl border border-border/50 flex items-center justify-center shadow-2xl shadow-primary/10 relative group">
                             <div className="absolute inset-0 bg-primary/5 rounded-3xl blur-3xl group-hover:bg-primary/10 transition-all duration-500" />
-                            <img src={selectedIcon.path} alt={selectedIcon.name} className="w-48 h-48 object-contain drop-shadow-2xl relative z-10" onError={handleImageError} />
+                            {brokenIcons.has(selectedIcon.path) ? (
+                                <span className="text-3xl font-black text-muted-foreground/30 select-none">?</span>
+                            ) : (
+                                <img src={selectedIcon.path} alt={selectedIcon.name} className="w-48 h-48 object-contain drop-shadow-2xl relative z-10" onError={() => handleImageError(selectedIcon.path)} />
+                            )}
                         </div>
                         <div className="text-center space-y-2">
                             <h3 className="text-2xl font-black uppercase tracking-[0.2em] text-foreground">{selectedIcon.name}</h3>

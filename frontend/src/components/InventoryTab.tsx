@@ -36,6 +36,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
     const [removeModal, setRemoveModal] = useState<{handles: number[], names: string[]} | null>(null);
     const [isRemoving, setIsRemoving] = useState(false);
+    const [brokenIcons, setBrokenIcons] = useState<Set<string>>(new Set());
 
     const toggleSelect = (key: string) => {
         setSelectedKeys(prev => {
@@ -207,16 +208,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         return [...Array.from(nonStackableMap.values()), ...Array.from(stackableMap.values())];
     })();
 
-    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
-        const target = e.currentTarget;
-        target.style.display = 'none';
-        const parent = target.parentElement;
-        if (parent) {
-            const placeholder = document.createElement('div');
-            placeholder.className = 'text-[10px] font-black text-muted-foreground/30 select-none';
-            placeholder.innerText = '?';
-            parent.appendChild(placeholder);
-        }
+    const handleImageError = (iconPath: string) => {
+        setBrokenIcons(prev => new Set(prev).add(iconPath));
     };
 
     useEffect(() => {
@@ -236,10 +229,10 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         }
     };
 
-    const sortItems = (items: any[]) => {
+    const sortItems = (items: MergedItem[]) => {
         return [...items].sort((a, b) => {
-            let valA = a[sortCol as keyof typeof a];
-            let valB = b[sortCol as keyof typeof b];
+            let valA: string | number = 0;
+            let valB: string | number = 0;
 
             if (sortCol === 'maxUpgrade') {
                 valA = a.maxUpgrade || 0;
@@ -247,9 +240,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             } else if (sortCol === 'currentUpgrade') {
                 valA = a.currentUpgrade || 0;
                 valB = b.currentUpgrade || 0;
-            } else if (typeof valA === 'string') {
-                valA = valA.toLowerCase();
-                valB = valB.toLowerCase();
+            } else {
+                const rawA = a[sortCol as keyof MergedItem];
+                const rawB = b[sortCol as keyof MergedItem];
+                if (typeof rawA === 'string' && typeof rawB === 'string') {
+                    valA = rawA.toLowerCase();
+                    valB = rawB.toLowerCase();
+                } else if (typeof rawA === 'number' && typeof rawB === 'number') {
+                    valA = rawA;
+                    valB = rawB;
+                }
             }
 
             if (valA < valB) return sortDir === 'asc' ? -1 : 1;
@@ -444,12 +444,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
                                                 onClick={() => setSelectedIcon({name: item.name, path: item.iconPath})}
                                             >
-                                                <img 
-                                                    src={item.iconPath} 
-                                                    alt="" 
-                                                    className="w-full h-full p-0.5 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
-                                                    onError={handleImageError}
-                                                />
+                                                {brokenIcons.has(item.iconPath) ? (
+                                                    <span className="text-[10px] font-black text-muted-foreground/30 select-none">?</span>
+                                                ) : (
+                                                    <img
+                                                        src={item.iconPath}
+                                                        alt=""
+                                                        className="w-full h-full p-0.5 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
+                                                        onError={() => handleImageError(item.iconPath)}
+                                                    />
+                                                )}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
