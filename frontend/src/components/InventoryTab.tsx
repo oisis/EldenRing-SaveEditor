@@ -373,7 +373,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col gap-0.5">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
-                                                    <span className="text-[13px] font-semibold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                                    <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
                                                     {item.flags?.includes('cut_content') && (
                                                         <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
                                                     )}
