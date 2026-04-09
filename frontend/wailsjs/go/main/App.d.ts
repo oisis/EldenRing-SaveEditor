@@ -27,6 +27,8 @@ export function GetSourceActiveSlots():Promise<Array<boolean>>;
 
 export function GetSteamID():Promise<number>;
 
+export function GetSteamIDString():Promise<string>;
+
 export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 
 export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<void>;
@@ -40,5 +42,7 @@ export function SetGraceVisited(arg1:number,arg2:number,arg3:boolean):Promise<vo
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
 
 export function SetSteamID(arg1:number):Promise<void>;
+
+export function SetSteamIDFromString(arg1:string):Promise<void>;
 
 export function WriteSave(arg1:string):Promise<void>;

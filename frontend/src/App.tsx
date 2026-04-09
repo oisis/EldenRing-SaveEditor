@@ -25,16 +25,27 @@ function App() {
     const [selectedChar, setSelectedChar] = useState<number>(0);
     const [activeTab, setActiveTab] = useState('database');
     const [inventoryVersion, setInventoryVersion] = useState(0);
-    const [theme, setTheme] = useState<Theme>('light');
+    const [theme, setTheme] = useState<Theme>(() => {
+        return (localStorage.getItem('setting:theme') as Theme) || 'light';
+    });
     const [cloneModal, setCloneModal] = useState<{srcIdx: number} | null>(null);
     const [charAddSettings, setCharAddSettings] = useState<Record<number, AddSettings>>({});
-    const [columnVisibility, setColumnVisibility] = useState({
-        id: false,
-        category: true
+    const [columnVisibility, setColumnVisibility] = useState(() => {
+        try {
+            const saved = localStorage.getItem('setting:columnVisibility');
+            return saved ? JSON.parse(saved) : { id: false, category: true };
+        } catch { return { id: false, category: true }; }
     });
-    const [showFlaggedItems, setShowFlaggedItems] = useState(true);
+    const [showFlaggedItems, setShowFlaggedItems] = useState<boolean>(() => {
+        const saved = localStorage.getItem('setting:showFlaggedItems');
+        return saved === null ? true : saved === 'true';
+    });
 
     const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
+
+    useEffect(() => { localStorage.setItem('setting:theme', theme); }, [theme]);
+    useEffect(() => { localStorage.setItem('setting:columnVisibility', JSON.stringify(columnVisibility)); }, [columnVisibility]);
+    useEffect(() => { localStorage.setItem('setting:showFlaggedItems', String(showFlaggedItems)); }, [showFlaggedItems]);
 
     useEffect(() => {
         const root = document.documentElement;

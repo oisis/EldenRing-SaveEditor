@@ -1,5 +1,5 @@
-import {useState} from 'react';
-import {SelectAndOpenSave, WriteSave} from '../../wailsjs/go/main/App';
+import {useState, useEffect} from 'react';
+import {SelectAndOpenSave, WriteSave, GetSteamIDString, SetSteamIDFromString} from '../../wailsjs/go/main/App';
 
 interface SettingsTabProps {
     theme: 'light' | 'dark' | 'system';
@@ -30,6 +30,37 @@ export function SettingsTab({
     const [targetPlatform, setTargetPlatform] = useState<string>('PC');
     const [exporting, setExporting] = useState(false);
     const [importing, setImporting] = useState(false);
+
+    const [steamIdInput, setSteamIdInput] = useState('');
+    const [steamIdSaved, setSteamIdSaved] = useState('');
+    const [steamIdError, setSteamIdError] = useState('');
+    const [steamIdApplying, setSteamIdApplying] = useState(false);
+
+    useEffect(() => {
+        if (platform !== 'PC') { setSteamIdInput(''); setSteamIdSaved(''); return; }
+        GetSteamIDString().then(id => { setSteamIdInput(id); setSteamIdSaved(id); });
+    }, [platform]);
+
+    const validateSteamId = (val: string) => {
+        if (!/^\d{17}$/.test(val)) return 'SteamID must be exactly 17 digits.';
+        if (!val.startsWith('7656119')) return 'SteamID must start with 7656119.';
+        return '';
+    };
+
+    const handleApplySteamId = async () => {
+        const err = validateSteamId(steamIdInput);
+        if (err) { setSteamIdError(err); return; }
+        setSteamIdApplying(true);
+        setSteamIdError('');
+        try {
+            await SetSteamIDFromString(steamIdInput);
+            setSteamIdSaved(steamIdInput);
+        } catch (e) {
+            setSteamIdError(String(e));
+        } finally {
+            setSteamIdApplying(false);
+        }
+    };
 
     const handleImport = async () => {
         setImporting(true);
@@ -147,6 +178,52 @@ export function SettingsTab({
                             )}
                         </button>
                     </div>
+                </div>
+            </section>
+
+            {/* SteamID Section */}
+            <section className="space-y-6">
+                <div className="flex items-center space-x-4 px-1">
+                    <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                    <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/80">Steam ID</h2>
+                </div>
+
+                <div className="card p-6 space-y-4">
+                    {platform !== 'PC' ? (
+                        <p className="text-[10px] text-muted-foreground font-medium">
+                            {platform ? 'PS4 saves do not contain a SteamID.' : 'Load a PC save file to edit the SteamID.'}
+                        </p>
+                    ) : (
+                        <>
+                            <div className="space-y-1">
+                                <p className="text-xs font-bold text-foreground">Steam ID</p>
+                                <p className="text-[10px] text-muted-foreground font-medium">17-digit Steam account ID embedded in the save file. Required for the save to load on the correct account.</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <input
+                                    type="text"
+                                    value={steamIdInput}
+                                    onChange={e => { setSteamIdInput(e.target.value); setSteamIdError(''); }}
+                                    maxLength={17}
+                                    placeholder="76561198XXXXXXXXX"
+                                    className="flex-1 bg-background border border-border/50 rounded-md px-4 py-2.5 text-[11px] font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                                />
+                                <button
+                                    onClick={handleApplySteamId}
+                                    disabled={steamIdApplying || steamIdInput === steamIdSaved}
+                                    className="px-5 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                                >
+                                    {steamIdApplying ? 'Applying...' : 'Apply'}
+                                </button>
+                            </div>
+                            {steamIdError && (
+                                <p className="text-[10px] text-red-400 font-bold">{steamIdError}</p>
+                            )}
+                            {steamIdSaved && steamIdInput === steamIdSaved && (
+                                <p className="text-[10px] text-green-500 font-bold">Current: {steamIdSaved}</p>
+                            )}
+                        </>
+                    )}
                 </div>
             </section>
 

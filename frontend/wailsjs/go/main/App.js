@@ -50,6 +50,10 @@ export function GetSteamID() {
   return window['go']['main']['App']['GetSteamID']();
 }
 
+export function GetSteamIDString() {
+  return window['go']['main']['App']['GetSteamIDString']();
+}
+
 export function ImportCharacter(arg1, arg2) {
   return window['go']['main']['App']['ImportCharacter'](arg1, arg2);
 }
@@ -76,6 +80,10 @@ export function SetSlotActivity(arg1, arg2) {
 
 export function SetSteamID(arg1) {
   return window['go']['main']['App']['SetSteamID'](arg1);
+}
+
+export function SetSteamIDFromString(arg1) {
+  return window['go']['main']['App']['SetSteamIDFromString'](arg1);
 }
 
 export function WriteSave(arg1) {

@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
@@ -419,6 +420,27 @@ func (a *App) GetSteamID() uint64 {
 func (a *App) SetSteamID(id uint64) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
+	}
+	a.save.SteamID = id
+	return nil
+}
+
+// GetSteamIDString returns the SteamID as a decimal string to avoid JS float64 precision loss.
+func (a *App) GetSteamIDString() string {
+	if a.save == nil {
+		return ""
+	}
+	return strconv.FormatUint(a.save.SteamID, 10)
+}
+
+// SetSteamIDFromString parses a decimal string and updates the SteamID.
+func (a *App) SetSteamIDFromString(s string) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	id, err := strconv.ParseUint(s, 10, 64)
+	if err != nil {
+		return fmt.Errorf("invalid SteamID: %w", err)
 	}
 	a.save.SteamID = id
 	return nil
