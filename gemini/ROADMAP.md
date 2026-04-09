@@ -518,7 +518,7 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
-## Phase 19: Category Refactor — Wyrównanie do wiki.gg/Inventory 📋
+## Phase 19: Category Refactor — Wyrównanie do wiki.gg/Inventory ✅
 
 > **Cel:** Zastąpić obecne 24 granularne filtry UI przez 17 kategorii zgodnych z podziałem
 > ekwipunku w grze (https://eldenring.wiki.gg/wiki/Inventory). Wiąże się to z połączeniem
@@ -551,95 +551,131 @@ Wymaga weryfikacji z `Final.py`.
 
 ---
 
-- [ ] **19.1. Reorganizacja katalogów ikon (`frontend/public/items/`)**
-    - [ ] Rename `items/aow/` → `items/ashes_of_war/`
-    - [ ] Rename `items/bows/` → `items/ranged_and_catalysts/`, przenieś tam zawartość `items/staffs/` i `items/seals/`
-    - [ ] Rename `items/armor/helms/` → `items/head/`
-    - [ ] Rename `items/armor/chest/` → `items/chest/`
-    - [ ] Rename `items/armor/gauntlets/` → `items/arms/`
-    - [ ] Rename `items/armor/leggings/` → `items/legs/`
-    - [ ] Usuń pusty katalog `items/armor/`
-    - [ ] Rename `items/bolstering/` → `items/bolstering_materials/`
-    - [ ] Rename `items/keyitems/` → `items/key_items/`
-    - [ ] Rename `items/weapons/` → `items/melee_armaments/`
-    - [ ] Merge `items/consumables/` + `items/grease/` + `items/misc_tools/` → `items/tools/` (przenieś wszystkie pliki)
-    - [ ] Usuń opustoszałe katalogi: `items/staffs/`, `items/seals/`, `items/bows/`, `items/consumables/`, `items/grease/`, `items/misc_tools/`
+- [x] **19.1. Reorganizacja katalogów ikon (`frontend/public/items/`)**
+    - [x] Rename `items/aow/` → `items/ashes_of_war/`
+    - [x] Rename `items/bows/` → `items/ranged_and_catalysts/`, przenieś tam zawartość `items/staffs/` i `items/seals/`
+    - [x] Rename `items/armor/helms/` → `items/head/`
+    - [x] Rename `items/armor/chest/` → `items/chest/`
+    - [x] Rename `items/armor/gauntlets/` → `items/arms/`
+    - [x] Rename `items/armor/leggings/` → `items/legs/`
+    - [x] Usuń pusty katalog `items/armor/`
+    - [x] Rename `items/bolstering/` → `items/bolstering_materials/`
+    - [x] Rename `items/keyitems/` → `items/key_items/`
+    - [x] Rename `items/weapons/` → `items/melee_armaments/`
+    - [x] Merge `items/consumables/` + `items/grease/` + `items/misc_tools/` → `items/tools/` (przenieś wszystkie pliki)
+    - [x] Usuń opustoszałe katalogi: `items/staffs/`, `items/seals/`, `items/bows/`, `items/consumables/`, `items/grease/`, `items/misc_tools/`
 
-- [ ] **19.2. Merge plików Go w `backend/db/data/`**
-    - [ ] Połącz `bows.go` + `staffs.go` + `seals.go` → `ranged_and_catalysts.go`
-        - Zmień `Category` wszystkich wpisów na `"ranged_and_catalysts"`
-        - Zmień `IconPath`: `items/bows/` → `items/ranged_and_catalysts/`, `items/staffs/` → `items/ranged_and_catalysts/`, `items/seals/` → `items/ranged_and_catalysts/`
-        - Usuń stare pliki `bows.go`, `staffs.go`, `seals.go`
-    - [ ] Zmień `Category` w `weapons.go` z `"weapons"` → `"melee_armaments"`, `IconPath`: `items/weapons/` → `items/melee_armaments/`
-    - [ ] Zmień `Category` w `helms.go` z `"helms"` → `"head"`, `IconPath`: `items/armor/helms/` → `items/head/`
-    - [ ] Zmień `Category` w `chest.go` z `"chest"` (bez zmian), `IconPath`: `items/armor/chest/` → `items/chest/`
-    - [ ] Zmień `Category` w `gauntlets.go` z `"gauntlets"` → `"arms"`, `IconPath`: `items/armor/gauntlets/` → `items/arms/`; rename plik na `arms.go`
-    - [ ] Zmień `Category` w `leggings.go` z `"leggings"` → `"legs"`, `IconPath`: `items/armor/leggings/` → `items/legs/`; rename plik na `legs.go`
-    - [ ] Zmień `Category` w `aows.go` z `"aows"` → `"ashes_of_war"`, `IconPath`: `items/aow/` → `items/ashes_of_war/`
-    - [ ] Połącz `bolstering_materials.go` + `golden_runes.go` → `bolstering_materials.go`
-        - Zmień `IconPath` golden_runes: `items/bolstering/` → `items/bolstering_materials/`
-        - Usuń `golden_runes.go`
-    - [ ] Połącz `keyitems.go` + `remembrances.go` → `key_items.go`
-        - Ujednolić `Category` → `"key_items"`, `IconPath`: `items/keyitems/` → `items/key_items/`
-        - Usuń `remembrances.go`; rename `keyitems.go` → `key_items.go`
-    - [ ] Połącz `consumables.go` + `sacred_flasks.go` + `throwing_pots.go` + `perfume_arts.go` + `throwables.go` + `grease.go` + `misc_tools.go` + `quest_tools.go` → `tools.go`
-        - Zmień `Category` wszystkich wpisów na `"tools"`, `IconPath`: każdy stary prefix → `items/tools/`
-        - Usuń 8 starych plików
+- [x] **19.2. Merge plików Go w `backend/db/data/`**
+    - [x] Połącz `bows.go` + `staffs.go` + `seals.go` → `ranged_and_catalysts.go`
+    - [x] Zmień `Category` w `weapons.go` z `"weapons"` → `"melee_armaments"`
+    - [x] Zmień `Category` w `helms.go` z `"helms"` → `"head"`
+    - [x] Zmień `Category` w `chest.go`, `IconPath`: `items/armor/chest/` → `items/chest/`
+    - [x] Zmień `Category` w `gauntlets.go` → `arms.go` z `"gauntlets"` → `"arms"`
+    - [x] Zmień `Category` w `leggings.go` → `legs.go` z `"leggings"` → `"legs"`
+    - [x] Zmień `Category` w `aows.go` z `"aows"` → `"ashes_of_war"`
+    - [x] Połącz `bolstering_materials.go` + `golden_runes.go` → `bolstering_materials.go`
+    - [x] Połącz `keyitems.go` + `remembrances.go` → `key_items.go`
+    - [x] Połącz 8 plików consumables → `tools.go`
 
-- [ ] **19.3. Aktualizacja `backend/db/db.go`**
-    - [ ] W `GetItemsByCategory()`: zaktualizuj `switch category` — zastąp stare case'y nowymi:
-        - `case "melee_armaments"` (zamiast `"weapons"`)
-        - `case "ranged_and_catalysts"` (zamiast osobnych bows/staffs/seals — jeden case, jedna mapa)
-        - `case "head"`, `"chest"`, `"arms"`, `"legs"` (zamiast helms/chest/gauntlets/leggings)
-        - `case "ashes_of_war"` (zamiast `"aows"`)
-        - `case "key_items"` (zamiast `"keyitems"` + `"remembrances"`)
-        - `case "tools"` (zamiast 8 osobnych case'ów)
-    - [ ] W `GetItemCategoryFromHandle()`: zaktualizuj mapowanie handle prefix → category string
-    - [ ] Usuń nieużywane importy map (stare nazwy zmiennych np. `data.Bows`, `data.Staffs`, `data.Seals` → `data.RangedAndCatalysts`)
-    - [ ] Aktualizuj `GetAllItems()` — upewnij się że iteruje po nowych kategoriach
+- [x] **19.3. Aktualizacja `backend/db/db.go`**
+    - [x] Zaktualizowany `switch category` z nowymi case'ami
+    - [x] Zaktualizowane mapowanie handle prefix → category string
+    - [x] Usunięte nieużywane importy, nowe nazwy zmiennych (`data.RangedAndCatalysts`, etc.)
+    - [x] Zaktualizowany `GetAllItems()`
 
-- [ ] **19.4. Aktualizacja `frontend/src/components/DatabaseTab.tsx`**
-    - [ ] Zastąp `<select>` z 24+ opcjami przez 17 wiki-aligned kategorii:
-        ```
-        All Items
-        ── Armaments ──
-          Melee Armaments
-          Ranged Weapons & Catalysts
-          Arrows & Bolts
-          Shields
-          Ashes of War
-        ── Armor ──
-          Head
-          Chest
-          Arms
-          Legs
-        ── Accessories ──
-          Talismans
-        ── Magic ──
-          Sorceries
-          Incantations
-        ── Items ──
-          Tools
-          Crafting Materials
-          Bolstering Materials
-          Key Items
-          Spirit Ashes
-        ```
-    - [ ] Zaktualizuj logikę kontrolek "Global Add Settings" (upgrade/infuse sliders):
-        - Slider Weapon Level i Infuse: widoczny dla `"melee_armaments"`, `"ranged_and_catalysts"`, `"shields"`
-        - Spirit Ash Level: dla `"ashes"` (bez zmian)
-        - `isAsh` check: bez zmian (`item.category === "ashes"`)
+- [x] **19.4. Aktualizacja `frontend/src/components/DatabaseTab.tsx`**
+    - [x] 17 wiki-aligned kategorii z optgroup'ami
+    - [x] Zaktualizowana logika upgrade/infuse sliders dla nowych nazw kategorii
 
-- [ ] **19.5. Walidacja**
-    - [ ] `go build ./backend/...` — 0 błędów
-    - [ ] `go test -v ./tests/...` — wszystkie PASS
-    - [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
-    - [ ] `cd frontend && npm run lint` — 0 błędów
-    - [ ] Ręczna weryfikacja UI: każda kategoria wyświetla itemy z ikonami
+- [x] **19.5. Walidacja**
+    - [x] `go build ./backend/...` — PASS
+    - [x] `go test -v ./tests/...` — PASS
+    - [x] `cd frontend && npx tsc --noEmit` — PASS
+    - [x] `cd frontend && npm run lint` — PASS
+    - [x] Ręczna weryfikacja UI — OK
 
 ---
 
-## Phase 20: Quantity Hard Cap Enforcement ✅
+## Phase 20: Offset Safety & Code Hardening 📋
+
+> **Branch:** `feature/phase20-offset-safety`
+> **Szczegółowy plan implementacji:** [`gemini/REFACTOR.md`](REFACTOR.md)
+>
+> **Cel:** Wyeliminować ryzyka uszkodzenia save file (panic, buffer overflow, silent corruption)
+> przez bounds-checked offset management, walidację krzyżową łańcucha offsetów, error propagation
+> zamiast silent fallback, oraz poprawę spójności i wydajności frontendu.
+>
+> **Zasada:** Zero zmian w binarnym formacie save file. Refaktor dotyczy WYŁĄCZNIE logiki
+> odczytu/zapisu/walidacji. Round-trip testy MUSZĄ przechodzić po każdym etapie.
+
+### Etapy (każdy = osobny commit)
+
+- [ ] **20.A. Named Offset Constants** (`backend/core/offset_defs.go` — NOWY)
+    - Jedno źródło prawdy: stałe dla stat offsets, dynamic chain, inventory layout, sanity limits.
+    - Stałe weryfikowane z `gemini/SPEC.md` §5.2 i §5.4.
+
+- [ ] **20.B. SlotAccessor** (`backend/core/slot_access.go` — NOWY)
+    - Bounds-checked ReadU32/WriteU32/ReadU8/WriteU8/ReadU16/WriteU16.
+    - `ReadDynamicSize(off, maxSize, name)` — clamp + warning zamiast panic.
+    - `CheckBounds(off, size, label)` — pre-write validation.
+    - `Warnings []string` — non-fatal issues (PS4 garbage).
+
+- [ ] **20.C. Error Propagation** (`backend/core/structures.go` — MODIFY)
+    - `mapStats()` → zwraca `error`, używa `SlotAccessor` + stałych z `offset_defs.go`.
+    - `calculateDynamicOffsets()` → zwraca `error`, używa `ReadDynamicSize` z sanity limits.
+    - `Read()` → propaguje errory, dodaje warning przy MagicPattern fallback.
+    - `Write()` → używa `SlotAccessor` + named constants.
+    - Dodanie pola `Warnings []string` do `SaveSlot` struct.
+
+- [ ] **20.D. Cross-Validation** (`backend/core/structures.go` — MODIFY)
+    - `validateOffsetChain()` — sprawdza bounds + monotoniczny porządek offsetów.
+    - Wywoływana po `calculateDynamicOffsets()`, przed `mapInventory()`.
+
+- [ ] **20.E. Writer Safety** (`backend/core/writer.go` — MODIFY)
+    - `writeGaItem()`: bounds check przez `SlotAccessor.CheckBounds()`.
+    - `addToInventory()`: bounds check przed zapisem do `slot.Data`.
+    - `generateUniqueHandle()`: zmiana sygnatury na `(uint32, error)`, limit 10000 iteracji.
+
+- [ ] **20.F. Warnings Pipeline** (`backend/vm/character_vm.go`, `frontend/src/components/App.tsx`)
+    - `CharacterViewModel.Warnings []string` — propagacja z `SaveSlot.Warnings`.
+    - UI: żółty banner "Save loaded with warnings" z listą.
+
+- [ ] **20.G. Frontend Hardening** (frontend)
+    - `ErrorBoundary` component w `main.tsx`.
+    - `useMemo` w `InventoryTab` i `DatabaseTab` (filtered/sorted lists).
+    - Fix `window.go.main.App.SaveCharacter` → import z wailsjs.
+    - `WorldProgressTab`: nie połykaj błędów w `.catch()`.
+
+- [ ] **20.H. Unit Tests** (`backend/core/` — NOWE PLIKI)
+    - `slot_access_test.go`: out-of-bounds, negative offset, dynamic size clamp.
+    - `offset_validation_test.go`: valid chain, non-monotonic, too-small MagicOffset.
+    - Rozszerzenie `roundtrip_test.go`: sprawdzenie `Warnings == nil` na known-good saves.
+
+- [ ] **20.I. SaveManager Hardening** (`backend/core/save_manager.go`)
+    - [ ] Walidacja minimalnego rozmiaru pliku w `LoadSave()`.
+    - [ ] Error propagation z `ReadBytes()` (zamień `_` na obsługę błędu).
+    - [ ] Cross-platform atomic write (`os.Rename` fix dla Windows, nie kasuj `.tmp` przy błędzie).
+
+- [ ] **20.J. Database & Event Flags Hardening** (`backend/db/db.go`, `app.go`)
+    - [ ] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
+    - [ ] Global item index `map[uint32]ItemEntry` — O(1) lookup zamiast O(18×n) linear search.
+
+- [ ] **20.K. Frontend Performance & UI Consistency**
+    - [ ] Table virtualization z `@tanstack/react-virtual` w InventoryTab i DatabaseTab.
+    - [ ] Unified toast system (`react-hot-toast`), usunięcie `alert()`.
+    - [ ] Shared UI components: `Card`, `SectionHeader`, `ActionButton`.
+
+### Walidacja końcowa
+
+- [ ] `go test -v ./backend/core/...` — PASS
+- [ ] `go test -v ./tests/roundtrip_test.go` — 4/4 PASS (PS4, PC, PS4→PC, PC→PS4)
+- [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
+- [ ] `cd frontend && npm run lint` — 0 błędów
+- [ ] `make build` — OK
+
+---
+
+## Phase 19b: Quantity Hard Cap Enforcement ✅
 
 > **Cel:** Uniemożliwić ustawienie większej ilości itemów niż dozwolone w bazie danych (MaxInventory / MaxStorage).
 > Przekroczenie limitów ilościowych jest wykrywane przez serwery FromSoftware i grozi banem konta.
@@ -668,6 +704,18 @@ Wymaga weryfikacji z `Final.py`.
     - [ ] `go build ./backend/... && go build .` — 0 błędów
     - [ ] `cd frontend && npx tsc --noEmit` — 0 błędów
     - [ ] `cd frontend && npm run lint` — 0 błędów
+
+---
+
+## Phase 21: Advanced Safety & UX 📋
+
+> **Zależność:** Wymaga ukończonego Phase 20.
+> **Szczegóły architektoniczne:** [`gemini/REFACTOR.md` §15](REFACTOR.md)
+
+- [ ] **21.1. Write-ahead validation** — `validateSlotIntegrity()` przed każdym `SaveFile()` jako ostatnia linia obrony przed zapisaniem uszkodzonego save'a.
+- [ ] **21.2. `updateItemsAndSync()` transactionality** — walidacja offsetów przed startem zapisu qty, rollback na kopii `slot.Data` przy błędzie. Migracja na `SlotAccessor`.
+- [ ] **21.3. Undo/redo** — deep copy `slot.Data` przed edycją, stack operacji w `App`, przycisk "Revert" w UI.
+- [ ] **21.4. Save file diffing** — porównanie przed/po zapisie, UI dialog "Review Changes" z listą modyfikacji.
 
 ---
 
