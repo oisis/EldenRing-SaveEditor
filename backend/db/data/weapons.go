@@ -395,8 +395,6 @@ var Weapons = map[uint32]ItemData{
 	0x0175FE30: {Name: "Lamenting Visage", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/lamenting_visage.png"},
 	0x02915940: {Name: "Arbalest", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/arbalest.png"},
 	0x02A70420: {Name: "Rabbath's Cannon", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/rabbaths_cannon.png"},
-
-	0x0311D3E0: {Name: "Igon's Harpoon", Category: "melee_armaments", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/melee_armaments/igons_harpoon.png"},
 	0x039B2820: {Name: "Dryleaf Arts", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/dryleaf_arts.png"},
 	0x039B2A14: {Name: "Flame Art Dryleaf Arts", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/flame_art_dryleaf_arts.png"},
 	0x039B4F30: {Name: "Dane's Footwork", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/danes_footwork.png"},
@@ -826,8 +824,6 @@ var Weapons = map[uint32]ItemData{
 	0x8175FE30: {Name: "Lamenting Visage", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/lamenting_visage.png"},
 	0x82915940: {Name: "Arbalest", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/arbalest.png"},
 	0x82A70420: {Name: "Rabbath's Cannon", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/rabbaths_cannon.png"},
-
-	0x8311D3E0: {Name: "Igon's Harpoon", Category: "melee_armaments", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/melee_armaments/igons_harpoon.png"},
 	0x839B2820: {Name: "Dryleaf Arts", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/dryleaf_arts.png"},
 	0x839B2A14: {Name: "Flame Art Dryleaf Arts", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/flame_art_dryleaf_arts.png"},
 	0x839B4F30: {Name: "Dane's Footwork", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/danes_footwork.png"},

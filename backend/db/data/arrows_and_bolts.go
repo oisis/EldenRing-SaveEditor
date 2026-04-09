@@ -127,4 +127,6 @@ var ArrowsAndBolts = map[uint32]ItemData{
 	0x830ACF00: {Name: "Radahn's Spear", Category: "arrows_and_bolts", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/radahns_spear.png"},
 	0x0319EA30: {Name: "Black-Key Bolt", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/black_key_bolt.png"},
 	0x8319EA30: {Name: "Black-Key Bolt", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/black_key_bolt.png"},
+	0x8311D3E0: {Name: "Igon's Harpoon", Category: "melee_armaments", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/igons_harpoon.png"},
+	0x0311D3E0: {Name: "Igon's Harpoon", Category: "melee_armaments", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/igons_harpoon.png"},
 }
