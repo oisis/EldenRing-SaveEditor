@@ -2,6 +2,7 @@ import {useEffect, useState} from 'react';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
+import {CategorySelect} from './CategorySelect';
 
 interface DatabaseTabProps {
     columnVisibility: {
@@ -13,6 +14,8 @@ interface DatabaseTabProps {
     onItemsAdded?: () => void;
     addSettings: AddSettings;
     showFlaggedItems: boolean;
+    category: string;
+    setCategory: (value: string) => void;
 }
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
@@ -20,9 +23,8 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems, category, setCategory}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
-    const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
     const [loading, setLoading] = useState(false);
@@ -46,7 +48,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     const [addToStorage, setAddToStorage] = useState(false);
     const [storageMax, setStorageMax] = useState(false);
     const [storageQtyVal, setStorageQtyVal] = useState(1);
-    const [copies, setCopies] = useState(1);
 
     // Icon preview
     const [selectedIcon, setSelectedIcon] = useState<{name: string, path: string} | null>(null);
@@ -99,20 +100,29 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         if (!confirmModal || isSaving) return;
         setIsSaving(true);
         try {
-            const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
-            const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
+            const baseIds = confirmModal.map(i => i.id);
 
-            // For non-stackable items, repeat each id `copies` times to add multiple copies.
-            const ids = modalNonStackable && copies > 1
-                ? confirmModal.flatMap(i => Array<number>(copies).fill(i.id))
-                : confirmModal.map(i => i.id);
+            if (modalNonStackable) {
+                // Non-stackable: separate calls for inv and storage (different copy counts).
+                if (addToInv && invQtyVal > 0) {
+                    const ids = invQtyVal > 1
+                        ? confirmModal.flatMap(i => Array<number>(invQtyVal).fill(i.id))
+                        : baseIds;
+                    await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
+                }
+                if (addToStorage && storageQtyVal > 0) {
+                    const ids = storageQtyVal > 1
+                        ? confirmModal.flatMap(i => Array<number>(storageQtyVal).fill(i.id))
+                        : baseIds;
+                    await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                }
+            } else {
+                // Stackable: single call with qty values.
+                const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
+                const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
+                await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty);
+            }
 
-            await AddItemsToCharacter(
-                charIndex,
-                ids,
-                upgrade25, upgrade10, infuseOffset, upgradeAsh,
-                invQty, storQty
-            );
             setConfirmModal(null);
             setSelectedDbItems(new Set());
             onItemsAdded?.();
@@ -130,7 +140,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         setAddToStorage(true);
         setStorageMax(false);
         setStorageQtyVal(1);
-        setCopies(1);
         setConfirmModal(items);
     };
 
@@ -199,12 +208,15 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 <input
                                     type="number"
                                     min={1}
-                                    max={modalNonStackable ? copies : modalMaxInv}
-                                    value={modalNonStackable ? copies : (invMax ? modalMaxInv : invQtyVal)}
-                                    disabled={!addToInv || invMax || modalNonStackable}
-                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalMaxInv, parseInt(e.target.value) || 1)))}
+                                    max={modalNonStackable ? 99 : modalMaxInv}
+                                    value={invMax ? modalMaxInv : invQtyVal}
+                                    disabled={!addToInv || invMax}
+                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxInv, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
+                                {modalNonStackable && (
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
+                                )}
                                 {!modalNonStackable && modalMaxInv > 1 && (
                                     <div
                                         onClick={() => addToInv && setInvMax(!invMax)}
@@ -230,12 +242,15 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 <input
                                     type="number"
                                     min={1}
-                                    max={modalNonStackable ? copies : modalMaxStorage}
-                                    value={modalNonStackable ? copies : (storageMax ? modalMaxStorage : storageQtyVal)}
-                                    disabled={!addToStorage || storageMax || modalNonStackable}
-                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalMaxStorage, parseInt(e.target.value) || 1)))}
+                                    max={modalNonStackable ? 99 : modalMaxStorage}
+                                    value={storageMax ? modalMaxStorage : storageQtyVal}
+                                    disabled={!addToStorage || storageMax}
+                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorage, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
+                                {modalNonStackable && (
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
+                                )}
                                 {!modalNonStackable && modalMaxStorage > 1 && (
                                     <div
                                         onClick={() => addToStorage && setStorageMax(!storageMax)}
@@ -249,20 +264,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 )}
                             </div>
                         </div>
-
-                        {modalNonStackable && (
-                            <div className="flex items-center space-x-3 pt-1">
-                                <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Copies</span>
-                                <input
-                                    type="number"
-                                    min={1}
-                                    max={99}
-                                    value={copies}
-                                    onChange={e => setCopies(Math.max(1, Math.min(99, parseInt(e.target.value) || 1)))}
-                                    className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
-                                />
-                            </div>
-                        )}
 
                         {modalMixedMaxes && (
                             <p className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5">
@@ -286,45 +287,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
             <div className="flex items-center justify-between bg-muted/10 p-4 rounded-xl border border-border/50 backdrop-blur-sm sticky top-0 z-20">
                 <div className="flex items-center space-x-4 flex-1">
                     {/* Filter (first) */}
-                    <div className="relative w-56 shrink-0">
-                        <select
-                            value={category}
-                            onChange={e => setCategory(e.target.value)}
-                            className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
-                        >
-                            <option value="all">All Items</option>
-                            <optgroup label="Armaments" className="bg-background text-foreground">
-                                <option value="melee_armaments">Melee Armaments</option>
-                                <option value="ranged_and_catalysts">Ranged Weapons &amp; Catalysts</option>
-                                <option value="arrows_and_bolts">Arrows &amp; Bolts</option>
-                                <option value="shields">Shields</option>
-                                <option value="ashes_of_war">Ashes of War</option>
-                            </optgroup>
-                            <optgroup label="Armor" className="bg-background text-foreground">
-                                <option value="head">Head</option>
-                                <option value="chest">Chest</option>
-                                <option value="arms">Arms</option>
-                                <option value="legs">Legs</option>
-                            </optgroup>
-                            <optgroup label="Accessories" className="bg-background text-foreground">
-                                <option value="talismans">Talismans</option>
-                            </optgroup>
-                            <optgroup label="Magic" className="bg-background text-foreground">
-                                <option value="sorceries">Sorceries</option>
-                                <option value="incantations">Incantations</option>
-                            </optgroup>
-                            <optgroup label="Items" className="bg-background text-foreground">
-                                <option value="ashes">Spirit Ashes</option>
-                                <option value="tools">Tools</option>
-                                <option value="crafting_materials">Crafting Materials</option>
-                                <option value="bolstering_materials">Bolstering Materials</option>
-                                <option value="key_items">Key Items</option>
-                            </optgroup>
-                        </select>
-                        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                            <svg className="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 9l-7 7-7-7"/></svg>
-                        </div>
-                    </div>
+                    <CategorySelect value={category} onChange={setCategory} className="w-56 shrink-0" />
 
                     {/* Search (second) */}
                     <div className="relative flex-1 max-w-md group">

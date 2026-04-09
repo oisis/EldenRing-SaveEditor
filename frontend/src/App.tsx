@@ -40,6 +40,7 @@ function App() {
         const saved = localStorage.getItem('setting:showFlaggedItems');
         return saved === null ? true : saved === 'true';
     });
+    const [category, setCategory] = useState('all');
 
     const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
 
@@ -242,6 +243,8 @@ function App() {
                                     onItemsAdded={() => setInventoryVersion(v => v + 1)}
                                     addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
                                     showFlaggedItems={showFlaggedItems}
+                                    category={category}
+                                    setCategory={setCategory}
                                 />
                             </div>
                         ) : activeTab === 'settings' ? (
@@ -274,7 +277,7 @@ function App() {
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} />}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>

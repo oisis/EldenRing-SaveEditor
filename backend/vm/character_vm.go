@@ -2,7 +2,6 @@ package vm
 
 import (
 	"encoding/binary"
-	"fmt"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 	"unicode/utf16"
@@ -107,11 +106,9 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				return
 			}
 
-			// Append upgrade suffix for upgraded/infused weapons
 			var currentUpgrade uint32
 			if baseID != itemID && itemID > baseID {
 				currentUpgrade = itemID - baseID
-				name = fmt.Sprintf("%s +%d", name, currentUpgrade)
 			}
 
 			displayQuantity := item.Quantity
