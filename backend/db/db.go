@@ -94,10 +94,10 @@ func findAshBase(baseName string, idPrefix uint32) (data.ItemData, uint32) {
 	return data.ItemData{}, 0
 }
 
-// GetItemDataFuzzy returns item metadata for an exact ID, or falls back to a base lookup for:
-//   - Spirit ashes (0x40... PC or 0xB0... PS4): each upgrade level is a separate DB entry;
-//     this finds the base (+0) entry so currentUpgrade can be computed from the ID difference.
-//   - Upgraded/infused weapons: PS4 (0x80...) and PC (0x00...) via byte-masked base search.
+// GetItemDataFuzzy returns item metadata for an exact ID, or falls back to:
+//   - Handle→ItemID conversion: for stackable items read from inventory (0xA0→0x20, 0xB0→0x40)
+//   - Spirit ashes: finds base (+0) entry so currentUpgrade can be computed from ID difference.
+//   - Upgraded/infused weapons: byte-masked base search for 0x00... weapon IDs.
 //
 // The returned ItemData.Name is the base name without "+N" (caller appends "+N" if needed).
 func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
@@ -116,26 +116,31 @@ func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
 
 	prefix := id & 0xF0000000
 
-	// PS4 spirit ashes use 0xB0... goods IDs; the DB stores them as 0x40... PC IDs.
-	if prefix == 0xB0000000 {
-		pcID := (id & 0x0FFFFFFF) | 0x40000000
+	// Handle prefix → item ID prefix conversion for stackable items.
+	// Inventory stores handles with GaItem prefixes (0xA0 talismans, 0xB0 goods),
+	// but DB uses item ID prefixes (0x20, 0x40). Convert and retry.
+	if prefix == 0xA0000000 || prefix == 0xB0000000 {
+		pcID := HandleToItemID(id)
 		pcEntry := GetItemData(pcID)
-		if pcEntry.Name != "" && pcEntry.Category == "ashes" {
-			baseName := pcEntry.Name
-			if idx := strings.Index(baseName, " +"); idx >= 0 {
-				baseName = baseName[:idx]
+		if pcEntry.Name != "" {
+			// Spirit ashes: find base (+0) for upgrade calculation
+			if pcEntry.Category == "ashes" {
+				baseName := pcEntry.Name
+				if idx := strings.Index(baseName, " +"); idx >= 0 {
+					baseName = baseName[:idx]
+				}
+				if entry, baseID := findAshBase(baseName, 0x40000000); baseID != 0 {
+					return entry, baseID
+				}
 			}
-			if entry, baseID := findAshBase(baseName, 0xB0000000); baseID != 0 {
-				return entry, baseID
-			}
-			return pcEntry, id
+			return pcEntry, pcID
 		}
 	}
 
-	// Weapon fuzzy search: handles PS4 (0x80...) and PC (0x00...) upgraded/infused weapons.
+	// Weapon fuzzy search: upgraded/infused weapons with 0x00... item IDs.
 	// Uses a byte-masked comparison (id & 0xFFFFFF00) which is accurate for standard upgrades
 	// (offset 0–25). Heavily infused weapons (offset > 255) are not matched here.
-	if prefix == 0x80000000 || prefix == 0 {
+	if prefix == 0 {
 		weaponMaps := []map[uint32]data.ItemData{data.Weapons, data.RangedAndCatalysts, data.Shields}
 		masked := id & 0xFFFFFF00
 		for _, m := range weaponMaps {
@@ -180,8 +185,7 @@ func GetItemName(id uint32, category string) string {
 }
 
 // IsArrowID returns true if the given item ID corresponds to an arrow or bolt.
-// Arrows/bolts have 0x82... prefix (PS4) or 0x02... prefix (PC) and are stackable despite
-// appearing weapon-like in the GaItems type system.
+// Arrows have 0x02.../0x03... item IDs (weapon subtype) but are stackable in inventory.
 func IsArrowID(id uint32) bool {
 	_, ok := data.ArrowsAndBolts[id]
 	return ok
@@ -205,52 +209,64 @@ func GetItemCategoryFromHandle(handle uint32) string {
 	}
 }
 
-// ps4Prefix maps PS4 item-type prefixes to their PC equivalents.
-// All data maps store both variants; this lets us pick the right one per platform.
-//
-//	PS4 → PC: 0x80→0x00 (Weapon), 0x90→0x10 (Armor), 0xA0→0x20 (Accessory),
-//	          0xB0→0x40 (Goods), 0xC0→0x80 (AoW)
-func toPCPrefix(ps4 uint32) uint32 {
-	switch ps4 {
+// HandleToItemID converts a GaItem handle prefix to the corresponding item ID prefix.
+// Handles always use GaItem type prefixes (0x80/0x90/0xA0/0xB0/0xC0) while item IDs
+// in the database use item type prefixes (0x00/0x10/0x20/0x40/0x80).
+// For stackable items (talismans, goods) where handle=id with handle prefix,
+// this recovers the DB-compatible item ID.
+func HandleToItemID(handle uint32) uint32 {
+	prefix := handle & 0xF0000000
+	lower := handle & 0x0FFFFFFF
+	switch prefix {
 	case 0x80000000:
-		return 0x00000000
+		return lower // weapon: 0x80→0x00
 	case 0x90000000:
-		return 0x10000000
+		return lower | 0x10000000 // armor: 0x90→0x10
 	case 0xA0000000:
-		return 0x20000000
+		return lower | 0x20000000 // talisman: 0xA0→0x20
 	case 0xB0000000:
-		return 0x40000000
+		return lower | 0x40000000 // goods: 0xB0→0x40
 	case 0xC0000000:
-		return 0x80000000
+		return lower | 0x80000000 // AoW: 0xC0→0x80
 	default:
-		return ps4
+		return handle
+	}
+}
+
+// ItemIDToHandlePrefix returns the GaItem handle prefix for a given item ID.
+// Item ID prefix (0x00/0x10/0x20/0x40/0x80) → handle prefix (0x80/0x90/0xA0/0xB0/0xC0).
+func ItemIDToHandlePrefix(id uint32) uint32 {
+	switch id & 0xF0000000 {
+	case 0x00000000:
+		return 0x80000000 // weapon
+	case 0x10000000:
+		return 0x90000000 // armor
+	case 0x20000000:
+		return 0xA0000000 // talisman
+	case 0x40000000:
+		return 0xB0000000 // goods
+	case 0x80000000:
+		return 0xC0000000 // AoW
+	default:
+		return 0x80000000 // fallback: weapon
 	}
 }
 
 // GetItemsByCategory returns a sorted list of items for a given category.
-// platform must be "PC" or "PS4" — it controls which ID variant is returned.
+// The database stores only PC-style item IDs (0x00=weapon, 0x10=armor, 0x20=talisman,
+// 0x40=goods, 0x80=AoW). Platform conversion to handle prefixes happens at runtime
+// in AddItemsToSlot (writer.go) and MapParsedSlotToVM (character_vm.go).
 func GetItemsByCategory(category, platform string) []ItemEntry {
 	if category == "all" {
 		return GetAllItems(platform)
 	}
 
-	isPC := platform == "PC"
-
 	var items []ItemEntry
 
-	// processMap adds items from source to the result list.
-	// ps4Prefix is the PS4-side upper nibble for this data map; it is converted to the
-	// PC equivalent when platform == "PC".
-	processMap := func(source map[uint32]data.ItemData, catName string, ps4Prefix uint32) {
-		wantPrefix := ps4Prefix
-		if isPC {
-			wantPrefix = toPCPrefix(ps4Prefix)
-		}
+	// processMap adds all items from source to the result list.
+	processMap := func(source map[uint32]data.ItemData, catName string) {
 		for id, item := range source {
 			if item.Name == "" || item.Name == "Unarmed" {
-				continue
-			}
-			if id&0xF0000000 != wantPrefix {
 				continue
 			}
 			items = append(items, ItemEntry{
@@ -268,42 +284,35 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 
 	switch category {
 	case "melee_armaments":
-		processMap(data.Weapons, "melee_armaments", 0x80000000)
+		processMap(data.Weapons, "melee_armaments")
 		items = filterInfuseVariants(items)
 	case "ranged_and_catalysts":
-		processMap(data.RangedAndCatalysts, "ranged_and_catalysts", 0x80000000)
+		processMap(data.RangedAndCatalysts, "ranged_and_catalysts")
 		items = filterInfuseVariants(items)
 	case "shields":
-		processMap(data.Shields, "shields", 0x80000000)
+		processMap(data.Shields, "shields")
 		items = filterInfuseVariants(items)
 	case "head":
-		processMap(data.Helms, "head", 0x90000000)
+		processMap(data.Helms, "head")
 	case "arms":
-		processMap(data.Arms, "arms", 0x90000000)
+		processMap(data.Arms, "arms")
 	case "legs":
-		processMap(data.Legs, "legs", 0x90000000)
+		processMap(data.Legs, "legs")
 	case "chest":
-		processMap(data.Chest, "chest", 0x90000000)
+		processMap(data.Chest, "chest")
 	case "talismans":
-		processMap(data.Talismans, "talismans", 0xA0000000)
+		processMap(data.Talismans, "talismans")
 	case "ashes_of_war":
-		processMap(data.Aows, "ashes_of_war", 0xC0000000)
+		processMap(data.Aows, "ashes_of_war")
 	case "ashes":
-		// StandardAshes has both 0x40... (PC) and 0xB0... (PS4) entries for each upgrade level.
-		// Iterate only 0x40... base (+0) entries and remap to PS4 prefix when needed.
-		ashTargetPrefix := uint32(0xB0000000)
-		if isPC {
-			ashTargetPrefix = 0x40000000
-		}
+		// StandardAshes stores each upgrade level as a separate entry.
+		// Only return base (+0) entries — filter out " +N" variants.
 		for id, item := range data.StandardAshes {
-			if id&0xF0000000 != 0x40000000 {
-				continue // always iterate from PC entries to avoid duplicates
-			}
 			if item.Name == "" || strings.Contains(item.Name, " +") {
 				continue
 			}
 			items = append(items, ItemEntry{
-				ID:           (id & 0x0FFFFFFF) | ashTargetPrefix,
+				ID:           id,
 				Name:         item.Name,
 				Category:     "ashes",
 				MaxInventory: item.MaxInventory,
@@ -314,50 +323,20 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 			})
 		}
 	case "gestures":
-		processMap(data.Gestures, "gestures", 0xB0000000)
+		processMap(data.Gestures, "gestures")
 	case "sorceries":
-		processMap(data.Sorceries, "sorceries", 0xB0000000)
+		processMap(data.Sorceries, "sorceries")
 	case "incantations":
-		processMap(data.Incantations, "incantations", 0xB0000000)
+		processMap(data.Incantations, "incantations")
 	case "crafting_materials":
-		processMap(data.CraftingMaterials, "crafting_materials", 0xB0000000)
+		processMap(data.CraftingMaterials, "crafting_materials")
 	case "bolstering_materials":
-		processMap(data.BolsteringMaterials, "bolstering_materials", 0xB0000000)
+		processMap(data.BolsteringMaterials, "bolstering_materials")
 	case "arrows_and_bolts":
-		// ArrowsAndBolts has both PC (0x02...) and PS4 (0x82...) entries.
-		// Filter by platform bit 31.
-		for id, item := range data.ArrowsAndBolts {
-			if item.Name == "" {
-				continue
-			}
-			hasPS4Bit := id&0x80000000 != 0
-			if isPC && hasPS4Bit {
-				continue
-			}
-			if !isPC && !hasPS4Bit {
-				continue
-			}
-			items = append(items, ItemEntry{
-				ID:           id,
-				Name:         item.Name,
-				Category:     "arrows_and_bolts",
-				MaxInventory: item.MaxInventory,
-				MaxStorage:   item.MaxStorage,
-				MaxUpgrade:   item.MaxUpgrade,
-				IconPath:     item.IconPath,
-				Flags:        item.Flags,
-			})
-		}
+		processMap(data.ArrowsAndBolts, "arrows_and_bolts")
 	case "tools":
-		wantPrefix := uint32(0xB0000000)
-		if isPC {
-			wantPrefix = 0x40000000
-		}
 		for id, item := range data.Tools {
 			if item.Name == "" {
-				continue
-			}
-			if id&0xF0000000 != wantPrefix {
 				continue
 			}
 			// Filter upgraded Flask variants — only keep base versions (no " +N" suffix)
@@ -376,7 +355,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 			})
 		}
 	case "key_items":
-		processMap(data.KeyItems, "key_items", 0xB0000000)
+		processMap(data.KeyItems, "key_items")
 	}
 
 	sort.Slice(items, func(i, j int) bool {

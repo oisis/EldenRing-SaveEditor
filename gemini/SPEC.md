@@ -359,15 +359,54 @@ Handle 0xCxxxxxxx → Ash of War → itemID = GaMap[handle]
 
 ## 7. Item IDs — Normalizacja i Infuse System
 
-### 7.1. Kategorie ID (górne bity)
+### 7.1. Dwa odrębne systemy prefiksów
+
+Elden Ring używa **dwóch niezależnych systemów prefiksów** które NIE wolno mylić:
+
+#### A) Item ID Prefix — identyfikator przedmiotu w bazie danych gry
+
+Prefiks `InventoryItemType` (Rust reference) — określa **typ przedmiotu**. Identyczny na PC i PS4.
 
 | Prefix (górne 4 bity) | Typ | Przykład |
 |---|---|---|
-| `0x0` | Broń (baza w DB) | `0x00C95000` = Dagger |
-| `0x1` | Zbroja | `0x10000000`+ |
-| `0x2` | Talizman | `0x20000000`+ |
-| `0x4` | Przedmiot / konsumable | `0x40000000`+ |
-| `0x8` | AoW (w slocie broń) | `0x80000000`+ |
+| `0x0` | Broń (Weapon) | `0x00C95000` = Dagger |
+| `0x1` | Zbroja (Armor) | `0x10000000`+ |
+| `0x2` | Talizman (Accessory) | `0x20000000`+ |
+| `0x4` | Przedmiot / konsumable (Goods) | `0x40000000`+ |
+| `0x8` | Ash of War (AoW) | `0x80000000`+ |
+
+> Strzały/bełty używają prefiksu `0x02`/`0x03` — to podtyp broni, NIE osobna kategoria.
+> Przykład: `0x02FAF080` = Arrow (na obu platformach).
+
+#### B) Handle Prefix (GaItemHandle) — identyfikator instancji w GaItems
+
+Prefiks `InventoryGaitemType` (Rust reference) — określa **typ handle'a w inwentarzu**.
+
+| Prefix (górne 4 bity) | Typ | Rozmiar rekordu GaItems |
+|---|---|---|
+| `0x8` | Broń (Weapon) | 21 bajtów |
+| `0x9` | Zbroja (Armor) | 16 bajtów |
+| `0xA` | Talizman (Accessory) | 8 bajtów |
+| `0xB` | Przedmiot / konsumable (Goods) | 8 bajtów |
+| `0xC` | Ash of War (AoW) | 8 bajtów |
+
+> Handle prefix ≠ Item ID prefix! Dagger ma itemID `0x00C95000` ale handle `0x80xxxxxx`.
+
+#### C) Mapowanie Handle→ItemID i stackable items
+
+Dla broni, zbroi i AoW: handle jest **unikalnym** identyfikatorem instancji, a GaMap przechowuje
+mapowanie `handle → itemID`. Wiele handle'i może wskazywać na ten sam itemID (np. dwa Daggery).
+
+Dla stackable items (goods, talismans): handle **IS** itemID (z zamienionym prefiksem).
+Na PS4 stackable handle ma prefix `0xB0`, na PC `0x40` — to **jedyne** rozróżnienie platformowe.
+
+```
+PC:  handle = 0x40000334 → itemID = 0x40000334 (Boiled Crab, goods prefix)
+PS4: handle = 0xB0000334 → itemID = 0x40000334 (ten sam item, ale handle ma 0xB0)
+```
+
+Baza danych przechowuje **wyłącznie PC-style item IDs** (`0x00`, `0x10`, `0x20`, `0x40`, `0x80`).
+Konwersja handle↔itemID dla stackable items odbywa się w runtime.
 
 ### 7.2. Upgrade Level
 
@@ -614,16 +653,21 @@ type ItemData struct {
 
 ### 13.3. Kategorie
 
-| Kategoria | Handle prefix | Klucz DB |
-|---|---|---|
-| weapons, bows, shields, staffs, seals | `0x8` | `data.Weapons`, `data.Bows`, ... |
-| helms, chest, gauntlets, leggings | `0x9` | `data.Helms`, `data.Chest`, ... |
-| talismans | `0xA` | `data.Talismans` |
-| consumables, crafting, flasks, … | `0xB` | `data.Consumables`, ... |
-| aows (Ashes of War) | `0xC` | `data.Aows` |
-| ashes (Spirit Ashes) | `0x8` | `data.StandardAshes` |
-| sorceries, incantations | `0xB` | `data.Sorceries`, ... |
-| keyitems | `0xB` | `data.Keyitems` |
+| Kategoria | Handle prefix | Item ID prefix | Klucz DB |
+|---|---|---|---|
+| weapons, bows, shields, staffs, seals | `0x8` | `0x0` | `data.Weapons`, `data.Bows`, ... |
+| arrows, bolts | `0x8` | `0x0` (sub: `0x02`, `0x03`) | `data.ArrowsAndBolts` |
+| helms, chest, gauntlets, leggings | `0x9` | `0x1` | `data.Helms`, `data.Chest`, ... |
+| talismans | `0xA` | `0x2` | `data.Talismans` |
+| consumables, crafting, flasks, tools | `0xB` | `0x4` | `data.Tools`, `data.Consumables`, ... |
+| aows (Ashes of War) | `0xC` | `0x8` | `data.Aows` |
+| ashes (Spirit Ashes) | `0xB` | `0x4` | `data.StandardAshes` |
+| sorceries, incantations | `0xB` | `0x4` | `data.Sorceries`, ... |
+| keyitems | `0xB` | `0x4` | `data.Keyitems` |
+
+> **Ważne**: Baza danych przechowuje **wyłącznie PC-style item IDs** (kolumna "Item ID prefix").
+> Handle prefix to osobny system — patrz §7.1. Nie ma wariantów "PS4 ID" w bazie.
+> Jedyna konwersja platformowa dotyczy stackable handle'i (goods/ashes): `0x40↔0xB0` w runtime.
 
 ---
 

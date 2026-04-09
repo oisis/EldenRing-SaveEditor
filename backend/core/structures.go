@@ -147,7 +147,7 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 func (s *SaveSlot) calculateDynamicOffsets() error {
 	sa := NewSlotAccessor(s.Data)
 
-	s.PlayerDataOffset = s.InventoryEnd + DynPlayerData
+	s.PlayerDataOffset = s.MagicOffset
 
 	spEffect := s.PlayerDataOffset + DynSpEffect
 	equipedItemIndex := spEffect + DynEquipedItemIndex
@@ -211,8 +211,8 @@ func (s *SaveSlot) validateOffsetChain() error {
 
 	checks := []check{
 		{"MagicOffset", s.MagicOffset, MinMagicOffset, SlotSize},
-		{"InventoryEnd", s.InventoryEnd, GaItemsStart, s.MagicOffset},
-		{"PlayerDataOffset", s.PlayerDataOffset, s.InventoryEnd, SlotSize},
+		{"InventoryEnd", s.InventoryEnd, GaItemsStart, s.MagicOffset - DynPlayerData + 1},
+		{"PlayerDataOffset", s.PlayerDataOffset, s.MagicOffset, SlotSize},
 		{"FaceDataOffset", s.FaceDataOffset, s.PlayerDataOffset, SlotSize},
 		{"StorageBoxOffset", s.StorageBoxOffset, s.FaceDataOffset, SlotSize},
 	}
@@ -226,7 +226,7 @@ func (s *SaveSlot) validateOffsetChain() error {
 
 	// Monotonicity: offsets MUST be strictly increasing in this order
 	if !(s.InventoryEnd <= s.MagicOffset &&
-		s.MagicOffset < s.PlayerDataOffset &&
+		s.MagicOffset <= s.PlayerDataOffset &&
 		s.PlayerDataOffset < s.FaceDataOffset &&
 		s.FaceDataOffset < s.StorageBoxOffset) {
 		return fmt.Errorf("offset chain order violated: "+
@@ -363,8 +363,13 @@ func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
 
+	gaLimit := s.MagicOffset - DynPlayerData // writable GaItems region ends 0x1B0 before Magic
+	if gaLimit < start {
+		gaLimit = start
+	}
+
 	lastEnd := start
-	for curr+GaRecordItem <= s.MagicOffset {
+	for curr+GaRecordItem <= gaLimit {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 

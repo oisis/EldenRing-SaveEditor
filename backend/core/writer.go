@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
+	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 )
 
 type Writer struct {
@@ -41,38 +43,39 @@ func (w *Writer) WriteBytes(v []byte) error {
 
 // AddItemsToSlot adds multiple items to a specific save slot.
 // invQty and storageQty control quantities: 0 = skip, -1 = use provided max from caller, >0 = exact qty.
-// forceStackable treats items as stackable goods (handle=id, 21-byte record) regardless of ID prefix.
-// Used for arrows/bolts which have weapon-like 0x8x... IDs but are stackable in inventory.
+// forceStackable treats items as stackable (reuse existing GaMap handle) regardless of type.
+// Used for arrows/bolts which have weapon-like IDs but are stackable in inventory.
 func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, forceStackable bool) error {
 	for _, id := range itemIDs {
-		// 1. Determine item type and handle prefix from upper nibble
-		var prefix uint32
+		// 1. Convert item ID prefix to handle prefix and determine record size.
+		// DB stores PC-style item IDs (0x00=weapon, 0x10=armor, 0x20=talisman, 0x40=goods, 0x80=AoW).
+		// Handles always use GaItem prefixes (0x80=weapon, 0x90=armor, 0xA0=talisman, 0xB0=goods, 0xC0=AoW).
+		handlePrefix := db.ItemIDToHandlePrefix(id)
 		var recordSize int
-		switch id & GaHandleTypeMask {
+		switch handlePrefix {
 		case ItemTypeWeapon:
-			prefix = ItemTypeWeapon
 			recordSize = GaRecordWeapon
 		case ItemTypeArmor:
-			prefix = ItemTypeArmor
 			recordSize = GaRecordArmor
 		case ItemTypeAccessory:
-			prefix = ItemTypeAccessory
 			recordSize = GaRecordAccessory
 		case ItemTypeItem:
-			prefix = ItemTypeItem
 			recordSize = GaRecordItem
 		case ItemTypeAow:
-			prefix = ItemTypeAow
 			recordSize = GaRecordAoW
 		default:
-			prefix = ItemTypeWeapon
 			recordSize = GaRecordWeapon
 		}
 
-		// 2. Generate a unique handle.
-		// For stackable items (goods, talismans, arrows), reuse existing handle if item already in GaMap.
+		// 2. Determine if item is stackable (handle=id pattern).
+		// Stackable: talismans (0xA0), goods (0xB0). Handle = handlePrefix | lower bits of item ID.
+		// Non-stackable: weapons (0x80), armor (0x90), AoW (0xC0). Handle = unique, GaMap indirection.
+		// forceStackable: arrows — weapon-type but stackable; reuse GaMap handle if found.
+		isStackable := handlePrefix == ItemTypeItem || handlePrefix == ItemTypeAccessory
+
+		// 3. Search for existing handle in GaMap (for stackable reuse).
 		handle := uint32(0)
-		if prefix == ItemTypeItem || prefix == ItemTypeAccessory || prefix == ItemTypeAow || forceStackable {
+		if isStackable || forceStackable {
 			for h, i := range slot.GaMap {
 				if i == id {
 					handle = h
@@ -82,16 +85,14 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		}
 
 		if handle == 0 {
-			// For stackable goods (0xB0) and talismans (0xA0), the game convention
-			// is handle == ID (no indirection). character_vm.go reads these back as
-			// itemID = item.GaItemHandle, so the handle must equal the item ID.
-			// Arrows (forceStackable) also use handle == ID for stacking.
-			// Weapons, armor, and AoW use separate handle→ID indirection via GaMap.
-			if prefix == ItemTypeItem || prefix == ItemTypeAccessory || forceStackable {
-				handle = id
+			if isStackable {
+				// Stackable goods/talismans: handle = handlePrefix | lower bits of item ID.
+				// The game reads these as: itemID = HandleToItemID(handle).
+				handle = (id & 0x0FFFFFFF) | handlePrefix
 			} else {
+				// Weapons, armor, AoW, and arrows: generate unique handle with GaMap indirection.
 				var err error
-				handle, err = generateUniqueHandle(slot, prefix)
+				handle, err = generateUniqueHandle(slot, handlePrefix)
 				if err != nil {
 					return err
 				}
@@ -102,7 +103,7 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			slot.GaMap[handle] = id
 		}
 
-		// 3. Add to Inventory
+		// 4. Add to Inventory
 		if invQty != 0 {
 			qty := uint32(invQty)
 			if err := addToInventory(slot, handle, qty, false); err != nil {
@@ -110,7 +111,7 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			}
 		}
 
-		// 4. Add to Storage
+		// 5. Add to Storage
 		if storageQty != 0 {
 			qty := uint32(storageQty)
 			if err := addToInventory(slot, handle, qty, true); err != nil {
@@ -141,10 +142,11 @@ func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 	if err := sa.CheckBounds(slot.InventoryEnd, size, "writeGaItem"); err != nil {
 		return err
 	}
-	if slot.InventoryEnd+size >= slot.MagicOffset {
+	gaLimit := slot.MagicOffset - DynPlayerData
+	if slot.InventoryEnd+size > gaLimit {
 		return fmt.Errorf("writeGaItem: no space in GaItems section "+
-			"(InventoryEnd=0x%X + size=%d >= MagicOffset=0x%X)",
-			slot.InventoryEnd, size, slot.MagicOffset)
+			"(InventoryEnd=0x%X + size=%d > gaLimit=0x%X)",
+			slot.InventoryEnd, size, gaLimit)
 	}
 
 	// Write handle and itemID

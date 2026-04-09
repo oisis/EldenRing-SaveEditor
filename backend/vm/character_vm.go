@@ -91,8 +91,10 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			// For Weapons, Armor, and AoW, we MUST use the GaMap to find the real ItemID.
 			itemID, ok = gaMap[item.GaItemHandle]
 		} else if category != "Unknown" {
-			// For others (Talisman, Item), the handle IS the ID.
-			itemID = item.GaItemHandle
+			// For stackable items (Talisman=0xA0, Goods=0xB0), handle encodes the item ID
+			// with handle prefix. Convert back to DB-compatible item ID prefix:
+			// 0xA0→0x20 (talisman), 0xB0→0x40 (goods).
+			itemID = db.HandleToItemID(item.GaItemHandle)
 			ok = true
 		}
 

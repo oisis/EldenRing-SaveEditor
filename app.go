@@ -231,7 +231,7 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		actualInv := resolveQty(invQty, int(itemData.MaxInventory))
 		actualStorage := resolveQty(storageQty, int(itemData.MaxStorage))
 
-		// Arrows/bolts are stackable despite weapon-like 0x82... IDs.
+		// Arrows/bolts are stackable despite weapon-like IDs (0x02.../0x03...).
 		forceStackable := db.IsArrowID(finalID)
 
 		if err := core.AddItemsToSlot(slot, []uint32{finalID}, actualInv, actualStorage, forceStackable); err != nil {
