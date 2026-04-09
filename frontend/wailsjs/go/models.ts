@@ -113,6 +113,8 @@ export namespace vm {
 	    shadowRealmBlessing: number;
 	    inventory: ItemViewModel[];
 	    storage: ItemViewModel[];
+	    warnings: string[];
+	    eventFlagsAvailable: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new CharacterViewModel(source);
@@ -135,6 +137,8 @@ export namespace vm {
 	        this.shadowRealmBlessing = source["shadowRealmBlessing"];
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
 	        this.storage = this.convertValues(source["storage"], ItemViewModel);
+	        this.warnings = source["warnings"];
+	        this.eventFlagsAvailable = source["eventFlagsAvailable"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

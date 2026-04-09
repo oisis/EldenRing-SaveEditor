@@ -41,6 +41,7 @@ function App() {
         return saved === null ? true : saved === 'true';
     });
     const [category, setCategory] = useState('all');
+    const [charWarnings, setCharWarnings] = useState<string[]>([]);
 
     const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
 
@@ -76,6 +77,13 @@ function App() {
                 },
             }));
         }).catch(() => {});
+    }, [selectedChar, platform]);
+
+    useEffect(() => {
+        if (!platform) return;
+        GetCharacter(selectedChar).then(char => {
+            setCharWarnings(char?.warnings || []);
+        }).catch(() => setCharWarnings([]));
     }, [selectedChar, platform]);
 
     const handleOpenSave = async () => {
@@ -276,6 +284,14 @@ function App() {
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                {charWarnings.length > 0 && (
+                                    <div className="mx-4 mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                                        <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest">Save loaded with warnings</p>
+                                        <ul className="mt-1 text-[9px] text-yellow-600/80 list-disc list-inside">
+                                            {charWarnings.map((w, i) => <li key={i}>{w}</li>)}
+                                        </ul>
+                                    </div>
+                                )}
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}

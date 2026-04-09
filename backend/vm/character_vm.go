@@ -38,6 +38,8 @@ type CharacterViewModel struct {
 	ShadowRealmBlessing uint8           `json:"shadowRealmBlessing"`
 	Inventory           []ItemViewModel `json:"inventory"`
 	Storage             []ItemViewModel `json:"storage"`
+	Warnings            []string        `json:"warnings"`
+	EventFlagsAvailable bool            `json:"eventFlagsAvailable"`
 }
 
 func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
@@ -60,6 +62,8 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	}
 
 	vm.Name = core.UTF16ToString(data.CharacterName[:])
+	vm.Warnings = slot.Warnings
+	vm.EventFlagsAvailable = slot.EventFlagsOffset > 0
 
 	// Map Inventory
 	vm.Inventory = mapItems(slot.Inventory, slot.GaMap)
