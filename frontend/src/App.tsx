@@ -32,6 +32,7 @@ function App() {
         id: false,
         category: true
     });
+    const [showFlaggedItems, setShowFlaggedItems] = useState(true);
 
     const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
 
@@ -229,15 +230,18 @@ function App() {
                                     charIndex={selectedChar}
                                     onItemsAdded={() => setInventoryVersion(v => v + 1)}
                                     addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
+                                    showFlaggedItems={showFlaggedItems}
                                 />
                             </div>
                         ) : activeTab === 'settings' ? (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-y-auto custom-scrollbar pr-2">
-                                <SettingsTab 
-                                    theme={theme} 
-                                    setTheme={setTheme} 
-                                    columnVisibility={columnVisibility} 
+                                <SettingsTab
+                                    theme={theme}
+                                    setTheme={setTheme}
+                                    columnVisibility={columnVisibility}
                                     setColumnVisibility={setColumnVisibility}
+                                    showFlaggedItems={showFlaggedItems}
+                                    setShowFlaggedItems={setShowFlaggedItems}
                                     platform={platform}
                                     setPlatform={setPlatform}
                                     refreshSlots={refreshSlots}
@@ -259,7 +263,7 @@ function App() {
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} />}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>

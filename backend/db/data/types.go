@@ -8,4 +8,5 @@ type ItemData struct {
 	MaxStorage   uint32
 	MaxUpgrade   uint32
 	IconPath     string
+	Flags        []string
 }

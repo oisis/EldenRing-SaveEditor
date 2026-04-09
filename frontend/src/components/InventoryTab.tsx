@@ -9,9 +9,10 @@ interface InventoryTabProps {
         id: boolean;
         category: boolean;
     };
+    showFlaggedItems: boolean;
 }
 
-export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: InventoryTabProps) {
+export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, showFlaggedItems }: InventoryTabProps) {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
@@ -79,6 +80,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
         nonStackable: boolean; inInventory: boolean; inStorage: boolean;
         invQty: number; storageQty: number;
         maxInv: number; maxStorage: number; maxUpgrade: number; currentUpgrade: number; iconPath: string;
+        flags: string[];
     };
 
     // Merge inventory and storage items for display.
@@ -97,6 +99,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     invQty: 1, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                    flags: item.flags ?? [],
                 });
             } else {
                 stackableMap.set(item.id, {
@@ -106,6 +109,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     invQty: item.quantity, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                    flags: item.flags ?? [],
                 });
             }
         });
@@ -124,6 +128,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         invQty: 0, storageQty: 1,
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                        flags: item.flags ?? [],
                     });
                 }
             } else {
@@ -139,6 +144,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         invQty: 0, storageQty: item.quantity,
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                        flags: item.flags ?? [],
                     });
                 }
             }
@@ -199,10 +205,11 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
     };
 
     const filteredOwnedItems = sortItems(mergedOwnedItems.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
+        if (!showFlaggedItems && item.flags?.length > 0) return false;
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
-        
-        if (category === 'all') return matchesSearch && item.subCategory !== 'keyitems';
+
+        if (category === 'all') return matchesSearch && item.subCategory !== 'key_items';
 
         return item.subCategory === category && matchesSearch;
     }));
@@ -248,46 +255,32 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                     >
                         <option value="all">All Categories</option>
-                        <optgroup label="Equipment" className="bg-background text-foreground">
-                            <option value="weapons">Melee Weapons</option>
-                            <option value="bows">Bows & Ballistae</option>
-                            <option value="arrows_and_bolts">Arrows & Bolts</option>
+                        <optgroup label="Armaments" className="bg-background text-foreground">
+                            <option value="melee_armaments">Melee Armaments</option>
+                            <option value="ranged_and_catalysts">Ranged Weapons &amp; Catalysts</option>
+                            <option value="arrows_and_bolts">Arrows &amp; Bolts</option>
                             <option value="shields">Shields</option>
-                            <option value="staffs">Glintstone Staffs</option>
-                            <option value="seals">Sacred Seals</option>
-                            <option value="talismans">Talismans</option>
-                            <option value="aows">Ashes of War</option>
+                            <option value="ashes_of_war">Ashes of War</option>
                         </optgroup>
                         <optgroup label="Armor" className="bg-background text-foreground">
-                            <option value="helms">Helms</option>
-                            <option value="chest">Chest Armor</option>
-                            <option value="gauntlets">Gauntlets</option>
-                            <option value="leggings">Leggings</option>
+                            <option value="head">Head</option>
+                            <option value="chest">Chest</option>
+                            <option value="arms">Arms</option>
+                            <option value="legs">Legs</option>
                         </optgroup>
-                        <optgroup label="Magic & Ashes" className="bg-background text-foreground">
+                        <optgroup label="Accessories" className="bg-background text-foreground">
+                            <option value="talismans">Talismans</option>
+                        </optgroup>
+                        <optgroup label="Magic" className="bg-background text-foreground">
                             <option value="sorceries">Sorceries</option>
                             <option value="incantations">Incantations</option>
-                            <option value="ashes">Spirit Ashes</option>
                         </optgroup>
-                        <optgroup label="Items & Materials" className="bg-background text-foreground">
+                        <optgroup label="Items" className="bg-background text-foreground">
+                            <option value="ashes">Spirit Ashes</option>
+                            <option value="tools">Tools</option>
                             <option value="crafting_materials">Crafting Materials</option>
                             <option value="bolstering_materials">Bolstering Materials</option>
-                            <option value="consumables">Consumables</option>
-                        </optgroup>
-                        <optgroup label="Tools" className="bg-background text-foreground">
-                            <option value="sacred_flasks">Sacred Flasks</option>
-                            <option value="throwing_pots">Throwing Pots</option>
-                            <option value="perfume_arts">Perfume Arts</option>
-                            <option value="throwables">Throwables</option>
-                            <option value="grease">Grease</option>
-                            <option value="misc_tools">Miscellaneous Tools</option>
-                            <option value="quest_tools">Quest Tools</option>
-                            <option value="golden_runes">Golden Runes</option>
-                            <option value="remembrances">Remembrances</option>
-                            <option value="multiplayer">Multiplayer Items</option>
-                        </optgroup>
-                        <optgroup label="Progress" className="bg-background text-foreground">
-                            <option value="keyitems">Key Items</option>
+                            <option value="key_items">Key Items</option>
                         </optgroup>
                     </select>
                     <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">
@@ -378,8 +371,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                                    {item.flags?.includes('cut_content') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
+                                                    )}
+                                                    {item.flags?.includes('ban_risk') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
+                                                    )}
+                                                </div>
                                                 <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tighter">0x{item.id.toString(16).toUpperCase()}</span>
                                             </div>
                                         </td>

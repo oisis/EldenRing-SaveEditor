@@ -12,6 +12,7 @@ interface DatabaseTabProps {
     charIndex: number;
     onItemsAdded?: () => void;
     addSettings: AddSettings;
+    showFlaggedItems: boolean;
 }
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
@@ -19,7 +20,7 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
@@ -63,6 +64,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     }, [category]);
 
     const filteredItems = dbItems.filter(item => {
+        if (!showFlaggedItems && item.flags?.length > 0) return false;
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
         if (category === 'all') return matchesSearch;
@@ -291,46 +293,32 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                             className="w-full appearance-none bg-muted/30 border border-border rounded-md px-4 py-2.5 pr-10 text-[10px] font-black uppercase tracking-widest text-muted-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all cursor-pointer"
                         >
                             <option value="all">All Items</option>
-                            <optgroup label="Equipment" className="bg-background text-foreground">
-                                <option value="weapons">Melee Weapons</option>
-                                <option value="bows">Bows & Ballistae</option>
-                                <option value="arrows_and_bolts">Arrows & Bolts</option>
+                            <optgroup label="Armaments" className="bg-background text-foreground">
+                                <option value="melee_armaments">Melee Armaments</option>
+                                <option value="ranged_and_catalysts">Ranged Weapons &amp; Catalysts</option>
+                                <option value="arrows_and_bolts">Arrows &amp; Bolts</option>
                                 <option value="shields">Shields</option>
-                                <option value="staffs">Glintstone Staffs</option>
-                                <option value="seals">Sacred Seals</option>
-                                <option value="talismans">Talismans</option>
-                                <option value="aows">Ashes of War</option>
+                                <option value="ashes_of_war">Ashes of War</option>
                             </optgroup>
                             <optgroup label="Armor" className="bg-background text-foreground">
-                                <option value="helms">Helms</option>
-                                <option value="chest">Chest Armor</option>
-                                <option value="gauntlets">Gauntlets</option>
-                                <option value="leggings">Leggings</option>
+                                <option value="head">Head</option>
+                                <option value="chest">Chest</option>
+                                <option value="arms">Arms</option>
+                                <option value="legs">Legs</option>
                             </optgroup>
-                            <optgroup label="Magic & Ashes" className="bg-background text-foreground">
+                            <optgroup label="Accessories" className="bg-background text-foreground">
+                                <option value="talismans">Talismans</option>
+                            </optgroup>
+                            <optgroup label="Magic" className="bg-background text-foreground">
                                 <option value="sorceries">Sorceries</option>
                                 <option value="incantations">Incantations</option>
-                                <option value="ashes">Spirit Ashes</option>
                             </optgroup>
-                            <optgroup label="Items & Materials" className="bg-background text-foreground">
+                            <optgroup label="Items" className="bg-background text-foreground">
+                                <option value="ashes">Spirit Ashes</option>
+                                <option value="tools">Tools</option>
                                 <option value="crafting_materials">Crafting Materials</option>
                                 <option value="bolstering_materials">Bolstering Materials</option>
-                                <option value="consumables">Consumables</option>
-                            </optgroup>
-                            <optgroup label="Tools" className="bg-background text-foreground">
-                                <option value="sacred_flasks">Sacred Flasks</option>
-                                <option value="throwing_pots">Throwing Pots</option>
-                                <option value="perfume_arts">Perfume Arts</option>
-                                <option value="throwables">Throwables</option>
-                                <option value="grease">Grease</option>
-                                <option value="misc_tools">Miscellaneous Tools</option>
-                                <option value="quest_tools">Quest Tools</option>
-                                <option value="golden_runes">Golden Runes</option>
-                                <option value="remembrances">Remembrances</option>
-                                <option value="multiplayer">Multiplayer Items</option>
-                            </optgroup>
-                            <optgroup label="Progress" className="bg-background text-foreground">
-                                <option value="keyitems">Key Items</option>
+                                <option value="key_items">Key Items</option>
                             </optgroup>
                         </select>
                         <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
@@ -445,8 +433,16 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                                    {item.flags?.includes('cut_content') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
+                                                    )}
+                                                    {item.flags?.includes('ban_risk') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
+                                                    )}
+                                                </div>
                                                 {showPreview ? (
                                                     <span className="text-[8px] font-mono font-bold text-primary/60 uppercase tracking-tight">
                                                         {previewParts.join(' ')}
