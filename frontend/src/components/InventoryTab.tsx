@@ -15,9 +15,10 @@ interface InventoryTabProps {
     showFlaggedItems: boolean;
     category: string;
     setCategory: (value: string) => void;
+    onMutate?: () => void;
 }
 
-export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, showFlaggedItems, category, setCategory }: InventoryTabProps) {
+export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, showFlaggedItems, category, setCategory, onMutate }: InventoryTabProps) {
     const [search, setSearch] = useState('');
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
     const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
@@ -72,6 +73,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             // Reload inventory
             const char = await GetCharacter(charIndex);
             if (char) { setCharInventory(char.inventory || []); setCharStorage(char.storage || []); }
+            onMutate?.();
         } catch (err) {
             toast.error('Remove failed: ' + err);
         } finally {
@@ -108,13 +110,14 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             }));
 
             await SaveCharacter(charIndex, char);
-            
+
             // Refresh data
             const updatedChar = await GetCharacter(charIndex);
             setCharInventory(updatedChar?.inventory || []);
             setCharStorage(updatedChar?.storage || []);
             setEditedInv({});
             setEditedStorage({});
+            onMutate?.();
             
         } catch (err) {
             console.error("Failed to save inventory changes:", err);

@@ -13,11 +13,31 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
+const maxUndoDepth = 5
+
+// slotSnapshot holds a deep copy of a SaveSlot for undo purposes.
+type slotSnapshot struct {
+	Data              []byte
+	Player            core.PlayerGameData
+	GaMap             map[uint32]uint32
+	Inventory         core.EquipInventoryData
+	Storage           core.EquipInventoryData
+	Warnings          []string
+	MagicOffset       int
+	InventoryEnd      int
+	EventFlagsOffset  int
+	PlayerDataOffset  int
+	FaceDataOffset    int
+	StorageBoxOffset  int
+	IngameTimerOffset int
+}
+
 // App struct
 type App struct {
 	ctx        context.Context
 	save       *core.SaveFile
 	sourceSave *core.SaveFile
+	undoStacks [10][]slotSnapshot
 }
 
 // NewApp creates a new App struct
@@ -52,6 +72,7 @@ func (a *App) SelectAndOpenSave() (string, error) {
 		return "", err
 	}
 	a.save = save
+	a.clearAllUndoStacks()
 	return string(save.Platform), nil
 }
 
@@ -100,6 +121,8 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 	if index < 0 || index >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
+
+	a.pushUndo(index)
 
 	// 1. Update the slot data
 	if err := vm.ApplyVMToParsedSlot(&charVM, &a.save.Slots[index]); err != nil {
@@ -158,7 +181,11 @@ func (a *App) WriteSave(platform string) error {
 		a.save.Encrypted = false
 	}
 
-	return a.save.SaveFile(path)
+	if err := a.save.SaveFile(path); err != nil {
+		return err
+	}
+	a.clearAllUndoStacks()
+	return nil
 }
 
 // GetItemList returns a list of items for a given category, filtered by the loaded save's platform.
@@ -183,6 +210,8 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 	if charIdx < 0 || charIdx >= 10 {
 		return fmt.Errorf("invalid character index")
 	}
+
+	a.pushUndo(charIdx)
 
 	slot := &a.save.Slots[charIdx]
 
@@ -220,6 +249,8 @@ func (a *App) RemoveItemsFromCharacter(charIdx int, handles []uint32, fromInvent
 	if charIdx < 0 || charIdx >= 10 {
 		return fmt.Errorf("invalid character index")
 	}
+	a.pushUndo(charIdx)
+
 	slot := &a.save.Slots[charIdx]
 	for _, handle := range handles {
 		if err := core.RemoveItemFromSlot(slot, handle, fromInventory, fromStorage); err != nil {
@@ -290,6 +321,8 @@ func (a *App) SetGraceVisited(slotIndex int, graceID uint32, visited bool) error
 		return fmt.Errorf("invalid slot index")
 	}
 
+	a.pushUndo(slotIndex)
+
 	slot := &a.save.Slots[slotIndex]
 	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
 		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
@@ -327,6 +360,8 @@ func (a *App) CloneSlot(srcIdx, destIdx int) error {
 		return fmt.Errorf("destination slot %d is not empty", destIdx)
 	}
 
+	a.pushUndo(destIdx)
+
 	src := a.save.Slots[srcIdx]
 
 	// Deep copy Data
@@ -359,6 +394,11 @@ func (a *App) DeleteSlot(idx int) error {
 	name := core.UTF16ToString(a.save.Slots[idx].Player.CharacterName[:])
 	if name == "" {
 		return fmt.Errorf("slot %d is already empty", idx)
+	}
+
+	// Snapshot all affected slots (idx..9) since delete shifts them down
+	for i := idx; i < 10; i++ {
+		a.pushUndo(i)
 	}
 
 	for i := idx; i < 9; i++ {
@@ -472,6 +512,110 @@ func (a *App) SetSteamIDFromString(s string) error {
 	}
 	a.save.SteamID = id
 	return nil
+}
+
+// pushUndo takes a deep-copy snapshot of the given slot and pushes it onto the undo stack.
+func (a *App) pushUndo(idx int) {
+	slot := &a.save.Slots[idx]
+
+	// Deep copy Data
+	dataCopy := make([]byte, len(slot.Data))
+	copy(dataCopy, slot.Data)
+
+	// Deep copy GaMap
+	gaMapCopy := make(map[uint32]uint32, len(slot.GaMap))
+	for k, v := range slot.GaMap {
+		gaMapCopy[k] = v
+	}
+
+	// Deep copy Inventory CommonItems & KeyItems
+	invCommon := make([]core.InventoryItem, len(slot.Inventory.CommonItems))
+	copy(invCommon, slot.Inventory.CommonItems)
+	invKey := make([]core.InventoryItem, len(slot.Inventory.KeyItems))
+	copy(invKey, slot.Inventory.KeyItems)
+
+	// Deep copy Storage CommonItems & KeyItems
+	storCommon := make([]core.InventoryItem, len(slot.Storage.CommonItems))
+	copy(storCommon, slot.Storage.CommonItems)
+	storKey := make([]core.InventoryItem, len(slot.Storage.KeyItems))
+	copy(storKey, slot.Storage.KeyItems)
+
+	snap := slotSnapshot{
+		Data:   dataCopy,
+		Player: slot.Player,
+		GaMap:  gaMapCopy,
+		Inventory: core.EquipInventoryData{
+			CommonItems: invCommon,
+			KeyItems:    invKey,
+		},
+		Storage: core.EquipInventoryData{
+			CommonItems: storCommon,
+			KeyItems:    storKey,
+		},
+		Warnings:          append([]string{}, slot.Warnings...),
+		MagicOffset:       slot.MagicOffset,
+		InventoryEnd:      slot.InventoryEnd,
+		EventFlagsOffset:  slot.EventFlagsOffset,
+		PlayerDataOffset:  slot.PlayerDataOffset,
+		FaceDataOffset:    slot.FaceDataOffset,
+		StorageBoxOffset:  slot.StorageBoxOffset,
+		IngameTimerOffset: slot.IngameTimerOffset,
+	}
+
+	stack := a.undoStacks[idx]
+	if len(stack) >= maxUndoDepth {
+		stack = stack[1:] // drop oldest
+	}
+	a.undoStacks[idx] = append(stack, snap)
+}
+
+// RevertSlot pops the last snapshot from the undo stack and restores the slot.
+func (a *App) RevertSlot(idx int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if idx < 0 || idx >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	stack := a.undoStacks[idx]
+	if len(stack) == 0 {
+		return fmt.Errorf("nothing to undo for slot %d", idx)
+	}
+
+	snap := stack[len(stack)-1]
+	a.undoStacks[idx] = stack[:len(stack)-1]
+
+	slot := &a.save.Slots[idx]
+	slot.Data = snap.Data
+	slot.Player = snap.Player
+	slot.GaMap = snap.GaMap
+	slot.Inventory = snap.Inventory
+	slot.Storage = snap.Storage
+	slot.Warnings = snap.Warnings
+	slot.MagicOffset = snap.MagicOffset
+	slot.InventoryEnd = snap.InventoryEnd
+	slot.EventFlagsOffset = snap.EventFlagsOffset
+	slot.PlayerDataOffset = snap.PlayerDataOffset
+	slot.FaceDataOffset = snap.FaceDataOffset
+	slot.StorageBoxOffset = snap.StorageBoxOffset
+	slot.IngameTimerOffset = snap.IngameTimerOffset
+
+	return nil
+}
+
+// GetUndoDepth returns the number of undo snapshots available for a slot.
+func (a *App) GetUndoDepth(idx int) int {
+	if a.save == nil || idx < 0 || idx >= 10 {
+		return 0
+	}
+	return len(a.undoStacks[idx])
+}
+
+// clearAllUndoStacks resets all undo history (called on file load/save).
+func (a *App) clearAllUndoStacks() {
+	for i := range a.undoStacks {
+		a.undoStacks[i] = nil
+	}
 }
 
 // Dummy method to force Wails to export types

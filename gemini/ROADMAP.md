@@ -712,8 +712,8 @@ Wymaga weryfikacji z `Final.py`.
 > **Zależność:** Wymaga ukończonego Phase 20.
 > **Szczegóły architektoniczne:** [`gemini/REFACTOR.md` §15](REFACTOR.md)
 
-- [ ] **21.1. Write-ahead validation** — `validateSlotIntegrity()` przed każdym `SaveFile()` jako ostatnia linia obrony przed zapisaniem uszkodzonego save'a.
-- [ ] **21.2. `updateItemsAndSync()` transactionality** — walidacja offsetów przed startem zapisu qty, rollback na kopii `slot.Data` przy błędzie. Migracja na `SlotAccessor`.
+- [x] **21.1. Write-ahead validation** — `validateSlotIntegrity()` przed każdym `SaveFile()` jako ostatnia linia obrony przed zapisaniem uszkodzonego save'a.
+- [x] **21.2. `updateItemsAndSync()` transactionality** — walidacja offsetów przed startem zapisu qty, rollback na kopii `slot.Data` przy błędzie. Migracja na `SlotAccessor`.
 - [ ] **21.3. Undo/redo** — deep copy `slot.Data` przed edycją, stack operacji w `App`, przycisk "Revert" w UI.
 - [ ] **21.4. Save file diffing** — porównanie przed/po zapisie, UI dialog "Review Changes" z listą modyfikacji.
 

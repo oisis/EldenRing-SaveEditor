@@ -1,6 +1,6 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import toast, {Toaster} from 'react-hot-toast';
-import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter} from '../wailsjs/go/main/App';
+import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth} from '../wailsjs/go/main/App';
 import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
@@ -43,6 +43,14 @@ function App() {
     });
     const [category, setCategory] = useState('all');
     const [charWarnings, setCharWarnings] = useState<string[]>([]);
+    const [undoDepth, setUndoDepth] = useState(0);
+
+    const refreshUndoDepth = useCallback(() => {
+        if (!platform) { setUndoDepth(0); return; }
+        GetUndoDepth(selectedChar).then(setUndoDepth).catch(() => setUndoDepth(0));
+    }, [platform, selectedChar]);
+
+    useEffect(() => { refreshUndoDepth(); }, [refreshUndoDepth, inventoryVersion]);
 
     const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
 
@@ -102,6 +110,7 @@ function App() {
         const names = await GetCharacterNames();
         setActiveSlots(slots);
         setCharacterNames(names);
+        refreshUndoDepth();
     };
 
     const toggleSlot = async (idx: number) => {
@@ -114,6 +123,17 @@ function App() {
             await CloneSlot(srcIdx, destIdx);
             refreshSlots();
             setCloneModal(null);
+        } catch (err) {
+            toast.error(String(err));
+        }
+    };
+
+    const handleRevert = async () => {
+        try {
+            await RevertSlot(selectedChar);
+            refreshUndoDepth();
+            setInventoryVersion(v => v + 1);
+            toast.success('Reverted to previous state');
         } catch (err) {
             toast.error(String(err));
         }
@@ -234,6 +254,16 @@ function App() {
                         ))}
                     </nav>
                     <div className="flex items-center space-x-4">
+                        {undoDepth > 0 && (
+                            <button
+                                onClick={handleRevert}
+                                title={`Undo last change (${undoDepth} left)`}
+                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-yellow-500/40 bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20 transition-all text-[9px] font-black uppercase tracking-widest"
+                            >
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M3 10h10a5 5 0 015 5v2M3 10l4-4m-4 4l4 4" /></svg>
+                                <span>Undo ({undoDepth})</span>
+                            </button>
+                        )}
                         <div className="text-right">
                             <p className="text-[9px] font-black uppercase tracking-widest text-foreground leading-none mb-1">
                                 {charNames[selectedChar] || 'No Slot'}
@@ -298,8 +328,8 @@ function App() {
                                     </div>
                                 )}
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} />}
-                                {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} />}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
+                                {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
                             </div>
                         )}
