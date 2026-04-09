@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"runtime"
 )
 
 // ps4HeaderTemplate is the canonical 0x70-byte PS4 save header.
@@ -325,15 +326,20 @@ func (s *SaveFile) SaveFile(path string) error {
 	}
 
 	// Atomic write: write to a temp file first, then rename into place.
-	// os.Rename is atomic on POSIX — prevents partial writes from corrupting the target.
+	// On failure, preserve .tmp — it contains the user's data.
 	tmpPath := path + ".tmp"
 	if err := os.WriteFile(tmpPath, finalData, 0644); err != nil {
-		os.Remove(tmpPath)
 		return fmt.Errorf("failed to write save data: %w", err)
 	}
+
+	// Windows: os.Rename cannot overwrite an existing file — remove target first.
+	if runtime.GOOS == "windows" {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("cannot remove old file for atomic write: %w (new data preserved in %s)", err, tmpPath)
+		}
+	}
 	if err := os.Rename(tmpPath, path); err != nil {
-		os.Remove(tmpPath)
-		return fmt.Errorf("failed to finalize save file: %w", err)
+		return fmt.Errorf("rename failed: %w (new data preserved in %s)", err, tmpPath)
 	}
 	return nil
 }
