@@ -656,9 +656,9 @@ Wymaga weryfikacji z `Final.py`.
     - [x] Error propagation z `ReadBytes()` (zamień `_` na obsługę błędu).
     - [x] Cross-platform atomic write (`os.Rename` fix dla Windows, nie kasuj `.tmp` przy błędzie).
 
-- [ ] **20.J. Database & Event Flags Hardening** (`backend/db/db.go`, `app.go`)
-    - [ ] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
-    - [ ] Global item index `map[uint32]ItemEntry` — O(1) lookup zamiast O(18×n) linear search.
+- [x] **20.J. Database & Event Flags Hardening** (`backend/db/db.go`, `app.go`)
+    - [x] `GetEventFlag`/`SetEventFlag` → zwracają `error` na OOB zamiast silent no-op.
+    - [x] Global item index `map[uint32]ItemEntry` — O(1) lookup zamiast O(18×n) linear search.
 
 - [ ] **20.K. Frontend Performance & UI Consistency**
     - [ ] Table virtualization z `@tanstack/react-virtual` w InventoryTab i DatabaseTab.
