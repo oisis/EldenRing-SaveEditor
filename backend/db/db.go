@@ -50,9 +50,10 @@ type GraceEntry struct {
 	Visited bool   `json:"visited"`
 }
 
-// GetItemData returns the full metadata of an item by its ID and category.
-func GetItemData(id uint32, category string) data.ItemData {
-	// Search in all relevant maps
+// globalItemIndex provides O(1) item lookup by ID, built once at startup.
+var globalItemIndex map[uint32]data.ItemData
+
+func init() {
 	allMaps := []map[uint32]data.ItemData{
 		data.Weapons, data.RangedAndCatalysts, data.Shields, data.ArrowsAndBolts,
 		data.Helms, data.Chest, data.Arms, data.Legs,
@@ -62,13 +63,23 @@ func GetItemData(id uint32, category string) data.ItemData {
 		data.BolsteringMaterials, data.KeyItems,
 		data.Tools,
 	}
-
+	size := 0
 	for _, m := range allMaps {
-		if item, ok := m[id]; ok {
-			return item
+		size += len(m)
+	}
+	globalItemIndex = make(map[uint32]data.ItemData, size)
+	for _, m := range allMaps {
+		for id, entry := range m {
+			globalItemIndex[id] = entry
 		}
 	}
+}
 
+// GetItemData returns the full metadata of an item by its ID via the global index.
+func GetItemData(id uint32) data.ItemData {
+	if item, ok := globalItemIndex[id]; ok {
+		return item
+	}
 	return data.ItemData{}
 }
 
@@ -90,7 +101,7 @@ func findAshBase(baseName string, idPrefix uint32) (data.ItemData, uint32) {
 //
 // The returned ItemData.Name is the base name without "+N" (caller appends "+N" if needed).
 func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
-	exact := GetItemData(id, "")
+	exact := GetItemData(id)
 	if exact.Name != "" {
 		// Spirit ashes store each upgrade level as a separate DB entry with "+N" in the name.
 		// Find the base (+0) entry so currentUpgrade = id - baseID is computed correctly.
@@ -108,7 +119,7 @@ func GetItemDataFuzzy(id uint32) (data.ItemData, uint32) {
 	// PS4 spirit ashes use 0xB0... goods IDs; the DB stores them as 0x40... PC IDs.
 	if prefix == 0xB0000000 {
 		pcID := (id & 0x0FFFFFFF) | 0x40000000
-		pcEntry := GetItemData(pcID, "")
+		pcEntry := GetItemData(pcID)
 		if pcEntry.Name != "" && pcEntry.Category == "ashes" {
 			baseName := pcEntry.Name
 			if idx := strings.Index(baseName, " +"); idx >= 0 {
