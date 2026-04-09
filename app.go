@@ -208,6 +208,23 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 	return nil
 }
 
+// RemoveItemsFromCharacter removes items by handle from inventory, storage, or both.
+func (a *App) RemoveItemsFromCharacter(charIdx int, handles []uint32, fromInventory, fromStorage bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= 10 {
+		return fmt.Errorf("invalid character index")
+	}
+	slot := &a.save.Slots[charIdx]
+	for _, handle := range handles {
+		if err := core.RemoveItemFromSlot(slot, handle, fromInventory, fromStorage); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // resolveQty converts a qty directive into an actual quantity.
 // qty=0 → 0 (skip); qty=-1 → max; qty>0 → min(qty, max).
 func resolveQty(qty, max int) int {

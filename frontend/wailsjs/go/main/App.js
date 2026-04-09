@@ -58,6 +58,10 @@ export function ImportCharacter(arg1, arg2) {
   return window['go']['main']['App']['ImportCharacter'](arg1, arg2);
 }
 
+export function RemoveItemsFromCharacter(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['RemoveItemsFromCharacter'](arg1, arg2, arg3, arg4);
+}
+
 export function SaveCharacter(arg1, arg2) {
   return window['go']['main']['App']['SaveCharacter'](arg1, arg2);
 }

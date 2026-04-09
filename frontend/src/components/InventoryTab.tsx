@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetCharacter} from '../../wailsjs/go/main/App';
+import {GetCharacter, RemoveItemsFromCharacter} from '../../wailsjs/go/main/App';
 import {vm} from '../../wailsjs/go/models';
 
 interface InventoryTabProps {
@@ -29,6 +29,49 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     // Local state for edited quantities
     const [editedInv, setEditedInv] = useState<Record<number, number>>({});
     const [editedStorage, setEditedStorage] = useState<Record<number, number>>({});
+
+    // Selection + remove
+    const [selectedHandles, setSelectedHandles] = useState<Set<number>>(new Set());
+    const [removeModal, setRemoveModal] = useState<{handles: number[], names: string[]} | null>(null);
+    const [isRemoving, setIsRemoving] = useState(false);
+
+    const toggleSelect = (handle: number) => {
+        setSelectedHandles(prev => {
+            const next = new Set(prev);
+            if (next.has(handle)) next.delete(handle); else next.add(handle);
+            return next;
+        });
+    };
+
+    const toggleSelectAll = () => {
+        if (selectedHandles.size === filteredOwnedItems.length && filteredOwnedItems.length > 0) {
+            setSelectedHandles(new Set());
+        } else {
+            setSelectedHandles(new Set(filteredOwnedItems.map(i => i.handle)));
+        }
+    };
+
+    const handleRemoveSelected = () => {
+        const items = filteredOwnedItems.filter(i => selectedHandles.has(i.handle));
+        setRemoveModal({ handles: items.map(i => i.handle), names: items.map(i => i.name) });
+    };
+
+    const confirmRemove = async (fromInventory: boolean, fromStorage: boolean) => {
+        if (!removeModal || isRemoving) return;
+        setIsRemoving(true);
+        try {
+            await RemoveItemsFromCharacter(charIndex, removeModal.handles, fromInventory, fromStorage);
+            setSelectedHandles(new Set());
+            setRemoveModal(null);
+            // Reload inventory
+            const char = await GetCharacter(charIndex);
+            if (char) { setCharInventory(char.inventory || []); setCharStorage(char.storage || []); }
+        } catch (err) {
+            alert('Remove failed: ' + err);
+        } finally {
+            setIsRemoving(false);
+        }
+    };
 
     const handleQtyChange = (handle: number, value: string, type: 'inv' | 'storage', max: number) => {
         const qty = parseInt(value) || 0;
@@ -221,6 +264,44 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
 
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {/* Remove Confirm Modal */}
+            {removeModal && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-card p-8 rounded-2xl border border-red-500/20 flex flex-col space-y-6 max-w-sm w-full mx-4 shadow-2xl shadow-red-500/10 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/30 flex items-center justify-center shrink-0">
+                                <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black uppercase tracking-widest text-foreground">Remove {removeModal.handles.length} item{removeModal.handles.length > 1 ? 's' : ''}?</h3>
+                                <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">Choose what to remove</p>
+                            </div>
+                        </div>
+                        {removeModal.names.length <= 5 && (
+                            <ul className="space-y-1">
+                                {removeModal.names.map((n, i) => (
+                                    <li key={i} className="text-[11px] text-muted-foreground font-medium truncate">— {n}</li>
+                                ))}
+                            </ul>
+                        )}
+                        <div className="flex flex-col space-y-2 pt-1">
+                            <button onClick={() => confirmRemove(true, true)} disabled={isRemoving} className="w-full px-4 py-2.5 bg-red-500 text-white rounded-md text-[10px] font-black uppercase tracking-widest hover:bg-red-600 active:scale-95 transition-all disabled:opacity-50">
+                                {isRemoving ? 'Removing...' : 'Remove from Inventory & Storage'}
+                            </button>
+                            <button onClick={() => confirmRemove(true, false)} disabled={isRemoving} className="w-full px-4 py-2.5 bg-muted/40 text-foreground rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:bg-muted/60 active:scale-95 transition-all disabled:opacity-50">
+                                Inventory only
+                            </button>
+                            <button onClick={() => confirmRemove(false, true)} disabled={isRemoving} className="w-full px-4 py-2.5 bg-muted/40 text-foreground rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:bg-muted/60 active:scale-95 transition-all disabled:opacity-50">
+                                Storage only
+                            </button>
+                            <button onClick={() => setRemoveModal(null)} disabled={isRemoving} className="w-full px-4 py-2.5 bg-transparent text-muted-foreground rounded-md text-[10px] font-black uppercase tracking-widest hover:text-foreground transition-all">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Icon Popover */}
             {selectedIcon && (
                 <div 
@@ -289,12 +370,20 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                 </div>
 
                 {(Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
-                    <button 
+                    <button
                         onClick={saveChanges}
                         disabled={isSaving}
                         className="px-6 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
                     >
                         {isSaving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                )}
+                {selectedHandles.size > 0 && (
+                    <button
+                        onClick={handleRemoveSelected}
+                        className="px-6 py-2.5 bg-red-500/10 text-red-400 border border-red-500/30 rounded-md text-[10px] font-black uppercase tracking-widest hover:bg-red-500/20 active:scale-95 transition-all animate-in zoom-in-95 duration-200"
+                    >
+                        Remove ({selectedHandles.size})
                     </button>
                 )}
 
@@ -320,6 +409,15 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
+                                <th className="px-4 py-4 w-10">
+                                    <div
+                                        onClick={toggleSelectAll}
+                                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedHandles.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border hover:border-red-400/50'}`}
+                                    >
+                                        {selectedHandles.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 &&
+                                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                    </div>
+                                </th>
                                 <th className="px-6 py-4 w-16">Icon</th>
                                 <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('name')}>
                                     Name <SortIndicator col="name" />
@@ -347,7 +445,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                         <tbody className="divide-y divide-border/30">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-24 text-center">
+                                    <td colSpan={9} className="px-6 py-24 text-center">
                                         <div className="flex flex-col items-center justify-center space-y-4">
                                             <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Accessing data...</p>
@@ -356,9 +454,18 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                 </tr>
                             ) : filteredOwnedItems.length > 0 ? (
                                 filteredOwnedItems.map((item) => (
-                                    <tr key={item.handle} className="group hover:bg-primary/[0.02] transition-colors">
+                                    <tr key={item.handle} className={`group hover:bg-primary/[0.02] transition-colors ${selectedHandles.has(item.handle) ? 'bg-red-500/[0.03]' : ''}`}>
+                                        <td className="px-4 py-0.5">
+                                            <div
+                                                onClick={() => toggleSelect(item.handle)}
+                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedHandles.has(item.handle) ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border group-hover:border-red-400/50'}`}
+                                            >
+                                                {selectedHandles.has(item.handle) &&
+                                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                            </div>
+                                        </td>
                                         <td className="px-6 py-0.5">
-                                            <div 
+                                            <div
                                                 className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
                                                 onClick={() => setSelectedIcon({name: item.name, path: item.iconPath})}
                                             >
@@ -442,7 +549,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={8} className="px-6 py-24 text-center">
+                                    <td colSpan={9} className="px-6 py-24 text-center">
                                         <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                     </td>
                                 </tr>

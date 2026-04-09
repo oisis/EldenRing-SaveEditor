@@ -31,6 +31,8 @@ export function GetSteamIDString():Promise<string>;
 
 export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 
+export function RemoveItemsFromCharacter(arg1:number,arg2:Array<number>,arg3:boolean,arg4:boolean):Promise<void>;
+
 export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<void>;
 
 export function SelectAndOpenSave():Promise<string>;

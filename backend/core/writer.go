@@ -147,6 +147,75 @@ func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 	return nil
 }
 
+// RemoveItemFromSlot zeroes out inventory/storage slots for the given handle.
+// Inventory: fixed pre-allocated array — zero the matching slot(s).
+// Storage: dynamic list — zero the matching slot(s); game stops reading at handle==0.
+// GaMap entry is removed only when the handle is absent from both lists after removal.
+func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorage bool) error {
+	if fromInventory {
+		invStart := slot.MagicOffset + 505
+		for i, item := range slot.Inventory.CommonItems {
+			if item.GaItemHandle == handle {
+				slot.Inventory.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: uint32(i)}
+				off := invStart + i*12
+				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
+				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
+				binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(i))
+			}
+		}
+		for i, item := range slot.Inventory.KeyItems {
+			if item.GaItemHandle == handle {
+				keyStart := invStart + 0xa80*12
+				slot.Inventory.KeyItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: uint32(i)}
+				off := keyStart + i*12
+				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
+				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
+				binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(i))
+			}
+		}
+	}
+	if fromStorage {
+		storageStart := slot.StorageBoxOffset + 4
+		for i, item := range slot.Storage.CommonItems {
+			if item.GaItemHandle == handle {
+				slot.Storage.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: 0}
+				off := storageStart + i*12
+				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
+				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
+				binary.LittleEndian.PutUint32(slot.Data[off+8:], 0)
+			}
+		}
+	}
+	// Remove from GaMap only if the handle is now absent from both lists.
+	stillPresent := false
+	for _, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle == handle {
+			stillPresent = true
+			break
+		}
+	}
+	if !stillPresent {
+		for _, item := range slot.Inventory.KeyItems {
+			if item.GaItemHandle == handle {
+				stillPresent = true
+				break
+			}
+		}
+	}
+	if !stillPresent {
+		for _, item := range slot.Storage.CommonItems {
+			if item.GaItemHandle == handle {
+				stillPresent = true
+				break
+			}
+		}
+	}
+	if !stillPresent {
+		delete(slot.GaMap, handle)
+	}
+	return nil
+}
+
 func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) error {
 	var items *[]InventoryItem
 	var startOffset int
