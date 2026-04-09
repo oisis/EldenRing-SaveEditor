@@ -12,6 +12,7 @@ interface DatabaseTabProps {
     charIndex: number;
     onItemsAdded?: () => void;
     addSettings: AddSettings;
+    showFlaggedItems: boolean;
 }
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
@@ -19,7 +20,7 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
@@ -63,6 +64,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     }, [category]);
 
     const filteredItems = dbItems.filter(item => {
+        if (!showFlaggedItems && item.flags?.length > 0) return false;
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
         if (category === 'all') return matchesSearch;
@@ -431,8 +433,16 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                             </div>
                                         </td>
                                         <td className="p-4">
-                                            <div className="flex flex-col">
-                                                <span className="text-[11px] font-bold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                                    {item.flags?.includes('cut_content') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
+                                                    )}
+                                                    {item.flags?.includes('ban_risk') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
+                                                    )}
+                                                </div>
                                                 {showPreview ? (
                                                     <span className="text-[8px] font-mono font-bold text-primary/60 uppercase tracking-tight">
                                                         {previewParts.join(' ')}

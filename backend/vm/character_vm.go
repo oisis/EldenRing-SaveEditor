@@ -9,17 +9,18 @@ import (
 )
 
 type ItemViewModel struct {
-	Handle       uint32 `json:"handle"`
-	ID           uint32 `json:"id"`
-	Name         string `json:"name"`
-	Category     string `json:"category"`
-	SubCategory  string `json:"subCategory"`
-	Quantity     uint32 `json:"quantity"`
-	MaxInventory uint32 `json:"maxInventory"`
-	MaxStorage   uint32 `json:"maxStorage"`
-	MaxUpgrade     uint32 `json:"maxUpgrade"`
-	CurrentUpgrade uint32 `json:"currentUpgrade"`
-	IconPath       string `json:"iconPath"`
+	Handle         uint32   `json:"handle"`
+	ID             uint32   `json:"id"`
+	Name           string   `json:"name"`
+	Category       string   `json:"category"`
+	SubCategory    string   `json:"subCategory"`
+	Quantity       uint32   `json:"quantity"`
+	MaxInventory   uint32   `json:"maxInventory"`
+	MaxStorage     uint32   `json:"maxStorage"`
+	MaxUpgrade     uint32   `json:"maxUpgrade"`
+	CurrentUpgrade uint32   `json:"currentUpgrade"`
+	IconPath       string   `json:"iconPath"`
+	Flags          []string `json:"flags"`
 }
 
 type CharacterViewModel struct {
@@ -136,6 +137,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				MaxUpgrade:     itemData.MaxUpgrade,
 				CurrentUpgrade: currentUpgrade,
 				IconPath:       itemData.IconPath,
+				Flags:          itemData.Flags,
 			})
 		}
 	}

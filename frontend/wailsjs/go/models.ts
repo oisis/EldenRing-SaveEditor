@@ -40,6 +40,7 @@ export namespace db {
 	    maxStorage: number;
 	    maxUpgrade: number;
 	    iconPath: string;
+	    flags: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemEntry(source);
@@ -54,6 +55,7 @@ export namespace db {
 	        this.maxStorage = source["maxStorage"];
 	        this.maxUpgrade = source["maxUpgrade"];
 	        this.iconPath = source["iconPath"];
+	        this.flags = source["flags"];
 	    }
 	}
 
@@ -73,6 +75,7 @@ export namespace vm {
 	    maxUpgrade: number;
 	    currentUpgrade: number;
 	    iconPath: string;
+	    flags: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemViewModel(source);
@@ -91,6 +94,7 @@ export namespace vm {
 	        this.maxUpgrade = source["maxUpgrade"];
 	        this.currentUpgrade = source["currentUpgrade"];
 	        this.iconPath = source["iconPath"];
+	        this.flags = source["flags"];
 	    }
 	}
 	export class CharacterViewModel {

@@ -9,13 +9,14 @@ import (
 
 // ItemEntry represents a single item from the game database.
 type ItemEntry struct {
-	ID           uint32 `json:"id"`
-	Name         string `json:"name"`
-	Category     string `json:"category"`
-	MaxInventory uint32 `json:"maxInventory"`
-	MaxStorage   uint32 `json:"maxStorage"`
-	MaxUpgrade   uint32 `json:"maxUpgrade"`
-	IconPath     string `json:"iconPath"`
+	ID           uint32   `json:"id"`
+	Name         string   `json:"name"`
+	Category     string   `json:"category"`
+	MaxInventory uint32   `json:"maxInventory"`
+	MaxStorage   uint32   `json:"maxStorage"`
+	MaxUpgrade   uint32   `json:"maxUpgrade"`
+	IconPath     string   `json:"iconPath"`
+	Flags        []string `json:"flags"`
 }
 
 // InfuseType represents a weapon infusion type and its ID offset.
@@ -232,6 +233,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
 				IconPath:     item.IconPath,
+				Flags:        item.Flags,
 			})
 		}
 	}
@@ -276,6 +278,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
 				IconPath:     item.IconPath,
+				Flags:        item.Flags,
 			})
 		}
 	case "gestures":
@@ -306,6 +309,7 @@ func GetItemsByCategory(category string) []ItemEntry {
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
 				IconPath:     item.IconPath,
+				Flags:        item.Flags,
 			})
 		}
 	case "tools":

@@ -9,16 +9,20 @@ interface SettingsTabProps {
         category: boolean;
     };
     setColumnVisibility: (visibility: { id: boolean; category: boolean }) => void;
+    showFlaggedItems: boolean;
+    setShowFlaggedItems: (value: boolean) => void;
     platform: string | null;
     setPlatform: (platform: string | null) => void;
     refreshSlots: () => void;
 }
 
-export function SettingsTab({ 
-    theme, 
-    setTheme, 
-    columnVisibility, 
+export function SettingsTab({
+    theme,
+    setTheme,
+    columnVisibility,
     setColumnVisibility,
+    showFlaggedItems,
+    setShowFlaggedItems,
     platform,
     setPlatform,
     refreshSlots
@@ -159,8 +163,8 @@ export function SettingsTab({
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <label className="flex items-center justify-between p-4 rounded-lg bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Show ID (HEX)</span>
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={columnVisibility.id}
                                     onChange={e => setColumnVisibility({ ...columnVisibility, id: e.target.checked })}
                                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
@@ -168,14 +172,30 @@ export function SettingsTab({
                             </label>
                             <label className="flex items-center justify-between p-4 rounded-lg bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Show Category</span>
-                                <input 
-                                    type="checkbox" 
+                                <input
+                                    type="checkbox"
                                     checked={columnVisibility.category}
                                     onChange={e => setColumnVisibility({ ...columnVisibility, category: e.target.checked })}
                                     className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20"
                                 />
                             </label>
                         </div>
+                    </div>
+
+                    <div className="space-y-4 border-t border-border/40 pt-6">
+                        <p className="text-xs font-bold text-foreground">Flagged Content</p>
+                        <label className="flex items-center justify-between p-4 rounded-lg bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                            <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Show Cut &amp; Ban-Risk Items</span>
+                                <p className="text-[9px] text-muted-foreground/60 font-medium">Display items marked as cut content or ban risk in Database and Inventory.</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={showFlaggedItems}
+                                onChange={e => setShowFlaggedItems(e.target.checked)}
+                                className="w-4 h-4 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-4"
+                            />
+                        </label>
                     </div>
                 </div>
             </section>

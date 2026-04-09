@@ -9,9 +9,10 @@ interface InventoryTabProps {
         id: boolean;
         category: boolean;
     };
+    showFlaggedItems: boolean;
 }
 
-export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: InventoryTabProps) {
+export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, showFlaggedItems }: InventoryTabProps) {
     const [category, setCategory] = useState('all');
     const [search, setSearch] = useState('');
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
@@ -79,6 +80,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
         nonStackable: boolean; inInventory: boolean; inStorage: boolean;
         invQty: number; storageQty: number;
         maxInv: number; maxStorage: number; maxUpgrade: number; currentUpgrade: number; iconPath: string;
+        flags: string[];
     };
 
     // Merge inventory and storage items for display.
@@ -97,6 +99,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     invQty: 1, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                    flags: item.flags ?? [],
                 });
             } else {
                 stackableMap.set(item.id, {
@@ -106,6 +109,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                     invQty: item.quantity, storageQty: 0,
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                    flags: item.flags ?? [],
                 });
             }
         });
@@ -124,6 +128,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         invQty: 0, storageQty: 1,
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                        flags: item.flags ?? [],
                     });
                 }
             } else {
@@ -139,6 +144,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                         invQty: 0, storageQty: item.quantity,
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                        flags: item.flags ?? [],
                     });
                 }
             }
@@ -199,9 +205,10 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
     };
 
     const filteredOwnedItems = sortItems(mergedOwnedItems.filter(item => {
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || 
+        if (!showFlaggedItems && item.flags?.length > 0) return false;
+        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
-        
+
         if (category === 'all') return matchesSearch && item.subCategory !== 'key_items';
 
         return item.subCategory === category && matchesSearch;
@@ -364,8 +371,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility }: 
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex flex-col">
-                                                <span className="font-black uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                            <div className="flex flex-col gap-0.5">
+                                                <div className="flex items-center gap-1.5 flex-wrap">
+                                                    <span className="text-[13px] font-semibold uppercase tracking-widest text-foreground group-hover:text-primary transition-colors">{item.name}</span>
+                                                    {item.flags?.includes('cut_content') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
+                                                    )}
+                                                    {item.flags?.includes('ban_risk') && (
+                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
+                                                    )}
+                                                </div>
                                                 <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tighter">0x{item.id.toString(16).toUpperCase()}</span>
                                             </div>
                                         </td>
