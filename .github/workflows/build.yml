@@ -7,6 +7,9 @@ on:
     types: [closed]
     branches: [main]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   # Gate: only run on merged PRs or commits with [build] prefix
   check:
@@ -55,7 +58,7 @@ jobs:
             platform: darwin
             arch: arm64
             artifact: ER-Save-Editor-macos-arm64
-          - os: macos-13
+          - os: macos-latest
             platform: darwin
             arch: amd64
             artifact: ER-Save-Editor-macos-amd64
@@ -76,13 +79,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
 
       - name: Install Wails CLI
         run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
-
-      # macOS: install webkit2gtk equivalent (not needed, WebKit is built-in)
-      # Windows: WebView2 is pre-installed on GitHub runners
 
       - name: Install frontend dependencies
         run: cd frontend && npm ci
