@@ -126,12 +126,12 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         flags: string[];
     };
 
-    // Merge inventory and storage items for display.
+    // Build item list for display.
     // Non-stackable (maxInventory <= 1): one row per handle — consolidated across both locations.
-    // Stackable (maxInventory > 1): one row per id — qty merged from both locations.
+    // Stackable (maxInventory > 1): separate rows for inventory and storage entries.
     const mergedOwnedItems = (() => {
         const nonStackableMap = new Map<number, MergedItem>();
-        const stackableMap = new Map<number, MergedItem>();
+        const stackableItems: MergedItem[] = [];
 
         charInventory.forEach(item => {
             if (item.maxInventory <= 1) {
@@ -145,7 +145,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     flags: item.flags ?? [],
                 });
             } else {
-                stackableMap.set(item.id, {
+                stackableItems.push({
                     id: item.id, handle: item.handle, name: item.name,
                     category: item.category, subCategory: item.subCategory,
                     nonStackable: false, inInventory: true, inStorage: false,
@@ -175,25 +175,19 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     });
                 }
             } else {
-                const existing = stackableMap.get(item.id);
-                if (existing) {
-                    existing.inStorage = true;
-                    existing.storageQty = item.quantity;
-                } else {
-                    stackableMap.set(item.id, {
-                        id: item.id, handle: item.handle, name: item.name,
-                        category: item.category, subCategory: item.subCategory,
-                        nonStackable: false, inInventory: false, inStorage: true,
-                        invQty: 0, storageQty: item.quantity,
-                        maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                        maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
-                        flags: item.flags ?? [],
-                    });
-                }
+                stackableItems.push({
+                    id: item.id, handle: item.handle, name: item.name,
+                    category: item.category, subCategory: item.subCategory,
+                    nonStackable: false, inInventory: false, inStorage: true,
+                    invQty: 0, storageQty: item.quantity,
+                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                    flags: item.flags ?? [],
+                });
             }
         });
 
-        return [...Array.from(nonStackableMap.values()), ...Array.from(stackableMap.values())];
+        return [...Array.from(nonStackableMap.values()), ...stackableItems];
     })();
 
     const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
@@ -516,7 +510,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inInventory ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/30'}`}>
                                                     {item.inInventory ? '✓' : '—'}
                                                 </span>
-                                            ) : (
+                                            ) : item.inInventory ? (
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
                                                         type="number"
@@ -528,6 +522,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                     />
                                                     <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxInv}</span>
                                                 </div>
+                                            ) : (
+                                                <span className="text-muted-foreground/30 text-[10px] font-black">—</span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-center">
@@ -535,7 +531,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inStorage ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/30'}`}>
                                                     {item.inStorage ? '✓' : '—'}
                                                 </span>
-                                            ) : (
+                                            ) : item.inStorage ? (
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
                                                         type="number"
@@ -547,6 +543,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                     />
                                                     <span className="text-[9px] font-bold text-muted-foreground/30 uppercase tracking-tighter">/ {item.maxStorage}</span>
                                                 </div>
+                                            ) : (
+                                                <span className="text-muted-foreground/30 text-[10px] font-black">—</span>
                                             )}
                                         </td>
                                     </tr>

@@ -313,7 +313,31 @@ func GetItemsByCategory(category string) []ItemEntry {
 			})
 		}
 	case "tools":
-		processMap(data.Tools, "tools", 0)
+		for id, item := range data.Tools {
+			if item.Name == "" {
+				continue
+			}
+			idPrefix := id & 0xF0000000
+			switch idPrefix {
+			case 0x80000000, 0x90000000, 0xA0000000, 0xB0000000, 0xC0000000:
+			default:
+				continue
+			}
+			// Filter upgraded Flask variants — only keep base versions (no " +N" suffix)
+			if strings.Contains(item.Name, "Flask of") && strings.Contains(item.Name, " +") {
+				continue
+			}
+			items = append(items, ItemEntry{
+				ID:           id,
+				Name:         item.Name,
+				Category:     "tools",
+				MaxInventory: item.MaxInventory,
+				MaxStorage:   item.MaxStorage,
+				MaxUpgrade:   item.MaxUpgrade,
+				IconPath:     item.IconPath,
+				Flags:        item.Flags,
+			})
+		}
 	case "key_items":
 		processMap(data.KeyItems, "key_items", 0)
 	}
