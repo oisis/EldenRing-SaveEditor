@@ -1,19 +1,60 @@
-# README
+# ER Save Editor
 
-## About
+> **WARNING: This software is in early development and is NOT stable. It can corrupt your save files beyond recovery. Do NOT use it on your main account or primary save files. Always work on copies. You have been warned.**
 
-This is the official Wails React-TS template.
+Desktop application for editing Elden Ring save files (`.sl2` / `memory.dat`). Built with [Wails v2](https://wails.io/) (Go backend + React/TypeScript frontend).
 
-You can configure the project by editing `wails.json`. More information about the project settings can be found
-here: https://wails.io/docs/reference/project-config
+## Features
 
-## Live Development
+- Read and write binary save files for **PC (Steam)** and **PS4**
+- Two-way platform conversion (PS4 ↔ PC)
+- Character stats editing (level, attributes, runes)
+- Inventory and storage management (add/remove items, set quantities)
+- Equipment and spell loadout editing
+- Sites of Grace unlock/lock
+- Event flags (bosses, summon pools)
+- DLC support (Scadutree Blessing, Shadow Realm Blessing)
+- Automatic backup before every save
+- AES-128 encryption/decryption for PC saves
 
-To run in live development mode, run `wails dev` in the project directory. This will run a Vite development
-server that will provide very fast hot reload of your frontend changes. If you want to develop in a browser
-and have access to your Go methods, there is also a dev server that runs on http://localhost:34115. Connect
-to this in your browser, and you can call your Go code from devtools.
+## Supported Platforms
+
+| Save Format | File | Encryption | Status |
+|---|---|---|---|
+| PC (Steam) | `ER0000.sl2` | AES-128-CBC | Supported |
+| PS4 | `memory.dat` | None | Supported (priority) |
 
 ## Building
 
-To build a redistributable, production mode package, use `wails build`.
+Requirements: Go 1.23+, Node.js 20+, [Wails CLI v2](https://wails.io/docs/gettingstarted/installation)
+
+```bash
+# Install dependencies
+make deps
+
+# Build for current platform
+make build
+
+# Run in development mode (requires GUI)
+make dev
+
+# Run tests
+make test
+```
+
+## Development
+
+```
+.
+├── backend/
+│   ├── core/        # Save file I/O: reader, writer, crypto, structures
+│   ├── db/          # Game database: items, graces, event flags
+│   └── vm/          # ViewModel: maps binary data to UI-friendly structs
+├── frontend/src/    # React + TypeScript + Tailwind CSS
+├── tests/           # Round-trip and unit tests
+└── Makefile
+```
+
+## License
+
+This project is not affiliated with FromSoftware or Bandai Namco.
