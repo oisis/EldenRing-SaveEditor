@@ -102,10 +102,16 @@ type SaveFile struct {
 	UserData11       []byte
 }
 
+// MinSaveFileSize is the minimum valid save file size: 10 slots × 0x280000 + UserData10 (0x60000).
+const MinSaveFileSize = 10*SlotSize + 0x60000
+
 func LoadSave(path string) (*SaveFile, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read file: %w", err)
+	}
+	if len(data) < MinSaveFileSize {
+		return nil, fmt.Errorf("file too small (%d bytes, minimum %d) — not a valid save", len(data), MinSaveFileSize)
 	}
 
 	save := &SaveFile{}
@@ -129,11 +135,17 @@ func LoadSave(path string) (*SaveFile, error) {
 }
 
 func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	save.Header, _ = r.ReadBytes(0x300)
+	var err error
+	save.Header, err = r.ReadBytes(0x300)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PC header: %w", err)
+	}
 
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
-		r.ReadBytes(0x10) // MD5
+		if _, err := r.ReadBytes(0x10); err != nil {
+			return nil, fmt.Errorf("failed to read MD5 for slot %d: %w", i, err)
+		}
 		if err := save.Slots[i].Read(r, "PC"); err != nil {
 			fmt.Printf("Warning: failed to parse slot %d: %v\n", i, err)
 		}
@@ -142,18 +154,29 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 	// UserData10
 	udStart := r.Pos()
-	r.ReadBytes(0x10) // MD5
-	save.UserData10.Data, _ = r.ReadBytes(0x60000)
+	if _, err := r.ReadBytes(0x10); err != nil {
+		return nil, fmt.Errorf("failed to read UserData10 MD5: %w", err)
+	}
+	save.UserData10.Data, err = r.ReadBytes(0x60000)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read UserData10: %w", err)
+	}
 
 	udReader := NewReader(save.UserData10.Data)
 
 	// SteamID is at the beginning of UserData10 data on PC
-	save.SteamID, _ = udReader.ReadU64()
+	save.SteamID, err = udReader.ReadU64()
+	if err != nil {
+		return nil, fmt.Errorf("failed to read SteamID: %w", err)
+	}
 
 	// Active Slots are at 0x310
 	udReader.Seek(0x310, 0)
 	for i := 0; i < 10; i++ {
-		b, _ := udReader.ReadU8()
+		b, err := udReader.ReadU8()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read ActiveSlot %d: %w", i, err)
+		}
 		save.ActiveSlots[i] = b == 1
 	}
 
@@ -166,14 +189,21 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	r.Seek(int64(udStart+0x10+0x60000), 0)
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
-		save.UserData11, _ = r.ReadBytes(int(remaining))
+		save.UserData11, err = r.ReadBytes(int(remaining))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read UserData11: %w", err)
+		}
 	}
 
 	return save, nil
 }
 
 func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
-	save.Header, _ = r.ReadBytes(0x70)
+	var err error
+	save.Header, err = r.ReadBytes(0x70)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PS4 header: %w", err)
+	}
 
 	for i := 0; i < 10; i++ {
 		slotStart := r.Pos()
@@ -183,13 +213,19 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		r.Seek(int64(slotStart+0x280000), 0)
 	}
 
-	save.UserData10.Data, _ = r.ReadBytes(0x60000)
+	save.UserData10.Data, err = r.ReadBytes(0x60000)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read PS4 UserData10: %w", err)
+	}
 	udReader := NewReader(save.UserData10.Data)
 
 	// PS4: Active Slots are at 0x300, Summaries at 0x30A
 	udReader.Seek(0x300, 0)
 	for i := 0; i < 10; i++ {
-		b, _ := udReader.ReadU8()
+		b, err := udReader.ReadU8()
+		if err != nil {
+			return nil, fmt.Errorf("failed to read PS4 ActiveSlot %d: %w", i, err)
+		}
 		save.ActiveSlots[i] = b == 1
 	}
 	for i := 0; i < 10; i++ {
@@ -198,7 +234,10 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 	remaining := r.Len() - r.Pos()
 	if remaining > 0 {
-		save.UserData11, _ = r.ReadBytes(int(remaining))
+		save.UserData11, err = r.ReadBytes(int(remaining))
+		if err != nil {
+			return nil, fmt.Errorf("failed to read PS4 UserData11: %w", err)
+		}
 	}
 
 	return save, nil
