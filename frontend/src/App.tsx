@@ -44,6 +44,9 @@ function App() {
     });
     const [category, setCategory] = useState('all');
     const [charWarnings, setCharWarnings] = useState<string[]>([]);
+    const [debugMode, setDebugMode] = useState<boolean>(() => {
+        return localStorage.getItem('setting:debugMode') === 'true';
+    });
     const [undoDepth, setUndoDepth] = useState(0);
     const [diffModal, setDiffModal] = useState(false);
     const [diffSummary, setDiffSummary] = useState<main.SlotDiffSummary[]>([]);
@@ -62,6 +65,7 @@ function App() {
     useEffect(() => { localStorage.setItem('setting:theme', theme); }, [theme]);
     useEffect(() => { localStorage.setItem('setting:columnVisibility', JSON.stringify(columnVisibility)); }, [columnVisibility]);
     useEffect(() => { localStorage.setItem('setting:showFlaggedItems', String(showFlaggedItems)); }, [showFlaggedItems]);
+    useEffect(() => { localStorage.setItem('setting:debugMode', String(debugMode)); }, [debugMode]);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -332,6 +336,8 @@ function App() {
                                     setColumnVisibility={setColumnVisibility}
                                     showFlaggedItems={showFlaggedItems}
                                     setShowFlaggedItems={setShowFlaggedItems}
+                                    debugMode={debugMode}
+                                    setDebugMode={setDebugMode}
                                     platform={platform}
                                     setPlatform={setPlatform}
                                     refreshSlots={refreshSlots}
@@ -352,17 +358,22 @@ function App() {
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                {charWarnings.length > 0 && (
-                                    <div className="mx-4 mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg relative">
-                                        <button onClick={() => setCharWarnings([])} className="absolute top-2 right-2 text-yellow-600/60 hover:text-yellow-600 transition-colors">
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                                        </button>
-                                        <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest">Save loaded with warnings</p>
-                                        <ul className="mt-1 text-[9px] text-yellow-600/80 list-disc list-inside">
-                                            {charWarnings.map((w, i) => <li key={i}>{w}</li>)}
-                                        </ul>
-                                    </div>
-                                )}
+                                {(() => {
+                                    const debugPatterns = ['clamped to', 'using fallback offset'];
+                                    const isDebugWarning = (w: string) => debugPatterns.some(p => w.toLowerCase().includes(p));
+                                    const visibleWarnings = debugMode ? charWarnings : charWarnings.filter(w => !isDebugWarning(w));
+                                    return visibleWarnings.length > 0 && (
+                                        <div className="mx-4 mt-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg relative">
+                                            <button onClick={() => setCharWarnings([])} className="absolute top-2 right-2 text-yellow-600/60 hover:text-yellow-600 transition-colors">
+                                                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                            </button>
+                                            <p className="text-[10px] font-bold text-yellow-600 uppercase tracking-widest">Save loaded with warnings</p>
+                                            <ul className="mt-1 text-[9px] text-yellow-600/80 list-disc list-inside">
+                                                {visibleWarnings.map((w, i) => <li key={i}>{w}</li>)}
+                                            </ul>
+                                        </div>
+                                    );
+                                })()}
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}

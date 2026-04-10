@@ -9,14 +9,19 @@ import (
 
 // ItemEntry represents a single item from the game database.
 type ItemEntry struct {
-	ID           uint32   `json:"id"`
-	Name         string   `json:"name"`
-	Category     string   `json:"category"`
-	MaxInventory uint32   `json:"maxInventory"`
-	MaxStorage   uint32   `json:"maxStorage"`
-	MaxUpgrade   uint32   `json:"maxUpgrade"`
-	IconPath     string   `json:"iconPath"`
-	Flags        []string `json:"flags"`
+	ID           uint32       `json:"id"`
+	Name         string       `json:"name"`
+	Category     string       `json:"category"`
+	MaxInventory uint32       `json:"maxInventory"`
+	MaxStorage   uint32       `json:"maxStorage"`
+	MaxUpgrade   uint32       `json:"maxUpgrade"`
+	IconPath     string       `json:"iconPath"`
+	Flags        []string     `json:"flags"`
+	Description  string       `json:"description,omitempty"`
+	Weight       float64      `json:"weight,omitempty"`
+	Weapon       *data.WeaponStats `json:"weapon,omitempty"`
+	Armor        *data.ArmorStats  `json:"armor,omitempty"`
+	Spell        *data.SpellStats  `json:"spell,omitempty"`
 }
 
 // InfuseType represents a weapon infusion type and its ID offset.
@@ -81,6 +86,22 @@ func GetItemData(id uint32) data.ItemData {
 		return item
 	}
 	return data.ItemData{}
+}
+
+// enrichItemEntry populates Description, Weight, and stat fields from the Descriptions table.
+func enrichItemEntry(e *ItemEntry) {
+	if data.Descriptions == nil {
+		return
+	}
+	desc, ok := data.Descriptions[e.ID]
+	if !ok {
+		return
+	}
+	e.Description = desc.Description
+	e.Weight = desc.Weight
+	e.Weapon = desc.Weapon
+	e.Armor = desc.Armor
+	e.Spell = desc.Spell
 }
 
 // findAshBase searches StandardAshes for the base (+0) entry matching the given name prefix.
@@ -269,7 +290,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 			if item.Name == "" || item.Name == "Unarmed" {
 				continue
 			}
-			items = append(items, ItemEntry{
+			entry := ItemEntry{
 				ID:           id,
 				Name:         item.Name,
 				Category:     catName,
@@ -278,7 +299,9 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 				MaxUpgrade:   item.MaxUpgrade,
 				IconPath:     item.IconPath,
 				Flags:        item.Flags,
-			})
+			}
+			enrichItemEntry(&entry)
+			items = append(items, entry)
 		}
 	}
 
