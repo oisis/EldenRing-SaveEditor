@@ -1,3 +1,106 @@
+export namespace data {
+	
+	export class ArmorStats {
+	    Weight: number;
+	    Physical: number;
+	    Strike: number;
+	    Slash: number;
+	    Pierce: number;
+	    Magic: number;
+	    Fire: number;
+	    Lightning: number;
+	    Holy: number;
+	    Immunity: number;
+	    Robustness: number;
+	    Focus: number;
+	    Vitality: number;
+	    Poise: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new ArmorStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Weight = source["Weight"];
+	        this.Physical = source["Physical"];
+	        this.Strike = source["Strike"];
+	        this.Slash = source["Slash"];
+	        this.Pierce = source["Pierce"];
+	        this.Magic = source["Magic"];
+	        this.Fire = source["Fire"];
+	        this.Lightning = source["Lightning"];
+	        this.Holy = source["Holy"];
+	        this.Immunity = source["Immunity"];
+	        this.Robustness = source["Robustness"];
+	        this.Focus = source["Focus"];
+	        this.Vitality = source["Vitality"];
+	        this.Poise = source["Poise"];
+	    }
+	}
+	export class SpellStats {
+	    FPCost: number;
+	    Slots: number;
+	    ReqInt: number;
+	    ReqFai: number;
+	    ReqArc: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SpellStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.FPCost = source["FPCost"];
+	        this.Slots = source["Slots"];
+	        this.ReqInt = source["ReqInt"];
+	        this.ReqFai = source["ReqFai"];
+	        this.ReqArc = source["ReqArc"];
+	    }
+	}
+	export class WeaponStats {
+	    Weight: number;
+	    PhysDamage: number;
+	    MagDamage: number;
+	    FireDamage: number;
+	    LitDamage: number;
+	    HolyDamage: number;
+	    ScaleStr: number;
+	    ScaleDex: number;
+	    ScaleInt: number;
+	    ScaleFai: number;
+	    ReqStr: number;
+	    ReqDex: number;
+	    ReqInt: number;
+	    ReqFai: number;
+	    ReqArc: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new WeaponStats(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.Weight = source["Weight"];
+	        this.PhysDamage = source["PhysDamage"];
+	        this.MagDamage = source["MagDamage"];
+	        this.FireDamage = source["FireDamage"];
+	        this.LitDamage = source["LitDamage"];
+	        this.HolyDamage = source["HolyDamage"];
+	        this.ScaleStr = source["ScaleStr"];
+	        this.ScaleDex = source["ScaleDex"];
+	        this.ScaleInt = source["ScaleInt"];
+	        this.ScaleFai = source["ScaleFai"];
+	        this.ReqStr = source["ReqStr"];
+	        this.ReqDex = source["ReqDex"];
+	        this.ReqInt = source["ReqInt"];
+	        this.ReqFai = source["ReqFai"];
+	        this.ReqArc = source["ReqArc"];
+	    }
+	}
+
+}
+
 export namespace db {
 	
 	export class GraceEntry {
@@ -41,6 +144,11 @@ export namespace db {
 	    maxUpgrade: number;
 	    iconPath: string;
 	    flags: string[];
+	    description?: string;
+	    weight?: number;
+	    weapon?: data.WeaponStats;
+	    armor?: data.ArmorStats;
+	    spell?: data.SpellStats;
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemEntry(source);
@@ -56,7 +164,30 @@ export namespace db {
 	        this.maxUpgrade = source["maxUpgrade"];
 	        this.iconPath = source["iconPath"];
 	        this.flags = source["flags"];
+	        this.description = source["description"];
+	        this.weight = source["weight"];
+	        this.weapon = this.convertValues(source["weapon"], data.WeaponStats);
+	        this.armor = this.convertValues(source["armor"], data.ArmorStats);
+	        this.spell = this.convertValues(source["spell"], data.SpellStats);
 	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 
 }
