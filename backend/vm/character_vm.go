@@ -131,7 +131,10 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 
 			var currentUpgrade uint32
 			if baseID != itemID && itemID > baseID {
-				currentUpgrade = itemID - baseID
+				diff := itemID - baseID
+				// Strip infusion offset (multiples of 100: Heavy=100, Keen=200, ..., Occult=1200)
+				// to get the actual upgrade level (0-25)
+				currentUpgrade = diff % 100
 			}
 
 			displayQuantity := item.Quantity

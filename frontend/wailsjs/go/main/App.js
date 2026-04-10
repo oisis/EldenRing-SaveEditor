@@ -22,6 +22,10 @@ export function GetAllGraces() {
   return window['go']['main']['App']['GetAllGraces']();
 }
 
+export function GetBosses(arg1) {
+  return window['go']['main']['App']['GetBosses'](arg1);
+}
+
 export function GetCharacter(arg1) {
   return window['go']['main']['App']['GetCharacter'](arg1);
 }
@@ -88,6 +92,10 @@ export function SelectAndOpenSave() {
 
 export function SelectAndOpenSourceSave() {
   return window['go']['main']['App']['SelectAndOpenSourceSave']();
+}
+
+export function SetBossDefeated(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetBossDefeated'](arg1, arg2, arg3);
 }
 
 export function SetGraceVisited(arg1, arg2, arg3) {

@@ -38,28 +38,15 @@ Class-aware validation of character stats with automatic level recalculation.
 
 ## Phase 2 — Event Flags & Quest System
 
-### 🔲 Event Flags Parser 🟡
+### ✅ Event Flags Parser 🟡
 Parse the EventFlags bitfield (~14.7 million flags at `EventFlagsOffset`, size `0x1BF99F` bytes). Implement read/write for individual flags by ID.
 
-**Technical details (from audit):**
-- Flag addressing: `byteIdx = flagID / 8`, `bitIdx = 7 - (flagID % 8)`
-- `flag_set = data[EventFlagsOffset + byteIdx] & (1 << bitIdx)`
-- EventFlags offset is computed via dynamic offset chain (see §10 of audit):
-  ```
-  gesturesOff    = StorageBoxOffset + 0x100
-  unlockedRegSz  = read_u32(data[gesturesOff])     // DYNAMIC
-  unlockedRegion = gesturesOff + unlockedRegSz*4 + 4
-  horse          = unlockedRegion + 0x29
-  bloodStain     = horse + 0x4C
-  menuProfile    = bloodStain + 0x103C
-  gaItemsOther   = menuProfile + 0x1B588
-  tutorialData   = gaItemsOther + 0x40B
-  IngameTimer    = tutorialData + 0x1A
-  EventFlags     = IngameTimer + 0x1C0000
-  ```
-- PS4 caveat: `unlockedRegSz` can contain garbage — must be bounded (max 1024) and result validated within `0x280000`
-- Terminated by single `0x00` byte
-- Reference: [soulsmods.github.io/elden-ring-eventparam](https://soulsmods.github.io/elden-ring-eventparam/)
+**Implementation:** `backend/db/db.go`, `backend/db/data/event_flags.go`, `backend/core/structures.go`
+- `GetEventFlag(flags, id)` / `SetEventFlag(flags, id, value)` — lookup table + standard formula fallback
+- ~840 flags in precomputed lookup table (`EventFlagInfo{Byte, Bit}`)
+- `EventFlagsOffset` computed via full dynamic offset chain in `calculateDynamicOffsets()`
+- `EventFlagsAvailable` exposed in `CharacterViewModel`
+- PS4 caveat handled: `unlockedRegSz` bounded (max 1024), offset validated within `0x280000`
 
 ### 🔲 NPC Quest State Editor 🟡
 Human-readable quest progression UI built on top of event flags. **Single most requested missing feature** across all Elden Ring editor communities.
@@ -72,25 +59,32 @@ Human-readable quest progression UI built on top of event flags. **Single most r
 - Cover both base game and DLC (Shadow of the Erdtree) questlines
 - Community request: "Can I revive NPCs?" / "Can I reset quest progress?" — extremely common
 
-### 🔲 Boss Kill / Respawn Manager 🟡
+### ✅ Boss Kill / Respawn Manager 🟡
 Dedicated UI for toggling boss defeat states via event flags.
 
-**Technical details:**
-- Boss defeat flags: IDs 9100-9135 (synchronized), 61100-61268 (per-boss)
-- Each boss has 2 flags: defeat flag + reward flag
-- Show boss names with toggle switches
-- Include remembrance/reward status
+**Implementation:** `backend/db/data/bosses.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- ~120 bosses (base game + Shadow of the Erdtree DLC) with per-map defeat flag IDs
+- `BossEntry` type with: id, name, region, type (main/field), remembrance, defeated state
+- `GetBosses(slotIndex)` / `SetBossDefeated(slotIndex, bossID, defeated)` in `app.go`
+- UI integrated into World Progress tab with sub-tabs (Sites of Grace / Bosses)
+- Filter by type: all / main / field
+- Kill All / Respawn All per region
+- Remembrance boss indicator, main boss indicator
+- Boss diff support in save comparison (`diffBosses`)
 
 ---
 
 ## Phase 3 — Sites of Grace & World State
 
-### 🔲 Sites of Grace Toggle 🟡
+### ✅ Sites of Grace Toggle 🟡
 Unlock/lock individual Sites of Grace. Especially valuable on PS4 where no other tool offers this.
 
-**Technical details:**
-- Grace data stored in event flags (flag addressing as in Phase 2)
-- Need mapping of grace names → flag IDs (from soulsmods reference)
+**Implementation:** `backend/db/data/graces.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- ~460 grace entries mapped to flag IDs in `data.Graces`
+- `GraceEntry` type with: id, name, region, visited state
+- `GetGraces(slotIndex)` / `SetGraceVisited(slotIndex, graceID, visited)` in `app.go`
+- UI: region-grouped with expand/collapse, Unlock All per region, region map previews
+- Grace diff support in save comparison (`diffGraces`)
 
 ### 🔲 Summoning Pools Toggle 🟢
 Enable/disable summoning pool activation via event flags.
@@ -192,6 +186,13 @@ Show which achievements are completable given current save state (e.g., "5/7 leg
 ### ✅ Phase 1 — Safety & Integrity
 - CSPlayerGameDataHash recalculation (hash.go, hash_test.go)
 - Stat consistency validation (validation.go, classes.go)
+
+### ✅ Phase 2 — Event Flags & World State
+- Event Flags Parser (db.go, event_flags.go, structures.go)
+- Boss Kill / Respawn Manager (bosses.go, WorldProgressTab.tsx)
+
+### ✅ Phase 3 — Sites of Grace
+- Sites of Grace Toggle (graces.go, WorldProgressTab.tsx)
 
 ### ✅ Phase 22 — Item Descriptions & Stats
 Display item flavor text and detailed stats in the item detail modal. Data sourced from ERDB (MIT-licensed, parsed from regulation.bin).

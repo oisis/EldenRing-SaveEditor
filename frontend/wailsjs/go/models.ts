@@ -103,6 +103,28 @@ export namespace data {
 
 export namespace db {
 	
+	export class BossEntry {
+	    id: number;
+	    name: string;
+	    region: string;
+	    type: string;
+	    remembrance: boolean;
+	    defeated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new BossEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.region = source["region"];
+	        this.type = source["type"];
+	        this.remembrance = source["remembrance"];
+	        this.defeated = source["defeated"];
+	    }
+	}
 	export class GraceEntry {
 	    id: number;
 	    name: string;

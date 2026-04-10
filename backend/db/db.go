@@ -55,6 +55,16 @@ type GraceEntry struct {
 	Visited bool   `json:"visited"`
 }
 
+// BossEntry represents a boss encounter with defeat state.
+type BossEntry struct {
+	ID          uint32 `json:"id"`
+	Name        string `json:"name"`
+	Region      string `json:"region"`
+	Type        string `json:"type"`        // "main" or "field"
+	Remembrance bool   `json:"remembrance"` // drops Remembrance item
+	Defeated    bool   `json:"defeated"`
+}
+
 // globalItemIndex provides O(1) item lookup by ID, built once at startup.
 var globalItemIndex map[uint32]data.ItemData
 
@@ -582,6 +592,27 @@ func filterInfuseVariants(items []ItemEntry) []ItemEntry {
 // GetInfuseTypes returns all weapon infusion types.
 func GetInfuseTypes() []InfuseType {
 	return InfuseTypes
+}
+
+// GetAllBosses returns all boss encounters as a flat list sorted by region then name.
+func GetAllBosses() []BossEntry {
+	bosses := make([]BossEntry, 0, len(data.Bosses))
+	for id, boss := range data.Bosses {
+		bosses = append(bosses, BossEntry{
+			ID:          id,
+			Name:        boss.Name,
+			Region:      boss.Region,
+			Type:        boss.Type,
+			Remembrance: boss.Remembrance,
+		})
+	}
+	sort.Slice(bosses, func(i, j int) bool {
+		if bosses[i].Region != bosses[j].Region {
+			return bosses[i].Region < bosses[j].Region
+		}
+		return bosses[i].Name < bosses[j].Name
+	})
+	return bosses
 }
 
 // SetEventFlag sets or clears a specific event flag in the bit array.

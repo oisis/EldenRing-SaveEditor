@@ -335,6 +335,55 @@ func (a *App) SetGraceVisited(slotIndex int, graceID uint32, visited bool) error
 	return nil
 }
 
+// GetBosses returns all boss encounters with defeated state from the specified character slot
+func (a *App) GetBosses(slotIndex int) ([]db.BossEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	bosses := db.GetAllBosses()
+
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range bosses {
+			defeated, err := db.GetEventFlag(flags, bosses[i].ID)
+			if err != nil {
+				continue
+			}
+			bosses[i].Defeated = defeated
+		}
+	}
+
+	return bosses, nil
+}
+
+// SetBossDefeated sets or clears the defeated flag for a boss in the specified character slot
+func (a *App) SetBossDefeated(slotIndex int, bossID uint32, defeated bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := db.SetEventFlag(flags, bossID, defeated); err != nil {
+		return fmt.Errorf("failed to set boss %d: %w", bossID, err)
+	}
+	return nil
+}
+
 // ImportCharacter copies a slot from the source save file to the destination save file
 func (a *App) ImportCharacter(srcIdx, destIdx int) error {
 	return fmt.Errorf("ImportCharacter is temporarily disabled during architecture refactor")
@@ -700,6 +749,9 @@ func (a *App) GetSlotDiff(idx int) ([]DiffEntry, error) {
 	// --- Graces diff ---
 	diffs = append(diffs, a.diffGraces(idx)...)
 
+	// --- Boss diff ---
+	diffs = append(diffs, a.diffBosses(idx)...)
+
 	return diffs, nil
 }
 
@@ -818,6 +870,44 @@ func (a *App) diffGraces(idx int) []DiffEntry {
 	return diffs
 }
 
+// diffBosses compares boss defeat event flags between source and current save.
+func (a *App) diffBosses(idx int) []DiffEntry {
+	cur := &a.save.Slots[idx]
+	orig := &a.sourceSave.Slots[idx]
+
+	if cur.EventFlagsOffset <= 0 || orig.EventFlagsOffset <= 0 {
+		return nil
+	}
+	if cur.EventFlagsOffset >= len(cur.Data) || orig.EventFlagsOffset >= len(orig.Data) {
+		return nil
+	}
+
+	curFlags := cur.Data[cur.EventFlagsOffset:]
+	origFlags := orig.Data[orig.EventFlagsOffset:]
+	bosses := db.GetAllBosses()
+
+	var diffs []DiffEntry
+	for _, b := range bosses {
+		curDefeated, err1 := db.GetEventFlag(curFlags, b.ID)
+		origDefeated, err2 := db.GetEventFlag(origFlags, b.ID)
+		if err1 != nil || err2 != nil {
+			continue
+		}
+		if curDefeated != origDefeated {
+			action := "added"
+			if !curDefeated {
+				action = "removed"
+			}
+			diffs = append(diffs, DiffEntry{
+				Category: "boss",
+				Action:   action,
+				Field:    b.Name + " (" + b.Region + ")",
+			})
+		}
+	}
+	return diffs
+}
+
 // GetSaveDiffSummary returns a quick change-count overview for all active slots.
 func (a *App) GetSaveDiffSummary() ([]SlotDiffSummary, error) {
 	if a.save == nil || a.sourceSave == nil {
@@ -844,6 +934,6 @@ func (a *App) GetSaveDiffSummary() ([]SlotDiffSummary, error) {
 }
 
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.ItemEntry, DiffEntry, SlotDiffSummary) {
-	return db.GraceEntry{}, db.ItemEntry{}, DiffEntry{}, SlotDiffSummary{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, DiffEntry, SlotDiffSummary) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, DiffEntry{}, SlotDiffSummary{}
 }
