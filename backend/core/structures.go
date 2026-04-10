@@ -463,6 +463,10 @@ func (s *SaveSlot) Write(platform string) []byte {
 	if platform == "PC" {
 		sa.WriteU64(SlotSize-8, s.SteamID)
 	}
+
+	// Recalculate CSPlayerGameDataHash after all writes
+	RecalculateSlotHash(s)
+
 	return s.Data
 }
 

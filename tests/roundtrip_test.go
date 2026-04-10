@@ -1,11 +1,66 @@
 package tests
 
 import (
-	"bytes"
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"os"
 	"testing"
 )
+
+// recalculatedRegions returns file-level byte ranges that are recalculated on save:
+// - CSPlayerGameDataHash (0x80 bytes in each slot)
+// - MD5 checksum prefix (16 bytes before each slot, PC only)
+// These must be excluded from byte-for-byte round-trip comparison.
+func recalculatedRegions(save *core.SaveFile) [][2]int {
+	var regions [][2]int
+	headerSize := 0x70 // PS4
+	if save.Platform == core.PlatformPC {
+		headerSize = 0x300
+	}
+	slotRecordSize := core.SlotSize
+	if save.Platform == core.PlatformPC {
+		slotRecordSize += 16 // MD5 prefix
+	}
+	for i := 0; i < 10; i++ {
+		recordStart := headerSize + i*slotRecordSize
+		if save.Platform == core.PlatformPC {
+			// Exclude MD5 prefix (recalculated because hash inside slot changed)
+			regions = append(regions, [2]int{recordStart, recordStart + 16})
+		}
+		slotDataStart := recordStart
+		if save.Platform == core.PlatformPC {
+			slotDataStart += 16 // skip MD5 prefix
+		}
+		hashStart := slotDataStart + core.HashOffset
+		hashEnd := hashStart + core.HashSize
+		regions = append(regions, [2]int{hashStart, hashEnd})
+	}
+	return regions
+}
+
+// bytesEqualExcluding compares two byte slices, ignoring specified regions.
+// Returns true if equal (excluding the regions), and the first mismatch offset if not.
+func bytesEqualExcluding(a, b []byte, exclude [][2]int) (bool, int) {
+	if len(a) != len(b) {
+		return false, min(len(a), len(b))
+	}
+	isExcluded := func(offset int) bool {
+		for _, r := range exclude {
+			if offset >= r[0] && offset < r[1] {
+				return true
+			}
+		}
+		return false
+	}
+	for i := range a {
+		if isExcluded(i) {
+			continue
+		}
+		if a[i] != b[i] {
+			return false, i
+		}
+	}
+	return true, -1
+}
 
 func TestRoundTripPS4(t *testing.T) {
 	// Use the provided test save file
@@ -39,26 +94,21 @@ func TestRoundTripPS4(t *testing.T) {
 	}
 	defer os.Remove(tmpPath)
 
-	// 3. Compare bytes bit-per-bit
+	// 3. Compare bytes excluding hash regions (recalculated on save)
 	originalData, _ := os.ReadFile(path)
 	newData, _ := os.ReadFile(tmpPath)
+	hashRegions := recalculatedRegions(save)
 
-	if !bytes.Equal(originalData, newData) {
+	if equal, offset := bytesEqualExcluding(originalData, newData, hashRegions); !equal {
 		t.Errorf("Byte mismatch! Round-trip failed to preserve data integrity.")
-
-		// Find first mismatch for debugging
-		for i := 0; i < len(originalData); i++ {
-			if i >= len(newData) {
-				t.Logf("New data is shorter than original (len: %d vs %d)", len(newData), len(originalData))
-				break
-			}
-			if originalData[i] != newData[i] {
-				t.Logf("First mismatch at offset 0x%x: expected %02x, got %02x", i, originalData[i], newData[i])
-				break
-			}
+		if offset >= 0 && offset < len(originalData) && offset < len(newData) {
+			t.Logf("First mismatch at offset 0x%x: expected %02x, got %02x",
+				offset, originalData[offset], newData[offset])
+		} else {
+			t.Logf("Size mismatch: original=%d, new=%d", len(originalData), len(newData))
 		}
 	} else {
-		t.Logf("Round-trip successful! Data integrity preserved.")
+		t.Logf("Round-trip successful! Data integrity preserved (hash regions recalculated).")
 	}
 }
 
@@ -93,26 +143,21 @@ func TestRoundTripPC(t *testing.T) {
 	}
 	defer os.Remove(tmpPath)
 
-	// 3. Compare bytes bit-per-bit
+	// 3. Compare bytes excluding hash regions (recalculated on save)
 	originalData, _ := os.ReadFile(path)
 	newData, _ := os.ReadFile(tmpPath)
+	hashRegions := recalculatedRegions(save)
 
-	if !bytes.Equal(originalData, newData) {
+	if equal, offset := bytesEqualExcluding(originalData, newData, hashRegions); !equal {
 		t.Errorf("Byte mismatch! Round-trip failed to preserve data integrity.")
-
-		// Find first mismatch for debugging
-		for i := 0; i < len(originalData); i++ {
-			if i >= len(newData) {
-				t.Logf("New data is shorter than original (len: %d vs %d)", len(newData), len(originalData))
-				break
-			}
-			if originalData[i] != newData[i] {
-				t.Logf("First mismatch at offset 0x%x: expected %02x, got %02x", i, originalData[i], newData[i])
-				break
-			}
+		if offset >= 0 && offset < len(originalData) && offset < len(newData) {
+			t.Logf("First mismatch at offset 0x%x: expected %02x, got %02x",
+				offset, originalData[offset], newData[offset])
+		} else {
+			t.Logf("Size mismatch: original=%d, new=%d", len(originalData), len(newData))
 		}
 	} else {
-		t.Logf("Round-trip successful! Data integrity preserved.")
+		t.Logf("Round-trip successful! Data integrity preserved (hash regions recalculated).")
 	}
 }
 
