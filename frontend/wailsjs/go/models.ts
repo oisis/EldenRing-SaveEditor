@@ -235,6 +235,22 @@ export namespace main {
 
 export namespace vm {
 	
+	export class StatValidationResult {
+	    valid: boolean;
+	    errors: string[];
+	    warnings: string[];
+	
+	    static createFrom(source: any = {}) {
+	        return new StatValidationResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.valid = source["valid"];
+	        this.errors = source["errors"];
+	        this.warnings = source["warnings"];
+	    }
+	}
 	export class ItemViewModel {
 	    handle: number;
 	    id: number;
@@ -273,6 +289,8 @@ export namespace vm {
 	    name: string;
 	    level: number;
 	    souls: number;
+	    class: number;
+	    className: string;
 	    vigor: number;
 	    mind: number;
 	    endurance: number;
@@ -286,6 +304,7 @@ export namespace vm {
 	    inventory: ItemViewModel[];
 	    storage: ItemViewModel[];
 	    warnings: string[];
+	    statValidation?: StatValidationResult;
 	    eventFlagsAvailable: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -297,6 +316,8 @@ export namespace vm {
 	        this.name = source["name"];
 	        this.level = source["level"];
 	        this.souls = source["souls"];
+	        this.class = source["class"];
+	        this.className = source["className"];
 	        this.vigor = source["vigor"];
 	        this.mind = source["mind"];
 	        this.endurance = source["endurance"];
@@ -310,6 +331,7 @@ export namespace vm {
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
 	        this.storage = this.convertValues(source["storage"], ItemViewModel);
 	        this.warnings = source["warnings"];
+	        this.statValidation = this.convertValues(source["statValidation"], StatValidationResult);
 	        this.eventFlagsAvailable = source["eventFlagsAvailable"];
 	    }
 	
@@ -331,6 +353,7 @@ export namespace vm {
 		    return a;
 		}
 	}
+	
 
 }
 
