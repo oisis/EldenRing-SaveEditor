@@ -125,6 +125,24 @@ export namespace db {
 	        this.defeated = source["defeated"];
 	    }
 	}
+	export class ColosseumEntry {
+	    id: number;
+	    name: string;
+	    region: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new ColosseumEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.region = source["region"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
 	export class GraceEntry {
 	    id: number;
 	    name: string;
@@ -210,6 +228,24 @@ export namespace db {
 		    }
 		    return a;
 		}
+	}
+	export class SummoningPoolEntry {
+	    id: number;
+	    name: string;
+	    region: string;
+	    activated: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new SummoningPoolEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.region = source["region"];
+	        this.activated = source["activated"];
+	    }
 	}
 
 }

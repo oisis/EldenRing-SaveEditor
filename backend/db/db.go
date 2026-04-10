@@ -65,6 +65,22 @@ type BossEntry struct {
 	Defeated    bool   `json:"defeated"`
 }
 
+// SummoningPoolEntry represents a Martyr Effigy with activation state.
+type SummoningPoolEntry struct {
+	ID        uint32 `json:"id"`
+	Name      string `json:"name"`
+	Region    string `json:"region"`
+	Activated bool   `json:"activated"`
+}
+
+// ColosseumEntry represents a PvP colosseum with unlock state.
+type ColosseumEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Region   string `json:"region"`
+	Unlocked bool   `json:"unlocked"`
+}
+
 // globalItemIndex provides O(1) item lookup by ID, built once at startup.
 var globalItemIndex map[uint32]data.ItemData
 
@@ -613,6 +629,41 @@ func GetAllBosses() []BossEntry {
 		return bosses[i].Name < bosses[j].Name
 	})
 	return bosses
+}
+
+// GetAllSummoningPools returns all summoning pools as a flat list sorted by region then name.
+func GetAllSummoningPools() []SummoningPoolEntry {
+	pools := make([]SummoningPoolEntry, 0, len(data.SummoningPools))
+	for id, pool := range data.SummoningPools {
+		pools = append(pools, SummoningPoolEntry{
+			ID:     id,
+			Name:   pool.Name,
+			Region: pool.Region,
+		})
+	}
+	sort.Slice(pools, func(i, j int) bool {
+		if pools[i].Region != pools[j].Region {
+			return pools[i].Region < pools[j].Region
+		}
+		return pools[i].Name < pools[j].Name
+	})
+	return pools
+}
+
+// GetAllColosseums returns all colosseums as a flat list sorted by name.
+func GetAllColosseums() []ColosseumEntry {
+	colosseums := make([]ColosseumEntry, 0, len(data.Colosseums))
+	for id, c := range data.Colosseums {
+		colosseums = append(colosseums, ColosseumEntry{
+			ID:     id,
+			Name:   c.Name,
+			Region: c.Region,
+		})
+	}
+	sort.Slice(colosseums, func(i, j int) bool {
+		return colosseums[i].Name < colosseums[j].Name
+	})
+	return colosseums
 }
 
 // SetEventFlag sets or clears a specific event flag in the bit array.

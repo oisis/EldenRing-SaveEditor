@@ -385,6 +385,104 @@ func (a *App) SetBossDefeated(slotIndex int, bossID uint32, defeated bool) error
 	return nil
 }
 
+// GetSummoningPools returns all summoning pools with activation state from the specified character slot
+func (a *App) GetSummoningPools(slotIndex int) ([]db.SummoningPoolEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	pools := db.GetAllSummoningPools()
+
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range pools {
+			activated, err := db.GetEventFlag(flags, pools[i].ID)
+			if err != nil {
+				continue
+			}
+			pools[i].Activated = activated
+		}
+	}
+
+	return pools, nil
+}
+
+// SetSummoningPoolActivated sets or clears the activation flag for a summoning pool
+func (a *App) SetSummoningPoolActivated(slotIndex int, poolID uint32, activated bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := db.SetEventFlag(flags, poolID, activated); err != nil {
+		return fmt.Errorf("failed to set summoning pool %d: %w", poolID, err)
+	}
+	return nil
+}
+
+// GetColosseums returns all colosseums with unlock state from the specified character slot
+func (a *App) GetColosseums(slotIndex int) ([]db.ColosseumEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	colosseums := db.GetAllColosseums()
+
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range colosseums {
+			unlocked, err := db.GetEventFlag(flags, colosseums[i].ID)
+			if err != nil {
+				continue
+			}
+			colosseums[i].Unlocked = unlocked
+		}
+	}
+
+	return colosseums, nil
+}
+
+// SetColosseumUnlocked sets or clears the unlock flag for a colosseum
+func (a *App) SetColosseumUnlocked(slotIndex int, colosseumID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := db.SetEventFlag(flags, colosseumID, unlocked); err != nil {
+		return fmt.Errorf("failed to set colosseum %d: %w", colosseumID, err)
+	}
+	return nil
+}
+
 // ImportCharacter copies a slot from the source save file to the destination save file
 func (a *App) ImportCharacter(srcIdx, destIdx int) error {
 	return fmt.Errorf("ImportCharacter is temporarily disabled during architecture refactor")

@@ -86,11 +86,28 @@ Unlock/lock individual Sites of Grace. Especially valuable on PS4 where no other
 - UI: region-grouped with expand/collapse, Unlock All per region, region map previews
 - Grace diff support in save comparison (`diffGraces`)
 
-### 🔲 Summoning Pools Toggle 🟢
-Enable/disable summoning pool activation via event flags.
+### ✅ Summoning Pools Toggle 🟢
+Enable/disable summoning pool (Martyr Effigy) activation via event flags.
 
-### 🔲 Colosseum Toggle 🟢
+**Implementation:** `backend/db/data/summoning_pools.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- ~162 summoning pools (base game + Shadow of the Erdtree DLC) mapped to event flag IDs
+- Legacy dungeon pools (10000040+) use precomputed lookup table entries already in `event_flags.go`
+- Open-world pools (1035530040+) also covered via lookup table
+- `SummoningPoolEntry` type with: id, name, region, activated state
+- `GetSummoningPools(slotIndex)` / `SetSummoningPoolActivated(slotIndex, poolID, activated)` in `app.go`
+- UI: region-grouped with expand/collapse, Activate All per region, global Activate All
+- Integrated as "Summoning Pools" sub-tab in World Progress tab
+
+### ✅ Colosseum Toggle 🟢
 Unlock colosseums via their respective event flags.
+
+**Implementation:** `backend/db/data/summoning_pools.go` (Colosseums map), `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- 3 colosseums: Limgrave (60360), Caelid (60350), Royal/Leyndell (60370)
+- Flag IDs already in `event_flags.go` lookup table
+- `ColosseumEntry` type with: id, name, region, unlocked state
+- `GetColosseums(slotIndex)` / `SetColosseumUnlocked(slotIndex, colosseumID, unlocked)` in `app.go`
+- UI: card grid with large toggles, global Unlock All button
+- Integrated as "Colosseums" sub-tab in World Progress tab
 
 ### 🔲 Map Exploration Data Editing 🔵
 Edit fog-of-war / map reveal data. **Fully unique feature** — no existing editor touches this.
@@ -191,8 +208,10 @@ Show which achievements are completable given current save state (e.g., "5/7 leg
 - Event Flags Parser (db.go, event_flags.go, structures.go)
 - Boss Kill / Respawn Manager (bosses.go, WorldProgressTab.tsx)
 
-### ✅ Phase 3 — Sites of Grace
+### ✅ Phase 3 — Sites of Grace & World State
 - Sites of Grace Toggle (graces.go, WorldProgressTab.tsx)
+- Summoning Pools Toggle (summoning_pools.go, WorldProgressTab.tsx)
+- Colosseum Toggle (summoning_pools.go, WorldProgressTab.tsx)
 
 ### ✅ Phase 22 — Item Descriptions & Stats
 Display item flavor text and detailed stats in the item detail modal. Data sourced from ERDB (MIT-licensed, parsed from regulation.bin).

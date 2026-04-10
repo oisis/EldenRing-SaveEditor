@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
@@ -10,19 +10,24 @@ interface WorldProgressTabProps {
 export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [graces, setGraces] = useState<db.GraceEntry[]>([]);
     const [bosses, setBosses] = useState<db.BossEntry[]>([]);
+    const [pools, setPools] = useState<db.SummoningPoolEntry[]>([]);
+    const [colosseums, setColosseums] = useState<db.ColosseumEntry[]>([]);
     const [loading, setLoading] = useState(false);
     const [expandedRegions, setExpandedRegions] = useState<Record<string, boolean>>({});
     const [expandedBossRegions, setExpandedBossRegions] = useState<Record<string, boolean>>({});
+    const [expandedPoolRegions, setExpandedPoolRegions] = useState<Record<string, boolean>>({});
     const [selectedMap, setSelectedMap] = useState<{name: string, path: string} | null>(null);
     const [bossFilter, setBossFilter] = useState<'all' | 'main' | 'field'>('all');
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
-    const [activeSection, setActiveSection] = useState<'graces' | 'bosses'>('graces');
+    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums'>('graces');
 
     const loadData = () => {
         setLoading(true);
         Promise.all([
             GetGraces(charIdx).then(res => setGraces(res || [])),
-            GetBosses(charIdx).then(res => setBosses(res || []))
+            GetBosses(charIdx).then(res => setBosses(res || [])),
+            GetSummoningPools(charIdx).then(res => setPools(res || [])),
+            GetColosseums(charIdx).then(res => setColosseums(res || [])),
         ]).finally(() => setLoading(false));
     };
 
@@ -108,7 +113,6 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
         onMutate?.();
     };
 
-    // --- Global boss actions ---
     const handleGlobalKillAll = async () => {
         const alive = filteredBosses.filter(b => !b.defeated);
         if (alive.length === 0) return;
@@ -124,6 +128,59 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
         await Promise.all(dead.map(b => SetBossDefeated(charIdx, b.id, false)));
         const ids = new Set(dead.map(b => b.id));
         setBosses(prev => prev.map(b => ids.has(b.id) ? {...b, defeated: false} : b));
+        onMutate?.();
+    };
+
+    // --- Summoning Pool logic ---
+    const poolRegions = pools.reduce((acc, pool) => {
+        const region = pool.region || 'Unknown';
+        if (!acc[region]) acc[region] = [];
+        acc[region].push(pool);
+        return acc;
+    }, {} as Record<string, db.SummoningPoolEntry[]>);
+
+    const togglePoolRegion = (region: string) => {
+        setExpandedPoolRegions(prev => ({...prev, [region]: !prev[region]}));
+    };
+
+    const handlePoolToggle = async (pool: db.SummoningPoolEntry, activated: boolean) => {
+        await SetSummoningPoolActivated(charIdx, pool.id, activated);
+        setPools(prev => prev.map(p => p.id === pool.id ? {...p, activated} : p));
+        onMutate?.();
+    };
+
+    const handleActivateAllPools = async (regionPools: db.SummoningPoolEntry[]) => {
+        await Promise.all(
+            regionPools
+                .filter(p => !p.activated)
+                .map(p => SetSummoningPoolActivated(charIdx, p.id, true))
+        );
+        const ids = new Set(regionPools.map(p => p.id));
+        setPools(prev => prev.map(p => ids.has(p.id) ? {...p, activated: true} : p));
+        onMutate?.();
+    };
+
+    const handleGlobalActivateAllPools = async () => {
+        const inactive = pools.filter(p => !p.activated);
+        if (inactive.length === 0) return;
+        await Promise.all(inactive.map(p => SetSummoningPoolActivated(charIdx, p.id, true)));
+        const ids = new Set(inactive.map(p => p.id));
+        setPools(prev => prev.map(p => ids.has(p.id) ? {...p, activated: true} : p));
+        onMutate?.();
+    };
+
+    // --- Colosseum logic ---
+    const handleColosseumToggle = async (colosseum: db.ColosseumEntry, unlocked: boolean) => {
+        await SetColosseumUnlocked(charIdx, colosseum.id, unlocked);
+        setColosseums(prev => prev.map(c => c.id === colosseum.id ? {...c, unlocked} : c));
+        onMutate?.();
+    };
+
+    const handleUnlockAllColosseums = async () => {
+        const locked = colosseums.filter(c => !c.unlocked);
+        if (locked.length === 0) return;
+        await Promise.all(locked.map(c => SetColosseumUnlocked(charIdx, c.id, true)));
+        setColosseums(prev => prev.map(c => ({...c, unlocked: true})));
         onMutate?.();
     };
 
@@ -162,6 +219,10 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const defeatedBosses = bosses.filter(b => b.defeated).length;
     const mainBosses = bosses.filter(b => b.type === 'main');
     const defeatedMain = mainBosses.filter(b => b.defeated).length;
+    const totalPools = pools.length;
+    const activatedPools = pools.filter(p => p.activated).length;
+    const totalColosseums = colosseums.length;
+    const unlockedColosseums = colosseums.filter(c => c.unlocked).length;
 
     if (loading) return (
         <div className="py-20 flex flex-col items-center justify-center space-y-4">
@@ -194,27 +255,25 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             )}
 
             {/* Section Tabs + Stats */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center space-x-1">
-                    <button
-                        onClick={() => setActiveSection('graces')}
-                        className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] transition-all ${activeSection === 'graces' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}
-                    >
-                        Sites of Grace
-                    </button>
-                    <button
-                        onClick={() => setActiveSection('bosses')}
-                        className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] transition-all ${activeSection === 'bosses' ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}
-                    >
-                        Bosses
-                    </button>
+                    {(['graces', 'bosses', 'pools', 'colosseums'] as const).map(section => (
+                        <button
+                            key={section}
+                            onClick={() => setActiveSection(section)}
+                            className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-[0.15em] transition-all ${activeSection === section ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}
+                        >
+                            {section === 'graces' ? 'Sites of Grace' : section === 'pools' ? 'Summoning Pools' : section.charAt(0).toUpperCase() + section.slice(1)}
+                        </button>
+                    ))}
                 </div>
 
-                {activeSection === 'graces' ? (
+                {activeSection === 'graces' && (
                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
                         {visitedGraces}/{totalGraces} discovered
                     </span>
-                ) : (
+                )}
+                {activeSection === 'bosses' && (
                     <div className="flex items-center space-x-3">
                         <button
                             onClick={handleGlobalKillAll}
@@ -257,6 +316,36 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                         <div className="w-px h-4 bg-border/50" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
                             {defeatedMain}/{mainBosses.length} main | {defeatedBosses}/{totalBosses} total
+                        </span>
+                    </div>
+                )}
+                {activeSection === 'pools' && (
+                    <div className="flex items-center space-x-3">
+                        <button
+                            onClick={handleGlobalActivateAllPools}
+                            className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary border border-border/50 hover:border-primary/50 px-2.5 py-1 rounded transition-all"
+                            title="Activate All Summoning Pools"
+                        >
+                            Activate All
+                        </button>
+                        <div className="w-px h-4 bg-border/50" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                            {activatedPools}/{totalPools} active
+                        </span>
+                    </div>
+                )}
+                {activeSection === 'colosseums' && (
+                    <div className="flex items-center space-x-3">
+                        <button
+                            onClick={handleUnlockAllColosseums}
+                            className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary border border-border/50 hover:border-primary/50 px-2.5 py-1 rounded transition-all"
+                            title="Unlock All Colosseums"
+                        >
+                            Unlock All
+                        </button>
+                        <div className="w-px h-4 bg-border/50" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                            {unlockedColosseums}/{totalColosseums} unlocked
                         </span>
                     </div>
                 )}
@@ -444,6 +533,109 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* Summoning Pools Section */}
+            {activeSection === 'pools' && (
+                <div className="grid grid-cols-1 gap-4 animate-in fade-in duration-300">
+                    {Object.entries(poolRegions).sort().map(([region, regionPools]) => {
+                        const activatedCount = regionPools.filter(p => p.activated).length;
+                        const total = regionPools.length;
+                        const allActivated = activatedCount === total;
+
+                        return (
+                            <div key={region} className="card overflow-hidden">
+                                <div className={`w-full px-5 py-4 flex justify-between items-center transition-all ${expandedPoolRegions[region] ? 'bg-muted/30 border-b border-border' : 'hover:bg-muted/10'}`}>
+                                    <button
+                                        onClick={() => togglePoolRegion(region)}
+                                        className="flex-1 flex items-center space-x-4 text-left"
+                                    >
+                                        <div className={`transition-transform duration-300 ${expandedPoolRegions[region] ? 'rotate-90 text-primary' : 'text-muted-foreground'}`}>
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7"></path>
+                                            </svg>
+                                        </div>
+                                        <h2 className="text-xs font-black uppercase tracking-widest text-foreground">{region}</h2>
+                                    </button>
+
+                                    <div className="flex items-center space-x-3">
+                                        {!allActivated && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleActivateAllPools(regionPools); }}
+                                                className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary border border-border/50 hover:border-primary/50 px-2 py-0.5 rounded transition-all"
+                                                title="Activate All Pools in Region"
+                                            >
+                                                Activate All
+                                            </button>
+                                        )}
+                                        <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded border ${allActivated ? 'text-primary border-primary/50 bg-primary/10' : 'text-muted-foreground bg-muted/50 border-border'}`}>
+                                            {activatedCount}/{total}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {expandedPoolRegions[region] && (
+                                    <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-3 animate-in slide-in-from-top-2 duration-300">
+                                        {regionPools.map(pool => (
+                                            <label key={pool.id} className="flex items-center space-x-3 group cursor-pointer py-1.5 px-2 rounded-md hover:bg-muted/40 transition-all">
+                                                <div className="relative flex items-center justify-center">
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={pool.activated}
+                                                        onChange={(e) => handlePoolToggle(pool, e.target.checked)}
+                                                        className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer focus:ring-2 focus:ring-primary/20"
+                                                    />
+                                                    <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path>
+                                                    </svg>
+                                                </div>
+                                                <span className={`text-[11px] transition-colors truncate font-semibold ${pool.activated ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} title={pool.name}>
+                                                    {pool.name}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Colosseums Section */}
+            {activeSection === 'colosseums' && (
+                <div className="grid grid-cols-1 gap-4 animate-in fade-in duration-300">
+                    <div className="card p-6">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-6">
+                            Unlock PvP colosseums — enables access without defeating the required boss
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {colosseums.map(colosseum => (
+                                <label key={colosseum.id} className="flex items-center space-x-4 group cursor-pointer py-4 px-5 rounded-lg border border-border hover:border-primary/40 hover:bg-muted/30 transition-all">
+                                    <div className="relative flex items-center justify-center flex-shrink-0">
+                                        <input
+                                            type="checkbox"
+                                            checked={colosseum.unlocked}
+                                            onChange={(e) => handleColosseumToggle(colosseum, e.target.checked)}
+                                            className="peer appearance-none w-5 h-5 rounded border-2 border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer focus:ring-2 focus:ring-primary/20"
+                                        />
+                                        <svg className="absolute w-3 h-3 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className={`text-sm font-black uppercase tracking-wide transition-colors ${colosseum.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                            {colosseum.name}
+                                        </p>
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
+                                            {colosseum.region}
+                                        </p>
+                                    </div>
+                                </label>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             )}
         </div>
