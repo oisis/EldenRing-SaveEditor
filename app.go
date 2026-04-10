@@ -167,8 +167,9 @@ func (a *App) WriteSave(platform string) error {
 	}
 
 	// Apply target platform — enables cross-platform conversion.
+	origPlatform := a.save.Platform
 	a.save.Platform = core.Platform(platform)
-	if platform == "PC" && !a.save.Encrypted {
+	if platform == "PC" && origPlatform == core.PlatformPS {
 		// PS4 → PC: enable AES encryption with a fresh random IV.
 		iv := make([]byte, 16)
 		if _, err := rand.Read(iv); err != nil {
