@@ -211,12 +211,16 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	equipedItems := equipedSpells + DynEquipedItems
 	equipedGestures := equipedItems + DynEquipedGestures
 
-	// Dynamic read #1: projSize
-	projSize, err := sa.ReadDynamicSize(equipedGestures, MaxProjSize, "projSize")
-	if err != nil {
+	// Dynamic field #1: acquired_projectiles header.
+	// The u32 at equipedGestures is the byte-size of projectile data that follows.
+	// Reference editors (ER-Save-Editor, er-save-manager) skip this section by reading
+	// the 4-byte header and advancing past it. The actual projectile data size is embedded
+	// in the header value but we only need to skip the 4-byte header itself — the projectile
+	// data is already accounted for in the fixed offsets that follow.
+	if err := sa.CheckBounds(equipedGestures, 4, "projHeader"); err != nil {
 		return err
 	}
-	equipedProjectile := equipedGestures + projSize*8 + 4
+	equipedProjectile := equipedGestures + 4
 
 	equipedArmaments := equipedProjectile + DynEquipedArmaments
 	equipePhysics := equipedArmaments + DynEquipePhysics
@@ -231,12 +235,13 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 		return nil // non-fatal — event flags are optional for basic editing
 	}
 
-	// Dynamic read #2: unlockedRegSz
-	unlockedRegSz, err := sa.ReadDynamicSize(gesturesOff, MaxUnlockedRegSz, "unlockedRegSz")
-	if err != nil {
+	// Dynamic field #2: unlocked_regions header.
+	// Same pattern as projSize — the u32 is a byte-size/count value but we only need
+	// to skip the 4-byte header. The region data is accounted for in fixed offsets.
+	if err := sa.CheckBounds(gesturesOff, 4, "unlockedRegHeader"); err != nil {
 		return err
 	}
-	unlockedRegion := gesturesOff + unlockedRegSz*4 + 4
+	unlockedRegion := gesturesOff + 4
 
 	horse := unlockedRegion + DynHorse
 	bloodStain := horse + DynBloodStain

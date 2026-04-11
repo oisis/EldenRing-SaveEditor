@@ -258,11 +258,9 @@ func ComputeSlotHash(slot *SaveSlot) [HashSize]byte {
 		writeEntry(8, equipmentHash(armorIDs))
 	}
 
-	// [9-10] Require dynamic projSize read (BUG-4 fix).
-	// Read projSize from the save data at equipedGesturesOff, same as calculateDynamicOffsets().
-	projSize, err := sa.ReadDynamicSize(equipedGesturesOff, MaxProjSize, "hash/projSize")
+	// [9-10] Validate offset chain is reachable by checking projHeader bounds.
+	err := sa.CheckBounds(equipedGesturesOff, 4, "hash/projHeader")
 	if err == nil {
-		_ = projSize // projSize validates the chain; the actual offsets above are already correct
 
 		// [10] Equipped Spells — from EquipedSpells section
 		// Each spell entry = 8 bytes (SpellID i32 + unk i32), 14 spell slots.
