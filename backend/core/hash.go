@@ -174,6 +174,13 @@ func readQuickItemIDs(data []byte, offset int) []uint32 {
 // ComputeSlotHash calculates the full CSPlayerGameDataHash (0x80 bytes) for a slot.
 // The hash block is written at SlotSize - 0x80.
 //
+// WARNING: This function is NOT called in the save path. All reference editors
+// (ER-Save-Editor, er-save-manager, Final.py) preserve the original hash bytes
+// verbatim. The game may not validate this hash, and our algorithm has known issues:
+// - readQuickItemIDs [9] may read from wrong base offset (missing ChrAsmEquipment skip)
+// - bytesHash produces 32-bit results but original hash values appear to be 16-bit
+// Do NOT enable RecalculateSlotHash in Write() without thorough testing against real saves.
+//
 // Hash entries:
 //
 //	[0]  Level

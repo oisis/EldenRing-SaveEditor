@@ -161,7 +161,13 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			// tracks all items ever acquired. The game looks up weapon properties (reinforce_type)
 			// from this list on load; an absent entry causes EXCEPTION_ACCESS_VIOLATION.
 			// Source: ER-Save-Editor upsert_gaitem_data_list() / upsert_projectile_list()
-			if handlePrefix == ItemTypeWeapon || handlePrefix == ItemTypeAow {
+			//
+			// Exception: arrows/bolts have weapon-type handles (0x80xxxxxx) but belong in the
+			// projectile list (EquipProjectileData), NOT in GaItemData. The Rust reference editor
+			// routes them via upsert_projectile_list() instead. Since we don't yet parse/write the
+			// projectile section, we skip GaItemData registration for arrows — the game handles
+			// projectile registration on its own when the item is first used.
+			if (handlePrefix == ItemTypeWeapon && !db.IsArrowID(id)) || handlePrefix == ItemTypeAow {
 				if err := upsertGaItemData(slot, id); err != nil {
 					return err
 				}

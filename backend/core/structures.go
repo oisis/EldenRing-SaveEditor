@@ -167,14 +167,10 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	// 6. Map inventory
 	s.mapInventory()
 
-	if platform == "PC" {
-		sa := NewSlotAccessor(s.Data)
-		steamID, err := sa.ReadU64(SlotSize - 8)
-		if err != nil {
-			return fmt.Errorf("SteamID read: %w", err)
-		}
-		s.SteamID = steamID
-	}
+	// NOTE: Per-slot SteamID is at a dynamic offset within the sequential parsing chain
+	// (after BaseVersion, before PS5Activity), NOT at the fixed SlotSize-8 address.
+	// SlotSize-8 falls inside the PlayerGameDataHash region. The authoritative SteamID
+	// is read from UserData10 by the save_manager and propagated to slots from there.
 	return nil
 }
 
@@ -523,9 +519,11 @@ func (s *SaveSlot) Write(platform string) []byte {
 		sa.WriteU16(nameOff+i*2, s.Player.CharacterName[i])
 	}
 
-	if platform == "PC" {
-		sa.WriteU64(SlotSize-8, s.SteamID)
-	}
+	// NOTE: Per-slot SteamID is NOT written here. The offset is at a dynamic position within
+	// the sequential data chain (after BaseVersion, before PS5Activity), NOT at SlotSize-8.
+	// SlotSize-8 falls inside the PlayerGameDataHash region (last 0x80 bytes). Writing there
+	// corrupts hash data. The primary SteamID is stored in UserData10 and flushed by
+	// flushMetadata() — that is the authoritative source the game uses.
 
 	// NOTE: CSPlayerGameDataHash (last 0x80 bytes) is intentionally NOT recomputed here.
 	// All reference editors (ER-Save-Editor, er-save-manager, Final.py) treat this region
