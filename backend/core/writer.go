@@ -152,8 +152,12 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		if handle == 0 {
 			if isStackable {
 				// Stackable goods/talismans: handle = handlePrefix | lower bits of item ID.
-				// The game reads these as: itemID = HandleToItemID(handle).
+				// The game resolves these DIRECTLY from the handle (itemID = HandleToItemID(handle)).
+				// They are NEVER stored in the GaItems array — real saves have zero 0xA0/0xB0
+				// entries in GaItems. Writing a GaItem for stackable items displaces empty fill
+				// entries, causing the game to read past the fixed-count GaItem boundary → crash.
 				handle = (id & 0x0FFFFFFF) | handlePrefix
+				slot.GaMap[handle] = id
 			} else {
 				// Weapons, armor, AoW, and arrows: generate unique handle with GaMap indirection.
 				var err error
@@ -161,25 +165,25 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 				if err != nil {
 					return err
 				}
-			}
-			if err := writeGaItem(slot, handle, id, recordSize); err != nil {
-				return err
-			}
-			slot.GaMap[handle] = id
-
-			// Weapons and AoW must be registered in GaItemData — a separate section that
-			// tracks all items ever acquired. The game looks up weapon properties (reinforce_type)
-			// from this list on load; an absent entry causes EXCEPTION_ACCESS_VIOLATION.
-			// Source: ER-Save-Editor upsert_gaitem_data_list() / upsert_projectile_list()
-			//
-			// Exception: arrows/bolts have weapon-type handles (0x80xxxxxx) but belong in the
-			// projectile list (EquipProjectileData), NOT in GaItemData. The Rust reference editor
-			// routes them via upsert_projectile_list() instead. Since we don't yet parse/write the
-			// projectile section, we skip GaItemData registration for arrows — the game handles
-			// projectile registration on its own when the item is first used.
-			if (handlePrefix == ItemTypeWeapon && !db.IsArrowID(id)) || handlePrefix == ItemTypeAow {
-				if err := upsertGaItemData(slot, id); err != nil {
+				if err := writeGaItem(slot, handle, id, recordSize); err != nil {
 					return err
+				}
+				slot.GaMap[handle] = id
+
+				// Weapons and AoW must be registered in GaItemData — a separate section that
+				// tracks all items ever acquired. The game looks up weapon properties (reinforce_type)
+				// from this list on load; an absent entry causes EXCEPTION_ACCESS_VIOLATION.
+				// Source: ER-Save-Editor upsert_gaitem_data_list() / upsert_projectile_list()
+				//
+				// Exception: arrows/bolts have weapon-type handles (0x80xxxxxx) but belong in the
+				// projectile list (EquipProjectileData), NOT in GaItemData. The Rust reference editor
+				// routes them via upsert_projectile_list() instead. Since we don't yet parse/write the
+				// projectile section, we skip GaItemData registration for arrows — the game handles
+				// projectile registration on its own when the item is first used.
+				if (handlePrefix == ItemTypeWeapon && !db.IsArrowID(id)) || handlePrefix == ItemTypeAow {
+					if err := upsertGaItemData(slot, id); err != nil {
+						return err
+					}
 				}
 			}
 		}
@@ -557,9 +561,12 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			return io.ErrShortBuffer // All storage slots occupied
 		}
 
-		// Compute safe next index. Only consider items with valid type prefix
-		// (0x80-0xC0 in high nibble) — storage can have garbage data in unused regions.
-		nextListId := uint32(InvEquipReservedMax + 1)
+		// Use next_equip_index as the Index value (matching Rust ER-Save-Editor behavior).
+		// Clamp to be > InvEquipReservedMax and > max existing index to prevent collisions.
+		nextListId := slot.Storage.NextEquipIndex
+		if nextListId <= InvEquipReservedMax {
+			nextListId = InvEquipReservedMax + 1
+		}
 		for i := 0; i < storageCapacity; i++ {
 			off := startOffset + i*InvRecordLen
 			if off+InvRecordLen > len(slot.Data) {
@@ -569,15 +576,12 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			if h == GaHandleEmpty || h == GaHandleInvalid {
 				continue
 			}
-			// Validate handle has a known type prefix
 			typeBits := h & GaHandleTypeMask
 			if typeBits != ItemTypeWeapon && typeBits != ItemTypeArmor &&
 				typeBits != ItemTypeAccessory && typeBits != ItemTypeItem && typeBits != ItemTypeAow {
-				continue // garbage data, not a real item
+				continue
 			}
 			idx := binary.LittleEndian.Uint32(slot.Data[off+8:])
-			// Index must be in sane range: > reserved (432), < reasonable max (50000).
-			// Higher values indicate garbage data from misaligned storage regions.
 			if idx > InvEquipReservedMax && idx < 50000 && idx >= nextListId {
 				nextListId = idx + 1
 			}
@@ -591,6 +595,16 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		binary.LittleEndian.PutUint32(slot.Data[off:], newItem.GaItemHandle)
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
+
+		// Advance BOTH counters and write back (matching Rust ER-Save-Editor).
+		slot.Storage.NextEquipIndex = nextListId + 1
+		slot.Storage.NextAcquisitionSortId = nextListId + 1
+		if slot.Storage.nextEquipIndexOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextEquipIndexOff:], slot.Storage.NextEquipIndex)
+		}
+		if slot.Storage.nextAcqSortIdOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
+		}
 
 		// Update in-memory list
 		*items = append(*items, newItem)
@@ -607,14 +621,14 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			return io.ErrShortBuffer // All slots occupied
 		}
 
-		// Compute safe next index:
-		//   1. Start from next_acquisition_sort_id stored in the save file.
-		//   2. Clamp to be > InvEquipReservedMax (432) — CSGaItemIns[0..432] are reserved for
-		//      equipment slots. If a new item lands in that range the game dereferences a wrong
-		//      entry and crashes (EXCEPTION_ACCESS_VIOLATION).
-		//   3. Clamp to be > max(existing item indices) — the counter can be stale (e.g., 242)
-		//      while existing items already occupy 433-483. Using a stale value collides.
-		nextListId := slot.Inventory.NextAcquisitionSortId
+		// Use next_equip_index as the Index value (matching Rust ER-Save-Editor).
+		// The game uses this as CSGaItemIns index; items with index >= next_equip_index
+		// are considered invalid and cause EXCEPTION_ACCESS_VIOLATION.
+		// Clamp to be > InvEquipReservedMax (432) and > max existing index.
+		nextListId := slot.Inventory.NextEquipIndex
+		if nextListId <= InvEquipReservedMax {
+			nextListId = InvEquipReservedMax + 1
+		}
 		maxExisting := uint32(InvEquipReservedMax)
 		for _, item := range slot.Inventory.CommonItems {
 			if item.GaItemHandle != GaHandleEmpty && item.GaItemHandle != GaHandleInvalid && item.Index > maxExisting {
@@ -639,8 +653,14 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], qty)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], nextListId)
 
-		// Advance counter to nextListId+1 and write back (may have jumped over stale range).
+		// Advance BOTH counters and write back (matching Rust ER-Save-Editor).
+		// The game requires next_equip_index > all item indices; without this update
+		// the game considers new items invalid → crash.
+		slot.Inventory.NextEquipIndex = nextListId + 1
 		slot.Inventory.NextAcquisitionSortId = nextListId + 1
+		if slot.Inventory.nextEquipIndexOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Inventory.nextEquipIndexOff:], slot.Inventory.NextEquipIndex)
+		}
 		if slot.Inventory.nextAcqSortIdOff > 0 {
 			binary.LittleEndian.PutUint32(slot.Data[slot.Inventory.nextAcqSortIdOff:], slot.Inventory.NextAcquisitionSortId)
 		}

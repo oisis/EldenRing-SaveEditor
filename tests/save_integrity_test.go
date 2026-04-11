@@ -420,27 +420,31 @@ func TestAddItemsAndRoundtrip(t *testing.T) {
 		}
 	}
 
-	// Add a few well-known items: Uchigatana (weapon), Leather Armor (armor), Crimson Amber Medallion (talisman)
-	testItems := []uint32{
+	// Add items: Moonveil (weapon), Leather Armor (armor), Crimson Amber Medallion (talisman)
+	// Non-stackable items (weapon, armor) go into GaItems; stackable (talisman) do NOT.
+	nonStackableItems := []uint32{
 		0x003D0900, // Moonveil (weapon)
 		0x1339E340, // Leather Armor (chest)
+	}
+	stackableItems := []uint32{
 		0x20000BB8, // Crimson Amber Medallion (talisman)
 	}
+	testItems := append(nonStackableItems, stackableItems...)
 
 	err := core.AddItemsToSlot(slot, testItems, 1, 0, false)
 	if err != nil {
 		t.Fatalf("AddItemsToSlot failed: %v", err)
 	}
 
-	// Verify items were added
-	if len(slot.GaMap) <= origGaMapSize {
-		t.Error("GaMap did not grow after adding items")
+	// Verify non-stackable items were added to GaItems (GaMap grows, InventoryEnd advances)
+	if len(slot.GaMap) < origGaMapSize+len(nonStackableItems) {
+		t.Errorf("GaMap grew by %d, expected at least %d", len(slot.GaMap)-origGaMapSize, len(nonStackableItems))
 	}
 	if slot.InventoryEnd <= origInvEnd {
-		t.Error("InventoryEnd did not advance after adding items")
+		t.Error("InventoryEnd did not advance after adding non-stackable items")
 	}
 
-	// Verify inventory contains the new items (by finding their handles in GaMap)
+	// Verify all items exist in GaMap (in-memory, including stackable)
 	for _, id := range testItems {
 		found := false
 		for _, mappedID := range slot.GaMap {
@@ -451,6 +455,27 @@ func TestAddItemsAndRoundtrip(t *testing.T) {
 		}
 		if !found {
 			t.Errorf("Item 0x%08X not found in GaMap after add", id)
+		}
+	}
+
+	// Verify all items are in inventory (by finding any handle that maps to item ID)
+	for _, id := range testItems {
+		// Collect ALL handles that map to this item ID
+		handles := make(map[uint32]bool)
+		for h, mid := range slot.GaMap {
+			if mid == id {
+				handles[h] = true
+			}
+		}
+		found := false
+		for _, item := range slot.Inventory.CommonItems {
+			if handles[item.GaItemHandle] {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Item 0x%08X not found in inventory (checked %d handles)", id, len(handles))
 		}
 	}
 
@@ -499,8 +524,8 @@ func TestAddItemsAndRoundtrip(t *testing.T) {
 
 	slot2 := &save2.Slots[slotIdx]
 
-	// Verify items survive roundtrip
-	for _, id := range testItems {
+	// Verify NON-STACKABLE items survive roundtrip via GaMap
+	for _, id := range nonStackableItems {
 		found := false
 		for _, mappedID := range slot2.GaMap {
 			if mappedID == id {
@@ -509,7 +534,25 @@ func TestAddItemsAndRoundtrip(t *testing.T) {
 			}
 		}
 		if !found {
-			t.Errorf("Item 0x%08X lost after roundtrip", id)
+			t.Errorf("Non-stackable item 0x%08X lost from GaMap after roundtrip", id)
+		}
+	}
+
+	// Verify STACKABLE items survive roundtrip via inventory handle
+	// (stackable items are NOT in GaItems, so they won't be in GaMap after reload;
+	// the game resolves them directly from the handle prefix)
+	for _, id := range stackableItems {
+		handlePrefix := uint32(0xA0000000) // talisman prefix
+		expectedHandle := (id & 0x0FFFFFFF) | handlePrefix
+		found := false
+		for _, item := range slot2.Inventory.CommonItems {
+			if item.GaItemHandle == expectedHandle {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("Stackable item 0x%08X (handle 0x%08X) lost from inventory after roundtrip", id, expectedHandle)
 		}
 	}
 
@@ -528,8 +571,9 @@ func TestAddItemsAndRoundtrip(t *testing.T) {
 		t.Errorf("ValidateSlotIntegrity failed after roundtrip: %v", err)
 	}
 
-	t.Logf("Added %d items, GaMap: %d->%d, InvEnd: 0x%X->0x%X",
-		len(testItems), origGaMapSize, len(slot2.GaMap), origInvEnd, slot2.InventoryEnd)
+	t.Logf("Added %d items (%d non-stackable, %d stackable), GaMap: %d->%d, InvEnd: 0x%X->0x%X",
+		len(testItems), len(nonStackableItems), len(stackableItems),
+		origGaMapSize, len(slot2.GaMap), origInvEnd, slot2.InventoryEnd)
 }
 
 // ---------- Add Arrows (Stackable Weapons) ----------
@@ -959,16 +1003,19 @@ func TestAddItemsToStorage(t *testing.T) {
 			origStorageCount, len(slot2.Storage.CommonItems))
 	}
 
-	// Verify the specific item we added exists in reloaded storage
+	// Verify the specific item we added exists in reloaded storage.
+	// Crimson Amber Medallion is stackable — its handle is derived from item ID,
+	// not stored in GaItems. Check by handle directly instead of GaMap lookup.
+	expectedHandle := (testItems[0] & 0x0FFFFFFF) | 0xA0000000
 	itemFound := false
 	for _, item := range slot2.Storage.CommonItems {
-		if mappedID, ok := slot2.GaMap[item.GaItemHandle]; ok && mappedID == testItems[0] {
+		if item.GaItemHandle == expectedHandle {
 			itemFound = true
 			break
 		}
 	}
 	if !itemFound {
-		t.Error("Added storage item not found after roundtrip")
+		t.Errorf("Added storage item (handle 0x%08X) not found after roundtrip", expectedHandle)
 	}
 }
 
