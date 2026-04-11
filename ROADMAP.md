@@ -15,14 +15,15 @@
 
 ## Phase 1 — Safety & Integrity (Critical)
 
-### ✅ CSPlayerGameDataHash Recalculation 🔴
-Implemented modified Adler-like checksum for the last 0x80 bytes of each save slot. Hash is recalculated automatically on every save.
+### ✅ CSPlayerGameDataHash — Preserved (NOT recomputed) 🔴
+The last 0x80 bytes of each save slot are preserved verbatim from the original file. **Do not recompute.**
 
-**Implementation:** `backend/core/hash.go`
-- 12 hash entries: Level, Stats (Int/Faith swapped), ArcheType, PGD+0xB8, padding, Souls, SoulMemory, EquippedWeapons (10 IDs), EquippedArmors (9 IDs), EquippedItems (16 IDs, lower 28 bits), EquippedSpells (14 IDs), padding
-- Algorithm: `ComputeHashedValue()` with magic constant `0x80078071`
-- `RecalculateSlotHash()` called in `SaveSlot.Write()` before return
-- Tests: `backend/core/hash_test.go` (9 tests), round-trip tests updated to exclude hash regions
+**Investigation:** `backend/core/hash.go`, `backend/core/structures.go`
+- All reference editors (ER-Save-Editor/Rust, er-save-manager/Python, Final.py) treat this region as opaque — they copy it unchanged
+- The game uses these bytes at runtime for equipment data, NOT just as an integrity hash
+- Our `ComputeHashedValue()` / `bytesHash()` algorithm was wrong: produced 32-bit values, original values are 16-bit (e.g. 0x36DF). 11/12 entries mismatched on real save → EXCEPTION_ACCESS_VIOLATION crash
+- Hash functions remain in `hash.go` for reference; `RecalculateSlotHash()` is NOT called from `Write()`
+- Round-trip tests exclude hash region (bytes are unchanged by design)
 
 ### ✅ Stat Consistency Validation 🔴
 Class-aware validation of character stats with automatic level recalculation.
@@ -230,3 +231,15 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
 
 ### ✅ Bugfixes
 - Fix duplicate talismans in database (155 entries with `0xA0` prefix removed from `talismans.go`)
+- Fix game crash (EXCEPTION_ACCESS_VIOLATION) after adding weapons to both inventory and storage:
+  - `writeGaItem()`: after writing any GaItem record, fill the entire remaining pre-allocated empty slot region (InventoryEnd → gaLimit) with clean `00000000|FFFFFFFF` markers. Root cause: weapon records are 21B (21 mod 8 = 5), creating a 5-byte phase shift between the game's scanner grid and the original 8-byte empty-slot grid — the two grids never converge, so the game reads garbage handles (e.g. 0x00FFFFFF) and crashes. Previous fix (4-byte zero at InventoryEnd) was insufficient: the scanner advances 8B and hits misaligned data at InventoryEnd+8.
+  - `scanGaItems()`: validate GaItem handle type prefix — unknown prefix (e.g. `0xFFFF0000`) treated as stop condition, not a valid item
+  - `DatabaseTab.tsx`: when adding 1 non-stackable item to both inv and storage, use single `AddItemsToCharacter` call so both locations share the same GaItem handle (prevents duplicate GaItem records)
+- Fix game crash (EXCEPTION_ACCESS_VIOLATION) after loading save with added weapons — wrong `Index` (listId) in EquipInventoryData:
+  - `addToInventory()`: new inventory items were assigned `Index = emptyIdx` (array position, e.g. 26). The game uses `Index` to look up CSGaItemIns in an internal table — indices 0-432 are reserved for equipment slots, so index=26 returns 0xFFFFFFFF (uninitialized) → r14=0xFFFFFFFF → crash reading from 0xFFFFFFFFFFFFFFFF.
+  - Fix: storage item count header at `StorageBoxOffset` (4 bytes) is now updated after each append — previously stayed at 0, so game read 0 storage items
+- Fix game crash (EXCEPTION_ACCESS_VIOLATION) — `next_acquisition_sort_id` not parsed from save file (`structures.go`, `writer.go`, `offset_defs.go`):
+  - `EquipInventoryData.Read()` was missing: (a) skip of 4-byte `key_count` header between common and key items, (b) read of trailing counters `next_equip_index` + `next_acquisition_sort_id` with their byte offsets for write-back
+  - `addToInventory()` was using `maxExistingIndex + 2` (heuristic) instead of `next_acquisition_sort_id` from save — the heuristic produces wrong values when the game's actual stride is 1 (not 2) or when the counter has diverged
+  - Fix: `Read()` now skips key_count header, reads and stores both trailing counters; `addToInventory()` uses `slot.Inventory.NextAcquisitionSortId` / `slot.Storage.NextAcquisitionSortId` as Index, then increments and writes the counter back to `slot.Data`
+  - New constants: `StorageCommonCount=0x780`, `StorageKeyCount=0x80`, `InvKeyCountHeader=4`, offset constants for all trailing counters

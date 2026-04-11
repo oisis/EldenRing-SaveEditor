@@ -36,8 +36,12 @@ type InventoryItem struct {
 }
 
 type EquipInventoryData struct {
-	CommonItems []InventoryItem
-	KeyItems    []InventoryItem
+	CommonItems           []InventoryItem
+	KeyItems              []InventoryItem
+	NextEquipIndex        uint32
+	NextAcquisitionSortId uint32
+	nextEquipIndexOff     int // absolute byte offset in slot.Data (for write-back)
+	nextAcqSortIdOff      int // absolute byte offset in slot.Data (for write-back)
 }
 
 func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
@@ -47,12 +51,18 @@ func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
 		e.CommonItems[i].Quantity, _ = r.ReadU32()
 		e.CommonItems[i].Index, _ = r.ReadU32()
 	}
+	r.ReadU32() // skip key_count header (4 bytes between common and key items)
 	e.KeyItems = make([]InventoryItem, keyCount)
 	for i := 0; i < keyCount; i++ {
 		e.KeyItems[i].GaItemHandle, _ = r.ReadU32()
 		e.KeyItems[i].Quantity, _ = r.ReadU32()
 		e.KeyItems[i].Index, _ = r.ReadU32()
 	}
+	// Trailing counters — record offsets for write-back
+	e.nextEquipIndexOff = r.Pos()
+	e.NextEquipIndex, _ = r.ReadU32()
+	e.nextAcqSortIdOff = r.Pos()
+	e.NextAcquisitionSortId, _ = r.ReadU32()
 }
 
 type PlayerGameData struct {
@@ -87,10 +97,11 @@ type SaveSlot struct {
 	EventFlagsOffset int
 
 	// Dynamic offsets from Python logic
-	PlayerDataOffset  int
-	FaceDataOffset    int
-	StorageBoxOffset  int
-	IngameTimerOffset int
+	PlayerDataOffset   int
+	FaceDataOffset     int
+	StorageBoxOffset   int
+	IngameTimerOffset  int
+	GaItemDataOffset   int // start of GaItemData section (distinct_acquired_items_count header)
 }
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
@@ -190,6 +201,7 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	bloodStain := horse + DynBloodStain
 	menuProfile := bloodStain + DynMenuProfile
 	gaItemsOther := menuProfile + DynGaItemsOther
+	s.GaItemDataOffset = gaItemsOther // GaItemData (ga_item_data) starts here — see Rust save_slot.rs read sequence
 	tutorialData := gaItemsOther + DynTutorialData
 	s.IngameTimerOffset = tutorialData + DynIngameTimer
 	s.EventFlagsOffset = s.IngameTimerOffset + DynEventFlags
@@ -374,17 +386,27 @@ func (s *SaveSlot) scanGaItems(start int) {
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 
 		if handle != GaHandleEmpty && handle != GaHandleInvalid {
-			s.GaMap[handle] = itemID
-
+			// Validate type prefix — only known types are valid GaItem records.
+			// An unknown prefix (e.g. 0xFFFF0000 from scanner misalignment) must
+			// be treated as a stop condition, not a valid item.
 			typeBits := handle & GaHandleTypeMask
-			if typeBits == ItemTypeWeapon {
+			switch typeBits {
+			case ItemTypeWeapon:
+				s.GaMap[handle] = itemID
 				curr += GaRecordWeapon
-			} else if typeBits == ItemTypeArmor {
+				lastEnd = curr
+			case ItemTypeArmor:
+				s.GaMap[handle] = itemID
 				curr += GaRecordArmor
-			} else {
+				lastEnd = curr
+			case ItemTypeAccessory, ItemTypeItem, ItemTypeAow:
+				s.GaMap[handle] = itemID
 				curr += GaRecordItem
+				lastEnd = curr
+			default:
+				// Unknown type prefix — stop scanning (corrupted/misaligned region).
+				curr = gaLimit
 			}
-			lastEnd = curr
 		} else {
 			curr += GaRecordItem
 		}
@@ -431,6 +453,17 @@ func (s *SaveSlot) mapInventory() {
 		sr := NewReader(s.Data)
 		sr.Seek(int64(storageStart), 0)
 		s.Storage.ReadStorage(sr, StorageItemCount)
+
+		// Read storage trailing counters from fixed position
+		// Layout: StorageCommonCount×12 + key_count(4) + StorageKeyCount×12 + next_equip_index(4) + next_acq_sort_id(4)
+		storageNextEquipOff := storageStart + StorageNextEquipIdxRel
+		storageNextAcqOff := storageStart + StorageNextAcqSortRel
+		if storageNextAcqOff+4 <= len(s.Data) {
+			s.Storage.nextEquipIndexOff = storageNextEquipOff
+			s.Storage.NextEquipIndex = binary.LittleEndian.Uint32(s.Data[storageNextEquipOff:])
+			s.Storage.nextAcqSortIdOff = storageNextAcqOff
+			s.Storage.NextAcquisitionSortId = binary.LittleEndian.Uint32(s.Data[storageNextAcqOff:])
+		}
 	}
 }
 
@@ -464,8 +497,11 @@ func (s *SaveSlot) Write(platform string) []byte {
 		sa.WriteU64(SlotSize-8, s.SteamID)
 	}
 
-	// Recalculate CSPlayerGameDataHash after all writes
-	RecalculateSlotHash(s)
+	// NOTE: CSPlayerGameDataHash (last 0x80 bytes) is intentionally NOT recomputed here.
+	// All reference editors (ER-Save-Editor, er-save-manager, Final.py) treat this region
+	// as read-only — they preserve the original bytes from the save file. The game does not
+	// validate this hash on load. Recomputing it with a wrong algorithm corrupts those bytes
+	// and causes EXCEPTION_ACCESS_VIOLATION (the game uses these offsets for equipment lookup).
 
 	return s.Data
 }

@@ -58,14 +58,27 @@ const (
 // Inventory layout (relative to MagicOffset).
 // Source: SPEC.md §5.4 Dynamic Offsets.
 const (
-	InvStartFromMagic = 505       // MagicOffset + 505
+	InvStartFromMagic = 505       // MagicOffset + 505 — points to first common item (common_count header at -4)
 	CommonItemCount   = 0xA80     // 2688 common item slots
 	KeyItemCount      = 0x180     // 384 key item slots
-	StorageItemCount  = 2048      // storage box capacity
+	StorageItemCount  = 2048      // storage box capacity (read limit for ReadStorage)
+	StorageCommonCount = 0x780    // 1920 actual common item slots in storage
+	StorageKeyCount   = 0x80     // 128 key item slots in storage
 	InvRecordLen      = 12        // bytes per inventory record (handle + qty + index)
 	InvSafetyMargin   = 0x9000    // max distance from invStart to validate section
 	StorageSafetyMarg = 0x6000    // max distance from storageStart to validate section
 	StorageHeaderSkip = 4         // skip 4-byte header at StorageBoxOffset
+	InvKeyCountHeader = 4         // 4-byte key_count header between common and key items
+
+	// Offsets of trailing counters relative to invStart (= MagicOffset + InvStartFromMagic).
+	// Layout: CommonItemCount×12 + key_count(4) + KeyItemCount×12 + next_equip_index(4) + next_acq_sort_id(4)
+	InvNextEquipIdxRelInv = CommonItemCount*InvRecordLen + InvKeyCountHeader + KeyItemCount*InvRecordLen
+	InvNextAcqSortRelInv  = InvNextEquipIdxRelInv + 4
+
+	// Offsets of trailing counters relative to (StorageBoxOffset + StorageHeaderSkip).
+	// Layout: StorageCommonCount×12 + key_count(4) + StorageKeyCount×12 + next_equip_index(4) + next_acq_sort_id(4)
+	StorageNextEquipIdxRel = StorageCommonCount*InvRecordLen + InvKeyCountHeader + StorageKeyCount*InvRecordLen
+	StorageNextAcqSortRel  = StorageNextEquipIdxRel + 4
 )
 
 // Dynamic offset chain constants (relative to InventoryEnd).
@@ -101,3 +114,19 @@ const (
 	MaxUnlockedRegSz  = 1024  // max unlocked region entries
 	MaxHandleAttempts = 10000 // max iterations for generateUniqueHandle
 )
+
+// GaItemData section (distinct_acquired_items_count + GaItem2 array).
+// Source: ER-Save-Editor save_slot.rs, GaItemData struct.
+// GaItemData records every weapon/AoW ID ever acquired. The game looks up weapon properties
+// (reinforce_type etc.) from this list on load. Missing entry → crash.
+const (
+	GaItemDataEntryLen = 16   // id(4) + unk(4) + reinforce_type(4) + unk1(4)
+	GaItemDataArrayOff = 8    // array starts after distinct_count(4) + unk1(4)
+	GaItemDataMaxCount = 7000 // 0x1B58 max entries (matches DynGaItemsOther / GaItemDataEntryLen)
+)
+
+// InvEquipReservedMax is the highest CSGaItemIns index reserved for equipment slots (0-432).
+// Inventory items added via save editor must have Index > InvEquipReservedMax.
+// If next_acquisition_sort_id from the save is ≤ InvEquipReservedMax or overlaps an existing
+// item's index, the game dereferences the wrong CSGaItemIns entry → EXCEPTION_ACCESS_VIOLATION.
+const InvEquipReservedMax = 432

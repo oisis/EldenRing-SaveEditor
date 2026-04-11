@@ -20,6 +20,8 @@ export function GetCharacter(arg1:number):Promise<vm.CharacterViewModel>;
 
 export function GetCharacterNames():Promise<Array<string>>;
 
+export function GetColosseums(arg1:number):Promise<Array<db.ColosseumEntry>>;
+
 export function GetGraces(arg1:number):Promise<Array<db.GraceEntry>>;
 
 export function GetInfuseTypes():Promise<Array<db.InfuseType>>;
@@ -35,6 +37,8 @@ export function GetSourceActiveSlots():Promise<Array<boolean>>;
 export function GetSteamID():Promise<number>;
 
 export function GetSteamIDString():Promise<string>;
+
+export function GetSummoningPools(arg1:number):Promise<Array<db.SummoningPoolEntry>>;
 
 export function GetUndoDepth(arg1:number):Promise<number>;
 
@@ -52,6 +56,8 @@ export function SelectAndOpenSourceSave():Promise<string>;
 
 export function SetBossDefeated(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
+export function SetColosseumUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
+
 export function SetGraceVisited(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
@@ -59,5 +65,7 @@ export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
 export function SetSteamID(arg1:number):Promise<void>;
 
 export function SetSteamIDFromString(arg1:string):Promise<void>;
+
+export function SetSummoningPoolActivated(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function WriteSave(arg1:string):Promise<void>;
