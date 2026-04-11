@@ -8,6 +8,71 @@ import (
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 )
 
+// upsertGaItemData ensures itemID is present in the GaItemData section.
+// GaItemData tracks all weapons and AoW ever acquired; the game looks up weapon
+// properties (reinforce_type) from this list on load. Adding a weapon without
+// a corresponding GaItemData entry causes EXCEPTION_ACCESS_VIOLATION on load.
+//
+// Source: ER-Save-Editor src/vm/inventory/add_single.rs upsert_gaitem_data_list()
+//
+// Layout (at slot.GaItemDataOffset):
+//   [0]   distinct_acquired_items_count (i32)
+//   [4]   unk1 (i32) — preserve unchanged
+//   [8+]  GaItem2 array: id(4) + unk(4) + reinforce_type(4) + unk1(4) per entry
+// reinforceTypeFromItemID extracts the reinforce_type (upgrade level) from a weapon item ID.
+// Weapon IDs encode upgrade level as: baseID + infuseOffset + upgradeLevel
+// where infuseOffset is a multiple of 100 (0=Standard, 100=Heavy, ..., 1200=Occult)
+// and upgradeLevel is 0-25 (normal weapons) or 0-10 (boss/unique weapons).
+// The reinforce_type stored in GaItemData equals the upgrade level.
+// Source: ER-Save-Editor upsert_gaitem_data_list() uses item's reinforce_type_id from regulation.
+func reinforceTypeFromItemID(itemID uint32) uint32 {
+	return itemID % 100
+}
+
+func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
+	off := slot.GaItemDataOffset
+	if off <= 0 {
+		return nil // offset chain failed or not computed — skip silently
+	}
+	sa := NewSlotAccessor(slot.Data)
+
+	// Read current count (first 4 bytes of GaItemData)
+	if err := sa.CheckBounds(off, 4, "upsertGaItemData/count"); err != nil {
+		return nil // non-fatal
+	}
+	count := int(int32(binary.LittleEndian.Uint32(slot.Data[off:])))
+	if count < 0 || count >= GaItemDataMaxCount {
+		return nil // corrupt or full — skip
+	}
+
+	// Scan existing entries for this itemID (only scan [0..count-1])
+	arrayBase := off + GaItemDataArrayOff
+	for i := 0; i < count; i++ {
+		entryOff := arrayBase + i*GaItemDataEntryLen
+		if err := sa.CheckBounds(entryOff, 4, "upsertGaItemData/scan"); err != nil {
+			return nil
+		}
+		if binary.LittleEndian.Uint32(slot.Data[entryOff:]) == itemID {
+			return nil // already present
+		}
+	}
+
+	// Append new entry at position [count]
+	newEntryOff := arrayBase + count*GaItemDataEntryLen
+	if err := sa.CheckBounds(newEntryOff, GaItemDataEntryLen, "upsertGaItemData/write"); err != nil {
+		return nil // non-fatal: no room
+	}
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff:], itemID)
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+4:], 0)                          // unk
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+8:], reinforceTypeFromItemID(itemID)) // reinforce_type
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+12:], 0)                         // unk1
+
+	// Write updated count
+	binary.LittleEndian.PutUint32(slot.Data[off:], uint32(count+1))
+
+	return nil
+}
+
 type Writer struct {
 	w io.Writer
 }
@@ -87,8 +152,12 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		if handle == 0 {
 			if isStackable {
 				// Stackable goods/talismans: handle = handlePrefix | lower bits of item ID.
-				// The game reads these as: itemID = HandleToItemID(handle).
+				// The game resolves these DIRECTLY from the handle (itemID = HandleToItemID(handle)).
+				// They are NEVER stored in the GaItems array — real saves have zero 0xA0/0xB0
+				// entries in GaItems. Writing a GaItem for stackable items displaces empty fill
+				// entries, causing the game to read past the fixed-count GaItem boundary → crash.
 				handle = (id & 0x0FFFFFFF) | handlePrefix
+				slot.GaMap[handle] = id
 			} else {
 				// Weapons, armor, AoW, and arrows: generate unique handle with GaMap indirection.
 				var err error
@@ -96,11 +165,27 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 				if err != nil {
 					return err
 				}
+				if err := writeGaItem(slot, handle, id, recordSize); err != nil {
+					return err
+				}
+				slot.GaMap[handle] = id
+
+				// Weapons and AoW must be registered in GaItemData — a separate section that
+				// tracks all items ever acquired. The game looks up weapon properties (reinforce_type)
+				// from this list on load; an absent entry causes EXCEPTION_ACCESS_VIOLATION.
+				// Source: ER-Save-Editor upsert_gaitem_data_list() / upsert_projectile_list()
+				//
+				// Exception: arrows/bolts have weapon-type handles (0x80xxxxxx) but belong in the
+				// projectile list (EquipProjectileData), NOT in GaItemData. The Rust reference editor
+				// routes them via upsert_projectile_list() instead. Since we don't yet parse/write the
+				// projectile section, we skip GaItemData registration for arrows — the game handles
+				// projectile registration on its own when the item is first used.
+				if (handlePrefix == ItemTypeWeapon && !db.IsArrowID(id)) || handlePrefix == ItemTypeAow {
+					if err := upsertGaItemData(slot, id); err != nil {
+						return err
+					}
+				}
 			}
-			if err := writeGaItem(slot, handle, id, recordSize); err != nil {
-				return err
-			}
-			slot.GaMap[handle] = id
 		}
 
 		// 4. Add to Inventory
@@ -123,7 +208,25 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 }
 
 func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
-	h := prefix | GaHandleBase
+	// Extract part_id (byte 2, bits 16-23) from existing handles in GaMap.
+	// Real handles: 0xTTPPCCCC where TT=type, PP=part_id (always 0x80 on real saves), CCCC=counter.
+	// Reference: ER-Save-Editor generates handle = type | (part_gaitem_handle << 16) | counter
+	partID := uint32(0x80) // default
+	maxCounter := uint32(0)
+	for h := range slot.GaMap {
+		if h&GaHandleTypeMask == prefix {
+			p := (h >> 16) & 0xFF
+			if p != 0 {
+				partID = p
+			}
+			counter := h & 0xFFFF
+			if counter > maxCounter {
+				maxCounter = counter
+			}
+		}
+	}
+	// Start from maxCounter+1 to avoid collisions
+	h := prefix | (partID << 16) | (maxCounter + 1)
 	for i := 0; i < MaxHandleAttempts; i++ {
 		if _, ok := slot.GaMap[h]; !ok {
 			return h, nil
@@ -136,13 +239,13 @@ func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
 
 func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 	sa := NewSlotAccessor(slot.Data)
+	gaLimit := slot.MagicOffset - DynPlayerData + 1
 
 	// Check BOTH constraints: GaItems must not overflow into Magic section,
 	// AND must not exceed the physical buffer.
 	if err := sa.CheckBounds(slot.InventoryEnd, size, "writeGaItem"); err != nil {
 		return err
 	}
-	gaLimit := slot.MagicOffset - DynPlayerData
 	if slot.InventoryEnd+size > gaLimit {
 		return fmt.Errorf("writeGaItem: no space in GaItems section "+
 			"(InventoryEnd=0x%X + size=%d > gaLimit=0x%X)",
@@ -156,13 +259,102 @@ func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 	if err := sa.WriteU32(slot.InventoryEnd+4, itemID); err != nil {
 		return err
 	}
-	// Zero remaining bytes (weapon=13 extra, armor=8 extra, others=0)
-	for i := 8; i < size; i++ {
-		if err := sa.WriteU8(slot.InventoryEnd+i, 0); err != nil {
+
+	// Write extra fields with correct sentinel defaults.
+	// Source: ER-Save-Editor save_slot.rs GaItem::default() / GaItem::write()
+	//
+	// Weapon record (21 bytes total after handle+itemID: 13 extra bytes):
+	//   [8-11]  unk2 = -1 (0xFFFFFFFF) — game reads as i32; 0 is a valid-looking pointer → crash
+	//   [12-15] unk3 = -1 (0xFFFFFFFF) — same
+	//   [16-19] aow_gaitem_handle = 0xFFFFFFFF — "no AoW attached"; 0 would resolve to empty handle
+	//   [20]    unk5 = 0
+	//
+	// Armor record (16 bytes total: 8 extra bytes):
+	//   [8-11]  unk2 = -1 (0xFFFFFFFF)
+	//   [12-15] unk3 = -1 (0xFFFFFFFF)
+	//
+	// Writing zeros here (previous behavior) caused EXCEPTION_ACCESS_VIOLATION because the game
+	// treats 0 as a valid GaItem handle / pointer rather than the null sentinel 0xFFFFFFFF.
+	switch size {
+	case GaRecordWeapon:
+		if err := sa.WriteU32(slot.InventoryEnd+8, 0xFFFFFFFF); err != nil {
 			return err
 		}
+		if err := sa.WriteU32(slot.InventoryEnd+12, 0xFFFFFFFF); err != nil {
+			return err
+		}
+		if err := sa.WriteU32(slot.InventoryEnd+16, 0xFFFFFFFF); err != nil {
+			return err
+		}
+		if err := sa.WriteU8(slot.InventoryEnd+20, 0); err != nil {
+			return err
+		}
+	case GaRecordArmor:
+		if err := sa.WriteU32(slot.InventoryEnd+8, 0xFFFFFFFF); err != nil {
+			return err
+		}
+		if err := sa.WriteU32(slot.InventoryEnd+12, 0xFFFFFFFF); err != nil {
+			return err
+		}
+	// GaRecordItem / GaRecordAccessory / GaRecordAoW: handle+itemID only (8 bytes), no extra fields.
 	}
 	slot.InventoryEnd += size
+
+	// For records larger than 8 bytes (weapon=21, armor=16), the extra bytes
+	// push trailing empty entries past gaLimit, causing the game to read into
+	// PlayerGameData (crash). The game reads a FIXED count (5120) of entries.
+	//
+	// Fix (matching Final.py): shift ALL data after GaItems section backward
+	// by (size-8) bytes, effectively removing empty bytes from the END of the
+	// GaItems region. Then update MagicOffset and all dependent offsets.
+	// This maintains: GaItems section size = constant = 5120 entries worth.
+	if size > GaRecordItem {
+		// The GaItem array has a fixed entry count (5120/5118). Adding a larger-than-8B
+		// record at InventoryEnd consumes (size-8) extra bytes. To maintain the fixed
+		// entry count, we shift ALL data from gaLimit onward RIGHT by (size-8) bytes.
+		// This EXPANDS the GaItems section and moves MagicOffset (and everything after) right.
+		// The slot's padding at the end absorbs the expansion.
+		extraBytes := size - GaRecordItem
+
+		// Shift everything from gaLimit to end of slot RIGHT by extraBytes
+		// (last extraBytes of slot padding are lost — they were zeros anyway)
+		copy(slot.Data[gaLimit+extraBytes:SlotSize], slot.Data[gaLimit:SlotSize-extraBytes])
+
+		// Update all offsets (they reference positions at/after gaLimit, which shifted right)
+		slot.MagicOffset += extraBytes
+		slot.PlayerDataOffset += extraBytes
+		slot.FaceDataOffset += extraBytes
+		slot.StorageBoxOffset += extraBytes
+		slot.GaItemDataOffset += extraBytes
+		slot.IngameTimerOffset += extraBytes
+		if slot.EventFlagsOffset > 0 {
+			slot.EventFlagsOffset += extraBytes
+		}
+		if slot.Inventory.nextEquipIndexOff >= gaLimit {
+			slot.Inventory.nextEquipIndexOff += extraBytes
+		}
+		if slot.Inventory.nextAcqSortIdOff >= gaLimit {
+			slot.Inventory.nextAcqSortIdOff += extraBytes
+		}
+		if slot.Storage.nextEquipIndexOff >= gaLimit {
+			slot.Storage.nextEquipIndexOff += extraBytes
+		}
+		if slot.Storage.nextAcqSortIdOff >= gaLimit {
+			slot.Storage.nextAcqSortIdOff += extraBytes
+		}
+		// gaLimit itself increased (recalculate for fill below)
+		gaLimit += extraBytes
+	}
+
+	// Rewrite empty fill from InventoryEnd to current gaLimit
+	newGaLimit := slot.MagicOffset - DynPlayerData + 1
+	fillPos := slot.InventoryEnd
+	for fillPos+GaRecordItem <= newGaLimit {
+		sa.WriteU32(fillPos, GaHandleEmpty)
+		sa.WriteU32(fillPos+4, GaHandleInvalid)
+		fillPos += GaRecordItem
+	}
+
 	return nil
 }
 
@@ -202,17 +394,25 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 		}
 	}
 	if fromStorage {
+		// Scan the physical pre-allocated storage array (1920 slots) to find and zero the handle.
+		// Cannot use in-memory list index because ReadStorage skips empty slots (sparse).
 		storageStart := slot.StorageBoxOffset + StorageHeaderSkip
-		for i, item := range slot.Storage.CommonItems {
-			if item.GaItemHandle == handle {
-				slot.Storage.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: 0}
-				off := storageStart + i*InvRecordLen
-				if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/storage"); err != nil {
-					return err
-				}
+		for i := 0; i < StorageCommonCount; i++ {
+			off := storageStart + i*InvRecordLen
+			if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/storage"); err != nil {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h == handle {
 				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+8:], 0)
+			}
+		}
+		// Update in-memory list
+		for i, item := range slot.Storage.CommonItems {
+			if item.GaItemHandle == handle {
+				slot.Storage.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: 0}
 			}
 		}
 	}
@@ -250,16 +450,13 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	sa := NewSlotAccessor(slot.Data)
 	var items *[]InventoryItem
 	var startOffset int
-	var maxItems int
 
 	if isStorage {
 		items = &slot.Storage.CommonItems
 		startOffset = slot.StorageBoxOffset + StorageHeaderSkip
-		maxItems = StorageItemCount
 	} else {
 		items = &slot.Inventory.CommonItems
 		startOffset = slot.MagicOffset + InvStartFromMagic
-		maxItems = CommonItemCount
 	}
 
 	// Check if already in inventory (for stackable items).
@@ -278,20 +475,73 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	}
 
 	if isStorage {
-		// Storage uses a dynamic list — append at current length if capacity allows
-		if len(*items) >= maxItems {
-			return io.ErrShortBuffer
+		// Storage is pre-allocated (StorageCommonCount=1920 slots), same as held inventory.
+		// Find first empty slot by scanning the binary data directly (the in-memory list
+		// only contains non-empty items due to ReadStorage skipping gaps).
+		storageCapacity := StorageCommonCount
+		emptyIdx := -1
+		for i := 0; i < storageCapacity; i++ {
+			off := startOffset + i*InvRecordLen
+			if off+InvRecordLen > len(slot.Data) {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h == GaHandleEmpty || h == GaHandleInvalid {
+				emptyIdx = i
+				break
+			}
 		}
-		newIdx := uint32(len(*items))
-		newItem := InventoryItem{GaItemHandle: handle, Quantity: qty, Index: newIdx}
-		*items = append(*items, newItem)
-		off := startOffset + int(newIdx)*InvRecordLen
-		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/storage-append"); err != nil {
+		if emptyIdx < 0 {
+			return io.ErrShortBuffer // All storage slots occupied
+		}
+
+		// Use next_equip_index as the Index value (matching Rust ER-Save-Editor behavior).
+		// Clamp to be > InvEquipReservedMax and > max existing index to prevent collisions.
+		nextListId := slot.Storage.NextEquipIndex
+		if nextListId <= InvEquipReservedMax {
+			nextListId = InvEquipReservedMax + 1
+		}
+		for i := 0; i < storageCapacity; i++ {
+			off := startOffset + i*InvRecordLen
+			if off+InvRecordLen > len(slot.Data) {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h == GaHandleEmpty || h == GaHandleInvalid {
+				continue
+			}
+			typeBits := h & GaHandleTypeMask
+			if typeBits != ItemTypeWeapon && typeBits != ItemTypeArmor &&
+				typeBits != ItemTypeAccessory && typeBits != ItemTypeItem && typeBits != ItemTypeAow {
+				continue
+			}
+			idx := binary.LittleEndian.Uint32(slot.Data[off+8:])
+			if idx > InvEquipReservedMax && idx < 50000 && idx >= nextListId {
+				nextListId = idx + 1
+			}
+		}
+
+		newItem := InventoryItem{GaItemHandle: handle, Quantity: qty, Index: nextListId}
+		off := startOffset + emptyIdx*InvRecordLen
+		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/storage-insert"); err != nil {
 			return err
 		}
 		binary.LittleEndian.PutUint32(slot.Data[off:], newItem.GaItemHandle)
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
+
+		// Advance BOTH counters and write back (matching Rust ER-Save-Editor).
+		slot.Storage.NextEquipIndex = nextListId + 1
+		slot.Storage.NextAcquisitionSortId = nextListId + 1
+		if slot.Storage.nextEquipIndexOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextEquipIndexOff:], slot.Storage.NextEquipIndex)
+		}
+		if slot.Storage.nextAcqSortIdOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
+		}
+
+		// Update in-memory list
+		*items = append(*items, newItem)
 	} else {
 		// Inventory is fully pre-allocated — find first empty slot (handle == 0 or 0xFFFFFFFF)
 		emptyIdx := -1
@@ -304,14 +554,50 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		if emptyIdx < 0 {
 			return io.ErrShortBuffer // All slots occupied
 		}
-		(*items)[emptyIdx] = InventoryItem{GaItemHandle: handle, Quantity: qty, Index: uint32(emptyIdx)}
+
+		// Use next_equip_index as the Index value (matching Rust ER-Save-Editor).
+		// The game uses this as CSGaItemIns index; items with index >= next_equip_index
+		// are considered invalid and cause EXCEPTION_ACCESS_VIOLATION.
+		// Clamp to be > InvEquipReservedMax (432) and > max existing index.
+		nextListId := slot.Inventory.NextEquipIndex
+		if nextListId <= InvEquipReservedMax {
+			nextListId = InvEquipReservedMax + 1
+		}
+		maxExisting := uint32(InvEquipReservedMax)
+		for _, item := range slot.Inventory.CommonItems {
+			if item.GaItemHandle != GaHandleEmpty && item.GaItemHandle != GaHandleInvalid && item.Index > maxExisting {
+				maxExisting = item.Index
+			}
+		}
+		for _, item := range slot.Inventory.KeyItems {
+			if item.GaItemHandle != GaHandleEmpty && item.GaItemHandle != GaHandleInvalid && item.Index > maxExisting {
+				maxExisting = item.Index
+			}
+		}
+		if nextListId <= maxExisting {
+			nextListId = maxExisting + 1
+		}
+
+		(*items)[emptyIdx] = InventoryItem{GaItemHandle: handle, Quantity: qty, Index: nextListId}
 		off := startOffset + emptyIdx*InvRecordLen
 		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/inv-insert"); err != nil {
 			return err
 		}
 		binary.LittleEndian.PutUint32(slot.Data[off:], handle)
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], qty)
-		binary.LittleEndian.PutUint32(slot.Data[off+8:], uint32(emptyIdx))
+		binary.LittleEndian.PutUint32(slot.Data[off+8:], nextListId)
+
+		// Advance BOTH counters and write back (matching Rust ER-Save-Editor).
+		// The game requires next_equip_index > all item indices; without this update
+		// the game considers new items invalid → crash.
+		slot.Inventory.NextEquipIndex = nextListId + 1
+		slot.Inventory.NextAcquisitionSortId = nextListId + 1
+		if slot.Inventory.nextEquipIndexOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Inventory.nextEquipIndexOff:], slot.Inventory.NextEquipIndex)
+		}
+		if slot.Inventory.nextAcqSortIdOff > 0 {
+			binary.LittleEndian.PutUint32(slot.Data[slot.Inventory.nextAcqSortIdOff:], slot.Inventory.NextAcquisitionSortId)
+		}
 	}
 
 	return nil

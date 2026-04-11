@@ -36,23 +36,72 @@ type InventoryItem struct {
 }
 
 type EquipInventoryData struct {
-	CommonItems []InventoryItem
-	KeyItems    []InventoryItem
+	CommonItems           []InventoryItem
+	KeyItems              []InventoryItem
+	NextEquipIndex        uint32
+	NextAcquisitionSortId uint32
+	nextEquipIndexOff     int // absolute byte offset in slot.Data (for write-back)
+	nextAcqSortIdOff      int // absolute byte offset in slot.Data (for write-back)
 }
 
-func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
+// Clone returns a deep copy of EquipInventoryData, including unexported offset fields.
+func (e *EquipInventoryData) Clone() EquipInventoryData {
+	c := EquipInventoryData{
+		NextEquipIndex:        e.NextEquipIndex,
+		NextAcquisitionSortId: e.NextAcquisitionSortId,
+		nextEquipIndexOff:     e.nextEquipIndexOff,
+		nextAcqSortIdOff:      e.nextAcqSortIdOff,
+	}
+	if e.CommonItems != nil {
+		c.CommonItems = make([]InventoryItem, len(e.CommonItems))
+		copy(c.CommonItems, e.CommonItems)
+	}
+	if e.KeyItems != nil {
+		c.KeyItems = make([]InventoryItem, len(e.KeyItems))
+		copy(c.KeyItems, e.KeyItems)
+	}
+	return c
+}
+
+func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) error {
 	e.CommonItems = make([]InventoryItem, commonCount)
+	var err error
 	for i := 0; i < commonCount; i++ {
-		e.CommonItems[i].GaItemHandle, _ = r.ReadU32()
-		e.CommonItems[i].Quantity, _ = r.ReadU32()
-		e.CommonItems[i].Index, _ = r.ReadU32()
+		if e.CommonItems[i].GaItemHandle, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("common[%d].handle: %w", i, err)
+		}
+		if e.CommonItems[i].Quantity, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("common[%d].quantity: %w", i, err)
+		}
+		if e.CommonItems[i].Index, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("common[%d].index: %w", i, err)
+		}
+	}
+	if _, err = r.ReadU32(); err != nil { // skip key_count header
+		return fmt.Errorf("key_count header: %w", err)
 	}
 	e.KeyItems = make([]InventoryItem, keyCount)
 	for i := 0; i < keyCount; i++ {
-		e.KeyItems[i].GaItemHandle, _ = r.ReadU32()
-		e.KeyItems[i].Quantity, _ = r.ReadU32()
-		e.KeyItems[i].Index, _ = r.ReadU32()
+		if e.KeyItems[i].GaItemHandle, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("key[%d].handle: %w", i, err)
+		}
+		if e.KeyItems[i].Quantity, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("key[%d].quantity: %w", i, err)
+		}
+		if e.KeyItems[i].Index, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("key[%d].index: %w", i, err)
+		}
 	}
+	// Trailing counters — record offsets for write-back
+	e.nextEquipIndexOff = r.Pos()
+	if e.NextEquipIndex, err = r.ReadU32(); err != nil {
+		return fmt.Errorf("NextEquipIndex: %w", err)
+	}
+	e.nextAcqSortIdOff = r.Pos()
+	if e.NextAcquisitionSortId, err = r.ReadU32(); err != nil {
+		return fmt.Errorf("NextAcquisitionSortId: %w", err)
+	}
+	return nil
 }
 
 type PlayerGameData struct {
@@ -75,6 +124,7 @@ type PlayerGameData struct {
 
 type SaveSlot struct {
 	Data      []byte
+	Version   uint32 // slot format version (offset 0x00); 0 = empty slot
 	Player    PlayerGameData
 	GaMap     map[uint32]uint32
 	Inventory EquipInventoryData
@@ -87,10 +137,11 @@ type SaveSlot struct {
 	EventFlagsOffset int
 
 	// Dynamic offsets from Python logic
-	PlayerDataOffset  int
-	FaceDataOffset    int
-	StorageBoxOffset  int
-	IngameTimerOffset int
+	PlayerDataOffset   int
+	FaceDataOffset     int
+	StorageBoxOffset   int
+	IngameTimerOffset  int
+	GaItemDataOffset   int // start of GaItemData section (distinct_acquired_items_count header)
 }
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
@@ -99,6 +150,9 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	if err != nil {
 		return err
 	}
+
+	// 0. Read slot version (offset 0x00). Version 0 = empty/unused slot.
+	s.Version = binary.LittleEndian.Uint32(s.Data[0:4])
 
 	// 1. Find primary anchor
 	s.MagicOffset = NewReader(s.Data).FindPattern(MagicPattern)
@@ -131,16 +185,14 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	}
 
 	// 6. Map inventory
-	s.mapInventory()
-
-	if platform == "PC" {
-		sa := NewSlotAccessor(s.Data)
-		steamID, err := sa.ReadU64(SlotSize - 8)
-		if err != nil {
-			return fmt.Errorf("SteamID read: %w", err)
-		}
-		s.SteamID = steamID
+	if err := s.mapInventory(); err != nil {
+		return fmt.Errorf("mapInventory: %w", err)
 	}
+
+	// NOTE: Per-slot SteamID is at a dynamic offset within the sequential parsing chain
+	// (after BaseVersion, before PS5Activity), NOT at the fixed SlotSize-8 address.
+	// SlotSize-8 falls inside the PlayerGameDataHash region. The authoritative SteamID
+	// is read from UserData10 by the save_manager and propagated to slots from there.
 	return nil
 }
 
@@ -159,12 +211,16 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	equipedItems := equipedSpells + DynEquipedItems
 	equipedGestures := equipedItems + DynEquipedGestures
 
-	// Dynamic read #1: projSize
-	projSize, err := sa.ReadDynamicSize(equipedGestures, MaxProjSize, "projSize")
-	if err != nil {
+	// Dynamic field #1: acquired_projectiles header.
+	// The u32 at equipedGestures is the byte-size of projectile data that follows.
+	// Reference editors (ER-Save-Editor, er-save-manager) skip this section by reading
+	// the 4-byte header and advancing past it. The actual projectile data size is embedded
+	// in the header value but we only need to skip the 4-byte header itself — the projectile
+	// data is already accounted for in the fixed offsets that follow.
+	if err := sa.CheckBounds(equipedGestures, 4, "projHeader"); err != nil {
 		return err
 	}
-	equipedProjectile := equipedGestures + projSize*8 + 4
+	equipedProjectile := equipedGestures + 4
 
 	equipedArmaments := equipedProjectile + DynEquipedArmaments
 	equipePhysics := equipedArmaments + DynEquipePhysics
@@ -179,17 +235,19 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 		return nil // non-fatal — event flags are optional for basic editing
 	}
 
-	// Dynamic read #2: unlockedRegSz
-	unlockedRegSz, err := sa.ReadDynamicSize(gesturesOff, MaxUnlockedRegSz, "unlockedRegSz")
-	if err != nil {
+	// Dynamic field #2: unlocked_regions header.
+	// Same pattern as projSize — the u32 is a byte-size/count value but we only need
+	// to skip the 4-byte header. The region data is accounted for in fixed offsets.
+	if err := sa.CheckBounds(gesturesOff, 4, "unlockedRegHeader"); err != nil {
 		return err
 	}
-	unlockedRegion := gesturesOff + unlockedRegSz*4 + 4
+	unlockedRegion := gesturesOff + 4
 
 	horse := unlockedRegion + DynHorse
 	bloodStain := horse + DynBloodStain
 	menuProfile := bloodStain + DynMenuProfile
 	gaItemsOther := menuProfile + DynGaItemsOther
+	s.GaItemDataOffset = gaItemsOther // GaItemData (ga_item_data) starts here — see Rust save_slot.rs read sequence
 	tutorialData := gaItemsOther + DynTutorialData
 	s.IngameTimerOffset = tutorialData + DynIngameTimer
 	s.EventFlagsOffset = s.IngameTimerOffset + DynEventFlags
@@ -363,48 +421,74 @@ func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
 
-	gaLimit := s.MagicOffset - DynPlayerData // writable GaItems region ends 0x1B0 before Magic
+	gaLimit := s.MagicOffset - DynPlayerData + 1 // GaItems section ends 0x1AF bytes before Magic (inclusive)
 	if gaLimit < start {
 		gaLimit = start
 	}
 
+	// Determine expected GaItem count from slot version.
+	// Reference: ER-Save-Editor reads exactly 5118 (version ≤ 81) or 5120 (version > 81).
+	maxEntries := GaItemCountNew
+	if s.Version > 0 && s.Version <= GaItemVersionBreak {
+		maxEntries = GaItemCountOld
+	}
+
 	lastEnd := start
-	for curr+GaRecordItem <= gaLimit {
+	entriesRead := 0
+	for curr+GaRecordItem <= gaLimit && entriesRead < maxEntries {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 
 		if handle != GaHandleEmpty && handle != GaHandleInvalid {
-			s.GaMap[handle] = itemID
-
+			// Validate type prefix — only known types are valid GaItem records.
+			// An unknown prefix (e.g. 0xFFFF0000 from scanner misalignment) must
+			// be treated as a stop condition, not a valid item.
 			typeBits := handle & GaHandleTypeMask
-			if typeBits == ItemTypeWeapon {
+			switch typeBits {
+			case ItemTypeWeapon:
+				s.GaMap[handle] = itemID
 				curr += GaRecordWeapon
-			} else if typeBits == ItemTypeArmor {
+				lastEnd = curr
+			case ItemTypeArmor:
+				s.GaMap[handle] = itemID
 				curr += GaRecordArmor
-			} else {
+				lastEnd = curr
+			case ItemTypeAccessory, ItemTypeItem, ItemTypeAow:
+				s.GaMap[handle] = itemID
 				curr += GaRecordItem
+				lastEnd = curr
+			default:
+				// Unknown type prefix — stop scanning (corrupted/misaligned region).
+				curr = gaLimit
 			}
-			lastEnd = curr
 		} else {
 			curr += GaRecordItem
 		}
+		entriesRead++
 	}
 	s.InventoryEnd = lastEnd
 }
 
-func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
+func (e *EquipInventoryData) ReadStorage(r *Reader, count int) error {
 	e.CommonItems = []InventoryItem{}
 	for i := 0; i < count; i++ {
-		handle, _ := r.ReadU32()
-		quantity, _ := r.ReadU32()
-		index, _ := r.ReadU32()
+		handle, err := r.ReadU32()
+		if err != nil {
+			return fmt.Errorf("storage[%d].handle: %w", i, err)
+		}
+		quantity, err := r.ReadU32()
+		if err != nil {
+			return fmt.Errorf("storage[%d].quantity: %w", i, err)
+		}
+		index, err := r.ReadU32()
+		if err != nil {
+			return fmt.Errorf("storage[%d].index: %w", i, err)
+		}
 
-		if handle == 0 || handle == 0xFFFFFFFF {
-			// Stop reading at the first empty slot to avoid garbage data
-			// Note: We don't break because we need to maintain the reader position if needed,
-			// but for storage box it's usually the end of the section.
-			// Actually, breaking is safer here to avoid "Unknown Items".
-			break
+		// Skip empty/invalid entries but continue reading — storage can have sparse gaps
+		// after item removal. Breaking on first empty would lose items after the gap.
+		if handle == GaHandleEmpty || handle == GaHandleInvalid {
+			continue
 		}
 
 		e.CommonItems = append(e.CommonItems, InventoryItem{
@@ -414,15 +498,18 @@ func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
 		})
 	}
 	e.KeyItems = []InventoryItem{}
+	return nil
 }
 
-func (s *SaveSlot) mapInventory() {
+func (s *SaveSlot) mapInventory() error {
 	// Main Inventory
 	invStart := s.MagicOffset + InvStartFromMagic
 	if invStart+InvSafetyMargin < len(s.Data) {
 		ir := NewReader(s.Data)
 		ir.Seek(int64(invStart), 0)
-		s.Inventory.Read(ir, CommonItemCount, KeyItemCount)
+		if err := s.Inventory.Read(ir, CommonItemCount, KeyItemCount); err != nil {
+			return fmt.Errorf("inventory read: %w", err)
+		}
 	}
 
 	// Storage Box
@@ -430,8 +517,22 @@ func (s *SaveSlot) mapInventory() {
 	if storageStart+StorageSafetyMarg < len(s.Data) {
 		sr := NewReader(s.Data)
 		sr.Seek(int64(storageStart), 0)
-		s.Storage.ReadStorage(sr, StorageItemCount)
+		if err := s.Storage.ReadStorage(sr, StorageItemCount); err != nil {
+			return fmt.Errorf("storage read: %w", err)
+		}
+
+		// Read storage trailing counters from fixed position
+		// Layout: StorageCommonCount×12 + key_count(4) + StorageKeyCount×12 + next_equip_index(4) + next_acq_sort_id(4)
+		storageNextEquipOff := storageStart + StorageNextEquipIdxRel
+		storageNextAcqOff := storageStart + StorageNextAcqSortRel
+		if storageNextAcqOff+4 <= len(s.Data) {
+			s.Storage.nextEquipIndexOff = storageNextEquipOff
+			s.Storage.NextEquipIndex = binary.LittleEndian.Uint32(s.Data[storageNextEquipOff:])
+			s.Storage.nextAcqSortIdOff = storageNextAcqOff
+			s.Storage.NextAcquisitionSortId = binary.LittleEndian.Uint32(s.Data[storageNextAcqOff:])
+		}
 	}
+	return nil
 }
 
 func (s *SaveSlot) Write(platform string) []byte {
@@ -460,9 +561,18 @@ func (s *SaveSlot) Write(platform string) []byte {
 		sa.WriteU16(nameOff+i*2, s.Player.CharacterName[i])
 	}
 
-	if platform == "PC" {
-		sa.WriteU64(SlotSize-8, s.SteamID)
-	}
+	// NOTE: Per-slot SteamID is NOT written here. The offset is at a dynamic position within
+	// the sequential data chain (after BaseVersion, before PS5Activity), NOT at SlotSize-8.
+	// SlotSize-8 falls inside the PlayerGameDataHash region (last 0x80 bytes). Writing there
+	// corrupts hash data. The primary SteamID is stored in UserData10 and flushed by
+	// flushMetadata() — that is the authoritative source the game uses.
+
+	// NOTE: CSPlayerGameDataHash (last 0x80 bytes) is intentionally NOT recomputed here.
+	// All reference editors (ER-Save-Editor, er-save-manager, Final.py) treat this region
+	// as read-only — they preserve the original bytes from the save file. The game does not
+	// validate this hash on load. Recomputing it with a wrong algorithm corrupts those bytes
+	// and causes EXCEPTION_ACCESS_VIOLATION (the game uses these offsets for equipment lookup).
+
 	return s.Data
 }
 

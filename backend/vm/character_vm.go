@@ -24,23 +24,26 @@ type ItemViewModel struct {
 }
 
 type CharacterViewModel struct {
-	Name                string          `json:"name"`
-	Level               uint32          `json:"level"`
-	Souls               uint32          `json:"souls"`
-	Vigor               uint32          `json:"vigor"`
-	Mind                uint32          `json:"mind"`
-	Endurance           uint32          `json:"endurance"`
-	Strength            uint32          `json:"strength"`
-	Dexterity           uint32          `json:"dexterity"`
-	Intelligence        uint32          `json:"intelligence"`
-	Faith               uint32          `json:"faith"`
-	Arcane              uint32          `json:"arcane"`
-	ScadutreeBlessing   uint8           `json:"scadutreeBlessing"`
-	ShadowRealmBlessing uint8           `json:"shadowRealmBlessing"`
-	Inventory           []ItemViewModel `json:"inventory"`
-	Storage             []ItemViewModel `json:"storage"`
-	Warnings            []string        `json:"warnings"`
-	EventFlagsAvailable bool            `json:"eventFlagsAvailable"`
+	Name                string                `json:"name"`
+	Level               uint32                `json:"level"`
+	Souls               uint32                `json:"souls"`
+	Class               uint8                 `json:"class"`
+	ClassName           string                `json:"className"`
+	Vigor               uint32                `json:"vigor"`
+	Mind                uint32                `json:"mind"`
+	Endurance           uint32                `json:"endurance"`
+	Strength            uint32                `json:"strength"`
+	Dexterity           uint32                `json:"dexterity"`
+	Intelligence        uint32                `json:"intelligence"`
+	Faith               uint32                `json:"faith"`
+	Arcane              uint32                `json:"arcane"`
+	ScadutreeBlessing   uint8                 `json:"scadutreeBlessing"`
+	ShadowRealmBlessing uint8                 `json:"shadowRealmBlessing"`
+	Inventory           []ItemViewModel       `json:"inventory"`
+	Storage             []ItemViewModel       `json:"storage"`
+	Warnings            []string              `json:"warnings"`
+	StatValidation      *StatValidationResult `json:"statValidation,omitempty"`
+	EventFlagsAvailable bool                  `json:"eventFlagsAvailable"`
 }
 
 func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
@@ -48,6 +51,7 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	vm := &CharacterViewModel{
 		Level:               data.Level,
 		Souls:               data.Souls,
+		Class:               data.Class,
 		Vigor:               data.Vigor,
 		Mind:                data.Mind,
 		Endurance:           data.Endurance,
@@ -65,6 +69,18 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	vm.Name = core.UTF16ToString(data.CharacterName[:])
 	vm.Warnings = slot.Warnings
 	vm.EventFlagsAvailable = slot.EventFlagsOffset > 0
+
+	// Set class name
+	cs := db.GetClassStats(data.Class)
+	if cs != nil {
+		vm.ClassName = cs.Name
+	} else {
+		vm.ClassName = fmt.Sprintf("Unknown (%d)", data.Class)
+	}
+
+	// Run stat consistency validation
+	validation := vm.ValidateStatsConsistency(data.Class)
+	vm.StatValidation = &validation
 
 	// Map Inventory
 	vm.Inventory = mapItems(slot.Inventory, slot.GaMap)
@@ -115,7 +131,10 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 
 			var currentUpgrade uint32
 			if baseID != itemID && itemID > baseID {
-				currentUpgrade = itemID - baseID
+				diff := itemID - baseID
+				// Strip infusion offset (multiples of 100: Heavy=100, Keen=200, ..., Occult=1200)
+				// to get the actual upgrade level (0-25)
+				currentUpgrade = diff % 100
 			}
 
 			displayQuantity := item.Quantity

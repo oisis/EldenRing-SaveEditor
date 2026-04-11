@@ -3,7 +3,7 @@ package data
 var CraftingMaterials = map[uint32]ItemData{
 	// Base Game Materials
 	0x400006E0: {Name: "Ruin Fragment", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ruin_fragment.png"},
-	0x40002710: {Name: "Glass Shard", Category: "crafting_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/crafting_materials/glass_shard.png"},
+	0x40002710: {Name: "Glass Shard", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/glass_shard.png"},
 	0x40003A98: {Name: "Sliver of Meat", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sliver_of_meat.png"},
 	0x40003AA2: {Name: "Beast Liver", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/beast_liver.png"},
 	0x40003AAC: {Name: "Lump of Flesh", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/lump_of_flesh.png"},
@@ -20,7 +20,7 @@ var CraftingMaterials = map[uint32]ItemData{
 	0x40003B2E: {Name: "Miranda Powder", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/miranda_powder.png"},
 	0x40003B38: {Name: "Strip of White Flesh", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/strip_of_white_flesh.png"},
 	0x40003BEC: {Name: "Thin Beast Bones", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/thin_beast_bones.png"},
-	0x40003BED: {Name: "Hefty Beast Bone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/hefty_beast_bone.png"},
+	0x40003BED: {Name: "Hefty Beast Bone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/hefty_beast_bone.png"},
 	0x40003C28: {Name: "String", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/string.png"},
 	0x40003C32: {Name: "Living Jar Shard", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/living_jar_shard.png"},
 	0x40003C3C: {Name: "Albinauric Bloodclot", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/albinauric_bloodclot.png"},

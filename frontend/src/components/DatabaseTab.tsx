@@ -111,18 +111,25 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
             const baseIds = confirmModal.map(i => i.id);
 
             if (modalNonStackable) {
-                // Non-stackable: separate calls for inv and storage (different copy counts).
-                if (addToInv && invQtyVal > 0) {
-                    const ids = invQtyVal > 1
-                        ? confirmModal.flatMap(i => Array<number>(invQtyVal).fill(i.id))
-                        : baseIds;
-                    await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
-                }
-                if (addToStorage && storageQtyVal > 0) {
-                    const ids = storageQtyVal > 1
-                        ? confirmModal.flatMap(i => Array<number>(storageQtyVal).fill(i.id))
-                        : baseIds;
-                    await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                // Non-stackable: each copy needs its own GaItem handle in the backend.
+                // When adding exactly 1 copy to both inv and storage, use a single call so
+                // both locations share the same handle (prevents duplicate GaItem records).
+                const bothActive = addToInv && invQtyVal > 0 && addToStorage && storageQtyVal > 0;
+                if (bothActive && invQtyVal === 1 && storageQtyVal === 1) {
+                    await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1);
+                } else {
+                    if (addToInv && invQtyVal > 0) {
+                        const ids = invQtyVal > 1
+                            ? confirmModal.flatMap(i => Array<number>(invQtyVal).fill(i.id))
+                            : baseIds;
+                        await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
+                    }
+                    if (addToStorage && storageQtyVal > 0) {
+                        const ids = storageQtyVal > 1
+                            ? confirmModal.flatMap(i => Array<number>(storageQtyVal).fill(i.id))
+                            : baseIds;
+                        await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                    }
                 }
             } else {
                 // Stackable: single call with qty values.

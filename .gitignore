@@ -163,6 +163,8 @@ data/
 # gemini/ROADMAP.md
 
 # Custom dirs
+analiza/
+analiza.md
 org-src/
 save/
 build/bin/

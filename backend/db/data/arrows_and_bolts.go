@@ -3,8 +3,8 @@ package data
 var ArrowsAndBolts = map[uint32]ItemData{
 	0x02FC2900: {Name: "Rainbow Stone Arrow (Fletched)", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/rainbow_stone_arrow_fletched.png"},
 	0x02FE4BE0: {Name: "Rainbow Stone Arrow", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/rainbow_stone_arrow.png"},
-	0x0328B740: {Name: "Ballista Bolt", Category: "arrows_and_bolts", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/ballista_bolt.png"},
-	0x03292C70: {Name: "Bone Ballista Bolt", Category: "arrows_and_bolts", MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/bone_ballista_bolt.png"},
+	0x0328B740: {Name: "Ballista Bolt", Category: "arrows_and_bolts", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/ballista_bolt.png"},
+	0x03292C70: {Name: "Bone Ballista Bolt", Category: "arrows_and_bolts", MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/bone_ballista_bolt.png"},
 	0x02FAF080: {Name: "Arrow", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/arrow.png"},
 	0x02FB3EA0: {Name: "Serpent Arrow", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/serpent_arrow.png"},
 	0x02FB65B0: {Name: "Bone Arrow (Fletched)", Category: "arrows_and_bolts", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/bone_arrow_fletched.png"},

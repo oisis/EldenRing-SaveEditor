@@ -4,7 +4,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/md5"
-	"crypto/sha256"
 	"fmt"
 )
 
@@ -72,7 +71,3 @@ func ComputeMD5(data []byte) [16]byte {
 	return md5.Sum(data)
 }
 
-// ComputeSHA256 calculates the SHA256 checksum of the given data.
-func ComputeSHA256(data []byte) [32]byte {
-	return sha256.Sum256(data)
-}

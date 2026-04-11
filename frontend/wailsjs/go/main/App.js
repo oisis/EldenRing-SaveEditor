@@ -22,12 +22,20 @@ export function GetAllGraces() {
   return window['go']['main']['App']['GetAllGraces']();
 }
 
+export function GetBosses(arg1) {
+  return window['go']['main']['App']['GetBosses'](arg1);
+}
+
 export function GetCharacter(arg1) {
   return window['go']['main']['App']['GetCharacter'](arg1);
 }
 
 export function GetCharacterNames() {
   return window['go']['main']['App']['GetCharacterNames']();
+}
+
+export function GetColosseums(arg1) {
+  return window['go']['main']['App']['GetColosseums'](arg1);
 }
 
 export function GetGraces(arg1) {
@@ -62,6 +70,10 @@ export function GetSteamIDString() {
   return window['go']['main']['App']['GetSteamIDString']();
 }
 
+export function GetSummoningPools(arg1) {
+  return window['go']['main']['App']['GetSummoningPools'](arg1);
+}
+
 export function GetUndoDepth(arg1) {
   return window['go']['main']['App']['GetUndoDepth'](arg1);
 }
@@ -90,6 +102,14 @@ export function SelectAndOpenSourceSave() {
   return window['go']['main']['App']['SelectAndOpenSourceSave']();
 }
 
+export function SetBossDefeated(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetBossDefeated'](arg1, arg2, arg3);
+}
+
+export function SetColosseumUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetColosseumUnlocked'](arg1, arg2, arg3);
+}
+
 export function SetGraceVisited(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetGraceVisited'](arg1, arg2, arg3);
 }
@@ -104,6 +124,10 @@ export function SetSteamID(arg1) {
 
 export function SetSteamIDFromString(arg1) {
   return window['go']['main']['App']['SetSteamIDFromString'](arg1);
+}
+
+export function SetSummoningPoolActivated(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetSummoningPoolActivated'](arg1, arg2, arg3);
 }
 
 export function WriteSave(arg1) {
