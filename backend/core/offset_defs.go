@@ -125,6 +125,18 @@ const (
 	GaItemDataMaxCount = 7000 // 0x1B58 max entries (matches DynGaItemsOther / GaItemDataEntryLen)
 )
 
+// DLC section constants.
+// CSDlc is 0x32 (50) bytes located at SlotSize - 0xB2 (before PlayerGameDataHash).
+// Byte[0] = pre-order gesture "The Ring"
+// Byte[1] = Shadow of the Erdtree entry flag (non-zero = entered DLC; causes infinite loading without DLC)
+// Bytes[2] = pre-order gesture "Ring of Miquella"
+// Bytes[3-49] = must be 0x00
+const (
+	DlcSectionSize   = 0x32                          // 50 bytes
+	DlcSectionOffset = SlotSize - HashSize - DlcSectionSize // SlotSize - 0xB2
+	DlcEntryFlagByte = 1                              // byte index within DLC section for SotE entry flag
+)
+
 // InvEquipReservedMax is the highest CSGaItemIns index reserved for equipment slots (0-432).
 // Inventory items added via save editor must have Index > InvEquipReservedMax.
 // If next_acquisition_sort_id from the save is ≤ InvEquipReservedMax or overlaps an existing

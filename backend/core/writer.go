@@ -19,6 +19,16 @@ import (
 //   [0]   distinct_acquired_items_count (i32)
 //   [4]   unk1 (i32) — preserve unchanged
 //   [8+]  GaItem2 array: id(4) + unk(4) + reinforce_type(4) + unk1(4) per entry
+// reinforceTypeFromItemID extracts the reinforce_type (upgrade level) from a weapon item ID.
+// Weapon IDs encode upgrade level as: baseID + infuseOffset + upgradeLevel
+// where infuseOffset is a multiple of 100 (0=Standard, 100=Heavy, ..., 1200=Occult)
+// and upgradeLevel is 0-25 (normal weapons) or 0-10 (boss/unique weapons).
+// The reinforce_type stored in GaItemData equals the upgrade level.
+// Source: ER-Save-Editor upsert_gaitem_data_list() uses item's reinforce_type_id from regulation.
+func reinforceTypeFromItemID(itemID uint32) uint32 {
+	return itemID % 100
+}
+
 func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
 	off := slot.GaItemDataOffset
 	if off <= 0 {
@@ -53,9 +63,9 @@ func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
 		return nil // non-fatal: no room
 	}
 	binary.LittleEndian.PutUint32(slot.Data[newEntryOff:], itemID)
-	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+4:], 0)  // unk
-	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+8:], 0)  // reinforce_type
-	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+12:], 0) // unk1
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+4:], 0)                          // unk
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+8:], reinforceTypeFromItemID(itemID)) // reinforce_type
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+12:], 0)                         // unk1
 
 	// Write updated count
 	binary.LittleEndian.PutUint32(slot.Data[off:], uint32(count+1))

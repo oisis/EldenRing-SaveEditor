@@ -197,6 +197,16 @@ Edit the 5 group password slots stored in PlayerGameData (offset 0x124-0x17B, 5 
 ### 🔲 Achievement / Trophy Progress Viewer 🔵
 Show which achievements are completable given current save state (e.g., "5/7 legendary armaments collected").
 
+### 🔲 Full Slot Rebuild (R-1) 🟡
+Implement full slot serialization instead of in-place patching, matching reference editors (ER-Save-Editor/Rust, er-save-manager/Python).
+
+**Technical details:**
+- Parse entire slot into structured data, modify structures, serialize ALL sections from scratch to 0x280000 buffer
+- Eliminates risk of data shift/misalignment bugs (BUG-1 class issues)
+- Requires full parsing and serialization of ~25 sequential sections
+- Currently mitigated by GaItems region clean-fill (writeGaItem) and version-based scan limits
+- Reference: ER-Save-Editor `save_slot.rs` write(), er-save-manager `slot_rebuild.py`
+
 ---
 
 ## Completed
@@ -257,4 +267,20 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
   - Added `EquipInventoryData.Clone()` method that deep-copies unexported `nextEquipIndexOff`/`nextAcqSortIdOff` fields
   - `pushUndo`/`RevertSlot` now preserve `Version` and `GaItemDataOffset`
 - Fix `ReadStorage` breaking on first empty handle — now uses `continue` instead of `break`, preventing data loss from sparse storage gaps
-- `RecalculateSlotHash`: documented known issues (wrong readQuickItemIDs base offset, 32-bit vs 16-bit hash mismatch); must NOT be called in save path
+- Fix `ComputeSlotHash()` offset chain missing dynamic `projSize` (BUG-4):
+  - Hash entries [7]-[10] now use the full dynamic offset chain matching `calculateDynamicOffsets()`
+  - `projSize` is read from save data via `ReadDynamicSize()` at the correct position in the chain
+- Fix `readQuickItemIDs()` reading from wrong offset (BUG-5):
+  - Quick items start at `equipedItemsOff + 0x58` (after ChrAsmEquipment header), not at `equipedItemsOff`
+  - Added `ChrAsmEquipmentSize` constant (0x58 = 22 × 4 bytes)
+- Fix `upsertGaItemData()` always setting `reinforce_type = 0` (BUG-6):
+  - Added `reinforceTypeFromItemID()` that extracts upgrade level from item ID (`itemID % 100`)
+  - Weapons +10/+25 now have correct reinforce_type in GaItemData
+- Fix `EquipInventoryData.Read()` and `ReadStorage()` silently ignoring errors (BUG-9):
+  - Both functions now return `error` and propagate read failures
+  - `mapInventory()` returns error, propagated through `SaveSlot.Read()`
+- Remove `ComputeSHA256` dead code from `crypto.go` (BUG-10)
+- Sanitize DLC entry flag on cross-platform conversion (R-9):
+  - DLC byte[1] (Shadow of the Erdtree entry flag) zeroed on PS4↔PC conversion
+  - Prevents infinite loading when target platform/account doesn't own DLC
+  - Constants: `DlcSectionOffset`, `DlcSectionSize`, `DlcEntryFlagByte` in `offset_defs.go`

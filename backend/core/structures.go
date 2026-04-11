@@ -63,25 +63,45 @@ func (e *EquipInventoryData) Clone() EquipInventoryData {
 	return c
 }
 
-func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
+func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) error {
 	e.CommonItems = make([]InventoryItem, commonCount)
+	var err error
 	for i := 0; i < commonCount; i++ {
-		e.CommonItems[i].GaItemHandle, _ = r.ReadU32()
-		e.CommonItems[i].Quantity, _ = r.ReadU32()
-		e.CommonItems[i].Index, _ = r.ReadU32()
+		if e.CommonItems[i].GaItemHandle, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("common[%d].handle: %w", i, err)
+		}
+		if e.CommonItems[i].Quantity, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("common[%d].quantity: %w", i, err)
+		}
+		if e.CommonItems[i].Index, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("common[%d].index: %w", i, err)
+		}
 	}
-	r.ReadU32() // skip key_count header (4 bytes between common and key items)
+	if _, err = r.ReadU32(); err != nil { // skip key_count header
+		return fmt.Errorf("key_count header: %w", err)
+	}
 	e.KeyItems = make([]InventoryItem, keyCount)
 	for i := 0; i < keyCount; i++ {
-		e.KeyItems[i].GaItemHandle, _ = r.ReadU32()
-		e.KeyItems[i].Quantity, _ = r.ReadU32()
-		e.KeyItems[i].Index, _ = r.ReadU32()
+		if e.KeyItems[i].GaItemHandle, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("key[%d].handle: %w", i, err)
+		}
+		if e.KeyItems[i].Quantity, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("key[%d].quantity: %w", i, err)
+		}
+		if e.KeyItems[i].Index, err = r.ReadU32(); err != nil {
+			return fmt.Errorf("key[%d].index: %w", i, err)
+		}
 	}
 	// Trailing counters — record offsets for write-back
 	e.nextEquipIndexOff = r.Pos()
-	e.NextEquipIndex, _ = r.ReadU32()
+	if e.NextEquipIndex, err = r.ReadU32(); err != nil {
+		return fmt.Errorf("NextEquipIndex: %w", err)
+	}
 	e.nextAcqSortIdOff = r.Pos()
-	e.NextAcquisitionSortId, _ = r.ReadU32()
+	if e.NextAcquisitionSortId, err = r.ReadU32(); err != nil {
+		return fmt.Errorf("NextAcquisitionSortId: %w", err)
+	}
+	return nil
 }
 
 type PlayerGameData struct {
@@ -165,7 +185,9 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	}
 
 	// 6. Map inventory
-	s.mapInventory()
+	if err := s.mapInventory(); err != nil {
+		return fmt.Errorf("mapInventory: %w", err)
+	}
 
 	// NOTE: Per-slot SteamID is at a dynamic offset within the sequential parsing chain
 	// (after BaseVersion, before PS5Activity), NOT at the fixed SlotSize-8 address.
@@ -442,12 +464,21 @@ func (s *SaveSlot) scanGaItems(start int) {
 	s.InventoryEnd = lastEnd
 }
 
-func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
+func (e *EquipInventoryData) ReadStorage(r *Reader, count int) error {
 	e.CommonItems = []InventoryItem{}
 	for i := 0; i < count; i++ {
-		handle, _ := r.ReadU32()
-		quantity, _ := r.ReadU32()
-		index, _ := r.ReadU32()
+		handle, err := r.ReadU32()
+		if err != nil {
+			return fmt.Errorf("storage[%d].handle: %w", i, err)
+		}
+		quantity, err := r.ReadU32()
+		if err != nil {
+			return fmt.Errorf("storage[%d].quantity: %w", i, err)
+		}
+		index, err := r.ReadU32()
+		if err != nil {
+			return fmt.Errorf("storage[%d].index: %w", i, err)
+		}
 
 		// Skip empty/invalid entries but continue reading — storage can have sparse gaps
 		// after item removal. Breaking on first empty would lose items after the gap.
@@ -462,15 +493,18 @@ func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
 		})
 	}
 	e.KeyItems = []InventoryItem{}
+	return nil
 }
 
-func (s *SaveSlot) mapInventory() {
+func (s *SaveSlot) mapInventory() error {
 	// Main Inventory
 	invStart := s.MagicOffset + InvStartFromMagic
 	if invStart+InvSafetyMargin < len(s.Data) {
 		ir := NewReader(s.Data)
 		ir.Seek(int64(invStart), 0)
-		s.Inventory.Read(ir, CommonItemCount, KeyItemCount)
+		if err := s.Inventory.Read(ir, CommonItemCount, KeyItemCount); err != nil {
+			return fmt.Errorf("inventory read: %w", err)
+		}
 	}
 
 	// Storage Box
@@ -478,7 +512,9 @@ func (s *SaveSlot) mapInventory() {
 	if storageStart+StorageSafetyMarg < len(s.Data) {
 		sr := NewReader(s.Data)
 		sr.Seek(int64(storageStart), 0)
-		s.Storage.ReadStorage(sr, StorageItemCount)
+		if err := s.Storage.ReadStorage(sr, StorageItemCount); err != nil {
+			return fmt.Errorf("storage read: %w", err)
+		}
 
 		// Read storage trailing counters from fixed position
 		// Layout: StorageCommonCount×12 + key_count(4) + StorageKeyCount×12 + next_equip_index(4) + next_acq_sort_id(4)
@@ -491,6 +527,7 @@ func (s *SaveSlot) mapInventory() {
 			s.Storage.NextAcquisitionSortId = binary.LittleEndian.Uint32(s.Data[storageNextAcqOff:])
 		}
 	}
+	return nil
 }
 
 func (s *SaveSlot) Write(platform string) []byte {

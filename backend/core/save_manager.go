@@ -288,15 +288,34 @@ func (s *SaveFile) SaveFile(path string) error {
 
 	// Resolve the header for the target platform, handling cross-platform conversions.
 	header := s.Header
+	crossPlatform := false
 	if s.Platform == PlatformPC {
 		if len(header) < 4 || !bytes.HasPrefix(header, []byte("BND4")) {
 			// PS4→PC conversion: original header is 0x70 PS4 bytes, rebuild BND4.
 			header = buildPCBND4Header(len(s.UserData11))
+			crossPlatform = true
 		}
 	} else {
 		if len(header) != 0x70 || bytes.HasPrefix(header, []byte("BND4")) {
 			// PC→PS4 conversion: replace BND4 header with canonical PS4 header.
 			header = ps4HeaderTemplate[:]
+			crossPlatform = true
+		}
+	}
+
+	// Sanitize DLC entry flag on cross-platform conversion.
+	// DLC byte[1] (Shadow of the Erdtree entry flag): non-zero means the character has
+	// entered the DLC area. If the target platform/account doesn't own the DLC, this
+	// causes infinite loading. Zero it on conversion as a safety measure.
+	if crossPlatform {
+		for i := 0; i < 10; i++ {
+			if !s.ActiveSlots[i] {
+				continue
+			}
+			dlcOff := DlcSectionOffset + DlcEntryFlagByte
+			if dlcOff < len(s.Slots[i].Data) {
+				s.Slots[i].Data[dlcOff] = 0
+			}
 		}
 	}
 

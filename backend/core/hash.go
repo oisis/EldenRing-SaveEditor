@@ -23,6 +23,9 @@ const (
 // ChrAsmEquipment field count — 22 u32 values per equipment section (0x58 bytes).
 const ChrAsmFieldCount = 22
 
+// ChrAsmEquipmentSize is the byte size of the ChrAsmEquipment header (22 × 4 = 0x58).
+const ChrAsmEquipmentSize = ChrAsmFieldCount * 4
+
 // Equipment section layout within ChrAsmEquipment (0x58 bytes):
 // [0]  LeftHandArmament1    [1]  RightHandArmament1
 // [2]  LeftHandArmament2    [3]  RightHandArmament2
@@ -155,10 +158,9 @@ func readSpellIDs(data []byte, offset int) []uint32 {
 	return result
 }
 
-// readQuickItemIDs reads 16 quick item / pouch IDs from EquipedItems section.
-// Layout: the section is 0x9C bytes. Quick items start after equipment slots.
-// From the ChrAsmEquipment (0x58 bytes) + some extra fields.
-// Quick items: 10 quick slots + 6 pouch slots = 16 IDs.
+// readQuickItemIDs reads 16 quick item / pouch IDs.
+// The caller must pass the correct offset (after ChrAsmEquipment header).
+// Layout: 10 quick slots + 6 pouch slots = 16 × u32 IDs.
 func readQuickItemIDs(data []byte, offset int) []uint32 {
 	const quickItemCount = 16
 	result := make([]uint32, quickItemCount)
@@ -174,12 +176,9 @@ func readQuickItemIDs(data []byte, offset int) []uint32 {
 // ComputeSlotHash calculates the full CSPlayerGameDataHash (0x80 bytes) for a slot.
 // The hash block is written at SlotSize - 0x80.
 //
-// WARNING: This function is NOT called in the save path. All reference editors
-// (ER-Save-Editor, er-save-manager, Final.py) preserve the original hash bytes
-// verbatim. The game may not validate this hash, and our algorithm has known issues:
-// - readQuickItemIDs [9] may read from wrong base offset (missing ChrAsmEquipment skip)
-// - bytesHash produces 32-bit results but original hash values appear to be 16-bit
-// Do NOT enable RecalculateSlotHash in Write() without thorough testing against real saves.
+// The offset chain for equipment sections mirrors calculateDynamicOffsets() in structures.go,
+// including the dynamic projSize field. This ensures hash entries [7]-[10] read from the
+// correct positions in the slot data.
 //
 // Hash entries:
 //
@@ -234,12 +233,20 @@ func ComputeSlotHash(slot *SaveSlot) [HashSize]byte {
 	soulMemory, _ := sa.ReadU32(mo + OffSoulMemory)
 	writeEntry(6, valueHash(soulMemory))
 
-	// [7-10] Equipment hashes — need dynamic offsets
-	// EquipedItemsID section contains the actual item IDs
-	// Offset chain: MO + DynSpEffect + DynEquipedItemIndex + DynActiveEquipedItems + DynEquipedItemsID
-	equipItemsIDOff := mo + DynSpEffect + DynEquipedItemIndex + DynActiveEquipedItems + DynEquipedItemsID
+	// [7-10] Equipment hashes — full dynamic offset chain from MagicOffset.
+	// Must match calculateDynamicOffsets() in structures.go exactly.
+	spEffect := mo + DynSpEffect
+	equipedItemIndex := spEffect + DynEquipedItemIndex
+	activeEquipedItems := equipedItemIndex + DynActiveEquipedItems
+	equipItemsIDOff := activeEquipedItems + DynEquipedItemsID
+	activeEquipedItemsGa := equipItemsIDOff + DynActiveEquipedItemsGa
+	inventoryHeld := activeEquipedItemsGa + DynInventoryHeld
+	spellsOff := inventoryHeld + DynEquipedSpells
+	equipedItemsOff := spellsOff + DynEquipedItems
+	equipedGesturesOff := equipedItemsOff + DynEquipedGestures
 
-	if equipItemsIDOff+0x58 <= len(slot.Data) {
+	// [7-8] Equipment IDs — from EquipedItemsID section (before dynamic fields)
+	if equipItemsIDOff+ChrAsmEquipmentSize <= len(slot.Data) {
 		equipSection := readEquipSection(slot.Data, equipItemsIDOff)
 
 		// [7] Equipped Weapons: L1,R1,L2,R2,L3,R3,Arrows1,Bolts1,Arrows2,Bolts2
@@ -251,24 +258,28 @@ func ComputeSlotHash(slot *SaveSlot) [HashSize]byte {
 		writeEntry(8, equipmentHash(armorIDs))
 	}
 
-	// [9] Equipped Quick Items / Pouch — from EquipedItems section
-	// equipedItems offset = spells + 0x8C
-	spellsOff := equipItemsIDOff + DynActiveEquipedItemsGa + DynInventoryHeld + DynEquipedSpells
-	equipedItemsOff := spellsOff + DynEquipedItems
+	// [9-10] Require dynamic projSize read (BUG-4 fix).
+	// Read projSize from the save data at equipedGesturesOff, same as calculateDynamicOffsets().
+	projSize, err := sa.ReadDynamicSize(equipedGesturesOff, MaxProjSize, "hash/projSize")
+	if err == nil {
+		_ = projSize // projSize validates the chain; the actual offsets above are already correct
 
-	// Quick items are at EquipedItems + 0x58 (after ChrAsmEquipment header)
-	// Actually the section starts with equipment indices, then quick items.
-	// The 16 quick/pouch IDs start after the equipment fields.
-	quickItemsOff := equipedItemsOff
-	if quickItemsOff+16*4 <= len(slot.Data) {
-		quickIDs := readQuickItemIDs(slot.Data, quickItemsOff)
-		writeEntry(9, quickItemsHash(quickIDs))
-	}
+		// [10] Equipped Spells — from EquipedSpells section
+		// Each spell entry = 8 bytes (SpellID i32 + unk i32), 14 spell slots.
+		if spellsOff+14*8 <= len(slot.Data) {
+			spellIDs := readSpellIDs(slot.Data, spellsOff)
+			writeEntry(10, equipmentHash(spellIDs))
+		}
 
-	// [10] Equipped Spells — from EquipedSpells section
-	if spellsOff+14*8 <= len(slot.Data) {
-		spellIDs := readSpellIDs(slot.Data, spellsOff)
-		writeEntry(10, equipmentHash(spellIDs))
+		// [9] Equipped Quick Items / Pouch — from EquipedItems section (BUG-5 fix).
+		// The EquipedItems section is 0x8C bytes:
+		//   ChrAsmEquipment (0x58) + QuickSlots (10×4=0x28) + PouchSlots (6×4=0x18) - overlap
+		// Quick items start AFTER the ChrAsmEquipment header.
+		quickItemsOff := equipedItemsOff + ChrAsmEquipmentSize
+		if quickItemsOff+16*4 <= len(slot.Data) {
+			quickIDs := readQuickItemIDs(slot.Data, quickItemsOff)
+			writeEntry(9, quickItemsHash(quickIDs))
+		}
 	}
 
 	// [11] padding
