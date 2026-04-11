@@ -44,6 +44,25 @@ type EquipInventoryData struct {
 	nextAcqSortIdOff      int // absolute byte offset in slot.Data (for write-back)
 }
 
+// Clone returns a deep copy of EquipInventoryData, including unexported offset fields.
+func (e *EquipInventoryData) Clone() EquipInventoryData {
+	c := EquipInventoryData{
+		NextEquipIndex:        e.NextEquipIndex,
+		NextAcquisitionSortId: e.NextAcquisitionSortId,
+		nextEquipIndexOff:     e.nextEquipIndexOff,
+		nextAcqSortIdOff:      e.nextAcqSortIdOff,
+	}
+	if e.CommonItems != nil {
+		c.CommonItems = make([]InventoryItem, len(e.CommonItems))
+		copy(c.CommonItems, e.CommonItems)
+	}
+	if e.KeyItems != nil {
+		c.KeyItems = make([]InventoryItem, len(e.KeyItems))
+		copy(c.KeyItems, e.KeyItems)
+	}
+	return c
+}
+
 func (e *EquipInventoryData) Read(r *Reader, commonCount, keyCount int) {
 	e.CommonItems = make([]InventoryItem, commonCount)
 	for i := 0; i < commonCount; i++ {
@@ -85,6 +104,7 @@ type PlayerGameData struct {
 
 type SaveSlot struct {
 	Data      []byte
+	Version   uint32 // slot format version (offset 0x00); 0 = empty slot
 	Player    PlayerGameData
 	GaMap     map[uint32]uint32
 	Inventory EquipInventoryData
@@ -110,6 +130,9 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	if err != nil {
 		return err
 	}
+
+	// 0. Read slot version (offset 0x00). Version 0 = empty/unused slot.
+	s.Version = binary.LittleEndian.Uint32(s.Data[0:4])
 
 	// 1. Find primary anchor
 	s.MagicOffset = NewReader(s.Data).FindPattern(MagicPattern)
@@ -380,8 +403,16 @@ func (s *SaveSlot) scanGaItems(start int) {
 		gaLimit = start
 	}
 
+	// Determine expected GaItem count from slot version.
+	// Reference: ER-Save-Editor reads exactly 5118 (version ≤ 81) or 5120 (version > 81).
+	maxEntries := GaItemCountNew
+	if s.Version > 0 && s.Version <= GaItemVersionBreak {
+		maxEntries = GaItemCountOld
+	}
+
 	lastEnd := start
-	for curr+GaRecordItem <= gaLimit {
+	entriesRead := 0
+	for curr+GaRecordItem <= gaLimit && entriesRead < maxEntries {
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 
@@ -410,6 +441,7 @@ func (s *SaveSlot) scanGaItems(start int) {
 		} else {
 			curr += GaRecordItem
 		}
+		entriesRead++
 	}
 	s.InventoryEnd = lastEnd
 }
@@ -421,12 +453,10 @@ func (e *EquipInventoryData) ReadStorage(r *Reader, count int) {
 		quantity, _ := r.ReadU32()
 		index, _ := r.ReadU32()
 
-		if handle == 0 || handle == 0xFFFFFFFF {
-			// Stop reading at the first empty slot to avoid garbage data
-			// Note: We don't break because we need to maintain the reader position if needed,
-			// but for storage box it's usually the end of the section.
-			// Actually, breaking is safer here to avoid "Unknown Items".
-			break
+		// Skip empty/invalid entries but continue reading — storage can have sparse gaps
+		// after item removal. Breaking on first empty would lose items after the gap.
+		if handle == GaHandleEmpty || handle == GaHandleInvalid {
+			continue
 		}
 
 		e.CommonItems = append(e.CommonItems, InventoryItem{

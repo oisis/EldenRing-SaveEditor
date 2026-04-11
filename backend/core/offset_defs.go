@@ -130,3 +130,11 @@ const (
 // If next_acquisition_sort_id from the save is ≤ InvEquipReservedMax or overlaps an existing
 // item's index, the game dereferences the wrong CSGaItemIns entry → EXCEPTION_ACCESS_VIOLATION.
 const InvEquipReservedMax = 432
+
+// GaItem entry counts by slot version.
+// Source: ER-Save-Editor save_slot.rs, er-save-manager user_data_x.py
+const (
+	GaItemCountOld     = 5118 // 0x13FE — version ≤ 81
+	GaItemCountNew     = 5120 // 0x1400 — version > 81
+	GaItemVersionBreak = 81   // version threshold for GaItem count change
+)

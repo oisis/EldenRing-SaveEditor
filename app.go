@@ -18,6 +18,7 @@ const maxUndoDepth = 5
 // slotSnapshot holds a deep copy of a SaveSlot for undo purposes.
 type slotSnapshot struct {
 	Data              []byte
+	Version           uint32
 	Player            core.PlayerGameData
 	GaMap             map[uint32]uint32
 	Inventory         core.EquipInventoryData
@@ -30,6 +31,7 @@ type slotSnapshot struct {
 	FaceDataOffset    int
 	StorageBoxOffset  int
 	IngameTimerOffset int
+	GaItemDataOffset  int
 }
 
 // App struct
@@ -676,30 +678,13 @@ func (a *App) pushUndo(idx int) {
 		gaMapCopy[k] = v
 	}
 
-	// Deep copy Inventory CommonItems & KeyItems
-	invCommon := make([]core.InventoryItem, len(slot.Inventory.CommonItems))
-	copy(invCommon, slot.Inventory.CommonItems)
-	invKey := make([]core.InventoryItem, len(slot.Inventory.KeyItems))
-	copy(invKey, slot.Inventory.KeyItems)
-
-	// Deep copy Storage CommonItems & KeyItems
-	storCommon := make([]core.InventoryItem, len(slot.Storage.CommonItems))
-	copy(storCommon, slot.Storage.CommonItems)
-	storKey := make([]core.InventoryItem, len(slot.Storage.KeyItems))
-	copy(storKey, slot.Storage.KeyItems)
-
 	snap := slotSnapshot{
-		Data:   dataCopy,
-		Player: slot.Player,
-		GaMap:  gaMapCopy,
-		Inventory: core.EquipInventoryData{
-			CommonItems: invCommon,
-			KeyItems:    invKey,
-		},
-		Storage: core.EquipInventoryData{
-			CommonItems: storCommon,
-			KeyItems:    storKey,
-		},
+		Data:              dataCopy,
+		Version:           slot.Version,
+		Player:            slot.Player,
+		GaMap:             gaMapCopy,
+		Inventory:         slot.Inventory.Clone(),
+		Storage:           slot.Storage.Clone(),
 		Warnings:          append([]string{}, slot.Warnings...),
 		MagicOffset:       slot.MagicOffset,
 		InventoryEnd:      slot.InventoryEnd,
@@ -708,6 +693,7 @@ func (a *App) pushUndo(idx int) {
 		FaceDataOffset:    slot.FaceDataOffset,
 		StorageBoxOffset:  slot.StorageBoxOffset,
 		IngameTimerOffset: slot.IngameTimerOffset,
+		GaItemDataOffset:  slot.GaItemDataOffset,
 	}
 
 	stack := a.undoStacks[idx]
@@ -735,6 +721,7 @@ func (a *App) RevertSlot(idx int) error {
 
 	slot := &a.save.Slots[idx]
 	slot.Data = snap.Data
+	slot.Version = snap.Version
 	slot.Player = snap.Player
 	slot.GaMap = snap.GaMap
 	slot.Inventory = snap.Inventory
@@ -747,6 +734,7 @@ func (a *App) RevertSlot(idx int) error {
 	slot.FaceDataOffset = snap.FaceDataOffset
 	slot.StorageBoxOffset = snap.StorageBoxOffset
 	slot.IngameTimerOffset = snap.IngameTimerOffset
+	slot.GaItemDataOffset = snap.GaItemDataOffset
 
 	return nil
 }
