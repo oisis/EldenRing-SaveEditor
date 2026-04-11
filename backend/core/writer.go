@@ -204,7 +204,25 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 }
 
 func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
-	h := prefix | GaHandleBase
+	// Extract part_id (byte 2, bits 16-23) from existing handles in GaMap.
+	// Real handles: 0xTTPPCCCC where TT=type, PP=part_id (always 0x80 on real saves), CCCC=counter.
+	// Reference: ER-Save-Editor generates handle = type | (part_gaitem_handle << 16) | counter
+	partID := uint32(0x80) // default
+	maxCounter := uint32(0)
+	for h := range slot.GaMap {
+		if h&GaHandleTypeMask == prefix {
+			p := (h >> 16) & 0xFF
+			if p != 0 {
+				partID = p
+			}
+			counter := h & 0xFFFF
+			if counter > maxCounter {
+				maxCounter = counter
+			}
+		}
+	}
+	// Start from maxCounter+1 to avoid collisions
+	h := prefix | (partID << 16) | (maxCounter + 1)
 	for i := 0; i < MaxHandleAttempts; i++ {
 		if _, ok := slot.GaMap[h]; !ok {
 			return h, nil
