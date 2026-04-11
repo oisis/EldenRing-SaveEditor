@@ -349,17 +349,25 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 		}
 	}
 	if fromStorage {
+		// Scan the physical pre-allocated storage array (1920 slots) to find and zero the handle.
+		// Cannot use in-memory list index because ReadStorage skips empty slots (sparse).
 		storageStart := slot.StorageBoxOffset + StorageHeaderSkip
-		for i, item := range slot.Storage.CommonItems {
-			if item.GaItemHandle == handle {
-				slot.Storage.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: 0}
-				off := storageStart + i*InvRecordLen
-				if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/storage"); err != nil {
-					return err
-				}
+		for i := 0; i < StorageCommonCount; i++ {
+			off := storageStart + i*InvRecordLen
+			if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/storage"); err != nil {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h == handle {
 				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+8:], 0)
+			}
+		}
+		// Update in-memory list
+		for i, item := range slot.Storage.CommonItems {
+			if item.GaItemHandle == handle {
+				slot.Storage.CommonItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: 0}
 			}
 		}
 	}
@@ -397,16 +405,13 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	sa := NewSlotAccessor(slot.Data)
 	var items *[]InventoryItem
 	var startOffset int
-	var maxItems int
 
 	if isStorage {
 		items = &slot.Storage.CommonItems
 		startOffset = slot.StorageBoxOffset + StorageHeaderSkip
-		maxItems = StorageItemCount
 	} else {
 		items = &slot.Inventory.CommonItems
 		startOffset = slot.MagicOffset + InvStartFromMagic
-		maxItems = CommonItemCount
 	}
 
 	// Check if already in inventory (for stackable items).
@@ -425,44 +430,63 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	}
 
 	if isStorage {
-		// Storage uses a dynamic list — append at current length if capacity allows
-		if len(*items) >= maxItems {
-			return io.ErrShortBuffer
-		}
-		// Compute safe next index (same logic as inventory path — see comment there).
-		nextListId := slot.Storage.NextAcquisitionSortId
-		maxExisting := uint32(InvEquipReservedMax)
-		for _, item := range slot.Storage.CommonItems {
-			if item.GaItemHandle != GaHandleEmpty && item.GaItemHandle != GaHandleInvalid && item.Index > maxExisting {
-				maxExisting = item.Index
+		// Storage is pre-allocated (StorageCommonCount=1920 slots), same as held inventory.
+		// Find first empty slot by scanning the binary data directly (the in-memory list
+		// only contains non-empty items due to ReadStorage skipping gaps).
+		storageCapacity := StorageCommonCount
+		emptyIdx := -1
+		for i := 0; i < storageCapacity; i++ {
+			off := startOffset + i*InvRecordLen
+			if off+InvRecordLen > len(slot.Data) {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h == GaHandleEmpty || h == GaHandleInvalid {
+				emptyIdx = i
+				break
 			}
 		}
-		if nextListId <= maxExisting {
-			nextListId = maxExisting + 1
+		if emptyIdx < 0 {
+			return io.ErrShortBuffer // All storage slots occupied
 		}
+
+		// Compute safe next index. Only consider items with valid type prefix
+		// (0x80-0xC0 in high nibble) — storage can have garbage data in unused regions.
+		nextListId := uint32(InvEquipReservedMax + 1)
+		for i := 0; i < storageCapacity; i++ {
+			off := startOffset + i*InvRecordLen
+			if off+InvRecordLen > len(slot.Data) {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h == GaHandleEmpty || h == GaHandleInvalid {
+				continue
+			}
+			// Validate handle has a known type prefix
+			typeBits := h & GaHandleTypeMask
+			if typeBits != ItemTypeWeapon && typeBits != ItemTypeArmor &&
+				typeBits != ItemTypeAccessory && typeBits != ItemTypeItem && typeBits != ItemTypeAow {
+				continue // garbage data, not a real item
+			}
+			idx := binary.LittleEndian.Uint32(slot.Data[off+8:])
+			// Index must be in sane range: > reserved (432), < reasonable max (50000).
+			// Higher values indicate garbage data from misaligned storage regions.
+			if idx > InvEquipReservedMax && idx < 50000 && idx >= nextListId {
+				nextListId = idx + 1
+			}
+		}
+
 		newItem := InventoryItem{GaItemHandle: handle, Quantity: qty, Index: nextListId}
-		appendIdx := len(*items)
-		*items = append(*items, newItem)
-		off := startOffset + appendIdx*InvRecordLen
-		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/storage-append"); err != nil {
+		off := startOffset + emptyIdx*InvRecordLen
+		if err := sa.CheckBounds(off, InvRecordLen, "addToInventory/storage-insert"); err != nil {
 			return err
 		}
 		binary.LittleEndian.PutUint32(slot.Data[off:], newItem.GaItemHandle)
 		binary.LittleEndian.PutUint32(slot.Data[off+4:], newItem.Quantity)
 		binary.LittleEndian.PutUint32(slot.Data[off+8:], newItem.Index)
 
-		// Update 4-byte storage item count header at StorageBoxOffset.
-		newCount := uint32(len(*items))
-		if err := sa.CheckBounds(slot.StorageBoxOffset, 4, "addToInventory/storage-header"); err != nil {
-			return err
-		}
-		binary.LittleEndian.PutUint32(slot.Data[slot.StorageBoxOffset:], newCount)
-
-		// Advance counter to nextListId+1 and write back (may have jumped over stale range).
-		slot.Storage.NextAcquisitionSortId = nextListId + 1
-		if slot.Storage.nextAcqSortIdOff > 0 {
-			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
-		}
+		// Update in-memory list
+		*items = append(*items, newItem)
 	} else {
 		// Inventory is fully pre-allocated — find first empty slot (handle == 0 or 0xFFFFFFFF)
 		emptyIdx := -1
