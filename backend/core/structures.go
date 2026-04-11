@@ -421,7 +421,7 @@ func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
 	curr := start
 
-	gaLimit := s.MagicOffset - DynPlayerData // writable GaItems region ends 0x1B0 before Magic
+	gaLimit := s.MagicOffset - DynPlayerData + 1 // GaItems section ends 0x1AF bytes before Magic (inclusive)
 	if gaLimit < start {
 		gaLimit = start
 	}

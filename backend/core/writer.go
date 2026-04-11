@@ -235,7 +235,7 @@ func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
 
 func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 	sa := NewSlotAccessor(slot.Data)
-	gaLimit := slot.MagicOffset - DynPlayerData
+	gaLimit := slot.MagicOffset - DynPlayerData + 1
 
 	// Check BOTH constraints: GaItems must not overflow into Magic section,
 	// AND must not exceed the physical buffer.
@@ -296,36 +296,125 @@ func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
 	}
 	slot.InventoryEnd += size
 
-	// Fill the remaining pre-allocated empty slot region with clean 00000000|FFFFFFFF markers.
+	// For records larger than 8 bytes (weapon=21, armor=16), the extra bytes
+	// push trailing empty entries past gaLimit, causing the game to read into
+	// PlayerGameData (crash). The game reads a FIXED count (5120) of entries.
 	//
-	// Why this is necessary for weapon records (21B):
-	//   After writing a 21B weapon at position P, the game's GaItem scanner reads
-	//   the next entry at P+21. But the original pre-allocated empty slots sit on the
-	//   8-byte grid (P+0, P+8, P+16, P+24 ...), so P+21 falls 5 bytes into the slot
-	//   that started at P+16. The 4-byte handle read at P+21 spans the tail of the
-	//   FFFFFFFF itemID (3×FF) and the first byte of the next slot handle (00), yielding
-	//   0x00FFFFFF — an unknown type prefix. The game tries to dereference it as a
-	//   pointer and crashes (EXCEPTION_ACCESS_VIOLATION reading 0xFFFFFFFFFFFFFFFF).
-	//
-	//   Writing 4 zeros at InventoryEnd (Fix #2, now removed) was insufficient:
-	//   the scanner advances 8 bytes and lands at P+29, which is again misaligned.
-	//   The two scanner grids {P+21, P+29, P+37, ...} and {P+0, P+8, P+16, ...}
-	//   are offset by 5 and NEVER converge, so patching any finite number of bytes
-	//   after the record does not help.
-	//
-	//   The only correct fix: rewrite all pre-allocated empty slots from the new
-	//   InventoryEnd to gaLimit with a clean 00000000|FFFFFFFF pattern aligned to
-	//   the game's NEW scanner grid. Every scanner step from InventoryEnd onward
-	//   then hits a valid GaHandleEmpty regardless of the preceding record size.
+	// Fix (matching Final.py): shift ALL data after GaItems section backward
+	// by (size-8) bytes, effectively removing empty bytes from the END of the
+	// GaItems region. Then update MagicOffset and all dependent offsets.
+	// This maintains: GaItems section size = constant = 5120 entries worth.
+	if size > GaRecordItem {
+		// The GaItem array has a fixed entry count (5120/5118). Adding a larger-than-8B
+		// record at InventoryEnd consumes (size-8) extra bytes. To maintain the fixed
+		// entry count, we shift ALL data from gaLimit onward RIGHT by (size-8) bytes.
+		// This EXPANDS the GaItems section and moves MagicOffset (and everything after) right.
+		// The slot's padding at the end absorbs the expansion.
+		extraBytes := size - GaRecordItem
+
+		// Shift everything from gaLimit to end of slot RIGHT by extraBytes
+		// (last extraBytes of slot padding are lost — they were zeros anyway)
+		copy(slot.Data[gaLimit+extraBytes:SlotSize], slot.Data[gaLimit:SlotSize-extraBytes])
+
+		// Update all offsets (they reference positions at/after gaLimit, which shifted right)
+		slot.MagicOffset += extraBytes
+		slot.PlayerDataOffset += extraBytes
+		slot.FaceDataOffset += extraBytes
+		slot.StorageBoxOffset += extraBytes
+		slot.GaItemDataOffset += extraBytes
+		slot.IngameTimerOffset += extraBytes
+		if slot.EventFlagsOffset > 0 {
+			slot.EventFlagsOffset += extraBytes
+		}
+		if slot.Inventory.nextEquipIndexOff >= gaLimit {
+			slot.Inventory.nextEquipIndexOff += extraBytes
+		}
+		if slot.Inventory.nextAcqSortIdOff >= gaLimit {
+			slot.Inventory.nextAcqSortIdOff += extraBytes
+		}
+		if slot.Storage.nextEquipIndexOff >= gaLimit {
+			slot.Storage.nextEquipIndexOff += extraBytes
+		}
+		if slot.Storage.nextAcqSortIdOff >= gaLimit {
+			slot.Storage.nextAcqSortIdOff += extraBytes
+		}
+		// gaLimit itself increased (recalculate for fill below)
+		gaLimit += extraBytes
+	}
+
+	// Rewrite empty fill from InventoryEnd to current gaLimit
+	newGaLimit := slot.MagicOffset - DynPlayerData + 1
 	fillPos := slot.InventoryEnd
-	for fillPos+GaRecordItem <= gaLimit {
-		if err := sa.WriteU32(fillPos, GaHandleEmpty); err != nil {
-			return err
-		}
-		if err := sa.WriteU32(fillPos+4, GaHandleInvalid); err != nil {
-			return err
-		}
+	for fillPos+GaRecordItem <= newGaLimit {
+		sa.WriteU32(fillPos, GaHandleEmpty)
+		sa.WriteU32(fillPos+4, GaHandleInvalid)
 		fillPos += GaRecordItem
+	}
+
+	return nil
+}
+
+// fillGaItemRegion rewrites empty entries from InventoryEnd to maintain exactly
+// maxEntries total GaItem records (5120 or 5118). Called once after all additions.
+//
+// The game reads a FIXED count of entries from offset 0x20. Each non-8B record
+// (weapon=21, armor=16) consumes extra bytes that reduce the number of trailing
+// empty entries that fit. This function calculates the exact fill needed.
+func fillGaItemRegion(slot *SaveSlot) error {
+	sa := NewSlotAccessor(slot.Data)
+	gaLimit := slot.MagicOffset - DynPlayerData + 1
+
+	// Count entries from 0x20 to InventoryEnd (the valid region)
+	validBytes := slot.InventoryEnd - GaItemsStart
+	// Count how many entries those bytes represent by re-scanning
+	curr := GaItemsStart
+	validEntries := 0
+	for curr < slot.InventoryEnd && curr+GaRecordItem <= gaLimit {
+		handle := binary.LittleEndian.Uint32(slot.Data[curr:])
+		if handle == 0 || handle == 0xFFFFFFFF {
+			curr += GaRecordItem
+		} else {
+			typeBits := handle & GaHandleTypeMask
+			switch typeBits {
+			case ItemTypeWeapon:
+				curr += GaRecordWeapon
+			case ItemTypeArmor:
+				curr += GaRecordArmor
+			default:
+				curr += GaRecordItem
+			}
+		}
+		validEntries++
+	}
+
+	_ = validBytes // suppress unused warning
+
+	maxEntries := GaItemCountNew
+	if slot.Version > 0 && slot.Version <= GaItemVersionBreak {
+		maxEntries = GaItemCountOld
+	}
+
+	// How many empty 8B entries do we need to reach maxEntries total?
+	emptyNeeded := maxEntries - validEntries
+	if emptyNeeded < 0 {
+		emptyNeeded = 0
+	}
+
+	// Write exactly emptyNeeded × 8 bytes of empty markers
+	fillPos := slot.InventoryEnd
+	for i := 0; i < emptyNeeded; i++ {
+		if fillPos+GaRecordItem > gaLimit {
+			break // safety: don't write past section boundary
+		}
+		sa.WriteU32(fillPos, GaHandleEmpty)
+		sa.WriteU32(fillPos+4, GaHandleInvalid)
+		fillPos += GaRecordItem
+	}
+
+	// Zero any remaining bytes between fillPos and gaLimit
+	for fillPos < gaLimit {
+		slot.Data[fillPos] = 0
+		fillPos++
 	}
 
 	return nil

@@ -104,7 +104,7 @@ func TestGaItemsIntegrity(t *testing.T) {
 					if slot.InventoryEnd < core.GaItemsStart {
 						t.Errorf("InventoryEnd (0x%X) < GaItemsStart (0x%X)", slot.InventoryEnd, core.GaItemsStart)
 					}
-					gaLimit := slot.MagicOffset - 0x1B0 // DynPlayerData
+					gaLimit := slot.MagicOffset - 0x1B0 + 1 // DynPlayerData
 					if slot.InventoryEnd > gaLimit {
 						t.Errorf("InventoryEnd (0x%X) > gaLimit (0x%X)", slot.InventoryEnd, gaLimit)
 					}
@@ -128,7 +128,7 @@ func TestGaItemRecordAlignment(t *testing.T) {
 		// Re-scan the GaItems region and verify we get the same map
 		gaMap2 := make(map[uint32]uint32)
 		curr := core.GaItemsStart
-		gaLimit := slot.MagicOffset - 0x1B0
+		gaLimit := slot.MagicOffset - 0x1B0 + 1
 		maxEntries := 5120
 		if slot.Version > 0 && slot.Version <= 81 {
 			maxEntries = 5118
@@ -651,7 +651,7 @@ func TestEditedSaveIntegrity(t *testing.T) {
 		}
 
 		// Verify InventoryEnd is still within bounds
-		gaLimit := slot.MagicOffset - 0x1B0
+		gaLimit := slot.MagicOffset - 0x1B0 + 1
 		if slot.InventoryEnd > gaLimit {
 			t.Errorf("Edited slot %d: InventoryEnd (0x%X) > gaLimit (0x%X)",
 				i, slot.InventoryEnd, gaLimit)
@@ -678,7 +678,7 @@ func TestGaItemRegionCleanAfterInventoryEnd(t *testing.T) {
 			continue
 		}
 		slot := &save.Slots[i]
-		gaLimit := slot.MagicOffset - 0x1B0
+		gaLimit := slot.MagicOffset - 0x1B0 + 1
 
 		// After InventoryEnd, remaining GaItem region should be clean 00000000|FFFFFFFF pairs
 		// OR all zeros. Check for misaligned data that could confuse the game's scanner.

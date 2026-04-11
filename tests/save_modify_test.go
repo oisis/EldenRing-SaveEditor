@@ -679,7 +679,7 @@ func TestStressAddManyItems(t *testing.T) {
 	}
 
 	// InventoryEnd must still be within GaItems bounds
-	gaLimit := slot.MagicOffset - 0x1B0
+	gaLimit := slot.MagicOffset - 0x1B0 + 1
 	if slot.InventoryEnd > gaLimit {
 		t.Errorf("InventoryEnd (0x%X) > gaLimit (0x%X) — overflow!", slot.InventoryEnd, gaLimit)
 	}
