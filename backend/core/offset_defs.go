@@ -52,7 +52,6 @@ const (
 	GaHandleEmpty    = 0x00000000
 	GaHandleInvalid  = 0xFFFFFFFF
 	GaHandleTypeMask = 0xF0000000 // upper nibble = item type
-	GaHandleBase     = 0x00010000 // base value for generated handles
 )
 
 // Inventory layout (relative to MagicOffset).
@@ -69,11 +68,6 @@ const (
 	StorageSafetyMarg = 0x6000    // max distance from storageStart to validate section
 	StorageHeaderSkip = 4         // skip 4-byte header at StorageBoxOffset
 	InvKeyCountHeader = 4         // 4-byte key_count header between common and key items
-
-	// Offsets of trailing counters relative to invStart (= MagicOffset + InvStartFromMagic).
-	// Layout: CommonItemCount×12 + key_count(4) + KeyItemCount×12 + next_equip_index(4) + next_acq_sort_id(4)
-	InvNextEquipIdxRelInv = CommonItemCount*InvRecordLen + InvKeyCountHeader + KeyItemCount*InvRecordLen
-	InvNextAcqSortRelInv  = InvNextEquipIdxRelInv + 4
 
 	// Offsets of trailing counters relative to (StorageBoxOffset + StorageHeaderSkip).
 	// Layout: StorageCommonCount×12 + key_count(4) + StorageKeyCount×12 + next_equip_index(4) + next_acq_sort_id(4)

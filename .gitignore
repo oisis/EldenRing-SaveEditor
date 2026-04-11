@@ -164,6 +164,7 @@ data/
 
 # Custom dirs
 analiza/
+analiza.md
 org-src/
 save/
 build/bin/
