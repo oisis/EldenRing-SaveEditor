@@ -243,3 +243,18 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
   - `addToInventory()` was using `maxExistingIndex + 2` (heuristic) instead of `next_acquisition_sort_id` from save — the heuristic produces wrong values when the game's actual stride is 1 (not 2) or when the counter has diverged
   - Fix: `Read()` now skips key_count header, reads and stores both trailing counters; `addToInventory()` uses `slot.Inventory.NextAcquisitionSortId` / `slot.Storage.NextAcquisitionSortId` as Index, then increments and writes the counter back to `slot.Data`
   - New constants: `StorageCommonCount=0x780`, `StorageKeyCount=0x80`, `InvKeyCountHeader=4`, offset constants for all trailing counters
+- Fix per-slot SteamID read/write corrupting PlayerGameDataHash region:
+  - `SlotSize-8` (0x27FFF8) falls inside the last 0x80 bytes (hash region), NOT the actual SteamID field
+  - Per-slot SteamID is at a dynamic offset in the sequential parsing chain (after BaseVersion, before PS5Activity)
+  - Fix: removed per-slot SteamID read/write; authoritative SteamID is in UserData10 (managed by `flushMetadata()`)
+- Fix arrows/bolts incorrectly registered in GaItemData section:
+  - Arrows have weapon-type handles (0x80xxxxxx) but belong in EquipProjectileData, not GaItemData
+  - Fix: `upsertGaItemData()` now skips items identified by `db.IsArrowID()` — matches Rust reference (upsert_projectile_list)
+- Fix GaItem scanner reading unbounded entries:
+  - `scanGaItems()` now limits entries to 5118 (version ≤ 81) or 5120 (version > 81), matching reference editors
+  - Added `SaveSlot.Version` field parsed from slot offset 0x00
+- Fix undo not preserving inventory counter offsets:
+  - Added `EquipInventoryData.Clone()` method that deep-copies unexported `nextEquipIndexOff`/`nextAcqSortIdOff` fields
+  - `pushUndo`/`RevertSlot` now preserve `Version` and `GaItemDataOffset`
+- Fix `ReadStorage` breaking on first empty handle — now uses `continue` instead of `break`, preventing data loss from sparse storage gaps
+- `RecalculateSlotHash`: documented known issues (wrong readQuickItemIDs base offset, 32-bit vs 16-bit hash mismatch); must NOT be called in save path
