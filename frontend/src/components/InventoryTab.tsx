@@ -135,18 +135,21 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         flags: string[];
     };
 
-    const rowKey = (item: MergedItem) => item.nonStackable ? `h-${item.invHandle || item.storageHandle}` : `s-${item.id}`;
+    const rowKey = (item: MergedItem) => item.nonStackable
+        ? `h-${item.inInventory ? 'i' : 's'}-${item.invHandle || item.storageHandle}`
+        : `s-${item.id}`;
 
     // Build item list for display.
-    // Non-stackable (maxInventory <= 1): one row per handle — consolidated across both locations.
+    // Non-stackable (maxInventory <= 1): separate row for each instance in inventory and storage.
+    //   Each copy can have different upgrade/infuse/AoW, so merging by handle is wrong.
     // Stackable (maxInventory > 1): merged by item ID — one row with both inv and storage qty.
     const mergedOwnedItems = useMemo(() => {
-        const nonStackableMap = new Map<number, MergedItem>();
+        const nonStackableList: MergedItem[] = [];
         const stackableMap = new Map<number, MergedItem>();
 
         charInventory.forEach(item => {
             if (item.maxInventory <= 1) {
-                nonStackableMap.set(item.handle, {
+                nonStackableList.push({
                     id: item.id, name: item.name,
                     category: item.category, subCategory: item.subCategory,
                     nonStackable: true, inInventory: true, inStorage: false,
@@ -172,22 +175,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
 
         charStorage.forEach(item => {
             if (item.maxInventory <= 1) {
-                const existing = nonStackableMap.get(item.handle);
-                if (existing) {
-                    existing.inStorage = true;
-                    existing.storageQty = 1;
-                } else {
-                    nonStackableMap.set(item.handle, {
-                        id: item.id, name: item.name,
-                        category: item.category, subCategory: item.subCategory,
-                        nonStackable: true, inInventory: false, inStorage: true,
-                        invHandle: 0, storageHandle: item.handle,
-                        invQty: 0, storageQty: 1,
-                        maxInv: item.maxInventory, maxStorage: item.maxStorage,
-                        maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
-                        flags: item.flags ?? [],
-                    });
-                }
+                nonStackableList.push({
+                    id: item.id, name: item.name,
+                    category: item.category, subCategory: item.subCategory,
+                    nonStackable: true, inInventory: false, inStorage: true,
+                    invHandle: 0, storageHandle: item.handle,
+                    invQty: 0, storageQty: 1,
+                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                    flags: item.flags ?? [],
+                });
             } else {
                 const existing = stackableMap.get(item.id);
                 if (existing) {
@@ -209,7 +206,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             }
         });
 
-        return [...Array.from(nonStackableMap.values()), ...Array.from(stackableMap.values())];
+        return [...nonStackableList, ...Array.from(stackableMap.values())];
     }, [charInventory, charStorage]);
 
     const handleImageError = (iconPath: string) => {

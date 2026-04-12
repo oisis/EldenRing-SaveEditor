@@ -211,37 +211,49 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	equipedItems := equipedSpells + DynEquipedItems
 	equipedGestures := equipedItems + DynEquipedGestures
 
-	// Dynamic field #1: acquired_projectiles header.
-	// The u32 at equipedGestures is the byte-size of projectile data that follows.
-	// Reference editors (ER-Save-Editor, er-save-manager) skip this section by reading
-	// the 4-byte header and advancing past it. The actual projectile data size is embedded
-	// in the header value but we only need to skip the 4-byte header itself — the projectile
-	// data is already accounted for in the fixed offsets that follow.
+	// Dynamic field #1: acquired_projectiles.
+	// The u32 at equipedGestures is the projectile COUNT. Total skip = count*8 + 4.
+	// Source: Final.py:1453 — equiped_projc_size * 8 + 4
+	// Without this skip, ALL subsequent offsets (FaceData, StorageBox, GaItemData,
+	// EventFlags) are shifted left by projCount*8 bytes, causing storage writes
+	// to land at the wrong position and become invisible to the game.
 	if err := sa.CheckBounds(equipedGestures, 4, "projHeader"); err != nil {
 		return err
 	}
-	equipedProjectile := equipedGestures + 4
+	projCount, err := sa.ReadDynamicSize(equipedGestures, MaxProjCount, "projCount")
+	if err != nil {
+		return err
+	}
+	equipedProjectile := equipedGestures + projCount*8 + 4
 
 	equipedArmaments := equipedProjectile + DynEquipedArmaments
 	equipePhysics := equipedArmaments + DynEquipePhysics
 	s.FaceDataOffset = equipePhysics + DynFaceData
-	s.StorageBoxOffset = s.FaceDataOffset + DynStorageBox
+	// StorageBoxOffset = start of storage section (EquipInventoryData #2).
+	// Rust ER-Save-Editor reads storage immediately after face_data (0x12F bytes).
+	// DynStorageBox (0x6010) is the SIZE of the storage section, not a gap.
+	s.StorageBoxOffset = s.FaceDataOffset
+	storageEnd := s.StorageBoxOffset + DynStorageBox
 
 	// EventFlags offset chain
-	gesturesOff := s.StorageBoxOffset + DynStorageToGestures
+	gesturesOff := storageEnd + DynStorageToGestures
 	if err := sa.CheckBounds(gesturesOff, 4, "gesturesOff"); err != nil {
 		s.Warnings = append(s.Warnings, "EventFlags chain unreachable: "+err.Error())
 		s.Warnings = append(s.Warnings, sa.Warnings...)
 		return nil // non-fatal — event flags are optional for basic editing
 	}
 
-	// Dynamic field #2: unlocked_regions header.
-	// Same pattern as projSize — the u32 is a byte-size/count value but we only need
-	// to skip the 4-byte header. The region data is accounted for in fixed offsets.
+	// Dynamic field #2: unlocked_regions.
+	// The u32 at gesturesOff is the region COUNT. Total skip = count*4 + 4.
+	// Source: Final.py:1462 — unlocked_region_size * 4 + 4
 	if err := sa.CheckBounds(gesturesOff, 4, "unlockedRegHeader"); err != nil {
 		return err
 	}
-	unlockedRegion := gesturesOff + 4
+	regCount, err := sa.ReadDynamicSize(gesturesOff, MaxUnlockedRegCnt, "regCount")
+	if err != nil {
+		return err
+	}
+	unlockedRegion := gesturesOff + regCount*4 + 4
 
 	horse := unlockedRegion + DynHorse
 	bloodStain := horse + DynBloodStain
@@ -282,11 +294,12 @@ func (s *SaveSlot) validateOffsetChain() error {
 		}
 	}
 
-	// Monotonicity: offsets MUST be strictly increasing in this order
+	// Monotonicity: offsets MUST be strictly increasing in this order.
+	// StorageBoxOffset == FaceDataOffset (storage starts at face data end).
 	if !(s.InventoryEnd <= s.MagicOffset &&
 		s.MagicOffset <= s.PlayerDataOffset &&
 		s.PlayerDataOffset < s.FaceDataOffset &&
-		s.FaceDataOffset < s.StorageBoxOffset) {
+		s.FaceDataOffset <= s.StorageBoxOffset) {
 		return fmt.Errorf("offset chain order violated: "+
 			"InventoryEnd=0x%X MagicOffset=0x%X PlayerData=0x%X FaceData=0x%X StorageBox=0x%X",
 			s.InventoryEnd, s.MagicOffset, s.PlayerDataOffset,

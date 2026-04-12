@@ -22,7 +22,7 @@ func TestValidateOffsetChain_Valid(t *testing.T) {
 		0x5000,   // InventoryEnd  (< MagicOffset)
 		0x20000,  // PlayerData    (> MagicOffset)
 		0x30000,  // FaceData      (> PlayerData)
-		0x40000,  // StorageBox    (> FaceData)
+		0x30000,  // StorageBox    (== FaceData, storage starts at face data end)
 		0x100000, // EventFlags    (within SlotSize)
 	)
 	if err := s.validateOffsetChain(); err != nil {

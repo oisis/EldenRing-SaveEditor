@@ -397,6 +397,7 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 		// Scan the physical pre-allocated storage array (1920 slots) to find and zero the handle.
 		// Cannot use in-memory list index because ReadStorage skips empty slots (sparse).
 		storageStart := slot.StorageBoxOffset + StorageHeaderSkip
+		removed := 0
 		for i := 0; i < StorageCommonCount; i++ {
 			off := storageStart + i*InvRecordLen
 			if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/storage"); err != nil {
@@ -407,6 +408,17 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 				binary.LittleEndian.PutUint32(slot.Data[off:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+4:], 0)
 				binary.LittleEndian.PutUint32(slot.Data[off+8:], 0)
+				removed++
+			}
+		}
+		// Decrement common_inventory_items_distinct_count header
+		if removed > 0 {
+			countOff := slot.StorageBoxOffset
+			if err := sa.CheckBounds(countOff, 4, "RemoveItemFromSlot/storage-count"); err == nil {
+				currentCount := binary.LittleEndian.Uint32(slot.Data[countOff:])
+				if currentCount >= uint32(removed) {
+					binary.LittleEndian.PutUint32(slot.Data[countOff:], currentCount-uint32(removed))
+				}
 			}
 		}
 		// Update in-memory list
@@ -538,6 +550,16 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 		}
 		if slot.Storage.nextAcqSortIdOff > 0 {
 			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
+		}
+
+		// Update common_inventory_items_distinct_count header.
+		// The game uses this count to determine how many storage items to load.
+		// Without this update, added items are invisible in-game (count stays 0).
+		// Source: Rust ER-Save-Editor add_to_storage_common_items() increments common_item_count.
+		countOff := slot.StorageBoxOffset // header is at StorageBoxOffset (before items)
+		if err := sa.CheckBounds(countOff, 4, "addToInventory/storage-count"); err == nil {
+			currentCount := binary.LittleEndian.Uint32(slot.Data[countOff:])
+			binary.LittleEndian.PutUint32(slot.Data[countOff:], currentCount+1)
 		}
 
 		// Update in-memory list

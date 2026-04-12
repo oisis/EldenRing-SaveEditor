@@ -84,7 +84,7 @@ const (
 	DynActiveEquipedItems   = 0x1C
 	DynEquipedItemsID       = 0x58
 	DynActiveEquipedItemsGa = 0x58
-	DynInventoryHeld        = 0x9010
+	DynInventoryHeld        = 0x9011
 	DynEquipedSpells        = 0x74
 	DynEquipedItems         = 0x8C
 	DynEquipedGestures      = 0x18
@@ -104,9 +104,9 @@ const (
 
 // Sanity limits for dynamic size reads from untrusted save data.
 const (
-	MaxProjSize       = 256   // max projectile slots (read from save, PS4 can have garbage)
-	MaxUnlockedRegSz  = 1024  // max unlocked region entries
-	MaxHandleAttempts = 10000 // max iterations for generateUniqueHandle
+	MaxProjCount      = 200000 // max acquired_projectiles count (projSkip = count*8+4; observed: 67584 PC, 103168 PS4)
+	MaxUnlockedRegCnt = 20000  // max unlocked_regions count (regSkip = count*4+4)
+	MaxHandleAttempts = 10000  // max iterations for generateUniqueHandle
 )
 
 // GaItemData section (distinct_acquired_items_count + GaItem2 array).
