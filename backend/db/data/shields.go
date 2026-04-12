@@ -167,4 +167,5 @@ var Shields = map[uint32]ItemData{
 	0x016F2060: {Name: "Beast-Repellent Torch", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/beast_repellent_torch.png"},
 	0x016F4770: {Name: "Sentry's Torch", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/shields/sentrys_torch.png"},
 	0x0175D720: {Name: "Nanaya's Torch", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/shields/nanayas_torch.png"},
+	0x0175FE30: {Name: "Lamenting Visage", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/shields/lamenting_visage.png"},
 }
