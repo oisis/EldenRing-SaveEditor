@@ -29,6 +29,61 @@ type GaItem struct {
 	ItemID uint32
 }
 
+// GaItemFull represents a complete GaItem entry with all variable-length fields.
+// Size depends on item_id type: weapon=21B, armor=16B, everything else=8B.
+// Matches Rust ER-Save-Editor save_slot.rs GaItem struct.
+type GaItemFull struct {
+	Handle          uint32
+	ItemID          uint32
+	Unk2            int32  // weapon/armor: default -1 (0xFFFFFFFF)
+	Unk3            int32  // weapon/armor: default -1 (0xFFFFFFFF)
+	AoWGaItemHandle uint32 // weapon only: default 0xFFFFFFFF ("no AoW attached")
+	Unk5            uint8  // weapon only: default 0
+}
+
+// GaItemRecordSize returns the byte size of a GaItem record based on item_id.
+// Uses item_id (not handle) for size determination, matching Rust ER-Save-Editor.
+func GaItemRecordSize(itemID uint32) int {
+	if itemID == 0 || itemID == GaHandleInvalid {
+		return GaRecordItem // 8
+	}
+	switch itemID & 0xF0000000 {
+	case 0x00000000:
+		return GaRecordWeapon // 21
+	case 0x10000000:
+		return GaRecordArmor // 16
+	default:
+		return GaRecordItem // 8
+	}
+}
+
+// ByteSize returns the serialized byte size of this entry.
+func (g *GaItemFull) ByteSize() int {
+	return GaItemRecordSize(g.ItemID)
+}
+
+// IsEmpty returns true if this GaItem slot is unused.
+func (g *GaItemFull) IsEmpty() bool {
+	return g.ItemID == 0 || g.ItemID == GaHandleInvalid
+}
+
+// Serialize writes the GaItem entry into buf and returns bytes written.
+// buf must have at least g.ByteSize() bytes available.
+func (g *GaItemFull) Serialize(buf []byte) int {
+	binary.LittleEndian.PutUint32(buf[0:], g.Handle)
+	binary.LittleEndian.PutUint32(buf[4:], g.ItemID)
+	sz := g.ByteSize()
+	if sz >= GaRecordArmor {
+		binary.LittleEndian.PutUint32(buf[8:], uint32(g.Unk2))
+		binary.LittleEndian.PutUint32(buf[12:], uint32(g.Unk3))
+	}
+	if sz >= GaRecordWeapon {
+		binary.LittleEndian.PutUint32(buf[16:], g.AoWGaItemHandle)
+		buf[20] = g.Unk5
+	}
+	return sz
+}
+
 type InventoryItem struct {
 	GaItemHandle uint32
 	Quantity     uint32
@@ -127,6 +182,7 @@ type SaveSlot struct {
 	Version   uint32 // slot format version (offset 0x00); 0 = empty slot
 	Player    PlayerGameData
 	GaMap     map[uint32]uint32
+	GaItems   []GaItemFull // parsed GaItem array (5118 or 5120 entries)
 	Inventory EquipInventoryData
 	Storage   EquipInventoryData
 	SteamID   uint64
@@ -281,7 +337,7 @@ func (s *SaveSlot) validateOffsetChain() error {
 
 	checks := []check{
 		{"MagicOffset", s.MagicOffset, MinMagicOffset, SlotSize},
-		{"InventoryEnd", s.InventoryEnd, GaItemsStart, s.MagicOffset - DynPlayerData + 1},
+		{"InventoryEnd", s.InventoryEnd, GaItemsStart, s.MagicOffset - DynPlayerData + 2},
 		{"PlayerDataOffset", s.PlayerDataOffset, s.MagicOffset, SlotSize},
 		{"FaceDataOffset", s.FaceDataOffset, s.PlayerDataOffset, SlotSize},
 		{"StorageBoxOffset", s.StorageBoxOffset, s.FaceDataOffset, SlotSize},
@@ -430,56 +486,72 @@ func (s *SaveSlot) mapStats() error {
 	return nil
 }
 
+// scanGaItems parses ALL GaItem entries (5118 or 5120) into the GaItems array.
+// Uses item_id for record size determination, matching Rust ER-Save-Editor.
+// Builds GaMap (handle→itemID) for non-empty entries.
 func (s *SaveSlot) scanGaItems(start int) {
 	s.GaMap = make(map[uint32]uint32)
-	curr := start
 
-	gaLimit := s.MagicOffset - DynPlayerData + 1 // GaItems section ends 0x1AF bytes before Magic (inclusive)
+	gaLimit := s.MagicOffset - DynPlayerData + 1
 	if gaLimit < start {
 		gaLimit = start
 	}
 
-	// Determine expected GaItem count from slot version.
-	// Reference: ER-Save-Editor reads exactly 5118 (version ≤ 81) or 5120 (version > 81).
 	maxEntries := GaItemCountNew
 	if s.Version > 0 && s.Version <= GaItemVersionBreak {
 		maxEntries = GaItemCountOld
 	}
 
-	lastEnd := start
-	entriesRead := 0
-	for curr+GaRecordItem <= gaLimit && entriesRead < maxEntries {
+	s.GaItems = make([]GaItemFull, maxEntries)
+	curr := start
+
+	for i := 0; i < maxEntries; i++ {
+		if curr+GaRecordItem > gaLimit {
+			// Remaining entries are empty (no bytes left in section).
+			s.GaItems[i] = GaItemFull{Unk2: -1, Unk3: -1, AoWGaItemHandle: 0xFFFFFFFF}
+			continue
+		}
+
 		handle := binary.LittleEndian.Uint32(s.Data[curr:])
 		itemID := binary.LittleEndian.Uint32(s.Data[curr+4:])
 
-		if handle != GaHandleEmpty && handle != GaHandleInvalid {
-			// Validate type prefix — only known types are valid GaItem records.
-			// An unknown prefix (e.g. 0xFFFF0000 from scanner misalignment) must
-			// be treated as a stop condition, not a valid item.
+		entry := GaItemFull{
+			Handle:          handle,
+			ItemID:          itemID,
+			Unk2:            -1,
+			Unk3:            -1,
+			AoWGaItemHandle: 0xFFFFFFFF,
+			Unk5:            0,
+		}
+
+		// Determine record size from item_id (matching Rust ER-Save-Editor read logic).
+		recSize := GaItemRecordSize(itemID)
+
+		// Read extended fields for weapons (21B) and armor (16B).
+		if recSize >= GaRecordArmor && curr+GaRecordArmor <= len(s.Data) {
+			entry.Unk2 = int32(binary.LittleEndian.Uint32(s.Data[curr+8:]))
+			entry.Unk3 = int32(binary.LittleEndian.Uint32(s.Data[curr+12:]))
+		}
+		if recSize >= GaRecordWeapon && curr+GaRecordWeapon <= len(s.Data) {
+			entry.AoWGaItemHandle = binary.LittleEndian.Uint32(s.Data[curr+16:])
+			entry.Unk5 = s.Data[curr+20]
+		}
+
+		s.GaItems[i] = entry
+		curr += recSize
+
+		// Build GaMap for non-empty entries.
+		if !entry.IsEmpty() {
 			typeBits := handle & GaHandleTypeMask
 			switch typeBits {
-			case ItemTypeWeapon:
+			case ItemTypeWeapon, ItemTypeArmor, ItemTypeAccessory, ItemTypeItem, ItemTypeAow:
 				s.GaMap[handle] = itemID
-				curr += GaRecordWeapon
-				lastEnd = curr
-			case ItemTypeArmor:
-				s.GaMap[handle] = itemID
-				curr += GaRecordArmor
-				lastEnd = curr
-			case ItemTypeAccessory, ItemTypeItem, ItemTypeAow:
-				s.GaMap[handle] = itemID
-				curr += GaRecordItem
-				lastEnd = curr
-			default:
-				// Unknown type prefix — stop scanning (corrupted/misaligned region).
-				curr = gaLimit
 			}
-		} else {
-			curr += GaRecordItem
 		}
-		entriesRead++
 	}
-	s.InventoryEnd = lastEnd
+
+	// InventoryEnd = byte offset after all parsed entries (= section end).
+	s.InventoryEnd = curr
 }
 
 func (e *EquipInventoryData) ReadStorage(r *Reader, count int) error {

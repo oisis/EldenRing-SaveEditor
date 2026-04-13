@@ -21,6 +21,7 @@ type slotSnapshot struct {
 	Version           uint32
 	Player            core.PlayerGameData
 	GaMap             map[uint32]uint32
+	GaItems           []core.GaItemFull
 	Inventory         core.EquipInventoryData
 	Storage           core.EquipInventoryData
 	Warnings          []string
@@ -678,11 +679,19 @@ func (a *App) pushUndo(idx int) {
 		gaMapCopy[k] = v
 	}
 
+	// Deep copy GaItems
+	var gaItemsCopy []core.GaItemFull
+	if slot.GaItems != nil {
+		gaItemsCopy = make([]core.GaItemFull, len(slot.GaItems))
+		copy(gaItemsCopy, slot.GaItems)
+	}
+
 	snap := slotSnapshot{
 		Data:              dataCopy,
 		Version:           slot.Version,
 		Player:            slot.Player,
 		GaMap:             gaMapCopy,
+		GaItems:           gaItemsCopy,
 		Inventory:         slot.Inventory.Clone(),
 		Storage:           slot.Storage.Clone(),
 		Warnings:          append([]string{}, slot.Warnings...),
@@ -724,6 +733,7 @@ func (a *App) RevertSlot(idx int) error {
 	slot.Version = snap.Version
 	slot.Player = snap.Player
 	slot.GaMap = snap.GaMap
+	slot.GaItems = snap.GaItems
 	slot.Inventory = snap.Inventory
 	slot.Storage = snap.Storage
 	slot.Warnings = snap.Warnings

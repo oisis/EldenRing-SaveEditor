@@ -110,35 +110,26 @@ func (w *Writer) WriteBytes(v []byte) error {
 // invQty and storageQty control quantities: 0 = skip, -1 = use provided max from caller, >0 = exact qty.
 // forceStackable treats items as stackable (reuse existing GaMap handle) regardless of type.
 // Used for arrows/bolts which have weapon-like IDs but are stackable in inventory.
+//
+// Algorithm (Plan D — GaItems Section Re-serialization):
+//   Phase 1: Allocate GaItem entries in-memory array + write GaItemData at old offsets.
+//   Phase 2: FlushGaItems — serialize array, compute size delta, single shift, update offsets.
+//   Phase 3: Add to inventory/storage (offsets now correct after flush).
 func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, forceStackable bool) error {
-	for _, id := range itemIDs {
-		// 1. Convert item ID prefix to handle prefix and determine record size.
-		// DB stores PC-style item IDs (0x00=weapon, 0x10=armor, 0x20=talisman, 0x40=goods, 0x80=AoW).
-		// Handles always use GaItem prefixes (0x80=weapon, 0x90=armor, 0xA0=talisman, 0xB0=goods, 0xC0=AoW).
-		handlePrefix := db.ItemIDToHandlePrefix(id)
-		var recordSize int
-		switch handlePrefix {
-		case ItemTypeWeapon:
-			recordSize = GaRecordWeapon
-		case ItemTypeArmor:
-			recordSize = GaRecordArmor
-		case ItemTypeAccessory:
-			recordSize = GaRecordAccessory
-		case ItemTypeItem:
-			recordSize = GaRecordItem
-		case ItemTypeAow:
-			recordSize = GaRecordAoW
-		default:
-			recordSize = GaRecordWeapon
-		}
+	type pendingInv struct {
+		handle     uint32
+		invQty     uint32
+		storageQty uint32
+	}
+	var pending []pendingInv
+	gaModified := false
 
-		// 2. Determine if item is stackable (handle=id pattern).
-		// Stackable: talismans (0xA0), goods (0xB0). Handle = handlePrefix | lower bits of item ID.
-		// Non-stackable: weapons (0x80), armor (0x90), AoW (0xC0). Handle = unique, GaMap indirection.
-		// forceStackable: arrows — weapon-type but stackable; reuse GaMap handle if found.
+	// Phase 1: allocate GaItem entries in-memory + GaItemData at old offsets.
+	for _, id := range itemIDs {
+		handlePrefix := db.ItemIDToHandlePrefix(id)
 		isStackable := handlePrefix == ItemTypeItem || handlePrefix == ItemTypeAccessory
 
-		// 3. Search for existing handle in GaMap (for stackable reuse).
+		// Search for existing handle in GaMap (for stackable reuse).
 		handle := uint32(0)
 		if isStackable || forceStackable {
 			for h, i := range slot.GaMap {
@@ -152,34 +143,26 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		if handle == 0 {
 			if isStackable {
 				// Stackable goods/talismans: handle = handlePrefix | lower bits of item ID.
-				// The game resolves these DIRECTLY from the handle (itemID = HandleToItemID(handle)).
-				// They are NEVER stored in the GaItems array — real saves have zero 0xA0/0xB0
-				// entries in GaItems. Writing a GaItem for stackable items displaces empty fill
-				// entries, causing the game to read past the fixed-count GaItem boundary → crash.
+				// Never stored in GaItems array — game resolves directly from handle.
 				handle = (id & 0x0FFFFFFF) | handlePrefix
 				slot.GaMap[handle] = id
 			} else {
-				// Weapons, armor, AoW, and arrows: generate unique handle with GaMap indirection.
+				// Non-stackable: weapons, armor, AoW, arrows.
 				var err error
 				handle, err = generateUniqueHandle(slot, handlePrefix)
 				if err != nil {
 					return err
 				}
-				if err := writeGaItem(slot, handle, id, recordSize); err != nil {
+
+				// Allocate in GaItems array (in-memory only — no binary write yet).
+				if err := allocateGaItem(slot, handle, id); err != nil {
 					return err
 				}
+				gaModified = true
 				slot.GaMap[handle] = id
 
-				// Weapons and AoW must be registered in GaItemData — a separate section that
-				// tracks all items ever acquired. The game looks up weapon properties (reinforce_type)
-				// from this list on load; an absent entry causes EXCEPTION_ACCESS_VIOLATION.
-				// Source: ER-Save-Editor upsert_gaitem_data_list() / upsert_projectile_list()
-				//
-				// Exception: arrows/bolts have weapon-type handles (0x80xxxxxx) but belong in the
-				// projectile list (EquipProjectileData), NOT in GaItemData. The Rust reference editor
-				// routes them via upsert_projectile_list() instead. Since we don't yet parse/write the
-				// projectile section, we skip GaItemData registration for arrows — the game handles
-				// projectile registration on its own when the item is first used.
+				// Register in GaItemData (writes at old offsets — shift will move them).
+				// Arrows use projectile list instead (not yet implemented).
 				if (handlePrefix == ItemTypeWeapon && !db.IsArrowID(id)) || handlePrefix == ItemTypeAow {
 					if err := upsertGaItemData(slot, id); err != nil {
 						return err
@@ -188,22 +171,34 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			}
 		}
 
-		// 4. Add to Inventory
-		if invQty != 0 {
-			qty := uint32(invQty)
-			if err := addToInventory(slot, handle, qty, false); err != nil {
+		pending = append(pending, pendingInv{
+			handle:     handle,
+			invQty:     uint32(invQty),
+			storageQty: uint32(storageQty),
+		})
+	}
+
+	// Phase 2: flush GaItems array to binary (serialize + shift + update offsets).
+	if gaModified {
+		if err := FlushGaItems(slot); err != nil {
+			return err
+		}
+	}
+
+	// Phase 3: add to inventory/storage (offsets are now correct).
+	for _, p := range pending {
+		if p.invQty != 0 {
+			if err := addToInventory(slot, p.handle, p.invQty, false); err != nil {
 				return err
 			}
 		}
-
-		// 5. Add to Storage
-		if storageQty != 0 {
-			qty := uint32(storageQty)
-			if err := addToInventory(slot, handle, qty, true); err != nil {
+		if p.storageQty != 0 {
+			if err := addToInventory(slot, p.handle, p.storageQty, true); err != nil {
 				return err
 			}
 		}
 	}
+
 	return nil
 }
 
@@ -237,123 +232,101 @@ func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
 		MaxHandleAttempts, prefix)
 }
 
-func writeGaItem(slot *SaveSlot, handle, itemID uint32, size int) error {
-	sa := NewSlotAccessor(slot.Data)
-	gaLimit := slot.MagicOffset - DynPlayerData + 1
-
-	// Check BOTH constraints: GaItems must not overflow into Magic section,
-	// AND must not exceed the physical buffer.
-	if err := sa.CheckBounds(slot.InventoryEnd, size, "writeGaItem"); err != nil {
-		return err
+// allocateGaItem finds an empty slot in the in-memory GaItems array and places
+// the new item there. Does NOT write to binary data — call FlushGaItems after
+// all allocations to serialize the array and update slot.Data.
+func allocateGaItem(slot *SaveSlot, handle, itemID uint32) error {
+	for i := range slot.GaItems {
+		if slot.GaItems[i].IsEmpty() {
+			slot.GaItems[i] = GaItemFull{
+				Handle:          handle,
+				ItemID:          itemID,
+				Unk2:            -1,            // sentinel: game treats 0 as valid pointer → crash
+				Unk3:            -1,            // sentinel
+				AoWGaItemHandle: 0xFFFFFFFF,    // "no AoW attached"
+				Unk5:            0,
+			}
+			return nil
+		}
 	}
-	if slot.InventoryEnd+size > gaLimit {
-		return fmt.Errorf("writeGaItem: no space in GaItems section "+
-			"(InventoryEnd=0x%X + size=%d > gaLimit=0x%X)",
-			slot.InventoryEnd, size, gaLimit)
+	return fmt.Errorf("allocateGaItem: no empty slot in GaItems array (%d entries)", len(slot.GaItems))
+}
+
+// FlushGaItems serializes the entire in-memory GaItems array back to slot.Data.
+// If the total byte size changed (e.g. empty 8B slot replaced by 21B weapon),
+// shifts all data after the GaItems section and updates all downstream offsets.
+// This is the Plan D approach: one serialization + one shift per batch of additions.
+func FlushGaItems(slot *SaveSlot) error {
+	// 1. Serialize all GaItem entries into a temporary buffer.
+	// Max possible size: all entries as weapons (21B each).
+	maxBuf := len(slot.GaItems) * GaRecordWeapon
+	buf := make([]byte, maxBuf)
+	pos := 0
+	for i := range slot.GaItems {
+		n := slot.GaItems[i].Serialize(buf[pos:])
+		pos += n
+	}
+	newGaBytes := buf[:pos]
+	newGaSize := len(newGaBytes)
+
+	// 2. Compute old section size and delta.
+	oldGaLimit := slot.MagicOffset - DynPlayerData + 1
+	if oldGaLimit < GaItemsStart {
+		oldGaLimit = GaItemsStart
+	}
+	oldGaSize := oldGaLimit - GaItemsStart
+	delta := newGaSize - oldGaSize
+
+	// 3. Safety check: new section must fit within slot.
+	if GaItemsStart+newGaSize+DynPlayerData > SlotSize {
+		return fmt.Errorf("FlushGaItems: section too large (%d bytes, max %d)",
+			newGaSize, SlotSize-GaItemsStart-DynPlayerData)
 	}
 
-	// Write handle and itemID
-	if err := sa.WriteU32(slot.InventoryEnd, handle); err != nil {
-		return err
-	}
-	if err := sa.WriteU32(slot.InventoryEnd+4, itemID); err != nil {
-		return err
-	}
+	// 4. Shift data after GaItems section if size changed.
+	if delta != 0 {
+		if delta > 0 {
+			// Section grew — shift right (loses trailing padding bytes at end of slot).
+			copy(slot.Data[oldGaLimit+delta:SlotSize], slot.Data[oldGaLimit:SlotSize-delta])
+		} else {
+			// Section shrank — shift left (frees bytes at end of slot).
+			absDelta := -delta
+			copy(slot.Data[oldGaLimit-absDelta:SlotSize-absDelta], slot.Data[oldGaLimit:SlotSize])
+			// Zero the freed space at the end.
+			for i := SlotSize - absDelta; i < SlotSize; i++ {
+				slot.Data[i] = 0
+			}
+		}
 
-	// Write extra fields with correct sentinel defaults.
-	// Source: ER-Save-Editor save_slot.rs GaItem::default() / GaItem::write()
-	//
-	// Weapon record (21 bytes total after handle+itemID: 13 extra bytes):
-	//   [8-11]  unk2 = -1 (0xFFFFFFFF) — game reads as i32; 0 is a valid-looking pointer → crash
-	//   [12-15] unk3 = -1 (0xFFFFFFFF) — same
-	//   [16-19] aow_gaitem_handle = 0xFFFFFFFF — "no AoW attached"; 0 would resolve to empty handle
-	//   [20]    unk5 = 0
-	//
-	// Armor record (16 bytes total: 8 extra bytes):
-	//   [8-11]  unk2 = -1 (0xFFFFFFFF)
-	//   [12-15] unk3 = -1 (0xFFFFFFFF)
-	//
-	// Writing zeros here (previous behavior) caused EXCEPTION_ACCESS_VIOLATION because the game
-	// treats 0 as a valid GaItem handle / pointer rather than the null sentinel 0xFFFFFFFF.
-	switch size {
-	case GaRecordWeapon:
-		if err := sa.WriteU32(slot.InventoryEnd+8, 0xFFFFFFFF); err != nil {
-			return err
-		}
-		if err := sa.WriteU32(slot.InventoryEnd+12, 0xFFFFFFFF); err != nil {
-			return err
-		}
-		if err := sa.WriteU32(slot.InventoryEnd+16, 0xFFFFFFFF); err != nil {
-			return err
-		}
-		if err := sa.WriteU8(slot.InventoryEnd+20, 0); err != nil {
-			return err
-		}
-	case GaRecordArmor:
-		if err := sa.WriteU32(slot.InventoryEnd+8, 0xFFFFFFFF); err != nil {
-			return err
-		}
-		if err := sa.WriteU32(slot.InventoryEnd+12, 0xFFFFFFFF); err != nil {
-			return err
-		}
-	// GaRecordItem / GaRecordAccessory / GaRecordAoW: handle+itemID only (8 bytes), no extra fields.
-	}
-	slot.InventoryEnd += size
-
-	// For records larger than 8 bytes (weapon=21, armor=16), the extra bytes
-	// push trailing empty entries past gaLimit, causing the game to read into
-	// PlayerGameData (crash). The game reads a FIXED count (5120) of entries.
-	//
-	// Fix (matching Final.py): shift ALL data after GaItems section backward
-	// by (size-8) bytes, effectively removing empty bytes from the END of the
-	// GaItems region. Then update MagicOffset and all dependent offsets.
-	// This maintains: GaItems section size = constant = 5120 entries worth.
-	if size > GaRecordItem {
-		// The GaItem array has a fixed entry count (5120/5118). Adding a larger-than-8B
-		// record at InventoryEnd consumes (size-8) extra bytes. To maintain the fixed
-		// entry count, we shift ALL data from gaLimit onward RIGHT by (size-8) bytes.
-		// This EXPANDS the GaItems section and moves MagicOffset (and everything after) right.
-		// The slot's padding at the end absorbs the expansion.
-		extraBytes := size - GaRecordItem
-
-		// Shift everything from gaLimit to end of slot RIGHT by extraBytes
-		// (last extraBytes of slot padding are lost — they were zeros anyway)
-		copy(slot.Data[gaLimit+extraBytes:SlotSize], slot.Data[gaLimit:SlotSize-extraBytes])
-
-		// Update all offsets (they reference positions at/after gaLimit, which shifted right)
-		slot.MagicOffset += extraBytes
-		slot.PlayerDataOffset += extraBytes
-		slot.FaceDataOffset += extraBytes
-		slot.StorageBoxOffset += extraBytes
-		slot.GaItemDataOffset += extraBytes
-		slot.IngameTimerOffset += extraBytes
+		// Update ALL downstream offsets by delta (single update for entire batch).
+		slot.MagicOffset += delta
+		slot.PlayerDataOffset += delta
+		slot.FaceDataOffset += delta
+		slot.StorageBoxOffset += delta
+		slot.GaItemDataOffset += delta
+		slot.IngameTimerOffset += delta
 		if slot.EventFlagsOffset > 0 {
-			slot.EventFlagsOffset += extraBytes
+			slot.EventFlagsOffset += delta
 		}
-		if slot.Inventory.nextEquipIndexOff >= gaLimit {
-			slot.Inventory.nextEquipIndexOff += extraBytes
+		if slot.Inventory.nextEquipIndexOff >= oldGaLimit {
+			slot.Inventory.nextEquipIndexOff += delta
 		}
-		if slot.Inventory.nextAcqSortIdOff >= gaLimit {
-			slot.Inventory.nextAcqSortIdOff += extraBytes
+		if slot.Inventory.nextAcqSortIdOff >= oldGaLimit {
+			slot.Inventory.nextAcqSortIdOff += delta
 		}
-		if slot.Storage.nextEquipIndexOff >= gaLimit {
-			slot.Storage.nextEquipIndexOff += extraBytes
+		if slot.Storage.nextEquipIndexOff >= oldGaLimit {
+			slot.Storage.nextEquipIndexOff += delta
 		}
-		if slot.Storage.nextAcqSortIdOff >= gaLimit {
-			slot.Storage.nextAcqSortIdOff += extraBytes
+		if slot.Storage.nextAcqSortIdOff >= oldGaLimit {
+			slot.Storage.nextAcqSortIdOff += delta
 		}
-		// gaLimit itself increased (recalculate for fill below)
-		gaLimit += extraBytes
 	}
 
-	// Rewrite empty fill from InventoryEnd to current gaLimit
-	newGaLimit := slot.MagicOffset - DynPlayerData + 1
-	fillPos := slot.InventoryEnd
-	for fillPos+GaRecordItem <= newGaLimit {
-		sa.WriteU32(fillPos, GaHandleEmpty)
-		sa.WriteU32(fillPos+4, GaHandleInvalid)
-		fillPos += GaRecordItem
-	}
+	// 5. Write serialized GaItems into slot.Data (covers [GaItemsStart, GaItemsStart+newGaSize)).
+	copy(slot.Data[GaItemsStart:], newGaBytes)
+
+	// 6. Update InventoryEnd to match the new section end.
+	slot.InventoryEnd = GaItemsStart + newGaSize
 
 	return nil
 }
