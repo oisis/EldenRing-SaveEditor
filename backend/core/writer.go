@@ -203,53 +203,90 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 }
 
 func generateUniqueHandle(slot *SaveSlot, prefix uint32) (uint32, error) {
-	// Extract part_id (byte 2, bits 16-23) from existing handles in GaMap.
-	// Real handles: 0xTTPPCCCC where TT=type, PP=part_id (always 0x80 on real saves), CCCC=counter.
-	// Reference: ER-Save-Editor generates handle = type | (part_gaitem_handle << 16) | counter
-	partID := uint32(0x80) // default
-	maxCounter := uint32(0)
-	for h := range slot.GaMap {
-		if h&GaHandleTypeMask == prefix {
-			p := (h >> 16) & 0xFF
-			if p != 0 {
-				partID = p
-			}
-			counter := h & 0xFFFF
-			if counter > maxCounter {
-				maxCounter = counter
-			}
-		}
-	}
-	// Start from maxCounter+1 to avoid collisions
-	h := prefix | (partID << 16) | (maxCounter + 1)
+	// Use global counter from tracked indices (matching Rust ER-Save-Editor).
+	// Handle format: 0xTTPPCCCC where TT=type, PP=part_id, CCCC=global counter.
+	// The game regenerates all handles on load, so the counter just needs to be unique.
+	partID := uint32(slot.PartGaItemHandle)
+	counter := slot.NextGaItemHandle
+
+	h := prefix | (partID << 16) | counter
 	for i := 0; i < MaxHandleAttempts; i++ {
 		if _, ok := slot.GaMap[h]; !ok {
+			slot.NextGaItemHandle = counter + 1
 			return h, nil
 		}
-		h++
+		counter++
+		h = prefix | (partID << 16) | counter
 	}
 	return 0, fmt.Errorf("failed to generate unique handle after %d attempts (prefix 0x%X)",
 		MaxHandleAttempts, prefix)
 }
 
-// allocateGaItem finds an empty slot in the in-memory GaItems array and places
-// the new item there. Does NOT write to binary data — call FlushGaItems after
-// all allocations to serialize the array and update slot.Data.
+// allocateGaItem places a new item in the GaItems array at the correct
+// type-segregated position. The game expects AoW entries at low indices,
+// armor/weapons at higher indices. Matching Rust ER-Save-Editor's add_gaitem().
+//
+// AoW → placed at slot.NextAoWIndex, then NextAoWIndex++ and NextArmamentIndex++
+// Weapon/Armor → placed at slot.NextArmamentIndex, then NextArmamentIndex++
+//
+// Does NOT write to binary data — call FlushGaItems after all allocations.
 func allocateGaItem(slot *SaveSlot, handle, itemID uint32) error {
-	for i := range slot.GaItems {
-		if slot.GaItems[i].IsEmpty() {
-			slot.GaItems[i] = GaItemFull{
-				Handle:          handle,
-				ItemID:          itemID,
-				Unk2:            -1,            // sentinel: game treats 0 as valid pointer → crash
-				Unk3:            -1,            // sentinel
-				AoWGaItemHandle: 0xFFFFFFFF,    // "no AoW attached"
-				Unk5:            0,
-			}
-			return nil
-		}
+	handleType := handle & GaHandleTypeMask
+	isAoW := handleType == ItemTypeAow
+
+	entry := GaItemFull{
+		Handle:          handle,
+		ItemID:          itemID,
+		Unk2:            -1,
+		Unk3:            -1,
+		AoWGaItemHandle: 0xFFFFFFFF,
+		Unk5:            0,
 	}
-	return fmt.Errorf("allocateGaItem: no empty slot in GaItems array (%d entries)", len(slot.GaItems))
+
+	maxEntries := len(slot.GaItems)
+
+	if isAoW {
+		idx := slot.NextAoWIndex
+		if idx >= maxEntries {
+			return fmt.Errorf("allocateGaItem: AoW array full (index %d >= %d)", idx, maxEntries)
+		}
+		// If position is occupied, shift entries right to make room
+		if !slot.GaItems[idx].IsEmpty() {
+			// Find the end of used entries to shift into
+			shiftEnd := idx
+			for shiftEnd < maxEntries && !slot.GaItems[shiftEnd].IsEmpty() {
+				shiftEnd++
+			}
+			if shiftEnd >= maxEntries {
+				return fmt.Errorf("allocateGaItem: no room to insert AoW at index %d", idx)
+			}
+			// Shift right by 1
+			copy(slot.GaItems[idx+1:shiftEnd+1], slot.GaItems[idx:shiftEnd])
+		}
+		slot.GaItems[idx] = entry
+		slot.NextAoWIndex++
+		slot.NextArmamentIndex++ // AoW insertion shifts armament zone right
+	} else {
+		idx := slot.NextArmamentIndex
+		if idx >= maxEntries {
+			return fmt.Errorf("allocateGaItem: armament/armor array full (index %d >= %d)", idx, maxEntries)
+		}
+		// If position is occupied, shift entries right to make room
+		if !slot.GaItems[idx].IsEmpty() {
+			shiftEnd := idx
+			for shiftEnd < maxEntries && !slot.GaItems[shiftEnd].IsEmpty() {
+				shiftEnd++
+			}
+			if shiftEnd >= maxEntries {
+				return fmt.Errorf("allocateGaItem: no room to insert weapon/armor at index %d", idx)
+			}
+			copy(slot.GaItems[idx+1:shiftEnd+1], slot.GaItems[idx:shiftEnd])
+		}
+		slot.GaItems[idx] = entry
+		slot.NextArmamentIndex++
+	}
+
+	return nil
 }
 
 // FlushGaItems serializes the entire in-memory GaItems array back to slot.Data.

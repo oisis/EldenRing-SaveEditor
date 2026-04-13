@@ -1,0 +1,240 @@
+package core
+
+import (
+	"testing"
+)
+
+// makeTestSlot creates a minimal SaveSlot with empty GaItems array for placement tests.
+func makeTestSlot(numEntries int) *SaveSlot {
+	slot := &SaveSlot{
+		Data:             make([]byte, SlotSize),
+		Version:          100,
+		GaMap:            make(map[uint32]uint32),
+		GaItems:          make([]GaItemFull, numEntries),
+		MagicOffset:      0x15420 + 432,
+		PartGaItemHandle: 0x80,
+		NextGaItemHandle: 1,
+	}
+	// Initialize all entries as empty
+	for i := range slot.GaItems {
+		slot.GaItems[i] = GaItemFull{Unk2: -1, Unk3: -1, AoWGaItemHandle: 0xFFFFFFFF}
+	}
+	return slot
+}
+
+func TestAllocateGaItem_AoWAtLowIndex(t *testing.T) {
+	slot := makeTestSlot(100)
+	slot.NextAoWIndex = 0
+	slot.NextArmamentIndex = 0
+
+	// Add an AoW
+	handle := uint32(ItemTypeAow | 0x00800001)
+	itemID := uint32(0x40000000) // AoW item ID
+	if err := allocateGaItem(slot, handle, itemID); err != nil {
+		t.Fatalf("allocateGaItem AoW: %v", err)
+	}
+
+	if slot.GaItems[0].Handle != handle {
+		t.Errorf("AoW should be at index 0, got handle 0x%X at index 0", slot.GaItems[0].Handle)
+	}
+	if slot.NextAoWIndex != 1 {
+		t.Errorf("NextAoWIndex should be 1, got %d", slot.NextAoWIndex)
+	}
+	if slot.NextArmamentIndex != 1 {
+		t.Errorf("NextArmamentIndex should be 1 (shifted by AoW insert), got %d", slot.NextArmamentIndex)
+	}
+}
+
+func TestAllocateGaItem_WeaponAfterAoW(t *testing.T) {
+	slot := makeTestSlot(100)
+	slot.NextAoWIndex = 0
+	slot.NextArmamentIndex = 0
+
+	// Add AoW first
+	aowHandle := uint32(ItemTypeAow | 0x00800001)
+	if err := allocateGaItem(slot, aowHandle, 0x40000000); err != nil {
+		t.Fatalf("allocateGaItem AoW: %v", err)
+	}
+
+	// Add weapon — should go after AoW
+	weaponHandle := uint32(ItemTypeWeapon | 0x00800002)
+	weaponID := uint32(0x00100000) // weapon item ID
+	if err := allocateGaItem(slot, weaponHandle, weaponID); err != nil {
+		t.Fatalf("allocateGaItem Weapon: %v", err)
+	}
+
+	if slot.GaItems[0].Handle != aowHandle {
+		t.Errorf("Index 0 should be AoW, got 0x%X", slot.GaItems[0].Handle)
+	}
+	if slot.GaItems[1].Handle != weaponHandle {
+		t.Errorf("Index 1 should be Weapon, got 0x%X", slot.GaItems[1].Handle)
+	}
+	if slot.NextAoWIndex != 1 {
+		t.Errorf("NextAoWIndex should be 1, got %d", slot.NextAoWIndex)
+	}
+	if slot.NextArmamentIndex != 2 {
+		t.Errorf("NextArmamentIndex should be 2, got %d", slot.NextArmamentIndex)
+	}
+}
+
+func TestAllocateGaItem_TypeSegregation(t *testing.T) {
+	slot := makeTestSlot(100)
+	slot.NextAoWIndex = 0
+	slot.NextArmamentIndex = 0
+
+	// Add: AoW, Weapon, Armor, AoW, Weapon
+	items := []struct {
+		handle uint32
+		itemID uint32
+	}{
+		{ItemTypeAow | 0x00800001, 0x40000001},    // AoW 1
+		{ItemTypeWeapon | 0x00800002, 0x00100002},  // Weapon 1
+		{ItemTypeArmor | 0x00800003, 0x10100003},   // Armor 1
+		{ItemTypeAow | 0x00800004, 0x40000004},     // AoW 2
+		{ItemTypeWeapon | 0x00800005, 0x00100005},   // Weapon 2
+	}
+
+	for _, it := range items {
+		if err := allocateGaItem(slot, it.handle, it.itemID); err != nil {
+			t.Fatalf("allocateGaItem handle=0x%X: %v", it.handle, err)
+		}
+	}
+
+	// Expected layout: [AoW1, AoW2, Weapon1, Armor1, Weapon2]
+	// AoW entries should be at indices 0-1 (both AoWs)
+	// Non-AoW entries should be at indices 2+ (weapons, armor)
+	aowCount := 0
+	nonAowStart := -1
+	for i := 0; i < 5; i++ {
+		h := slot.GaItems[i].Handle
+		isAoW := (h & GaHandleTypeMask) == ItemTypeAow
+		if isAoW {
+			if nonAowStart >= 0 {
+				t.Errorf("AoW at index %d found AFTER non-AoW at index %d — type segregation broken", i, nonAowStart)
+			}
+			aowCount++
+		} else if nonAowStart < 0 {
+			nonAowStart = i
+		}
+	}
+
+	if aowCount != 2 {
+		t.Errorf("Expected 2 AoW entries, got %d", aowCount)
+	}
+	if slot.NextAoWIndex != 2 {
+		t.Errorf("NextAoWIndex should be 2, got %d", slot.NextAoWIndex)
+	}
+	if slot.NextArmamentIndex != 5 {
+		t.Errorf("NextArmamentIndex should be 5, got %d", slot.NextArmamentIndex)
+	}
+}
+
+func TestAllocateGaItem_ShiftPreservesExisting(t *testing.T) {
+	slot := makeTestSlot(100)
+
+	// Pre-populate: weapon at index 0
+	slot.GaItems[0] = GaItemFull{
+		Handle: ItemTypeWeapon | 0x00800001,
+		ItemID: 0x00100001,
+		Unk2:   -1, Unk3: -1, AoWGaItemHandle: 0xFFFFFFFF,
+	}
+	slot.NextAoWIndex = 0
+	slot.NextArmamentIndex = 1
+
+	// Insert AoW — should shift weapon right
+	aowHandle := uint32(ItemTypeAow | 0x00800002)
+	if err := allocateGaItem(slot, aowHandle, 0x40000002); err != nil {
+		t.Fatalf("allocateGaItem AoW: %v", err)
+	}
+
+	if slot.GaItems[0].Handle != aowHandle {
+		t.Errorf("Index 0 should be AoW after shift, got 0x%X", slot.GaItems[0].Handle)
+	}
+	if slot.GaItems[1].Handle != (ItemTypeWeapon | 0x00800001) {
+		t.Errorf("Index 1 should be shifted weapon, got 0x%X", slot.GaItems[1].Handle)
+	}
+}
+
+func TestGenerateUniqueHandle_GlobalCounter(t *testing.T) {
+	slot := makeTestSlot(100)
+	slot.NextGaItemHandle = 42
+	slot.PartGaItemHandle = 0x80
+
+	h1, err := generateUniqueHandle(slot, ItemTypeWeapon)
+	if err != nil {
+		t.Fatalf("generateUniqueHandle weapon: %v", err)
+	}
+	if h1&0xFFFF != 42 {
+		t.Errorf("Expected counter 42, got %d (handle=0x%X)", h1&0xFFFF, h1)
+	}
+	if (h1>>16)&0xFF != 0x80 {
+		t.Errorf("Expected partID 0x80, got 0x%X", (h1>>16)&0xFF)
+	}
+	slot.GaMap[h1] = 0x00100000
+
+	h2, err := generateUniqueHandle(slot, ItemTypeArmor)
+	if err != nil {
+		t.Fatalf("generateUniqueHandle armor: %v", err)
+	}
+	if h2&0xFFFF != 43 {
+		t.Errorf("Expected counter 43 (global increment), got %d (handle=0x%X)", h2&0xFFFF, h2)
+	}
+	if h2&GaHandleTypeMask != ItemTypeArmor {
+		t.Errorf("Expected armor type prefix, got 0x%X", h2&GaHandleTypeMask)
+	}
+}
+
+func TestScanGaItems_TrackedIndices(t *testing.T) {
+	// Build a minimal slot with known GaItems in binary data.
+	slot := &SaveSlot{
+		Data:        make([]byte, SlotSize),
+		Version:     100,
+		MagicOffset: 0x15420 + 432,
+	}
+
+	// Write 3 entries at GaItemsStart (0x20):
+	// [0] AoW: handle=0xC0800001, itemID=0x40000001 (8 bytes)
+	// [1] AoW: handle=0xC0800005, itemID=0x40000002 (8 bytes)
+	// [2] Weapon: handle=0x80800003, itemID=0x00100000 (21 bytes)
+	off := GaItemsStart
+	writeEntry := func(handle, itemID uint32) {
+		le := func(buf []byte, v uint32) {
+			buf[0] = byte(v)
+			buf[1] = byte(v >> 8)
+			buf[2] = byte(v >> 16)
+			buf[3] = byte(v >> 24)
+		}
+		le(slot.Data[off:], handle)
+		le(slot.Data[off+4:], itemID)
+		recSize := GaItemRecordSize(itemID)
+		if recSize >= GaRecordArmor {
+			le(slot.Data[off+8:], 0xFFFFFFFF)  // unk2
+			le(slot.Data[off+12:], 0xFFFFFFFF) // unk3
+		}
+		if recSize >= GaRecordWeapon {
+			le(slot.Data[off+16:], 0xFFFFFFFF) // AoWGaItemHandle
+			slot.Data[off+20] = 0              // unk5
+		}
+		off += recSize
+	}
+
+	writeEntry(0xC0800001, 0x40000001) // AoW
+	writeEntry(0xC0800005, 0x40000002) // AoW
+	writeEntry(0x80800003, 0x00100000) // Weapon
+
+	slot.scanGaItems(GaItemsStart)
+
+	if slot.NextAoWIndex != 2 {
+		t.Errorf("NextAoWIndex: expected 2, got %d", slot.NextAoWIndex)
+	}
+	// Entry with highest counter (0x0005) is at index 1 → NextArmamentIndex = 2
+	if slot.NextArmamentIndex != 2 {
+		t.Errorf("NextArmamentIndex: expected 2, got %d", slot.NextArmamentIndex)
+	}
+	if slot.NextGaItemHandle != 6 {
+		t.Errorf("NextGaItemHandle: expected 6 (max counter 5 + 1), got %d", slot.NextGaItemHandle)
+	}
+	if slot.PartGaItemHandle != 0x80 {
+		t.Errorf("PartGaItemHandle: expected 0x80, got 0x%X", slot.PartGaItemHandle)
+	}
+}

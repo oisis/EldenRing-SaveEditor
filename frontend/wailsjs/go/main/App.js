@@ -54,6 +54,10 @@ export function GetSaveDiffSummary() {
   return window['go']['main']['App']['GetSaveDiffSummary']();
 }
 
+export function GetSlotCapacity(arg1) {
+  return window['go']['main']['App']['GetSlotCapacity'](arg1);
+}
+
 export function GetSlotDiff(arg1) {
   return window['go']['main']['App']['GetSlotDiff'](arg1);
 }

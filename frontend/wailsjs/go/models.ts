@@ -272,6 +272,28 @@ export namespace main {
 	        this.newValue = source["newValue"];
 	    }
 	}
+	export class SlotCapacity {
+	    gaItemsUsed: number;
+	    gaItemsMax: number;
+	    inventoryUsed: number;
+	    inventoryMax: number;
+	    storageUsed: number;
+	    storageMax: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SlotCapacity(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.gaItemsUsed = source["gaItemsUsed"];
+	        this.gaItemsMax = source["gaItemsMax"];
+	        this.inventoryUsed = source["inventoryUsed"];
+	        this.inventoryMax = source["inventoryMax"];
+	        this.storageUsed = source["storageUsed"];
+	        this.storageMax = source["storageMax"];
+	    }
+	}
 	export class SlotDiffSummary {
 	    slotIndex: number;
 	    charName: string;

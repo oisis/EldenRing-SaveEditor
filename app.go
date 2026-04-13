@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"crypto/rand"
+	"encoding/binary"
 	"fmt"
 	"os"
 	"strconv"
@@ -33,6 +34,11 @@ type slotSnapshot struct {
 	StorageBoxOffset  int
 	IngameTimerOffset int
 	GaItemDataOffset  int
+	// GaItem tracked indices
+	NextAoWIndex      int
+	NextArmamentIndex int
+	NextGaItemHandle  uint32
+	PartGaItemHandle  uint8
 }
 
 // App struct
@@ -703,6 +709,10 @@ func (a *App) pushUndo(idx int) {
 		StorageBoxOffset:  slot.StorageBoxOffset,
 		IngameTimerOffset: slot.IngameTimerOffset,
 		GaItemDataOffset:  slot.GaItemDataOffset,
+		NextAoWIndex:      slot.NextAoWIndex,
+		NextArmamentIndex: slot.NextArmamentIndex,
+		NextGaItemHandle:  slot.NextGaItemHandle,
+		PartGaItemHandle:  slot.PartGaItemHandle,
 	}
 
 	stack := a.undoStacks[idx]
@@ -745,6 +755,10 @@ func (a *App) RevertSlot(idx int) error {
 	slot.StorageBoxOffset = snap.StorageBoxOffset
 	slot.IngameTimerOffset = snap.IngameTimerOffset
 	slot.GaItemDataOffset = snap.GaItemDataOffset
+	slot.NextAoWIndex = snap.NextAoWIndex
+	slot.NextArmamentIndex = snap.NextArmamentIndex
+	slot.NextGaItemHandle = snap.NextGaItemHandle
+	slot.PartGaItemHandle = snap.PartGaItemHandle
 
 	return nil
 }
@@ -1030,7 +1044,68 @@ func (a *App) GetSaveDiffSummary() ([]SlotDiffSummary, error) {
 	return summaries, nil
 }
 
+// SlotCapacity reports used vs max counts for GaItems, Inventory, and Storage.
+type SlotCapacity struct {
+	GaItemsUsed    int `json:"gaItemsUsed"`
+	GaItemsMax     int `json:"gaItemsMax"`
+	InventoryUsed  int `json:"inventoryUsed"`
+	InventoryMax   int `json:"inventoryMax"`
+	StorageUsed    int `json:"storageUsed"`
+	StorageMax     int `json:"storageMax"`
+}
+
+// GetSlotCapacity returns capacity usage for a character slot.
+func (a *App) GetSlotCapacity(charIdx int) (*SlotCapacity, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[charIdx]
+
+	// GaItems: count non-empty entries
+	gaUsed := 0
+	for _, g := range slot.GaItems {
+		if !g.IsEmpty() {
+			gaUsed++
+		}
+	}
+
+	// Inventory: count non-empty common items
+	invUsed := 0
+	for _, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle != 0 && item.GaItemHandle != core.GaHandleInvalid {
+			invUsed++
+		}
+	}
+
+	// Storage: count non-empty common items from binary data (in-memory list skips gaps)
+	storageUsed := 0
+	storageStart := slot.StorageBoxOffset + core.StorageHeaderSkip
+	for i := 0; i < core.StorageCommonCount; i++ {
+		off := storageStart + i*core.InvRecordLen
+		if off+core.InvRecordLen > len(slot.Data) {
+			break
+		}
+		h := binary.LittleEndian.Uint32(slot.Data[off:])
+		if h != core.GaHandleEmpty && h != core.GaHandleInvalid {
+			storageUsed++
+		}
+	}
+
+	return &SlotCapacity{
+		GaItemsUsed:   gaUsed,
+		GaItemsMax:    len(slot.GaItems),
+		InventoryUsed: invUsed,
+		InventoryMax:  core.CommonItemCount,
+		StorageUsed:   storageUsed,
+		StorageMax:    core.StorageCommonCount,
+	}, nil
+}
+
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, DiffEntry, SlotDiffSummary) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, DiffEntry{}, SlotDiffSummary{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, DiffEntry, SlotDiffSummary, SlotCapacity) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}
 }

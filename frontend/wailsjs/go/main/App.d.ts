@@ -30,6 +30,8 @@ export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 
 export function GetSaveDiffSummary():Promise<Array<main.SlotDiffSummary>>;
 
+export function GetSlotCapacity(arg1:number):Promise<main.SlotCapacity>;
+
 export function GetSlotDiff(arg1:number):Promise<Array<main.DiffEntry>>;
 
 export function GetSourceActiveSlots():Promise<Array<boolean>>;
