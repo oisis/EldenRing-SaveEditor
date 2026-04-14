@@ -28,7 +28,10 @@ Edytor plików zapisu Elden Ring: odczyt/zapis binarnego formatu `.sl2`, krypto,
 │       └── wailsjs/     # Auto-generowane bindingsy Go→JS (NIE EDYTUJ ręcznie)
 ├── tests/               # roundtrip_test.go, steamid_test.go + data/
 ├── scripts/             # extractor.go — import danych z Rust source
+├-- tmp/repos            # repozytoria z kodem referencyjnym
+├--- tmp/save            # pliki save do testow
 └── Makefile
+
 ```
 
 ---
