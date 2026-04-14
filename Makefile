@@ -1,6 +1,6 @@
 # Variables
 BINARY_NAME=ER-Save-Editor
-VERSION=0.2.0
+VERSION=0.3.0
 BUILD_DIR=build/bin
 WAILS=/Users/oisis/go/bin/wails
 
