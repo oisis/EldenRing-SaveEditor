@@ -10,6 +10,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
+	"github.com/oisis/EldenRing-SaveEditor/backend/db/data"
 	"github.com/oisis/EldenRing-SaveEditor/backend/vm"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -489,6 +490,132 @@ func (a *App) SetColosseumUnlocked(slotIndex int, colosseumID uint32, unlocked b
 	if err := db.SetEventFlag(flags, colosseumID, unlocked); err != nil {
 		return fmt.Errorf("failed to set colosseum %d: %w", colosseumID, err)
 	}
+	return nil
+}
+
+// GetMapProgress returns all map region flags with their current state
+func (a *App) GetMapProgress(slotIndex int) ([]db.MapEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	entries := db.GetAllMapEntries()
+
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range entries {
+			enabled, err := db.GetEventFlag(flags, entries[i].ID)
+			if err != nil {
+				continue
+			}
+			entries[i].Enabled = enabled
+		}
+	}
+
+	return entries, nil
+}
+
+// SetMapFlag sets or clears a single map flag
+func (a *App) SetMapFlag(slotIndex int, flagID uint32, enabled bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := db.SetEventFlag(flags, flagID, enabled); err != nil {
+		return fmt.Errorf("failed to set map flag %d: %w", flagID, err)
+	}
+	return nil
+}
+
+// RevealAllMap sets all map visibility, acquisition, and POI discovery flags to true
+func (a *App) RevealAllMap(slotIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+
+	// System flags
+	for id := range data.MapSystem {
+		_ = db.SetEventFlag(flags, id, true)
+	}
+	// Visible flags
+	for id := range data.MapVisible {
+		_ = db.SetEventFlag(flags, id, true)
+	}
+	// Acquired flags
+	for id := range data.MapAcquired {
+		_ = db.SetEventFlag(flags, id, true)
+	}
+	// POI discovery ranges
+	for _, r := range data.MapPOIRanges {
+		for fid := r.Start; fid <= r.End; fid++ {
+			_ = db.SetEventFlag(flags, fid, true)
+		}
+	}
+
+	return nil
+}
+
+// ResetMapExploration clears all map visibility, acquisition, and POI discovery flags
+func (a *App) ResetMapExploration(slotIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+
+	// Clear visible flags
+	for id := range data.MapVisible {
+		_ = db.SetEventFlag(flags, id, false)
+	}
+	// Clear acquired flags
+	for id := range data.MapAcquired {
+		_ = db.SetEventFlag(flags, id, false)
+	}
+	// Clear POI discovery ranges
+	for _, r := range data.MapPOIRanges {
+		for fid := r.Start; fid <= r.End; fid++ {
+			_ = db.SetEventFlag(flags, fid, false)
+		}
+	}
+	// Note: system flags (62000, 62001, 82001, 82002) are preserved
+
 	return nil
 }
 
@@ -1106,6 +1233,6 @@ func (a *App) GetSlotCapacity(charIdx int) (*SlotCapacity, error) {
 }
 
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, DiffEntry, SlotDiffSummary, SlotCapacity) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, DiffEntry, SlotDiffSummary, SlotCapacity) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}
 }

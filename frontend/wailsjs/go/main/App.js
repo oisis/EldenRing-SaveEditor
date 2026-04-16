@@ -50,6 +50,10 @@ export function GetItemList(arg1) {
   return window['go']['main']['App']['GetItemList'](arg1);
 }
 
+export function GetMapProgress(arg1) {
+  return window['go']['main']['App']['GetMapProgress'](arg1);
+}
+
 export function GetSaveDiffSummary() {
   return window['go']['main']['App']['GetSaveDiffSummary']();
 }
@@ -90,6 +94,14 @@ export function RemoveItemsFromCharacter(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['RemoveItemsFromCharacter'](arg1, arg2, arg3, arg4);
 }
 
+export function ResetMapExploration(arg1) {
+  return window['go']['main']['App']['ResetMapExploration'](arg1);
+}
+
+export function RevealAllMap(arg1) {
+  return window['go']['main']['App']['RevealAllMap'](arg1);
+}
+
 export function RevertSlot(arg1) {
   return window['go']['main']['App']['RevertSlot'](arg1);
 }
@@ -116,6 +128,10 @@ export function SetColosseumUnlocked(arg1, arg2, arg3) {
 
 export function SetGraceVisited(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetGraceVisited'](arg1, arg2, arg3);
+}
+
+export function SetMapFlag(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetMapFlag'](arg1, arg2, arg3);
 }
 
 export function SetSlotActivity(arg1, arg2) {

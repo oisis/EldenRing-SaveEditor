@@ -35,6 +35,10 @@ var EventFlags = map[uint32]EventFlagInfo{
 	60350:      {Byte: 0x50D, Bit: 1},
 	60360:      {Byte: 0x50F, Bit: 7},
 	60370:      {Byte: 0x510, Bit: 5},
+	// Map system flags
+	62000:      {Byte: 0x5DC, Bit: 7}, // Allow Map Display
+	62001:      {Byte: 0x5DC, Bit: 6}, // Allow Underground Map Display
+	// Map visible flags
 	62004:      {Byte: 0x5DC, Bit: 3},
 	62005:      {Byte: 0x5DC, Bit: 2},
 	62006:      {Byte: 0x5DC, Bit: 1},
@@ -62,8 +66,40 @@ var EventFlags = map[uint32]EventFlagInfo{
 	62063:      {Byte: 0x5E3, Bit: 0},
 	62064:      {Byte: 0x5E4, Bit: 7},
 	62065:      {Byte: 0x5E4, Bit: 6},
+	// DLC map visible flags
+	62080:      {Byte: 0x5E6, Bit: 7}, // Gravesite Plain
+	62081:      {Byte: 0x5E6, Bit: 6}, // Scadu Altus
+	62082:      {Byte: 0x5E6, Bit: 5}, // Southern Shore
+	62083:      {Byte: 0x5E6, Bit: 4}, // Rauh Ruins
+	62084:      {Byte: 0x5E6, Bit: 3}, // Abyss
+	// Catacomb map visible flags
 	62102:      {Byte: 0x5E8, Bit: 1},
 	62103:      {Byte: 0x5E8, Bit: 0},
+	// Map acquired flags (63xxx)
+	63010:      {Byte: 0x65A, Bit: 5}, // Limgrave, West
+	63011:      {Byte: 0x65A, Bit: 4}, // Weeping Peninsula
+	63012:      {Byte: 0x65A, Bit: 3}, // Limgrave, East
+	63020:      {Byte: 0x65B, Bit: 3}, // Liurnia, East
+	63021:      {Byte: 0x65B, Bit: 2}, // Liurnia, North
+	63022:      {Byte: 0x65B, Bit: 1}, // Liurnia, West
+	63030:      {Byte: 0x65C, Bit: 1}, // Altus Plateau
+	63031:      {Byte: 0x65C, Bit: 0}, // Leyndell, Royal Capital
+	63032:      {Byte: 0x65D, Bit: 7}, // Mt. Gelmir
+	63040:      {Byte: 0x65E, Bit: 7}, // Caelid
+	63041:      {Byte: 0x65E, Bit: 6}, // Dragonbarrow
+	63050:      {Byte: 0x65F, Bit: 5}, // Mountaintops, West
+	63051:      {Byte: 0x65F, Bit: 4}, // Mountaintops, East
+	63052:      {Byte: 0x65F, Bit: 3}, // Consecrated Snowfield
+	63060:      {Byte: 0x660, Bit: 3}, // Ainsel River
+	63061:      {Byte: 0x660, Bit: 2}, // Lake of Rot
+	63062:      {Byte: 0x660, Bit: 1}, // Mohgwyn Palace
+	63063:      {Byte: 0x660, Bit: 0}, // Siofra River
+	63064:      {Byte: 0x661, Bit: 7}, // Deeproot Depths
+	63080:      {Byte: 0x663, Bit: 7}, // Gravesite Plain
+	63081:      {Byte: 0x663, Bit: 6}, // Scadu Altus
+	63082:      {Byte: 0x663, Bit: 5}, // Southern Shore
+	63083:      {Byte: 0x663, Bit: 4}, // Rauh Ruins
+	63084:      {Byte: 0x663, Bit: 3}, // Abyss
 	65600:      {Byte: 0x79E, Bit: 7},
 	65610:      {Byte: 0x79F, Bit: 5},
 	65620:      {Byte: 0x7A0, Bit: 3},
@@ -451,7 +487,8 @@ var EventFlags = map[uint32]EventFlagInfo{
 	76551:      {Byte: 0xCF6, Bit: 0},
 	76652:      {Byte: 0xD03, Bit: 3},
 	76653:      {Byte: 0xD03, Bit: 2},
-	82001:      {Byte: 0xFA0, Bit: 6},
+	82001:      {Byte: 0xFA0, Bit: 6}, // Show Underground
+	82002:      {Byte: 0xFA0, Bit: 5}, // Show Shadow Realm Map
 	580300:     {Byte: 0x2FFF, Bit: 3},
 	710620:     {Byte: 0x3680, Bit: 3},
 	10000040:   {Byte: 0x151BD4, Bit: 7},

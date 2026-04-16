@@ -229,6 +229,26 @@ export namespace db {
 		    return a;
 		}
 	}
+	export class MapEntry {
+	    id: number;
+	    name: string;
+	    area: string;
+	    category: string;
+	    enabled: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new MapEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.area = source["area"];
+	        this.category = source["category"];
+	        this.enabled = source["enabled"];
+	    }
+	}
 	export class SummoningPoolEntry {
 	    id: number;
 	    name: string;

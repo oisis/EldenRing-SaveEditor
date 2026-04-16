@@ -81,6 +81,15 @@ type ColosseumEntry struct {
 	Unlocked bool   `json:"unlocked"`
 }
 
+// MapEntry represents a map region flag with its current state.
+type MapEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Area     string `json:"area"`
+	Category string `json:"category"` // "visible", "acquired", "system"
+	Enabled  bool   `json:"enabled"`
+}
+
 // globalItemIndex provides O(1) item lookup by ID, built once at startup.
 var globalItemIndex map[uint32]data.ItemData
 
@@ -554,24 +563,35 @@ func GetAllGraces() []GraceEntry {
 }
 
 // GetEventFlag checks if a specific event flag is set in the bit array.
-// For IDs in the lookup table, uses the precomputed byte/bit offsets.
-// For all other IDs (e.g. Sites of Grace), uses the standard formula:
-// byte = id / 8, bit = 7 - (id % 8).
+// Resolution order:
+//  1. Precomputed lookup table (data.EventFlags) — exact byte/bit for known IDs.
+//  2. BST lookup (data.EventFlagBST) — block-based mapping from game's CSFD4VirtualMemoryFlag.
+//  3. Fallback formula: byte = id / 8, bit = 7 - (id % 8).
+//
 // Returns error if the computed byte offset is out of bounds.
 func GetEventFlag(flags []byte, id uint32) (bool, error) {
-	var byteIdx uint32
-	var bitIdx uint8
-	if info, ok := data.EventFlags[id]; ok {
-		byteIdx = info.Byte
-		bitIdx = info.Bit
-	} else {
-		byteIdx = id / 8
-		bitIdx = uint8(7 - (id % 8))
-	}
+	byteIdx, bitIdx := resolveEventFlagPosition(id)
 	if int(byteIdx) >= len(flags) {
 		return false, fmt.Errorf("event flag %d (byte %d) out of bounds (flags len %d)", id, byteIdx, len(flags))
 	}
 	return (flags[byteIdx] & (1 << bitIdx)) != 0, nil
+}
+
+// resolveEventFlagPosition returns the byte offset and bit index for an event flag ID.
+func resolveEventFlagPosition(id uint32) (byteIdx uint32, bitIdx uint8) {
+	// 1. Precomputed lookup table
+	if info, ok := data.EventFlags[id]; ok {
+		return info.Byte, info.Bit
+	}
+	// 2. BST lookup
+	data.LoadBST()
+	block := id / data.BSTFlagDivisor
+	if bstPos, ok := data.EventFlagBST[block]; ok {
+		idx := id % data.BSTFlagDivisor
+		return bstPos*data.BSTBlockSize + idx/8, uint8(7 - (idx % 8))
+	}
+	// 3. Fallback formula
+	return id / 8, uint8(7 - (id % 8))
 }
 
 // filterInfuseVariants removes infuse-variant entries from a weapon item list.
@@ -666,21 +686,35 @@ func GetAllColosseums() []ColosseumEntry {
 	return colosseums
 }
 
+// GetAllMapEntries returns all map region entries (visible + acquired + system) sorted by area then name.
+func GetAllMapEntries() []MapEntry {
+	entries := make([]MapEntry, 0, len(data.MapVisible)+len(data.MapAcquired)+len(data.MapSystem))
+	for id, m := range data.MapSystem {
+		entries = append(entries, MapEntry{ID: id, Name: m.Name, Area: m.Area, Category: "system"})
+	}
+	for id, m := range data.MapVisible {
+		entries = append(entries, MapEntry{ID: id, Name: m.Name, Area: m.Area, Category: "visible"})
+	}
+	for id, m := range data.MapAcquired {
+		entries = append(entries, MapEntry{ID: id, Name: m.Name, Area: m.Area, Category: "acquired"})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Area != entries[j].Area {
+			return entries[i].Area < entries[j].Area
+		}
+		if entries[i].Category != entries[j].Category {
+			return entries[i].Category < entries[j].Category
+		}
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
+}
+
 // SetEventFlag sets or clears a specific event flag in the bit array.
-// For IDs in the lookup table, uses the precomputed byte/bit offsets.
-// For all other IDs (e.g. Sites of Grace), uses the standard formula:
-// byte = id / 8, bit = 7 - (id % 8).
+// Uses the same resolution order as GetEventFlag (lookup table → BST → fallback).
 // Returns error if the computed byte offset is out of bounds.
 func SetEventFlag(flags []byte, id uint32, value bool) error {
-	var byteIdx uint32
-	var bitIdx uint8
-	if info, ok := data.EventFlags[id]; ok {
-		byteIdx = info.Byte
-		bitIdx = info.Bit
-	} else {
-		byteIdx = id / 8
-		bitIdx = uint8(7 - (id % 8))
-	}
+	byteIdx, bitIdx := resolveEventFlagPosition(id)
 	if int(byteIdx) >= len(flags) {
 		return fmt.Errorf("event flag %d (byte %d) out of bounds (flags len %d)", id, byteIdx, len(flags))
 	}

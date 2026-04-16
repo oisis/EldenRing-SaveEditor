@@ -99,7 +99,7 @@ const (
 	DynGaItemsOther         = 0x1B588
 	DynTutorialData         = 0x40B
 	DynIngameTimer          = 0x1A
-	DynEventFlags           = 0x1C0000
+	DynEventFlags           = 0
 )
 
 // Sanity limits for dynamic size reads from untrusted save data.
