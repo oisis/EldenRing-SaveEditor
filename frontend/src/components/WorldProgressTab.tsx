@@ -76,6 +76,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const handleGraceToggle = async (grace: db.GraceEntry, visited: boolean) => { await SetGraceVisited(charIdx, grace.id, visited); setGraces(prev => prev.map(g => g.id === grace.id ? {...g, visited} : g)); onMutate?.(); };
     const handleUnlockRegionGraces = async (rg: db.GraceEntry[]) => { await Promise.all(rg.filter(g => !g.visited).map(g => SetGraceVisited(charIdx, g.id, true))); const ids = new Set(rg.map(g => g.id)); setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: true} : g)); onMutate?.(); };
     const handleUnlockAllGraces = async () => { const u = graces.filter(g => !g.visited && (!skipBossArenas || !g.isBossArena)); if (!u.length) return; await Promise.all(u.map(g => SetGraceVisited(charIdx, g.id, true))); const ids = new Set(u.map(g => g.id)); setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: true} : g)); onMutate?.(); };
+    const handleLockAllGraces = async () => { const u = graces.filter(g => g.visited); if (!u.length) return; await Promise.all(u.map(g => SetGraceVisited(charIdx, g.id, false))); const ids = new Set(u.map(g => g.id)); setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: false} : g)); onMutate?.(); };
 
     // --- Boss logic ---
     const filteredBosses = bosses.filter(b => bossFilter === 'all' || b.type === bossFilter);
@@ -170,6 +171,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                 {activeSection === 'graces' && (
                     <div className="flex items-center space-x-2">
                         <button onClick={handleUnlockAllGraces} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                        <button onClick={handleLockAllGraces} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         <label className="flex items-center space-x-1 cursor-pointer">
                             <Chk checked={skipBossArenas} onChange={setSkipBossArenas} />
                             <span className="text-[7px] font-black uppercase tracking-widest text-muted-foreground">Skip Bosses</span>
@@ -245,9 +247,11 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                         {rg.map(g => (
                                             <label key={g.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
                                                 <Chk checked={g.visited} onChange={v => handleGraceToggle(g, v)} />
+                                                {g.isBossArena && <span className="text-amber-500 text-[10px] flex-shrink-0" title="Boss Arena">⚔</span>}
                                                 <span className={`text-[10px] truncate font-semibold ${g.visited ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} title={g.name}>
-                                                    {g.name}{g.isBossArena && <span className="ml-1 text-[7px] text-amber-500/70">B</span>}
+                                                    {g.name}
                                                 </span>
+                                                {g.isBossArena && <span className="flex-shrink-0 text-[7px] font-black uppercase tracking-wider px-1 py-px rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30" title="Site of Grace appears after defeating a boss">Boss Arena</span>}
                                             </label>
                                         ))}
                                     </div>
