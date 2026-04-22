@@ -114,8 +114,8 @@ export function SettingsTab({
     };
     const handleUpload = async () => {
         if (!selectedTarget) return; setDeploying(true);
-        const tid = toast.loading('Uploading...');
-        try { await DeploySave(selectedTarget); toast.success('Uploaded', { id: tid }); }
+        const tid = toast.loading('Uploading save...');
+        try { const msg = await DeploySave(selectedTarget); toast.success(msg, { id: tid }); }
         catch (e) { toast.error(String(e), { id: tid }); }
         finally { setDeploying(false); }
     };
@@ -128,11 +128,11 @@ export function SettingsTab({
     };
     const handleLaunch = async () => {
         if (!selectedTarget) return;
-        try { await LaunchRemoteGame(selectedTarget); toast.success('Game launched'); } catch (e) { toast.error(String(e)); }
+        try { const msg = await LaunchRemoteGame(selectedTarget); toast.success(msg || 'Game launch sent'); } catch (e) { toast.error(String(e)); }
     };
     const handleClose = async () => {
         if (!selectedTarget) return;
-        try { await CloseRemoteGame(selectedTarget); toast.success('Game closed'); } catch (e) { toast.error(String(e)); }
+        try { const msg = await CloseRemoteGame(selectedTarget); toast.success(msg || 'Game close sent'); } catch (e) { toast.error(String(e)); }
     };
     const handleDeployAndLaunch = async () => {
         if (!selectedTarget) return; setDeploying(true);

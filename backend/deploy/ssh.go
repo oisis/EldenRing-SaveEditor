@@ -144,6 +144,7 @@ func (m *SSHManager) DownloadSave(targetName string, localPath string) error {
 }
 
 // LaunchGame executes the game start command on the remote target.
+// The command is run in the background (nohup) so the SSH session doesn't block.
 func (m *SSHManager) LaunchGame(targetName string) (string, error) {
 	t, ok := m.store.Get(targetName)
 	if !ok {
@@ -153,10 +154,11 @@ func (m *SSHManager) LaunchGame(targetName string) (string, error) {
 	if cmd == "" {
 		cmd = DefaultStartCmd
 	}
-	return m.execRemote(t, cmd)
+	return m.execRemoteFireAndForget(t, cmd)
 }
 
 // CloseGame executes the game stop command on the remote target.
+// Returns success even if no matching process was found (pkill exit 1).
 func (m *SSHManager) CloseGame(targetName string) (string, error) {
 	t, ok := m.store.Get(targetName)
 	if !ok {
@@ -166,7 +168,15 @@ func (m *SSHManager) CloseGame(targetName string) (string, error) {
 	if cmd == "" {
 		cmd = DefaultStopCmd
 	}
-	return m.execRemote(t, cmd)
+	output, err := m.execRemote(t, cmd)
+	if err != nil {
+		// pkill returns exit 1 when no process matched — not a real error
+		if strings.Contains(err.Error(), "exit status 1") {
+			return "No matching process found (game not running)", nil
+		}
+		return output, err
+	}
+	return output, nil
 }
 
 // DeployAndLaunch performs the full workflow: close game → wait → upload → launch.
@@ -225,6 +235,29 @@ func (m *SSHManager) dial(t Target) (*ssh.Client, error) {
 		return nil, fmt.Errorf("SSH connection to %s failed: %w", addr, err)
 	}
 	return client, nil
+}
+
+// execRemoteFireAndForget runs a command via SSH without waiting for it to finish.
+// Used for launching games/Steam which are long-running processes.
+func (m *SSHManager) execRemoteFireAndForget(t Target, command string) (string, error) {
+	client, err := m.dial(t)
+	if err != nil {
+		return "", err
+	}
+	defer client.Close()
+
+	session, err := client.NewSession()
+	if err != nil {
+		return "", fmt.Errorf("SSH session failed: %w", err)
+	}
+	defer session.Close()
+
+	// Run in background so the SSH session can close immediately
+	bgCmd := fmt.Sprintf("nohup %s >/dev/null 2>&1 &", command)
+	if err := session.Run(bgCmd); err != nil {
+		return "", fmt.Errorf("command failed: %w", err)
+	}
+	return fmt.Sprintf("Command sent: %s", command), nil
 }
 
 func (m *SSHManager) execRemote(t Target, command string) (string, error) {

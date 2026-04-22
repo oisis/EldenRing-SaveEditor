@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -110,6 +111,7 @@ func (m *LocalManager) DownloadSave(targetName string, localPath string) error {
 }
 
 // LaunchGame starts the game using the configured command or platform default.
+// The command is started as a detached process so it doesn't block.
 func (m *LocalManager) LaunchGame(targetName string) (string, error) {
 	t, ok := m.store.Get(targetName)
 	if !ok {
@@ -121,10 +123,11 @@ func (m *LocalManager) LaunchGame(targetName string) (string, error) {
 		cmd = defaultLocalStartCmd()
 	}
 
-	return runLocalCmd(cmd)
+	return runLocalCmdDetached(cmd)
 }
 
 // CloseGame stops the game using the configured command or platform default.
+// Returns success even if no matching process was found.
 func (m *LocalManager) CloseGame(targetName string) (string, error) {
 	t, ok := m.store.Get(targetName)
 	if !ok {
@@ -136,7 +139,15 @@ func (m *LocalManager) CloseGame(targetName string) (string, error) {
 		cmd = defaultLocalStopCmd()
 	}
 
-	return runLocalCmd(cmd)
+	output, err := runLocalCmd(cmd)
+	if err != nil {
+		// pkill/taskkill exit 1 = no process matched — not a real error
+		if strings.Contains(err.Error(), "exit status 1") {
+			return "No matching process found (game not running)", nil
+		}
+		return output, err
+	}
+	return output, nil
 }
 
 // DeployAndLaunch performs: close game → wait → copy save → launch.
@@ -191,6 +202,24 @@ func defaultLocalStopCmd() string {
 	default: // linux, darwin
 		return `pkill -TERM -f eldenring.exe`
 	}
+}
+
+// runLocalCmdDetached starts a command without waiting for it to finish.
+func runLocalCmdDetached(command string) (string, error) {
+	var cmd *exec.Cmd
+	switch runtime.GOOS {
+	case "windows":
+		cmd = exec.Command("cmd", "/C", command)
+	default:
+		cmd = exec.Command("sh", "-c", command)
+	}
+
+	if err := cmd.Start(); err != nil {
+		return "", fmt.Errorf("failed to start: %w", err)
+	}
+	// Release the process so it runs independently
+	go cmd.Wait()
+	return fmt.Sprintf("Command sent: %s", command), nil
 }
 
 func runLocalCmd(command string) (string, error) {

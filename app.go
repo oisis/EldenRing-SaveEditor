@@ -1357,25 +1357,37 @@ func (a *App) TestSSHConnection(targetName string) (string, error) {
 }
 
 // DeploySave writes the current in-memory save to a temp file and uploads/copies it to a target.
-func (a *App) DeploySave(targetName string) error {
+// Returns a human-readable success message with file size.
+func (a *App) DeploySave(targetName string) (string, error) {
 	if a.deployStore == nil {
-		return fmt.Errorf("deploy not initialized")
+		return "", fmt.Errorf("deploy not initialized")
 	}
 	if a.save == nil {
-		return fmt.Errorf("no save loaded")
+		return "", fmt.Errorf("no save loaded")
 	}
 
 	// Write current working state to a temp file for upload
 	tmpPath, err := a.writeTempSave()
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer os.Remove(tmpPath)
 
+	info, _ := os.Stat(tmpPath)
+	sizeMB := float64(info.Size()) / (1024 * 1024)
+
 	if a.isLocalTarget(targetName) {
-		return a.deployLocal.UploadSave(targetName, tmpPath)
+		if err := a.deployLocal.UploadSave(targetName, tmpPath); err != nil {
+			return "", err
+		}
+	} else {
+		if err := a.deploySSH.UploadSave(targetName, tmpPath); err != nil {
+			return "", err
+		}
 	}
-	return a.deploySSH.UploadSave(targetName, tmpPath)
+
+	t, _ := a.deployStore.Get(targetName)
+	return fmt.Sprintf("Uploaded %.1f MB to %s", sizeMB, t.Name), nil
 }
 
 // DownloadRemoteSave downloads/copies a save file from a target and loads it.
