@@ -275,6 +275,7 @@ export namespace db {
 export namespace deploy {
 	
 	export class Target {
+	    type: string;
 	    name: string;
 	    host: string;
 	    port: number;
@@ -290,6 +291,7 @@ export namespace deploy {
 	
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.type = source["type"];
 	        this.name = source["name"];
 	        this.host = source["host"];
 	        this.port = source["port"];

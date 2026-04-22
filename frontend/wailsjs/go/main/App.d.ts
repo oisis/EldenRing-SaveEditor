@@ -17,7 +17,7 @@ export function DeleteSlot(arg1:number):Promise<void>;
 
 export function DeployAndLaunch(arg1:string):Promise<void>;
 
-export function DeploySave(arg1:string):Promise<void>;
+export function DeploySave(arg1:string):Promise<string>;
 
 export function DownloadRemoteSave(arg1:string):Promise<string>;
 
