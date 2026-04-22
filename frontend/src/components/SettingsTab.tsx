@@ -4,7 +4,7 @@ import {
     SelectAndOpenSave, GetSteamIDString, SetSteamIDFromString,
     GetDeployTargets, SaveDeployTarget, DeleteDeployTarget,
     TestSSHConnection, DeploySave, DownloadRemoteSave,
-    LaunchRemoteGame, CloseRemoteGame, DeployAndLaunch,
+    LaunchRemoteGame, CloseRemoteGame, DeployAndLaunch, CloseAndDownload,
 } from '../../wailsjs/go/main/App';
 import {deploy} from '../../wailsjs/go/models';
 
@@ -130,8 +130,15 @@ export function SettingsTab({
     };
     const handleDeployAndLaunch = async () => {
         if (!selectedTarget) return; setDeploying(true);
-        const tid = toast.loading('Close → Upload → Launch...');
+        const tid = toast.loading('Upload → Launch...');
         try { await DeployAndLaunch(selectedTarget); toast.success('Deploy complete', { id: tid }); }
+        catch (e) { toast.error(String(e), { id: tid }); }
+        finally { setDeploying(false); }
+    };
+    const handleCloseAndDownload = async () => {
+        if (!selectedTarget) return; setDeploying(true);
+        const tid = toast.loading('Close → Download...');
+        try { const plat = await CloseAndDownload(selectedTarget); setPlatform(plat); refreshSlots(); toast.success('Game closed & save loaded', { id: tid }); }
         catch (e) { toast.error(String(e), { id: tid }); }
         finally { setDeploying(false); }
     };
@@ -203,6 +210,7 @@ export function SettingsTab({
                             <button onClick={handleLaunch} disabled={deploying} className={btnAction}>Launch</button>
                             <button onClick={handleClose} disabled={deploying} className={`${btnSm} bg-red-600 text-white shadow-sm hover:brightness-110 active:scale-95`}>Close Game</button>
                             <button onClick={handleDeployAndLaunch} disabled={deploying || !platform} className={btnAction}>Deploy & Launch</button>
+                            <button onClick={handleCloseAndDownload} disabled={deploying} className={`${btnSm} bg-orange-600 text-white shadow-sm hover:brightness-110 active:scale-95`}>Close & Download</button>
                         </div>
                     )}
                     {showForm && (

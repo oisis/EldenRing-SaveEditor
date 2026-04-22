@@ -9,6 +9,8 @@ export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,a
 
 export function CloneSlot(arg1:number,arg2:number):Promise<void>;
 
+export function CloseAndDownload(arg1:string):Promise<string>;
+
 export function CloseRemoteGame(arg1:string):Promise<string>;
 
 export function DeleteDeployTarget(arg1:string):Promise<void>;

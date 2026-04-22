@@ -10,6 +10,10 @@ export function CloneSlot(arg1, arg2) {
   return window['go']['main']['App']['CloneSlot'](arg1, arg2);
 }
 
+export function CloseAndDownload(arg1) {
+  return window['go']['main']['App']['CloseAndDownload'](arg1);
+}
+
 export function CloseRemoteGame(arg1) {
   return window['go']['main']['App']['CloseRemoteGame'](arg1);
 }

@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
@@ -1391,6 +1392,7 @@ func (a *App) DeploySave(targetName string) (string, error) {
 }
 
 // DownloadRemoteSave downloads/copies a save file from a target and loads it.
+// The temp file is removed after loading into memory.
 func (a *App) DownloadRemoteSave(targetName string) (string, error) {
 	if a.deployStore == nil {
 		return "", fmt.Errorf("deploy not initialized")
@@ -1400,6 +1402,8 @@ func (a *App) DownloadRemoteSave(targetName string) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("cannot create temp dir: %w", err)
 	}
+	defer os.RemoveAll(tmpDir)
+
 	localPath := tmpDir + "/ER0000.sl2"
 
 	if a.isLocalTarget(targetName) {
@@ -1417,7 +1421,7 @@ func (a *App) DownloadRemoteSave(targetName string) (string, error) {
 		return "", fmt.Errorf("downloaded file is not a valid save: %w", err)
 	}
 	a.save = save
-	a.lastSavePath = localPath
+	a.lastSavePath = ""
 	a.clearAllUndoStacks()
 	return string(save.Platform), nil
 }
@@ -1444,7 +1448,7 @@ func (a *App) CloseRemoteGame(targetName string) (string, error) {
 	return a.deploySSH.CloseGame(targetName)
 }
 
-// DeployAndLaunch performs the full workflow: close → write temp → copy/upload → launch.
+// DeployAndLaunch performs: write temp → upload → launch (no close).
 func (a *App) DeployAndLaunch(targetName string) error {
 	if a.deployStore == nil {
 		return fmt.Errorf("deploy not initialized")
@@ -1459,10 +1463,50 @@ func (a *App) DeployAndLaunch(targetName string) error {
 	}
 	defer os.Remove(tmpPath)
 
+	// Upload save
 	if a.isLocalTarget(targetName) {
-		return a.deployLocal.DeployAndLaunch(targetName, tmpPath)
+		if err := a.deployLocal.UploadSave(targetName, tmpPath); err != nil {
+			return fmt.Errorf("upload failed: %w", err)
+		}
+	} else {
+		if err := a.deploySSH.UploadSave(targetName, tmpPath); err != nil {
+			return fmt.Errorf("upload failed: %w", err)
+		}
 	}
-	return a.deploySSH.DeployAndLaunch(targetName, tmpPath)
+
+	// Launch game
+	if a.isLocalTarget(targetName) {
+		if _, err := a.deployLocal.LaunchGame(targetName); err != nil {
+			return fmt.Errorf("launch failed: %w", err)
+		}
+	} else {
+		if _, err := a.deploySSH.LaunchGame(targetName); err != nil {
+			return fmt.Errorf("launch failed: %w", err)
+		}
+	}
+
+	return nil
+}
+
+// CloseAndDownload performs: close game → wait for save flush → download → load.
+// The temp file is removed after loading into memory.
+func (a *App) CloseAndDownload(targetName string) (string, error) {
+	if a.deployStore == nil {
+		return "", fmt.Errorf("deploy not initialized")
+	}
+
+	// Close the game (ignore errors — game might not be running)
+	if a.isLocalTarget(targetName) {
+		a.deployLocal.CloseGame(targetName)
+	} else {
+		a.deploySSH.CloseGame(targetName)
+	}
+
+	// Wait for graceful shutdown and save file flush
+	time.Sleep(5 * time.Second)
+
+	// Download save
+	return a.DownloadRemoteSave(targetName)
 }
 
 // writeTempSave serializes the current in-memory save to a temp file, preserving target platform.
