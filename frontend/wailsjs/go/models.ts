@@ -148,6 +148,7 @@ export namespace db {
 	    name: string;
 	    region: string;
 	    visited: boolean;
+	    isBossArena: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new GraceEntry(source);
@@ -159,6 +160,7 @@ export namespace db {
 	        this.name = source["name"];
 	        this.region = source["region"];
 	        this.visited = source["visited"];
+	        this.isBossArena = source["isBossArena"];
 	    }
 	}
 	export class InfuseType {

@@ -48,6 +48,8 @@ export function GetUndoDepth(arg1:number):Promise<number>;
 
 export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 
+export function RemoveFogOfWar(arg1:number):Promise<void>;
+
 export function RemoveItemsFromCharacter(arg1:number,arg2:Array<number>,arg3:boolean,arg4:boolean):Promise<void>;
 
 export function ResetMapExploration(arg1:number):Promise<void>;
@@ -69,6 +71,8 @@ export function SetColosseumUnlocked(arg1:number,arg2:number,arg3:boolean):Promi
 export function SetGraceVisited(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetMapFlag(arg1:number,arg2:number,arg3:boolean):Promise<void>;
+
+export function SetMapRegionFlags(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
 

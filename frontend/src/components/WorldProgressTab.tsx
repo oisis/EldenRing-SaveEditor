@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, RevealAllMap, ResetMapExploration} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
@@ -22,6 +22,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
     const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map'>('graces');
     const [expandedMapAreas, setExpandedMapAreas] = useState<Record<string, boolean>>({});
+    const [skipBossArenas, setSkipBossArenas] = useState(true);
 
     const loadData = () => {
         setLoading(true);
@@ -56,13 +57,22 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
         onMutate?.();
     };
 
-    const handleUnlockAll = async (regionGraces: db.GraceEntry[]) => {
+    const handleUnlockRegionGraces = async (regionGraces: db.GraceEntry[]) => {
         await Promise.all(
             regionGraces
                 .filter(g => !g.visited)
                 .map(g => SetGraceVisited(charIdx, g.id, true))
         );
         const ids = new Set(regionGraces.map(g => g.id));
+        setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: true} : g));
+        onMutate?.();
+    };
+
+    const handleUnlockAllGraces = async () => {
+        const toUnlock = graces.filter(g => !g.visited && (!skipBossArenas || !g.isBossArena));
+        if (toUnlock.length === 0) return;
+        await Promise.all(toUnlock.map(g => SetGraceVisited(charIdx, g.id, true)));
+        const ids = new Set(toUnlock.map(g => g.id));
         setGraces(prev => prev.map(g => ids.has(g.id) ? {...g, visited: true} : g));
         onMutate?.();
     };
@@ -188,7 +198,11 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     };
 
     // --- Map discovery logic ---
-    const mapAreas = mapEntries.reduce((acc, entry) => {
+    // Combine visible + acquired into unified regions, exclude system and unsafe
+    const mapRegionEntries = mapEntries.filter(e => e.category === 'visible');
+    const mapSystemEntries = mapEntries.filter(e => e.category === 'system');
+
+    const mapAreas = mapRegionEntries.reduce((acc, entry) => {
         const area = entry.area || 'Unknown';
         if (!acc[area]) acc[area] = [];
         acc[area].push(entry);
@@ -199,7 +213,23 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
         setExpandedMapAreas(prev => ({...prev, [area]: !prev[area]}));
     };
 
-    const handleMapToggle = async (entry: db.MapEntry, enabled: boolean) => {
+    // Toggle sets both visible + acquired + removes FoW
+    const handleMapRegionToggle = async (entry: db.MapEntry, enabled: boolean) => {
+        await SetMapRegionFlags(charIdx, entry.id, enabled);
+        if (enabled) {
+            await RemoveFogOfWar(charIdx);
+        }
+        // Update local state: mark visible as toggled, and find matching acquired
+        const acquiredId = entry.id + 1000;
+        setMapEntries(prev => prev.map(e => {
+            if (e.id === entry.id) return {...e, enabled};
+            if (e.id === acquiredId && e.category === 'acquired') return {...e, enabled};
+            return e;
+        }));
+        onMutate?.();
+    };
+
+    const handleSystemFlagToggle = async (entry: db.MapEntry, enabled: boolean) => {
         await SetMapFlag(charIdx, entry.id, enabled);
         setMapEntries(prev => prev.map(e => e.id === entry.id ? {...e, enabled} : e));
         onMutate?.();
@@ -207,6 +237,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
 
     const handleRevealAllMap = async () => {
         await RevealAllMap(charIdx);
+        await RemoveFogOfWar(charIdx);
         setMapEntries(prev => prev.map(e => ({...e, enabled: true})));
         onMutate?.();
     };
@@ -217,8 +248,8 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
         onMutate?.();
     };
 
-    const totalMapVisible = mapEntries.filter(e => e.category === 'visible').length;
-    const enabledMapVisible = mapEntries.filter(e => e.category === 'visible' && e.enabled).length;
+    const totalMapRegions = mapRegionEntries.length;
+    const enabledMapRegions = mapRegionEntries.filter(e => e.enabled).length;
 
     // --- Map helpers ---
     const REGION_MAP_ALIASES: Record<string, string | null> = {
@@ -305,9 +336,33 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                 </div>
 
                 {activeSection === 'graces' && (
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                        {visitedGraces}/{totalGraces} discovered
-                    </span>
+                    <div className="flex items-center space-x-3">
+                        <button
+                            onClick={handleUnlockAllGraces}
+                            className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary border border-border/50 hover:border-primary/50 px-2.5 py-1 rounded transition-all"
+                            title={skipBossArenas ? "Unlock all graces except boss arenas" : "Unlock all graces"}
+                        >
+                            Unlock All
+                        </button>
+                        <label className="flex items-center space-x-1.5 cursor-pointer" title="Skip boss arena graces when unlocking all">
+                            <div className="relative flex items-center justify-center">
+                                <input
+                                    type="checkbox"
+                                    checked={skipBossArenas}
+                                    onChange={(e) => setSkipBossArenas(e.target.checked)}
+                                    className="peer appearance-none w-3.5 h-3.5 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer"
+                                />
+                                <svg className="absolute w-2 h-2 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">Skip Boss Arenas</span>
+                        </label>
+                        <div className="w-px h-4 bg-border/50" />
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                            {visitedGraces}/{totalGraces} discovered
+                        </span>
+                    </div>
                 )}
                 {activeSection === 'bosses' && (
                     <div className="flex items-center space-x-3">
@@ -390,7 +445,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                         <button
                             onClick={handleRevealAllMap}
                             className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary border border-border/50 hover:border-primary/50 px-2.5 py-1 rounded transition-all"
-                            title="Reveal entire map including POIs"
+                            title="Reveal entire map and remove Fog of War"
                         >
                             Reveal All
                         </button>
@@ -403,7 +458,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                         </button>
                         <div className="w-px h-4 bg-border/50" />
                         <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
-                            {enabledMapVisible}/{totalMapVisible} regions revealed
+                            {enabledMapRegions}/{totalMapRegions} regions revealed
                         </span>
                     </div>
                 )}
@@ -435,7 +490,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                     <div className="flex items-center space-x-3">
                                         {!allVisited && (
                                             <button
-                                                onClick={(e) => { e.stopPropagation(); handleUnlockAll(regionGraces); }}
+                                                onClick={(e) => { e.stopPropagation(); handleUnlockRegionGraces(regionGraces); }}
                                                 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground hover:text-primary border border-border/50 hover:border-primary/50 px-2 py-0.5 rounded transition-all"
                                                 title="Unlock All Graces in Region"
                                             >
@@ -486,6 +541,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                                 </div>
                                                 <span className={`text-[11px] transition-colors truncate font-semibold ${grace.visited ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} title={grace.name}>
                                                     {grace.name}
+                                                    {grace.isBossArena && <span className="ml-1 text-[8px] text-amber-500/70" title="Boss Arena">B</span>}
                                                 </span>
                                             </label>
                                         ))}
@@ -700,16 +756,23 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             {/* Map Discovery Section */}
             {activeSection === 'map' && (
                 <div className="grid grid-cols-1 gap-4 animate-in fade-in duration-300">
-                    <div className="card p-4">
-                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-                            Toggle map region visibility, map fragment acquisition, and system display flags.
-                            "Reveal All" also sets ~700 POI discovery flags (62100-62799) for full fog-of-war removal.
-                        </p>
-                    </div>
+                    {/* System flags as top-level checkboxes */}
+                    {mapSystemEntries.length > 0 && (
+                        <div className="card px-5 py-4">
+                            <div className="flex items-center flex-wrap gap-x-6 gap-y-2">
+                                {mapSystemEntries.map(entry => (
+                                    <label key={entry.id} className="flex items-center space-x-2 group cursor-pointer">
+                                        <div className="relative flex items-center justify-center">
+                                            <input type="checkbox" checked={entry.enabled} onChange={(e) => handleSystemFlagToggle(entry, e.target.checked)} className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer" />
+                                            <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+                                        <span className={`text-[10px] font-bold uppercase tracking-widest ${entry.enabled ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{entry.name}</span>
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {Object.entries(mapAreas).sort(([a], [b]) => a.localeCompare(b)).map(([area, areaEntries]) => {
-                        const visibleEntries = areaEntries.filter(e => e.category === 'visible');
-                        const acquiredEntries = areaEntries.filter(e => e.category === 'acquired');
-                        const systemEntries = areaEntries.filter(e => e.category === 'system');
                         const enabledCount = areaEntries.filter(e => e.enabled).length;
                         const total = areaEntries.length;
                         const allEnabled = enabledCount === total;
@@ -734,55 +797,18 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                 </div>
 
                                 {expandedMapAreas[area] && (
-                                    <div className="p-6 space-y-4 animate-in slide-in-from-top-2 duration-300">
-                                        {systemEntries.length > 0 && (
-                                            <div>
-                                                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">System</h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
-                                                    {systemEntries.map(entry => (
-                                                        <label key={entry.id} className="flex items-center space-x-3 group cursor-pointer py-1.5 px-2 rounded-md hover:bg-muted/40 transition-all">
-                                                            <div className="relative flex items-center justify-center">
-                                                                <input type="checkbox" checked={entry.enabled} onChange={(e) => handleMapToggle(entry, e.target.checked)} className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer" />
-                                                                <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>
-                                                            </div>
-                                                            <span className={`text-[11px] font-semibold truncate ${entry.enabled ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{entry.name}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                        {visibleEntries.length > 0 && (
-                                            <div>
-                                                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">Map Visible</h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
-                                                    {visibleEntries.map(entry => (
-                                                        <label key={entry.id} className="flex items-center space-x-3 group cursor-pointer py-1.5 px-2 rounded-md hover:bg-muted/40 transition-all">
-                                                            <div className="relative flex items-center justify-center">
-                                                                <input type="checkbox" checked={entry.enabled} onChange={(e) => handleMapToggle(entry, e.target.checked)} className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer" />
-                                                                <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>
-                                                            </div>
-                                                            <span className={`text-[11px] font-semibold truncate ${entry.enabled ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{entry.name}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                        {acquiredEntries.length > 0 && (
-                                            <div>
-                                                <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">Map Acquired</h3>
-                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
-                                                    {acquiredEntries.map(entry => (
-                                                        <label key={entry.id} className="flex items-center space-x-3 group cursor-pointer py-1.5 px-2 rounded-md hover:bg-muted/40 transition-all">
-                                                            <div className="relative flex items-center justify-center">
-                                                                <input type="checkbox" checked={entry.enabled} onChange={(e) => handleMapToggle(entry, e.target.checked)} className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-emerald-500 checked:border-emerald-500 transition-all cursor-pointer" />
-                                                                <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>
-                                                            </div>
-                                                            <span className={`text-[11px] font-semibold truncate ${entry.enabled ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{entry.name}</span>
-                                                        </label>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
+                                    <div className="p-6 animate-in slide-in-from-top-2 duration-300">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-2">
+                                            {areaEntries.map(entry => (
+                                                <label key={entry.id} className="flex items-center space-x-3 group cursor-pointer py-1.5 px-2 rounded-md hover:bg-muted/40 transition-all">
+                                                    <div className="relative flex items-center justify-center">
+                                                        <input type="checkbox" checked={entry.enabled} onChange={(e) => handleMapRegionToggle(entry, e.target.checked)} className="peer appearance-none w-4 h-4 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer" />
+                                                        <svg className="absolute w-2.5 h-2.5 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path></svg>
+                                                    </div>
+                                                    <span className={`text-[11px] font-semibold truncate ${entry.enabled ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{entry.name}</span>
+                                                </label>
+                                            ))}
+                                        </div>
                                     </div>
                                 )}
                             </div>

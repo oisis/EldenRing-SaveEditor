@@ -519,6 +519,39 @@ func (a *App) GetMapProgress(slotIndex int) ([]db.MapEntry, error) {
 	return entries, nil
 }
 
+// SetMapRegionFlags sets or clears both the visible and acquired flags for a map region.
+// Visible flag IDs (62xxx) map to acquired flag IDs (63xxx) via +1000 offset.
+func (a *App) SetMapRegionFlags(slotIndex int, visibleFlagID uint32, enabled bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+
+	// Set visible flag
+	if err := db.SetEventFlag(flags, visibleFlagID, enabled); err != nil {
+		return fmt.Errorf("failed to set visible flag %d: %w", visibleFlagID, err)
+	}
+
+	// Set corresponding acquired flag (visible + 1000), if it exists
+	acquiredID := visibleFlagID + 1000
+	if _, ok := data.MapAcquired[acquiredID]; ok {
+		_ = db.SetEventFlag(flags, acquiredID, enabled)
+	}
+
+	return nil
+}
+
 // SetMapFlag sets or clears a single map flag
 func (a *App) SetMapFlag(slotIndex int, flagID uint32, enabled bool) error {
 	if a.save == nil {
@@ -607,6 +640,43 @@ func (a *App) ResetMapExploration(slotIndex int) error {
 		_ = db.SetEventFlag(flags, id, false)
 	}
 	// Note: system flags (62000, 62001, 82001, 82002) are preserved
+
+	return nil
+}
+
+// RemoveFogOfWar fills the exploration bitfield with 0xFF, removing all Fog of War.
+// See spec/27-fog-of-war.md for details.
+func (a *App) RemoveFogOfWar(slotIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	storageEnd := slot.StorageBoxOffset + core.DynStorageBox
+	gesturesOff := storageEnd + core.DynStorageToGestures
+
+	if gesturesOff+4 > len(slot.Data) {
+		return fmt.Errorf("gesturesOff 0x%X out of bounds", gesturesOff)
+	}
+
+	regCount := int(binary.LittleEndian.Uint32(slot.Data[gesturesOff : gesturesOff+4]))
+	afterRegs := gesturesOff + 4 + regCount*4
+
+	fowStart := afterRegs + 0x087E
+	fowEnd := afterRegs + 0x10B0
+
+	if fowEnd >= len(slot.Data)-0x80 {
+		return fmt.Errorf("FoW bitfield range out of bounds (0x%X)", fowEnd)
+	}
+
+	for i := fowStart; i <= fowEnd; i++ {
+		slot.Data[i] = 0xFF
+	}
 
 	return nil
 }

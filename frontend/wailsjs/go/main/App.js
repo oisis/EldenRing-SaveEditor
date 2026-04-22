@@ -90,6 +90,10 @@ export function ImportCharacter(arg1, arg2) {
   return window['go']['main']['App']['ImportCharacter'](arg1, arg2);
 }
 
+export function RemoveFogOfWar(arg1) {
+  return window['go']['main']['App']['RemoveFogOfWar'](arg1);
+}
+
 export function RemoveItemsFromCharacter(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['RemoveItemsFromCharacter'](arg1, arg2, arg3, arg4);
 }
@@ -132,6 +136,10 @@ export function SetGraceVisited(arg1, arg2, arg3) {
 
 export function SetMapFlag(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetMapFlag'](arg1, arg2, arg3);
+}
+
+export function SetMapRegionFlags(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetMapRegionFlags'](arg1, arg2, arg3);
 }
 
 export function SetSlotActivity(arg1, arg2) {

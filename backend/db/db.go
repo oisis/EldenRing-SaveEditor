@@ -49,10 +49,11 @@ var InfuseTypes = []InfuseType{
 
 // GraceEntry represents a Site of Grace.
 type GraceEntry struct {
-	ID      uint32 `json:"id"`
-	Name    string `json:"name"`
-	Region  string `json:"region"`
-	Visited bool   `json:"visited"`
+	ID          uint32 `json:"id"`
+	Name        string `json:"name"`
+	Region      string `json:"region"`
+	Visited     bool   `json:"visited"`
+	IsBossArena bool   `json:"isBossArena"`
 }
 
 // BossEntry represents a boss encounter with defeat state.
@@ -467,6 +468,31 @@ func GetAllItems(platform string) []ItemEntry {
 	return all
 }
 
+// isBossArenaGrace returns true if the grace name matches a known boss arena.
+func isBossArenaGrace(name string) bool {
+	bossKeywords := []string{
+		"Godrick the Grafted", "Margit, the Fell Omen",
+		"Rennala, Queen", "Starscourge Radahn",
+		"Rykard, Lord of Blasphemy", "Morgott, the Omen King",
+		"Mohg, Lord of Blood", "Cocoon of the Empyrean",
+		"Malenia, Goddess of Rot", "Maliketh, the Black Blade",
+		"Dragonlord Placidusax", "Godfrey, First Elden Lord",
+		"Radagon of the Elden Order", "Elden Throne",
+		"Fire Giant", "Regal Ancestor Spirit",
+		"Astel, Naturalborn", "Lichdragon Fortissax",
+		"Leonine Misbegotten", "Commander Niall",
+		"Abductor Virgin", "Magma Wyrm Makar",
+		"Mimic Tear", "Fractured Marika", "Elden Beast",
+		"Ruin-Strewn Precipice Overlook",
+	}
+	for _, kw := range bossKeywords {
+		if strings.Contains(name, kw) {
+			return true
+		}
+	}
+	return false
+}
+
 // GetAllGraces returns all Sites of Grace as a flat list.
 func GetAllGraces() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))
@@ -546,9 +572,10 @@ func GetAllGraces() []GraceEntry {
 		}
 
 		graces = append(graces, GraceEntry{
-			ID:     id,
-			Name:   name,
-			Region: region,
+			ID:          id,
+			Name:        name,
+			Region:      region,
+			IsBossArena: isBossArenaGrace(name),
 		})
 	}
 
