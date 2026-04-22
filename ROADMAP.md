@@ -110,13 +110,26 @@ Unlock colosseums via their respective event flags.
 - UI: card grid with large toggles, global Unlock All button
 - Integrated as "Colosseums" sub-tab in World Progress tab
 
-### 🔲 Map Exploration Data Editing 🔵
-Edit fog-of-war / map reveal data. **Fully unique feature** — no existing editor touches this.
+### ✅ Map Exploration & Fog of War 🟡
+Full map reveal with Fog of War removal. **Fully unique feature** — no existing editor touches FoW.
 
-**Technical details:**
-- Map discovery flags in range 62000-63065
-- Reset map exploration for fresh discovery feel on existing characters
-- Full map reveal without walking everywhere
+**Implementation:** `app.go`, `backend/db/data/maps.go`, `backend/db/db.go`, `frontend/src/components/WorldProgressTab.tsx`, `spec/27-fog-of-war.md`
+- Map visibility (62xxx) + acquisition (63xxx) combined into single toggle per region
+- System flags (62000, 62001, 82001, 82002) as top-level checkboxes
+- `RemoveFogOfWar(slotIndex)` — fills FoW exploration bitfield (2099 bytes at `afterRegs+0x087E..+0x10B0`) with 0xFF
+- Unsafe sub-region flags (62004-62009, 62053, 62065) separated into `MapUnsafe` — excluded from Reveal All
+- FoW automatically removed on any map region toggle or Reveal All
+- Brute-force POI ranges replaced with individual named flags
+- Tested on Steam Deck: full map reveal + FoW removal confirmed working
+- See `spec/27-fog-of-war.md` for full reverse-engineering documentation
+
+### ✅ Grace Unlock with Boss Arena Filter 🟢
+Global "Unlock All" for Sites of Grace with option to skip boss arena graces.
+
+**Implementation:** `backend/db/db.go`, `frontend/src/components/WorldProgressTab.tsx`
+- `IsBossArena` field on `GraceEntry` — detected from grace name (26 boss keywords)
+- "Skip Boss Arenas" checkbox (default: on) filters boss graces from bulk unlock
+- Boss arena graces marked with "B" indicator in UI
 
 ---
 
@@ -209,6 +222,59 @@ Implement full slot serialization instead of in-place patching, matching referen
 
 ---
 
+## Phase 7 — Remote Deploy & Game Control
+
+### ✅ SSH Deploy Target Management 🟡
+Configure remote machines (Steam Deck, gaming PC) as deploy targets. Settings stored in app config directory (`os.UserConfigDir()/EldenRing-SaveEditor/targets.json`), not in a config file.
+
+**Technical details:**
+- New package `backend/deploy/` — `Target` struct, `LoadTargets()`, `SaveTargets()`, `DeleteTarget()`
+- Config path: macOS `~/Library/Application Support/`, Linux `~/.config/`, Windows `%APPDATA%`
+- Target fields: `name`, `host`, `port`, `user`, `keyPath`, `savePath`, `gameStartCmd`, `gameStopCmd`
+- Default `savePath`: `/home/deck/.local/share/Steam/steamapps/compatdata/1245620/pfx/drive_c/users/steamuser/AppData/Roaming/EldenRing/{STEAM_ID}/ER0000.sl2`
+- Default `gameStartCmd`: `steam steam://rungameid/1245620`
+- Default `gameStopCmd`: `pkill -TERM -f eldenring.exe`
+- UI: new "Deploy" section in SettingsTab with target list, add/edit/delete forms
+- App methods: `GetDeployTargets()`, `SaveDeployTarget(target)`, `DeleteDeployTarget(name)`
+
+### ✅ SSH Connection & File Transfer 🟡
+Upload and download save files to/from remote machines via SSH/SFTP.
+
+**Technical details:**
+- New package `backend/deploy/ssh.go` — `SSHManager` using `golang.org/x/crypto/ssh`
+- Authentication: SSH key (preferred) or password fallback
+- File transfer via SFTP (`github.com/pkg/sftp`) — more reliable than SCP
+- `TestConnection(targetName)` — verify SSH connectivity, return host info
+- `UploadSave(targetName)` — backup remote file (timestamped `.bkp`), upload current save, verify file size
+- `DownloadSave(targetName)` — download remote save file, load into editor
+- Verification: compare local/remote file sizes after transfer
+- Remote backup: `cp "{remote}" "{remote}.{YYYYMMDD_HHMMSS}.bkp"` before overwrite
+- App methods: `TestSSHConnection(name)`, `DeploySave(name)`, `DownloadRemoteSave(name)`
+- UI: buttons in SettingsTab per target — Test, Upload, Download with status feedback
+- Elden Ring Steam App ID: `1245620`
+
+### ✅ Remote Game Launch & Stop 🟢
+Start and stop Elden Ring on remote machines via SSH.
+
+**Technical details:**
+- `LaunchGame(targetName)` — execute `game_start_cmd` via SSH (default: `steam steam://rungameid/1245620`)
+- `CloseGame(targetName)` — execute `game_stop_cmd` via SSH (default: `pkill -TERM -f eldenring.exe`)
+- Per-target command overrides (stored in target config)
+- SIGTERM for graceful shutdown (game saves before exit)
+- App methods: `LaunchRemoteGame(name)`, `CloseRemoteGame(name)`
+- UI: Launch / Close buttons per target with status indicators
+
+### ✅ Deploy Workflow Integration 🟢
+One-click workflow: Close Game → Upload Save → Launch Game.
+
+**Technical details:**
+- `DeployAndLaunch(targetName)` — sequential: close game (if running) → wait 3s → upload save → launch game
+- Progress feedback via Wails events (step-by-step status updates to frontend)
+- Error handling: abort on upload failure, show detailed error
+- UI: single "Deploy & Launch" button combining all steps
+
+---
+
 ## Completed
 
 ### ✅ Phase 1 — Safety & Integrity
@@ -221,8 +287,11 @@ Implement full slot serialization instead of in-place patching, matching referen
 
 ### ✅ Phase 3 — Sites of Grace & World State
 - Sites of Grace Toggle (graces.go, WorldProgressTab.tsx)
+- Grace Unlock All with Boss Arena filter (db.go, WorldProgressTab.tsx)
 - Summoning Pools Toggle (summoning_pools.go, WorldProgressTab.tsx)
 - Colosseum Toggle (summoning_pools.go, WorldProgressTab.tsx)
+- Map Exploration & Fog of War removal (maps.go, app.go, spec/27-fog-of-war.md)
+- Combined Map Visible + Acquired toggle, System flags as top-level checkboxes
 
 ### ✅ Phase 22 — Item Descriptions & Stats
 Display item flavor text and detailed stats in the item detail modal. Data sourced from ERDB (MIT-licensed, parsed from regulation.bin).

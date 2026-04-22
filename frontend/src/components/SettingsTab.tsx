@@ -1,6 +1,12 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import toast from 'react-hot-toast';
-import {SelectAndOpenSave, WriteSave, GetSteamIDString, SetSteamIDFromString} from '../../wailsjs/go/main/App';
+import {
+    SelectAndOpenSave, WriteSave, GetSteamIDString, SetSteamIDFromString,
+    GetDeployTargets, SaveDeployTarget, DeleteDeployTarget,
+    TestSSHConnection, DeploySave, DownloadRemoteSave,
+    LaunchRemoteGame, CloseRemoteGame, DeployAndLaunch,
+} from '../../wailsjs/go/main/App';
+import {deploy} from '../../wailsjs/go/models';
 
 interface SettingsTabProps {
     theme: 'light' | 'dark' | 'system';
@@ -18,6 +24,13 @@ interface SettingsTabProps {
     setPlatform: (platform: string | null) => void;
     refreshSlots: () => void;
 }
+
+const EMPTY_TARGET: deploy.Target = new deploy.Target({
+    name: '', host: '', port: 22, user: 'deck', keyPath: '~/.ssh/id_rsa',
+    savePath: '/home/deck/.local/share/Steam/steamapps/compatdata/1245620/pfx/drive_c/users/steamuser/AppData/Roaming/EldenRing/{STEAM_ID}/ER0000.sl2',
+    gameStartCmd: 'steam steam://rungameid/1245620',
+    gameStopCmd: 'pkill -TERM -f eldenring.exe',
+});
 
 export function SettingsTab({
     theme,
@@ -40,6 +53,21 @@ export function SettingsTab({
     const [steamIdSaved, setSteamIdSaved] = useState('');
     const [steamIdError, setSteamIdError] = useState('');
     const [steamIdApplying, setSteamIdApplying] = useState(false);
+
+    // Deploy state
+    const [targets, setTargets] = useState<deploy.Target[]>([]);
+    const [selectedTarget, setSelectedTarget] = useState<string>('');
+    const [editTarget, setEditTarget] = useState<deploy.Target>(new deploy.Target(EMPTY_TARGET));
+    const [showForm, setShowForm] = useState(false);
+    const [deploying, setDeploying] = useState(false);
+
+    const loadTargets = useCallback(() => {
+        GetDeployTargets().then(t => {
+            setTargets(t || []);
+        }).catch(() => setTargets([]));
+    }, []);
+
+    useEffect(() => { loadTargets(); }, [loadTargets]);
 
     useEffect(() => {
         if (platform !== 'PC') { setSteamIdInput(''); setSteamIdSaved(''); return; }
@@ -93,6 +121,93 @@ export function SettingsTab({
         }
     };
 
+    // Deploy handlers
+    const handleSaveTarget = async () => {
+        if (!editTarget.name || !editTarget.host) {
+            toast.error('Name and host are required'); return;
+        }
+        try {
+            await SaveDeployTarget(editTarget);
+            toast.success(`Target "${editTarget.name}" saved`);
+            loadTargets();
+            setShowForm(false);
+            setSelectedTarget(editTarget.name);
+        } catch (e) { toast.error(String(e)); }
+    };
+
+    const handleDeleteTarget = async (name: string) => {
+        try {
+            await DeleteDeployTarget(name);
+            toast.success(`Target "${name}" deleted`);
+            if (selectedTarget === name) setSelectedTarget('');
+            loadTargets();
+        } catch (e) { toast.error(String(e)); }
+    };
+
+    const handleTestConnection = async () => {
+        if (!selectedTarget) return;
+        const tid = toast.loading('Testing connection...');
+        try {
+            const msg = await TestSSHConnection(selectedTarget);
+            toast.success(msg, { id: tid });
+        } catch (e) { toast.error(String(e), { id: tid }); }
+    };
+
+    const handleUpload = async () => {
+        if (!selectedTarget) return;
+        setDeploying(true);
+        const tid = toast.loading('Uploading save...');
+        try {
+            await DeploySave(selectedTarget);
+            toast.success('Save uploaded successfully', { id: tid });
+        } catch (e) { toast.error(String(e), { id: tid }); }
+        finally { setDeploying(false); }
+    };
+
+    const handleDownload = async () => {
+        if (!selectedTarget) return;
+        setDeploying(true);
+        const tid = toast.loading('Downloading save...');
+        try {
+            const plat = await DownloadRemoteSave(selectedTarget);
+            setPlatform(plat);
+            refreshSlots();
+            toast.success('Save downloaded and loaded', { id: tid });
+        } catch (e) { toast.error(String(e), { id: tid }); }
+        finally { setDeploying(false); }
+    };
+
+    const handleLaunch = async () => {
+        if (!selectedTarget) return;
+        try {
+            await LaunchRemoteGame(selectedTarget);
+            toast.success('Game launched');
+        } catch (e) { toast.error(String(e)); }
+    };
+
+    const handleClose = async () => {
+        if (!selectedTarget) return;
+        try {
+            await CloseRemoteGame(selectedTarget);
+            toast.success('Game closed');
+        } catch (e) { toast.error(String(e)); }
+    };
+
+    const handleDeployAndLaunch = async () => {
+        if (!selectedTarget) return;
+        setDeploying(true);
+        const tid = toast.loading('Deploying: Close → Upload → Launch...');
+        try {
+            await DeployAndLaunch(selectedTarget);
+            toast.success('Deploy complete — game launched', { id: tid });
+        } catch (e) { toast.error(String(e), { id: tid }); }
+        finally { setDeploying(false); }
+    };
+
+    const inputCls = "w-full bg-background border border-border/50 rounded-md px-3 py-2 text-[11px] font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all";
+    const labelCls = "text-[9px] font-black uppercase tracking-widest text-muted-foreground";
+    const btnSmall = "px-3 py-1.5 rounded-md text-[9px] font-black uppercase tracking-widest transition-all disabled:opacity-50";
+
     return (
         <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             {/* Appearance Section */}
@@ -101,7 +216,7 @@ export function SettingsTab({
                     <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                     <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/80">Appearance</h2>
                 </div>
-                
+
                 <div className="card p-6 space-y-6">
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                         <div className="space-y-1">
@@ -129,14 +244,14 @@ export function SettingsTab({
                     <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                     <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/80">File Operations</h2>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="card p-6 space-y-4">
                         <div className="space-y-1">
                             <p className="text-xs font-bold text-foreground">Import Save</p>
                             <p className="text-[10px] text-muted-foreground font-medium">Load an existing Elden Ring save file.</p>
                         </div>
-                        <button 
+                        <button
                             onClick={handleImport}
                             disabled={importing}
                             className="w-full bg-muted/30 hover:bg-muted/50 text-foreground font-black py-3 rounded-lg text-[9px] uppercase tracking-[0.2em] border border-border transition-all flex items-center justify-center space-x-2"
@@ -168,7 +283,7 @@ export function SettingsTab({
                                 </button>
                             ))}
                         </div>
-                        <button 
+                        <button
                             onClick={handleExport}
                             disabled={!platform || exporting}
                             className="w-full bg-primary text-primary-foreground font-black py-3 rounded-lg text-[9px] uppercase tracking-[0.2em] shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
@@ -183,6 +298,132 @@ export function SettingsTab({
                             )}
                         </button>
                     </div>
+                </div>
+            </section>
+
+            {/* Remote Deploy Section */}
+            <section className="space-y-6">
+                <div className="flex items-center space-x-4 px-1">
+                    <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
+                    <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/80">Remote Deploy</h2>
+                </div>
+
+                <div className="card p-6 space-y-6">
+                    {/* Target selector + actions */}
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-center gap-3">
+                            <select
+                                value={selectedTarget}
+                                onChange={e => setSelectedTarget(e.target.value)}
+                                className="flex-1 bg-background border border-border/50 rounded-md px-3 py-2.5 text-[11px] font-mono focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+                            >
+                                <option value="">Select target...</option>
+                                {targets.map(t => (
+                                    <option key={t.name} value={t.name}>{t.name} ({t.host})</option>
+                                ))}
+                            </select>
+                            <button
+                                onClick={() => { setEditTarget(new deploy.Target(EMPTY_TARGET)); setShowForm(true); }}
+                                className={`${btnSmall} bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:brightness-110`}
+                            >
+                                + Add
+                            </button>
+                            {selectedTarget && (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            const t = targets.find(x => x.name === selectedTarget);
+                                            if (t) { setEditTarget(new deploy.Target(t)); setShowForm(true); }
+                                        }}
+                                        className={`${btnSmall} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteTarget(selectedTarget)}
+                                        className={`${btnSmall} bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20`}
+                                    >
+                                        Delete
+                                    </button>
+                                </>
+                            )}
+                        </div>
+
+                        {/* Action buttons */}
+                        {selectedTarget && (
+                            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-2">
+                                <button onClick={handleTestConnection} disabled={deploying} className={`${btnSmall} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>
+                                    Test
+                                </button>
+                                <button onClick={handleUpload} disabled={deploying || !platform} className={`${btnSmall} bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20`}>
+                                    Upload
+                                </button>
+                                <button onClick={handleDownload} disabled={deploying} className={`${btnSmall} bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20`}>
+                                    Download
+                                </button>
+                                <button onClick={handleLaunch} disabled={deploying} className={`${btnSmall} bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20`}>
+                                    Launch
+                                </button>
+                                <button onClick={handleClose} disabled={deploying} className={`${btnSmall} bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20`}>
+                                    Close
+                                </button>
+                                <button onClick={handleDeployAndLaunch} disabled={deploying || !platform} className={`${btnSmall} bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:brightness-110`}>
+                                    Deploy & Launch
+                                </button>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Target form (add/edit) */}
+                    {showForm && (
+                        <div className="border border-border/50 rounded-lg p-5 space-y-4 bg-muted/10">
+                            <p className="text-xs font-bold text-foreground">
+                                {editTarget.name && targets.some(t => t.name === editTarget.name) ? 'Edit Target' : 'Add Target'}
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-1">
+                                    <label className={labelCls}>Name</label>
+                                    <input value={editTarget.name} onChange={e => setEditTarget({...editTarget, name: e.target.value} as deploy.Target)} placeholder="Steam Deck" className={inputCls} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className={labelCls}>Host</label>
+                                    <input value={editTarget.host} onChange={e => setEditTarget({...editTarget, host: e.target.value} as deploy.Target)} placeholder="192.168.1.100" className={inputCls} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className={labelCls}>Port</label>
+                                    <input type="number" value={editTarget.port} onChange={e => setEditTarget({...editTarget, port: parseInt(e.target.value) || 22} as deploy.Target)} className={inputCls} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className={labelCls}>User</label>
+                                    <input value={editTarget.user} onChange={e => setEditTarget({...editTarget, user: e.target.value} as deploy.Target)} placeholder="deck" className={inputCls} />
+                                </div>
+                                <div className="space-y-1 md:col-span-2">
+                                    <label className={labelCls}>SSH Key Path</label>
+                                    <input value={editTarget.keyPath} onChange={e => setEditTarget({...editTarget, keyPath: e.target.value} as deploy.Target)} placeholder="~/.ssh/id_rsa" className={inputCls} />
+                                </div>
+                                <div className="space-y-1 md:col-span-2">
+                                    <label className={labelCls}>Remote Save Path</label>
+                                    <input value={editTarget.savePath} onChange={e => setEditTarget({...editTarget, savePath: e.target.value} as deploy.Target)} className={inputCls} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className={labelCls}>Game Start Command</label>
+                                    <input value={editTarget.gameStartCmd} onChange={e => setEditTarget({...editTarget, gameStartCmd: e.target.value} as deploy.Target)} className={inputCls} />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className={labelCls}>Game Stop Command</label>
+                                    <input value={editTarget.gameStopCmd} onChange={e => setEditTarget({...editTarget, gameStopCmd: e.target.value} as deploy.Target)} className={inputCls} />
+                                </div>
+                            </div>
+                            <div className="flex gap-2 pt-2">
+                                <button onClick={handleSaveTarget} className={`${btnSmall} bg-primary text-primary-foreground shadow-sm shadow-primary/20 hover:brightness-110`}>
+                                    Save Target
+                                </button>
+                                <button onClick={() => setShowForm(false)} className={`${btnSmall} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>
+                                    Cancel
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -238,7 +479,7 @@ export function SettingsTab({
                     <div className="w-1.5 h-6 bg-primary rounded-full shadow-[0_0_8px_rgba(var(--primary),0.4)]" />
                     <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-foreground/80">UI Customization</h2>
                 </div>
-                
+
                 <div className="card p-6 space-y-6">
                     <div className="space-y-4">
                         <p className="text-xs font-bold text-foreground">Inventory Table Columns</p>

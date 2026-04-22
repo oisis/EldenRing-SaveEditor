@@ -11,6 +11,7 @@ import (
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db/data"
+	"github.com/oisis/EldenRing-SaveEditor/backend/deploy"
 	"github.com/oisis/EldenRing-SaveEditor/backend/vm"
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
@@ -44,10 +45,13 @@ type slotSnapshot struct {
 
 // App struct
 type App struct {
-	ctx        context.Context
-	save       *core.SaveFile
-	sourceSave *core.SaveFile
-	undoStacks [10][]slotSnapshot
+	ctx          context.Context
+	save         *core.SaveFile
+	sourceSave   *core.SaveFile
+	undoStacks   [10][]slotSnapshot
+	lastSavePath string
+	deployStore  *deploy.TargetStore
+	deploySSH    *deploy.SSHManager
 }
 
 // NewApp creates a new App struct
@@ -59,6 +63,14 @@ func NewApp() *App {
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
+
+	store, err := deploy.NewTargetStore()
+	if err != nil {
+		fmt.Printf("Warning: deploy targets unavailable: %v\n", err)
+		return
+	}
+	a.deployStore = store
+	a.deploySSH = deploy.NewSSHManager(store)
 }
 
 // SelectAndOpenSave opens a native file dialog and loads the selected save
@@ -82,6 +94,7 @@ func (a *App) SelectAndOpenSave() (string, error) {
 		return "", err
 	}
 	a.save = save
+	a.lastSavePath = path
 	a.clearAllUndoStacks()
 	return string(save.Platform), nil
 }
@@ -195,6 +208,7 @@ func (a *App) WriteSave(platform string) error {
 	if err := a.save.SaveFile(path); err != nil {
 		return err
 	}
+	a.lastSavePath = path
 	a.clearAllUndoStacks()
 	return nil
 }
@@ -1294,7 +1308,106 @@ func (a *App) GetSlotCapacity(charIdx int) (*SlotCapacity, error) {
 	}, nil
 }
 
+// ---------- Deploy ----------
+
+// GetDeployTargets returns all configured deploy targets.
+func (a *App) GetDeployTargets() []deploy.Target {
+	if a.deployStore == nil {
+		return nil
+	}
+	return a.deployStore.List()
+}
+
+// SaveDeployTarget adds or updates a deploy target.
+func (a *App) SaveDeployTarget(t deploy.Target) error {
+	if a.deployStore == nil {
+		return fmt.Errorf("deploy not initialized")
+	}
+	return a.deployStore.Save(t)
+}
+
+// DeleteDeployTarget removes a deploy target by name.
+func (a *App) DeleteDeployTarget(name string) error {
+	if a.deployStore == nil {
+		return fmt.Errorf("deploy not initialized")
+	}
+	return a.deployStore.Delete(name)
+}
+
+// TestSSHConnection tests SSH connectivity to a target.
+func (a *App) TestSSHConnection(targetName string) (string, error) {
+	if a.deploySSH == nil {
+		return "", fmt.Errorf("deploy not initialized")
+	}
+	return a.deploySSH.TestConnection(targetName)
+}
+
+// DeploySave uploads the current save file to a remote target.
+func (a *App) DeploySave(targetName string) error {
+	if a.deploySSH == nil {
+		return fmt.Errorf("deploy not initialized")
+	}
+	if a.lastSavePath == "" {
+		return fmt.Errorf("no save file path — load or export a save first")
+	}
+	return a.deploySSH.UploadSave(targetName, a.lastSavePath)
+}
+
+// DownloadRemoteSave downloads a save file from a remote target and loads it.
+func (a *App) DownloadRemoteSave(targetName string) (string, error) {
+	if a.deploySSH == nil {
+		return "", fmt.Errorf("deploy not initialized")
+	}
+
+	// Download to a temp file, then load it
+	tmpDir, err := os.MkdirTemp("", "er-save-download-")
+	if err != nil {
+		return "", fmt.Errorf("cannot create temp dir: %w", err)
+	}
+	localPath := tmpDir + "/ER0000.sl2"
+
+	if err := a.deploySSH.DownloadSave(targetName, localPath); err != nil {
+		return "", err
+	}
+
+	save, err := core.LoadSave(localPath)
+	if err != nil {
+		return "", fmt.Errorf("downloaded file is not a valid save: %w", err)
+	}
+	a.save = save
+	a.lastSavePath = localPath
+	a.clearAllUndoStacks()
+	return string(save.Platform), nil
+}
+
+// LaunchRemoteGame starts the game on a remote target.
+func (a *App) LaunchRemoteGame(targetName string) (string, error) {
+	if a.deploySSH == nil {
+		return "", fmt.Errorf("deploy not initialized")
+	}
+	return a.deploySSH.LaunchGame(targetName)
+}
+
+// CloseRemoteGame stops the game on a remote target.
+func (a *App) CloseRemoteGame(targetName string) (string, error) {
+	if a.deploySSH == nil {
+		return "", fmt.Errorf("deploy not initialized")
+	}
+	return a.deploySSH.CloseGame(targetName)
+}
+
+// DeployAndLaunch performs the full workflow: close → upload → launch.
+func (a *App) DeployAndLaunch(targetName string) error {
+	if a.deploySSH == nil {
+		return fmt.Errorf("deploy not initialized")
+	}
+	if a.lastSavePath == "" {
+		return fmt.Errorf("no save file path — load or export a save first")
+	}
+	return a.deploySSH.DeployAndLaunch(targetName, a.lastSavePath)
+}
+
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, DiffEntry, SlotDiffSummary, SlotCapacity) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}
 }
