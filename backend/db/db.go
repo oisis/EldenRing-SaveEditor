@@ -688,7 +688,7 @@ func GetAllColosseums() []ColosseumEntry {
 
 // GetAllMapEntries returns all map region entries (visible + acquired + system) sorted by area then name.
 func GetAllMapEntries() []MapEntry {
-	entries := make([]MapEntry, 0, len(data.MapVisible)+len(data.MapAcquired)+len(data.MapSystem))
+	entries := make([]MapEntry, 0, len(data.MapVisible)+len(data.MapAcquired)+len(data.MapSystem)+len(data.MapUnsafe))
 	for id, m := range data.MapSystem {
 		entries = append(entries, MapEntry{ID: id, Name: m.Name, Area: m.Area, Category: "system"})
 	}
@@ -697,6 +697,9 @@ func GetAllMapEntries() []MapEntry {
 	}
 	for id, m := range data.MapAcquired {
 		entries = append(entries, MapEntry{ID: id, Name: m.Name, Area: m.Area, Category: "acquired"})
+	}
+	for id, m := range data.MapUnsafe {
+		entries = append(entries, MapEntry{ID: id, Name: m.Name, Area: m.Area, Category: "unsafe"})
 	}
 	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].Area != entries[j].Area {

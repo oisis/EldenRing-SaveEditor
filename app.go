@@ -572,12 +572,6 @@ func (a *App) RevealAllMap(slotIndex int) error {
 	for id := range data.MapAcquired {
 		_ = db.SetEventFlag(flags, id, true)
 	}
-	// POI discovery ranges
-	for _, r := range data.MapPOIRanges {
-		for fid := r.Start; fid <= r.End; fid++ {
-			_ = db.SetEventFlag(flags, fid, true)
-		}
-	}
 
 	return nil
 }
@@ -608,11 +602,9 @@ func (a *App) ResetMapExploration(slotIndex int) error {
 	for id := range data.MapAcquired {
 		_ = db.SetEventFlag(flags, id, false)
 	}
-	// Clear POI discovery ranges
-	for _, r := range data.MapPOIRanges {
-		for fid := r.Start; fid <= r.End; fid++ {
-			_ = db.SetEventFlag(flags, fid, false)
-		}
+	// Clear unsafe sub-region flags
+	for id := range data.MapUnsafe {
+		_ = db.SetEventFlag(flags, id, false)
 	}
 	// Note: system flags (62000, 62001, 82001, 82002) are preserved
 

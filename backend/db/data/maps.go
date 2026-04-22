@@ -14,17 +14,11 @@ var MapSystem = map[uint32]MapRegionData{
 	82002: {Name: "Show Shadow Realm Map", Area: "System"},
 }
 
-// MapVisible contains map region visibility flags (62xxx).
+// MapVisible contains safe map region visibility flags (62xxx).
 // Setting these reveals the map texture for each region.
+// Only includes flags verified as safe — see MapUnsafe for risky sub-region flags.
 var MapVisible = map[uint32]MapRegionData{
-	// Limgrave base tiles
-	62004: {Name: "Center", Area: "Limgrave"},
-	62005: {Name: "SW", Area: "Limgrave"},
-	62006: {Name: "NW", Area: "Limgrave"},
-	62007: {Name: "SE", Area: "Limgrave"},
-	62008: {Name: "NE", Area: "Limgrave"},
-	62009: {Name: "N", Area: "Limgrave"},
-	// Limgrave named regions
+	// Limgrave
 	62010: {Name: "Limgrave, West", Area: "Limgrave"},
 	62011: {Name: "Weeping Peninsula", Area: "Limgrave"},
 	62012: {Name: "Limgrave, East", Area: "Limgrave"},
@@ -42,7 +36,7 @@ var MapVisible = map[uint32]MapRegionData{
 	// Mountaintops
 	62050: {Name: "Mountaintops of the Giants, West", Area: "Mountaintops"},
 	62051: {Name: "Mountaintops of the Giants, East", Area: "Mountaintops"},
-	62052: {Name: "Mountaintops of the Giants, North", Area: "Mountaintops"},
+	62052: {Name: "Consecrated Snowfield", Area: "Mountaintops"},
 	// Underground
 	62060: {Name: "Ainsel River", Area: "Underground"},
 	62061: {Name: "Lake of Rot", Area: "Underground"},
@@ -55,9 +49,23 @@ var MapVisible = map[uint32]MapRegionData{
 	62082: {Name: "Southern Shore", Area: "DLC"},
 	62083: {Name: "Rauh Ruins", Area: "DLC"},
 	62084: {Name: "Abyss", Area: "DLC"},
-	// Catacombs / Caves
+	// Dungeon maps
 	62102: {Name: "Fringefolk Hero's Cave", Area: "Limgrave"},
 	62103: {Name: "Stormfoot Catacombs", Area: "Limgrave"},
+}
+
+// MapUnsafe contains sub-region visibility flags that can cause black map tiles
+// when set without the game's normal discovery flow. Shown in UI but excluded
+// from "Reveal All" to prevent visual corruption.
+var MapUnsafe = map[uint32]MapRegionData{
+	62004: {Name: "Center (sub-region)", Area: "Limgrave"},
+	62005: {Name: "SW (sub-region)", Area: "Limgrave"},
+	62006: {Name: "NW (sub-region)", Area: "Limgrave"},
+	62007: {Name: "SE (sub-region)", Area: "Limgrave"},
+	62008: {Name: "NE (sub-region)", Area: "Limgrave"},
+	62009: {Name: "N (sub-region)", Area: "Limgrave"},
+	62053: {Name: "Mountaintops, North (sub-region)", Area: "Mountaintops"},
+	62065: {Name: "Underground (sub-region)", Area: "Underground"},
 }
 
 // MapAcquired contains map fragment acquisition flags (63xxx).
@@ -89,21 +97,3 @@ var MapAcquired = map[uint32]MapRegionData{
 	63084: {Name: "Abyss", Area: "DLC"},
 }
 
-// MapPOIRange defines a range of event flag IDs for point-of-interest discovery.
-type MapPOIRange struct {
-	Start uint32
-	End   uint32
-	Area  string
-}
-
-// MapPOIRanges defines the event flag ranges for map point discovery.
-// Setting all flags in these ranges reveals POI icons on the map.
-var MapPOIRanges = []MapPOIRange{
-	{Start: 62100, End: 62199, Area: "Limgrave"},
-	{Start: 62200, End: 62299, Area: "Liurnia"},
-	{Start: 62300, End: 62399, Area: "Altus"},
-	{Start: 62400, End: 62499, Area: "Caelid"},
-	{Start: 62500, End: 62599, Area: "Mountaintops"},
-	{Start: 62600, End: 62699, Area: "Underground"},
-	{Start: 62700, End: 62799, Area: "Other"},
-}

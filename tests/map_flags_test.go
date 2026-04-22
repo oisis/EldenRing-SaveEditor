@@ -59,6 +59,7 @@ func TestGetAllMapEntries(t *testing.T) {
 	visible := 0
 	acquired := 0
 	system := 0
+	unsafe := 0
 	for _, e := range entries {
 		switch e.Category {
 		case "visible":
@@ -67,22 +68,27 @@ func TestGetAllMapEntries(t *testing.T) {
 			acquired++
 		case "system":
 			system++
+		case "unsafe":
+			unsafe++
 		default:
 			t.Errorf("unexpected category %q for flag %d", e.Category, e.ID)
 		}
 	}
 
-	t.Logf("Map entries: %d visible, %d acquired, %d system = %d total",
-		visible, acquired, system, len(entries))
+	t.Logf("Map entries: %d visible, %d acquired, %d system, %d unsafe = %d total",
+		visible, acquired, system, unsafe, len(entries))
 
-	if visible < 28 {
-		t.Errorf("expected at least 28 visible entries, got %d", visible)
+	if visible < 26 {
+		t.Errorf("expected at least 26 visible entries, got %d", visible)
 	}
 	if acquired < 20 {
 		t.Errorf("expected at least 20 acquired entries, got %d", acquired)
 	}
 	if system != 4 {
 		t.Errorf("expected 4 system entries, got %d", system)
+	}
+	if unsafe != 8 {
+		t.Errorf("expected 8 unsafe entries, got %d", unsafe)
 	}
 }
 
