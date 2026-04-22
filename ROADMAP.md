@@ -131,6 +131,32 @@ Global "Unlock All" for Sites of Grace with option to skip boss arena graces.
 - "Skip Boss Arenas" checkbox (default: on) filters boss graces from bulk unlock
 - Boss arena graces marked with "B" indicator in UI
 
+### ✅ Dungeon Entrance Door Auto-Unlock 🟢
+Automatically open/close catacomb and hero's grave sealed entrance doors when toggling their Site of Grace.
+
+**Implementation:** `backend/db/data/graces.go`, `app.go`
+- `DoorFlag uint32` field on `GraceData` — overworld ObjAct event flag for the entrance door
+- `SetGraceVisited()` automatically sets/clears `DoorFlag` alongside the grace flag
+- Door flags reverse-engineered via binary diff of before/after save files (5 confirmed via RE, 14 via bruteforce scan)
+- Flag format: `10{col}{row}{ObjAct}` where col/row = overworld tile m60 coordinates
+- ObjAct offsets: catacombs use 8540 or 8600, hero's graves use 8620
+- 19/25 dungeons have confirmed door flags; 6 remain unknown (DoorFlag=0):
+  - War-Dead Catacombs (requires Radahn defeat, different access mechanism)
+  - Consecrated Snowfield Catacombs, Hidden Path to the Haligtree (endgame, not yet RE'd)
+  - Leyndell Catacombs (accessed via sewers, no overworld door)
+  - Fog Rift / Scorpion River / Darklight Catacombs (DLC, m61 tiles, not yet RE'd)
+
+### 🔲 Dungeon Door Flags — Missing Entries 🟢
+RE remaining dungeon entrance door flags.
+
+**TODO:**
+- War-Dead Catacombs (m60_52_41) — requires Radahn boss defeat to access area; standard ObjAct scan inconclusive (8540/8600 both failed). May need boss defeat flag + door flag combo
+- Giant-Conquering Hero's Grave + Giants' Mountaintop Catacombs (shared tile m60_50_53) — flag 8600 on this tile is NOT the door for either dungeon. Need before/after RE for each separately; shared tile may use different ObjAct offsets (e.g. 8540+8620)
+- Consecrated Snowfield Catacombs (m60_50_55) — need before/after save pair
+- Hidden Path to the Haligtree (m60_49_54) — need before/after save pair
+- Leyndell Catacombs (m35_00) — sewer access, may not have standard overworld door flag
+- DLC catacombs: Fog Rift (m61_47_46), Scorpion River (m61_44_46), Darklight (m61_51_43/52_43) — m61 tile prefix, likely `20{col}{row}{ObjAct}` format
+
 ---
 
 ## Phase 4 — Inventory & Equipment Enhancements

@@ -360,6 +360,14 @@ func (a *App) SetGraceVisited(slotIndex int, graceID uint32, visited bool) error
 	if err := db.SetEventFlag(flags, graceID, visited); err != nil {
 		return fmt.Errorf("failed to set grace %d: %w", graceID, err)
 	}
+
+	// Automatically open/close dungeon entrance door when toggling catacomb/hero's grave graces
+	if gd, ok := data.Graces[graceID]; ok && gd.DoorFlag != 0 {
+		if err := db.SetEventFlag(flags, gd.DoorFlag, visited); err != nil {
+			return fmt.Errorf("failed to set door flag %d: %w", gd.DoorFlag, err)
+		}
+	}
+
 	return nil
 }
 

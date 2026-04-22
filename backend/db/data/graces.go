@@ -5,6 +5,7 @@ type GraceData struct {
 	Name        string
 	BossArena   bool   // true if this grace appears in/after a boss fight
 	DungeonType string // "catacomb", "hero_grave", or "" for regular graces
+	DoorFlag    uint32 // overworld ObjAct event flag that opens the entrance door (0 = none)
 }
 
 // G is a shorthand constructor for regular graces.
@@ -14,10 +15,14 @@ func G(name string) GraceData { return GraceData{Name: name} }
 func B(name string) GraceData { return GraceData{Name: name, BossArena: true} }
 
 // Cat is a shorthand constructor for catacomb graces (sealed entrance doors).
-func Cat(name string) GraceData { return GraceData{Name: name, DungeonType: "catacomb"} }
+func Cat(name string, doorFlag uint32) GraceData {
+	return GraceData{Name: name, DungeonType: "catacomb", DoorFlag: doorFlag}
+}
 
 // HG is a shorthand constructor for hero's grave graces (sealed entrance doors).
-func HG(name string) GraceData { return GraceData{Name: name, DungeonType: "hero_grave"} }
+func HG(name string, doorFlag uint32) GraceData {
+	return GraceData{Name: name, DungeonType: "hero_grave", DoorFlag: doorFlag}
+}
 
 var Graces = map[uint32]GraceData{
 	// --- Stormveil Castle ---
@@ -172,27 +177,27 @@ var Graces = map[uint32]GraceData{
 	0x00011C62: G("Library (Shadow of the Erdtree)"),
 
 	// --- Catacombs ---
-	0x00011D28: Cat("Tombsward Catacombs (Weeping Peninsula)"),
-	0x00011D29: Cat("Impaler's Catacombs (Weeping Peninsula)"),
-	0x00011D2A: Cat("Stormfoot Catacombs (Limgrave West)"),
-	0x00011D2B: Cat("Road's End Catacombs (Liurnia West)"),
-	0x00011D2C: Cat("Murkwater Catacombs (Limgrave West)"),
-	0x00011D2D: Cat("Black Knife Catacombs (Liurnia East)"),
-	0x00011D2E: Cat("Cliffbottom Catacombs (Liurnia East)"),
-	0x00011D2F: Cat("Wyndham Catacombs (Altus Plateau)"),
-	0x00011D30: HG("Sainted Hero's Grave (Altus Plateau)"),
-	0x00011D31: HG("Gelmir Hero's Grave (Mt. Gelmir)"),
-	0x00011D32: HG("Auriza Hero's Grave (Altus Plateau)"),
-	0x00011D33: Cat("Deathtouched Catacombs (Limgrave East)"),
-	0x00011D34: Cat("Unsightly Catacombs (Mt. Gelmir)"),
-	0x00011D35: Cat("Auriza Side Tomb (Altus Plateau)"),
-	0x00011D36: Cat("Minor Erdtree Catacombs (Caelid)"),
-	0x00011D37: Cat("Caelid Catacombs (Caelid)"),
-	0x00011D38: Cat("War-Dead Catacombs (Caelid)"),
-	0x00011D39: HG("Giant-Conquering Hero's Grave (Mountaintops of the Giants East)"),
-	0x00011D3A: Cat("Giant's Mountaintop Catacombs (Mountaintops of the Giants East)"),
-	0x00011D3B: Cat("Consecrated Snowfield Catacombs (Consecrated Snowfield)"),
-	0x00011D3C: Cat("Hidden Path to the Haligtree (Consecrated Snowfield)"),
+	0x00011D28: Cat("Tombsward Catacombs (Weeping Peninsula)", 1043338600),
+	0x00011D29: Cat("Impaler's Catacombs (Weeping Peninsula)", 1045348540),
+	0x00011D2A: Cat("Stormfoot Catacombs (Limgrave West)", 1041378540),
+	0x00011D2B: Cat("Road's End Catacombs (Liurnia West)", 1033438600),
+	0x00011D2C: Cat("Murkwater Catacombs (Limgrave West)", 1043388540),
+	0x00011D2D: Cat("Black Knife Catacombs (Liurnia East)", 1039488540),
+	0x00011D2E: Cat("Cliffbottom Catacombs (Liurnia East)", 1039418540),
+	0x00011D2F: Cat("Wyndham Catacombs (Altus Plateau)", 1038528600),
+	0x00011D30: HG("Sainted Hero's Grave (Altus Plateau)", 1040528620),
+	0x00011D31: HG("Gelmir Hero's Grave (Mt. Gelmir)", 1037538620),
+	0x00011D32: HG("Auriza Hero's Grave (Altus Plateau)", 1045518620),
+	0x00011D33: Cat("Deathtouched Catacombs (Limgrave East)", 1043398540),
+	0x00011D34: Cat("Unsightly Catacombs (Mt. Gelmir)", 1036518600),
+	0x00011D35: Cat("Auriza Side Tomb (Altus Plateau)", 1045528600),
+	0x00011D36: Cat("Minor Erdtree Catacombs (Caelid)", 1047408540),
+	0x00011D37: Cat("Caelid Catacombs (Caelid)", 1048368600),
+	0x00011D38: Cat("War-Dead Catacombs (Caelid)", 0),
+	0x00011D39: HG("Giant-Conquering Hero's Grave (Mountaintops of the Giants East)", 0),
+	0x00011D3A: Cat("Giant's Mountaintop Catacombs (Mountaintops of the Giants East)", 0),
+	0x00011D3B: Cat("Consecrated Snowfield Catacombs (Consecrated Snowfield)", 0),
+	0x00011D3C: Cat("Hidden Path to the Haligtree (Consecrated Snowfield)", 0),
 
 	// --- Caves ---
 	0x00011D8C: G("Murkwater Cave (Limgrave West)"),
@@ -245,7 +250,7 @@ var Graces = map[uint32]GraceData{
 	0x00011F1C: B("Cathedral of the Forsaken (Leyndell Royal Capital)"),
 	0x00011F1D: G("Underground Roadside (Leyndell Royal Capital)"),
 	0x00011F1E: G("Forsaken Depths (Leyndell Royal Capital)"),
-	0x00011F1F: Cat("Leyndell Catacombs (Leyndell Royal Capital)"),
+	0x00011F1F: Cat("Leyndell Catacombs (Leyndell Royal Capital)", 0),
 	0x00011F20: G("Frenzied Flame Proscription (Leyndell Royal Capital)"),
 
 	// --- Ruin-Strewn Precipice ---
@@ -254,9 +259,9 @@ var Graces = map[uint32]GraceData{
 	0x000120AE: B("Ruin-Strewn Precipice Overlook (Altus Plateau)"),
 
 	// --- Shadow of the Erdtree — DLC Dungeons ---
-	0x00012110: Cat("Fog Rift Catacombs (Shadow of the Erdtree)"),
-	0x00012111: Cat("Scorpion River Catacombs (Shadow of the Erdtree)"),
-	0x00012112: Cat("Darklight Catacombs (Shadow of the Erdtree)"),
+	0x00012110: Cat("Fog Rift Catacombs (Shadow of the Erdtree)", 0),
+	0x00012111: Cat("Scorpion River Catacombs (Shadow of the Erdtree)", 0),
+	0x00012112: Cat("Darklight Catacombs (Shadow of the Erdtree)", 0),
 	0x00012174: G("Belurat Gaol (Shadow of the Erdtree)"),
 	0x00012175: G("Bonny Gaol (Shadow of the Erdtree)"),
 	0x00012176: G("Lamenter's Gaol (Shadow of the Erdtree)"),
