@@ -197,11 +197,11 @@ export function SettingsTab({
                     </div>
                     {selectedTarget && (
                         <div className="flex flex-wrap gap-1.5">
-                            <button onClick={handleTestConnection} disabled={deploying} className={btnSecondary}>Test</button>
+                            <button onClick={handleTestConnection} disabled={deploying} className={`${btnSm} bg-green-600 text-white shadow-sm hover:brightness-110 active:scale-95`}>Test</button>
                             <button onClick={handleUpload} disabled={deploying || !platform} className={btnAction}>Upload</button>
                             <button onClick={handleDownload} disabled={deploying} className={btnAction}>Download</button>
                             <button onClick={handleLaunch} disabled={deploying} className={btnAction}>Launch</button>
-                            <button onClick={handleClose} disabled={deploying} className={btnSecondary}>Close Game</button>
+                            <button onClick={handleClose} disabled={deploying} className={`${btnSm} bg-red-600 text-white shadow-sm hover:brightness-110 active:scale-95`}>Close Game</button>
                             <button onClick={handleDeployAndLaunch} disabled={deploying || !platform} className={btnAction}>Deploy & Launch</button>
                         </div>
                     )}
