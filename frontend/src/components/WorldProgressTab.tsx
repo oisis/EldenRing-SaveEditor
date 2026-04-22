@@ -8,10 +8,10 @@ interface WorldProgressTabProps {
 }
 
 // Shared compact checkbox + label
-const Chk = ({checked, onChange, color = 'primary'}: {checked: boolean; onChange: (v: boolean) => void; color?: string}) => (
+const Chk = ({checked, onChange}: {checked: boolean; onChange: (v: boolean) => void}) => (
     <div className="relative flex items-center justify-center">
         <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
-            className={`peer appearance-none w-3.5 h-3.5 rounded border border-border bg-background checked:bg-${color} checked:border-${color} transition-all cursor-pointer`} />
+            className="peer appearance-none w-3.5 h-3.5 rounded border border-border bg-background checked:bg-primary checked:border-primary transition-all cursor-pointer" />
         <svg className="absolute w-2 h-2 text-white pointer-events-none hidden peer-checked:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7"></path>
         </svg>
@@ -34,8 +34,8 @@ const Arrow = ({open}: {open: boolean}) => (
     </div>
 );
 
-const Badge = ({count, total, color = 'primary'}: {count: number; total: number; color?: string}) => (
-    <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${count === total ? `text-${color} border-${color}/50 bg-${color}/10` : 'text-muted-foreground bg-muted/50 border-border'}`}>
+const Badge = ({count, total, activeCls}: {count: number; total: number; activeCls?: string}) => (
+    <span className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${count === total ? (activeCls || 'text-primary border-primary/50 bg-primary/10') : 'text-muted-foreground bg-muted/50 border-border'}`}>
         {count}/{total}
     </span>
 );
@@ -274,7 +274,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                     <div className="flex items-center space-x-2">
                                         {dc < rb.length && <button onClick={e => { e.stopPropagation(); handleKillAll(rb); }} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Kill</button>}
                                         {dc > 0 && <button onClick={e => { e.stopPropagation(); handleRespawnAll(rb); }} className={`${btnSm} hover:text-green-400 hover:border-green-400/50`}>Respawn</button>}
-                                        <Badge count={dc} total={rb.length} color={dc === rb.length ? 'red-400' : dc > 0 ? 'amber-400' : 'primary'} />
+                                        <Badge count={dc} total={rb.length} activeCls={dc === rb.length ? 'text-red-400 border-red-400/50 bg-red-400/10' : dc > 0 ? 'text-amber-400 border-amber-400/50 bg-amber-400/10' : undefined} />
                                     </div>
                                 </div>
                                 {expandedBossRegions[region] && (
