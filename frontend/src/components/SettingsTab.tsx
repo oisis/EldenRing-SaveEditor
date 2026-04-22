@@ -139,8 +139,8 @@ export function SettingsTab({
     const inputCls = "w-full bg-background border border-border/50 rounded px-2.5 py-1.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all";
     const labelCls = "text-[8px] font-black uppercase tracking-widest text-muted-foreground";
     const btnSm = "px-2.5 py-1 rounded text-[8px] font-black uppercase tracking-widest transition-all disabled:opacity-50";
-    const btnAction = `${btnSm} bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20`;
-    const btnDanger = `${btnSm} bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20`;
+    const btnAction = `${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110 active:scale-95`;
+    const btnSecondary = `${btnSm} bg-muted/30 text-foreground border border-border hover:bg-muted/50`;
     const sectionHdr = "flex items-center space-x-3 px-1";
     const dot = "w-1 h-5 bg-primary rounded-full shadow-[0_0_6px_rgba(var(--primary),0.3)]";
     const hdrText = "text-[10px] font-black uppercase tracking-[0.25em] text-foreground/80";
@@ -187,22 +187,22 @@ export function SettingsTab({
                             {targets.map(t => <option key={t.name} value={t.name}>{t.name} ({t.type === 'local' ? 'local' : t.host})</option>)}
                         </select>
                         <button onClick={() => { setEditTarget(new deploy.Target(EMPTY_SSH_TARGET)); setShowForm(true); }}
-                            className={`${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110`}>+ Add</button>
+                            className={btnAction}>+ Add</button>
                         {selectedTarget && <>
                             <button onClick={() => { const t = targets.find(x => x.name === selectedTarget); if (t) { setEditTarget(new deploy.Target(t)); setShowForm(true); } }}
-                                className={`${btnSm} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>Edit</button>
+                                className={btnSecondary}>Edit</button>
                             <button onClick={() => handleDeleteTarget(selectedTarget)}
-                                className={btnDanger}>Del</button>
+                                className={btnSecondary}>Del</button>
                         </>}
                     </div>
                     {selectedTarget && (
                         <div className="flex flex-wrap gap-1.5">
-                            <button onClick={handleTestConnection} disabled={deploying} className={`${btnSm} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>Test</button>
+                            <button onClick={handleTestConnection} disabled={deploying} className={btnSecondary}>Test</button>
                             <button onClick={handleUpload} disabled={deploying || !platform} className={btnAction}>Upload</button>
                             <button onClick={handleDownload} disabled={deploying} className={btnAction}>Download</button>
                             <button onClick={handleLaunch} disabled={deploying} className={btnAction}>Launch</button>
-                            <button onClick={handleClose} disabled={deploying} className={btnDanger}>Close Game</button>
-                            <button onClick={handleDeployAndLaunch} disabled={deploying || !platform} className={`${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110`}>Deploy & Launch</button>
+                            <button onClick={handleClose} disabled={deploying} className={btnSecondary}>Close Game</button>
+                            <button onClick={handleDeployAndLaunch} disabled={deploying || !platform} className={btnAction}>Deploy & Launch</button>
                         </div>
                     )}
                     {showForm && (
@@ -239,8 +239,8 @@ export function SettingsTab({
                                 <div className="space-y-0.5"><label className={labelCls}>Stop Command <span className="text-muted-foreground/50">(empty = auto-detect)</span></label><input value={editTarget.gameStopCmd} onChange={e => setEditTarget({...editTarget, gameStopCmd: e.target.value} as deploy.Target)} className={inputCls} /></div>
                             </div>
                             <div className="flex gap-1.5 pt-1">
-                                <button onClick={handleSaveTarget} className={`${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110`}>Save</button>
-                                <button onClick={() => setShowForm(false)} className={`${btnSm} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>Cancel</button>
+                                <button onClick={handleSaveTarget} className={btnAction}>Save</button>
+                                <button onClick={() => setShowForm(false)} className={btnSecondary}>Cancel</button>
                             </div>
                         </div>
                     )}
