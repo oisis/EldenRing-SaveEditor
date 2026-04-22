@@ -10,8 +10,28 @@ export function CloneSlot(arg1, arg2) {
   return window['go']['main']['App']['CloneSlot'](arg1, arg2);
 }
 
+export function CloseRemoteGame(arg1) {
+  return window['go']['main']['App']['CloseRemoteGame'](arg1);
+}
+
+export function DeleteDeployTarget(arg1) {
+  return window['go']['main']['App']['DeleteDeployTarget'](arg1);
+}
+
 export function DeleteSlot(arg1) {
   return window['go']['main']['App']['DeleteSlot'](arg1);
+}
+
+export function DeployAndLaunch(arg1) {
+  return window['go']['main']['App']['DeployAndLaunch'](arg1);
+}
+
+export function DeploySave(arg1) {
+  return window['go']['main']['App']['DeploySave'](arg1);
+}
+
+export function DownloadRemoteSave(arg1) {
+  return window['go']['main']['App']['DownloadRemoteSave'](arg1);
 }
 
 export function GetActiveSlots() {
@@ -36,6 +56,10 @@ export function GetCharacterNames() {
 
 export function GetColosseums(arg1) {
   return window['go']['main']['App']['GetColosseums'](arg1);
+}
+
+export function GetDeployTargets() {
+  return window['go']['main']['App']['GetDeployTargets']();
 }
 
 export function GetGraces(arg1) {
@@ -90,6 +114,10 @@ export function ImportCharacter(arg1, arg2) {
   return window['go']['main']['App']['ImportCharacter'](arg1, arg2);
 }
 
+export function LaunchRemoteGame(arg1) {
+  return window['go']['main']['App']['LaunchRemoteGame'](arg1);
+}
+
 export function RemoveFogOfWar(arg1) {
   return window['go']['main']['App']['RemoveFogOfWar'](arg1);
 }
@@ -112,6 +140,10 @@ export function RevertSlot(arg1) {
 
 export function SaveCharacter(arg1, arg2) {
   return window['go']['main']['App']['SaveCharacter'](arg1, arg2);
+}
+
+export function SaveDeployTarget(arg1) {
+  return window['go']['main']['App']['SaveDeployTarget'](arg1);
 }
 
 export function SelectAndOpenSave() {
@@ -156,6 +188,10 @@ export function SetSteamIDFromString(arg1) {
 
 export function SetSummoningPoolActivated(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetSummoningPoolActivated'](arg1, arg2, arg3);
+}
+
+export function TestSSHConnection(arg1) {
+  return window['go']['main']['App']['TestSSHConnection'](arg1);
 }
 
 export function WriteSave(arg1) {

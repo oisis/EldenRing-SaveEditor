@@ -272,6 +272,37 @@ export namespace db {
 
 }
 
+export namespace deploy {
+	
+	export class Target {
+	    name: string;
+	    host: string;
+	    port: number;
+	    user: string;
+	    keyPath: string;
+	    savePath: string;
+	    gameStartCmd: string;
+	    gameStopCmd: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new Target(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.host = source["host"];
+	        this.port = source["port"];
+	        this.user = source["user"];
+	        this.keyPath = source["keyPath"];
+	        this.savePath = source["savePath"];
+	        this.gameStartCmd = source["gameStartCmd"];
+	        this.gameStopCmd = source["gameStopCmd"];
+	    }
+	}
+
+}
+
 export namespace main {
 	
 	export class DiffEntry {
