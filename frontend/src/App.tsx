@@ -52,6 +52,9 @@ function App() {
     const [diffSummary, setDiffSummary] = useState<main.SlotDiffSummary[]>([]);
     const [diffDetails, setDiffDetails] = useState<Record<number, main.DiffEntry[]>>({});
     const [diffExpanded, setDiffExpanded] = useState<Record<number, boolean>>({});
+    const [selectedDeployTarget, setSelectedDeployTarget] = useState<string>('');
+    const [targetPlatform, setTargetPlatform] = useState<string>('PC');
+    const [exporting, setExporting] = useState(false);
 
     const refreshUndoDepth = useCallback(() => {
         if (!platform) { setUndoDepth(0); return; }
@@ -112,6 +115,13 @@ function App() {
         } catch (err) {
             toast.error(String(err));
         }
+    };
+
+    const handleExport = async () => {
+        setExporting(true);
+        try { await WriteSave(targetPlatform); toast.success(`Exported as ${targetPlatform}`); }
+        catch (err) { toast.error(String(err)); }
+        finally { setExporting(false); }
     };
 
     const refreshSlots = async () => {
@@ -263,9 +273,25 @@ function App() {
                     )}
                 </div>
                 
-                <div className="p-4 border-t border-border bg-muted/5 space-y-4">
+                <div className="p-4 border-t border-border bg-muted/5 space-y-3">
+                    {platform && (
+                        <div className="space-y-1.5">
+                            <div className="flex bg-muted/30 p-0.5 rounded border border-border">
+                                {(['PC', 'PS4'] as const).map(p => (
+                                    <button key={p} onClick={() => setTargetPlatform(p)}
+                                        className={`flex-1 py-1 rounded text-[8px] font-black uppercase tracking-widest transition-all ${targetPlatform === p ? 'bg-background text-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >{p}</button>
+                                ))}
+                            </div>
+                            <button onClick={handleExport} disabled={exporting}
+                                className="w-full bg-primary text-primary-foreground font-black py-2 rounded-lg text-[8px] uppercase tracking-[0.15em] shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center space-x-1.5">
+                                {exporting ? <div className="w-3 h-3 border-2 border-primary-foreground/20 border-t-primary-foreground rounded-full animate-spin" /> :
+                                <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg><span>Export as {targetPlatform}</span></>}
+                            </button>
+                        </div>
+                    )}
                     <div className="flex items-center justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
-                        <span>v0.1.0 Alpha</span>
+                        <span>v0.3.0</span>
                         <span>System Ready</span>
                     </div>
                 </div>
@@ -341,6 +367,8 @@ function App() {
                                     platform={platform}
                                     setPlatform={setPlatform}
                                     refreshSlots={refreshSlots}
+                                    selectedDeployTarget={selectedDeployTarget}
+                                    setSelectedDeployTarget={setSelectedDeployTarget}
                                 />
                             </div>
                         ) : !platform ? (

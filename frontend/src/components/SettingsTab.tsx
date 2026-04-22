@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback} from 'react';
 import toast from 'react-hot-toast';
 import {
-    SelectAndOpenSave, WriteSave, GetSteamIDString, SetSteamIDFromString,
+    SelectAndOpenSave, GetSteamIDString, SetSteamIDFromString,
     GetDeployTargets, SaveDeployTarget, DeleteDeployTarget,
     TestSSHConnection, DeploySave, DownloadRemoteSave,
     LaunchRemoteGame, CloseRemoteGame, DeployAndLaunch,
@@ -20,6 +20,8 @@ interface SettingsTabProps {
     platform: string | null;
     setPlatform: (platform: string | null) => void;
     refreshSlots: () => void;
+    selectedDeployTarget: string;
+    setSelectedDeployTarget: (v: string) => void;
 }
 
 const EMPTY_SSH_TARGET: deploy.Target = new deploy.Target({
@@ -39,10 +41,9 @@ const EMPTY_LOCAL_TARGET: deploy.Target = new deploy.Target({
 export function SettingsTab({
     theme, setTheme, columnVisibility, setColumnVisibility,
     showFlaggedItems, setShowFlaggedItems, debugMode, setDebugMode,
-    platform, setPlatform, refreshSlots
+    platform, setPlatform, refreshSlots,
+    selectedDeployTarget: selectedTarget, setSelectedDeployTarget: setSelectedTarget,
 }: SettingsTabProps) {
-    const [targetPlatform, setTargetPlatform] = useState<string>('PC');
-    const [exporting, setExporting] = useState(false);
     const [importing, setImporting] = useState(false);
     const [steamIdInput, setSteamIdInput] = useState('');
     const [steamIdSaved, setSteamIdSaved] = useState('');
@@ -51,7 +52,6 @@ export function SettingsTab({
 
     // Deploy state
     const [targets, setTargets] = useState<deploy.Target[]>([]);
-    const [selectedTarget, setSelectedTarget] = useState<string>('');
     const [editTarget, setEditTarget] = useState<deploy.Target>(new deploy.Target(EMPTY_SSH_TARGET));
     const [showForm, setShowForm] = useState(false);
     const [deploying, setDeploying] = useState(false);
@@ -89,16 +89,10 @@ export function SettingsTab({
         finally { setImporting(false); }
     };
 
-    const handleExport = async () => {
-        setExporting(true);
-        try { await WriteSave(targetPlatform); toast.success(`Exported as ${targetPlatform}`); }
-        catch (err) { toast.error(String(err)); }
-        finally { setExporting(false); }
-    };
-
     // Deploy handlers
     const handleSaveTarget = async () => {
-        if (!editTarget.name || !editTarget.host) { toast.error('Name and host required'); return; }
+        if (!editTarget.name || (editTarget.type === 'ssh' && !editTarget.host)) { toast.error('Name and host required'); return; }
+        if (!editTarget.savePath) { toast.error('Save path required'); return; }
         try { await SaveDeployTarget(editTarget); toast.success(`Target "${editTarget.name}" saved`); loadTargets(); setShowForm(false); setSelectedTarget(editTarget.name); }
         catch (e) { toast.error(String(e)); }
     };
@@ -145,6 +139,8 @@ export function SettingsTab({
     const inputCls = "w-full bg-background border border-border/50 rounded px-2.5 py-1.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/20 focus:border-primary transition-all";
     const labelCls = "text-[8px] font-black uppercase tracking-widest text-muted-foreground";
     const btnSm = "px-2.5 py-1 rounded text-[8px] font-black uppercase tracking-widest transition-all disabled:opacity-50";
+    const btnAction = `${btnSm} bg-primary/10 text-primary border border-primary/30 hover:bg-primary/20`;
+    const btnDanger = `${btnSm} bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20`;
     const sectionHdr = "flex items-center space-x-3 px-1";
     const dot = "w-1 h-5 bg-primary rounded-full shadow-[0_0_6px_rgba(var(--primary),0.3)]";
     const hdrText = "text-[10px] font-black uppercase tracking-[0.25em] text-foreground/80";
@@ -168,33 +164,15 @@ export function SettingsTab({
                 </div>
             </section>
 
-            {/* File Operations */}
+            {/* Import Save */}
             <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>File Operations</h2></div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div className="card px-4 py-3 space-y-2">
-                        <p className="text-[10px] font-bold text-foreground">Import Save</p>
-                        <button onClick={handleImport} disabled={importing}
-                            className="w-full bg-muted/30 hover:bg-muted/50 text-foreground font-black py-2 rounded text-[8px] uppercase tracking-[0.15em] border border-border transition-all flex items-center justify-center space-x-1.5">
-                            {importing ? <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" /> :
-                            <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><span>Select File</span></>}
-                        </button>
-                    </div>
-                    <div className="card px-4 py-3 space-y-2">
-                        <p className="text-[10px] font-bold text-foreground">Export Save</p>
-                        <div className="flex bg-muted/30 p-0.5 rounded border border-border mb-1.5">
-                            {(['PC', 'PS4'] as const).map(p => (
-                                <button key={p} onClick={() => setTargetPlatform(p)}
-                                    className={`flex-1 py-1 rounded text-[8px] font-black uppercase tracking-widest transition-all ${targetPlatform === p ? 'bg-background text-foreground shadow-sm ring-1 ring-border' : 'text-muted-foreground hover:text-foreground'}`}
-                                >{p}</button>
-                            ))}
-                        </div>
-                        <button onClick={handleExport} disabled={!platform || exporting}
-                            className="w-full bg-primary text-primary-foreground font-black py-2 rounded text-[8px] uppercase tracking-[0.15em] shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-1.5">
-                            {exporting ? <div className="w-3 h-3 border-2 border-primary-foreground/20 border-t-primary-foreground rounded-full animate-spin" /> :
-                            <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg><span>Export as {targetPlatform}</span></>}
-                        </button>
-                    </div>
+                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Import Save</h2></div>
+                <div className="card px-4 py-3">
+                    <button onClick={handleImport} disabled={importing}
+                        className="w-full bg-muted/30 hover:bg-muted/50 text-foreground font-black py-2 rounded text-[8px] uppercase tracking-[0.15em] border border-border transition-all flex items-center justify-center space-x-1.5">
+                        {importing ? <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" /> :
+                        <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><span>Select File</span></>}
+                    </button>
                 </div>
             </section>
 
@@ -214,16 +192,16 @@ export function SettingsTab({
                             <button onClick={() => { const t = targets.find(x => x.name === selectedTarget); if (t) { setEditTarget(new deploy.Target(t)); setShowForm(true); } }}
                                 className={`${btnSm} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>Edit</button>
                             <button onClick={() => handleDeleteTarget(selectedTarget)}
-                                className={`${btnSm} bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20`}>Del</button>
+                                className={btnDanger}>Del</button>
                         </>}
                     </div>
                     {selectedTarget && (
                         <div className="flex flex-wrap gap-1.5">
                             <button onClick={handleTestConnection} disabled={deploying} className={`${btnSm} bg-muted/30 text-foreground border border-border hover:bg-muted/50`}>Test</button>
-                            <button onClick={handleUpload} disabled={deploying || !platform} className={`${btnSm} bg-blue-500/10 text-blue-400 border border-blue-500/20 hover:bg-blue-500/20`}>Upload</button>
-                            <button onClick={handleDownload} disabled={deploying} className={`${btnSm} bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 hover:bg-cyan-500/20`}>Download</button>
-                            <button onClick={handleLaunch} disabled={deploying} className={`${btnSm} bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20`}>Launch</button>
-                            <button onClick={handleClose} disabled={deploying} className={`${btnSm} bg-orange-500/10 text-orange-400 border border-orange-500/20 hover:bg-orange-500/20`}>Close</button>
+                            <button onClick={handleUpload} disabled={deploying || !platform} className={btnAction}>Upload</button>
+                            <button onClick={handleDownload} disabled={deploying} className={btnAction}>Download</button>
+                            <button onClick={handleLaunch} disabled={deploying} className={btnAction}>Launch</button>
+                            <button onClick={handleClose} disabled={deploying} className={btnDanger}>Close Game</button>
                             <button onClick={handleDeployAndLaunch} disabled={deploying || !platform} className={`${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110`}>Deploy & Launch</button>
                         </div>
                     )}
@@ -312,16 +290,16 @@ export function SettingsTab({
                         </div>
                     </div>
                     <div className="border-t border-border/40 pt-2.5">
-                        <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                            <div><span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cut & Ban-Risk Items</span><p className="text-[8px] text-muted-foreground/60 font-medium mt-0.5">Show flagged items in Database/Inventory.</p></div>
-                            <input type="checkbox" checked={showFlaggedItems} onChange={e => setShowFlaggedItems(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-3" />
-                        </label>
-                    </div>
-                    <div className="border-t border-border/40 pt-2.5">
-                        <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                            <div><span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span><p className="text-[8px] text-muted-foreground/60 font-medium mt-0.5">Show all parser warnings.</p></div>
-                            <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-3" />
-                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cut & Ban-Risk</span>
+                                <input type="checkbox" checked={showFlaggedItems} onChange={e => setShowFlaggedItems(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
+                            </label>
+                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
+                                <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
+                            </label>
+                        </div>
                     </div>
                 </div>
             </section>
