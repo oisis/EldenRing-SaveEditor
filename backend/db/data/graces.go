@@ -344,7 +344,7 @@ var Graces = map[uint32]GraceData{
 	0x000129B2: G("Foot of the Four Belfries (Liurnia West)"),
 	0x000129B5: G("Road to the Manor (Liurnia West)"),
 	0x000129B6: G("Main Caria Manor Gate (Liurnia West)"),
-	0x000129B7: G("Slumbering Wolf's Shack (Liurnia West)"),
+	0x000129B7: B("Slumbering Wolf's Shack (Liurnia West)"),
 	0x000129BA: G("Revenger's Shack (Liurnia West)"),
 	0x000129C3: G("The Four Belfries (Liurnia West)"),
 	0x000129C4: G("Ranni's Rise (Liurnia West)"),
