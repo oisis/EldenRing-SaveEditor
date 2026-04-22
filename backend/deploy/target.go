@@ -17,8 +17,15 @@ const (
 	DefaultStopCmd  = "pkill -TERM -f eldenring.exe"
 )
 
-// Target represents a remote deploy destination (Steam Deck, gaming PC, etc.).
+// Target type constants.
+const (
+	TargetTypeSSH   = "ssh"
+	TargetTypeLocal = "local"
+)
+
+// Target represents a deploy destination — either a remote SSH host or a local directory.
 type Target struct {
+	Type         string `json:"type"` // "ssh" or "local"
 	Name         string `json:"name"`
 	Host         string `json:"host"`
 	Port         int    `json:"port"`
@@ -27,6 +34,11 @@ type Target struct {
 	SavePath     string `json:"savePath"`
 	GameStartCmd string `json:"gameStartCmd"`
 	GameStopCmd  string `json:"gameStopCmd"`
+}
+
+// IsLocal returns true if this is a local (non-SSH) target.
+func (t Target) IsLocal() bool {
+	return t.Type == TargetTypeLocal
 }
 
 // TargetStore manages persistent storage of deploy targets.
@@ -79,8 +91,14 @@ func (s *TargetStore) Save(t Target) error {
 	if t.Name == "" {
 		return fmt.Errorf("target name is required")
 	}
-	if t.Host == "" {
-		return fmt.Errorf("host is required")
+	if t.Type == "" {
+		t.Type = TargetTypeSSH
+	}
+	if t.Type == TargetTypeSSH && t.Host == "" {
+		return fmt.Errorf("host is required for SSH targets")
+	}
+	if t.SavePath == "" {
+		return fmt.Errorf("save path is required")
 	}
 	if t.Port == 0 {
 		t.Port = DefaultPort

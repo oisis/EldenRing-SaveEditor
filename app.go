@@ -52,6 +52,7 @@ type App struct {
 	lastSavePath string
 	deployStore  *deploy.TargetStore
 	deploySSH    *deploy.SSHManager
+	deployLocal  *deploy.LocalManager
 }
 
 // NewApp creates a new App struct
@@ -71,6 +72,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.deployStore = store
 	a.deploySSH = deploy.NewSSHManager(store)
+	a.deployLocal = deploy.NewLocalManager(store)
 }
 
 // SelectAndOpenSave opens a native file dialog and loads the selected save
@@ -1334,40 +1336,68 @@ func (a *App) DeleteDeployTarget(name string) error {
 	return a.deployStore.Delete(name)
 }
 
-// TestSSHConnection tests SSH connectivity to a target.
+// isLocalTarget returns true if the named target is configured as local.
+func (a *App) isLocalTarget(name string) bool {
+	if a.deployStore == nil {
+		return false
+	}
+	t, ok := a.deployStore.Get(name)
+	return ok && t.IsLocal()
+}
+
+// TestSSHConnection tests connectivity to a target (SSH or local path).
 func (a *App) TestSSHConnection(targetName string) (string, error) {
-	if a.deploySSH == nil {
+	if a.deployStore == nil {
 		return "", fmt.Errorf("deploy not initialized")
+	}
+	if a.isLocalTarget(targetName) {
+		return a.deployLocal.TestConnection(targetName)
 	}
 	return a.deploySSH.TestConnection(targetName)
 }
 
-// DeploySave uploads the current save file to a remote target.
+// DeploySave writes the current in-memory save to a temp file and uploads/copies it to a target.
 func (a *App) DeploySave(targetName string) error {
-	if a.deploySSH == nil {
+	if a.deployStore == nil {
 		return fmt.Errorf("deploy not initialized")
 	}
-	if a.lastSavePath == "" {
-		return fmt.Errorf("no save file path — load or export a save first")
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
 	}
-	return a.deploySSH.UploadSave(targetName, a.lastSavePath)
+
+	// Write current working state to a temp file for upload
+	tmpPath, err := a.writeTempSave()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpPath)
+
+	if a.isLocalTarget(targetName) {
+		return a.deployLocal.UploadSave(targetName, tmpPath)
+	}
+	return a.deploySSH.UploadSave(targetName, tmpPath)
 }
 
-// DownloadRemoteSave downloads a save file from a remote target and loads it.
+// DownloadRemoteSave downloads/copies a save file from a target and loads it.
 func (a *App) DownloadRemoteSave(targetName string) (string, error) {
-	if a.deploySSH == nil {
+	if a.deployStore == nil {
 		return "", fmt.Errorf("deploy not initialized")
 	}
 
-	// Download to a temp file, then load it
 	tmpDir, err := os.MkdirTemp("", "er-save-download-")
 	if err != nil {
 		return "", fmt.Errorf("cannot create temp dir: %w", err)
 	}
 	localPath := tmpDir + "/ER0000.sl2"
 
-	if err := a.deploySSH.DownloadSave(targetName, localPath); err != nil {
-		return "", err
+	if a.isLocalTarget(targetName) {
+		if err := a.deployLocal.DownloadSave(targetName, localPath); err != nil {
+			return "", err
+		}
+	} else {
+		if err := a.deploySSH.DownloadSave(targetName, localPath); err != nil {
+			return "", err
+		}
 	}
 
 	save, err := core.LoadSave(localPath)
@@ -1380,31 +1410,63 @@ func (a *App) DownloadRemoteSave(targetName string) (string, error) {
 	return string(save.Platform), nil
 }
 
-// LaunchRemoteGame starts the game on a remote target.
+// LaunchRemoteGame starts the game on a target (SSH or local).
 func (a *App) LaunchRemoteGame(targetName string) (string, error) {
-	if a.deploySSH == nil {
+	if a.deployStore == nil {
 		return "", fmt.Errorf("deploy not initialized")
+	}
+	if a.isLocalTarget(targetName) {
+		return a.deployLocal.LaunchGame(targetName)
 	}
 	return a.deploySSH.LaunchGame(targetName)
 }
 
-// CloseRemoteGame stops the game on a remote target.
+// CloseRemoteGame stops the game on a target (SSH or local).
 func (a *App) CloseRemoteGame(targetName string) (string, error) {
-	if a.deploySSH == nil {
+	if a.deployStore == nil {
 		return "", fmt.Errorf("deploy not initialized")
+	}
+	if a.isLocalTarget(targetName) {
+		return a.deployLocal.CloseGame(targetName)
 	}
 	return a.deploySSH.CloseGame(targetName)
 }
 
-// DeployAndLaunch performs the full workflow: close → upload → launch.
+// DeployAndLaunch performs the full workflow: close → write temp → copy/upload → launch.
 func (a *App) DeployAndLaunch(targetName string) error {
-	if a.deploySSH == nil {
+	if a.deployStore == nil {
 		return fmt.Errorf("deploy not initialized")
 	}
-	if a.lastSavePath == "" {
-		return fmt.Errorf("no save file path — load or export a save first")
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
 	}
-	return a.deploySSH.DeployAndLaunch(targetName, a.lastSavePath)
+
+	tmpPath, err := a.writeTempSave()
+	if err != nil {
+		return err
+	}
+	defer os.Remove(tmpPath)
+
+	if a.isLocalTarget(targetName) {
+		return a.deployLocal.DeployAndLaunch(targetName, tmpPath)
+	}
+	return a.deploySSH.DeployAndLaunch(targetName, tmpPath)
+}
+
+// writeTempSave serializes the current in-memory save to a temp file, preserving target platform.
+func (a *App) writeTempSave() (string, error) {
+	tmpFile, err := os.CreateTemp("", "er-deploy-*.sl2")
+	if err != nil {
+		return "", fmt.Errorf("cannot create temp file: %w", err)
+	}
+	tmpPath := tmpFile.Name()
+	tmpFile.Close()
+
+	if err := a.save.SaveFile(tmpPath); err != nil {
+		os.Remove(tmpPath)
+		return "", fmt.Errorf("failed to write temp save: %w", err)
+	}
+	return tmpPath, nil
 }
 
 // Dummy method to force Wails to export types

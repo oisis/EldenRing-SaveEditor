@@ -22,11 +22,18 @@ interface SettingsTabProps {
     refreshSlots: () => void;
 }
 
-const EMPTY_TARGET: deploy.Target = new deploy.Target({
-    name: '', host: '', port: 22, user: 'deck', keyPath: '~/.ssh/id_rsa',
+const EMPTY_SSH_TARGET: deploy.Target = new deploy.Target({
+    type: 'ssh', name: '', host: '', port: 22, user: 'deck', keyPath: '~/.ssh/id_rsa',
     savePath: '/home/deck/.local/share/Steam/steamapps/compatdata/1245620/pfx/drive_c/users/steamuser/AppData/Roaming/EldenRing/{STEAM_ID}/ER0000.sl2',
     gameStartCmd: 'steam steam://rungameid/1245620',
     gameStopCmd: 'pkill -TERM -f eldenring.exe',
+});
+
+const EMPTY_LOCAL_TARGET: deploy.Target = new deploy.Target({
+    type: 'local', name: '', host: '', port: 22, user: '', keyPath: '',
+    savePath: '',
+    gameStartCmd: '',
+    gameStopCmd: '',
 });
 
 export function SettingsTab({
@@ -45,7 +52,7 @@ export function SettingsTab({
     // Deploy state
     const [targets, setTargets] = useState<deploy.Target[]>([]);
     const [selectedTarget, setSelectedTarget] = useState<string>('');
-    const [editTarget, setEditTarget] = useState<deploy.Target>(new deploy.Target(EMPTY_TARGET));
+    const [editTarget, setEditTarget] = useState<deploy.Target>(new deploy.Target(EMPTY_SSH_TARGET));
     const [showForm, setShowForm] = useState(false);
     const [deploying, setDeploying] = useState(false);
 
@@ -191,17 +198,17 @@ export function SettingsTab({
                 </div>
             </section>
 
-            {/* Remote Deploy */}
+            {/* Deploy */}
             <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Remote Deploy</h2></div>
+                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Deploy</h2></div>
                 <div className="card px-4 py-3 space-y-3">
                     <div className="flex items-center gap-2">
                         <select value={selectedTarget} onChange={e => setSelectedTarget(e.target.value)}
                             className="flex-1 bg-background border border-border/50 rounded px-2.5 py-1.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all">
                             <option value="">Select target...</option>
-                            {targets.map(t => <option key={t.name} value={t.name}>{t.name} ({t.host})</option>)}
+                            {targets.map(t => <option key={t.name} value={t.name}>{t.name} ({t.type === 'local' ? 'local' : t.host})</option>)}
                         </select>
-                        <button onClick={() => { setEditTarget(new deploy.Target(EMPTY_TARGET)); setShowForm(true); }}
+                        <button onClick={() => { setEditTarget(new deploy.Target(EMPTY_SSH_TARGET)); setShowForm(true); }}
                             className={`${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110`}>+ Add</button>
                         {selectedTarget && <>
                             <button onClick={() => { const t = targets.find(x => x.name === selectedTarget); if (t) { setEditTarget(new deploy.Target(t)); setShowForm(true); } }}
@@ -222,20 +229,36 @@ export function SettingsTab({
                     )}
                     {showForm && (
                         <div className="border border-border/50 rounded p-3 space-y-2.5 bg-muted/10">
-                            <p className="text-[10px] font-bold text-foreground">{editTarget.name && targets.some(t => t.name === editTarget.name) ? 'Edit Target' : 'Add Target'}</p>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                                <div className="space-y-0.5"><label className={labelCls}>Name</label><input value={editTarget.name} onChange={e => setEditTarget({...editTarget, name: e.target.value} as deploy.Target)} placeholder="Steam Deck" className={inputCls} /></div>
-                                <div className="space-y-0.5"><label className={labelCls}>Host</label><input value={editTarget.host} onChange={e => setEditTarget({...editTarget, host: e.target.value} as deploy.Target)} placeholder="192.168.1.100" className={inputCls} /></div>
-                                <div className="space-y-0.5"><label className={labelCls}>Port</label><input type="number" value={editTarget.port} onChange={e => setEditTarget({...editTarget, port: parseInt(e.target.value) || 22} as deploy.Target)} className={inputCls} /></div>
-                                <div className="space-y-0.5"><label className={labelCls}>User</label><input value={editTarget.user} onChange={e => setEditTarget({...editTarget, user: e.target.value} as deploy.Target)} placeholder="deck" className={inputCls} /></div>
+                            <div className="flex items-center justify-between">
+                                <p className="text-[10px] font-bold text-foreground">{editTarget.name && targets.some(t => t.name === editTarget.name) ? 'Edit Target' : 'Add Target'}</p>
+                                <div className="flex bg-muted/30 p-0.5 rounded border border-border">
+                                    {(['ssh', 'local'] as const).map(tp => (
+                                        <button key={tp} onClick={() => {
+                                            const base = tp === 'local' ? EMPTY_LOCAL_TARGET : EMPTY_SSH_TARGET;
+                                            setEditTarget(new deploy.Target({...base, name: editTarget.name, savePath: editTarget.savePath} as deploy.Target));
+                                        }}
+                                            className={`px-3 py-0.5 rounded text-[8px] font-black uppercase tracking-widest transition-all ${editTarget.type === tp ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                        >{tp}</button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className={`grid gap-2 ${editTarget.type === 'local' ? 'grid-cols-1' : 'grid-cols-2 md:grid-cols-4'}`}>
+                                <div className="space-y-0.5"><label className={labelCls}>Name</label><input value={editTarget.name} onChange={e => setEditTarget({...editTarget, name: e.target.value} as deploy.Target)} placeholder={editTarget.type === 'local' ? 'Local PC' : 'Steam Deck'} className={inputCls} /></div>
+                                {editTarget.type === 'ssh' && <>
+                                    <div className="space-y-0.5"><label className={labelCls}>Host</label><input value={editTarget.host} onChange={e => setEditTarget({...editTarget, host: e.target.value} as deploy.Target)} placeholder="192.168.1.100" className={inputCls} /></div>
+                                    <div className="space-y-0.5"><label className={labelCls}>Port</label><input type="number" value={editTarget.port} onChange={e => setEditTarget({...editTarget, port: parseInt(e.target.value) || 22} as deploy.Target)} className={inputCls} /></div>
+                                    <div className="space-y-0.5"><label className={labelCls}>User</label><input value={editTarget.user} onChange={e => setEditTarget({...editTarget, user: e.target.value} as deploy.Target)} placeholder="deck" className={inputCls} /></div>
+                                </>}
+                            </div>
+                            <div className={`grid gap-2 ${editTarget.type === 'local' ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2'}`}>
+                                {editTarget.type === 'ssh' && (
+                                    <div className="space-y-0.5"><label className={labelCls}>SSH Key Path</label><input value={editTarget.keyPath} onChange={e => setEditTarget({...editTarget, keyPath: e.target.value} as deploy.Target)} className={inputCls} /></div>
+                                )}
+                                <div className="space-y-0.5"><label className={labelCls}>Save Path</label><input value={editTarget.savePath} onChange={e => setEditTarget({...editTarget, savePath: e.target.value} as deploy.Target)} placeholder={editTarget.type === 'local' ? 'C:\\Users\\...\\EldenRing\\{STEAM_ID}\\ER0000.sl2' : ''} className={inputCls} /></div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div className="space-y-0.5"><label className={labelCls}>SSH Key Path</label><input value={editTarget.keyPath} onChange={e => setEditTarget({...editTarget, keyPath: e.target.value} as deploy.Target)} className={inputCls} /></div>
-                                <div className="space-y-0.5"><label className={labelCls}>Remote Save Path</label><input value={editTarget.savePath} onChange={e => setEditTarget({...editTarget, savePath: e.target.value} as deploy.Target)} className={inputCls} /></div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                <div className="space-y-0.5"><label className={labelCls}>Start Command</label><input value={editTarget.gameStartCmd} onChange={e => setEditTarget({...editTarget, gameStartCmd: e.target.value} as deploy.Target)} className={inputCls} /></div>
-                                <div className="space-y-0.5"><label className={labelCls}>Stop Command</label><input value={editTarget.gameStopCmd} onChange={e => setEditTarget({...editTarget, gameStopCmd: e.target.value} as deploy.Target)} className={inputCls} /></div>
+                                <div className="space-y-0.5"><label className={labelCls}>Start Command <span className="text-muted-foreground/50">(empty = auto-detect)</span></label><input value={editTarget.gameStartCmd} onChange={e => setEditTarget({...editTarget, gameStartCmd: e.target.value} as deploy.Target)} className={inputCls} /></div>
+                                <div className="space-y-0.5"><label className={labelCls}>Stop Command <span className="text-muted-foreground/50">(empty = auto-detect)</span></label><input value={editTarget.gameStopCmd} onChange={e => setEditTarget({...editTarget, gameStopCmd: e.target.value} as deploy.Target)} className={inputCls} /></div>
                             </div>
                             <div className="flex gap-1.5 pt-1">
                                 <button onClick={handleSaveTarget} className={`${btnSm} bg-primary text-primary-foreground shadow-sm hover:brightness-110`}>Save</button>
