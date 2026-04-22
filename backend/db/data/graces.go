@@ -118,14 +118,14 @@ var Graces = map[uint32]GraceData{
 	0x0001174E: G("Elphael Inner Wall (Miquella's Haligtree)"),
 	0x0001174F: G("Drainage Channel (Miquella's Haligtree)"),
 	0x00011750: G("Haligtree Roots (Miquella's Haligtree)"),
-	0x00011751: G("Haligtree Promenade (Miquella's Haligtree)"),
+	0x00011751: B("Haligtree Promenade (Miquella's Haligtree)"),
 	0x00011752: G("Haligtree Canopy (Miquella's Haligtree)"),
 	0x00011753: G("Haligtree Town (Miquella's Haligtree)"),
 	0x00011754: G("Haligtree Town Plaza (Miquella's Haligtree)"),
 
 	// --- Mt. Gelmir — Volcano Manor ---
 	0x000117B0: B("Rykard, Lord of Blasphemy (Mt. Gelmir)"),
-	0x000117B1: G("Temple of Eiglay (Mt. Gelmir)"),
+	0x000117B1: B("Temple of Eiglay (Mt. Gelmir)"),
 	0x000117B2: G("Volcano Manor (Mt. Gelmir)"),
 	0x000117B3: G("Prison Town Church (Mt. Gelmir)"),
 	0x000117B4: G("Guest Hall (Mt. Gelmir)"),
@@ -242,7 +242,7 @@ var Graces = map[uint32]GraceData{
 	0x00011EF4: G("Isolated Divine Tower (Altus Plateau)"),
 
 	// --- Underground / Leyndell Sewers ---
-	0x00011F1C: G("Cathedral of the Forsaken (Leyndell Royal Capital)"),
+	0x00011F1C: B("Cathedral of the Forsaken (Leyndell Royal Capital)"),
 	0x00011F1D: G("Underground Roadside (Leyndell Royal Capital)"),
 	0x00011F1E: G("Forsaken Depths (Leyndell Royal Capital)"),
 	0x00011F1F: Cat("Leyndell Catacombs (Leyndell Royal Capital)"),
@@ -373,11 +373,11 @@ var Graces = map[uint32]GraceData{
 	0x00012A16: G("Minor Erdtree Church (Altus Plateau)"),
 	0x00012A17: G("Hermit Merchant's Shack (Altus Plateau)"),
 	0x00012A18: G("Outer Wall Battleground (Altus Plateau)"),
-	0x00012A19: G("Windmill Heights (Altus Plateau)"),
+	0x00012A19: B("Windmill Heights (Altus Plateau)"),
 	0x00012A1A: G("Capital Rampart (Altus Plateau)"),
 	0x00012A20: G("Shaded Castle Ramparts (Altus Plateau)"),
 	0x00012A21: G("Shaded Castle Inner Gate (Altus Plateau)"),
-	0x00012A22: G("Castellan's Hall (Altus Plateau)"),
+	0x00012A22: B("Castellan's Hall (Altus Plateau)"),
 
 	// --- Mt. Gelmir ---
 	0x00012A3E: G("Bridge of Iniquity (Mt. Gelmir)"),
@@ -408,7 +408,7 @@ var Graces = map[uint32]GraceData{
 	0x00012A80: G("Sellia Under-Stair (Caelid)"),
 	0x00012A81: G("Impassable Greatbridge (Caelid)"),
 	0x00012A82: G("Church of the Plague (Caelid)"),
-	0x00012A83: G("Redmane Castle Plaza (Caelid)"),
+	0x00012A83: B("Redmane Castle Plaza (Caelid)"),
 	0x00012A84: G("Chamber Outside the Plaza (Caelid)"),
 	0x00012A86: B("Starscourge Radahn (Caelid)"),
 
@@ -433,7 +433,7 @@ var Graces = map[uint32]GraceData{
 	0x00012AE9: G("Snow Valley Ruins Overlook (Mountaintops of the Giants West)"),
 	0x00012AEA: B("Castle Sol Main Gate (Mountaintops of the Giants West)"),
 	0x00012AEB: G("Church of the Eclipse (Mountaintops of the Giants West)"),
-	0x00012AEC: G("Castle Sol Rooftop (Mountaintops of the Giants West)"),
+	0x00012AEC: B("Castle Sol Rooftop (Mountaintops of the Giants West)"),
 
 	// --- Mountaintops of the Giants East ---
 	0x00012AD5: G("Zamor Ruins (Mountaintops of the Giants East)"),
@@ -441,7 +441,7 @@ var Graces = map[uint32]GraceData{
 	0x00012ADB: G("Church of Repose (Mountaintops of the Giants East)"),
 	0x00012ADC: G("Foot of the Forge (Mountaintops of the Giants East)"),
 	0x00012ADD: B("Fire Giant (Mountaintops of the Giants East)"),
-	0x00012ADE: G("Forge of the Giants (Mountaintops of the Giants East)"),
+	0x00012ADE: B("Forge of the Giants (Mountaintops of the Giants East)"),
 
 	// --- Consecrated Snowfield ---
 	0x00012B06: G("Consecrated Snowfield (Consecrated Snowfield)"),
