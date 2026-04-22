@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -75,10 +76,14 @@ func (m *SSHManager) UploadSave(targetName string, localPath string) error {
 		}
 	}
 
+	// Ensure remote directory exists (use path.Dir for POSIX remote paths)
+	remoteDir := path.Dir(t.SavePath)
+	sftpClient.MkdirAll(remoteDir)
+
 	// Upload
 	dst, err := sftpClient.Create(t.SavePath)
 	if err != nil {
-		return fmt.Errorf("cannot create remote file: %w", err)
+		return fmt.Errorf("cannot create remote file %s: %w", t.SavePath, err)
 	}
 	defer dst.Close()
 
