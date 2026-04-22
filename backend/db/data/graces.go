@@ -86,7 +86,7 @@ var Graces = map[uint32]GraceData{
 	// --- Crumbling Farum Azula ---
 	0x00011684: B("Maliketh, the Black Blade (Crumbling Farum Azula)"),
 	0x00011685: B("Dragonlord Placidusax (Crumbling Farum Azula)"),
-	0x00011686: {"Dragon Temple Altar (Crumbling Farum Azula)", false},
+	0x00011686: B("Dragon Temple Altar (Crumbling Farum Azula)"),
 	0x00011687: {"Crumbling Beast Grave (Crumbling Farum Azula)", false},
 	0x00011688: {"Crumbling Beast Grave Depths (Crumbling Farum Azula)", false},
 	0x00011689: {"Tempest-Facing Balcony (Crumbling Farum Azula)", false},
@@ -290,7 +290,7 @@ var Graces = map[uint32]GraceData{
 	0x0001297E: {"Castle Morne Lift (Weeping Peninsula)", false},
 	0x0001297F: {"Behind The Castle (Weeping Peninsula)", false},
 	0x00012980: {"Beside the Rampart Gaol (Weeping Peninsula)", false},
-	0x00012981: {"Morne Moangrave (Weeping Peninsula)", false},
+	0x00012981: B("Morne Moangrave (Weeping Peninsula)"),
 	0x00012982: {"Fourth Church of Marika (Weeping Peninsula)", false},
 
 	// --- Liurnia North ---
