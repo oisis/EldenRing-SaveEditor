@@ -248,10 +248,14 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                             <label key={g.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
                                                 <Chk checked={g.visited} onChange={v => handleGraceToggle(g, v)} />
                                                 {g.isBossArena && <span className="text-amber-500 text-[10px] flex-shrink-0" title="Boss Arena">⚔</span>}
+                                                {g.dungeonType === 'catacomb' && <span className="flex-shrink-0 text-violet-500" title="Catacomb"><svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M3 21V7l9-5 9 5v14H3zm2-2h14V8l-7-3.9L5 8v11zm5-1v-4h4v4h-4zm0-6V8h4v4h-4z"/></svg></span>}
+                                                {g.dungeonType === 'hero_grave' && <span className="flex-shrink-0 text-slate-400" title="Hero's Grave"><svg className="w-2.5 h-2.5" viewBox="0 0 24 24" fill="currentColor"><path d="M10 2h4v6h4l-6 6-6-6h4V2zm-7 18v-2h18v2H3z"/></svg></span>}
                                                 <span className={`text-[10px] truncate font-semibold ${g.visited ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`} title={g.name}>
                                                     {g.name}
                                                 </span>
                                                 {g.isBossArena && <span className="flex-shrink-0 text-[7px] font-black uppercase tracking-wider px-1 py-px rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30" title="Site of Grace appears after defeating a boss">Boss Arena</span>}
+                                                {g.dungeonType === 'catacomb' && <span className="flex-shrink-0 text-[7px] font-black uppercase tracking-wider px-1 py-px rounded bg-violet-500/15 text-violet-600 dark:text-violet-400 border border-violet-500/30" title="Catacomb — sealed entrance doors">Catacomb</span>}
+                                                {g.dungeonType === 'hero_grave' && <span className="flex-shrink-0 text-[7px] font-black uppercase tracking-wider px-1 py-px rounded bg-slate-500/15 text-slate-600 dark:text-slate-400 border border-slate-500/30" title="Hero's Grave — sealed entrance doors">Hero's Grave</span>}
                                             </label>
                                         ))}
                                     </div>

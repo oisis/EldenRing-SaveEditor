@@ -54,6 +54,7 @@ type GraceEntry struct {
 	Region      string `json:"region"`
 	Visited     bool   `json:"visited"`
 	IsBossArena bool   `json:"isBossArena"`
+	DungeonType string `json:"dungeonType,omitempty"`
 }
 
 // BossEntry represents a boss encounter with defeat state.
@@ -551,6 +552,7 @@ func GetAllGraces() []GraceEntry {
 			Name:        name,
 			Region:      region,
 			IsBossArena: gd.BossArena,
+			DungeonType: gd.DungeonType,
 		})
 	}
 
