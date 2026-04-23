@@ -74,6 +74,12 @@ Dedicated UI for toggling boss defeat states via event flags.
 - Remembrance boss indicator, main boss indicator
 - Boss diff support in save comparison (`diffBosses`)
 
+**Known issue — multi-flag boss defeat (needs rework):**
+- Currently only sets 1 event flag (9xxx defeat flag) per boss — grants runes but boss remains alive in-game
+- Proper kill/respawn requires setting multiple flags per boss (arena state, defeat, quest progression, grace activation, item drops, etc.)
+- Reference data available in `tmp/repos/er-save-manager/src/er_save_manager/data/boss_data.py` (208 bosses with complete flag lists)
+- Requires: new `EventFlags []uint32` field in `BossData`, re-keying map to arena state flag, iterating all flags in `SetBossDefeated()`, testing per-boss in-game
+
 ---
 
 ## Phase 3 — Sites of Grace & World State
@@ -410,7 +416,7 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
 
 ### 🔲 Known Bugs (to investigate)
 - **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
-- **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. May require additional flags (e.g. boss animation state, arena state). Blocks testing of War-Dead Catacombs door flag.
+- **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. Requires multi-flag approach — see Boss Kill / Respawn Manager section above for details and reference data.
 
 ### ✅ Bugfixes
 - Fix duplicate talismans in database (155 entries with `0xA0` prefix removed from `talismans.go`)
