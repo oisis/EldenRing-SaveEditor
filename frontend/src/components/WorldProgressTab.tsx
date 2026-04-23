@@ -74,7 +74,18 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             GetBosses(charIdx).then(res => setBosses(res || [])),
             GetSummoningPools(charIdx).then(res => setPools(res || [])),
             GetColosseums(charIdx).then(res => setColosseums(res || [])),
-            GetMapProgress(charIdx).then(res => setMapEntries(res || [])),
+            GetMapProgress(charIdx).then(async (res) => {
+                const entries = res || [];
+                const systemFlags = entries.filter(e => e.category === 'system' && !e.enabled);
+                if (systemFlags.length > 0) {
+                    await Promise.all(systemFlags.map(e => SetMapFlag(charIdx, e.id, true)));
+                    for (const sf of systemFlags) {
+                        const idx = entries.findIndex(e => e.id === sf.id);
+                        if (idx >= 0) entries[idx] = {...entries[idx], enabled: true};
+                    }
+                }
+                setMapEntries(entries);
+            }),
             GetCookbooks(charIdx).then(res => setCookbooks(res || [])),
             GetGestures(charIdx).then(res => setGesturesList(res || [])),
             GetQuestNPCs().then(res => setQuestNPCs(res || [])),
