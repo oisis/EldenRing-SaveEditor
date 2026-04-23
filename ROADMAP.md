@@ -141,22 +141,23 @@ Automatically open/close catacomb and hero's grave sealed entrance doors when to
 - Door flags reverse-engineered via binary diff of before/after save files (5 confirmed via RE, 14 via bruteforce scan)
 - Flag format: `10{col}{row}{ObjAct}` where col/row = overworld tile m60 coordinates
 - ObjAct offsets: catacombs use 8540 or 8600, hero's graves use 8620
-- 19/25 dungeons have confirmed door flags; 6 remain unknown (DoorFlag=0):
-  - War-Dead Catacombs (requires Radahn defeat, different access mechanism)
-  - Consecrated Snowfield Catacombs, Hidden Path to the Haligtree (endgame, not yet RE'd)
-  - Leyndell Catacombs (accessed via sewers, no overworld door)
-  - Fog Rift / Scorpion River / Darklight Catacombs (DLC, m61 tiles, not yet RE'd)
+- 22/25 dungeons have confirmed door flags; 2 reclassified as regular graces (no doors); 4 remain:
+  - War-Dead Catacombs (requires Radahn defeat, access mechanism unclear)
+  - Fog Rift / Scorpion River / Darklight Catacombs (DLC, m61 tiles, not yet supported)
 
 ### 🔲 Dungeon Door Flags — Missing Entries 🟢
 RE remaining dungeon entrance door flags.
 
+**Resolved (v0.4.1):**
+- ✅ Giant-Conquering Hero's Grave — door flag `1050538620` (confirmed via binary diff of before/after saves)
+- ✅ Giant's Mountaintop Catacombs — door flag `1050538600` (confirmed via binary diff)
+- ✅ Consecrated Snowfield Catacombs — door flag `1050558540` (confirmed via binary diff)
+- ✅ Hidden Path to the Haligtree — reclassified as regular grace (doors always open, passage to new area)
+- ✅ Leyndell Catacombs — reclassified as regular grace (no sealed doors, accessed via sewers)
+
 **TODO:**
-- War-Dead Catacombs (m60_52_41) — requires Radahn boss defeat to access area; standard ObjAct scan inconclusive (8540/8600 both failed). May need boss defeat flag + door flag combo
-- Giant-Conquering Hero's Grave + Giants' Mountaintop Catacombs (shared tile m60_50_53) — flag 8600 on this tile is NOT the door for either dungeon. Need before/after RE for each separately; shared tile may use different ObjAct offsets (e.g. 8540+8620)
-- Consecrated Snowfield Catacombs (m60_50_55) — need before/after save pair
-- Hidden Path to the Haligtree (m60_49_54) — need before/after save pair
-- Leyndell Catacombs (m35_00) — sewer access, may not have standard overworld door flag
-- DLC catacombs: Fog Rift (m61_47_46), Scorpion River (m61_44_46), Darklight (m61_51_43/52_43) — m61 tile prefix, likely `20{col}{row}{ObjAct}` format
+- War-Dead Catacombs (m60_52_41) — requires Radahn boss defeat to access area; standard ObjAct scan inconclusive. May need boss defeat flag + door flag combo, or may not have a standard door at all. Cannot test until boss kill mechanism is fixed.
+- DLC catacombs: Fog Rift (m61_47_46), Scorpion River (m61_44_46), Darklight (m61_51_43/52_43) — DLC not yet supported, m61 tile prefix, likely `20{col}{row}{ObjAct}` format
 
 ---
 
