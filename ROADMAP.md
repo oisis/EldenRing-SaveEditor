@@ -88,6 +88,10 @@ Unlock/lock individual Sites of Grace. Especially valuable on PS4 where no other
 - UI: region-grouped with expand/collapse, Unlock All per region, region map previews
 - Grace diff support in save comparison (`diffGraces`)
 
+**Known issue:** After toggling a grace via event flag, it appears on the map but is NOT fully activated — the player must physically touch it in-game to activate fast travel. The event flag controls map visibility, not full activation. May require additional flags or a different mechanism.
+
+**Known issue:** DLC (Shadow of the Erdtree) Sites of Grace and map regions are not yet supported. See DLC Progress Manager.
+
 ### ✅ Summoning Pools Toggle 🟢
 Enable/disable summoning pool (Martyr Effigy) activation via event flags.
 
@@ -110,6 +114,8 @@ Unlock colosseums via their respective event flags.
 - `GetColosseums(slotIndex)` / `SetColosseumUnlocked(slotIndex, colosseumID, unlocked)` in `app.go`
 - UI: card grid with large toggles, global Unlock All button
 - Integrated as "Colosseums" sub-tab in World Progress tab
+
+**Known issue:** Toggling colosseum flags in the GUI has no visible effect in-game (tested offline). May only work in online mode, or may require additional flags. Needs verification in online multiplayer session.
 
 ### ✅ Map Exploration & Fog of War 🟡
 Full map reveal with Fog of War removal. **Fully unique feature** — no existing editor touches FoW.
@@ -172,6 +178,8 @@ Visual grid of all cookbooks with unlock status via event flags.
 - `GetCookbooks(slotIndex)` / `SetCookbookUnlocked(slotIndex, cookbookID, unlocked)` in `app.go`
 - UI: category-grouped with expand/collapse, Unlock All / Lock All buttons
 - Integrated as "Cookbooks" sub-tab in World Progress tab
+
+**Known issue:** Toggling a cookbook event flag unlocks crafting recipes, but the physical cookbook item does NOT appear in the player's inventory (Key Items). The game stores cookbook ownership in two places: event flag (recipes) and inventory item (Key Items list). Currently only the event flag is toggled — need to also add/remove the corresponding Key Item (cookbook item IDs TBD).
 
 ### ✅ Great Rune Manager 🟢
 Equipped Great Rune selector + buff toggle.
@@ -374,6 +382,10 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
 - Bidirectional PC ↔ PS4 conversion
 - Backup manager
 - Cross-platform desktop app (Wails)
+
+### 🔲 Known Bugs (to investigate)
+- **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
+- **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. May require additional flags (e.g. boss animation state, arena state). Blocks testing of War-Dead Catacombs door flag.
 
 ### ✅ Bugfixes
 - Fix duplicate talismans in database (155 entries with `0xA0` prefix removed from `talismans.go`)
