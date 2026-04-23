@@ -173,6 +173,7 @@ type PlayerGameData struct {
 	CharacterName       [16]uint16
 	Gender              uint8
 	Class               uint8
+	TalismanSlots       uint8 // additional talisman slots (0-3), total = 1 + this value
 	ScadutreeBlessing   uint8
 	ShadowRealmBlessing uint8
 }
@@ -475,6 +476,12 @@ func (s *SaveSlot) mapStats() error {
 	if s.Player.Class, err = sa.ReadU8(mo + OffClass); err != nil {
 		return fmt.Errorf("Class: %w", err)
 	}
+	if s.Player.TalismanSlots, err = sa.ReadU8(mo + OffTalismanSlots); err != nil {
+		return fmt.Errorf("TalismanSlots: %w", err)
+	}
+	if s.Player.TalismanSlots > 3 {
+		s.Player.TalismanSlots = 3
+	}
 	if s.Player.ScadutreeBlessing, err = sa.ReadU8(mo + OffScadutreeBlessing); err != nil {
 		return fmt.Errorf("ScadutreeBlessing: %w", err)
 	}
@@ -691,6 +698,7 @@ func (s *SaveSlot) Write(platform string) []byte {
 	sa.WriteU32(mo+OffSouls, s.Player.Souls)
 	sa.WriteU8(mo+OffGender, s.Player.Gender)
 	sa.WriteU8(mo+OffClass, s.Player.Class)
+	sa.WriteU8(mo+OffTalismanSlots, s.Player.TalismanSlots)
 	sa.WriteU8(mo+OffScadutreeBlessing, s.Player.ScadutreeBlessing)
 	sa.WriteU8(mo+OffShadowRealmBlessing, s.Player.ShadowRealmBlessing)
 

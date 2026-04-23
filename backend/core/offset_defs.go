@@ -22,6 +22,7 @@ const (
 	OffSouls               = -331
 	OffGender              = -249
 	OffClass               = -248
+	OffTalismanSlots       = -241 // AdditionalTalismanSlotsCount (PGD 0xBE, u8, range 0-3)
 	OffScadutreeBlessing   = -187
 	OffShadowRealmBlessing = -186
 	OffCharacterName       = -0x11B // 16 x uint16 UTF-16LE

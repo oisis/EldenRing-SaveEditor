@@ -37,6 +37,7 @@ type CharacterViewModel struct {
 	Intelligence        uint32                `json:"intelligence"`
 	Faith               uint32                `json:"faith"`
 	Arcane              uint32                `json:"arcane"`
+	TalismanSlots       uint8                 `json:"talismanSlots"`
 	ScadutreeBlessing   uint8                 `json:"scadutreeBlessing"`
 	ShadowRealmBlessing uint8                 `json:"shadowRealmBlessing"`
 	Inventory           []ItemViewModel       `json:"inventory"`
@@ -60,6 +61,7 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 		Intelligence:        data.Intelligence,
 		Faith:               data.Faith,
 		Arcane:              data.Arcane,
+		TalismanSlots:       data.TalismanSlots,
 		ScadutreeBlessing:   data.ScadutreeBlessing,
 		ShadowRealmBlessing: data.ShadowRealmBlessing,
 		Inventory:           []ItemViewModel{},
@@ -189,6 +191,10 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	data.Intelligence = vm.Intelligence
 	data.Faith = vm.Faith
 	data.Arcane = vm.Arcane
+	if vm.TalismanSlots > 3 {
+		vm.TalismanSlots = 3
+	}
+	data.TalismanSlots = vm.TalismanSlots
 	data.ScadutreeBlessing = vm.ScadutreeBlessing
 	data.ShadowRealmBlessing = vm.ShadowRealmBlessing
 

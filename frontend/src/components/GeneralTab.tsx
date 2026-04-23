@@ -85,79 +85,86 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500 max-w-5xl mx-auto overflow-y-auto custom-scrollbar">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-                {/* Left Column: Identity & Level */}
-                <div className="md:col-span-4 space-y-6">
-                    <div className="card p-5 space-y-4">
-                        <div className="flex items-center space-x-2 mb-2">
-                            <div className="w-1 h-3 bg-primary rounded-full" />
-                            <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Profile</h3>
-                        </div>
-                        
-                        <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
-                            <input 
-                                type="text" 
-                                value={char.name} 
-                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-bold focus:ring-1 focus:ring-primary/30 outline-none transition-all"
-                                maxLength={16}
-                            />
-                        </div>
-
-                        <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Runes</label>
-                            <input 
-                                type="number" 
-                                value={char.souls} 
-                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all"
-                            />
-                        </div>
+            {/* Character — single flat section */}
+            <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                        <div className="w-1 h-3 bg-primary rounded-full" />
+                        <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Character</h3>
                     </div>
-
-                    <div className="card p-6 flex flex-col items-center justify-center text-center relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-full h-0.5 bg-primary/50" />
-                        <span className="text-[9px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">Current Level</span>
-                        <span className="text-5xl font-black tracking-tighter text-foreground">{char.level}</span>
+                    <div className="flex items-center space-x-3">
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">Level</span>
+                        <span className="text-4xl font-black tracking-tighter text-foreground leading-none">{char.level}</span>
                     </div>
                 </div>
 
-                {/* Right Column: Attributes Grid */}
-                <div className="md:col-span-8 card p-5">
-                    <div className="flex items-center space-x-2 mb-6">
-                        <div className="w-1 h-3 bg-zinc-500 rounded-full" />
-                        <h3 className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Attributes</h3>
+                {/* Profile row: Name + Runes + Talisman Slots + Spell Slots */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
+                        <input
+                            type="text"
+                            value={char.name}
+                            onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
+                            className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-bold focus:ring-1 focus:ring-primary/30 outline-none transition-all"
+                            maxLength={16}
+                        />
                     </div>
-                    
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                        {attributes.map(stat => (
-                            <div key={stat.id} className="flex items-center justify-between group py-1 border-b border-border/30 hover:border-primary/30 transition-all">
-                                <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">
-                                    {stat.label}
-                                </label>
-                                <input 
-                                    type="number" 
-                                    min="1" max="99"
-                                    value={(char as any)[stat.id]} 
-                                    onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
-                                    className="w-12 bg-muted/30 border border-border rounded text-center text-xs font-black py-1 focus:ring-1 focus:ring-primary/30 outline-none"
-                                />
-                            </div>
-                        ))}
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Runes</label>
+                        <input
+                            type="number"
+                            value={char.souls}
+                            onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
+                            className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all"
+                        />
                     </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                            Talisman Slots <span className="text-primary font-mono">{1 + (char.talismanSlots || 0)}/4</span>
+                        </label>
+                        <input
+                            type="number"
+                            min={0} max={3}
+                            value={char.talismanSlots || 0}
+                            onChange={e => {
+                                const v = Math.min(3, Math.max(0, parseInt(e.target.value) || 0));
+                                setChar(vm.CharacterViewModel.createFrom({...char, talismanSlots: v}));
+                            }}
+                            className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all"
+                        />
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                            Spell Slots <span className="text-muted-foreground/50 font-mono">—</span>
+                        </label>
+                        <input
+                            type="number"
+                            min={0} max={12}
+                            value={0}
+                            disabled
+                            title="Not yet implemented"
+                            className="w-full bg-muted/10 border border-border/50 rounded-md px-3 py-2 text-xs font-black font-mono text-muted-foreground/40 cursor-not-allowed"
+                        />
+                    </div>
+                </div>
 
-                    <div className="mt-8 pt-6 border-t border-border/50 flex justify-end items-center space-x-4">
-                        <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">
-                            Staged in memory
-                        </p>
-                        <button 
-                            onClick={handleSave}
-                            className="bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all font-black px-6 py-2 rounded-md text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
-                        >
-                            Apply Changes
-                        </button>
-                    </div>
+                {/* Attributes grid */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-3 pt-2 border-t border-border/30">
+                    {attributes.map(stat => (
+                        <div key={stat.id} className="flex items-center justify-between group py-1 border-b border-border/30 hover:border-primary/30 transition-all">
+                            <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider group-hover:text-foreground transition-colors">
+                                {stat.label}
+                            </label>
+                            <input
+                                type="number"
+                                min="1" max="99"
+                                value={(char as any)[stat.id]}
+                                onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
+                                className="w-12 bg-muted/30 border border-border rounded text-center text-xs font-black py-1 focus:ring-1 focus:ring-primary/30 outline-none"
+                            />
+                        </div>
+                    ))}
                 </div>
             </div>
 
@@ -176,7 +183,7 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
                         <input
                             type="range" min={0} max={25} value={upgrade25}
                             onChange={e => setUpgrade25(parseInt(e.target.value))}
-                            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer accent-primary [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg"
                         />
                         <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{upgrade25}</span>
                     </div>
@@ -187,7 +194,7 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
                         <input
                             type="range" min={0} max={10} value={upgrade10}
                             onChange={e => setUpgrade10(parseInt(e.target.value))}
-                            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer accent-primary [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg"
                         />
                         <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgrade10}</span>
                     </div>
@@ -212,11 +219,24 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
                         <input
                             type="range" min={0} max={10} value={upgradeAsh}
                             onChange={e => setUpgradeAsh(parseInt(e.target.value))}
-                            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer accent-primary [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg"
                         />
                         <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgradeAsh}</span>
                     </div>
                 </div>
+            </div>
+
+            {/* Apply Changes — fixed bottom */}
+            <div className="flex justify-end items-center space-x-4 pt-4 pb-2 border-t border-border/30">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">
+                    Staged in memory
+                </p>
+                <button
+                    onClick={handleSave}
+                    className="bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all font-black px-6 py-2 rounded-md text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20"
+                >
+                    Apply Changes
+                </button>
             </div>
         </div>
     );

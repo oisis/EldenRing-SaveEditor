@@ -436,6 +436,7 @@ export namespace vm {
 	    intelligence: number;
 	    faith: number;
 	    arcane: number;
+	    talismanSlots: number;
 	    scadutreeBlessing: number;
 	    shadowRealmBlessing: number;
 	    inventory: ItemViewModel[];
@@ -463,6 +464,7 @@ export namespace vm {
 	        this.intelligence = source["intelligence"];
 	        this.faith = source["faith"];
 	        this.arcane = source["arcane"];
+	        this.talismanSlots = source["talismanSlots"];
 	        this.scadutreeBlessing = source["scadutreeBlessing"];
 	        this.shadowRealmBlessing = source["shadowRealmBlessing"];
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
