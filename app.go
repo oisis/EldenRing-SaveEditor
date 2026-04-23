@@ -527,6 +527,410 @@ func (a *App) SetColosseumUnlocked(slotIndex int, colosseumID uint32, unlocked b
 	return nil
 }
 
+// GetGestures returns all gestures with unlock state from the specified character slot.
+// GestureGameData is 64×u32 at StorageBoxOffset + DynStorageBox (immediately after storage).
+// Gesture slot IDs vary by body type — some gestures have even/odd variants.
+func (a *App) GetGestures(slotIndex int) ([]db.GestureEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	gestures := db.GetAllGestureSlots()
+
+	gestureDataOff := slot.StorageBoxOffset + core.DynStorageBox
+	if gestureDataOff+core.DynStorageToGestures > len(slot.Data) {
+		return gestures, nil // return without unlock state
+	}
+
+	// Read all 64 gesture slots from save, match against both body-type variants
+	unlockedNames := make(map[string]bool, 64)
+	for i := 0; i < 64; i++ {
+		off := gestureDataOff + i*4
+		gID := binary.LittleEndian.Uint32(slot.Data[off : off+4])
+		if gID == data.GestureEmptySentinel || gID == 0 {
+			continue
+		}
+		if idx, ok := data.LookupGestureBySlotID(gID); ok {
+			unlockedNames[data.AllGestures[idx].Name] = true
+		}
+	}
+
+	for i := range gestures {
+		gestures[i].Unlocked = unlockedNames[gestures[i].Name]
+	}
+
+	return gestures, nil
+}
+
+// readGestureSlots reads the 64 u32 gesture slot values from the save data.
+func readGestureSlots(slotData []byte, gestureDataOff int) []uint32 {
+	slots := make([]uint32, 64)
+	for i := 0; i < 64; i++ {
+		off := gestureDataOff + i*4
+		slots[i] = binary.LittleEndian.Uint32(slotData[off : off+4])
+	}
+	return slots
+}
+
+// resolveGestureWriteID determines the correct save-file ID for a gesture,
+// accounting for body-type variants. gestureID is the canonical EvenID from the UI.
+func resolveGestureWriteID(gestureID uint32, bodyTypeOffset uint32) uint32 {
+	for _, g := range data.AllGestures {
+		if g.EvenID == gestureID {
+			if g.OddID != 0 && bodyTypeOffset == 1 {
+				return g.OddID
+			}
+			return g.EvenID
+		}
+	}
+	return gestureID // fallback: use as-is
+}
+
+// gestureMatchesCanonical returns true if saveID corresponds to the gesture with canonical EvenID.
+func gestureMatchesCanonical(saveID, canonicalEvenID uint32) bool {
+	if saveID == canonicalEvenID {
+		return true
+	}
+	// Check if saveID is the OddID variant of this gesture
+	for _, g := range data.AllGestures {
+		if g.EvenID == canonicalEvenID {
+			return g.OddID != 0 && saveID == g.OddID
+		}
+	}
+	return false
+}
+
+// SetGestureUnlocked adds or removes a gesture from the GestureGameData array.
+// gestureID is the canonical EvenID from the UI; body-type variant is resolved automatically.
+func (a *App) SetGestureUnlocked(slotIndex int, gestureID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	gestureDataOff := slot.StorageBoxOffset + core.DynStorageBox
+	if gestureDataOff+core.DynStorageToGestures > len(slot.Data) {
+		return fmt.Errorf("gesture data offset 0x%X out of bounds", gestureDataOff)
+	}
+
+	gestureSlots := readGestureSlots(slot.Data, gestureDataOff)
+
+	if unlocked {
+		// Check if already present (either body-type variant)
+		for _, gID := range gestureSlots {
+			if gestureMatchesCanonical(gID, gestureID) {
+				return nil // already unlocked
+			}
+		}
+		// Detect body type and resolve write ID
+		btOffset := data.DetectBodyTypeOffset(gestureSlots)
+		writeID := resolveGestureWriteID(gestureID, btOffset)
+		// Find first empty slot (sentinel 0xFFFFFFFE)
+		for i, gID := range gestureSlots {
+			if gID == data.GestureEmptySentinel {
+				off := gestureDataOff + i*4
+				binary.LittleEndian.PutUint32(slot.Data[off:off+4], writeID)
+				return nil
+			}
+		}
+		return fmt.Errorf("no empty gesture slot available")
+	}
+
+	// Remove: clear matching slot (check both variants)
+	for i, gID := range gestureSlots {
+		if gestureMatchesCanonical(gID, gestureID) {
+			off := gestureDataOff + i*4
+			binary.LittleEndian.PutUint32(slot.Data[off:off+4], data.GestureEmptySentinel)
+			return nil
+		}
+	}
+	return nil // not found, nothing to remove
+}
+
+// BulkSetGesturesUnlocked adds or removes multiple gestures in a single call.
+// gestureIDs are canonical EvenIDs from the UI; body-type variants are resolved automatically.
+func (a *App) BulkSetGesturesUnlocked(slotIndex int, gestureIDs []uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	if len(gestureIDs) == 0 {
+		return nil
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	gestureDataOff := slot.StorageBoxOffset + core.DynStorageBox
+	if gestureDataOff+core.DynStorageToGestures > len(slot.Data) {
+		return fmt.Errorf("gesture data offset 0x%X out of bounds", gestureDataOff)
+	}
+
+	gestureSlots := readGestureSlots(slot.Data, gestureDataOff)
+
+	if unlocked {
+		// Build set of already-present gesture names
+		presentNames := make(map[string]bool, 64)
+		for _, gID := range gestureSlots {
+			if gID == data.GestureEmptySentinel || gID == 0 {
+				continue
+			}
+			if idx, ok := data.LookupGestureBySlotID(gID); ok {
+				presentNames[data.AllGestures[idx].Name] = true
+			}
+		}
+
+		// Detect body type once for all additions
+		btOffset := data.DetectBodyTypeOffset(gestureSlots)
+
+		for _, gestureID := range gestureIDs {
+			// Resolve gesture name to check if already present
+			gIdx := -1
+			for gi, g := range data.AllGestures {
+				if g.EvenID == gestureID {
+					gIdx = gi
+					break
+				}
+			}
+			if gIdx >= 0 && presentNames[data.AllGestures[gIdx].Name] {
+				continue // already unlocked
+			}
+
+			writeID := resolveGestureWriteID(gestureID, btOffset)
+
+			placed := false
+			for i, gID := range gestureSlots {
+				if gID == data.GestureEmptySentinel {
+					off := gestureDataOff + i*4
+					binary.LittleEndian.PutUint32(slot.Data[off:off+4], writeID)
+					gestureSlots[i] = writeID
+					if gIdx >= 0 {
+						presentNames[data.AllGestures[gIdx].Name] = true
+					}
+					placed = true
+					break
+				}
+			}
+			if !placed {
+				return fmt.Errorf("no empty gesture slot available (tried to unlock %d gestures)", len(gestureIDs))
+			}
+		}
+	} else {
+		// Build name-based lookup for gestures to remove
+		removeNames := make(map[string]bool, len(gestureIDs))
+		for _, id := range gestureIDs {
+			for _, g := range data.AllGestures {
+				if g.EvenID == id {
+					removeNames[g.Name] = true
+					break
+				}
+			}
+		}
+		for i, gID := range gestureSlots {
+			if gID == data.GestureEmptySentinel || gID == 0 {
+				continue
+			}
+			if idx, ok := data.LookupGestureBySlotID(gID); ok {
+				if removeNames[data.AllGestures[idx].Name] {
+					off := gestureDataOff + i*4
+					binary.LittleEndian.PutUint32(slot.Data[off:off+4], data.GestureEmptySentinel)
+					gestureSlots[i] = data.GestureEmptySentinel
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+// DiagnoseSlot performs comprehensive corruption detection on a character slot.
+func (a *App) DiagnoseSlot(slotIndex int) (*core.SlotDiagnostics, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+	name := core.UTF16ToString(a.save.Slots[slotIndex].Player.CharacterName[:])
+	if name == "" {
+		return nil, fmt.Errorf("slot %d is empty", slotIndex)
+	}
+
+	result := core.DiagnoseSaveCorruption(&a.save.Slots[slotIndex], slotIndex)
+	return &result, nil
+}
+
+// DiagnoseAllSlots runs corruption detection on all active slots.
+func (a *App) DiagnoseAllSlots() ([]core.SlotDiagnostics, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+
+	var results []core.SlotDiagnostics
+	for i := 0; i < 10; i++ {
+		name := core.UTF16ToString(a.save.Slots[i].Player.CharacterName[:])
+		if name == "" {
+			continue
+		}
+		result := core.DiagnoseSaveCorruption(&a.save.Slots[i], i)
+		results = append(results, result)
+	}
+	return results, nil
+}
+
+// GetQuestNPCs returns the list of NPC names with quest data.
+func (a *App) GetQuestNPCs() []string {
+	return db.GetAllQuestNPCs()
+}
+
+// GetQuestProgress returns the quest progression for a specific NPC in a character slot.
+func (a *App) GetQuestProgress(slotIndex int, npcName string) (*db.QuestNPC, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	questSteps, ok := data.QuestData[npcName]
+	if !ok {
+		return nil, fmt.Errorf("unknown NPC: %s", npcName)
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	var flags []byte
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags = slot.Data[slot.EventFlagsOffset:]
+	}
+
+	result := &db.QuestNPC{
+		Name:  npcName,
+		Steps: make([]db.QuestStep, len(questSteps)),
+	}
+
+	for i, step := range questSteps {
+		qs := db.QuestStep{
+			Description: step.Description,
+			Location:    step.Location,
+			Flags:       make([]db.QuestFlagState, len(step.Flags)),
+			Complete:    true,
+		}
+		for j, flag := range step.Flags {
+			var current bool
+			if flags != nil {
+				current, _ = db.GetEventFlag(flags, flag.ID)
+			}
+			qs.Flags[j] = db.QuestFlagState{
+				ID:      flag.ID,
+				Target:  flag.Value,
+				Current: current,
+			}
+			targetBool := flag.Value == 1
+			if current != targetBool {
+				qs.Complete = false
+			}
+		}
+		result.Steps[i] = qs
+	}
+
+	return result, nil
+}
+
+// SetQuestStep sets all flags for a quest step to their target values.
+func (a *App) SetQuestStep(slotIndex int, npcName string, stepIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	questSteps, ok := data.QuestData[npcName]
+	if !ok {
+		return fmt.Errorf("unknown NPC: %s", npcName)
+	}
+	if stepIndex < 0 || stepIndex >= len(questSteps) {
+		return fmt.Errorf("invalid step index %d for %s", stepIndex, npcName)
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	step := questSteps[stepIndex]
+	for _, flag := range step.Flags {
+		if err := db.SetEventFlag(flags, flag.ID, flag.Value == 1); err != nil {
+			return fmt.Errorf("failed to set flag %d: %w", flag.ID, err)
+		}
+	}
+
+	return nil
+}
+
+// GetCookbooks returns all cookbooks with unlock state from the specified character slot
+func (a *App) GetCookbooks(slotIndex int) ([]db.CookbookEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	cookbooks := db.GetAllCookbooks()
+
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range cookbooks {
+			unlocked, err := db.GetEventFlag(flags, cookbooks[i].ID)
+			if err != nil {
+				continue
+			}
+			cookbooks[i].Unlocked = unlocked
+		}
+	}
+
+	return cookbooks, nil
+}
+
+// SetCookbookUnlocked sets or clears the unlock flag for a cookbook
+func (a *App) SetCookbookUnlocked(slotIndex int, cookbookID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := db.SetEventFlag(flags, cookbookID, unlocked); err != nil {
+		return fmt.Errorf("failed to set cookbook %d: %w", cookbookID, err)
+	}
+	return nil
+}
+
 // GetMapProgress returns all map region flags with their current state
 func (a *App) GetMapProgress(slotIndex int) ([]db.MapEntry, error) {
 	if a.save == nil {
@@ -577,10 +981,13 @@ func (a *App) SetMapRegionFlags(slotIndex int, visibleFlagID uint32, enabled boo
 		return fmt.Errorf("failed to set visible flag %d: %w", visibleFlagID, err)
 	}
 
-	// Set corresponding acquired flag (visible + 1000), if it exists
-	acquiredID := visibleFlagID + 1000
-	if _, ok := data.MapAcquired[acquiredID]; ok {
-		_ = db.SetEventFlag(flags, acquiredID, enabled)
+	// Add/remove map fragment item in inventory
+	if itemID, ok := data.MapFragmentItems[visibleFlagID]; ok {
+		if enabled {
+			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+		} else {
+			core.RemoveItemByBaseID(slot, itemID)
+		}
 	}
 
 	return nil
@@ -631,13 +1038,12 @@ func (a *App) RevealAllMap(slotIndex int) error {
 	for id := range data.MapSystem {
 		_ = db.SetEventFlag(flags, id, true)
 	}
-	// Visible flags
+	// Visible flags + map fragment items
 	for id := range data.MapVisible {
 		_ = db.SetEventFlag(flags, id, true)
-	}
-	// Acquired flags
-	for id := range data.MapAcquired {
-		_ = db.SetEventFlag(flags, id, true)
+		if itemID, ok := data.MapFragmentItems[id]; ok {
+			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+		}
 	}
 
 	return nil
@@ -661,9 +1067,12 @@ func (a *App) ResetMapExploration(slotIndex int) error {
 
 	flags := slot.Data[slot.EventFlagsOffset:]
 
-	// Clear visible flags
+	// Clear visible flags + remove map fragment items
 	for id := range data.MapVisible {
 		_ = db.SetEventFlag(flags, id, false)
+		if itemID, ok := data.MapFragmentItems[id]; ok {
+			core.RemoveItemByBaseID(slot, itemID)
+		}
 	}
 	// Clear acquired flags
 	for id := range data.MapAcquired {
@@ -1542,7 +1951,274 @@ func (a *App) writeTempSave() (string, error) {
 	return tmpPath, nil
 }
 
+// PresetInfo is the frontend-facing summary of an appearance preset.
+type PresetInfo struct {
+	Name     string `json:"name"`
+	Image    string `json:"image"`    // filename in presets/ dir (e.g. "geralt.jpg")
+	BodyType string `json:"bodyType"` // "Type A" or "Type B"
+}
+
+// ListAppearancePresets returns the list of available character appearance presets.
+func (a *App) ListAppearancePresets() []PresetInfo {
+	result := make([]PresetInfo, len(data.Presets))
+	for i, p := range data.Presets {
+		bt := "Type A"
+		if p.BodyType == 0 {
+			bt = "Type B"
+		}
+		result[i] = PresetInfo{Name: p.Name, Image: p.Image, BodyType: bt}
+	}
+	return result
+}
+
+// ApplyAppearancePreset applies a named appearance preset to the given slot.
+// Modifies face shape (64 bytes), body proportions (7 bytes), and skin/cosmetics (91 bytes)
+// directly in the slot's FaceData blob. For male presets (BodyType 1), model IDs are also
+// written using the confirmed PartsId = UI - 1 mapping. Female model IDs are skipped
+// because the mapping is non-sequential and requires a lookup table.
+func (a *App) ApplyAppearancePreset(slotIndex int, presetName string) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	var preset *data.AppearancePreset
+	for i := range data.Presets {
+		if data.Presets[i].Name == presetName {
+			preset = &data.Presets[i]
+			break
+		}
+	}
+	if preset == nil {
+		return fmt.Errorf("preset not found: %s", presetName)
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	a.pushUndo(slotIndex)
+
+	fd := slot.FaceDataStart()
+	if fd < 0 || fd+core.FaceDataBlobSize > len(slot.Data) {
+		return fmt.Errorf("FaceData blob out of bounds: start=0x%X", fd)
+	}
+
+	// Write face shape (64 bytes at 0x30)
+	copy(slot.Data[fd+core.FDOffFaceShape:], preset.FaceShape[:])
+
+	// Write body proportions (7 bytes at 0xB0)
+	copy(slot.Data[fd+core.FDOffHead:], preset.Body[:])
+
+	// Write skin & cosmetics (91 bytes at 0xB7)
+	copy(slot.Data[fd+core.FDOffSkinR:], preset.Skin[:])
+
+	// Update VoiceType in parsed struct (Write() serializes it back to slot.Data)
+	slot.Player.VoiceType = preset.VoiceType
+
+	// Write model IDs for male presets (BodyType 1 = Type A).
+	// Most categories use PartsId = UI - 1. Hair uses a lookup table because
+	// the game's internal IDs are non-sequential (e.g. UI 9 → PartsId 101).
+	// Female mapping is non-sequential for all categories — skip model IDs.
+	if preset.BodyType == 1 {
+		writeModelID := func(offset int, uiValue uint8) {
+			pos := fd + offset
+			if uiValue > 0 {
+				slot.Data[pos] = uiValue - 1
+			} else {
+				slot.Data[pos] = 0
+			}
+			slot.Data[pos+1] = 0
+			slot.Data[pos+2] = 0
+			slot.Data[pos+3] = 0
+		}
+		writeModelID(core.FDOffFaceModel, preset.FaceModel)
+		// Hair: lookup table first, fallback to UI-1 for unmapped styles
+		{
+			pos := fd + core.FDOffHairModel
+			if partsId, ok := data.LookupMaleHairPartsID(preset.HairModel); ok {
+				slot.Data[pos] = partsId
+			} else if preset.HairModel > 0 {
+				slot.Data[pos] = preset.HairModel - 1 // fallback
+			}
+			slot.Data[pos+1] = 0
+			slot.Data[pos+2] = 0
+			slot.Data[pos+3] = 0
+		}
+		writeModelID(core.FDOffEyeModel, preset.EyeModel)
+		writeModelID(core.FDOffEyebrowModel, preset.EyebrowModel)
+		writeModelID(core.FDOffBeardModel, preset.BeardModel)
+		writeModelID(core.FDOffEyepatchModel, preset.EyepatchModel)
+		writeModelID(core.FDOffDecalModel, preset.DecalModel)
+		writeModelID(core.FDOffEyelashModel, preset.EyelashModel)
+	}
+
+	return nil
+}
+
+// FavoriteSlotInfo describes a single Favorites slot in the Mirror.
+type FavoriteSlotInfo struct {
+	Index    int    `json:"index"`    // absolute slot index (0-14)
+	Active   bool   `json:"active"`   // true if slot has FACE magic
+	Safe     bool   `json:"safe"`     // true if not colliding with ProfileSummary
+	Name     string `json:"name"`     // preset name if we wrote it, empty otherwise
+}
+
+// GetFavoritesStatus returns the state of all 15 Favorites slots.
+func (a *App) GetFavoritesStatus() []FavoriteSlotInfo {
+	result := make([]FavoriteSlotInfo, core.FavSlotCount)
+	if a.save == nil {
+		return result
+	}
+
+	ud := a.save.UserData10.Data
+	safeSet := make(map[int]bool, len(core.FavSafeSlots))
+	for _, s := range core.FavSafeSlots {
+		safeSet[s] = true
+	}
+
+	for i := 0; i < core.FavSlotCount; i++ {
+		off := core.FavBaseOffset + i*core.FavSlotSize
+		active := off+0x1C <= len(ud) && string(ud[off+0x18:off+0x1C]) == "FACE"
+		result[i] = FavoriteSlotInfo{
+			Index:  i,
+			Active: active,
+			Safe:   safeSet[i],
+		}
+	}
+	return result
+}
+
+// RemoveFavoritePreset clears a Favorites slot in UserData10.
+func (a *App) RemoveFavoritePreset(slotIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= core.FavSlotCount {
+		return fmt.Errorf("invalid favorites slot index")
+	}
+
+	ud := a.save.UserData10.Data
+	off := core.FavBaseOffset + slotIndex*core.FavSlotSize
+	if off+core.FavSlotSize > len(ud) {
+		return fmt.Errorf("slot offset out of bounds")
+	}
+
+	// Zero out the entire slot
+	for i := 0; i < core.FavSlotSize; i++ {
+		ud[off+i] = 0
+	}
+	return nil
+}
+
+// WriteSelectedToFavorites writes selected presets to the next available safe Favorites slots.
+// Returns the number of presets written.
+func (a *App) WriteSelectedToFavorites(charIndex int, presetNames []string) (int, error) {
+	if a.save == nil {
+		return 0, fmt.Errorf("no save loaded")
+	}
+	if charIndex < 0 || charIndex >= 10 {
+		return 0, fmt.Errorf("invalid character index")
+	}
+	if len(presetNames) == 0 {
+		return 0, nil
+	}
+
+	ud := a.save.UserData10.Data
+	slot := &a.save.Slots[charIndex]
+
+	// Find available safe slots
+	var freeSlots []int
+	for _, s := range core.FavSafeSlots {
+		off := core.FavBaseOffset + s*core.FavSlotSize
+		if off+0x1C > len(ud) {
+			continue
+		}
+		magic := string(ud[off+0x18 : off+0x1C])
+		if magic != "FACE" {
+			freeSlots = append(freeSlots, s)
+		}
+	}
+
+	if len(presetNames) > len(freeSlots) {
+		return 0, fmt.Errorf("not enough free slots: need %d, have %d", len(presetNames), len(freeSlots))
+	}
+
+	// Read unknown block from character slot
+	var unkBlock [64]byte
+	fd := slot.FaceDataStart()
+	if fd >= 0 && fd+core.FaceDataBlobSize <= len(slot.Data) {
+		copy(unkBlock[:], slot.Data[fd+core.FDOffUnknownBlock:fd+core.FDOffUnknownBlock+64])
+	}
+
+	written := 0
+	for i, name := range presetNames {
+		var preset *data.AppearancePreset
+		for j := range data.Presets {
+			if data.Presets[j].Name == name {
+				preset = &data.Presets[j]
+				break
+			}
+		}
+		if preset == nil {
+			continue
+		}
+
+		safeIdx := freeSlots[i]
+		slotOff := core.FavBaseOffset + safeIdx*core.FavSlotSize
+
+		buf := make([]byte, core.FavSlotSize)
+
+		// Slot header
+		binary.LittleEndian.PutUint16(buf[0x00:], 0xFACE)
+		binary.LittleEndian.PutUint32(buf[0x04:], core.FavHeaderUnk)
+		buf[core.FavOffBodyFlag] = 1
+		if preset.BodyType == 1 {
+			buf[core.FavOffBodyType] = 0 // male in Favorites
+		} else {
+			buf[core.FavOffBodyType] = 1 // female in Favorites
+		}
+
+		// FACE block header
+		copy(buf[core.FavOffMagic:], []byte("FACE"))
+		binary.LittleEndian.PutUint32(buf[core.FavOffAlignment:], 4)
+		binary.LittleEndian.PutUint32(buf[core.FavOffInnerSize:], 0x120)
+
+		// Model IDs — male only, female skipped (no mapping)
+		if preset.BodyType == 1 {
+			writeModel := func(off int, uiVal uint8) {
+				val := uiVal
+				if val > 0 {
+					val--
+				}
+				binary.LittleEndian.PutUint32(buf[core.FavOffModelIDs+(off*4):], uint32(val))
+			}
+			// Hair: lookup table first, fallback to UI-1 for unmapped styles
+			if partsId, ok := data.LookupMaleHairPartsID(preset.HairModel); ok {
+				binary.LittleEndian.PutUint32(buf[core.FavOffModelIDs+1*4:], uint32(partsId))
+			} else if preset.HairModel > 0 {
+				binary.LittleEndian.PutUint32(buf[core.FavOffModelIDs+1*4:], uint32(preset.HairModel-1))
+			}
+			writeModel(2, preset.EyeModel)
+			writeModel(3, preset.EyebrowModel)
+			writeModel(4, preset.BeardModel)
+			writeModel(5, preset.EyepatchModel)
+			writeModel(6, preset.DecalModel)
+			writeModel(7, preset.EyelashModel)
+		}
+
+		copy(buf[core.FavOffFaceShape:], preset.FaceShape[:])
+		copy(buf[core.FavOffUnkBlock:], unkBlock[:])
+		copy(buf[core.FavOffBody:], preset.Body[:])
+		copy(buf[core.FavOffSkin:], preset.Skin[:])
+
+		copy(ud[slotOff:], buf)
+		written++
+	}
+
+	return written, nil
+}
+
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target, PresetInfo, FavoriteSlotInfo) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}, PresetInfo{}, FavoriteSlotInfo{}
 }

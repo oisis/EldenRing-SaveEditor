@@ -6,6 +6,7 @@ import {GeneralTab} from './components/GeneralTab';
 import {InventoryTab} from './components/InventoryTab';
 import {WorldProgressTab} from './components/WorldProgressTab';
 import {CharacterImporter} from './components/CharacterImporter';
+import {AppearanceTab} from './components/AppearanceTab';
 import {SettingsTab} from './components/SettingsTab';
 import {DatabaseTab} from './components/DatabaseTab';
 
@@ -63,7 +64,7 @@ function App() {
 
     useEffect(() => { refreshUndoDepth(); }, [refreshUndoDepth, inventoryVersion]);
 
-    const tabs = ['database', 'character', 'inventory', 'world progress', 'importer', 'settings'];
+    const tabs = ['database', 'character', 'inventory', 'world progress', 'appearance', 'importer', 'settings'];
 
     useEffect(() => { localStorage.setItem('setting:theme', theme); }, [theme]);
     useEffect(() => { localStorage.setItem('setting:columnVisibility', JSON.stringify(columnVisibility)); }, [columnVisibility]);
@@ -402,10 +403,13 @@ function App() {
                                         </div>
                                     );
                                 })()}
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
+                                {activeTab === 'appearance' && <AppearanceTab charIndex={selectedChar} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
+                                </div>
                             </div>
                         )}
                     </div>

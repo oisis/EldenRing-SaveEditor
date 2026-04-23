@@ -68,8 +68,41 @@ var MapUnsafe = map[uint32]MapRegionData{
 	62065: {Name: "Underground (sub-region)", Area: "Underground"},
 }
 
+// MapFragmentItems maps visible flag IDs (62xxx) to their corresponding
+// map fragment inventory item IDs (0x400021xx / 0x401EAxxx).
+// Used by SetMapRegion/RevealAllMap to add map items to inventory.
+var MapFragmentItems = map[uint32]uint32{
+	// Base game
+	62010: 0x40002198, // Limgrave, West
+	62011: 0x40002199, // Weeping Peninsula
+	62012: 0x4000219A, // Limgrave, East
+	62020: 0x4000219B, // Liurnia, East
+	62021: 0x4000219C, // Liurnia, North
+	62022: 0x4000219D, // Liurnia, West
+	62030: 0x4000219E, // Altus Plateau
+	62031: 0x4000219F, // Leyndell, Royal Capital
+	62032: 0x400021A0, // Mt. Gelmir
+	62040: 0x400021A1, // Caelid
+	62041: 0x400021A2, // Dragonbarrow
+	62050: 0x400021A3, // Mountaintops of the Giants, West
+	62051: 0x400021A4, // Mountaintops of the Giants, East
+	62052: 0x400021AA, // Consecrated Snowfield
+	62060: 0x400021A5, // Ainsel River
+	62061: 0x400021A6, // Lake of Rot
+	62062: 0x400021A8, // Mohgwyn Palace
+	62063: 0x400021A7, // Siofra River
+	62064: 0x400021A9, // Deeproot Depths
+	// DLC — Shadow of the Erdtree
+	62080: 0x401EA618, // Gravesite Plain
+	62081: 0x401EA619, // Scadu Altus
+	62082: 0x401EA61A, // Southern Shore
+	62083: 0x401EA61B, // Rauh Ruins
+	62084: 0x401EA61C, // Abyss
+}
+
 // MapAcquired contains map fragment acquisition flags (63xxx).
-// Setting these records that the physical Map Fragment item was picked up.
+// These are transient "pickup notification pending" triggers — the game clears them
+// after showing the "Map Fragment acquired" popup. NOT used for map visibility or items.
 var MapAcquired = map[uint32]MapRegionData{
 	63010: {Name: "Limgrave, West", Area: "Limgrave"},
 	63011: {Name: "Weeping Peninsula", Area: "Limgrave"},

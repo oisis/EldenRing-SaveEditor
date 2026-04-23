@@ -83,6 +83,42 @@ type ColosseumEntry struct {
 	Unlocked bool   `json:"unlocked"`
 }
 
+// GestureEntry represents a gesture with its unlock state.
+type GestureEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"`
+	Unlocked bool   `json:"unlocked"`
+}
+
+// GetAllGestureSlots returns all known gestures, one entry per gesture.
+// The ID is the canonical EvenID; the backend resolves body-type variants at runtime.
+func GetAllGestureSlots() []GestureEntry {
+	entries := make([]GestureEntry, 0, len(data.AllGestures))
+	for _, g := range data.AllGestures {
+		entries = append(entries, GestureEntry{
+			ID:       g.EvenID,
+			Name:     g.Name,
+			Category: g.Category,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Category != entries[j].Category {
+			return entries[i].Category < entries[j].Category
+		}
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
+}
+
+// CookbookEntry represents a cookbook with its unlock state.
+type CookbookEntry struct {
+	ID       uint32 `json:"id"`       // event flag ID
+	Name     string `json:"name"`
+	Category string `json:"category"` // series name for grouping
+	Unlocked bool   `json:"unlocked"`
+}
+
 // MapEntry represents a map region flag with its current state.
 type MapEntry struct {
 	ID       uint32 `json:"id"`
@@ -709,6 +745,56 @@ func GetAllMapEntries() []MapEntry {
 		if entries[i].Area != entries[j].Area {
 			return entries[i].Area < entries[j].Area
 		}
+		if entries[i].Category != entries[j].Category {
+			return entries[i].Category < entries[j].Category
+		}
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
+}
+
+// QuestNPC represents an NPC with their quest progression.
+type QuestNPC struct {
+	Name  string      `json:"name"`
+	Steps []QuestStep `json:"steps"`
+}
+
+// QuestStep represents one step in an NPC questline with current flag state.
+type QuestStep struct {
+	Description string          `json:"description"`
+	Location    string          `json:"location,omitempty"`
+	Flags       []QuestFlagState `json:"flags"`
+	Complete    bool            `json:"complete"` // all flags match target values
+}
+
+// QuestFlagState is a flag with its target and current value.
+type QuestFlagState struct {
+	ID      uint32 `json:"id"`
+	Target  uint8  `json:"target"`  // expected value (0 or 1)
+	Current bool   `json:"current"` // actual value in save
+}
+
+// GetAllQuestNPCs returns the list of NPC names with quest data.
+func GetAllQuestNPCs() []string {
+	names := make([]string, 0, len(data.QuestData))
+	for name := range data.QuestData {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+	return names
+}
+
+// GetAllCookbooks returns all cookbooks sorted by category then name.
+func GetAllCookbooks() []CookbookEntry {
+	entries := make([]CookbookEntry, 0, len(data.Cookbooks))
+	for id, cb := range data.Cookbooks {
+		entries = append(entries, CookbookEntry{
+			ID:       id,
+			Name:     cb.Name,
+			Category: cb.Category,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
 		if entries[i].Category != entries[j].Category {
 			return entries[i].Category < entries[j].Category
 		}

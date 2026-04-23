@@ -52,13 +52,14 @@ Parse the EventFlags bitfield (~14.7 million flags at `EventFlagsOffset`, size `
 ### 🔲 NPC Quest State Editor 🟡
 Human-readable quest progression UI built on top of event flags. **Single most requested missing feature** across all Elden Ring editor communities.
 
-**Technical details:**
-- Map known event flag IDs to NPC questline steps (source: soulsmods.github.io/elden-ring-eventparam/)
-- Show each NPC questline as step-by-step progression
-- Allow advancing/reverting quest steps
-- Support NPC revival (reset death flags)
-- Cover both base game and DLC (Shadow of the Erdtree) questlines
-- Community request: "Can I revive NPCs?" / "Can I reset quest progress?" — extremely common
+**Backend done:** `backend/db/data/quests.go`, `backend/db/db.go`, `app.go`
+- Quest data for major NPCs with step-by-step event flag mappings
+- `GetQuestNPCs()` — list of NPC names with quest data
+- `GetQuestProgress(slotIndex, npcName)` — returns quest steps with current flag state
+- `SetQuestStep(slotIndex, npcName, stepIndex)` — sets all flags for a step to target values
+- `QuestNPC`, `QuestStep`, `QuestFlagState` types exported via Wails bindings
+
+**TODO:** Frontend UI (NPC list → step progression → toggle buttons)
 
 ### ✅ Boss Kill / Respawn Manager 🟡
 Dedicated UI for toggling boss defeat states via event flags.
@@ -87,6 +88,10 @@ Unlock/lock individual Sites of Grace. Especially valuable on PS4 where no other
 - UI: region-grouped with expand/collapse, Unlock All per region, region map previews
 - Grace diff support in save comparison (`diffGraces`)
 
+**Known issue:** After toggling a grace via event flag, it appears on the map but is NOT fully activated — the player must physically touch it in-game to activate fast travel. The event flag controls map visibility, not full activation. May require additional flags or a different mechanism.
+
+**Known issue:** DLC (Shadow of the Erdtree) Sites of Grace and map regions are not yet supported. See DLC Progress Manager.
+
 ### ✅ Summoning Pools Toggle 🟢
 Enable/disable summoning pool (Martyr Effigy) activation via event flags.
 
@@ -109,6 +114,8 @@ Unlock colosseums via their respective event flags.
 - `GetColosseums(slotIndex)` / `SetColosseumUnlocked(slotIndex, colosseumID, unlocked)` in `app.go`
 - UI: card grid with large toggles, global Unlock All button
 - Integrated as "Colosseums" sub-tab in World Progress tab
+
+**Known issue:** Toggling colosseum flags in the GUI has no visible effect in-game (tested offline). May only work in online mode, or may require additional flags. Needs verification in online multiplayer session.
 
 ### ✅ Map Exploration & Fog of War 🟡
 Full map reveal with Fog of War removal. **Fully unique feature** — no existing editor touches FoW.
@@ -140,29 +147,39 @@ Automatically open/close catacomb and hero's grave sealed entrance doors when to
 - Door flags reverse-engineered via binary diff of before/after save files (5 confirmed via RE, 14 via bruteforce scan)
 - Flag format: `10{col}{row}{ObjAct}` where col/row = overworld tile m60 coordinates
 - ObjAct offsets: catacombs use 8540 or 8600, hero's graves use 8620
-- 19/25 dungeons have confirmed door flags; 6 remain unknown (DoorFlag=0):
-  - War-Dead Catacombs (requires Radahn defeat, different access mechanism)
-  - Consecrated Snowfield Catacombs, Hidden Path to the Haligtree (endgame, not yet RE'd)
-  - Leyndell Catacombs (accessed via sewers, no overworld door)
-  - Fog Rift / Scorpion River / Darklight Catacombs (DLC, m61 tiles, not yet RE'd)
+- 22/25 dungeons have confirmed door flags; 2 reclassified as regular graces (no doors); 4 remain:
+  - War-Dead Catacombs (requires Radahn defeat, access mechanism unclear)
+  - Fog Rift / Scorpion River / Darklight Catacombs (DLC, m61 tiles, not yet supported)
 
 ### 🔲 Dungeon Door Flags — Missing Entries 🟢
 RE remaining dungeon entrance door flags.
 
+**Resolved (v0.4.1):**
+- ✅ Giant-Conquering Hero's Grave — door flag `1050538620` (confirmed via binary diff of before/after saves)
+- ✅ Giant's Mountaintop Catacombs — door flag `1050538600` (confirmed via binary diff)
+- ✅ Consecrated Snowfield Catacombs — door flag `1050558540` (confirmed via binary diff)
+- ✅ Hidden Path to the Haligtree — reclassified as regular grace (doors always open, passage to new area)
+- ✅ Leyndell Catacombs — reclassified as regular grace (no sealed doors, accessed via sewers)
+
 **TODO:**
-- War-Dead Catacombs (m60_52_41) — requires Radahn boss defeat to access area; standard ObjAct scan inconclusive (8540/8600 both failed). May need boss defeat flag + door flag combo
-- Giant-Conquering Hero's Grave + Giants' Mountaintop Catacombs (shared tile m60_50_53) — flag 8600 on this tile is NOT the door for either dungeon. Need before/after RE for each separately; shared tile may use different ObjAct offsets (e.g. 8540+8620)
-- Consecrated Snowfield Catacombs (m60_50_55) — need before/after save pair
-- Hidden Path to the Haligtree (m60_49_54) — need before/after save pair
-- Leyndell Catacombs (m35_00) — sewer access, may not have standard overworld door flag
-- DLC catacombs: Fog Rift (m61_47_46), Scorpion River (m61_44_46), Darklight (m61_51_43/52_43) — m61 tile prefix, likely `20{col}{row}{ObjAct}` format
+- War-Dead Catacombs (m60_52_41) — requires Radahn boss defeat to access area; standard ObjAct scan inconclusive. May need boss defeat flag + door flag combo, or may not have a standard door at all. Cannot test until boss kill mechanism is fixed.
+- DLC catacombs: Fog Rift (m61_47_46), Scorpion River (m61_44_46), Darklight (m61_51_43/52_43) — DLC not yet supported, m61 tile prefix, likely `20{col}{row}{ObjAct}` format
 
 ---
 
 ## Phase 4 — Inventory & Equipment Enhancements
 
-### 🔲 Cookbook / Recipe Checklist 🟢
-Visual grid of all cookbooks with unlock status. Cookbooks are inventory items with known IDs — straightforward to implement.
+### ✅ Cookbook / Recipe Checklist 🟢
+Visual grid of all cookbooks with unlock status via event flags.
+
+**Implementation:** `backend/db/data/cookbooks.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- ~70 cookbooks (base game + DLC) with event flag IDs for unlock state
+- `CookbookEntry` type with: id, name, category, unlocked state
+- `GetCookbooks(slotIndex)` / `SetCookbookUnlocked(slotIndex, cookbookID, unlocked)` in `app.go`
+- UI: category-grouped with expand/collapse, Unlock All / Lock All buttons
+- Integrated as "Cookbooks" sub-tab in World Progress tab
+
+**Known issue:** Toggling a cookbook event flag unlocks crafting recipes, but the physical cookbook item does NOT appear in the player's inventory (Key Items). The game stores cookbook ownership in two places: event flag (recipes) and inventory item (Key Items list). Currently only the event flag is toggled — need to also add/remove the corresponding Key Item (cookbook item IDs TBD).
 
 ### ✅ Great Rune Manager 🟢
 Equipped Great Rune selector + buff toggle.
@@ -173,12 +190,20 @@ Equipped Great Rune selector + buff toggle.
 - `EquipItemsIDOffset` stored in SaveSlot for dynamic chain access
 - UI: dropdown (None/6 Great Runes) + checkbox (Active/Inactive) in GeneralTab
 
-### 🔲 Gesture Unlock Checklist 🟢
+### ✅ Gesture Unlock Checklist 🟢
 Toggle grid for all 64 gestures.
 
-**Technical details:**
-- GestureGameData: `0x100` bytes (64 × u32 gesture IDs)
-- Located at `StorageBoxOffset + storageSize` in dynamic offset chain
+**Implementation:** `backend/db/data/gestures.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- 57 gestures (base game + DLC) with body-type variant detection (even/odd IDs)
+- GestureGameData: `0x100` bytes (64 × u32) at `StorageBoxOffset + DynStorageBox`
+- Empty sentinel: `0xFFFFFFFE` (not 0)
+- `DetectBodyTypeOffset()` — auto-detects body type A (odd) vs B (even) from existing gestures
+- `GetGestures(slotIndex)` / `SetGestureUnlocked(slotIndex, gestureID, unlocked)` in `app.go`
+- `BulkSetGesturesUnlocked()` — batch operation (single IPC call, single pushUndo)
+- UI: flat grid with Unlock All / Lock All buttons
+- Integrated as "Gestures" sub-tab in World Progress tab
+
+**Known issue:** Toggling gestures in the binary array changes the save correctly, but gestures may not appear in-game. The game likely requires BOTH the binary array entry AND the corresponding event flag (range 60800–60849) to be set. Event flag mapping per gesture is not yet implemented — see spec/08-spells-gestures.md. Fixing this requires reverse-engineering the exact flag↔gesture mapping.
 
 ### 🔲 Spirit Ash Upgrade Level Editing 🟢
 Edit upgrade levels (+0 to +10) for spirit ashes already in inventory.
@@ -203,6 +228,30 @@ Edit New Game+ cycle (0-7) with automatic event flag synchronization.
 - `ClearCountOffset` stored in SaveSlot for read/write
 - UI: number input 0-7 in GeneralTab profile row
 
+### ✅ Character Appearance Presets 🟢
+Apply community-created character appearance presets (face, body, skin, cosmetics, gender, voice).
+Write presets to in-game Mirror Favorites (CSMenuSystemSaveLoad in UserData10).
+
+**Implementation:** `backend/core/offset_defs.go`, `backend/db/data/presets.go`, `backend/db/data/presets_generated.go`, `backend/db/data/hair_mapping.go`, `scripts/parse_presets.go`, `app.go`, `frontend/src/components/AppearanceTab.tsx`
+- FaceData blob layout fully mapped (303 bytes): header, 8 model IDs, 64 face shape params, 7 body proportions, 91 skin/cosmetics bytes
+- Hair model IDs use non-sequential lookup table (`hair_mapping.go`) — UI position ≠ PartsId
+- Other male model IDs use PartsId = UI - 1 (bone structure, beard, eyebrow, eyelash, tattoo, eyepatch)
+- Female model IDs skipped entirely (non-sequential mapping unknown for face/hair/eyebrow)
+- VoiceType added to PlayerGameData (offset -245 from MagicOffset)
+- 20 presets from eldensliders.com (parsed by `scripts/parse_presets.go` from `tmp/characters/characters.md`)
+- Mirror Favorites: writes to CSMenuSystemSaveLoad safe slots (0, 10-14) to avoid ProfileSummary collision
+- Favorites header: 0xFACE marker, 0x11D0 constant, body_type inverted (0=male, 1=female)
+- FaceModel forced to 0 in Favorites (non-zero causes invisible body in Mirror preview)
+- UI: checkbox selection, image zoom modal, Apply (1 preset) / Add to Mirror (N presets), Remove from Favorites
+- Undo supported via standard pushUndo mechanism
+
+**Known limitations / TODO:**
+- Male hair mapping incomplete: UI 1-9 confirmed, UI 10-31 unmapped (fallback to UI-1, inaccurate). Need save with styles 10-31 to complete table
+- DLC hair positions approximate (UI 32-37) — need confirmation
+- Female model IDs (face, hair, eyebrow) not written — mapping is non-sequential, no lookup table yet
+- FaceModel (bone structure) forced to 0 in Favorites — non-zero causes invisible body in Mirror
+- Other model categories (beard, eyebrow, etc.) may also need lookup tables like hair — not yet verified beyond UI-1
+
 ### 🔲 Player Coordinates / Teleportation 🔵
 Edit CSPlayerCoords section (0x3D bytes) — position, mapID, angle.
 
@@ -226,13 +275,20 @@ Shadow of the Erdtree specific data:
 ## Phase 6 — Save Management & Safety
 
 ### 🔲 Save Corruption Detection / Repair 🟢
-Expand beyond MD5 checksum recalculation.
+Comprehensive slot diagnostics with corruption detection.
 
-**Technical details:**
+**Backend done:** `backend/core/diagnostics.go`, `app.go`
+- `DiagnoseSaveCorruption(slot, index)` — runs all diagnostic checks on a slot
+- `DiagnoseSlot(slotIndex)` / `DiagnoseAllSlots()` in `app.go` — exposed via Wails bindings
+- `SlotDiagnostics` / `DiagnosticIssue` types with severity levels (info/warning/error)
+
+**TODO — Phase 2 (requires more investigation):**
 - Validate dynamic offset chain integrity (offsets monotonically increasing, within slot bounds)
 - Bounds-check `projSize` (max 256) and `unlockedRegSz` (max 1024) — especially PS4
 - Verify BND4 entry table consistency (PC): entry sizes, data offsets, name table
 - Detect common corruption patterns (zeroed magic, broken GaItem handles)
+- Frontend UI for diagnostics results display
+- Auto-repair for recoverable issues
 
 ### 🔲 Save File Merging 🔵
 Combine data from two different saves into one. **Fully unique** — no editor does this.
@@ -329,10 +385,12 @@ One-click workflow: Close Game → Upload Save → Launch Game.
 - Map Exploration & Fog of War removal (maps.go, app.go, spec/27-fog-of-war.md)
 - Combined Map Visible + Acquired toggle, System flags as top-level checkboxes
 
-### ✅ Phase 4 — Character Progression
+### ✅ Phase 4 — Character Progression & Inventory
 - Talisman Pouch Slots (offset_defs.go, structures.go, character_vm.go, GeneralTab.tsx)
 - NG+ Cycle Editor with event flag sync (offset_defs.go, structures.go, app.go, GeneralTab.tsx)
 - Great Rune Manager — equipped rune + buff toggle (offset_defs.go, structures.go, character_vm.go, GeneralTab.tsx)
+- Cookbook / Recipe Checklist — event flag unlock toggle (cookbooks.go, db.go, app.go, WorldProgressTab.tsx)
+- Gesture Unlock Checklist — 64-slot gesture toggle (gestures.go, db.go, app.go, WorldProgressTab.tsx)
 
 ### ✅ Phase 22 — Item Descriptions & Stats
 Display item flavor text and detailed stats in the item detail modal. Data sourced from ERDB (MIT-licensed, parsed from regulation.bin).
@@ -348,6 +406,10 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
 - Bidirectional PC ↔ PS4 conversion
 - Backup manager
 - Cross-platform desktop app (Wails)
+
+### 🔲 Known Bugs (to investigate)
+- **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
+- **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. May require additional flags (e.g. boss animation state, arena state). Blocks testing of War-Dead Catacombs door flag.
 
 ### ✅ Bugfixes
 - Fix duplicate talismans in database (155 entries with `0xA0` prefix removed from `talismans.go`)

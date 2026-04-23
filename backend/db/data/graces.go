@@ -194,10 +194,10 @@ var Graces = map[uint32]GraceData{
 	0x00011D36: Cat("Minor Erdtree Catacombs (Caelid)", 1047408540),
 	0x00011D37: Cat("Caelid Catacombs (Caelid)", 1048368600),
 	0x00011D38: Cat("War-Dead Catacombs (Caelid)", 0),
-	0x00011D39: HG("Giant-Conquering Hero's Grave (Mountaintops of the Giants East)", 0),
-	0x00011D3A: Cat("Giant's Mountaintop Catacombs (Mountaintops of the Giants East)", 0),
-	0x00011D3B: Cat("Consecrated Snowfield Catacombs (Consecrated Snowfield)", 0),
-	0x00011D3C: Cat("Hidden Path to the Haligtree (Consecrated Snowfield)", 0),
+	0x00011D39: HG("Giant-Conquering Hero's Grave (Mountaintops of the Giants East)", 1050538620),
+	0x00011D3A: Cat("Giant's Mountaintop Catacombs (Mountaintops of the Giants East)", 1050538600),
+	0x00011D3B: Cat("Consecrated Snowfield Catacombs (Consecrated Snowfield)", 1050558540),
+	0x00011D3C: G("Hidden Path to the Haligtree (Consecrated Snowfield)"),
 
 	// --- Caves ---
 	0x00011D8C: G("Murkwater Cave (Limgrave West)"),
@@ -250,7 +250,7 @@ var Graces = map[uint32]GraceData{
 	0x00011F1C: B("Cathedral of the Forsaken (Leyndell Royal Capital)"),
 	0x00011F1D: G("Underground Roadside (Leyndell Royal Capital)"),
 	0x00011F1E: G("Forsaken Depths (Leyndell Royal Capital)"),
-	0x00011F1F: Cat("Leyndell Catacombs (Leyndell Royal Capital)", 0),
+	0x00011F1F: G("Leyndell Catacombs (Leyndell Royal Capital)"),
 	0x00011F20: G("Frenzied Flame Proscription (Leyndell Royal Capital)"),
 
 	// --- Ruin-Strewn Precipice ---

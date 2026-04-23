@@ -26,6 +26,7 @@ const (
 	OffTalismanSlots       = -241 // AdditionalTalismanSlotsCount (PGD 0xBE, u8, range 0-3)
 	OffScadutreeBlessing   = -187
 	OffShadowRealmBlessing = -186
+	OffVoiceType           = -245 // Voice type (0=Young1, 1=Young2, 2=Mature1, 3=Mature2, 4=Aged1, 5=Aged2)
 	OffCharacterName       = -0x11B // 16 x uint16 UTF-16LE
 
 	// MagicOffset must be at least this value; otherwise negative stat offsets
@@ -104,6 +105,175 @@ const (
 	DynTutorialData         = 0x40B
 	DynIngameTimer          = 0x1A
 	DynEventFlags           = 0
+)
+
+// CSMenuSystemSaveLoad / Favorites preset constants.
+// Located in UserData10.Data. The game's Mirror at Roundtable Hold reads presets from here.
+// ProfileSummary writes (0x31A+i*0x100) collide with preset slots 1-9.
+// Safe slots: 0, 10, 11, 12, 13, 14 (6 total).
+const (
+	FavBaseOffset = 0x154 // first preset slot in UserData10.Data (same for PC and PS4)
+	FavSlotSize   = 0x130 // 304 bytes per preset slot
+	FavSlotCount  = 15    // total preset slots in CSMenuSystemSaveLoad
+
+	// Offsets within a single 0x130-byte preset slot
+	FavOffBodyFlag  = 0x08 // u8: body flag
+	FavOffBodyType  = 0x09 // u8: 0=female, 1=male
+	FavOffMarker    = 0x14 // u32: 0xFFFFFFFF
+	FavOffMagic     = 0x18 // "FACE" (4 bytes) — indicates slot is populated
+	FavOffAlignment = 0x1C // u32: 4
+	FavOffInnerSize = 0x20 // u32: 0x120 (288)
+	FavOffModelIDs  = 0x24 // 8 × u32: model IDs (same layout as FaceData blob)
+	FavOffFaceShape = 0x44 // 64 bytes: face shape sliders
+	FavOffUnkBlock  = 0x84 // 64 bytes: unknown block (copy from slot)
+	FavOffBody      = 0xC4 // 7 bytes: body proportions
+	FavOffSkin      = 0xCB // 69 bytes: skin & cosmetics (shorter than slot's 91 — no trailing hair colors?)
+)
+
+// FavSafeSlots lists preset slot indices that don't collide with ProfileSummary writes.
+// Slot 0 ends at 0x283, first ProfileSummary at 0x30A (PS4) / 0x31A (PC) — no collision.
+// Slots 1-9 collide with ProfileSummary writes. Slots 0, 10-14 are safe.
+var FavSafeSlots = [6]int{0, 10, 11, 12, 13, 14}
+
+// FavHeaderUnk is the constant u32 at preset header offset 0x04 (observed in all active presets).
+const FavHeaderUnk = 0x11D0
+
+// FaceData blob layout constants.
+// FaceData is a 303-byte (0x12F) block stored at FaceDataOffset-FaceDataBlobSize.
+// All offsets below are relative to the start of the FaceData blob.
+const (
+	FaceDataBlobSize = 0x12F // 303 bytes total
+
+	// Header (16 bytes)
+	FDOffMarker    = 0x00 // u32 = 0xFFFFFFFF
+	FDOffMagic     = 0x04 // "FACE"
+	FDOffAlignment = 0x08 // u32 = 4
+	FDOffInnerSize = 0x0C // u32 = 0x120 (288)
+
+	// Model IDs (8 × u32, effective u8 + 3 padding each)
+	FDOffFaceModel    = 0x10
+	FDOffHairModel    = 0x14
+	FDOffEyeModel     = 0x18
+	FDOffEyebrowModel = 0x1C
+	FDOffBeardModel   = 0x20
+	FDOffEyepatchModel = 0x24
+	FDOffDecalModel   = 0x28 // tattoo/mark
+	FDOffEyelashModel = 0x2C
+
+	// Face shape parameters (64 × u8, 0x30-0x6F)
+	FDOffFaceShape = 0x30
+
+	// Unknown block (64 bytes, 0x70-0xAF) — leave unchanged
+	FDOffUnknownBlock = 0x70
+
+	// Body proportions (7 × u8, 0xB0-0xB6)
+	FDOffHead    = 0xB0
+	FDOffChest   = 0xB1
+	FDOffAbdomen = 0xB2
+	FDOffArmR    = 0xB3
+	FDOffLegR    = 0xB4
+	FDOffArmL    = 0xB5
+	FDOffLegL    = 0xB6
+
+	// Skin & cosmetics (91 bytes, 0xB7-0x111)
+	FDOffSkinR       = 0xB7
+	FDOffSkinG       = 0xB8
+	FDOffSkinB       = 0xB9
+	FDOffSkinLuster  = 0xBA
+	FDOffPores       = 0xBB
+	FDOffStubble     = 0xBC
+	FDOffDarkCircles = 0xBD
+	FDOffDarkCircleR = 0xBE
+	FDOffDarkCircleG = 0xBF
+	FDOffDarkCircleB = 0xC0
+	FDOffCheeksInt   = 0xC1
+	FDOffCheekR      = 0xC2
+	FDOffCheekG      = 0xC3
+	FDOffCheekB      = 0xC4
+	FDOffEyeliner    = 0xC5
+	FDOffEyelinerR   = 0xC6
+	FDOffEyelinerG   = 0xC7
+	FDOffEyelinerB   = 0xC8
+	FDOffEyeShadLow  = 0xC9
+	FDOffEyeShadLowR = 0xCA
+	FDOffEyeShadLowG = 0xCB
+	FDOffEyeShadLowB = 0xCC
+	FDOffEyeShadUp   = 0xCD
+	FDOffEyeShadUpR  = 0xCE
+	FDOffEyeShadUpG  = 0xCF
+	FDOffEyeShadUpB  = 0xD0
+	FDOffLipstick    = 0xD1
+	FDOffLipstickR   = 0xD2
+	FDOffLipstickG   = 0xD3
+	FDOffLipstickB   = 0xD4
+	FDOffTattooH     = 0xD5
+	FDOffTattooV     = 0xD6
+	FDOffTattooAngle = 0xD7
+	FDOffTattooExp   = 0xD8
+	FDOffTattooR     = 0xD9
+	FDOffTattooG     = 0xDA
+	FDOffTattooB     = 0xDB
+	FDOffTattooUnk   = 0xDC
+	FDOffTattooFlip  = 0xDD
+	FDOffBodyHair    = 0xDE
+	FDOffBodyHairR   = 0xDF
+	FDOffBodyHairG   = 0xE0
+	FDOffBodyHairB   = 0xE1
+	// Right eye
+	FDOffRIrisR      = 0xE2
+	FDOffRIrisG      = 0xE3
+	FDOffRIrisB      = 0xE4
+	FDOffRIrisSize   = 0xE5
+	FDOffRClouding   = 0xE6
+	FDOffRCloudR     = 0xE7
+	FDOffRCloudG     = 0xE8
+	FDOffRCloudB     = 0xE9
+	FDOffRWhiteR     = 0xEA
+	FDOffRWhiteG     = 0xEB
+	FDOffRWhiteB     = 0xEC
+	FDOffREyePos     = 0xED
+	// Left eye
+	FDOffLIrisR      = 0xEE
+	FDOffLIrisG      = 0xEF
+	FDOffLIrisB      = 0xF0
+	FDOffLIrisSize   = 0xF1
+	FDOffLClouding   = 0xF2
+	FDOffLCloudR     = 0xF3
+	FDOffLCloudG     = 0xF4
+	FDOffLCloudB     = 0xF5
+	FDOffLWhiteR     = 0xF6
+	FDOffLWhiteG     = 0xF7
+	FDOffLWhiteB     = 0xF8
+	FDOffLEyePos     = 0xF9
+	// Hair colors
+	FDOffHairR       = 0xFA
+	FDOffHairG       = 0xFB
+	FDOffHairB       = 0xFC
+	FDOffHairLuster  = 0xFD
+	FDOffHairRoot    = 0xFE
+	FDOffHairWhite   = 0xFF
+	// Beard colors
+	FDOffBeardR      = 0x100
+	FDOffBeardG      = 0x101
+	FDOffBeardB      = 0x102
+	FDOffBeardLuster = 0x103
+	FDOffBeardRoot   = 0x104
+	FDOffBeardWhite  = 0x105
+	// Eyebrow colors
+	FDOffBrowR       = 0x106
+	FDOffBrowG       = 0x107
+	FDOffBrowB       = 0x108
+	FDOffBrowLuster  = 0x109
+	FDOffBrowRoot    = 0x10A
+	FDOffBrowWhite   = 0x10B
+	// Eyelash colors
+	FDOffLashR       = 0x10C
+	FDOffLashG       = 0x10D
+	FDOffLashB       = 0x10E
+	// Eyepatch colors
+	FDOffPatchR      = 0x10F
+	FDOffPatchG      = 0x110
+	FDOffPatchB      = 0x111
 )
 
 // Sanity limits for dynamic size reads from untrusted save data.
