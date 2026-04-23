@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
@@ -57,10 +57,15 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [selectedMap, setSelectedMap] = useState<{name: string, path: string} | null>(null);
     const [bossFilter, setBossFilter] = useState<'all' | 'main' | 'field'>('all');
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
-    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map' | 'cookbooks' | 'gestures'>('graces');
+    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map' | 'cookbooks' | 'gestures' | 'quests'>('graces');
     const [expandedCookbookCategories, setExpandedCookbookCategories] = useState<Record<string, boolean>>({});
     const [expandedMapAreas, setExpandedMapAreas] = useState<Record<string, boolean>>({});
     const [skipBossArenas, setSkipBossArenas] = useState(true);
+    const [questNPCs, setQuestNPCs] = useState<string[]>([]);
+    const [selectedNPC, setSelectedNPC] = useState<string>('');
+    const [questProgress, setQuestProgress] = useState<db.QuestNPC | null>(null);
+    const [expandedSteps, setExpandedSteps] = useState<Record<number, boolean>>({});
+    const [questLoading, setQuestLoading] = useState(false);
 
     const loadData = () => {
         setLoading(true);
@@ -72,6 +77,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             GetMapProgress(charIdx).then(res => setMapEntries(res || [])),
             GetCookbooks(charIdx).then(res => setCookbooks(res || [])),
             GetGestures(charIdx).then(res => setGesturesList(res || [])),
+            GetQuestNPCs().then(res => setQuestNPCs(res || [])),
         ]).finally(() => setLoading(false));
     };
     useEffect(() => { loadData(); }, [charIdx]);
@@ -115,6 +121,27 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const handleUnlockAllCookbooks = async () => { const l = cookbooks.filter(c => !c.unlocked); if (!l.length) return; await Promise.all(l.map(c => SetCookbookUnlocked(charIdx, c.id, true))); setCookbooks(prev => prev.map(c => ({...c, unlocked: true}))); onMutate?.(); };
     const handleLockAllCookbooks = async () => { const u = cookbooks.filter(c => c.unlocked); if (!u.length) return; await Promise.all(u.map(c => SetCookbookUnlocked(charIdx, c.id, false))); setCookbooks(prev => prev.map(c => ({...c, unlocked: false}))); onMutate?.(); };
     const unlockedCookbooks = cookbooks.filter(c => c.unlocked).length;
+
+    // --- Quest logic ---
+    const loadQuestProgress = async (npc: string) => {
+        if (!npc) { setQuestProgress(null); return; }
+        setQuestLoading(true);
+        try {
+            const p = await GetQuestProgress(charIdx, npc);
+            setQuestProgress(p);
+            setExpandedSteps({});
+        } catch { setQuestProgress(null); }
+        finally { setQuestLoading(false); }
+    };
+    const handleSelectNPC = (npc: string) => { setSelectedNPC(npc); loadQuestProgress(npc); };
+    const handleSetQuestStep = async (stepIndex: number) => {
+        if (!selectedNPC) return;
+        await SetQuestStep(charIdx, selectedNPC, stepIndex);
+        await loadQuestProgress(selectedNPC);
+        onMutate?.();
+    };
+    const questCompletedSteps = questProgress?.steps?.filter(s => s.complete).length ?? 0;
+    const questTotalSteps = questProgress?.steps?.length ?? 0;
 
     // --- Map logic ---
     const mapRegionEntries = mapEntries.filter(e => e.category === 'visible');
@@ -178,10 +205,10 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             {/* Tabs + toolbar */}
             <div className="flex items-center justify-between flex-wrap gap-1.5">
                 <div className="flex items-center space-x-0.5">
-                    {(['graces', 'bosses', 'pools', 'colosseums', 'map', 'cookbooks', 'gestures'] as const).map(s => (
+                    {(['graces', 'bosses', 'pools', 'colosseums', 'map', 'cookbooks', 'gestures', 'quests'] as const).map(s => (
                         <button key={s} onClick={() => setActiveSection(s)}
                             className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.12em] transition-all ${activeSection === s ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}>
-                            {s === 'graces' ? 'Sites of Grace' : s === 'pools' ? 'Summoning Pools' : s === 'map' ? 'Map Discovery' : s.charAt(0).toUpperCase() + s.slice(1)}
+                            {s === 'graces' ? 'Sites of Grace' : s === 'pools' ? 'Summoning Pools' : s === 'map' ? 'Map Discovery' : s === 'quests' ? 'NPC Quests' : s.charAt(0).toUpperCase() + s.slice(1)}
                         </button>
                     ))}
                 </div>
@@ -246,6 +273,17 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                         <button onClick={handleUnlockAllGestures} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
                         <button onClick={handleLockAllGestures} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{unlockedGestures}/{gestures.length}</span>
+                    </div>
+                )}
+                {activeSection === 'quests' && (
+                    <div className="flex items-center space-x-2">
+                        <select value={selectedNPC} onChange={e => handleSelectNPC(e.target.value)}
+                            className="bg-background border border-border rounded px-2 py-0.5 text-[10px] font-bold text-foreground focus:outline-none focus:border-primary max-w-[200px]">
+                            <option value="">Select NPC...</option>
+                            {questNPCs.map(n => <option key={n} value={n}>{n}</option>)}
+                        </select>
+                        {questProgress && <Badge count={questCompletedSteps} total={questTotalSteps} />}
+                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{questNPCs.length} npcs</span>
                     </div>
                 )}
             </div>
@@ -472,6 +510,104 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                             </div>
                         );
                     })}
+                </div>
+            )}
+
+            {/* NPC Quests */}
+            {activeSection === 'quests' && (
+                <div className="animate-in fade-in duration-200 space-y-2">
+                    {!selectedNPC && (
+                        <div className="card px-4 py-8 flex flex-col items-center justify-center space-y-2">
+                            <svg className="w-8 h-8 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                            </svg>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Select an NPC to view quest progress</p>
+                        </div>
+                    )}
+
+                    {questLoading && (
+                        <div className="py-8 flex flex-col items-center justify-center space-y-2">
+                            <div className="w-4 h-4 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+                            <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Loading...</p>
+                        </div>
+                    )}
+
+                    {selectedNPC && questProgress && !questLoading && (
+                        <div className="space-y-1">
+                            {questProgress.steps.map((step, idx) => {
+                                const isExpanded = !!expandedSteps[idx];
+                                const matchedFlags = step.flags?.filter(f => f.current === (f.target === 1)).length ?? 0;
+                                const totalFlags = step.flags?.length ?? 0;
+                                const partial = !step.complete && matchedFlags > 0;
+                                return (
+                                    <div key={idx} className={`card overflow-hidden transition-all ${step.complete ? 'border-primary/30' : ''}`}>
+                                        <div className={`w-full px-3 py-2 flex items-start gap-2.5 transition-all ${isExpanded ? 'bg-muted/30 border-b border-border' : 'hover:bg-muted/10'}`}>
+                                            {/* Step number */}
+                                            <span className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[8px] font-black mt-0.5
+                                                ${step.complete ? 'bg-primary text-primary-foreground' : partial ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40' : 'bg-muted text-muted-foreground border border-border'}`}>
+                                                {step.complete ? (
+                                                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3.5" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                ) : idx + 1}
+                                            </span>
+
+                                            {/* Description + location */}
+                                            <button onClick={() => setExpandedSteps(p => ({...p, [idx]: !p[idx]}))} className="flex-1 text-left min-w-0">
+                                                <p className={`text-[10px] font-semibold leading-snug ${step.complete ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                    {step.description}
+                                                </p>
+                                                {step.location && (
+                                                    <p className="text-[8px] text-muted-foreground/70 font-bold uppercase tracking-widest mt-0.5">{step.location}</p>
+                                                )}
+                                            </button>
+
+                                            {/* Flag count + Set button */}
+                                            <div className="flex items-center gap-2 flex-shrink-0">
+                                                {totalFlags > 0 && (
+                                                    <button onClick={() => setExpandedSteps(p => ({...p, [idx]: !p[idx]}))}
+                                                        className={`text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border cursor-pointer
+                                                        ${step.complete ? 'text-primary border-primary/50 bg-primary/10' : partial ? 'text-amber-500 border-amber-500/40 bg-amber-500/10' : 'text-muted-foreground border-border bg-muted/50'}`}>
+                                                        {matchedFlags}/{totalFlags}
+                                                    </button>
+                                                )}
+                                                {!step.complete && (
+                                                    <button onClick={() => handleSetQuestStep(idx)}
+                                                        className={`${btnSm} hover:text-primary hover:border-primary/50`}>
+                                                        Set
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Expanded flags detail */}
+                                        {isExpanded && step.flags && step.flags.length > 0 && (
+                                            <div className="px-3 py-2 space-y-0.5 animate-in slide-in-from-top-1 duration-200 bg-muted/10">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-0.5">
+                                                    {step.flags.map((f, fi) => {
+                                                        const matches = f.current === (f.target === 1);
+                                                        return (
+                                                            <div key={fi} className="flex items-center gap-1.5 py-0.5 px-1.5 rounded">
+                                                                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${matches ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+                                                                <span className="text-[8px] font-mono text-muted-foreground/70">{f.id}</span>
+                                                                <span className={`text-[7px] font-black uppercase tracking-wider ${matches ? 'text-primary' : 'text-muted-foreground/50'}`}>
+                                                                    {f.current ? 'ON' : 'OFF'}
+                                                                </span>
+                                                                <span className="text-[7px] text-muted-foreground/40">{'\u2192'}</span>
+                                                                <span className="text-[7px] font-black uppercase tracking-wider text-muted-foreground/70">
+                                                                    {f.target === 1 ? 'ON' : 'OFF'}
+                                                                </span>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
         </div>
