@@ -468,6 +468,24 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 	return nil
 }
 
+// RemoveItemByBaseID removes an item from inventory by its base item ID (e.g. 0x40002198).
+// For stackable items (tools, key items), GaItemHandle == item ID directly.
+func RemoveItemByBaseID(slot *SaveSlot, itemID uint32) {
+	// Find the handle in inventory (for stackable items, handle == itemID)
+	for _, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle == itemID && item.Quantity > 0 {
+			_ = RemoveItemFromSlot(slot, itemID, true, false)
+			return
+		}
+	}
+	for _, item := range slot.Inventory.KeyItems {
+		if item.GaItemHandle == itemID && item.Quantity > 0 {
+			_ = RemoveItemFromSlot(slot, itemID, true, false)
+			return
+		}
+	}
+}
+
 func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) error {
 	sa := NewSlotAccessor(slot.Data)
 	var items *[]InventoryItem

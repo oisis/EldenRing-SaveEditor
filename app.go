@@ -981,10 +981,13 @@ func (a *App) SetMapRegionFlags(slotIndex int, visibleFlagID uint32, enabled boo
 		return fmt.Errorf("failed to set visible flag %d: %w", visibleFlagID, err)
 	}
 
-	// Set corresponding acquired flag (visible + 1000), if it exists
-	acquiredID := visibleFlagID + 1000
-	if _, ok := data.MapAcquired[acquiredID]; ok {
-		_ = db.SetEventFlag(flags, acquiredID, enabled)
+	// Add/remove map fragment item in inventory
+	if itemID, ok := data.MapFragmentItems[visibleFlagID]; ok {
+		if enabled {
+			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+		} else {
+			core.RemoveItemByBaseID(slot, itemID)
+		}
 	}
 
 	return nil
@@ -1035,13 +1038,12 @@ func (a *App) RevealAllMap(slotIndex int) error {
 	for id := range data.MapSystem {
 		_ = db.SetEventFlag(flags, id, true)
 	}
-	// Visible flags
+	// Visible flags + map fragment items
 	for id := range data.MapVisible {
 		_ = db.SetEventFlag(flags, id, true)
-	}
-	// Acquired flags
-	for id := range data.MapAcquired {
-		_ = db.SetEventFlag(flags, id, true)
+		if itemID, ok := data.MapFragmentItems[id]; ok {
+			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+		}
 	}
 
 	return nil
@@ -1065,9 +1067,12 @@ func (a *App) ResetMapExploration(slotIndex int) error {
 
 	flags := slot.Data[slot.EventFlagsOffset:]
 
-	// Clear visible flags
+	// Clear visible flags + remove map fragment items
 	for id := range data.MapVisible {
 		_ = db.SetEventFlag(flags, id, false)
+		if itemID, ok := data.MapFragmentItems[id]; ok {
+			core.RemoveItemByBaseID(slot, itemID)
+		}
 	}
 	// Clear acquired flags
 	for id := range data.MapAcquired {
