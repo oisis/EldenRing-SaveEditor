@@ -128,6 +128,28 @@ type MapEntry struct {
 	Enabled  bool   `json:"enabled"`
 }
 
+// BellBearingEntry represents a bell bearing with its current state.
+type BellBearingEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Category string `json:"category"` // "npc", "merchant", "smithing", "peddler", "dlc"
+	Unlocked bool   `json:"unlocked"`
+}
+
+// WhetbladeEntry represents a whetblade unlock with its current state.
+type WhetbladeEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Unlocked bool   `json:"unlocked"`
+}
+
+// AshOfWarFlagEntry represents an Ash of War duplication flag.
+type AshOfWarFlagEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Unlocked bool   `json:"unlocked"`
+}
+
 // globalItemIndex provides O(1) item lookup by ID, built once at startup.
 var globalItemIndex map[uint32]data.ItemData
 
@@ -812,6 +834,55 @@ func GetAllCookbooks() []CookbookEntry {
 		if entries[i].Category != entries[j].Category {
 			return entries[i].Category < entries[j].Category
 		}
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
+}
+
+// GetAllBellBearings returns all bell bearings sorted by category then name.
+func GetAllBellBearings() []BellBearingEntry {
+	entries := make([]BellBearingEntry, 0, len(data.BellBearings))
+	for id, bb := range data.BellBearings {
+		entries = append(entries, BellBearingEntry{
+			ID:       id,
+			Name:     bb.Name,
+			Category: bb.Category,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Category != entries[j].Category {
+			return entries[i].Category < entries[j].Category
+		}
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
+}
+
+// GetAllWhetblades returns all whetblades sorted by name.
+func GetAllWhetblades() []WhetbladeEntry {
+	entries := make([]WhetbladeEntry, 0, len(data.Whetblades))
+	for id, wb := range data.Whetblades {
+		entries = append(entries, WhetbladeEntry{
+			ID:   id,
+			Name: wb.Name,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
+}
+
+// GetAllAshOfWarFlags returns all Ash of War duplication flags sorted by name.
+func GetAllAshOfWarFlags() []AshOfWarFlagEntry {
+	entries := make([]AshOfWarFlagEntry, 0, len(data.AshOfWarFlags))
+	for id, aow := range data.AshOfWarFlags {
+		entries = append(entries, AshOfWarFlagEntry{
+			ID:   id,
+			Name: aow.Name,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Name < entries[j].Name
 	})
 	return entries

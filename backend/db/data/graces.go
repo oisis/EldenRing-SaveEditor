@@ -145,36 +145,51 @@ var Graces = map[uint32]GraceData{
 	// --- Fractured Marika ---
 	0x000118DC: B("Fractured Marika (Leyndell Ashen Capital)"),
 
-	// --- Shadow of the Erdtree (DLC) — Legacy Dungeons ---
-	0x00011940: B("Theatre of the Divine Beast (Shadow of the Erdtree)"),
-	0x00011941: G("Tower Settlement (Shadow of the Erdtree)"),
-	0x00011943: G("Stagefront (Shadow of the Erdtree)"),
-	0x0001194A: B("Gate of Divinity (Shadow of the Erdtree)"),
-	0x0001194C: G("Outer Wall (Shadow of the Erdtree)"),
-	0x0001194E: G("Spiral Rise (Shadow of the Erdtree)"),
-	0x0001194F: G("Cleansing Chamber Anteroom (Shadow of the Erdtree)"),
-	0x00011950: G("Divine Gate Front Staircase (Shadow of the Erdtree)"),
-	0x000119A5: G("Main Gate Plaza (Shadow of the Erdtree)"),
-	0x000119A6: G("Main Gate (Shadow of the Erdtree)"),
-	0x000119AA: G("Church District Entrance (Shadow of the Erdtree)"),
-	0x000119AB: G("Sunken Chapel (Shadow of the Erdtree)"),
-	0x000119AC: G("Tree-Worship Sanctum (Shadow of the Erdtree)"),
-	0x000119AE: B("Messmer's Dark Chamber (Shadow of the Erdtree)"),
-	0x000119AF: G("First Floor (Shadow of the Erdtree)"),
-	0x000119B0: G("Fourth Floor (Shadow of the Erdtree)"),
-	0x000119B1: G("Seventh Floor (Shadow of the Erdtree)"),
-	0x000119B2: G("Dark Chamber Entrance (Shadow of the Erdtree)"),
-	0x000119B4: G("Back Section (Shadow of the Erdtree)"),
-	0x000119B5: G("Loft (Shadow of the Erdtree)"),
-	0x000119B8: G("West Rampart (Shadow of the Erdtree)"),
-	0x00011A08: G("Garden of Deep Purple (Shadow of the Erdtree)"),
-	0x00011A09: G("Main Fissure (Shadow of the Erdtree)"),
-	0x00011A0A: G("Fissure Cross (Shadow of the Erdtree)"),
-	0x00011A0B: G("Fissure Waypoint (Shadow of the Erdtree)"),
-	0x00011B34: B("Finger Birthing Grounds (Shadow of the Erdtree)"),
-	0x00011C60: G("Discussion Chamber (Shadow of the Erdtree)"),
-	0x00011C61: G("Manse Hall (Shadow of the Erdtree)"),
-	0x00011C62: G("Library (Shadow of the Erdtree)"),
+	// --- Shadow of the Erdtree (DLC) — Belurat, Tower Settlement ---
+	0x00011940: B("Theatre of the Divine Beast (Belurat, Tower Settlement)"),
+	0x00011941: G("Belurat, Tower Settlement (Belurat, Tower Settlement)"),
+	0x00011942: G("Small Private Altar (Belurat, Tower Settlement)"),
+	0x00011943: G("Stagefront (Belurat, Tower Settlement)"),
+
+	// --- Shadow of the Erdtree (DLC) — Enir-Ilim ---
+	0x0001194A: B("Gate of Divinity (Enir-Ilim)"),
+	0x0001194C: G("Enir-Ilim: Outer Wall (Enir-Ilim)"),
+	0x0001194D: G("First Rise (Enir-Ilim)"),
+	0x0001194E: G("Spiral Rise (Enir-Ilim)"),
+	0x0001194F: G("Cleansing Chamber Anteroom (Enir-Ilim)"),
+	0x00011950: G("Divine Gate Front Staircase (Enir-Ilim)"),
+
+	// --- Shadow of the Erdtree (DLC) — Shadow Keep ---
+	0x000119A5: G("Main Gate Plaza (Shadow Keep)"),
+	0x000119A6: G("Shadow Keep Main Gate (Shadow Keep)"),
+	0x000119AA: G("Church District Entrance (Shadow Keep, Church District)"),
+	0x000119AB: G("Sunken Chapel (Shadow Keep, Church District)"),
+	0x000119AC: G("Tree-Worship Passage (Shadow Keep, Church District)"),
+	0x000119AD: G("Tree-Worship Sanctum (Shadow Keep, Church District)"),
+	0x000119AE: B("Messmer's Dark Chamber (Shadow Keep)"),
+	0x000119AF: G("Storehouse, First Floor (Specimen Storehouse)"),
+	0x000119B0: G("Storehouse, Fourth Floor (Specimen Storehouse)"),
+	0x000119B1: G("Storehouse, Seventh Floor (Specimen Storehouse)"),
+	0x000119B2: G("Dark Chamber Entrance (Specimen Storehouse)"),
+	0x000119B4: G("Storehouse, Back Section (Specimen Storehouse)"),
+	0x000119B5: G("Storehouse, Loft (Specimen Storehouse)"),
+	0x000119B8: G("West Rampart (Shadow Keep)"),
+
+	// --- Shadow of the Erdtree (DLC) — Stone Coffin Fissure ---
+	0x00011A08: G("Garden of Deep Purple (Stone Coffin Fissure)"),
+	0x00011A09: G("Stone Coffin Fissure (Stone Coffin Fissure)"),
+	0x00011A0A: G("Fissure Cross (Stone Coffin Fissure)"),
+	0x00011A0B: G("Fissure Waypoint (Stone Coffin Fissure)"),
+	0x00011A0C: G("Fissure Depths (Stone Coffin Fissure)"),
+
+	// --- Shadow of the Erdtree (DLC) — Cathedral of Manus Metyr ---
+	0x00011B34: B("Finger Birthing Grounds (Cathedral of Manus Metyr)"),
+
+	// --- Shadow of the Erdtree (DLC) — Midra's Manse ---
+	0x00011C60: G("Discussion Chamber (Midra's Manse)"),
+	0x00011C61: G("Manse Hall (Midra's Manse)"),
+	0x00011C62: G("Midra's Library (Midra's Manse)"),
+	0x00011C63: G("Second Floor Chamber (Midra's Manse)"),
 
 	// --- Catacombs ---
 	0x00011D28: Cat("Tombsward Catacombs (Weeping Peninsula)", 1043338600),
@@ -259,18 +274,18 @@ var Graces = map[uint32]GraceData{
 	0x000120AE: B("Ruin-Strewn Precipice Overlook (Altus Plateau)"),
 
 	// --- Shadow of the Erdtree — DLC Dungeons ---
-	0x00012110: Cat("Fog Rift Catacombs (Shadow of the Erdtree)", 0),
-	0x00012111: Cat("Scorpion River Catacombs (Shadow of the Erdtree)", 0),
-	0x00012112: Cat("Darklight Catacombs (Shadow of the Erdtree)", 0),
-	0x00012174: G("Belurat Gaol (Shadow of the Erdtree)"),
-	0x00012175: G("Bonny Gaol (Shadow of the Erdtree)"),
-	0x00012176: G("Lamenter's Gaol (Shadow of the Erdtree)"),
-	0x000121D8: G("Ruined Forge Lava Intake (Shadow of the Erdtree)"),
-	0x000121DA: G("Starfall Past Forge (Shadow of the Erdtree)"),
-	0x000121DB: G("Taylew's Ruined Forge (Shadow of the Erdtree)"),
-	0x0001223C: G("Rivermouth Cave (Shadow of the Erdtree)"),
-	0x0001223D: G("Dragon's Pit (Shadow of the Erdtree)"),
-	0x0001226F: G("Dragon's Pit Terminus (Shadow of the Erdtree)"),
+	0x00012110: Cat("Fog Rift Catacombs (Gravesite Plain)", 0),
+	0x00012111: Cat("Scorpion River Catacombs (Scadu Altus)", 0),
+	0x00012112: Cat("Darklight Catacombs (Abyssal Woods)", 0),
+	0x00012174: G("Belurat Gaol (Gravesite Plain)"),
+	0x00012175: G("Bonny Gaol (Scadu Altus)"),
+	0x00012176: G("Lamenter's Gaol (Charo's Hidden Grave)"),
+	0x000121D8: G("Ruined Forge Lava Intake (Gravesite Plain)"),
+	0x000121DA: G("Ruined Forge of Starfall Past (Scadu Altus)"),
+	0x000121DB: G("Taylew's Ruined Forge (Rauh Base)"),
+	0x0001223C: G("Rivermouth Cave (Gravesite Plain)"),
+	0x0001223D: G("Dragon's Pit (Gravesite Plain)"),
+	0x0001226F: G("Dragon's Pit Terminus (Jagged Peak)"),
 
 	// --- Limgrave West ---
 	0x00012944: G("Church of Elleh (Limgrave West)"),
@@ -454,32 +469,83 @@ var Graces = map[uint32]GraceData{
 	0x00012B6C: G("Ordina, Liturgical Town (Consecrated Snowfield)"),
 	0x00012B6D: G("Apostate Derelict (Consecrated Snowfield)"),
 
-	// --- Shadow of the Erdtree — Open World ---
-	0x00012C00: G("Main Plain (Shadow of the Erdtree)"),
-	0x00012C0A: G("Pillar Path (Shadow of the Erdtree)"),
-	0x00012C0C: G("Ellac River Cave (Shadow of the Erdtree)"),
-	0x00012C15: G("Castle Entrance (Shadow of the Erdtree)"),
-	0x00012C17: G("Moongazing Grounds (Shadow of the Erdtree)"),
-	0x00012C1E: G("Ellac River Downstream (Shadow of the Erdtree)"),
-	0x00012C1F: G("Main Shore (Shadow of the Erdtree)"),
-	0x00012C21: G("The Fissure (Shadow of the Erdtree)"),
-	0x00012C28: G("Peak Base (Shadow of the Erdtree)"),
-	0x00012C29: G("Hidden Grave (Shadow of the Erdtree)"),
-	0x00012C32: G("Mountainside (Shadow of the Erdtree)"),
-	0x00012C34: G("Summit (Shadow of the Erdtree)"),
-	0x00012C35: B("Rest of the Dread Dragon (Shadow of the Erdtree)"),
-	0x00012C3C: G("Woods Entrance (Shadow of the Erdtree)"),
-	0x00012C3E: G("Forsaken Graveyard (Shadow of the Erdtree)"),
-	0x00012C64: G("Main Plaza (Shadow of the Erdtree)"),
-	0x00012C67: G("Bonny Village (Shadow of the Erdtree)"),
-	0x00012C70: G("Base Ruins (Shadow of the Erdtree)"),
-	0x00012C74: G("Watering Hole (Shadow of the Erdtree)"),
-	0x00012C76: G("River Downstream (Shadow of the Erdtree)"),
-	0x00012C82: G("Main Overlook (Shadow of the Erdtree)"),
-	0x00012C83: G("Keep Back Gate (Shadow of the Erdtree)"),
-	0x00012C87: G("Hinterland (Shadow of the Erdtree)"),
-	0x00012C8C: G("Eastern Ruins (Shadow of the Erdtree)"),
-	0x00012C8E: G("Western Ruins (Shadow of the Erdtree)"),
-	0x00012C91: B("Church of the Bud (Shadow of the Erdtree)"),
-	0x00012CA0: B("Scadutree Base (Shadow of the Erdtree)"),
+	// --- Shadow of the Erdtree — Gravesite Plain ---
+	0x00012C00: G("Gravesite Plain (Gravesite Plain)"),
+	0x00012C01: G("Scorched Ruins (Gravesite Plain)"),
+	0x00012C02: G("Three-Path Cross (Gravesite Plain)"),
+	0x00012C03: G("Main Gate Cross (Gravesite Plain)"),
+	0x00012C04: G("Cliffroad Terminus (Gravesite Plain)"),
+	0x00012C05: G("Greatbridge, North (Gravesite Plain)"),
+	0x00012C0A: G("Pillar Path Cross (Gravesite Plain)"),
+	0x00012C0B: G("Pillar Path Waypoint (Gravesite Plain)"),
+	0x00012C0C: G("Ellac River Cave (Gravesite Plain)"),
+	0x00012C0D: G("Castle Front (Gravesite Plain)"),
+	0x00012C1E: G("Ellac River Downstream (Gravesite Plain)"),
+
+	// --- Shadow of the Erdtree — Castle Ensis ---
+	0x00012C15: G("Castle Ensis Checkpoint (Castle Ensis)"),
+	0x00012C16: G("Castle-Lord's Chamber (Castle Ensis)"),
+	0x00012C17: G("Ensis Moongazing Grounds (Castle Ensis)"),
+
+	// --- Shadow of the Erdtree — Cerulean Coast ---
+	0x00012C1F: G("Cerulean Coast (Cerulean Coast)"),
+	0x00012C20: G("Cerulean Coast West (Cerulean Coast)"),
+	0x00012C21: G("The Fissure (Cerulean Coast)"),
+	0x00012C22: G("Finger Ruins of Rhia (Cerulean Coast)"),
+	0x00012C23: G("Cerulean Coast Cross (Cerulean Coast)"),
+
+	// --- Shadow of the Erdtree — Charo's Hidden Grave ---
+	0x00012C29: G("Charo's Hidden Grave (Charo's Hidden Grave)"),
+
+	// --- Shadow of the Erdtree — Jagged Peak ---
+	0x00012C28: G("Grand Altar of Dragon Communion (Jagged Peak)"),
+	0x00012C32: G("Foot of the Jagged Peak (Jagged Peak)"),
+	0x00012C33: G("Jagged Peak Mountainside (Jagged Peak)"),
+	0x00012C34: G("Jagged Peak Summit (Jagged Peak)"),
+	0x00012C35: B("Rest of the Dread Dragon (Jagged Peak)"),
+
+	// --- Shadow of the Erdtree — Abyssal Woods ---
+	0x00012C3C: G("Abyssal Woods (Abyssal Woods)"),
+	0x00012C3D: G("Divided Falls (Abyssal Woods)"),
+	0x00012C3E: G("Forsaken Graveyard (Abyssal Woods)"),
+	0x00012C3F: G("Woodland Trail (Abyssal Woods)"),
+	0x00012C40: G("Church Ruins (Abyssal Woods)"),
+
+	// --- Shadow of the Erdtree — Scadu Altus ---
+	0x00012C64: G("Highroad Cross (Scadu Altus)"),
+	0x00012C66: G("Moorth Ruins (Scadu Altus)"),
+	0x00012C67: G("Bonny Village (Scadu Altus)"),
+	0x00012C68: G("Bridge Leading to the Village (Scadu Altus)"),
+	0x00012C69: G("Church District Highroad (Scadu Altus)"),
+	0x00012C6A: G("Cathedral of Manus Metyr (Scadu Altus)"),
+	0x00012C6B: G("Scadu Altus, West (Scadu Altus)"),
+	0x00012C6C: G("Moorth Highway, South (Scadu Altus)"),
+	0x00012C6D: G("Fort of Reprimand (Scadu Altus)"),
+	0x00012C6E: G("Behind the Fort of Reprimand (Scadu Altus)"),
+	0x00012C6F: G("Scaduview Cross (Scadu Altus)"),
+	0x00012C74: G("Castle Watering Hole (Scadu Altus)"),
+	0x00012C75: G("Recluses' River Upstream (Scadu Altus)"),
+	0x00012C76: G("Recluses' River Downstream (Scadu Altus)"),
+
+	// --- Shadow of the Erdtree — Rauh Base ---
+	0x00012C70: G("Ancient Ruins Base (Rauh Base)"),
+	0x00012C71: G("Temple Town Ruins (Rauh Base)"),
+	0x00012C72: G("Ravine North (Rauh Base)"),
+
+	// --- Shadow of the Erdtree — Scaduview ---
+	0x00012C82: G("Scaduview (Scaduview)"),
+	0x00012C83: G("Shadow Keep, Back Gate (Scaduview)"),
+	0x00012C87: G("Hinterland (Scaduview)"),
+	0x00012C88: G("Fingerstone Hill (Scaduview)"),
+	0x00012C89: G("Hinterland Bridge (Scaduview)"),
+
+	// --- Shadow of the Erdtree — Ancient Ruins of Rauh ---
+	0x00012C8C: G("Viaduct Minor Tower (Ancient Ruins of Rauh)"),
+	0x00012C8D: G("Rauh Ancient Ruins, East (Ancient Ruins of Rauh)"),
+	0x00012C8E: G("Rauh Ancient Ruins, West (Ancient Ruins of Rauh)"),
+	0x00012C8F: G("Church of the Bud, Main Entrance (Ancient Ruins of Rauh)"),
+	0x00012C90: G("Ancient Ruins, Grand Stairway (Ancient Ruins of Rauh)"),
+	0x00012C91: B("Church of the Bud (Ancient Ruins of Rauh)"),
+	0x00012CA0: B("Scadutree Base (Shadow Keep)"),
 }
+

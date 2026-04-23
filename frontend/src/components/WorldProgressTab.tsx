@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
@@ -57,7 +57,10 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [selectedMap, setSelectedMap] = useState<{name: string, path: string} | null>(null);
     const [bossFilter, setBossFilter] = useState<'all' | 'main' | 'field'>('all');
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
-    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map' | 'cookbooks' | 'gestures' | 'quests'>('graces');
+    const [bellBearings, setBellBearings] = useState<db.BellBearingEntry[]>([]);
+    const [whetblades, setWhetblades] = useState<db.WhetbladeEntry[]>([]);
+    const [expandedBBCategories, setExpandedBBCategories] = useState<Record<string, boolean>>({});
+    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map' | 'cookbooks' | 'gestures' | 'quests' | 'bells' | 'whetblades'>('graces');
     const [expandedCookbookCategories, setExpandedCookbookCategories] = useState<Record<string, boolean>>({});
     const [expandedMapAreas, setExpandedMapAreas] = useState<Record<string, boolean>>({});
     const [skipBossArenas, setSkipBossArenas] = useState(true);
@@ -89,6 +92,8 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             GetCookbooks(charIdx).then(res => setCookbooks(res || [])),
             GetGestures(charIdx).then(res => setGesturesList(res || [])),
             GetQuestNPCs().then(res => setQuestNPCs(res || [])),
+            GetBellBearings(charIdx).then(res => setBellBearings(res || [])),
+            GetWhetblades(charIdx).then(res => setWhetblades(res || [])),
         ]).finally(() => setLoading(false));
     };
     useEffect(() => { loadData(); }, [charIdx]);
@@ -132,6 +137,18 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const handleUnlockAllCookbooks = async () => { const l = cookbooks.filter(c => !c.unlocked); if (!l.length) return; await BulkSetCookbooksUnlocked(charIdx, l.map(c => c.id), true); setCookbooks(prev => prev.map(c => ({...c, unlocked: true}))); onMutate?.(); };
     const handleLockAllCookbooks = async () => { const u = cookbooks.filter(c => c.unlocked); if (!u.length) return; await BulkSetCookbooksUnlocked(charIdx, u.map(c => c.id), false); setCookbooks(prev => prev.map(c => ({...c, unlocked: false}))); onMutate?.(); };
     const unlockedCookbooks = cookbooks.filter(c => c.unlocked).length;
+
+    // --- Bell Bearing logic ---
+    const bbCategories = bellBearings.reduce((acc, b) => { const cat = b.category || 'Other'; (acc[cat] ??= []).push(b); return acc; }, {} as Record<string, db.BellBearingEntry[]>);
+    const handleBBToggle = async (b: db.BellBearingEntry, unlocked: boolean) => { await SetBellBearingUnlocked(charIdx, b.id, unlocked); setBellBearings(prev => prev.map(x => x.id === b.id ? {...x, unlocked} : x)); onMutate?.(); };
+    const handleUnlockAllBBs = async () => { const l = bellBearings.filter(b => !b.unlocked); if (!l.length) return; await BulkSetBellBearings(charIdx, l.map(b => b.id), true); setBellBearings(prev => prev.map(b => ({...b, unlocked: true}))); onMutate?.(); };
+    const handleLockAllBBs = async () => { const u = bellBearings.filter(b => b.unlocked); if (!u.length) return; await BulkSetBellBearings(charIdx, u.map(b => b.id), false); setBellBearings(prev => prev.map(b => ({...b, unlocked: false}))); onMutate?.(); };
+    const unlockedBBs = bellBearings.filter(b => b.unlocked).length;
+
+    // --- Whetblade logic ---
+    const handleWBToggle = async (w: db.WhetbladeEntry, unlocked: boolean) => { await SetWhetbladeUnlocked(charIdx, w.id, unlocked); setWhetblades(prev => prev.map(x => x.id === w.id ? {...x, unlocked} : x)); onMutate?.(); };
+    const unlockedWBs = whetblades.filter(w => w.unlocked).length;
+
 
     // --- Quest logic ---
     const loadQuestProgress = async (npc: string) => {
@@ -216,10 +233,10 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             {/* Tabs + toolbar */}
             <div className="flex items-center justify-between flex-wrap gap-1.5">
                 <div className="flex items-center space-x-0.5">
-                    {(['graces', 'bosses', 'pools', 'colosseums', 'map', 'cookbooks', 'gestures', 'quests'] as const).map(s => (
+                    {(['graces', 'bosses', 'pools', 'colosseums', 'map', 'cookbooks', 'gestures', 'quests', 'bells', 'whetblades'] as const).map(s => (
                         <button key={s} onClick={() => setActiveSection(s)}
                             className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.12em] transition-all ${activeSection === s ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}>
-                            {s === 'graces' ? 'Sites of Grace' : s === 'pools' ? 'Summoning Pools' : s === 'map' ? 'Map Discovery' : s === 'quests' ? 'NPC Quests' : s.charAt(0).toUpperCase() + s.slice(1)}
+                            {s === 'graces' ? 'Sites of Grace' : s === 'pools' ? 'Summoning Pools' : s === 'map' ? 'Map Discovery' : s === 'quests' ? 'NPC Quests' : s === 'bells' ? 'Bell Bearings' : s.charAt(0).toUpperCase() + s.slice(1)}
                         </button>
                     ))}
                 </div>
@@ -295,6 +312,18 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                         </select>
                         {questProgress && <Badge count={questCompletedSteps} total={questTotalSteps} />}
                         <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{questNPCs.length} npcs</span>
+                    </div>
+                )}
+                {activeSection === 'bells' && (
+                    <div className="flex items-center space-x-2">
+                        <button onClick={handleUnlockAllBBs} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                        <button onClick={handleLockAllBBs} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{unlockedBBs}/{bellBearings.length}</span>
+                    </div>
+                )}
+                {activeSection === 'whetblades' && (
+                    <div className="flex items-center space-x-2">
+                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{unlockedWBs}/{whetblades.length}</span>
                     </div>
                 )}
             </div>
@@ -621,6 +650,51 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                     )}
                 </div>
             )}
+
+            {/* Bell Bearings */}
+            {activeSection === 'bells' && (
+                <div className="grid grid-cols-1 gap-1.5 animate-in fade-in duration-200">
+                    {Object.entries(bbCategories).sort(([a], [b]) => a.localeCompare(b)).map(([cat, bbs]) => {
+                        const uc = bbs.filter(b => b.unlocked).length;
+                        return (
+                            <div key={cat} className="card overflow-hidden">
+                                <div className={`w-full px-3 py-2 flex justify-between items-center transition-all ${expandedBBCategories[cat] ? 'bg-muted/30 border-b border-border' : 'hover:bg-muted/10'}`}>
+                                    <button onClick={() => setExpandedBBCategories(p => ({...p, [cat]: !p[cat]}))} className="flex-1 flex items-center space-x-2.5 text-left">
+                                        <Arrow open={!!expandedBBCategories[cat]} />
+                                        <h2 className="text-[10px] font-black uppercase tracking-widest text-foreground">{cat}</h2>
+                                    </button>
+                                    <Badge count={uc} total={bbs.length} />
+                                </div>
+                                {expandedBBCategories[cat] && (
+                                    <div className="px-3 py-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-0.5 animate-in slide-in-from-top-1 duration-200">
+                                        {bbs.map(b => (
+                                            <label key={b.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                                <Chk checked={b.unlocked} onChange={v => handleBBToggle(b, v)} />
+                                                <span className={`text-[10px] truncate font-semibold ${b.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{b.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Whetblades */}
+            {activeSection === 'whetblades' && (
+                <div className="card overflow-hidden animate-in fade-in duration-200">
+                    <div className="px-3 py-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-0.5">
+                        {whetblades.map(w => (
+                            <label key={w.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                <Chk checked={w.unlocked} onChange={v => handleWBToggle(w, v)} />
+                                <span className={`text-[10px] truncate font-semibold ${w.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{w.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+
         </div>
     );
 }

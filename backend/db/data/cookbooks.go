@@ -85,6 +85,79 @@ var Cookbooks = map[uint32]CookbookData{
 	// Frenzied's Cookbook (2)
 	68400: {Name: "Frenzied's Cookbook [1]", Category: "Frenzied's Cookbook"},
 	68410: {Name: "Frenzied's Cookbook [2]", Category: "Frenzied's Cookbook"},
+
+	// === SHADOW OF THE ERDTREE DLC ===
+
+	// Forager Brood Cookbook (7)
+	68520: {Name: "Forager Brood Cookbook [1]", Category: "Forager Brood Cookbook"},
+	68530: {Name: "Forager Brood Cookbook [2]", Category: "Forager Brood Cookbook"},
+	68540: {Name: "Forager Brood Cookbook [3]", Category: "Forager Brood Cookbook"},
+	68550: {Name: "Forager Brood Cookbook [4]", Category: "Forager Brood Cookbook"},
+	68560: {Name: "Forager Brood Cookbook [5]", Category: "Forager Brood Cookbook"},
+	68510: {Name: "Forager Brood Cookbook [6]", Category: "Forager Brood Cookbook"},
+	68830: {Name: "Forager Brood Cookbook [7]", Category: "Forager Brood Cookbook"},
+
+	// Greater Potentate's Cookbook (14)
+	68590: {Name: "Greater Potentate's Cookbook [1]", Category: "Greater Potentate's Cookbook"},
+	68730: {Name: "Greater Potentate's Cookbook [2]", Category: "Greater Potentate's Cookbook"},
+	68690: {Name: "Greater Potentate's Cookbook [3]", Category: "Greater Potentate's Cookbook"},
+	68600: {Name: "Greater Potentate's Cookbook [4]", Category: "Greater Potentate's Cookbook"},
+	68610: {Name: "Greater Potentate's Cookbook [5]", Category: "Greater Potentate's Cookbook"},
+	68720: {Name: "Greater Potentate's Cookbook [6]", Category: "Greater Potentate's Cookbook"},
+	68630: {Name: "Greater Potentate's Cookbook [7]", Category: "Greater Potentate's Cookbook"},
+	68680: {Name: "Greater Potentate's Cookbook [8]", Category: "Greater Potentate's Cookbook"},
+	68640: {Name: "Greater Potentate's Cookbook [9]", Category: "Greater Potentate's Cookbook"},
+	68650: {Name: "Greater Potentate's Cookbook [10]", Category: "Greater Potentate's Cookbook"},
+	68660: {Name: "Greater Potentate's Cookbook [11]", Category: "Greater Potentate's Cookbook"},
+	68620: {Name: "Greater Potentate's Cookbook [12]", Category: "Greater Potentate's Cookbook"},
+	68700: {Name: "Greater Potentate's Cookbook [13]", Category: "Greater Potentate's Cookbook"},
+	68710: {Name: "Greater Potentate's Cookbook [14]", Category: "Greater Potentate's Cookbook"},
+
+	// Mad Craftsman's Cookbook (3)
+	68750: {Name: "Mad Craftsman's Cookbook [1]", Category: "Mad Craftsman's Cookbook"},
+	68670: {Name: "Mad Craftsman's Cookbook [2]", Category: "Mad Craftsman's Cookbook"},
+	68880: {Name: "Mad Craftsman's Cookbook [3]", Category: "Mad Craftsman's Cookbook"},
+
+	// Ancient Dragon Knight's Cookbook (2)
+	68740: {Name: "Ancient Dragon Knight's Cookbook [1]", Category: "Ancient Dragon Knight's Cookbook"},
+	68780: {Name: "Ancient Dragon Knight's Cookbook [2]", Category: "Ancient Dragon Knight's Cookbook"},
+
+	// St. Trina Disciple's Cookbook (3)
+	68760: {Name: "St. Trina Disciple's Cookbook [1]", Category: "St. Trina Disciple's Cookbook"},
+	68950: {Name: "St. Trina Disciple's Cookbook [2]", Category: "St. Trina Disciple's Cookbook"},
+	68840: {Name: "St. Trina Disciple's Cookbook [3]", Category: "St. Trina Disciple's Cookbook"},
+
+	// Fire Knight's Cookbook (2)
+	68770: {Name: "Fire Knight's Cookbook [1]", Category: "Fire Knight's Cookbook"},
+	68900: {Name: "Fire Knight's Cookbook [2]", Category: "Fire Knight's Cookbook"},
+
+	// Igon's Cookbook (2)
+	68810: {Name: "Igon's Cookbook [1]", Category: "Igon's Cookbook"},
+	68570: {Name: "Igon's Cookbook [2]", Category: "Igon's Cookbook"},
+
+	// Finger-Weaver's Cookbook (2)
+	68920: {Name: "Finger-Weaver's Cookbook [1]", Category: "Finger-Weaver's Cookbook"},
+	68580: {Name: "Finger-Weaver's Cookbook [2]", Category: "Finger-Weaver's Cookbook"},
+
+	// Battlefield Priest's Cookbook (4)
+	68800: {Name: "Battlefield Priest's Cookbook [1]", Category: "Battlefield Priest's Cookbook"},
+	68820: {Name: "Battlefield Priest's Cookbook [2]", Category: "Battlefield Priest's Cookbook"},
+	68890: {Name: "Battlefield Priest's Cookbook [3]", Category: "Battlefield Priest's Cookbook"},
+	68930: {Name: "Battlefield Priest's Cookbook [4]", Category: "Battlefield Priest's Cookbook"},
+
+	// Grave Keeper's Cookbook (2)
+	68940: {Name: "Grave Keeper's Cookbook [1]", Category: "Grave Keeper's Cookbook"},
+	68850: {Name: "Grave Keeper's Cookbook [2]", Category: "Grave Keeper's Cookbook"},
+
+	// Antiquity Scholar's Cookbook (2)
+	68910: {Name: "Antiquity Scholar's Cookbook [1]", Category: "Antiquity Scholar's Cookbook"},
+	68860: {Name: "Antiquity Scholar's Cookbook [2]", Category: "Antiquity Scholar's Cookbook"},
+
+	// Loyal Knight's Cookbook (1)
+	68790: {Name: "Loyal Knight's Cookbook", Category: "Loyal Knight's Cookbook"},
+
+	// Tibia's Cookbook (1)
+	68870: {Name: "Tibia's Cookbook", Category: "Tibia's Cookbook"},
 }
 
 // CookbookFlagToItemID maps cookbook event flag ID → inventory item ID (Key Items).
@@ -164,6 +237,79 @@ var CookbookFlagToItemID = map[uint32]uint32{
 	// Frenzied's Cookbook [1-2]
 	68400: 0x400024E0, // [1]
 	68410: 0x400024E1, // [2]
+
+	// === DLC — Shadow of the Erdtree ===
+
+	// Forager Brood Cookbook [1-7]
+	68520: 0x401EA8D6, // [1]
+	68530: 0x401EA8D7, // [2]
+	68540: 0x401EA8D8, // [3]
+	68550: 0x401EA8D9, // [4]
+	68560: 0x401EA8DA, // [5]
+	68510: 0x401EA8D5, // [6]
+	68830: 0x401EA8F5, // [7]
+
+	// Greater Potentate's Cookbook [1-14]
+	68590: 0x401EA8DD, // [1]
+	68730: 0x401EA8EB, // [2]
+	68690: 0x401EA8E7, // [3]
+	68600: 0x401EA8DE, // [4]
+	68610: 0x401EA8DF, // [5]
+	68720: 0x401EA8EA, // [6]
+	68630: 0x401EA8E1, // [7]
+	68680: 0x401EA8E6, // [8]
+	68640: 0x401EA8E2, // [9]
+	68650: 0x401EA8E3, // [10]
+	68660: 0x401EA8E4, // [11]
+	68620: 0x401EA8E0, // [12]
+	68700: 0x401EA8E8, // [13]
+	68710: 0x401EA8E9, // [14]
+
+	// Mad Craftsman's Cookbook [1-3]
+	68750: 0x401EA8ED, // [1]
+	68670: 0x401EA8E5, // [2]
+	68880: 0x401EA8FA, // [3]
+
+	// Ancient Dragon Knight's Cookbook [1-2]
+	68740: 0x401EA8EC, // [1]
+	68780: 0x401EA8F0, // [2]
+
+	// St. Trina Disciple's Cookbook [1-3]
+	68760: 0x401EA8EE, // [1]
+	68950: 0x401EA901, // [2]
+	68840: 0x401EA8F6, // [3]
+
+	// Fire Knight's Cookbook [1-2]
+	68770: 0x401EA8EF, // [1]
+	68900: 0x401EA8FC, // [2]
+
+	// Igon's Cookbook [1-2]
+	68810: 0x401EA8F3, // [1]
+	68570: 0x401EA8DB, // [2]
+
+	// Finger-Weaver's Cookbook [1-2]
+	68920: 0x401EA8FE, // [1]
+	68580: 0x401EA8DC, // [2]
+
+	// Battlefield Priest's Cookbook [1-4]
+	68800: 0x401EA8F2, // [1]
+	68820: 0x401EA8F4, // [2]
+	68890: 0x401EA8FB, // [3]
+	68930: 0x401EA8FF, // [4]
+
+	// Grave Keeper's Cookbook [1-2]
+	68940: 0x401EA900, // [1]
+	68850: 0x401EA8F7, // [2]
+
+	// Antiquity Scholar's Cookbook [1-2]
+	68910: 0x401EA8FD, // [1]
+	68860: 0x401EA8F8, // [2]
+
+	// Loyal Knight's Cookbook
+	68790: 0x401EA8F1,
+
+	// Tibia's Cookbook
+	68870: 0x401EA8F9,
 }
 
 // cookbookItemIDs is a set of all cookbook inventory item IDs for filtering.

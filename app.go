@@ -274,6 +274,13 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		if err := core.AddItemsToSlot(slot, []uint32{finalID}, actualInv, actualStorage, forceStackable); err != nil {
 			return err
 		}
+
+		// Auto-set AoW duplication flag when adding an Ash of War item.
+		if flagID, ok := data.AoWItemToFlagID[id]; ok {
+			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
+			}
+		}
 	}
 	return nil
 }
@@ -958,6 +965,163 @@ func (a *App) BulkSetCookbooksUnlocked(slotIndex int, cookbookIDs []uint32, unlo
 		_ = core.AddItemsToSlot(slot, itemsToAdd, 1, 0, false)
 	}
 
+	return nil
+}
+
+// GetBellBearings returns all bell bearings with unlock state from the specified character slot
+func (a *App) GetBellBearings(slotIndex int) ([]db.BellBearingEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+	slot := &a.save.Slots[slotIndex]
+	entries := db.GetAllBellBearings()
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range entries {
+			unlocked, err := db.GetEventFlag(flags, entries[i].ID)
+			if err != nil {
+				continue
+			}
+			entries[i].Unlocked = unlocked
+		}
+	}
+	return entries, nil
+}
+
+// SetBellBearingUnlocked sets or clears the unlock flag for a bell bearing
+func (a *App) SetBellBearingUnlocked(slotIndex int, flagID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+	return db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, unlocked)
+}
+
+// GetWhetblades returns all whetblades with unlock state from the specified character slot
+func (a *App) GetWhetblades(slotIndex int) ([]db.WhetbladeEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+	slot := &a.save.Slots[slotIndex]
+	entries := db.GetAllWhetblades()
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range entries {
+			unlocked, err := db.GetEventFlag(flags, entries[i].ID)
+			if err != nil {
+				continue
+			}
+			entries[i].Unlocked = unlocked
+		}
+	}
+	return entries, nil
+}
+
+// SetWhetbladeUnlocked sets or clears the unlock flag for a whetblade
+func (a *App) SetWhetbladeUnlocked(slotIndex int, flagID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+	return db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, unlocked)
+}
+
+// GetAshOfWarFlags returns all Ash of War duplication flags with unlock state
+func (a *App) GetAshOfWarFlags(slotIndex int) ([]db.AshOfWarFlagEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+	slot := &a.save.Slots[slotIndex]
+	entries := db.GetAllAshOfWarFlags()
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := range entries {
+			unlocked, err := db.GetEventFlag(flags, entries[i].ID)
+			if err != nil {
+				continue
+			}
+			entries[i].Unlocked = unlocked
+		}
+	}
+	return entries, nil
+}
+
+// SetAshOfWarFlagUnlocked sets or clears an Ash of War duplication flag
+func (a *App) SetAshOfWarFlagUnlocked(slotIndex int, flagID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+	return db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, unlocked)
+}
+
+// BulkSetAshOfWarFlags sets multiple AoW duplication flags at once (single undo).
+func (a *App) BulkSetAshOfWarFlags(slotIndex int, flagIDs []uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+	flags := slot.Data[slot.EventFlagsOffset:]
+	for _, id := range flagIDs {
+		_ = db.SetEventFlag(flags, id, unlocked)
+	}
+	return nil
+}
+
+// BulkSetBellBearings sets multiple bell bearing flags at once (single undo).
+func (a *App) BulkSetBellBearings(slotIndex int, flagIDs []uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+	slot := &a.save.Slots[slotIndex]
+	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
+	}
+	flags := slot.Data[slot.EventFlagsOffset:]
+	for _, id := range flagIDs {
+		_ = db.SetEventFlag(flags, id, unlocked)
+	}
 	return nil
 }
 
@@ -2249,6 +2413,6 @@ func (a *App) WriteSelectedToFavorites(charIndex int, presetNames []string) (int
 }
 
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target, PresetInfo, FavoriteSlotInfo) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}, PresetInfo{}, FavoriteSlotInfo{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target, PresetInfo, FavoriteSlotInfo, db.BellBearingEntry, db.WhetbladeEntry, db.AshOfWarFlagEntry) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}, PresetInfo{}, FavoriteSlotInfo{}, db.BellBearingEntry{}, db.WhetbladeEntry{}, db.AshOfWarFlagEntry{}
 }
