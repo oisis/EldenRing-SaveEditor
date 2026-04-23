@@ -451,7 +451,21 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 			})
 		}
 	case "key_items":
-		processMap(data.KeyItems, "key_items")
+		for id, item := range data.KeyItems {
+			if item.Name == "" || data.IsCookbookItemID(id) {
+				continue
+			}
+			items = append(items, ItemEntry{
+				ID:           id,
+				Name:         item.Name,
+				Category:     "key_items",
+				MaxInventory: item.MaxInventory,
+				MaxStorage:   item.MaxStorage,
+				MaxUpgrade:   item.MaxUpgrade,
+				IconPath:     item.IconPath,
+				Flags:        item.Flags,
+			})
+		}
 	}
 
 	sort.Slice(items, func(i, j int) bool {

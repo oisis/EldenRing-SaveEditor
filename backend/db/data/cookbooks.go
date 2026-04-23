@@ -1,5 +1,7 @@
 package data
 
+import "strings"
+
 // CookbookData holds metadata for a cookbook item.
 type CookbookData struct {
 	Name     string
@@ -83,4 +85,105 @@ var Cookbooks = map[uint32]CookbookData{
 	// Frenzied's Cookbook (2)
 	68400: {Name: "Frenzied's Cookbook [1]", Category: "Frenzied's Cookbook"},
 	68410: {Name: "Frenzied's Cookbook [2]", Category: "Frenzied's Cookbook"},
+}
+
+// CookbookFlagToItemID maps cookbook event flag ID → inventory item ID (Key Items).
+// Built by matching cookbook names between Cookbooks and KeyItems.
+var CookbookFlagToItemID = map[uint32]uint32{
+	// Nomadic Warrior's Cookbook [1-24]
+	67000: 0x40002454, // [1]
+	67110: 0x4000245F, // [2]
+	67010: 0x40002455, // [3]
+	67800: 0x400024A4, // [4]
+	67830: 0x400024A7, // [5]
+	67020: 0x40002456, // [6]
+	67050: 0x40002459, // [7]
+	67880: 0x400024AC, // [8]
+	67430: 0x4000247F, // [9]
+	67030: 0x40002457, // [10]
+	67220: 0x4000246A, // [11]
+	67060: 0x4000245A, // [12]
+	67080: 0x4000245C, // [13]
+	67870: 0x400024AB, // [14]
+	67900: 0x400024AE, // [15]
+	67290: 0x40002471, // [16]
+	67100: 0x4000245E, // [17]
+	67270: 0x4000246F, // [18]
+	67070: 0x4000245B, // [19]
+	67230: 0x4000246B, // [20]
+	67120: 0x40002460, // [21]
+	67890: 0x400024AD, // [22]
+	67090: 0x4000245D, // [23]
+	67910: 0x400024AF, // [24]
+
+	// Missionary's Cookbook [1-7]
+	67610: 0x40002491, // [1]
+	67600: 0x40002490, // [2]
+	67650: 0x40002495, // [3]
+	67640: 0x40002494, // [4]
+	67630: 0x40002493, // [5]
+	67130: 0x40002461, // [6]
+	68230: 0x400024CF, // [7]
+
+	// Armorer's Cookbook [1-7]
+	67200: 0x40002468, // [1]
+	67210: 0x40002469, // [2]
+	67280: 0x40002470, // [3]
+	67260: 0x4000246E, // [4]
+	67310: 0x40002473, // [5]
+	67300: 0x40002472, // [6]
+	67250: 0x4000246D, // [7]
+
+	// Ancient Dragon Apostle's Cookbook [1-4]
+	68000: 0x400024B8, // [1]
+	68010: 0x400024B9, // [2]
+	68030: 0x400024BB, // [3]
+	68020: 0x400024BA, // [4]
+
+	// Fevor's Cookbook [1-3]
+	68200: 0x400024CC, // [1]
+	68220: 0x400024CE, // [2]
+	68210: 0x400024CD, // [3]
+
+	// Perfumer's Cookbook [1-4]
+	67840: 0x400024A8, // [1]
+	67850: 0x400024A9, // [2]
+	67860: 0x400024AA, // [3]
+	67920: 0x400024B0, // [4]
+
+	// Glintstone Craftsman's Cookbook [1-8]
+	67410: 0x4000247D, // [1]
+	67450: 0x40002481, // [2]
+	67480: 0x40002484, // [3]
+	67400: 0x4000247C, // [4]
+	67420: 0x4000247E, // [5]
+	67460: 0x40002482, // [6]
+	67470: 0x40002483, // [7]
+	67440: 0x40002480, // [8]
+
+	// Frenzied's Cookbook [1-2]
+	68400: 0x400024E0, // [1]
+	68410: 0x400024E1, // [2]
+}
+
+// cookbookItemIDs is a set of all cookbook inventory item IDs for filtering.
+var cookbookItemIDs map[uint32]bool
+
+func init() {
+	cookbookItemIDs = make(map[uint32]bool, len(CookbookFlagToItemID))
+	for _, itemID := range CookbookFlagToItemID {
+		cookbookItemIDs[itemID] = true
+	}
+}
+
+// IsCookbookItemID returns true if the item ID is a cookbook Key Item.
+// Checks both the mapped IDs and any Key Item with "Cookbook" in the name.
+func IsCookbookItemID(id uint32) bool {
+	if cookbookItemIDs[id] {
+		return true
+	}
+	if item, ok := KeyItems[id]; ok {
+		return strings.Contains(item.Name, "Cookbook")
+	}
+	return false
 }

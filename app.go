@@ -910,6 +910,12 @@ func (a *App) GetCookbooks(slotIndex int) ([]db.CookbookEntry, error) {
 
 // SetCookbookUnlocked sets or clears the unlock flag for a cookbook
 func (a *App) SetCookbookUnlocked(slotIndex int, cookbookID uint32, unlocked bool) error {
+	return a.BulkSetCookbooksUnlocked(slotIndex, []uint32{cookbookID}, unlocked)
+}
+
+// BulkSetCookbooksUnlocked sets event flags AND adds/removes inventory items for multiple cookbooks.
+// Single pushUndo — safe for concurrent Wails calls.
+func (a *App) BulkSetCookbooksUnlocked(slotIndex int, cookbookIDs []uint32, unlocked bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
 	}
@@ -925,9 +931,33 @@ func (a *App) SetCookbookUnlocked(slotIndex int, cookbookID uint32, unlocked boo
 	}
 
 	flags := slot.Data[slot.EventFlagsOffset:]
-	if err := db.SetEventFlag(flags, cookbookID, unlocked); err != nil {
-		return fmt.Errorf("failed to set cookbook %d: %w", cookbookID, err)
+
+	// Collect item IDs to add in batch.
+	var itemsToAdd []uint32
+
+	for _, cookbookID := range cookbookIDs {
+		if err := db.SetEventFlag(flags, cookbookID, unlocked); err != nil {
+			continue
+		}
+
+		if itemID, ok := data.CookbookFlagToItemID[cookbookID]; ok {
+			if unlocked {
+				itemsToAdd = append(itemsToAdd, itemID)
+			} else {
+				for handle, gID := range slot.GaMap {
+					if gID == itemID {
+						_ = core.RemoveItemFromSlot(slot, handle, true, false)
+						break
+					}
+				}
+			}
+		}
 	}
+
+	if len(itemsToAdd) > 0 {
+		_ = core.AddItemsToSlot(slot, itemsToAdd, 1, 0, false)
+	}
+
 	return nil
 }
 

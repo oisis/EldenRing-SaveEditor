@@ -10,6 +10,10 @@ export function ApplyAppearancePreset(arg1, arg2) {
   return window['go']['main']['App']['ApplyAppearancePreset'](arg1, arg2);
 }
 
+export function BulkSetCookbooksUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['BulkSetCookbooksUnlocked'](arg1, arg2, arg3);
+}
+
 export function BulkSetGesturesUnlocked(arg1, arg2, arg3) {
   return window['go']['main']['App']['BulkSetGesturesUnlocked'](arg1, arg2, arg3);
 }

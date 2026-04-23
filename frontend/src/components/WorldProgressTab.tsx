@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
@@ -129,8 +129,8 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     // --- Cookbook logic ---
     const cookbookCategories = cookbooks.reduce((acc, c) => { const cat = c.category || 'Other'; (acc[cat] ??= []).push(c); return acc; }, {} as Record<string, db.CookbookEntry[]>);
     const handleCookbookToggle = async (c: db.CookbookEntry, unlocked: boolean) => { await SetCookbookUnlocked(charIdx, c.id, unlocked); setCookbooks(prev => prev.map(x => x.id === c.id ? {...x, unlocked} : x)); onMutate?.(); };
-    const handleUnlockAllCookbooks = async () => { const l = cookbooks.filter(c => !c.unlocked); if (!l.length) return; await Promise.all(l.map(c => SetCookbookUnlocked(charIdx, c.id, true))); setCookbooks(prev => prev.map(c => ({...c, unlocked: true}))); onMutate?.(); };
-    const handleLockAllCookbooks = async () => { const u = cookbooks.filter(c => c.unlocked); if (!u.length) return; await Promise.all(u.map(c => SetCookbookUnlocked(charIdx, c.id, false))); setCookbooks(prev => prev.map(c => ({...c, unlocked: false}))); onMutate?.(); };
+    const handleUnlockAllCookbooks = async () => { const l = cookbooks.filter(c => !c.unlocked); if (!l.length) return; await BulkSetCookbooksUnlocked(charIdx, l.map(c => c.id), true); setCookbooks(prev => prev.map(c => ({...c, unlocked: true}))); onMutate?.(); };
+    const handleLockAllCookbooks = async () => { const u = cookbooks.filter(c => c.unlocked); if (!u.length) return; await BulkSetCookbooksUnlocked(charIdx, u.map(c => c.id), false); setCookbooks(prev => prev.map(c => ({...c, unlocked: false}))); onMutate?.(); };
     const unlockedCookbooks = cookbooks.filter(c => c.unlocked).length;
 
     // --- Quest logic ---

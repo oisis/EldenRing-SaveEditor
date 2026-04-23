@@ -10,6 +10,8 @@ export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,a
 
 export function ApplyAppearancePreset(arg1:number,arg2:string):Promise<void>;
 
+export function BulkSetCookbooksUnlocked(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
+
 export function BulkSetGesturesUnlocked(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
 
 export function CloneSlot(arg1:number,arg2:number):Promise<void>;
