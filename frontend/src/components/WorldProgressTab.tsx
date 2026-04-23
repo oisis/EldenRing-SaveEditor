@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 
 interface WorldProgressTabProps {
@@ -48,6 +48,8 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [pools, setPools] = useState<db.SummoningPoolEntry[]>([]);
     const [colosseums, setColosseums] = useState<db.ColosseumEntry[]>([]);
     const [mapEntries, setMapEntries] = useState<db.MapEntry[]>([]);
+    const [cookbooks, setCookbooks] = useState<db.CookbookEntry[]>([]);
+    const [gestures, setGesturesList] = useState<db.GestureEntry[]>([]);
     const [loading, setLoading] = useState(false);
     const [expandedRegions, setExpandedRegions] = useState<Record<string, boolean>>({});
     const [expandedBossRegions, setExpandedBossRegions] = useState<Record<string, boolean>>({});
@@ -55,7 +57,8 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     const [selectedMap, setSelectedMap] = useState<{name: string, path: string} | null>(null);
     const [bossFilter, setBossFilter] = useState<'all' | 'main' | 'field'>('all');
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
-    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map'>('graces');
+    const [activeSection, setActiveSection] = useState<'graces' | 'bosses' | 'pools' | 'colosseums' | 'map' | 'cookbooks' | 'gestures'>('graces');
+    const [expandedCookbookCategories, setExpandedCookbookCategories] = useState<Record<string, boolean>>({});
     const [expandedMapAreas, setExpandedMapAreas] = useState<Record<string, boolean>>({});
     const [skipBossArenas, setSkipBossArenas] = useState(true);
 
@@ -67,6 +70,8 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             GetSummoningPools(charIdx).then(res => setPools(res || [])),
             GetColosseums(charIdx).then(res => setColosseums(res || [])),
             GetMapProgress(charIdx).then(res => setMapEntries(res || [])),
+            GetCookbooks(charIdx).then(res => setCookbooks(res || [])),
+            GetGestures(charIdx).then(res => setGesturesList(res || [])),
         ]).finally(() => setLoading(false));
     };
     useEffect(() => { loadData(); }, [charIdx]);
@@ -97,6 +102,19 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
     // --- Colosseum logic ---
     const handleColosseumToggle = async (c: db.ColosseumEntry, unlocked: boolean) => { await SetColosseumUnlocked(charIdx, c.id, unlocked); setColosseums(prev => prev.map(x => x.id === c.id ? {...x, unlocked} : x)); onMutate?.(); };
     const handleUnlockAllColosseums = async () => { const l = colosseums.filter(c => !c.unlocked); if (!l.length) return; await Promise.all(l.map(c => SetColosseumUnlocked(charIdx, c.id, true))); setColosseums(prev => prev.map(c => ({...c, unlocked: true}))); onMutate?.(); };
+
+    // --- Gesture logic ---
+    const handleGestureToggle = async (g: db.GestureEntry, unlocked: boolean) => { await SetGestureUnlocked(charIdx, g.id, unlocked); setGesturesList(prev => prev.map(x => x.id === g.id ? {...x, unlocked} : x)); onMutate?.(); };
+    const handleUnlockAllGestures = async () => { const l = gestures.filter(g => !g.unlocked); if (!l.length) return; await BulkSetGesturesUnlocked(charIdx, l.map(g => g.id), true); setGesturesList(prev => prev.map(g => ({...g, unlocked: true}))); onMutate?.(); };
+    const handleLockAllGestures = async () => { const u = gestures.filter(g => g.unlocked); if (!u.length) return; await BulkSetGesturesUnlocked(charIdx, u.map(g => g.id), false); setGesturesList(prev => prev.map(g => ({...g, unlocked: false}))); onMutate?.(); };
+    const unlockedGestures = gestures.filter(g => g.unlocked).length;
+
+    // --- Cookbook logic ---
+    const cookbookCategories = cookbooks.reduce((acc, c) => { const cat = c.category || 'Other'; (acc[cat] ??= []).push(c); return acc; }, {} as Record<string, db.CookbookEntry[]>);
+    const handleCookbookToggle = async (c: db.CookbookEntry, unlocked: boolean) => { await SetCookbookUnlocked(charIdx, c.id, unlocked); setCookbooks(prev => prev.map(x => x.id === c.id ? {...x, unlocked} : x)); onMutate?.(); };
+    const handleUnlockAllCookbooks = async () => { const l = cookbooks.filter(c => !c.unlocked); if (!l.length) return; await Promise.all(l.map(c => SetCookbookUnlocked(charIdx, c.id, true))); setCookbooks(prev => prev.map(c => ({...c, unlocked: true}))); onMutate?.(); };
+    const handleLockAllCookbooks = async () => { const u = cookbooks.filter(c => c.unlocked); if (!u.length) return; await Promise.all(u.map(c => SetCookbookUnlocked(charIdx, c.id, false))); setCookbooks(prev => prev.map(c => ({...c, unlocked: false}))); onMutate?.(); };
+    const unlockedCookbooks = cookbooks.filter(c => c.unlocked).length;
 
     // --- Map logic ---
     const mapRegionEntries = mapEntries.filter(e => e.category === 'visible');
@@ -160,7 +178,7 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             {/* Tabs + toolbar */}
             <div className="flex items-center justify-between flex-wrap gap-1.5">
                 <div className="flex items-center space-x-0.5">
-                    {(['graces', 'bosses', 'pools', 'colosseums', 'map'] as const).map(s => (
+                    {(['graces', 'bosses', 'pools', 'colosseums', 'map', 'cookbooks', 'gestures'] as const).map(s => (
                         <button key={s} onClick={() => setActiveSection(s)}
                             className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.12em] transition-all ${activeSection === s ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}>
                             {s === 'graces' ? 'Sites of Grace' : s === 'pools' ? 'Summoning Pools' : s === 'map' ? 'Map Discovery' : s.charAt(0).toUpperCase() + s.slice(1)}
@@ -214,6 +232,20 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                         <button onClick={handleRevealAllMap} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Reveal All</button>
                         <button onClick={handleResetMap} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Reset</button>
                         <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{enabledMapRegions}/{totalMapRegions}</span>
+                    </div>
+                )}
+                {activeSection === 'cookbooks' && (
+                    <div className="flex items-center space-x-2">
+                        <button onClick={handleUnlockAllCookbooks} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                        <button onClick={handleLockAllCookbooks} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{unlockedCookbooks}/{cookbooks.length}</span>
+                    </div>
+                )}
+                {activeSection === 'gestures' && (
+                    <div className="flex items-center space-x-2">
+                        <button onClick={handleUnlockAllGestures} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                        <button onClick={handleLockAllGestures} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        <span className="text-[8px] font-black uppercase tracking-widest text-muted-foreground">{unlockedGestures}/{gestures.length}</span>
                     </div>
                 )}
             </div>
@@ -389,6 +421,50 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                             <label key={e.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
                                                 <Chk checked={e.enabled} onChange={v => handleMapRegionToggle(e, v)} />
                                                 <span className={`text-[10px] font-semibold truncate ${e.enabled ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{e.name}</span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+            )}
+
+            {/* Gestures */}
+            {activeSection === 'gestures' && (
+                <div className="card overflow-hidden animate-in fade-in duration-200">
+                    <div className="px-3 py-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-0.5">
+                        {gestures.map(g => (
+                            <label key={g.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
+                                <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{g.name}</span>
+                            </label>
+                        ))}
+                    </div>
+                </div>
+            )}
+
+            {/* Cookbooks */}
+            {activeSection === 'cookbooks' && (
+                <div className="grid grid-cols-1 gap-1.5 animate-in fade-in duration-200">
+                    {Object.entries(cookbookCategories).sort(([a], [b]) => a.localeCompare(b)).map(([cat, cbs]) => {
+                        const uc = cbs.filter(c => c.unlocked).length;
+                        return (
+                            <div key={cat} className="card overflow-hidden">
+                                <div className={`w-full px-3 py-2 flex justify-between items-center transition-all ${expandedCookbookCategories[cat] ? 'bg-muted/30 border-b border-border' : 'hover:bg-muted/10'}`}>
+                                    <button onClick={() => setExpandedCookbookCategories(p => ({...p, [cat]: !p[cat]}))} className="flex-1 flex items-center space-x-2.5 text-left">
+                                        <Arrow open={!!expandedCookbookCategories[cat]} />
+                                        <h2 className="text-[10px] font-black uppercase tracking-widest text-foreground">{cat}</h2>
+                                    </button>
+                                    <Badge count={uc} total={cbs.length} />
+                                </div>
+                                {expandedCookbookCategories[cat] && (
+                                    <div className="px-3 py-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-0.5 animate-in slide-in-from-top-1 duration-200">
+                                        {cbs.map(c => (
+                                            <label key={c.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                                <Chk checked={c.unlocked} onChange={v => handleCookbookToggle(c, v)} />
+                                                <span className={`text-[10px] truncate font-semibold ${c.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{c.name}</span>
                                             </label>
                                         ))}
                                     </div>

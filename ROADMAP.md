@@ -52,13 +52,14 @@ Parse the EventFlags bitfield (~14.7 million flags at `EventFlagsOffset`, size `
 ### 🔲 NPC Quest State Editor 🟡
 Human-readable quest progression UI built on top of event flags. **Single most requested missing feature** across all Elden Ring editor communities.
 
-**Technical details:**
-- Map known event flag IDs to NPC questline steps (source: soulsmods.github.io/elden-ring-eventparam/)
-- Show each NPC questline as step-by-step progression
-- Allow advancing/reverting quest steps
-- Support NPC revival (reset death flags)
-- Cover both base game and DLC (Shadow of the Erdtree) questlines
-- Community request: "Can I revive NPCs?" / "Can I reset quest progress?" — extremely common
+**Backend done:** `backend/db/data/quests.go`, `backend/db/db.go`, `app.go`
+- Quest data for major NPCs with step-by-step event flag mappings
+- `GetQuestNPCs()` — list of NPC names with quest data
+- `GetQuestProgress(slotIndex, npcName)` — returns quest steps with current flag state
+- `SetQuestStep(slotIndex, npcName, stepIndex)` — sets all flags for a step to target values
+- `QuestNPC`, `QuestStep`, `QuestFlagState` types exported via Wails bindings
+
+**TODO:** Frontend UI (NPC list → step progression → toggle buttons)
 
 ### ✅ Boss Kill / Respawn Manager 🟡
 Dedicated UI for toggling boss defeat states via event flags.
@@ -161,8 +162,15 @@ RE remaining dungeon entrance door flags.
 
 ## Phase 4 — Inventory & Equipment Enhancements
 
-### 🔲 Cookbook / Recipe Checklist 🟢
-Visual grid of all cookbooks with unlock status. Cookbooks are inventory items with known IDs — straightforward to implement.
+### ✅ Cookbook / Recipe Checklist 🟢
+Visual grid of all cookbooks with unlock status via event flags.
+
+**Implementation:** `backend/db/data/cookbooks.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- ~70 cookbooks (base game + DLC) with event flag IDs for unlock state
+- `CookbookEntry` type with: id, name, category, unlocked state
+- `GetCookbooks(slotIndex)` / `SetCookbookUnlocked(slotIndex, cookbookID, unlocked)` in `app.go`
+- UI: category-grouped with expand/collapse, Unlock All / Lock All buttons
+- Integrated as "Cookbooks" sub-tab in World Progress tab
 
 ### ✅ Great Rune Manager 🟢
 Equipped Great Rune selector + buff toggle.
@@ -173,12 +181,20 @@ Equipped Great Rune selector + buff toggle.
 - `EquipItemsIDOffset` stored in SaveSlot for dynamic chain access
 - UI: dropdown (None/6 Great Runes) + checkbox (Active/Inactive) in GeneralTab
 
-### 🔲 Gesture Unlock Checklist 🟢
+### ✅ Gesture Unlock Checklist 🟢
 Toggle grid for all 64 gestures.
 
-**Technical details:**
-- GestureGameData: `0x100` bytes (64 × u32 gesture IDs)
-- Located at `StorageBoxOffset + storageSize` in dynamic offset chain
+**Implementation:** `backend/db/data/gestures.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- 57 gestures (base game + DLC) with body-type variant detection (even/odd IDs)
+- GestureGameData: `0x100` bytes (64 × u32) at `StorageBoxOffset + DynStorageBox`
+- Empty sentinel: `0xFFFFFFFE` (not 0)
+- `DetectBodyTypeOffset()` — auto-detects body type A (odd) vs B (even) from existing gestures
+- `GetGestures(slotIndex)` / `SetGestureUnlocked(slotIndex, gestureID, unlocked)` in `app.go`
+- `BulkSetGesturesUnlocked()` — batch operation (single IPC call, single pushUndo)
+- UI: flat grid with Unlock All / Lock All buttons
+- Integrated as "Gestures" sub-tab in World Progress tab
+
+**Known issue:** Toggling gestures in the binary array changes the save correctly, but gestures may not appear in-game. The game likely requires BOTH the binary array entry AND the corresponding event flag (range 60800–60849) to be set. Event flag mapping per gesture is not yet implemented — see spec/08-spells-gestures.md. Fixing this requires reverse-engineering the exact flag↔gesture mapping.
 
 ### 🔲 Spirit Ash Upgrade Level Editing 🟢
 Edit upgrade levels (+0 to +10) for spirit ashes already in inventory.
@@ -226,13 +242,20 @@ Shadow of the Erdtree specific data:
 ## Phase 6 — Save Management & Safety
 
 ### 🔲 Save Corruption Detection / Repair 🟢
-Expand beyond MD5 checksum recalculation.
+Comprehensive slot diagnostics with corruption detection.
 
-**Technical details:**
+**Backend done:** `backend/core/diagnostics.go`, `app.go`
+- `DiagnoseSaveCorruption(slot, index)` — runs all diagnostic checks on a slot
+- `DiagnoseSlot(slotIndex)` / `DiagnoseAllSlots()` in `app.go` — exposed via Wails bindings
+- `SlotDiagnostics` / `DiagnosticIssue` types with severity levels (info/warning/error)
+
+**TODO — Phase 2 (requires more investigation):**
 - Validate dynamic offset chain integrity (offsets monotonically increasing, within slot bounds)
 - Bounds-check `projSize` (max 256) and `unlockedRegSz` (max 1024) — especially PS4
 - Verify BND4 entry table consistency (PC): entry sizes, data offsets, name table
 - Detect common corruption patterns (zeroed magic, broken GaItem handles)
+- Frontend UI for diagnostics results display
+- Auto-repair for recoverable issues
 
 ### 🔲 Save File Merging 🔵
 Combine data from two different saves into one. **Fully unique** — no editor does this.
@@ -329,10 +352,12 @@ One-click workflow: Close Game → Upload Save → Launch Game.
 - Map Exploration & Fog of War removal (maps.go, app.go, spec/27-fog-of-war.md)
 - Combined Map Visible + Acquired toggle, System flags as top-level checkboxes
 
-### ✅ Phase 4 — Character Progression
+### ✅ Phase 4 — Character Progression & Inventory
 - Talisman Pouch Slots (offset_defs.go, structures.go, character_vm.go, GeneralTab.tsx)
 - NG+ Cycle Editor with event flag sync (offset_defs.go, structures.go, app.go, GeneralTab.tsx)
 - Great Rune Manager — equipped rune + buff toggle (offset_defs.go, structures.go, character_vm.go, GeneralTab.tsx)
+- Cookbook / Recipe Checklist — event flag unlock toggle (cookbooks.go, db.go, app.go, WorldProgressTab.tsx)
+- Gesture Unlock Checklist — 64-slot gesture toggle (gestures.go, db.go, app.go, WorldProgressTab.tsx)
 
 ### ✅ Phase 22 — Item Descriptions & Stats
 Display item flavor text and detailed stats in the item detail modal. Data sourced from ERDB (MIT-licensed, parsed from regulation.bin).

@@ -6,6 +6,10 @@ export function AddItemsToCharacter(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
   return window['go']['main']['App']['AddItemsToCharacter'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
+export function BulkSetGesturesUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['BulkSetGesturesUnlocked'](arg1, arg2, arg3);
+}
+
 export function CloneSlot(arg1, arg2) {
   return window['go']['main']['App']['CloneSlot'](arg1, arg2);
 }
@@ -32,6 +36,14 @@ export function DeployAndLaunch(arg1) {
 
 export function DeploySave(arg1) {
   return window['go']['main']['App']['DeploySave'](arg1);
+}
+
+export function DiagnoseAllSlots() {
+  return window['go']['main']['App']['DiagnoseAllSlots']();
+}
+
+export function DiagnoseSlot(arg1) {
+  return window['go']['main']['App']['DiagnoseSlot'](arg1);
 }
 
 export function DownloadRemoteSave(arg1) {
@@ -62,8 +74,16 @@ export function GetColosseums(arg1) {
   return window['go']['main']['App']['GetColosseums'](arg1);
 }
 
+export function GetCookbooks(arg1) {
+  return window['go']['main']['App']['GetCookbooks'](arg1);
+}
+
 export function GetDeployTargets() {
   return window['go']['main']['App']['GetDeployTargets']();
+}
+
+export function GetGestures(arg1) {
+  return window['go']['main']['App']['GetGestures'](arg1);
 }
 
 export function GetGraces(arg1) {
@@ -80,6 +100,14 @@ export function GetItemList(arg1) {
 
 export function GetMapProgress(arg1) {
   return window['go']['main']['App']['GetMapProgress'](arg1);
+}
+
+export function GetQuestNPCs() {
+  return window['go']['main']['App']['GetQuestNPCs']();
+}
+
+export function GetQuestProgress(arg1, arg2) {
+  return window['go']['main']['App']['GetQuestProgress'](arg1, arg2);
 }
 
 export function GetSaveDiffSummary() {
@@ -166,6 +194,14 @@ export function SetColosseumUnlocked(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetColosseumUnlocked'](arg1, arg2, arg3);
 }
 
+export function SetCookbookUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetCookbookUnlocked'](arg1, arg2, arg3);
+}
+
+export function SetGestureUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetGestureUnlocked'](arg1, arg2, arg3);
+}
+
 export function SetGraceVisited(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetGraceVisited'](arg1, arg2, arg3);
 }
@@ -176,6 +212,10 @@ export function SetMapFlag(arg1, arg2, arg3) {
 
 export function SetMapRegionFlags(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetMapRegionFlags'](arg1, arg2, arg3);
+}
+
+export function SetQuestStep(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetQuestStep'](arg1, arg2, arg3);
 }
 
 export function SetSlotActivity(arg1, arg2) {
