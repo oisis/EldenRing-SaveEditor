@@ -6,6 +6,10 @@ export function AddItemsToCharacter(arg1, arg2, arg3, arg4, arg5, arg6, arg7, ar
   return window['go']['main']['App']['AddItemsToCharacter'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
+export function ApplyAppearancePreset(arg1, arg2) {
+  return window['go']['main']['App']['ApplyAppearancePreset'](arg1, arg2);
+}
+
 export function BulkSetGesturesUnlocked(arg1, arg2, arg3) {
   return window['go']['main']['App']['BulkSetGesturesUnlocked'](arg1, arg2, arg3);
 }
@@ -148,6 +152,10 @@ export function ImportCharacter(arg1, arg2) {
 
 export function LaunchRemoteGame(arg1) {
   return window['go']['main']['App']['LaunchRemoteGame'](arg1);
+}
+
+export function ListAppearancePresets() {
+  return window['go']['main']['App']['ListAppearancePresets']();
 }
 
 export function RemoveFogOfWar(arg1) {

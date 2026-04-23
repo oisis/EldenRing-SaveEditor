@@ -228,6 +228,19 @@ Edit New Game+ cycle (0-7) with automatic event flag synchronization.
 - `ClearCountOffset` stored in SaveSlot for read/write
 - UI: number input 0-7 in GeneralTab profile row
 
+### ✅ Character Appearance Presets 🟢
+Apply community-created character appearance presets (face, body, skin, cosmetics, gender, voice).
+
+**Implementation:** `backend/core/offset_defs.go`, `backend/db/data/presets.go`, `app.go`, `frontend/src/components/AppearanceTab.tsx`
+- FaceData blob layout fully mapped (303 bytes): header, 8 model IDs, 64 face shape params, 7 body proportions, 91 skin/cosmetics bytes
+- Model IDs are u8 (padded to u32 LE) — UI index = save value, no lookup table needed
+- "Match Hair" = direct RGB copy (no flag byte)
+- VoiceType added to PlayerGameData (offset -245 from MagicOffset)
+- 5 presets: Geralt, Sekiro, Ragnar Lodbrok, Trevor Belmont, Yennefer
+- Source: eldensliders.com (manually verified slider values)
+- Undo supported via standard pushUndo mechanism
+- Unknown block (0x70-0xAF, 64 bytes) and trailing bytes (0x120-0x12E) preserved unchanged
+
 ### 🔲 Player Coordinates / Teleportation 🔵
 Edit CSPlayerCoords section (0x3D bytes) — position, mapID, angle.
 

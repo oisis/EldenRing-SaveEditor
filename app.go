@@ -1951,7 +1951,73 @@ func (a *App) writeTempSave() (string, error) {
 	return tmpPath, nil
 }
 
+// PresetInfo is the frontend-facing summary of an appearance preset.
+type PresetInfo struct {
+	Name     string `json:"name"`
+	Image    string `json:"image"`    // filename in presets/ dir (e.g. "geralt.jpg")
+	BodyType string `json:"bodyType"` // "Type A" or "Type B"
+}
+
+// ListAppearancePresets returns the list of available character appearance presets.
+func (a *App) ListAppearancePresets() []PresetInfo {
+	result := make([]PresetInfo, len(data.Presets))
+	for i, p := range data.Presets {
+		bt := "Type A"
+		if p.BodyType == 0 {
+			bt = "Type B"
+		}
+		result[i] = PresetInfo{Name: p.Name, Image: p.Image, BodyType: bt}
+	}
+	return result
+}
+
+// ApplyAppearancePreset applies a named appearance preset to the given slot.
+// Modifies face shape (64 bytes), body proportions (7 bytes), and skin/cosmetics (91 bytes)
+// directly in the slot's FaceData blob. Model IDs (hair, face, beard, etc.) are NOT changed
+// because eldensliders.com values are UI indices, not the game's internal PartsId values.
+func (a *App) ApplyAppearancePreset(slotIndex int, presetName string) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+
+	var preset *data.AppearancePreset
+	for i := range data.Presets {
+		if data.Presets[i].Name == presetName {
+			preset = &data.Presets[i]
+			break
+		}
+	}
+	if preset == nil {
+		return fmt.Errorf("preset not found: %s", presetName)
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	a.pushUndo(slotIndex)
+
+	fd := slot.FaceDataStart()
+	if fd < 0 || fd+core.FaceDataBlobSize > len(slot.Data) {
+		return fmt.Errorf("FaceData blob out of bounds: start=0x%X", fd)
+	}
+
+	// Write face shape (64 bytes at 0x30)
+	copy(slot.Data[fd+core.FDOffFaceShape:], preset.FaceShape[:])
+
+	// Write body proportions (7 bytes at 0xB0)
+	copy(slot.Data[fd+core.FDOffHead:], preset.Body[:])
+
+	// Write skin & cosmetics (91 bytes at 0xB7)
+	copy(slot.Data[fd+core.FDOffSkinR:], preset.Skin[:])
+
+	// Write back to slot data
+	slot.Write(string(a.save.Platform))
+
+	return nil
+}
+
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target, PresetInfo) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}, PresetInfo{}
 }

@@ -503,6 +503,22 @@ export namespace main {
 	        this.newValue = source["newValue"];
 	    }
 	}
+	export class PresetInfo {
+	    name: string;
+	    image: string;
+	    bodyType: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new PresetInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.name = source["name"];
+	        this.image = source["image"];
+	        this.bodyType = source["bodyType"];
+	    }
+	}
 	export class SlotCapacity {
 	    gaItemsUsed: number;
 	    gaItemsMax: number;

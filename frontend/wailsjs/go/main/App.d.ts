@@ -8,6 +8,8 @@ import {main} from '../models';
 
 export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,arg4:number,arg5:number,arg6:number,arg7:number,arg8:number):Promise<void>;
 
+export function ApplyAppearancePreset(arg1:number,arg2:string):Promise<void>;
+
 export function BulkSetGesturesUnlocked(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
 
 export function CloneSlot(arg1:number,arg2:number):Promise<void>;
@@ -79,6 +81,8 @@ export function GetUndoDepth(arg1:number):Promise<number>;
 export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 
 export function LaunchRemoteGame(arg1:string):Promise<string>;
+
+export function ListAppearancePresets():Promise<Array<main.PresetInfo>>;
 
 export function RemoveFogOfWar(arg1:number):Promise<void>;
 

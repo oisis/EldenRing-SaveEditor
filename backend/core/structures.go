@@ -172,6 +172,7 @@ type PlayerGameData struct {
 	Souls               uint32
 	CharacterName       [16]uint16
 	Gender              uint8
+	VoiceType           uint8 // 0=Young1, 1=Young2, 2=Mature1, 3=Mature2, 4=Aged1, 5=Aged2
 	Class               uint8
 	TalismanSlots       uint8  // additional talisman slots (0-3), total = 1 + this value
 	ClearCount          uint32 // NG+ cycle (0=NG, 1=NG+1, ..., 7=NG+7)
@@ -456,6 +457,12 @@ func ValidateSlotIntegrity(slot *SaveSlot) error {
 	return nil
 }
 
+// FaceDataStart returns the byte offset in slot.Data where the FaceData blob begins.
+// FaceData is FaceDataBlobSize (303) bytes ending at FaceDataOffset.
+func (s *SaveSlot) FaceDataStart() int {
+	return s.FaceDataOffset - FaceDataBlobSize
+}
+
 func (s *SaveSlot) mapStats() error {
 	sa := NewSlotAccessor(s.Data)
 	mo := s.MagicOffset
@@ -493,6 +500,9 @@ func (s *SaveSlot) mapStats() error {
 	}
 	if s.Player.Gender, err = sa.ReadU8(mo + OffGender); err != nil {
 		return fmt.Errorf("Gender: %w", err)
+	}
+	if s.Player.VoiceType, err = sa.ReadU8(mo + OffVoiceType); err != nil {
+		return fmt.Errorf("VoiceType: %w", err)
 	}
 	if s.Player.Class, err = sa.ReadU8(mo + OffClass); err != nil {
 		return fmt.Errorf("Class: %w", err)
@@ -721,6 +731,7 @@ func (s *SaveSlot) Write(platform string) []byte {
 	sa.WriteU32(mo+OffArcane, s.Player.Arcane)
 	sa.WriteU32(mo+OffSouls, s.Player.Souls)
 	sa.WriteU8(mo+OffGender, s.Player.Gender)
+	sa.WriteU8(mo+OffVoiceType, s.Player.VoiceType)
 	sa.WriteU8(mo+OffClass, s.Player.Class)
 	sa.WriteU8(mo+OffTalismanSlots, s.Player.TalismanSlots)
 	sa.WriteU8(mo+OffGreatRuneOn, s.Player.GreatRuneOn)
