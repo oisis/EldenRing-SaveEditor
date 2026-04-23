@@ -48,6 +48,8 @@ export function GetCookbooks(arg1:number):Promise<Array<db.CookbookEntry>>;
 
 export function GetDeployTargets():Promise<Array<deploy.Target>>;
 
+export function GetFavoritesStatus():Promise<Array<main.FavoriteSlotInfo>>;
+
 export function GetGestures(arg1:number):Promise<Array<db.GestureEntry>>;
 
 export function GetGraces(arg1:number):Promise<Array<db.GraceEntry>>;
@@ -83,6 +85,8 @@ export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 export function LaunchRemoteGame(arg1:string):Promise<string>;
 
 export function ListAppearancePresets():Promise<Array<main.PresetInfo>>;
+
+export function RemoveFavoritePreset(arg1:number):Promise<void>;
 
 export function RemoveFogOfWar(arg1:number):Promise<void>;
 
@@ -129,3 +133,5 @@ export function SetSummoningPoolActivated(arg1:number,arg2:number,arg3:boolean):
 export function TestSSHConnection(arg1:string):Promise<string>;
 
 export function WriteSave(arg1:string):Promise<void>;
+
+export function WriteSelectedToFavorites(arg1:number,arg2:Array<string>):Promise<number>;

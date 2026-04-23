@@ -1973,8 +1973,9 @@ func (a *App) ListAppearancePresets() []PresetInfo {
 
 // ApplyAppearancePreset applies a named appearance preset to the given slot.
 // Modifies face shape (64 bytes), body proportions (7 bytes), and skin/cosmetics (91 bytes)
-// directly in the slot's FaceData blob. Model IDs (hair, face, beard, etc.) are NOT changed
-// because eldensliders.com values are UI indices, not the game's internal PartsId values.
+// directly in the slot's FaceData blob. For male presets (BodyType 1), model IDs are also
+// written using the confirmed PartsId = UI - 1 mapping. Female model IDs are skipped
+// because the mapping is non-sequential and requires a lookup table.
 func (a *App) ApplyAppearancePreset(slotIndex int, presetName string) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -2011,13 +2012,213 @@ func (a *App) ApplyAppearancePreset(slotIndex int, presetName string) error {
 	// Write skin & cosmetics (91 bytes at 0xB7)
 	copy(slot.Data[fd+core.FDOffSkinR:], preset.Skin[:])
 
-	// Write back to slot data
-	slot.Write(string(a.save.Platform))
+	// Update VoiceType in parsed struct (Write() serializes it back to slot.Data)
+	slot.Player.VoiceType = preset.VoiceType
+
+	// Write model IDs for male presets (BodyType 1 = Type A).
+	// Most categories use PartsId = UI - 1. Hair uses a lookup table because
+	// the game's internal IDs are non-sequential (e.g. UI 9 → PartsId 101).
+	// Female mapping is non-sequential for all categories — skip model IDs.
+	if preset.BodyType == 1 {
+		writeModelID := func(offset int, uiValue uint8) {
+			pos := fd + offset
+			if uiValue > 0 {
+				slot.Data[pos] = uiValue - 1
+			} else {
+				slot.Data[pos] = 0
+			}
+			slot.Data[pos+1] = 0
+			slot.Data[pos+2] = 0
+			slot.Data[pos+3] = 0
+		}
+		writeModelID(core.FDOffFaceModel, preset.FaceModel)
+		// Hair: lookup table first, fallback to UI-1 for unmapped styles
+		{
+			pos := fd + core.FDOffHairModel
+			if partsId, ok := data.LookupMaleHairPartsID(preset.HairModel); ok {
+				slot.Data[pos] = partsId
+			} else if preset.HairModel > 0 {
+				slot.Data[pos] = preset.HairModel - 1 // fallback
+			}
+			slot.Data[pos+1] = 0
+			slot.Data[pos+2] = 0
+			slot.Data[pos+3] = 0
+		}
+		writeModelID(core.FDOffEyeModel, preset.EyeModel)
+		writeModelID(core.FDOffEyebrowModel, preset.EyebrowModel)
+		writeModelID(core.FDOffBeardModel, preset.BeardModel)
+		writeModelID(core.FDOffEyepatchModel, preset.EyepatchModel)
+		writeModelID(core.FDOffDecalModel, preset.DecalModel)
+		writeModelID(core.FDOffEyelashModel, preset.EyelashModel)
+	}
 
 	return nil
 }
 
+// FavoriteSlotInfo describes a single Favorites slot in the Mirror.
+type FavoriteSlotInfo struct {
+	Index    int    `json:"index"`    // absolute slot index (0-14)
+	Active   bool   `json:"active"`   // true if slot has FACE magic
+	Safe     bool   `json:"safe"`     // true if not colliding with ProfileSummary
+	Name     string `json:"name"`     // preset name if we wrote it, empty otherwise
+}
+
+// GetFavoritesStatus returns the state of all 15 Favorites slots.
+func (a *App) GetFavoritesStatus() []FavoriteSlotInfo {
+	result := make([]FavoriteSlotInfo, core.FavSlotCount)
+	if a.save == nil {
+		return result
+	}
+
+	ud := a.save.UserData10.Data
+	safeSet := make(map[int]bool, len(core.FavSafeSlots))
+	for _, s := range core.FavSafeSlots {
+		safeSet[s] = true
+	}
+
+	for i := 0; i < core.FavSlotCount; i++ {
+		off := core.FavBaseOffset + i*core.FavSlotSize
+		active := off+0x1C <= len(ud) && string(ud[off+0x18:off+0x1C]) == "FACE"
+		result[i] = FavoriteSlotInfo{
+			Index:  i,
+			Active: active,
+			Safe:   safeSet[i],
+		}
+	}
+	return result
+}
+
+// RemoveFavoritePreset clears a Favorites slot in UserData10.
+func (a *App) RemoveFavoritePreset(slotIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= core.FavSlotCount {
+		return fmt.Errorf("invalid favorites slot index")
+	}
+
+	ud := a.save.UserData10.Data
+	off := core.FavBaseOffset + slotIndex*core.FavSlotSize
+	if off+core.FavSlotSize > len(ud) {
+		return fmt.Errorf("slot offset out of bounds")
+	}
+
+	// Zero out the entire slot
+	for i := 0; i < core.FavSlotSize; i++ {
+		ud[off+i] = 0
+	}
+	return nil
+}
+
+// WriteSelectedToFavorites writes selected presets to the next available safe Favorites slots.
+// Returns the number of presets written.
+func (a *App) WriteSelectedToFavorites(charIndex int, presetNames []string) (int, error) {
+	if a.save == nil {
+		return 0, fmt.Errorf("no save loaded")
+	}
+	if charIndex < 0 || charIndex >= 10 {
+		return 0, fmt.Errorf("invalid character index")
+	}
+	if len(presetNames) == 0 {
+		return 0, nil
+	}
+
+	ud := a.save.UserData10.Data
+	slot := &a.save.Slots[charIndex]
+
+	// Find available safe slots
+	var freeSlots []int
+	for _, s := range core.FavSafeSlots {
+		off := core.FavBaseOffset + s*core.FavSlotSize
+		if off+0x1C > len(ud) {
+			continue
+		}
+		magic := string(ud[off+0x18 : off+0x1C])
+		if magic != "FACE" {
+			freeSlots = append(freeSlots, s)
+		}
+	}
+
+	if len(presetNames) > len(freeSlots) {
+		return 0, fmt.Errorf("not enough free slots: need %d, have %d", len(presetNames), len(freeSlots))
+	}
+
+	// Read unknown block from character slot
+	var unkBlock [64]byte
+	fd := slot.FaceDataStart()
+	if fd >= 0 && fd+core.FaceDataBlobSize <= len(slot.Data) {
+		copy(unkBlock[:], slot.Data[fd+core.FDOffUnknownBlock:fd+core.FDOffUnknownBlock+64])
+	}
+
+	written := 0
+	for i, name := range presetNames {
+		var preset *data.AppearancePreset
+		for j := range data.Presets {
+			if data.Presets[j].Name == name {
+				preset = &data.Presets[j]
+				break
+			}
+		}
+		if preset == nil {
+			continue
+		}
+
+		safeIdx := freeSlots[i]
+		slotOff := core.FavBaseOffset + safeIdx*core.FavSlotSize
+
+		buf := make([]byte, core.FavSlotSize)
+
+		// Slot header
+		binary.LittleEndian.PutUint16(buf[0x00:], 0xFACE)
+		binary.LittleEndian.PutUint32(buf[0x04:], core.FavHeaderUnk)
+		buf[core.FavOffBodyFlag] = 1
+		if preset.BodyType == 1 {
+			buf[core.FavOffBodyType] = 0 // male in Favorites
+		} else {
+			buf[core.FavOffBodyType] = 1 // female in Favorites
+		}
+
+		// FACE block header
+		copy(buf[core.FavOffMagic:], []byte("FACE"))
+		binary.LittleEndian.PutUint32(buf[core.FavOffAlignment:], 4)
+		binary.LittleEndian.PutUint32(buf[core.FavOffInnerSize:], 0x120)
+
+		// Model IDs — male only, female skipped (no mapping)
+		if preset.BodyType == 1 {
+			writeModel := func(off int, uiVal uint8) {
+				val := uiVal
+				if val > 0 {
+					val--
+				}
+				binary.LittleEndian.PutUint32(buf[core.FavOffModelIDs+(off*4):], uint32(val))
+			}
+			// Hair: lookup table first, fallback to UI-1 for unmapped styles
+			if partsId, ok := data.LookupMaleHairPartsID(preset.HairModel); ok {
+				binary.LittleEndian.PutUint32(buf[core.FavOffModelIDs+1*4:], uint32(partsId))
+			} else if preset.HairModel > 0 {
+				binary.LittleEndian.PutUint32(buf[core.FavOffModelIDs+1*4:], uint32(preset.HairModel-1))
+			}
+			writeModel(2, preset.EyeModel)
+			writeModel(3, preset.EyebrowModel)
+			writeModel(4, preset.BeardModel)
+			writeModel(5, preset.EyepatchModel)
+			writeModel(6, preset.DecalModel)
+			writeModel(7, preset.EyelashModel)
+		}
+
+		copy(buf[core.FavOffFaceShape:], preset.FaceShape[:])
+		copy(buf[core.FavOffUnkBlock:], unkBlock[:])
+		copy(buf[core.FavOffBody:], preset.Body[:])
+		copy(buf[core.FavOffSkin:], preset.Skin[:])
+
+		copy(ud[slotOff:], buf)
+		written++
+	}
+
+	return written, nil
+}
+
 // Dummy method to force Wails to export types
-func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target, PresetInfo) {
-	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}, PresetInfo{}
+func (a *App) _forceExportTypes() (db.GraceEntry, db.BossEntry, db.ItemEntry, db.MapEntry, db.CookbookEntry, db.GestureEntry, db.QuestNPC, db.QuestStep, db.QuestFlagState, core.SlotDiagnostics, core.DiagnosticIssue, DiffEntry, SlotDiffSummary, SlotCapacity, deploy.Target, PresetInfo, FavoriteSlotInfo) {
+	return db.GraceEntry{}, db.BossEntry{}, db.ItemEntry{}, db.MapEntry{}, db.CookbookEntry{}, db.GestureEntry{}, db.QuestNPC{}, db.QuestStep{}, db.QuestFlagState{}, core.SlotDiagnostics{}, core.DiagnosticIssue{}, DiffEntry{}, SlotDiffSummary{}, SlotCapacity{}, deploy.Target{}, PresetInfo{}, FavoriteSlotInfo{}
 }

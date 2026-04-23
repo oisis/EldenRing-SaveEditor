@@ -86,6 +86,10 @@ export function GetDeployTargets() {
   return window['go']['main']['App']['GetDeployTargets']();
 }
 
+export function GetFavoritesStatus() {
+  return window['go']['main']['App']['GetFavoritesStatus']();
+}
+
 export function GetGestures(arg1) {
   return window['go']['main']['App']['GetGestures'](arg1);
 }
@@ -156,6 +160,10 @@ export function LaunchRemoteGame(arg1) {
 
 export function ListAppearancePresets() {
   return window['go']['main']['App']['ListAppearancePresets']();
+}
+
+export function RemoveFavoritePreset(arg1) {
+  return window['go']['main']['App']['RemoveFavoritePreset'](arg1);
 }
 
 export function RemoveFogOfWar(arg1) {
@@ -248,4 +256,8 @@ export function TestSSHConnection(arg1) {
 
 export function WriteSave(arg1) {
   return window['go']['main']['App']['WriteSave'](arg1);
+}
+
+export function WriteSelectedToFavorites(arg1, arg2) {
+  return window['go']['main']['App']['WriteSelectedToFavorites'](arg1, arg2);
 }

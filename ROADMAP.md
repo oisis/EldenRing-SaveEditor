@@ -230,16 +230,27 @@ Edit New Game+ cycle (0-7) with automatic event flag synchronization.
 
 ### ✅ Character Appearance Presets 🟢
 Apply community-created character appearance presets (face, body, skin, cosmetics, gender, voice).
+Write presets to in-game Mirror Favorites (CSMenuSystemSaveLoad in UserData10).
 
-**Implementation:** `backend/core/offset_defs.go`, `backend/db/data/presets.go`, `app.go`, `frontend/src/components/AppearanceTab.tsx`
+**Implementation:** `backend/core/offset_defs.go`, `backend/db/data/presets.go`, `backend/db/data/presets_generated.go`, `backend/db/data/hair_mapping.go`, `scripts/parse_presets.go`, `app.go`, `frontend/src/components/AppearanceTab.tsx`
 - FaceData blob layout fully mapped (303 bytes): header, 8 model IDs, 64 face shape params, 7 body proportions, 91 skin/cosmetics bytes
-- Model IDs are u8 (padded to u32 LE) — UI index = save value, no lookup table needed
-- "Match Hair" = direct RGB copy (no flag byte)
+- Hair model IDs use non-sequential lookup table (`hair_mapping.go`) — UI position ≠ PartsId
+- Other male model IDs use PartsId = UI - 1 (bone structure, beard, eyebrow, eyelash, tattoo, eyepatch)
+- Female model IDs skipped entirely (non-sequential mapping unknown for face/hair/eyebrow)
 - VoiceType added to PlayerGameData (offset -245 from MagicOffset)
-- 5 presets: Geralt, Sekiro, Ragnar Lodbrok, Trevor Belmont, Yennefer
-- Source: eldensliders.com (manually verified slider values)
+- 20 presets from eldensliders.com (parsed by `scripts/parse_presets.go` from `tmp/characters/characters.md`)
+- Mirror Favorites: writes to CSMenuSystemSaveLoad safe slots (0, 10-14) to avoid ProfileSummary collision
+- Favorites header: 0xFACE marker, 0x11D0 constant, body_type inverted (0=male, 1=female)
+- FaceModel forced to 0 in Favorites (non-zero causes invisible body in Mirror preview)
+- UI: checkbox selection, image zoom modal, Apply (1 preset) / Add to Mirror (N presets), Remove from Favorites
 - Undo supported via standard pushUndo mechanism
-- Unknown block (0x70-0xAF, 64 bytes) and trailing bytes (0x120-0x12E) preserved unchanged
+
+**Known limitations / TODO:**
+- Male hair mapping incomplete: UI 1-9 confirmed, UI 10-31 unmapped (fallback to UI-1, inaccurate). Need save with styles 10-31 to complete table
+- DLC hair positions approximate (UI 32-37) — need confirmation
+- Female model IDs (face, hair, eyebrow) not written — mapping is non-sequential, no lookup table yet
+- FaceModel (bone structure) forced to 0 in Favorites — non-zero causes invisible body in Mirror
+- Other model categories (beard, eyebrow, etc.) may also need lookup tables like hair — not yet verified beyond UI-1
 
 ### 🔲 Player Coordinates / Teleportation 🔵
 Edit CSPlayerCoords section (0x3D bytes) — position, mapID, angle.

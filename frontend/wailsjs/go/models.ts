@@ -503,6 +503,24 @@ export namespace main {
 	        this.newValue = source["newValue"];
 	    }
 	}
+	export class FavoriteSlotInfo {
+	    index: number;
+	    active: boolean;
+	    safe: boolean;
+	    name: string;
+	
+	    static createFrom(source: any = {}) {
+	        return new FavoriteSlotInfo(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.index = source["index"];
+	        this.active = source["active"];
+	        this.safe = source["safe"];
+	        this.name = source["name"];
+	    }
+	}
 	export class PresetInfo {
 	    name: string;
 	    image: string;

@@ -57,14 +57,9 @@ type AppearancePreset struct {
 }
 
 // Presets contains all available appearance presets.
+// Generated from tmp/characters/characters.md by scripts/parse_presets.go.
 // Source: https://eldensliders.com/
-var Presets = []AppearancePreset{
-	geralt,
-	sekiro,
-	ragnar,
-	trevorBelmont,
-	yennefer,
-}
+var Presets = GeneratedPresets
 
 // --- Geralt of Rivia, the Witcher ---
 var geralt = AppearancePreset{

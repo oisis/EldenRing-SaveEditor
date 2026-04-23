@@ -107,6 +107,37 @@ const (
 	DynEventFlags           = 0
 )
 
+// CSMenuSystemSaveLoad / Favorites preset constants.
+// Located in UserData10.Data. The game's Mirror at Roundtable Hold reads presets from here.
+// ProfileSummary writes (0x31A+i*0x100) collide with preset slots 1-9.
+// Safe slots: 0, 10, 11, 12, 13, 14 (6 total).
+const (
+	FavBaseOffset = 0x154 // first preset slot in UserData10.Data (same for PC and PS4)
+	FavSlotSize   = 0x130 // 304 bytes per preset slot
+	FavSlotCount  = 15    // total preset slots in CSMenuSystemSaveLoad
+
+	// Offsets within a single 0x130-byte preset slot
+	FavOffBodyFlag  = 0x08 // u8: body flag
+	FavOffBodyType  = 0x09 // u8: 0=female, 1=male
+	FavOffMarker    = 0x14 // u32: 0xFFFFFFFF
+	FavOffMagic     = 0x18 // "FACE" (4 bytes) — indicates slot is populated
+	FavOffAlignment = 0x1C // u32: 4
+	FavOffInnerSize = 0x20 // u32: 0x120 (288)
+	FavOffModelIDs  = 0x24 // 8 × u32: model IDs (same layout as FaceData blob)
+	FavOffFaceShape = 0x44 // 64 bytes: face shape sliders
+	FavOffUnkBlock  = 0x84 // 64 bytes: unknown block (copy from slot)
+	FavOffBody      = 0xC4 // 7 bytes: body proportions
+	FavOffSkin      = 0xCB // 69 bytes: skin & cosmetics (shorter than slot's 91 — no trailing hair colors?)
+)
+
+// FavSafeSlots lists preset slot indices that don't collide with ProfileSummary writes.
+// Slot 0 ends at 0x283, first ProfileSummary at 0x30A (PS4) / 0x31A (PC) — no collision.
+// Slots 1-9 collide with ProfileSummary writes. Slots 0, 10-14 are safe.
+var FavSafeSlots = [6]int{0, 10, 11, 12, 13, 14}
+
+// FavHeaderUnk is the constant u32 at preset header offset 0x04 (observed in all active presets).
+const FavHeaderUnk = 0x11D0
+
 // FaceData blob layout constants.
 // FaceData is a 303-byte (0x12F) block stored at FaceDataOffset-FaceDataBlobSize.
 // All offsets below are relative to the start of the FaceData blob.

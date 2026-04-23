@@ -403,11 +403,13 @@ function App() {
                                         </div>
                                     );
                                 })()}
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
                                 {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'appearance' && <AppearanceTab charIndex={selectedChar} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
+                                </div>
                             </div>
                         )}
                     </div>
