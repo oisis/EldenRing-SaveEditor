@@ -164,11 +164,14 @@ RE remaining dungeon entrance door flags.
 ### 🔲 Cookbook / Recipe Checklist 🟢
 Visual grid of all cookbooks with unlock status. Cookbooks are inventory items with known IDs — straightforward to implement.
 
-### 🔲 Great Rune Manager 🟢
-Dedicated UI showing:
-- Which Great Runes are obtained (inventory check)
-- Which is currently equipped
-- Rune Arc buff status (`GreatRuneOn` field at PlayerGameData+0xF7)
+### ✅ Great Rune Manager 🟢
+Equipped Great Rune selector + buff toggle.
+
+**Implementation:** `backend/core/offset_defs.go`, `backend/core/structures.go`, `backend/vm/character_vm.go`, `frontend/src/components/GeneralTab.tsx`
+- `GreatRuneOn` (PGD offset 0xF7, u8 bool) — read/write via MagicOffset-184
+- `EquippedGreatRune` (EquippedItemsItemIds+0x28, u32) — item IDs: Godrick 0x40000053, Radahn 0x40000054, Morgott 0x40000055, Rykard 0x40000056, Malenia 0x40000057, Mohg 0x40000058
+- `EquipItemsIDOffset` stored in SaveSlot for dynamic chain access
+- UI: dropdown (None/6 Great Runes) + checkbox (Active/Inactive) in GeneralTab
 
 ### 🔲 Gesture Unlock Checklist 🟢
 Toggle grid for all 64 gestures.
@@ -180,18 +183,25 @@ Toggle grid for all 64 gestures.
 ### 🔲 Spirit Ash Upgrade Level Editing 🟢
 Edit upgrade levels (+0 to +10) for spirit ashes already in inventory.
 
-### 🔲 Talisman Pouch Slots 🟢
-Directly set the number of unlocked talisman slots (1-4).
+### ✅ Talisman Pouch Slots 🟢
+Edit number of unlocked talisman slots (0-3 additional, total 1-4).
 
-**Technical details:**
-- Field: `AdditionalTalismanSlotsCount` at PlayerGameData+0xBE (u8)
+**Implementation:** `backend/core/offset_defs.go`, `backend/core/structures.go`, `backend/vm/character_vm.go`, `frontend/src/components/GeneralTab.tsx`
+- `AdditionalTalismanSlotsCount` at PGD offset 0xBE → MagicOffset-241 (u8, clamped 0-3)
+- UI: number input with arrows in GeneralTab profile row
 
 ---
 
 ## Phase 5 — Character & World
 
-### 🔲 NG+ Cycle Editor 🟢
-Edit the current New Game+ cycle. alfizari's editor has this — we should reach parity.
+### ✅ NG+ Cycle Editor 🟢
+Edit New Game+ cycle (0-7) with automatic event flag synchronization.
+
+**Implementation:** `backend/core/offset_defs.go`, `backend/core/structures.go`, `backend/vm/character_vm.go`, `app.go`, `frontend/src/components/GeneralTab.tsx`
+- ClearCount (u32) at dynamic chain offset `horse + 0x44` (`DynClearCount = 0x44`)
+- Event flags 50-57 synced on save: flag N = NG+N (clear all, set target)
+- `ClearCountOffset` stored in SaveSlot for read/write
+- UI: number input 0-7 in GeneralTab profile row
 
 ### 🔲 Player Coordinates / Teleportation 🔵
 Edit CSPlayerCoords section (0x3D bytes) — position, mapID, angle.
@@ -318,6 +328,11 @@ One-click workflow: Close Game → Upload Save → Launch Game.
 - Colosseum Toggle (summoning_pools.go, WorldProgressTab.tsx)
 - Map Exploration & Fog of War removal (maps.go, app.go, spec/27-fog-of-war.md)
 - Combined Map Visible + Acquired toggle, System flags as top-level checkboxes
+
+### ✅ Phase 4 — Character Progression
+- Talisman Pouch Slots (offset_defs.go, structures.go, character_vm.go, GeneralTab.tsx)
+- NG+ Cycle Editor with event flag sync (offset_defs.go, structures.go, app.go, GeneralTab.tsx)
+- Great Rune Manager — equipped rune + buff toggle (offset_defs.go, structures.go, character_vm.go, GeneralTab.tsx)
 
 ### ✅ Phase 22 — Item Descriptions & Stats
 Display item flavor text and detailed stats in the item detail modal. Data sourced from ERDB (MIT-licensed, parsed from regulation.bin).
