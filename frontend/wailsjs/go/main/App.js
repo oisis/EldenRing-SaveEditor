@@ -10,6 +10,14 @@ export function ApplyAppearancePreset(arg1, arg2) {
   return window['go']['main']['App']['ApplyAppearancePreset'](arg1, arg2);
 }
 
+export function BulkSetAshOfWarFlags(arg1, arg2, arg3) {
+  return window['go']['main']['App']['BulkSetAshOfWarFlags'](arg1, arg2, arg3);
+}
+
+export function BulkSetBellBearings(arg1, arg2, arg3) {
+  return window['go']['main']['App']['BulkSetBellBearings'](arg1, arg2, arg3);
+}
+
 export function BulkSetCookbooksUnlocked(arg1, arg2, arg3) {
   return window['go']['main']['App']['BulkSetCookbooksUnlocked'](arg1, arg2, arg3);
 }
@@ -64,6 +72,14 @@ export function GetActiveSlots() {
 
 export function GetAllGraces() {
   return window['go']['main']['App']['GetAllGraces']();
+}
+
+export function GetAshOfWarFlags(arg1) {
+  return window['go']['main']['App']['GetAshOfWarFlags'](arg1);
+}
+
+export function GetBellBearings(arg1) {
+  return window['go']['main']['App']['GetBellBearings'](arg1);
 }
 
 export function GetBosses(arg1) {
@@ -154,6 +170,10 @@ export function GetUndoDepth(arg1) {
   return window['go']['main']['App']['GetUndoDepth'](arg1);
 }
 
+export function GetWhetblades(arg1) {
+  return window['go']['main']['App']['GetWhetblades'](arg1);
+}
+
 export function ImportCharacter(arg1, arg2) {
   return window['go']['main']['App']['ImportCharacter'](arg1, arg2);
 }
@@ -206,6 +226,14 @@ export function SelectAndOpenSourceSave() {
   return window['go']['main']['App']['SelectAndOpenSourceSave']();
 }
 
+export function SetAshOfWarFlagUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetAshOfWarFlagUnlocked'](arg1, arg2, arg3);
+}
+
+export function SetBellBearingUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetBellBearingUnlocked'](arg1, arg2, arg3);
+}
+
 export function SetBossDefeated(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetBossDefeated'](arg1, arg2, arg3);
 }
@@ -252,6 +280,10 @@ export function SetSteamIDFromString(arg1) {
 
 export function SetSummoningPoolActivated(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetSummoningPoolActivated'](arg1, arg2, arg3);
+}
+
+export function SetWhetbladeUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetWhetbladeUnlocked'](arg1, arg2, arg3);
 }
 
 export function TestSSHConnection(arg1) {

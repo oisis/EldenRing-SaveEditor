@@ -10,6 +10,10 @@ export function AddItemsToCharacter(arg1:number,arg2:Array<number>,arg3:number,a
 
 export function ApplyAppearancePreset(arg1:number,arg2:string):Promise<void>;
 
+export function BulkSetAshOfWarFlags(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
+
+export function BulkSetBellBearings(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
+
 export function BulkSetCookbooksUnlocked(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
 
 export function BulkSetGesturesUnlocked(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
@@ -37,6 +41,10 @@ export function DownloadRemoteSave(arg1:string):Promise<string>;
 export function GetActiveSlots():Promise<Array<boolean>>;
 
 export function GetAllGraces():Promise<Array<db.GraceEntry>>;
+
+export function GetAshOfWarFlags(arg1:number):Promise<Array<db.AshOfWarFlagEntry>>;
+
+export function GetBellBearings(arg1:number):Promise<Array<db.BellBearingEntry>>;
 
 export function GetBosses(arg1:number):Promise<Array<db.BossEntry>>;
 
@@ -82,6 +90,8 @@ export function GetSummoningPools(arg1:number):Promise<Array<db.SummoningPoolEnt
 
 export function GetUndoDepth(arg1:number):Promise<number>;
 
+export function GetWhetblades(arg1:number):Promise<Array<db.WhetbladeEntry>>;
+
 export function ImportCharacter(arg1:number,arg2:number):Promise<void>;
 
 export function LaunchRemoteGame(arg1:string):Promise<string>;
@@ -108,6 +118,10 @@ export function SelectAndOpenSave():Promise<string>;
 
 export function SelectAndOpenSourceSave():Promise<string>;
 
+export function SetAshOfWarFlagUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
+
+export function SetBellBearingUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
+
 export function SetBossDefeated(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetColosseumUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
@@ -131,6 +145,8 @@ export function SetSteamID(arg1:number):Promise<void>;
 export function SetSteamIDFromString(arg1:string):Promise<void>;
 
 export function SetSummoningPoolActivated(arg1:number,arg2:number,arg3:boolean):Promise<void>;
+
+export function SetWhetbladeUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function TestSSHConnection(arg1:string):Promise<string>;
 
