@@ -438,6 +438,8 @@ export namespace vm {
 	    arcane: number;
 	    talismanSlots: number;
 	    clearCount: number;
+	    greatRuneOn: boolean;
+	    equippedGreatRune: number;
 	    scadutreeBlessing: number;
 	    shadowRealmBlessing: number;
 	    inventory: ItemViewModel[];
@@ -467,6 +469,8 @@ export namespace vm {
 	        this.arcane = source["arcane"];
 	        this.talismanSlots = source["talismanSlots"];
 	        this.clearCount = source["clearCount"];
+	        this.greatRuneOn = source["greatRuneOn"];
+	        this.equippedGreatRune = source["equippedGreatRune"];
 	        this.scadutreeBlessing = source["scadutreeBlessing"];
 	        this.shadowRealmBlessing = source["shadowRealmBlessing"];
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);

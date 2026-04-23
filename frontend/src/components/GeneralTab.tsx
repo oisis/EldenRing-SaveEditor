@@ -151,7 +151,7 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
                     </div>
                 </div>
 
-                {/* Second row: Spell Slots (mockup) */}
+                {/* Second row: Spell Slots (mockup) + Great Rune */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="space-y-1.5">
                         <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
@@ -165,6 +165,34 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
                             title="Not yet implemented"
                             className="w-full bg-muted/10 border border-border/50 rounded-md px-3 py-2 text-xs font-black font-mono text-muted-foreground/40 cursor-not-allowed"
                         />
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Equipped Great Rune</label>
+                        <select
+                            value={char.equippedGreatRune || 0}
+                            onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, equippedGreatRune: parseInt(e.target.value)}))}
+                            className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer h-[34px]"
+                        >
+                            <option value={0}>None</option>
+                            <option value={0x40000053}>Godrick's Great Rune</option>
+                            <option value={0x40000054}>Radahn's Great Rune</option>
+                            <option value={0x40000055}>Morgott's Great Rune</option>
+                            <option value={0x40000056}>Rykard's Great Rune</option>
+                            <option value={0x40000057}>Malenia's Great Rune</option>
+                            <option value={0x40000058}>Mohg's Great Rune</option>
+                        </select>
+                    </div>
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Great Rune Buff</label>
+                        <label className="flex items-center space-x-2 bg-muted/20 border border-border rounded-md px-3 py-2 cursor-pointer hover:border-primary/30 transition-all">
+                            <input
+                                type="checkbox"
+                                checked={char.greatRuneOn || false}
+                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, greatRuneOn: e.target.checked}))}
+                                className="accent-primary"
+                            />
+                            <span className="text-xs font-bold">{char.greatRuneOn ? 'Active' : 'Inactive'}</span>
+                        </label>
                     </div>
                 </div>
 

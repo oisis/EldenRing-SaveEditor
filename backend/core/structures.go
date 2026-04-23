@@ -175,6 +175,8 @@ type PlayerGameData struct {
 	Class               uint8
 	TalismanSlots       uint8  // additional talisman slots (0-3), total = 1 + this value
 	ClearCount          uint32 // NG+ cycle (0=NG, 1=NG+1, ..., 7=NG+7)
+	GreatRuneOn         uint8  // Great Rune buff active (0=off, 1=on)
+	EquippedGreatRune   uint32 // equipped Great Rune item ID (0=none)
 	ScadutreeBlessing   uint8
 	ShadowRealmBlessing uint8
 }
@@ -201,6 +203,7 @@ type SaveSlot struct {
 	IngameTimerOffset  int
 	GaItemDataOffset   int // start of GaItemData section (distinct_acquired_items_count header)
 	ClearCountOffset   int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
+	EquipItemsIDOffset int // start of EquippedItemsItemIds section
 
 	// Tracked indices for type-segregated GaItem placement.
 	// The game expects AoW entries at low indices, then armor, then weapons.
@@ -259,6 +262,12 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 		}
 	}
 
+	// 6b. Read equipped Great Rune from EquippedItemsItemIds+0x28
+	grOff := s.EquipItemsIDOffset + DynEquipGreatRune
+	if s.EquipItemsIDOffset > 0 && grOff+4 <= len(s.Data) {
+		s.Player.EquippedGreatRune = binary.LittleEndian.Uint32(s.Data[grOff:])
+	}
+
 	// 7. Map inventory
 	if err := s.mapInventory(); err != nil {
 		return fmt.Errorf("mapInventory: %w", err)
@@ -280,6 +289,7 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	equipedItemIndex := spEffect + DynEquipedItemIndex
 	activeEquipedItems := equipedItemIndex + DynActiveEquipedItems
 	equipedItemsID := activeEquipedItems + DynEquipedItemsID
+	s.EquipItemsIDOffset = equipedItemsID
 	activeEquipedItemsGa := equipedItemsID + DynActiveEquipedItemsGa
 	inventoryHeld := activeEquipedItemsGa + DynInventoryHeld
 	equipedSpells := inventoryHeld + DynEquipedSpells
@@ -492,6 +502,9 @@ func (s *SaveSlot) mapStats() error {
 	}
 	if s.Player.TalismanSlots > 3 {
 		s.Player.TalismanSlots = 3
+	}
+	if s.Player.GreatRuneOn, err = sa.ReadU8(mo + OffGreatRuneOn); err != nil {
+		return fmt.Errorf("GreatRuneOn: %w", err)
 	}
 	if s.Player.ScadutreeBlessing, err = sa.ReadU8(mo + OffScadutreeBlessing); err != nil {
 		return fmt.Errorf("ScadutreeBlessing: %w", err)
@@ -710,12 +723,19 @@ func (s *SaveSlot) Write(platform string) []byte {
 	sa.WriteU8(mo+OffGender, s.Player.Gender)
 	sa.WriteU8(mo+OffClass, s.Player.Class)
 	sa.WriteU8(mo+OffTalismanSlots, s.Player.TalismanSlots)
+	sa.WriteU8(mo+OffGreatRuneOn, s.Player.GreatRuneOn)
 	sa.WriteU8(mo+OffScadutreeBlessing, s.Player.ScadutreeBlessing)
 	sa.WriteU8(mo+OffShadowRealmBlessing, s.Player.ShadowRealmBlessing)
 
 	// ClearCount (NG+ cycle) — in dynamic chain, not relative to MagicOffset
 	if s.ClearCountOffset > 0 && s.ClearCountOffset+4 <= len(s.Data) {
 		sa.WriteU32(s.ClearCountOffset, s.Player.ClearCount)
+	}
+
+	// Equipped Great Rune — in EquippedItemsItemIds section
+	grOff := s.EquipItemsIDOffset + DynEquipGreatRune
+	if s.EquipItemsIDOffset > 0 && grOff+4 <= len(s.Data) {
+		sa.WriteU32(grOff, s.Player.EquippedGreatRune)
 	}
 
 	nameOff := mo + OffCharacterName

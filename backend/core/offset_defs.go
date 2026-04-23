@@ -22,6 +22,7 @@ const (
 	OffSouls               = -331
 	OffGender              = -249
 	OffClass               = -248
+	OffGreatRuneOn         = -184 // GreatRuneActive (PGD 0xF7, u8 bool, 0=off 1=on)
 	OffTalismanSlots       = -241 // AdditionalTalismanSlotsCount (PGD 0xBE, u8, range 0-3)
 	OffScadutreeBlessing   = -187
 	OffShadowRealmBlessing = -186
@@ -95,6 +96,7 @@ const (
 	DynStorageBox           = 0x6010
 	DynStorageToGestures    = 0x100
 	DynHorse                = 0x29
+	DynEquipGreatRune       = 0x28 // offset within EquippedItemsItemIds to Great Rune slot (u32)
 	DynClearCount           = 0x44 // offset from horse to ClearCount (NG+ cycle, uint32)
 	DynBloodStain           = 0x4C
 	DynMenuProfile          = 0x103C
