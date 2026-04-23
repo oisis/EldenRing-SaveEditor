@@ -53,7 +53,7 @@ function App() {
     const [diffSummary, setDiffSummary] = useState<main.SlotDiffSummary[]>([]);
     const [diffDetails, setDiffDetails] = useState<Record<number, main.DiffEntry[]>>({});
     const [diffExpanded, setDiffExpanded] = useState<Record<number, boolean>>({});
-    const [selectedDeployTarget, setSelectedDeployTarget] = useState<string>('');
+    const [selectedDeployTarget, setSelectedDeployTarget] = useState<string>(() => localStorage.getItem('selectedDeployTarget') || '');
     const [targetPlatform, setTargetPlatform] = useState<string>('PC');
     const [exporting, setExporting] = useState(false);
 
@@ -70,6 +70,7 @@ function App() {
     useEffect(() => { localStorage.setItem('setting:columnVisibility', JSON.stringify(columnVisibility)); }, [columnVisibility]);
     useEffect(() => { localStorage.setItem('setting:showFlaggedItems', String(showFlaggedItems)); }, [showFlaggedItems]);
     useEffect(() => { localStorage.setItem('setting:debugMode', String(debugMode)); }, [debugMode]);
+    useEffect(() => { localStorage.setItem('selectedDeployTarget', selectedDeployTarget); }, [selectedDeployTarget]);
 
     useEffect(() => {
         const root = document.documentElement;
@@ -200,8 +201,9 @@ function App() {
     return (
         <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-300">
             <Toaster position="top-right" toastOptions={{
-                duration: 3000,
+                duration: 5000,
                 style: { background: 'var(--color-card)', color: 'var(--color-foreground)', border: '1px solid var(--color-border)' },
+                loading: { duration: Infinity },
             }} />
             {/* Sidebar */}
             <aside className="w-64 border-r border-border bg-muted/5 flex flex-col z-20">

@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback} from 'react';
 import toast from 'react-hot-toast';
 import {
-    SelectAndOpenSave, GetSteamIDString, SetSteamIDFromString,
+    GetSteamIDString, SetSteamIDFromString,
     GetDeployTargets, SaveDeployTarget, DeleteDeployTarget,
     TestSSHConnection, DeploySave, DownloadRemoteSave,
     LaunchRemoteGame, CloseRemoteGame, DeployAndLaunch, CloseAndDownload,
@@ -44,7 +44,6 @@ export function SettingsTab({
     platform, setPlatform, refreshSlots,
     selectedDeployTarget: selectedTarget, setSelectedDeployTarget: setSelectedTarget,
 }: SettingsTabProps) {
-    const [importing, setImporting] = useState(false);
     const [steamIdInput, setSteamIdInput] = useState('');
     const [steamIdSaved, setSteamIdSaved] = useState('');
     const [steamIdError, setSteamIdError] = useState('');
@@ -80,13 +79,6 @@ export function SettingsTab({
         try { await SetSteamIDFromString(steamIdInput); setSteamIdSaved(steamIdInput); }
         catch (e) { setSteamIdError(String(e)); }
         finally { setSteamIdApplying(false); }
-    };
-
-    const handleImport = async () => {
-        setImporting(true);
-        try { const plat = await SelectAndOpenSave(); setPlatform(plat); refreshSlots(); toast.success("Save imported"); }
-        catch (err) { toast.error(String(err)); }
-        finally { setImporting(false); }
     };
 
     // Deploy handlers
@@ -154,32 +146,72 @@ export function SettingsTab({
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Appearance */}
+            {/* Appearance + SteamID */}
             <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Appearance</h2></div>
+                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Appearance & Steam ID</h2></div>
                 <div className="card px-4 py-3">
-                    <div className="flex items-center justify-between gap-3">
-                        <p className="text-[10px] font-bold text-foreground">Theme</p>
-                        <div className="flex bg-muted/30 p-0.5 rounded border border-border">
-                            {(['light', 'dark', 'system'] as const).map(t => (
-                                <button key={t} onClick={() => setTheme(t)}
-                                    className={`px-4 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all ${theme === t ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                                >{t}</button>
-                            ))}
+                    <div className="flex items-center gap-6 flex-wrap">
+                        {/* Theme */}
+                        <div className="flex items-center gap-3">
+                            <p className="text-[10px] font-bold text-foreground">Theme</p>
+                            <div className="flex bg-muted/30 p-0.5 rounded border border-border">
+                                {(['light', 'dark', 'system'] as const).map(t => (
+                                    <button key={t} onClick={() => setTheme(t)}
+                                        className={`px-4 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all ${theme === t ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >{t}</button>
+                                ))}
+                            </div>
+                        </div>
+                        {/* SteamID */}
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                            <p className="text-[10px] font-bold text-foreground flex-shrink-0">Steam ID</p>
+                            {platform !== 'PC' ? (
+                                <p className="text-[10px] text-muted-foreground font-medium">{platform ? 'N/A (PS4)' : 'Load a PC save first'}</p>
+                            ) : (<>
+                                <input type="text" value={steamIdInput} onChange={e => { setSteamIdInput(e.target.value); setSteamIdError(''); }}
+                                    maxLength={17} placeholder="76561198XXXXXXXXX"
+                                    className="flex-1 min-w-[180px] bg-background border border-border/50 rounded px-2.5 py-1 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all" />
+                                <button onClick={handleApplySteamId} disabled={steamIdApplying || steamIdInput === steamIdSaved}
+                                    className="px-3 py-1 bg-primary text-primary-foreground rounded text-[8px] font-black uppercase tracking-widest shadow-sm hover:brightness-110 transition-all disabled:opacity-50 flex-shrink-0">
+                                    {steamIdApplying ? '...' : 'Apply'}
+                                </button>
+                                {steamIdError && <span className="text-[9px] text-red-400 font-bold flex-shrink-0">{steamIdError}</span>}
+                                {steamIdSaved && steamIdInput === steamIdSaved && <span className="text-[9px] text-green-500 font-bold flex-shrink-0">{steamIdSaved}</span>}
+                            </>)}
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Import Save */}
+            {/* UI Customization */}
             <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Import Save</h2></div>
-                <div className="card px-4 py-3">
-                    <button onClick={handleImport} disabled={importing}
-                        className="w-full bg-muted/30 hover:bg-muted/50 text-foreground font-black py-2 rounded text-[8px] uppercase tracking-[0.15em] border border-border transition-all flex items-center justify-center space-x-1.5">
-                        {importing ? <div className="w-3 h-3 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" /> :
-                        <><svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg><span>Select File</span></>}
-                    </button>
+                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>UI Customization</h2></div>
+                <div className="card px-4 py-3 space-y-3">
+                    <div className="space-y-2">
+                        <p className="text-[10px] font-bold text-foreground">Inventory Columns</p>
+                        <div className="grid grid-cols-2 gap-2">
+                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">ID (HEX)</span>
+                                <input type="checkbox" checked={columnVisibility.id} onChange={e => setColumnVisibility({ ...columnVisibility, id: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
+                            </label>
+                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Category</span>
+                                <input type="checkbox" checked={columnVisibility.category} onChange={e => setColumnVisibility({ ...columnVisibility, category: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
+                            </label>
+                        </div>
+                    </div>
+                    <div className="border-t border-border/40 pt-2.5">
+                        <div className="grid grid-cols-2 gap-2">
+                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cut & Ban-Risk</span>
+                                <input type="checkbox" checked={showFlaggedItems} onChange={e => setShowFlaggedItems(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
+                            </label>
+                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
+                                <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -252,63 +284,6 @@ export function SettingsTab({
                             </div>
                         </div>
                     )}
-                </div>
-            </section>
-
-            {/* SteamID */}
-            <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Steam ID</h2></div>
-                <div className="card px-4 py-3">
-                    {platform !== 'PC' ? (
-                        <p className="text-[10px] text-muted-foreground font-medium">{platform ? 'PS4 saves do not contain a SteamID.' : 'Load a PC save to edit SteamID.'}</p>
-                    ) : (
-                        <div className="space-y-2">
-                            <p className="text-[9px] text-muted-foreground font-medium">17-digit Steam account ID embedded in the save file.</p>
-                            <div className="flex items-center gap-2">
-                                <input type="text" value={steamIdInput} onChange={e => { setSteamIdInput(e.target.value); setSteamIdError(''); }}
-                                    maxLength={17} placeholder="76561198XXXXXXXXX"
-                                    className="flex-1 bg-background border border-border/50 rounded px-3 py-1.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/20 transition-all" />
-                                <button onClick={handleApplySteamId} disabled={steamIdApplying || steamIdInput === steamIdSaved}
-                                    className="px-4 py-1.5 bg-primary text-primary-foreground rounded text-[9px] font-black uppercase tracking-widest shadow-sm hover:brightness-110 transition-all disabled:opacity-50">
-                                    {steamIdApplying ? '...' : 'Apply'}
-                                </button>
-                            </div>
-                            {steamIdError && <p className="text-[9px] text-red-400 font-bold">{steamIdError}</p>}
-                            {steamIdSaved && steamIdInput === steamIdSaved && <p className="text-[9px] text-green-500 font-bold">Current: {steamIdSaved}</p>}
-                        </div>
-                    )}
-                </div>
-            </section>
-
-            {/* UI Customization */}
-            <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>UI Customization</h2></div>
-                <div className="card px-4 py-3 space-y-3">
-                    <div className="space-y-2">
-                        <p className="text-[10px] font-bold text-foreground">Inventory Columns</p>
-                        <div className="grid grid-cols-2 gap-2">
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">ID (HEX)</span>
-                                <input type="checkbox" checked={columnVisibility.id} onChange={e => setColumnVisibility({ ...columnVisibility, id: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
-                            </label>
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Category</span>
-                                <input type="checkbox" checked={columnVisibility.category} onChange={e => setColumnVisibility({ ...columnVisibility, category: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
-                            </label>
-                        </div>
-                    </div>
-                    <div className="border-t border-border/40 pt-2.5">
-                        <div className="grid grid-cols-2 gap-2">
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cut & Ban-Risk</span>
-                                <input type="checkbox" checked={showFlaggedItems} onChange={e => setShowFlaggedItems(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
-                            </label>
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
-                                <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
-                            </label>
-                        </div>
-                    </div>
                 </div>
             </section>
         </div>
