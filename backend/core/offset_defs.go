@@ -95,6 +95,7 @@ const (
 	DynStorageBox           = 0x6010
 	DynStorageToGestures    = 0x100
 	DynHorse                = 0x29
+	DynClearCount           = 0x44 // offset from horse to ClearCount (NG+ cycle, uint32)
 	DynBloodStain           = 0x4C
 	DynMenuProfile          = 0x103C
 	DynGaItemsOther         = 0x1B588

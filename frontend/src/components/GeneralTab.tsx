@@ -136,6 +136,25 @@ export function GeneralTab({charIndex, onNameChange, addSettings, setAddSettings
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                            NG+ Cycle <span className="text-primary font-mono">{char.clearCount || 0}/7</span>
+                        </label>
+                        <input
+                            type="number"
+                            min={0} max={7}
+                            value={char.clearCount || 0}
+                            onChange={e => {
+                                const v = Math.min(7, Math.max(0, parseInt(e.target.value) || 0));
+                                setChar(vm.CharacterViewModel.createFrom({...char, clearCount: v}));
+                            }}
+                            className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all"
+                        />
+                    </div>
+                </div>
+
+                {/* Second row: Spell Slots (mockup) */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="space-y-1.5">
+                        <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
                             Spell Slots <span className="text-muted-foreground/50 font-mono">—</span>
                         </label>
                         <input

@@ -173,7 +173,8 @@ type PlayerGameData struct {
 	CharacterName       [16]uint16
 	Gender              uint8
 	Class               uint8
-	TalismanSlots       uint8 // additional talisman slots (0-3), total = 1 + this value
+	TalismanSlots       uint8  // additional talisman slots (0-3), total = 1 + this value
+	ClearCount          uint32 // NG+ cycle (0=NG, 1=NG+1, ..., 7=NG+7)
 	ScadutreeBlessing   uint8
 	ShadowRealmBlessing uint8
 }
@@ -199,6 +200,7 @@ type SaveSlot struct {
 	StorageBoxOffset   int
 	IngameTimerOffset  int
 	GaItemDataOffset   int // start of GaItemData section (distinct_acquired_items_count header)
+	ClearCountOffset   int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
 
 	// Tracked indices for type-segregated GaItem placement.
 	// The game expects AoW entries at low indices, then armor, then weapons.
@@ -249,7 +251,15 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 		return fmt.Errorf("offset validation: %w", err)
 	}
 
-	// 6. Map inventory
+	// 6. Read ClearCount (NG+ cycle) from dynamic chain offset
+	if s.ClearCountOffset > 0 && s.ClearCountOffset+4 <= len(s.Data) {
+		s.Player.ClearCount = binary.LittleEndian.Uint32(s.Data[s.ClearCountOffset:])
+		if s.Player.ClearCount > 7 {
+			s.Player.ClearCount = 7
+		}
+	}
+
+	// 7. Map inventory
 	if err := s.mapInventory(); err != nil {
 		return fmt.Errorf("mapInventory: %w", err)
 	}
@@ -321,6 +331,7 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	unlockedRegion := gesturesOff + regCount*4 + 4
 
 	horse := unlockedRegion + DynHorse
+	s.ClearCountOffset = horse + DynClearCount
 	bloodStain := horse + DynBloodStain
 	menuProfile := bloodStain + DynMenuProfile
 	gaItemsOther := menuProfile + DynGaItemsOther
@@ -701,6 +712,11 @@ func (s *SaveSlot) Write(platform string) []byte {
 	sa.WriteU8(mo+OffTalismanSlots, s.Player.TalismanSlots)
 	sa.WriteU8(mo+OffScadutreeBlessing, s.Player.ScadutreeBlessing)
 	sa.WriteU8(mo+OffShadowRealmBlessing, s.Player.ShadowRealmBlessing)
+
+	// ClearCount (NG+ cycle) — in dynamic chain, not relative to MagicOffset
+	if s.ClearCountOffset > 0 && s.ClearCountOffset+4 <= len(s.Data) {
+		sa.WriteU32(s.ClearCountOffset, s.Player.ClearCount)
+	}
 
 	nameOff := mo + OffCharacterName
 	for i := 0; i < 16; i++ {

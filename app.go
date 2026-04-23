@@ -155,7 +155,16 @@ func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 		return err
 	}
 
-	// 2. Update ProfileSummary (for the menu)
+	// 2. Sync NG+ event flags (50-57) with ClearCount
+	slot := &a.save.Slots[index]
+	if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+		flags := slot.Data[slot.EventFlagsOffset:]
+		for i := uint32(0); i <= 7; i++ {
+			_ = db.SetEventFlag(flags, 50+i, i == slot.Player.ClearCount)
+		}
+	}
+
+	// 3. Update ProfileSummary (for the menu)
 	a.save.ProfileSummaries[index].Level = a.save.Slots[index].Player.Level
 	copy(a.save.ProfileSummaries[index].CharacterName[:], a.save.Slots[index].Player.CharacterName[:])
 
