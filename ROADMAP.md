@@ -49,17 +49,17 @@ Parse the EventFlags bitfield (~14.7 million flags at `EventFlagsOffset`, size `
 - `EventFlagsAvailable` exposed in `CharacterViewModel`
 - PS4 caveat handled: `unlockedRegSz` bounded (max 1024), offset validated within `0x280000`
 
-### 🔲 NPC Quest State Editor 🟡
+### ✅ NPC Quest State Editor 🟡
 Human-readable quest progression UI built on top of event flags. **Single most requested missing feature** across all Elden Ring editor communities.
 
-**Backend done:** `backend/db/data/quests.go`, `backend/db/db.go`, `app.go`
-- Quest data for major NPCs with step-by-step event flag mappings
-- `GetQuestNPCs()` — list of NPC names with quest data
+**Implementation:** `backend/db/data/quests.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
+- 36 NPCs with step-by-step event flag mappings (5-40+ steps each)
+- `GetQuestNPCs()` — sorted list of NPC names
 - `GetQuestProgress(slotIndex, npcName)` — returns quest steps with current flag state
-- `SetQuestStep(slotIndex, npcName, stepIndex)` — sets all flags for a step to target values
+- `SetQuestStep(slotIndex, npcName, stepIndex)` — atomically sets all flags for a step
 - `QuestNPC`, `QuestStep`, `QuestFlagState` types exported via Wails bindings
-
-**TODO:** Frontend UI (NPC list → step progression → toggle buttons)
+- UI: "NPC Quests" sub-tab in World Progress with NPC dropdown, step list with completion status (green/yellow/grey), optional location, expandable flag details (current vs target), "Set" button per step
+- Undo supported via standard pushUndo mechanism
 
 ### ✅ Boss Kill / Respawn Manager 🟡
 Dedicated UI for toggling boss defeat states via event flags.
@@ -376,6 +376,7 @@ One-click workflow: Close Game → Upload Save → Launch Game.
 ### ✅ Phase 2 — Event Flags & World State
 - Event Flags Parser (db.go, event_flags.go, structures.go)
 - Boss Kill / Respawn Manager (bosses.go, WorldProgressTab.tsx)
+- NPC Quest State Editor — 36 NPCs, step-by-step progression UI (quests.go, db.go, app.go, WorldProgressTab.tsx)
 
 ### ✅ Phase 3 — Sites of Grace & World State
 - Sites of Grace Toggle (graces.go, WorldProgressTab.tsx)
