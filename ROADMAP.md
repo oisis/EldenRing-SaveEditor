@@ -123,50 +123,18 @@ Unlock colosseums via their respective event flags.
 
 **Known issue:** Toggling colosseum flags in the GUI has no visible effect in-game (tested offline). May only work in online mode, or may require additional flags. Needs verification in online multiplayer session.
 
-### 🟡 Map Exploration & Fog of War 🟡
+### ✅ Map Exploration & Fog of War 🟡
 Full map reveal with Fog of War removal. **Fully unique feature** — no existing editor touches FoW.
 
-**Implementation:** `app.go`, `backend/db/data/maps.go`, `backend/db/db.go`, `backend/core/writer.go`, `frontend/src/components/WorldProgressTab.tsx`, `spec/27-fog-of-war.md`
+**Implementation:** `app.go`, `backend/db/data/maps.go`, `backend/db/db.go`, `frontend/src/components/WorldProgressTab.tsx`, `spec/27-fog-of-war.md`
 - Map visibility (62xxx) + acquisition (63xxx) combined into single toggle per region
-- System flags (62000, 62001, 62002, 82001, 82002) as top-level checkboxes
-- Sub-region flags (62004-62009, 62053, 62065) set during Reveal All
-- DLC sub-area tile flags (628xx-629xx, 39 flags) — required for DLC map tile rendering
-- `RemoveFogOfWar(slotIndex)` — fills FoW exploration bitfield in 3 segments:
-  - Segment 1: `afterRegs+0x087E..+0x104C` (base + DLC overworld, 1999 bytes)
-  - Segment 2: `afterRegs+0x1055..+0x1062` (DLC FoW part 1, 14 bytes)
-  - Segment 3: `afterRegs+0x107D..+0x10B0` (DLC FoW part 2, 52 bytes)
-  - Gaps between segments contain DLC float coordinates — must NOT be filled
-- `AddDLCRegions()` — inserts 9 DLC region IDs (6800000-6940000) into `unlocked_regions` list via safe byte-shift up to `DlcSectionOffset`; DLC section preserved/restored after shift
+- System flags (62000, 62001, 82001, 82002) as top-level checkboxes
+- `RemoveFogOfWar(slotIndex)` — fills FoW exploration bitfield (2099 bytes at `afterRegs+0x087E..+0x10B0`) with 0xFF
+- Unsafe sub-region flags (62004-62009, 62053, 62065) separated into `MapUnsafe` — excluded from Reveal All
 - FoW automatically removed on any map region toggle or Reveal All
+- Brute-force POI ranges replaced with individual named flags
+- Tested on Steam Deck: full map reveal + FoW removal confirmed working
 - See `spec/27-fog-of-war.md` for full reverse-engineering documentation
-
-**Status: BASE GAME WORKS, DLC MAP STILL HAS BLACK TILES — needs further investigation.**
-
-**What works:**
-- Base game map: full reveal + FoW removal confirmed on Steam Deck ✅
-- Event flags (62xxx): correctly set for all base game + DLC regions ✅
-- FoW bitfield: 3-segment fill removes grey fog ✅
-- DLC region IDs: `AddDLCRegions` inserts 9 IDs, shift verified safe ✅
-
-**What doesn't work:**
-- DLC (Shadow of the Erdtree) map still shows black tiles after Reveal All
-- Black tiles = map texture not loaded by the game engine, distinct from FoW (grey fog)
-
-**Investigation so far:**
-- Event flags verified: all 62xxx flags from Zofia's complete playthrough are set
-- FoW segments: 3-segment fill verified against working save binary diffs
-- Region IDs: 9 DLC IDs added to `unlocked_regions`, matching Zofia's save exactly
-- Sub-region flags (62004-62009): now set during Reveal All
-- DLC sub-area flags (628xx-629xx): 39 flags extracted from complete DLC playthrough
-- BST byte/bit positions verified for all DLC flags
-- Python reference project (er-save-manager) uses region IDs for map area management — confirmed same approach
-- Diagnostic scripts in `tmp/`: `flag_deep_audit.go`, `region_audit.go`, `layout_audit.go`, `space_audit.go`, `verify_regions.go`
-
-**Possible remaining causes:**
-- DLC map tile loading may require additional game-internal state not stored in event flags or region IDs
-- The game may need player position within DLC world to trigger tile loading (streaming/LOD system)
-- Unknown data structures in the 611K gap between EventFlags BST end and DlcSectionOffset (52% non-zero) may contain DLC map state
-- Full slot rebuild (R-1) may be needed to safely restructure all sections
 
 ### ✅ Grace Unlock with Boss Arena Filter 🟢
 Global "Unlock All" for Sites of Grace with option to skip boss arena graces.

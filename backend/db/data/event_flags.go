@@ -38,7 +38,6 @@ var EventFlags = map[uint32]EventFlagInfo{
 	// Map system flags
 	62000:      {Byte: 0x5DC, Bit: 7}, // Allow Map Display
 	62001:      {Byte: 0x5DC, Bit: 6}, // Allow Underground Map Display
-	62002:      {Byte: 0x5DC, Bit: 5}, // Allow Shadow Realm Map Display
 	// Map visible flags
 	62004:      {Byte: 0x5DC, Bit: 3},
 	62005:      {Byte: 0x5DC, Bit: 2},
@@ -73,46 +72,6 @@ var EventFlags = map[uint32]EventFlagInfo{
 	62082:      {Byte: 0x5E6, Bit: 5}, // Southern Shore
 	62083:      {Byte: 0x5E6, Bit: 4}, // Rauh Ruins
 	62084:      {Byte: 0x5E6, Bit: 3}, // Abyss
-	// DLC sub-area map flags (628xx) — discovered via RE
-	62800:      {Byte: 0x640, Bit: 7},
-	62805:      {Byte: 0x640, Bit: 2},
-	62806:      {Byte: 0x640, Bit: 1},
-	62807:      {Byte: 0x640, Bit: 0},
-	62808:      {Byte: 0x641, Bit: 7},
-	62809:      {Byte: 0x641, Bit: 6},
-	62810:      {Byte: 0x641, Bit: 5},
-	62811:      {Byte: 0x641, Bit: 4},
-	62812:      {Byte: 0x641, Bit: 3},
-	62813:      {Byte: 0x641, Bit: 2},
-	62814:      {Byte: 0x641, Bit: 1},
-	62815:      {Byte: 0x641, Bit: 0},
-	62820:      {Byte: 0x642, Bit: 3},
-	62822:      {Byte: 0x642, Bit: 1},
-	62823:      {Byte: 0x642, Bit: 0},
-	62825:      {Byte: 0x643, Bit: 6},
-	62827:      {Byte: 0x643, Bit: 4},
-	62830:      {Byte: 0x643, Bit: 1},
-	62831:      {Byte: 0x643, Bit: 0},
-	62880:      {Byte: 0x64A, Bit: 7},
-	62881:      {Byte: 0x64A, Bit: 6},
-	62900:      {Byte: 0x64C, Bit: 3},
-	62902:      {Byte: 0x64C, Bit: 1},
-	62903:      {Byte: 0x64C, Bit: 0},
-	62905:      {Byte: 0x64D, Bit: 6},
-	62906:      {Byte: 0x64D, Bit: 5},
-	62907:      {Byte: 0x64D, Bit: 4},
-	62908:      {Byte: 0x64D, Bit: 3},
-	62909:      {Byte: 0x64D, Bit: 2},
-	62910:      {Byte: 0x64D, Bit: 1},
-	62917:      {Byte: 0x64E, Bit: 2},
-	62920:      {Byte: 0x64F, Bit: 7},
-	62931:      {Byte: 0x650, Bit: 4},
-	62932:      {Byte: 0x650, Bit: 3},
-	62940:      {Byte: 0x651, Bit: 3},
-	62941:      {Byte: 0x651, Bit: 2},
-	62942:      {Byte: 0x651, Bit: 1},
-	62980:      {Byte: 0x656, Bit: 3},
-	62981:      {Byte: 0x656, Bit: 2},
 	// Catacomb map visible flags
 	62102:      {Byte: 0x5E8, Bit: 1},
 	62103:      {Byte: 0x5E8, Bit: 0},
