@@ -18,6 +18,7 @@ interface DatabaseTabProps {
     showFlaggedItems: boolean;
     category: string;
     setCategory: (value: string) => void;
+    onSelectItem?: (item: db.ItemEntry | null) => void;
 }
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
@@ -25,7 +26,7 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems, category, setCategory}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems, category, setCategory, onSelectItem}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
@@ -427,7 +428,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     <span
                                                         className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors cursor-pointer hover:underline decoration-primary/40 underline-offset-2"
-                                                        onClick={e => { e.stopPropagation(); setDetailItem(item); }}
+                                                        onClick={e => { e.stopPropagation(); onSelectItem ? onSelectItem(item) : setDetailItem(item); }}
                                                     >{item.name}</span>
                                                     {item.flags?.includes('cut_content') && (
                                                         <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
