@@ -2,15 +2,15 @@ import {useState, useEffect, useCallback} from 'react';
 import toast, {Toaster} from 'react-hot-toast';
 import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetSlotDiff, GetSaveDiffSummary} from '../wailsjs/go/main/App';
 import {main} from '../wailsjs/go/models';
-import {GeneralTab} from './components/GeneralTab';
+import {CharacterTab} from './components/CharacterTab';
 import {InventoryTab} from './components/InventoryTab';
-import {WorldProgressTab} from './components/WorldProgressTab';
-import {CharacterImporter} from './components/CharacterImporter';
-import {AppearanceTab} from './components/AppearanceTab';
+import {WorldTab} from './components/WorldTab';
+import {ToolsTab} from './components/ToolsTab';
 import {SettingsTab} from './components/SettingsTab';
 import {DatabaseTab} from './components/DatabaseTab';
+import {ToastBar} from './components/ToastBar';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark' | 'golden';
 
 export type AddSettings = {
     upgrade25: number;
@@ -26,10 +26,10 @@ function App() {
     const [activeSlots, setActiveSlots] = useState<boolean[]>([]);
     const [charNames, setCharacterNames] = useState<string[]>([]);
     const [selectedChar, setSelectedChar] = useState<number>(0);
-    const [activeTab, setActiveTab] = useState('database');
+    const [activeTab, setActiveTab] = useState('character');
     const [inventoryVersion, setInventoryVersion] = useState(0);
     const [theme, setTheme] = useState<Theme>(() => {
-        return (localStorage.getItem('setting:theme') as Theme) || 'light';
+        return (localStorage.getItem('setting:theme') as Theme) || 'dark';
     });
     const [cloneModal, setCloneModal] = useState<{srcIdx: number} | null>(null);
     const [charAddSettings, setCharAddSettings] = useState<Record<number, AddSettings>>({});
@@ -64,7 +64,7 @@ function App() {
 
     useEffect(() => { refreshUndoDepth(); }, [refreshUndoDepth, inventoryVersion]);
 
-    const tabs = ['database', 'character', 'inventory', 'world progress', 'appearance', 'importer', 'settings'];
+    const tabs = ['character', 'inventory', 'world', 'tools', 'settings'];
 
     useEffect(() => { localStorage.setItem('setting:theme', theme); }, [theme]);
     useEffect(() => { localStorage.setItem('setting:columnVisibility', JSON.stringify(columnVisibility)); }, [columnVisibility]);
@@ -73,13 +73,7 @@ function App() {
     useEffect(() => { localStorage.setItem('selectedDeployTarget', selectedDeployTarget); }, [selectedDeployTarget]);
 
     useEffect(() => {
-        const root = document.documentElement;
-        if (theme === 'system') {
-            const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-            root.classList.toggle('dark', systemTheme === 'dark');
-        } else {
-            root.classList.toggle('dark', theme === 'dark');
-        }
+        document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
     useEffect(() => {
@@ -211,9 +205,9 @@ function App() {
                     <div className="flex items-center justify-between px-1">
                         <div className="flex items-center space-x-3">
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
-                                <span className="text-primary-foreground font-black text-lg tracking-tighter">ER</span>
+                                <span className="text-primary-foreground font-black text-lg tracking-tighter">SF</span>
                             </div>
-                            <h1 className="text-[10px] font-black uppercase tracking-[0.2em] leading-none">Editor</h1>
+                            <h1 className="text-[10px] font-black uppercase tracking-[0.2em] leading-none">SaveForge</h1>
                         </div>
                     </div>
 
@@ -343,20 +337,7 @@ function App() {
 
                 <div className="flex-1 flex flex-col min-h-0 relative">
                     <div className="w-full h-full p-6 flex flex-col min-h-0">
-                        {activeTab === 'database' ? (
-                            <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
-                                <DatabaseTab
-                                    columnVisibility={columnVisibility}
-                                    platform={platform}
-                                    charIndex={selectedChar}
-                                    onItemsAdded={() => setInventoryVersion(v => v + 1)}
-                                    addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
-                                    showFlaggedItems={showFlaggedItems}
-                                    category={category}
-                                    setCategory={setCategory}
-                                />
-                            </div>
-                        ) : activeTab === 'settings' ? (
+                        {activeTab === 'settings' ? (
                             <div className="animate-in fade-in slide-in-from-bottom-2 duration-500 overflow-y-auto custom-scrollbar pr-2">
                                 <SettingsTab
                                     theme={theme}
@@ -380,7 +361,7 @@ function App() {
                                     <svg className="w-8 h-8 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                                 </div>
                                 <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground/60">No Save File</h2>
-                                <button 
+                                <button
                                     onClick={handleOpenSave}
                                     className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-primary/20"
                                 >
@@ -406,11 +387,23 @@ function App() {
                                     );
                                 })()}
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
-                                {activeTab === 'character' && <GeneralTab charIndex={selectedChar} onNameChange={refreshSlots} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
-                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
-                                {activeTab === 'world progress' && <WorldProgressTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
-                                {activeTab === 'appearance' && <AppearanceTab charIndex={selectedChar} onMutate={refreshUndoDepth} />}
-                                {activeTab === 'importer' && <CharacterImporter destSlot={selectedChar} onComplete={refreshSlots} />}
+                                {activeTab === 'character' && <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={refreshUndoDepth} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({ ...prev, [selectedChar]: s }))} />}
+                                {activeTab === 'inventory' && (
+                                    <div className="flex-1 flex flex-col min-h-0 space-y-4">
+                                        <DatabaseTab
+                                            columnVisibility={columnVisibility}
+                                            platform={platform}
+                                            charIndex={selectedChar}
+                                            onItemsAdded={() => setInventoryVersion(v => v + 1)}
+                                            addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
+                                            showFlaggedItems={showFlaggedItems}
+                                            category={category}
+                                            setCategory={setCategory}
+                                        />
+                                    </div>
+                                )}
+                                {activeTab === 'world' && <WorldTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
+                                {activeTab === 'tools' && <ToolsTab charIndex={selectedChar} onComplete={refreshSlots} />}
                                 </div>
                             </div>
                         )}
@@ -536,6 +529,7 @@ function App() {
                 </div>
             </div>
         )}
+        <ToastBar sidebarWidth={256} />
         </div>
     );
 }

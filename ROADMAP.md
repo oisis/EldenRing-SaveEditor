@@ -414,6 +414,63 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
 - Backup manager
 - Cross-platform desktop app (Wails)
 
+---
+
+## Phase 8 — UI/UX Redesign ("Elden Ring SaveForge")
+
+Comprehensive UI/UX overhaul based on interactive mockup (`tmp/mockups/mockup-v2.html`).
+Rebranding from "ER Save Editor" to **Elden Ring SaveForge** (logo "SF").
+
+### 🔲 Theme System 🟡
+3 color themes (Dark, Light, Golden) via CSS Custom Properties (`data-theme` attribute switching).
+
+**Implementation plan:**
+- CSS variables defined on `[data-theme]` selectors in `index.css`
+- Theme switcher in Settings (inline with SteamID)
+- All components use `var(--bg)`, `var(--accent)`, etc. — no hardcoded colors
+- `accent-color` for native range sliders
+
+### 🔲 Tab Consolidation (7 → 5) 🟡
+Reduce tab count for better UX. New structure:
+
+| New Tab | Merges | Components |
+|---|---|---|
+| **Character** | GeneralTab + AppearanceTab | Profile (collapsible), Attributes (collapsible + sliders), Appearance Presets |
+| **Inventory** | InventoryTab + DatabaseTab | Inventory list + sliding "Add Items" panel with per-slot Add Settings |
+| **World** | WorldProgressTab (reorganized) | 3 sub-tabs: Exploration / Progress / Unlocks |
+| **Tools** | CharacterImporter + new utilities | 4 tool cards: Importer, Save Comparison, Diagnostics, Backup |
+| **Settings** | SettingsTab (simplified) | SteamID \| Theme inline, UI toggles, Deploy Targets |
+
+### 🔲 Reusable AccordionSection Component 🟢
+Collapsible section pattern used across entire UI:
+- Arrow + title + progress bar + count + action buttons in header
+- Collapsed summary (attribute pills, progress percentage)
+- Nested accordion support (accordion-belka → accordion-grid inside)
+- `column-count: 2` masonry layout for independent column heights
+
+### 🔲 World Tab Sub-tabs 🟡
+Reorganize World Progress into 3 sub-tabs:
+- **Exploration**: Map & FoW (1 toggle/region), Sites of Grace (2-col masonry), Summoning Pools (2-col masonry), Colosseums
+- **Progress**: Bosses (2-col masonry), NPC Quests (accordion-belka → accordion-grid)
+- **Unlocks**: Gestures, Cookbooks, Bell Bearings, Whetblades (all accordion-belka with progress bars)
+
+### 🔲 QuakeConsole + ToastBar 🟢
+- Toast bar: `position:fixed`, bottom, 30% width, centered, 1 line, 12px font
+- Quake console: toggle via `~` key or click on toast bar, 45vh height, session log with colored severity (INFO/WARN/ERROR)
+- Backdrop blur, symmetric margins (sidebar width on both sides)
+
+### 🔲 Character Tab Enhancements 🟢
+- Collapsible **Profile** section — summary: `Name | RL XX | NG+X | Runes`
+- Collapsible **Attributes** section — summary: `Vig XX | Min XX | End XX | ...`
+- Sliders with `accent-color` matching theme
+- Rename `Lv`/`Level` → `RL`/`Rune Level` globally
+- Memory Slots field in Profile
+
+### 🔲 Rebranding 🟢
+- Logo: "SF" (SaveForge) replacing "ER"
+- Title: "Elden Ring SaveForge"
+- Sidebar header update
+
 ### 🔲 Known Bugs (to investigate)
 - **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
 - **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. Requires multi-flag approach — see Boss Kill / Respawn Manager section above for details and reference data.
