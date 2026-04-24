@@ -6,6 +6,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
+	gamedata "github.com/oisis/EldenRing-SaveEditor/backend/db/data"
 )
 
 type ItemViewModel struct {
@@ -21,6 +22,7 @@ type ItemViewModel struct {
 	CurrentUpgrade uint32   `json:"currentUpgrade"`
 	IconPath       string   `json:"iconPath"`
 	Flags          []string `json:"flags"`
+	ReadOnly       bool     `json:"readOnly"`
 }
 
 type CharacterViewModel struct {
@@ -181,6 +183,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				CurrentUpgrade: currentUpgrade,
 				IconPath:       itemData.IconPath,
 				Flags:          itemData.Flags,
+				ReadOnly:       gamedata.IsCookbookItemID(itemID) || gamedata.IsWhetbladeItemID(itemID),
 			})
 		}
 	}

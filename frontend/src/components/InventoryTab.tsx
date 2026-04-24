@@ -134,6 +134,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         invQty: number; storageQty: number;
         maxInv: number; maxStorage: number; maxUpgrade: number; currentUpgrade: number; iconPath: string;
         flags: string[];
+        readOnly: boolean;
     };
 
     const rowKey = (item: MergedItem) => item.nonStackable
@@ -159,6 +160,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
+                    readOnly: item.readOnly ?? false,
                 });
             } else {
                 stackableMap.set(item.id, {
@@ -170,6 +172,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
+                    readOnly: item.readOnly ?? false,
                 });
             }
         });
@@ -185,6 +188,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     maxInv: item.maxInventory, maxStorage: item.maxStorage,
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
+                    readOnly: item.readOnly ?? false,
                 });
             } else {
                 const existing = stackableMap.get(item.id);
@@ -202,6 +206,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                         flags: item.flags ?? [],
+                        readOnly: item.readOnly ?? false,
                     });
                 }
             }
@@ -269,7 +274,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
 
-        if (category === 'all') return matchesSearch && item.subCategory !== 'key_items';
+        if (category === 'all') return matchesSearch && (item.subCategory !== 'key_items' || item.readOnly);
 
         return item.subCategory === category && matchesSearch;
     })), [mergedOwnedItems, search, category, sortCol, sortDir, showFlaggedItems]);
@@ -473,13 +478,19 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                     return (
                                     <tr key={key} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.02] transition-colors ${selectedKeys.has(key) ? 'bg-red-500/[0.03]' : ''}`}>
                                         <td className="px-4 py-0.5">
-                                            <div
-                                                onClick={() => toggleSelect(key)}
-                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedKeys.has(key) ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border group-hover:border-red-400/50'}`}
-                                            >
-                                                {selectedKeys.has(key) &&
-                                                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
-                                            </div>
+                                            {item.readOnly ? (
+                                                <div className="w-4 h-4 rounded border border-border/20 bg-muted/10 flex items-center justify-center" title="Managed by World tab">
+                                                    <svg className="w-2.5 h-2.5 text-muted-foreground/30" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
+                                                </div>
+                                            ) : (
+                                                <div
+                                                    onClick={() => toggleSelect(key)}
+                                                    className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedKeys.has(key) ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border group-hover:border-red-400/50'}`}
+                                                >
+                                                    {selectedKeys.has(key) &&
+                                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="px-6 py-0.5">
                                             <div
@@ -533,9 +544,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            {item.nonStackable ? (
+                                            {item.nonStackable || item.readOnly ? (
                                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inInventory ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/30'}`}>
-                                                    {item.inInventory ? '✓' : '—'}
+                                                    {item.inInventory ? (item.nonStackable ? '✓' : item.invQty) : '—'}
                                                 </span>
                                             ) : item.inInventory ? (
                                                 <div className="flex items-center justify-center space-x-2">
@@ -554,9 +565,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                             )}
                                         </td>
                                         <td className="px-6 py-4 text-center">
-                                            {item.nonStackable ? (
+                                            {item.nonStackable || item.readOnly ? (
                                                 <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inStorage ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/30'}`}>
-                                                    {item.inStorage ? '✓' : '—'}
+                                                    {item.inStorage ? (item.nonStackable ? '✓' : item.storageQty) : '—'}
                                                 </span>
                                             ) : item.inStorage ? (
                                                 <div className="flex items-center justify-center space-x-2">

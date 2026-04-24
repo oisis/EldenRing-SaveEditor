@@ -659,6 +659,7 @@ export namespace vm {
 	    currentUpgrade: number;
 	    iconPath: string;
 	    flags: string[];
+	    readOnly: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new ItemViewModel(source);
@@ -678,6 +679,7 @@ export namespace vm {
 	        this.currentUpgrade = source["currentUpgrade"];
 	        this.iconPath = source["iconPath"];
 	        this.flags = source["flags"];
+	        this.readOnly = source["readOnly"];
 	    }
 	}
 	export class CharacterViewModel {
