@@ -1,12 +1,32 @@
 import {useEffect, useState, useCallback, useRef} from 'react';
 
 export type LogLevel = 'info' | 'warn' | 'error';
-export type LogEntry = { time: string; level: LogLevel; message: string };
+export type LogEntry = { time: string; level: LogLevel; message: string; loading?: boolean };
 
 let globalLogFn: ((level: LogLevel, message: string) => void) | null = null;
+let globalLoadingFn: ((id: string, message: string) => void) | null = null;
+let globalDoneFn: ((id: string) => void) | null = null;
 
 export function sfLog(level: LogLevel, message: string) {
     globalLogFn?.(level, message);
+}
+
+export function sfLoading(id: string, message: string) {
+    globalLoadingFn?.(id, message);
+}
+
+export function sfDone(id: string) {
+    globalDoneFn?.(id);
+}
+
+function LoadingDots() {
+    return (
+        <span className="inline-flex ml-0.5">
+            <span className="animate-dot-1">.</span>
+            <span className="animate-dot-2">.</span>
+            <span className="animate-dot-3">.</span>
+        </span>
+    );
 }
 
 interface ToastBarProps {
@@ -33,6 +53,7 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
 
     const consoleRef = useRef<HTMLDivElement>(null);
     const resizingRef = useRef<{ edge: 'top' | 'left' | 'right' | 'topleft' | 'topright'; startX: number; startY: number; startW: number; startH: number } | null>(null);
+    const initRef = useRef(false);
 
     const addLog = useCallback((level: LogLevel, message: string) => {
         const entry: LogEntry = {
@@ -44,11 +65,42 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
         setLastMessage(entry);
     }, []);
 
+    const startLoading = useCallback((id: string, message: string) => {
+        const entry: LogEntry = {
+            time: new Date().toLocaleTimeString('en-GB', { hour12: false }),
+            level: 'info',
+            message,
+            loading: true,
+        };
+        setLogs(prev => {
+            const idx = prev.findIndex(e => (e as any)._loadId === id);
+            if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = Object.assign(entry, { _loadId: id });
+                return next;
+            }
+            return [...prev, Object.assign(entry, { _loadId: id })];
+        });
+        setLastMessage(entry);
+    }, []);
+
+    const finishLoading = useCallback((id: string) => {
+        setLogs(prev => prev.map(e =>
+            (e as any)._loadId === id ? { ...e, loading: false } : e
+        ));
+        setLastMessage(prev => prev && (prev as any)._loadId === id ? { ...prev, loading: false } : prev);
+    }, []);
+
     useEffect(() => {
         globalLogFn = addLog;
-        addLog('info', 'SaveForge session started');
-        return () => { globalLogFn = null; };
-    }, [addLog]);
+        globalLoadingFn = startLoading;
+        globalDoneFn = finishLoading;
+        if (!initRef.current) {
+            initRef.current = true;
+            addLog('info', 'SaveForge session started');
+        }
+        return () => { globalLogFn = null; globalLoadingFn = null; globalDoneFn = null; };
+    }, [addLog, startLoading, finishLoading]);
 
     // Keyboard toggle
     useEffect(() => {
@@ -158,9 +210,10 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
                 >
                     <div className="backdrop-blur-md border border-b-0 rounded-t-lg px-3 py-1.5 flex items-center gap-2"
                         style={{ background: 'var(--sf-toast-bg)', borderColor: 'var(--sf-console-border)' }}>
-                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse flex-shrink-0" />
+                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${lastMessage?.loading ? 'bg-warning animate-spin-slow' : 'bg-primary animate-pulse'}`} />
                         <span className="text-[11px] font-mono truncate flex-1" style={{ color: 'var(--sf-console-text-dim)' }}>
                             {lastMessage ? lastMessage.message : 'Ready'}
+                            {lastMessage?.loading && <LoadingDots />}
                         </span>
                         <span className="text-[9px] flex-shrink-0" style={{ color: 'var(--sf-console-text-dim)', opacity: 0.5 }}>
                             ▲ `
@@ -238,11 +291,14 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
                     <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 font-mono text-[11px] space-y-0.5">
                         {logs.map((entry, i) => (
                             <div key={i} className="flex gap-2">
-                                <span className="flex-shrink-0" style={{ color: 'var(--sf-console-text-dim)', opacity: 0.5 }}>{entry.time}</span>
+                                <span className="flex-shrink-0" style={{ color: 'var(--sf-console-text-dim)', opacity: 0.7 }}>{entry.time}</span>
                                 <span className={`uppercase font-bold flex-shrink-0 w-10 ${levelColor(entry.level)}`}>
                                     {entry.level}
                                 </span>
-                                <span style={{ color: 'var(--sf-console-text)' }}>{entry.message}</span>
+                                <span style={{ color: 'var(--sf-console-text)' }}>
+                                    {entry.message}
+                                    {entry.loading && <LoadingDots />}
+                                </span>
                             </div>
                         ))}
                         {logs.length === 0 && (

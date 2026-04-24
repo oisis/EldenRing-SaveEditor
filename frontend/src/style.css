@@ -67,11 +67,11 @@
   --sf-shadow-lg: 0 8px 30px rgba(0,0,0,0.12);
   --sf-scrollbar-thumb: 214 20% 80%;
   --sf-slider-accent: #16a34a;
-  --sf-console-bg: rgba(15, 15, 20, 0.92);
-  --sf-console-text: #e2e8f0;
-  --sf-console-text-dim: #94a3b8;
-  --sf-console-border: rgba(255, 255, 255, 0.08);
-  --sf-toast-bg: rgba(15, 15, 20, 0.75);
+  --sf-console-bg: rgba(15, 15, 20, 0.65);
+  --sf-console-text: #ffffff;
+  --sf-console-text-dim: #cbd5e1;
+  --sf-console-border: rgba(255, 255, 255, 0.15);
+  --sf-toast-bg: rgba(15, 15, 20, 0.50);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -110,11 +110,11 @@
   --sf-shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
   --sf-scrollbar-thumb: 215 19% 22%;
   --sf-slider-accent: #4ade80;
-  --sf-console-bg: rgba(235, 235, 240, 0.92);
-  --sf-console-text: #1a202c;
-  --sf-console-text-dim: #4a5568;
-  --sf-console-border: rgba(0, 0, 0, 0.1);
-  --sf-toast-bg: rgba(235, 235, 240, 0.8);
+  --sf-console-bg: rgba(235, 235, 240, 0.65);
+  --sf-console-text: #000000;
+  --sf-console-text-dim: #1e293b;
+  --sf-console-border: rgba(0, 0, 0, 0.2);
+  --sf-toast-bg: rgba(235, 235, 240, 0.50);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -153,11 +153,11 @@
   --sf-shadow-lg: 0 8px 30px rgba(0,0,0,0.6);
   --sf-scrollbar-thumb: 32 18% 18%;
   --sf-slider-accent: #d4a843;
-  --sf-console-bg: rgba(225, 218, 200, 0.90);
-  --sf-console-text: #1a1614;
-  --sf-console-text-dim: #6b5f50;
-  --sf-console-border: rgba(212, 168, 67, 0.15);
-  --sf-toast-bg: rgba(225, 218, 200, 0.75);
+  --sf-console-bg: rgba(225, 218, 200, 0.65);
+  --sf-console-text: #0f0e0d;
+  --sf-console-text-dim: #3d3529;
+  --sf-console-border: rgba(212, 168, 67, 0.25);
+  --sf-toast-bg: rgba(225, 218, 200, 0.50);
 }
 
 /* ═══════════════════════════════════════════════════
@@ -228,3 +228,16 @@
 input[type="range"] {
   accent-color: var(--sf-slider-accent);
 }
+
+/* ═══════════════════════════════════════════════════
+   LOADING DOTS ANIMATION
+   ═══════════════════════════════════════════════════ */
+@keyframes dot-blink {
+  0%, 20% { opacity: 0; }
+  40% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.animate-dot-1 { animation: dot-blink 1.4s infinite 0s; }
+.animate-dot-2 { animation: dot-blink 1.4s infinite 0.2s; }
+.animate-dot-3 { animation: dot-blink 1.4s infinite 0.4s; }

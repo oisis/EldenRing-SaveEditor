@@ -19,12 +19,15 @@ jobs:
     steps:
       - name: Decide whether to build
         id: decide
+        env:
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_MERGED: ${{ github.event.pull_request.merged }}
         run: |
-          if [[ "${{ github.event_name }}" == "pull_request" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+          if [[ "$EVENT_NAME" == "pull_request" && "$PR_MERGED" == "true" ]]; then
             echo "should_build=true" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ github.event_name }}" == "push" ]]; then
-            MSG="${{ github.event.head_commit.message }}"
-            if [[ "$MSG" == \[build\]* ]]; then
+          elif [[ "$EVENT_NAME" == "push" ]]; then
+            if [[ "$COMMIT_MSG" == \[build\]* ]]; then
               echo "should_build=true" >> "$GITHUB_OUTPUT"
             else
               echo "should_build=false" >> "$GITHUB_OUTPUT"
