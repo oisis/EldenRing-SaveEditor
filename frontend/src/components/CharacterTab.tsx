@@ -53,9 +53,14 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
     const freeSlots = favSlots.filter(s => s.safe && !s.active).length;
     const usedSafeSlots = favSlots.filter(s => s.safe && s.active);
 
+    const getStatMin = (statId: string): number => {
+        return char?.classBaseStats?.[statId] || 1;
+    };
+
     const updateStat = (key: string, val: number) => {
         if (!char) return;
-        const clampedVal = Math.min(99, Math.max(1, val));
+        const min = getStatMin(key);
+        const clampedVal = Math.min(99, Math.max(min, val));
         const updatedData = {...char, [key]: clampedVal} as any;
         const sum = updatedData.vigor + updatedData.mind + updatedData.endurance + updatedData.strength +
                     updatedData.dexterity + updatedData.intelligence + updatedData.faith + updatedData.arcane;
@@ -154,7 +159,13 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                 }
             >
                 <div className="space-y-4">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Starting Class</label>
+                            <div className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black text-primary">
+                                {char.className || 'Unknown'}
+                            </div>
+                        </div>
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
                             <input type="text" value={char.name} maxLength={16}
@@ -233,25 +244,34 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                 summary={attrSummary}
             >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
-                    {ATTRIBUTES.map(stat => (
-                        <div key={stat.id} className="flex items-center gap-3 py-1.5 border-b border-border/30">
-                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-20 flex-shrink-0">
-                                {stat.label}
-                            </span>
-                            <input
-                                type="range" min={1} max={99}
-                                value={(char as any)[stat.id]}
-                                onChange={e => updateStat(stat.id, parseInt(e.target.value))}
-                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg"
-                            />
-                            <input
-                                type="number" min={1} max={99}
-                                value={(char as any)[stat.id]}
-                                onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
-                                className="w-12 bg-muted/30 border border-border rounded text-center text-xs py-1 focus:ring-1 focus:ring-primary/30 outline-none"
-                            />
-                        </div>
-                    ))}
+                    {ATTRIBUTES.map(stat => {
+                        const statMin = getStatMin(stat.id);
+                        const redZonePct = ((statMin - 1) / 98) * 100;
+                        return (
+                            <div key={stat.id} className="flex items-center gap-3 py-1.5 border-b border-border/30">
+                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-20 flex-shrink-0"
+                                    title={`Base: ${statMin}`}>
+                                    {stat.label}
+                                    <span className="text-[8px] text-red-400/70 ml-1">{statMin}</span>
+                                </span>
+                                <input
+                                    type="range" min={1} max={99}
+                                    value={(char as any)[stat.id]}
+                                    onChange={e => updateStat(stat.id, parseInt(e.target.value))}
+                                    className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer"
+                                    style={{
+                                        background: `linear-gradient(to right, rgb(239 68 68 / 0.4) 0%, rgb(239 68 68 / 0.4) ${redZonePct}%, hsl(var(--border)) ${redZonePct}%, hsl(var(--border)) 100%)`,
+                                    }}
+                                />
+                                <input
+                                    type="number" min={statMin} max={99}
+                                    value={(char as any)[stat.id]}
+                                    onChange={e => updateStat(stat.id, parseInt(e.target.value) || statMin)}
+                                    className="w-12 bg-muted/30 border border-border rounded text-center text-xs py-1 focus:ring-1 focus:ring-primary/30 outline-none"
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
             </AccordionSection>
 

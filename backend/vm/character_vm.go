@@ -48,6 +48,7 @@ type CharacterViewModel struct {
 	Warnings            []string              `json:"warnings"`
 	StatValidation      *StatValidationResult `json:"statValidation,omitempty"`
 	EventFlagsAvailable bool                  `json:"eventFlagsAvailable"`
+	ClassBaseStats      map[string]uint32     `json:"classBaseStats"`
 }
 
 func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
@@ -78,12 +79,23 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	vm.Warnings = slot.Warnings
 	vm.EventFlagsAvailable = slot.EventFlagsOffset > 0
 
-	// Set class name
+	// Set class name and base stats
 	cs := db.GetClassStats(data.Class)
 	if cs != nil {
 		vm.ClassName = cs.Name
+		vm.ClassBaseStats = map[string]uint32{
+			"vigor":        cs.Vigor,
+			"mind":         cs.Mind,
+			"endurance":    cs.Endurance,
+			"strength":     cs.Strength,
+			"dexterity":    cs.Dexterity,
+			"intelligence": cs.Intelligence,
+			"faith":        cs.Faith,
+			"arcane":       cs.Arcane,
+		}
 	} else {
 		vm.ClassName = fmt.Sprintf("Unknown (%d)", data.Class)
+		vm.ClassBaseStats = map[string]uint32{}
 	}
 
 	// Run stat consistency validation

@@ -705,6 +705,7 @@ export namespace vm {
 	    warnings: string[];
 	    statValidation?: StatValidationResult;
 	    eventFlagsAvailable: boolean;
+	    classBaseStats: Record<string, number>;
 	
 	    static createFrom(source: any = {}) {
 	        return new CharacterViewModel(source);
@@ -736,6 +737,7 @@ export namespace vm {
 	        this.warnings = source["warnings"];
 	        this.statValidation = this.convertValues(source["statValidation"], StatValidationResult);
 	        this.eventFlagsAvailable = source["eventFlagsAvailable"];
+	        this.classBaseStats = source["classBaseStats"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
