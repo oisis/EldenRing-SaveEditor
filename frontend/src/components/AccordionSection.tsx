@@ -8,6 +8,7 @@ interface AccordionSectionProps {
     progress?: { current: number; total: number };
     summary?: string;
     actions?: ReactNode;
+    headerRight?: ReactNode;
     children: ReactNode;
     className?: string;
 }
@@ -20,6 +21,7 @@ export function AccordionSection({
     progress,
     summary,
     actions,
+    headerRight,
     children,
     className = '',
 }: AccordionSectionProps) {
@@ -88,6 +90,12 @@ export function AccordionSection({
                 {open && actions && (
                     <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
                         {actions}
+                    </div>
+                )}
+
+                {headerRight && (
+                    <div className="flex items-center flex-shrink-0 ml-auto" onClick={e => e.stopPropagation()}>
+                        {headerRight}
                     </div>
                 )}
             </button>

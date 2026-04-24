@@ -143,14 +143,14 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                 id="char-profile"
                 title="Profile"
                 summary={profileSummary}
+                headerRight={
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">RL</span>
+                        <span className="text-lg font-black tracking-tighter text-primary leading-none">{char.level}</span>
+                    </div>
+                }
             >
                 <div className="space-y-4">
-                    {/* Rune Level display */}
-                    <div className="flex items-center justify-end">
-                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] mr-2">RL</span>
-                        <span className="text-4xl font-black tracking-tighter text-foreground leading-none">{char.level}</span>
-                    </div>
-
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
