@@ -1,6 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
 import toast from './lib/toast';
-import {Toaster} from 'react-hot-toast';
 import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetSlotDiff, GetSaveDiffSummary, GetInfuseTypes} from '../wailsjs/go/main/App';
 import {main} from '../wailsjs/go/models';
 import {CharacterTab} from './components/CharacterTab';
@@ -203,14 +202,6 @@ function App() {
 
     return (
         <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-300">
-            <Toaster position="bottom-center" containerStyle={{bottom: 50}}
-                toastOptions={{
-                    duration: 3000,
-                    style: { background: 'var(--color-card)', color: 'var(--color-foreground)', border: '1px solid var(--color-border)', fontSize: '11px' },
-                    loading: { duration: Infinity },
-                    success: { style: { display: 'none' } },
-                    error: { style: { display: 'none' } },
-                }} />
             {/* Sidebar */}
             <aside className="w-64 border-r border-border bg-muted/5 flex flex-col z-20">
                 <div className="p-5 space-y-6 flex-1 overflow-y-auto custom-scrollbar">

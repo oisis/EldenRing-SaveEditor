@@ -1,24 +1,21 @@
 import {sfLog} from '../components/ToastBar';
-import hotToast from 'react-hot-toast';
+
+let idCounter = 0;
 
 const toast = Object.assign(
     (msg: string) => { sfLog('info', msg); },
     {
-        success: (msg: string, opts?: { id?: string }) => {
+        success: (msg: string, _opts?: { id?: string }) => {
             sfLog('info', msg);
-            if (opts?.id) hotToast.dismiss(opts.id);
         },
-        error: (msg: string, opts?: { id?: string }) => {
+        error: (msg: string, _opts?: { id?: string }) => {
             sfLog('error', msg);
-            if (opts?.id) hotToast.dismiss(opts.id);
         },
         loading: (msg: string) => {
             sfLog('info', msg);
-            return hotToast.loading(msg, {
-                style: { background: 'var(--color-card)', color: 'var(--color-foreground)', border: '1px solid var(--color-border)' },
-            });
+            return `sf-loading-${++idCounter}`;
         },
-        dismiss: hotToast.dismiss,
+        dismiss: (_id?: string) => {},
     }
 );
 
