@@ -414,6 +414,80 @@ Display item flavor text and detailed stats in the item detail modal. Data sourc
 - Backup manager
 - Cross-platform desktop app (Wails)
 
+---
+
+## Phase 8 — UI/UX Redesign ("Elden Ring SaveForge")
+
+Comprehensive UI/UX overhaul based on interactive mockup (`tmp/mockups/mockup-v2.html`).
+Rebranding from "ER Save Editor" to **Elden Ring SaveForge** (logo "ER", title "SaveForge by OiSiSk").
+
+### ✅ Theme System 🟡
+3 color themes (Dark, Light, Elden Ring) via CSS Custom Properties (`data-theme` attribute switching).
+
+**Implementation:** `frontend/src/style.css`
+- CSS variables defined on `[data-theme="dark"|"light"|"golden"]` selectors
+- Theme switcher in Settings (inline with SteamID)
+- All components use `var(--bg)`, `var(--accent)`, etc. — no hardcoded colors
+- `accent-color` for native range sliders
+- Console contrast colors per theme (`--sf-console-bg`, `--sf-console-text`)
+
+### ✅ Tab Consolidation (7 → 5) 🟡
+Reduced tab count for better UX.
+
+**Implementation:** `frontend/src/App.tsx`, new components
+| New Tab | Merges | Components |
+|---|---|---|
+| **Character** | GeneralTab + AppearanceTab | `CharacterTab.tsx` — Profile (collapsible), Attributes (2-col sliders), Appearance Presets |
+| **Inventory** | InventoryTab + DatabaseTab | Toggle between Inventory view and Item Database view with split detail panel (60/40) |
+| **World** | WorldProgressTab (reorganized) | `WorldTab.tsx` — 3 sub-tabs: Exploration / Progress / Unlocks |
+| **Tools** | CharacterImporter + placeholders | `ToolsTab.tsx` — Importer, Save Comparison, Diagnostics, Backup Manager |
+| **Settings** | SettingsTab (simplified) | SteamID \| Theme inline, UI toggles, Deploy Targets |
+
+### ✅ Reusable AccordionSection Component 🟢
+**Implementation:** `frontend/src/components/AccordionSection.tsx`
+- Arrow + title + progress bar + count + action buttons in header
+- Collapsed summary (attribute pills, progress percentage)
+- `headerRight` prop for always-visible content (e.g. RL level)
+- `id` prop for localStorage persistence of open/closed state
+- Nested accordion support with `column-count: 2` masonry layout
+- All sections default collapsed
+
+### ✅ World Tab Sub-tabs 🟡
+**Implementation:** `frontend/src/components/WorldTab.tsx`
+- **Exploration**: Map & FoW, Sites of Grace (2-col masonry), Summoning Pools (2-col masonry), Colosseums
+- **Progress**: Bosses (2-col masonry), NPC Quests
+- **Unlocks**: Gestures, Cookbooks, Bell Bearings, Whetblades (all with progress bars)
+- MiniProgress bars on all inner region/category accordions
+
+### ✅ QuakeConsole + ToastBar 🟢
+**Implementation:** `frontend/src/components/ToastBar.tsx`, `frontend/src/lib/toast.ts`
+- Toast bar: fixed bottom, 30% width, centered, 1 line — hidden when console open
+- Quake console: toggle via backtick key or click, resizable (drag edges/corners), dimensions persisted
+- Click outside to close, contrast backgrounds per theme
+- All `toast.success/error/loading` redirected to console via `lib/toast.ts` wrapper — no popup toasts
+- Session log with colored severity (INFO/WARN/ERROR)
+
+### ✅ Character Tab Enhancements 🟢
+**Implementation:** `frontend/src/components/CharacterTab.tsx`
+- Collapsible **Profile** — summary: `Name | RL XX | NG+X | Runes`, RL in header with primary color
+- Collapsible **Attributes** — 2-column sliders, summary: `Vig XX | Min XX | End XX | ...`
+- Memory Slots placeholder field in Profile
+- Add Settings moved to Inventory tab (Item Database view)
+
+### ✅ Inventory / Item Database Split View 🟢
+**Implementation:** `frontend/src/App.tsx`, `frontend/src/components/ItemDetailPanel.tsx`
+- Toggle button switches between Inventory view and Item Database view
+- Database view: split layout — DB list (60%) + Item Detail panel (40%)
+- `ItemDetailPanel` component: weapon/armor/spell stats, description, icon, item info
+- Add Settings collapsible above database
+- Sidebar: collapsible empty character slots
+
+### ✅ Rebranding 🟢
+- Logo: "ER" in primary-colored square
+- Title: "SaveForge" with "by OiSiSk" in primary color
+- Window title: "Elden Ring SaveForge by OiSiSk"
+- Theme label: "Elden Ring" (internal key: `golden`)
+
 ### 🔲 Known Bugs (to investigate)
 - **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
 - **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. Requires multi-flag approach — see Boss Kill / Respawn Manager section above for details and reference data.

@@ -1,0 +1,376 @@
+import {useEffect, useState} from 'react';
+import toast from '../lib/toast';
+import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyAppearancePreset, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
+import {vm, main} from '../../wailsjs/go/models';
+import {AccordionSection} from './AccordionSection';
+
+interface Props {
+    charIndex: number;
+    onNameChange?: () => void;
+    onMutate: () => void;
+}
+
+const ATTRIBUTES = [
+    { id: 'vigor', label: 'Vigor', abbr: 'Vig' },
+    { id: 'mind', label: 'Mind', abbr: 'Min' },
+    { id: 'endurance', label: 'Endurance', abbr: 'End' },
+    { id: 'strength', label: 'Strength', abbr: 'Str' },
+    { id: 'dexterity', label: 'Dexterity', abbr: 'Dex' },
+    { id: 'intelligence', label: 'Intelligence', abbr: 'Int' },
+    { id: 'faith', label: 'Faith', abbr: 'Fai' },
+    { id: 'arcane', label: 'Arcane', abbr: 'Arc' },
+];
+
+export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
+    const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
+    const [loading, setLoading] = useState(false);
+
+    // Appearance state
+    const [presets, setPresets] = useState<main.PresetInfo[]>([]);
+    const [checked, setChecked] = useState<Set<string>>(new Set());
+    const [applyingPreset, setApplyingPreset] = useState(false);
+    const [writingFav, setWritingFav] = useState(false);
+    const [favSlots, setFavSlots] = useState<main.FavoriteSlotInfo[]>([]);
+    const [zoomed, setZoomed] = useState<string | null>(null);
+    const [confirmApply, setConfirmApply] = useState(false);
+
+    useEffect(() => {
+        ListAppearancePresets().then(setPresets).catch(e => toast.error("" + e));
+        refreshFavStatus();
+    }, []);
+
+    useEffect(() => {
+        setLoading(true);
+        GetCharacter(charIndex)
+            .then(res => { setChar(res); setLoading(false); })
+            .catch(() => setLoading(false));
+    }, [charIndex]);
+
+    const refreshFavStatus = () => {
+        GetFavoritesStatus().then(setFavSlots).catch(() => {});
+    };
+
+    const freeSlots = favSlots.filter(s => s.safe && !s.active).length;
+    const usedSafeSlots = favSlots.filter(s => s.safe && s.active);
+
+    const updateStat = (key: string, val: number) => {
+        if (!char) return;
+        const clampedVal = Math.min(99, Math.max(1, val));
+        const updatedData = {...char, [key]: clampedVal} as any;
+        const sum = updatedData.vigor + updatedData.mind + updatedData.endurance + updatedData.strength +
+                    updatedData.dexterity + updatedData.intelligence + updatedData.faith + updatedData.arcane;
+        updatedData.level = Math.max(1, sum - 79);
+        setChar(vm.CharacterViewModel.createFrom(updatedData));
+    };
+
+    const handleSave = () => {
+        if (char) {
+            SaveCharacter(charIndex, char)
+                .then(() => { toast.success('Character data updated in memory'); onNameChange?.(); })
+                .catch(err => toast.error('Error: ' + err));
+        }
+    };
+
+    // Appearance handlers
+    const toggleCheck = (name: string) => {
+        setChecked(prev => {
+            const next = new Set(prev);
+            next.has(name) ? next.delete(name) : next.add(name);
+            return next;
+        });
+        setConfirmApply(false);
+    };
+
+    const handleApplyPreset = async () => {
+        if (checked.size !== 1) return;
+        const name = Array.from(checked)[0];
+        setApplyingPreset(true);
+        try {
+            await ApplyAppearancePreset(charIndex, name);
+            toast.success(`Applied "${name.split(',')[0]}"`);
+            setConfirmApply(false);
+            onMutate();
+        } catch (e) { toast.error("Failed: " + e); }
+        finally { setApplyingPreset(false); }
+    };
+
+    const handleWriteFavorites = async () => {
+        if (checked.size === 0 || checked.size > freeSlots) return;
+        setWritingFav(true);
+        try {
+            const count = await WriteSelectedToFavorites(charIndex, Array.from(checked));
+            toast.success(`Wrote ${count} presets to Mirror Favorites`);
+            setChecked(new Set());
+            refreshFavStatus();
+        } catch (e) { toast.error("" + e); }
+        finally { setWritingFav(false); }
+    };
+
+    const handleRemoveFav = async (slotIndex: number) => {
+        try {
+            await RemoveFavoritePreset(slotIndex);
+            toast.success(`Cleared Favorites slot ${slotIndex + 1}`);
+            refreshFavStatus();
+        } catch (e) { toast.error("" + e); }
+    };
+
+    // Summaries for collapsed sections
+    const profileSummary = char
+        ? `${char.name} | RL ${char.level} | NG+${char.clearCount || 0} | ${(char.souls || 0).toLocaleString()} Runes`
+        : '';
+
+    const attrSummary = char
+        ? ATTRIBUTES.map(a => `${a.abbr} ${(char as any)[a.id]}`).join(' | ')
+        : '';
+
+    if (loading) return (
+        <div className="py-10 flex flex-col items-center justify-center space-y-3">
+            <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+            <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Loading...</p>
+        </div>
+    );
+
+    if (!char) return (
+        <div className="py-10 text-center border border-dashed border-border rounded-lg">
+            <p className="text-xs text-muted-foreground">No character data.</p>
+        </div>
+    );
+
+    return (
+        <div className="space-y-3 animate-in fade-in duration-500 max-w-5xl mx-auto">
+            {/* ═══ PROFILE ═══ */}
+            <AccordionSection
+                id="char-profile"
+                title="Profile"
+                summary={profileSummary}
+                headerRight={
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em]">RL</span>
+                        <span className="text-lg font-black tracking-tighter text-primary leading-none">{char.level}</span>
+                    </div>
+                }
+            >
+                <div className="space-y-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
+                            <input type="text" value={char.name} maxLength={16}
+                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Runes</label>
+                            <input type="number" value={char.souls}
+                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                                Talisman Slots <span className="text-primary font-mono">{1 + (char.talismanSlots || 0)}/4</span>
+                            </label>
+                            <input type="number" min={0} max={3} value={char.talismanSlots || 0}
+                                onChange={e => {
+                                    const v = Math.min(3, Math.max(0, parseInt(e.target.value) || 0));
+                                    setChar(vm.CharacterViewModel.createFrom({...char, talismanSlots: v}));
+                                }}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                                NG+ Cycle <span className="text-primary font-mono">{char.clearCount || 0}/7</span>
+                            </label>
+                            <input type="number" min={0} max={7} value={char.clearCount || 0}
+                                onChange={e => {
+                                    const v = Math.min(7, Math.max(0, parseInt(e.target.value) || 0));
+                                    setChar(vm.CharacterViewModel.createFrom({...char, clearCount: v}));
+                                }}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Equipped Great Rune</label>
+                            <select value={char.equippedGreatRune || 0}
+                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, equippedGreatRune: parseInt(e.target.value)}))}
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer h-[34px]">
+                                <option value={0}>None</option>
+                                <option value={0x40000053}>Godrick's Great Rune</option>
+                                <option value={0x40000054}>Radahn's Great Rune</option>
+                                <option value={0x40000055}>Morgott's Great Rune</option>
+                                <option value={0x40000056}>Rykard's Great Rune</option>
+                                <option value={0x40000057}>Malenia's Great Rune</option>
+                                <option value={0x40000058}>Mohg's Great Rune</option>
+                            </select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Great Rune Buff</label>
+                            <label className="flex items-center space-x-2 bg-muted/20 border border-border rounded-md px-3 py-2 cursor-pointer hover:border-primary/30 transition-all">
+                                <input type="checkbox" checked={char.greatRuneOn || false}
+                                    onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, greatRuneOn: e.target.checked}))}
+                                    className="accent-primary" />
+                                <span className="text-xs font-bold">{char.greatRuneOn ? 'Active' : 'Inactive'}</span>
+                            </label>
+                        </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                                Memory Slots <span className="text-muted-foreground/50 font-mono">—</span>
+                            </label>
+                            <input type="number" min={0} max={12} value={0} disabled title="Not yet implemented"
+                                className="w-full bg-muted/10 border border-border/50 rounded-md px-3 py-2 text-xs font-black font-mono text-muted-foreground/40 cursor-not-allowed" />
+                        </div>
+                    </div>
+                </div>
+            </AccordionSection>
+
+            {/* ═══ ATTRIBUTES ═══ */}
+            <AccordionSection
+                id="char-attributes"
+                title="Attributes"
+                summary={attrSummary}
+            >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
+                    {ATTRIBUTES.map(stat => (
+                        <div key={stat.id} className="flex items-center gap-3 py-1.5 border-b border-border/30">
+                            <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-20 flex-shrink-0">
+                                {stat.label}
+                            </span>
+                            <input
+                                type="range" min={1} max={99}
+                                value={(char as any)[stat.id]}
+                                onChange={e => updateStat(stat.id, parseInt(e.target.value))}
+                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg"
+                            />
+                            <input
+                                type="number" min={1} max={99}
+                                value={(char as any)[stat.id]}
+                                onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
+                                className="w-12 bg-muted/30 border border-border rounded text-center text-xs py-1 focus:ring-1 focus:ring-primary/30 outline-none"
+                            />
+                        </div>
+                    ))}
+                </div>
+            </AccordionSection>
+
+            {/* ═══ APPEARANCE PRESETS ═══ */}
+            <AccordionSection
+                id="char-presets"
+                title="Appearance Presets"
+                badge={`${presets.length} presets`}
+                actions={
+                    checked.size > 0 ? (
+                        <div className="flex items-center gap-2">
+                            <span className="text-[8px] font-bold text-amber-500 uppercase tracking-wider">{checked.size} selected</span>
+                            {checked.size === 1 && !confirmApply && (
+                                <button onClick={() => setConfirmApply(true)}
+                                    className="px-2 py-0.5 bg-foreground text-background rounded text-[8px] font-black uppercase tracking-wider hover:brightness-110 transition-all">
+                                    Apply
+                                </button>
+                            )}
+                            {checked.size === 1 && confirmApply && (
+                                <button onClick={handleApplyPreset} disabled={applyingPreset}
+                                    className="px-2 py-0.5 bg-primary text-primary-foreground rounded text-[8px] font-black uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50">
+                                    {applyingPreset ? '...' : 'Confirm'}
+                                </button>
+                            )}
+                            <button onClick={handleWriteFavorites} disabled={writingFav || checked.size > freeSlots}
+                                className="px-2 py-0.5 border border-primary/30 text-primary rounded text-[8px] font-black uppercase tracking-wider hover:bg-primary/10 transition-all disabled:opacity-50">
+                                Mirror ({freeSlots} free)
+                            </button>
+                        </div>
+                    ) : undefined
+                }
+            >
+                <div className="space-y-3">
+                    <p className="text-[10px] text-muted-foreground">
+                        Click image to preview. Checkbox to select. Apply (1 preset) writes to character.
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                        {presets.map(p => {
+                            const isChecked = checked.has(p.name);
+                            return (
+                                <div key={p.name} className={`group relative rounded-lg border overflow-hidden transition-all
+                                    ${isChecked ? 'border-primary ring-1 ring-primary shadow-lg shadow-primary/10' : 'border-border hover:border-primary/30'}`}>
+                                    <div className="absolute top-2 left-2 z-10 cursor-pointer" onClick={() => toggleCheck(p.name)}>
+                                        <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all
+                                            ${isChecked ? 'bg-primary border-primary' : 'border-white/50 bg-black/40 hover:border-white/80'}`}>
+                                            {isChecked && (
+                                                <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                                </svg>
+                                            )}
+                                        </div>
+                                    </div>
+                                    <div className="relative aspect-[3/4] bg-muted/30 overflow-hidden cursor-pointer"
+                                         onClick={() => setZoomed(p.image ? `presets/${p.image}` : null)}>
+                                        {p.image ? (
+                                            <img src={`presets/${p.image}`} alt={p.name}
+                                                className="w-full h-full object-cover object-top transition-all duration-500 group-hover:scale-105" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                <svg className="w-10 h-10 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                                                </svg>
+                                            </div>
+                                        )}
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                                    </div>
+                                    <div className={`p-2.5 text-center transition-colors ${isChecked ? 'bg-primary/5' : 'bg-background'}`}>
+                                        <div className={`text-[10px] font-black uppercase tracking-wider leading-tight ${isChecked ? 'text-primary' : 'text-foreground'}`}>{p.name}</div>
+                                        <div className="text-[8px] text-muted-foreground font-medium uppercase tracking-widest mt-0.5">{p.bodyType}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* Mirror Favorites */}
+                    {usedSafeSlots.length > 0 && (
+                        <div className="pt-3 border-t border-border/50">
+                            <p className="text-[9px] font-black uppercase tracking-widest text-muted-foreground mb-2">Mirror Favorites ({usedSafeSlots.length} used)</p>
+                            <div className="flex flex-wrap gap-2">
+                                {usedSafeSlots.map(s => (
+                                    <div key={s.index} className="flex items-center gap-2 bg-muted/30 rounded-md px-3 py-1.5">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">Slot {s.index + 1}</span>
+                                        <button onClick={() => handleRemoveFav(s.index)}
+                                            className="text-red-400 hover:text-red-300 transition-colors" title="Remove">
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </AccordionSection>
+
+            {/* ═══ APPLY CHANGES ═══ */}
+            <div className="flex justify-end items-center space-x-4 pt-4 pb-2 border-t border-border/30">
+                <p className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">Staged in memory</p>
+                <button onClick={handleSave}
+                    className="bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all font-black px-6 py-2 rounded-md text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20">
+                    Apply Changes
+                </button>
+            </div>
+
+            {/* Zoom modal */}
+            {zoomed && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-pointer"
+                     onClick={() => setZoomed(null)}>
+                    <img src={zoomed} alt="Preview"
+                        className="max-h-[85vh] max-w-[85vw] rounded-xl shadow-2xl object-contain animate-in zoom-in-90 duration-300"
+                        onClick={e => e.stopPropagation()} />
+                    <button onClick={() => setZoomed(null)}
+                        className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            )}
+        </div>
+    );
+}

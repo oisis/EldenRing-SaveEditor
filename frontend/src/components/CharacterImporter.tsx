@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/toast';
 import {SelectAndOpenSourceSave, GetSourceActiveSlots, ImportCharacter} from '../../wailsjs/go/main/App';
 
 interface Props {

@@ -1,5 +1,5 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetSlotCapacity} from '../../wailsjs/go/main/App';
 import {vm, main} from '../../wailsjs/go/models';
@@ -356,7 +356,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             {capacity && (
                 <div className="flex flex-wrap gap-4 shrink-0">
                     {[
-                        { label: 'GaItems', used: capacity.gaItemsUsed, max: capacity.gaItemsMax },
+                        { label: 'All Items', used: capacity.gaItemsUsed, max: capacity.gaItemsMax },
                         { label: 'Inventory', used: capacity.inventoryUsed, max: capacity.inventoryMax },
                         { label: 'Storage', used: capacity.storageUsed, max: capacity.storageMax },
                     ].map(({ label, used, max }) => {

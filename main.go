@@ -18,7 +18,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:         "ER Save Editor",
+		Title:         "Elden Ring SaveForge by OiSiSk",
 		Width:         1280,
 		Height:        800,
 		MinWidth:      1024,
@@ -45,7 +45,7 @@ func main() {
 			WebviewIsTransparent: true,
 			WindowIsTranslucent:  true,
 			About: &mac.AboutInfo{
-				Title:   "ER Save Editor",
+				Title:   "Elden Ring SaveForge by OiSiSk",
 				Message: "© 2026 OiSiS",
 			},
 		},

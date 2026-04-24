@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/toast';
 import {ListAppearancePresets, ApplyAppearancePreset, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
 import {main} from '../../wailsjs/go/models';
 

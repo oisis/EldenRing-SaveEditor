@@ -1,5 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/toast';
 import {
     GetSteamIDString, SetSteamIDFromString,
     GetDeployTargets, SaveDeployTarget, DeleteDeployTarget,
@@ -9,8 +9,8 @@ import {
 import {deploy} from '../../wailsjs/go/models';
 
 interface SettingsTabProps {
-    theme: 'light' | 'dark' | 'system';
-    setTheme: (theme: 'light' | 'dark' | 'system') => void;
+    theme: 'light' | 'dark' | 'golden';
+    setTheme: (theme: 'light' | 'dark' | 'golden') => void;
     columnVisibility: { id: boolean; category: boolean };
     setColumnVisibility: (visibility: { id: boolean; category: boolean }) => void;
     showFlaggedItems: boolean;
@@ -155,10 +155,10 @@ export function SettingsTab({
                         <div className="flex items-center gap-3">
                             <p className="text-[10px] font-bold text-foreground">Theme</p>
                             <div className="flex bg-muted/30 p-0.5 rounded border border-border">
-                                {(['light', 'dark', 'system'] as const).map(t => (
+                                {(['light', 'dark', 'golden'] as const).map(t => (
                                     <button key={t} onClick={() => setTheme(t)}
                                         className={`px-4 py-1 rounded text-[9px] font-black uppercase tracking-widest transition-all ${theme === t ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
-                                    >{t}</button>
+                                    >{t === 'golden' ? 'Elden Ring' : t}</button>
                                 ))}
                             </div>
                         </div>
