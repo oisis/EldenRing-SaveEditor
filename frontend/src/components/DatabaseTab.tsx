@@ -1,5 +1,5 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
-import toast from 'react-hot-toast';
+import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
