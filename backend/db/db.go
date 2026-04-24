@@ -454,7 +454,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 		processMap(data.ArrowsAndBolts, "arrows_and_bolts")
 	case "tools":
 		for id, item := range data.Tools {
-			if item.Name == "" {
+			if item.Name == "" || data.IsWhetbladeItemID(id) {
 				continue
 			}
 			// Filter upgraded Flask variants — only keep base versions (no " +N" suffix)
@@ -474,7 +474,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 		}
 	case "key_items":
 		for id, item := range data.KeyItems {
-			if item.Name == "" || data.IsCookbookItemID(id) {
+			if item.Name == "" || data.IsCookbookItemID(id) || data.IsWhetbladeItemID(id) {
 				continue
 			}
 			items = append(items, ItemEntry{

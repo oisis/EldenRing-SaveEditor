@@ -147,6 +147,8 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
 
     // --- Whetblade logic ---
     const handleWBToggle = async (w: db.WhetbladeEntry, unlocked: boolean) => { await SetWhetbladeUnlocked(charIdx, w.id, unlocked); setWhetblades(prev => prev.map(x => x.id === w.id ? {...x, unlocked} : x)); onMutate?.(); };
+    const handleUnlockAllWBs = async () => { const l = whetblades.filter(w => !w.unlocked); if (!l.length) return; for (const w of l) { await SetWhetbladeUnlocked(charIdx, w.id, true); } setWhetblades(prev => prev.map(w => ({...w, unlocked: true}))); onMutate?.(); };
+    const handleLockAllWBs = async () => { const u = whetblades.filter(w => w.unlocked); if (!u.length) return; for (const w of u) { await SetWhetbladeUnlocked(charIdx, w.id, false); } setWhetblades(prev => prev.map(w => ({...w, unlocked: false}))); onMutate?.(); };
     const unlockedWBs = whetblades.filter(w => w.unlocked).length;
 
     // --- Quest logic ---
@@ -597,7 +599,11 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Whetblades */}
-                    <AccordionSection id="world-whetblades" title="Whetblades" progress={{current: unlockedWBs, total: whetblades.length}}>
+                    <AccordionSection id="world-whetblades" title="Whetblades" progress={{current: unlockedWBs, total: whetblades.length}}
+                        actions={<>
+                            <button onClick={handleUnlockAllWBs} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <button onClick={handleLockAllWBs} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        </>}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-0.5">
                             {whetblades.map(w => (
                                 <label key={w.id} className="flex items-center space-x-2 py-0.5 px-1 rounded hover:bg-muted/30 cursor-pointer">

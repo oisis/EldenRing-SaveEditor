@@ -1030,7 +1030,8 @@ func (a *App) GetWhetblades(slotIndex int) ([]db.WhetbladeEntry, error) {
 	return entries, nil
 }
 
-// SetWhetbladeUnlocked sets or clears the unlock flag for a whetblade
+// SetWhetbladeUnlocked sets or clears the unlock flag for a whetblade,
+// manages the inventory item, related affinity flags, and the AoW menu flag.
 func (a *App) SetWhetbladeUnlocked(slotIndex int, flagID uint32, unlocked bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -1038,12 +1039,64 @@ func (a *App) SetWhetbladeUnlocked(slotIndex int, flagID uint32, unlocked bool) 
 	if slotIndex < 0 || slotIndex >= 10 {
 		return fmt.Errorf("invalid slot index")
 	}
+
 	a.pushUndo(slotIndex)
+
 	slot := &a.save.Slots[slotIndex]
 	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
 		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
 	}
-	return db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, unlocked)
+
+	flags := slot.Data[slot.EventFlagsOffset:]
+
+	// 1. Set the whetblade event flag.
+	if err := db.SetEventFlag(flags, flagID, unlocked); err != nil {
+		return err
+	}
+
+	// 2. Set related affinity flags (e.g., Keen, Quality for Iron Whetblade).
+	if related, ok := data.WhetbladeRelatedFlags[flagID]; ok {
+		for _, rf := range related {
+			_ = db.SetEventFlag(flags, rf, unlocked)
+		}
+	}
+
+	// 3. Add/remove inventory item.
+	if itemID, ok := data.WhetbladeFlagToItemID[flagID]; ok {
+		if unlocked {
+			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+		} else {
+			for handle, gID := range slot.GaMap {
+				if gID == itemID {
+					_ = core.RemoveItemFromSlot(slot, handle, true, false)
+					break
+				}
+			}
+		}
+	}
+
+	// 4. Manage AoW menu flag (65800):
+	//    - unlock: always set (at least one whetblade is now active)
+	//    - lock: clear only if no other whetblades remain unlocked
+	if unlocked {
+		_ = db.SetEventFlag(flags, data.AoWMenuUnlockedFlag, true)
+	} else {
+		anyUnlocked := false
+		for wbFlag := range data.Whetblades {
+			if wbFlag == flagID {
+				continue
+			}
+			if on, err := db.GetEventFlag(flags, wbFlag); err == nil && on {
+				anyUnlocked = true
+				break
+			}
+		}
+		if !anyUnlocked {
+			_ = db.SetEventFlag(flags, data.AoWMenuUnlockedFlag, false)
+		}
+	}
+
+	return nil
 }
 
 // GetAshOfWarFlags returns all Ash of War duplication flags with unlock state

@@ -6,7 +6,7 @@ interface AccordionSectionProps {
     defaultOpen?: boolean;
     badge?: string | number;
     progress?: { current: number; total: number };
-    summary?: string;
+    summary?: ReactNode;
     actions?: ReactNode;
     headerRight?: ReactNode;
     children: ReactNode;
@@ -80,9 +80,12 @@ export function AccordionSection({
                 )}
 
                 {!open && summary && !progress && (
-                    <span className="text-[9px] text-muted-foreground font-medium ml-2 truncate">
-                        {summary}
-                    </span>
+                    <div className="flex items-center justify-center flex-1 min-w-0 ml-2 truncate">
+                        {typeof summary === 'string'
+                            ? <span className="text-[9px] text-muted-foreground font-medium truncate">{summary}</span>
+                            : summary
+                        }
+                    </div>
                 )}
 
                 {open && <div className="flex-1" />}

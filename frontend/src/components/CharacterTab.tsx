@@ -116,8 +116,11 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
 
     // Summaries for collapsed sections
     const profileSummary = char
-        ? `${char.name} | RL ${char.level} | NG+${char.clearCount || 0} | ${(char.souls || 0).toLocaleString()} Runes`
-        : '';
+        ? <span className="flex items-center gap-2 text-center">
+            <span className="text-xs font-black text-primary">{char.name}</span>
+            <span className="text-[9px] text-muted-foreground font-medium">RL {char.level} | NG+{char.clearCount || 0} | {(char.souls || 0).toLocaleString()} Runes</span>
+          </span>
+        : undefined;
 
     const attrSummary = char
         ? ATTRIBUTES.map(a => `${a.abbr} ${(char as any)[a.id]}`).join(' | ')
