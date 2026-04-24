@@ -130,3 +130,8 @@ var MapAcquired = map[uint32]MapRegionData{
 	63084: {Name: "Abyss", Area: "DLC"},
 }
 
+// IsDLCMapFlag returns true if the visible flag ID belongs to a DLC (Shadow of the Erdtree) map region.
+func IsDLCMapFlag(flagID uint32) bool {
+	return (flagID >= 62080 && flagID <= 62084) ||
+		(flagID >= 62800 && flagID <= 62999)
+}
