@@ -8,6 +8,18 @@ interface WorldTabProps {
     onMutate?: () => void;
 }
 
+const MiniProgress = ({current, total}: {current: number; total: number}) => {
+    const pct = total > 0 ? Math.round((current / total) * 100) : 0;
+    return (
+        <div className="flex items-center gap-1.5 ml-auto">
+            <div className="w-16 h-1 bg-muted/30 rounded-full overflow-hidden">
+                <div className="h-full bg-primary rounded-full transition-all duration-300" style={{width: `${pct}%`}} />
+            </div>
+            <span className="text-[8px] font-mono text-muted-foreground">{current}/{total}</span>
+        </div>
+    );
+};
+
 const Chk = ({checked, onChange}: {checked: boolean; onChange: (v: boolean) => void}) => (
     <div className="relative flex items-center justify-center">
         <input type="checkbox" checked={checked} onChange={e => onChange(e.target.checked)}
@@ -251,7 +263,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                         <svg className={`w-2.5 h-2.5 transition-transform ${expandedMapAreas[area] ? 'rotate-90 text-primary' : 'text-muted-foreground'}`}
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                                         <span className="text-[9px] font-bold uppercase tracking-wider text-foreground">{area}</span>
-                                        <span className="text-[8px] text-muted-foreground ml-auto">{ae.filter(e => e.enabled).length}/{ae.length}</span>
+                                        <MiniProgress current={ae.filter(e => e.enabled).length} total={ae.length} />
                                     </button>
                                     {expandedMapAreas[area] && ae.map(e => (
                                         <label key={e.id} className="flex items-center space-x-2 py-0.5 px-4 cursor-pointer hover:bg-muted/20 rounded">
@@ -294,7 +306,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                                         <img src={mapPath} alt="" className="w-full h-full object-cover opacity-60 hover:opacity-100" onError={e => (e.currentTarget.style.display = 'none')} />
                                                     </button>
                                                 )}
-                                                <span className="text-[8px] font-bold text-muted-foreground">{vc}/{rg.length}</span>
+                                                <MiniProgress current={vc} total={rg.length} />
                                             </div>
                                         </div>
                                         {expandedRegions[region] && (
@@ -330,7 +342,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                             </button>
                                             <div className="flex items-center gap-1.5">
                                                 {ac < rp.length && <button onClick={() => handleActivateAllPools(rp)} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Activate</button>}
-                                                <span className="text-[8px] font-bold text-muted-foreground">{ac}/{rp.length}</span>
+                                                <MiniProgress current={ac} total={rp.length} />
                                             </div>
                                         </div>
                                         {expandedPoolRegions[region] && (
@@ -399,7 +411,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                             <div className="flex items-center gap-1.5">
                                                 {dc < rb.length && <button onClick={() => handleKillAll(rb)} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Kill</button>}
                                                 {dc > 0 && <button onClick={() => handleRespawnAll(rb)} className={`${btnSm} hover:text-green-400 hover:border-green-400/50`}>Respawn</button>}
-                                                <span className="text-[8px] font-bold text-muted-foreground">{dc}/{rb.length}</span>
+                                                <MiniProgress current={dc} total={rb.length} />
                                             </div>
                                         </div>
                                         {expandedBossRegions[region] && (
@@ -531,7 +543,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                                                 <span className="text-[9px] font-bold uppercase tracking-wider">{cat}</span>
                                             </button>
-                                            <span className="text-[8px] font-bold text-muted-foreground">{uc}/{cbs.length}</span>
+                                            <MiniProgress current={uc} total={cbs.length} />
                                         </div>
                                         {expandedCookbookCategories[cat] && (
                                             <div className="px-2 py-1 space-y-0.5">
@@ -566,7 +578,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                                                 <span className="text-[9px] font-bold uppercase tracking-wider">{cat}</span>
                                             </button>
-                                            <span className="text-[8px] font-bold text-muted-foreground">{uc}/{bbs.length}</span>
+                                            <MiniProgress current={uc} total={bbs.length} />
                                         </div>
                                         {expandedBBCategories[cat] && (
                                             <div className="px-2 py-1 space-y-0.5">
