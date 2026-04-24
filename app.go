@@ -1244,12 +1244,11 @@ func (a *App) SetMapRegionFlags(slotIndex int, visibleFlagID uint32, enabled boo
 		return fmt.Errorf("failed to set visible flag %d: %w", visibleFlagID, err)
 	}
 
-	// Add/remove map fragment item in inventory
-	if itemID, ok := data.MapFragmentItems[visibleFlagID]; ok {
-		if enabled {
-			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
-		} else {
-			core.RemoveItemByBaseID(slot, itemID)
+	// When enabling a DLC map flag, ensure DLC region IDs are present
+	// so the game loads the DLC map tile data.
+	if enabled && data.IsDLCMapFlag(visibleFlagID) {
+		if err := core.AddDLCRegions(slot); err != nil {
+			return fmt.Errorf("AddDLCRegions: %w", err)
 		}
 	}
 
@@ -1301,12 +1300,26 @@ func (a *App) RevealAllMap(slotIndex int) error {
 	for id := range data.MapSystem {
 		_ = db.SetEventFlag(flags, id, true)
 	}
-	// Visible flags + map fragment items
+	// Sub-region flags — required for the map grid system.
+	// The game sets these during normal exploration; without them DLC tiles
+	// may not render even when area-level flags are set.
+	for id := range data.MapUnsafe {
+		_ = db.SetEventFlag(flags, id, true)
+	}
+	// Visible flags — map fragment items are NOT added to inventory because
+	// each AddItemsToSlot call shifts all downstream data forward and the cumulative
+	// shift overflows into the fixed DLC section / hash area, corrupting the save.
+	// The game manages map fragment items internally based on these flags.
 	for id := range data.MapVisible {
 		_ = db.SetEventFlag(flags, id, true)
-		if itemID, ok := data.MapFragmentItems[id]; ok {
-			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
-		}
+	}
+
+	// Add DLC region IDs to unlocked_regions list — required for the game to
+	// load DLC map tile data. Without these, DLC map shows black tiles even
+	// when visibility flags are correctly set. The shift is small (9×4=36 bytes)
+	// and safe — the 600K+ gap before DlcSectionOffset absorbs it easily.
+	if err := core.AddDLCRegions(slot); err != nil {
+		return fmt.Errorf("AddDLCRegions: %w", err)
 	}
 
 	return nil
@@ -1373,15 +1386,29 @@ func (a *App) RemoveFogOfWar(slotIndex int) error {
 	regCount := int(binary.LittleEndian.Uint32(slot.Data[gesturesOff : gesturesOff+4]))
 	afterRegs := gesturesOff + 4 + regCount*4
 
-	fowStart := afterRegs + 0x087E
-	fowEnd := afterRegs + 0x10B0
-
-	if fowEnd >= len(slot.Data)-0x80 {
-		return fmt.Errorf("FoW bitfield range out of bounds (0x%X)", fowEnd)
+	// The exploration bitfield is NOT contiguous — it has 3 segments with
+	// gaps containing DLC float coordinates and state data.
+	// Segment layout (all offsets relative to afterRegs):
+	//   0x087E..0x104C — base game + DLC overworld FoW (1999 bytes)
+	//   0x104D..0x1054 — DLC map position floats (8 bytes, DO NOT TOUCH)
+	//   0x1055..0x1062 — DLC FoW part 1 (14 bytes)
+	//   0x1063..0x107C — DLC state/padding (26 bytes, DO NOT TOUCH)
+	//   0x107D..0x10B0 — DLC FoW part 2 (52 bytes)
+	fowSegments := [][2]int{
+		{afterRegs + 0x087E, afterRegs + 0x104C}, // base + DLC overworld
+		{afterRegs + 0x1055, afterRegs + 0x1062}, // DLC FoW part 1
+		{afterRegs + 0x107D, afterRegs + 0x10B0}, // DLC FoW part 2
 	}
 
-	for i := fowStart; i <= fowEnd; i++ {
-		slot.Data[i] = 0xFF
+	lastEnd := fowSegments[len(fowSegments)-1][1]
+	if lastEnd >= len(slot.Data)-0x80 {
+		return fmt.Errorf("FoW bitfield range out of bounds (0x%X)", lastEnd)
+	}
+
+	for _, seg := range fowSegments {
+		for i := seg[0]; i <= seg[1]; i++ {
+			slot.Data[i] = 0xFF
+		}
 	}
 
 	return nil

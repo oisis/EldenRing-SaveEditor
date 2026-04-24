@@ -315,22 +315,26 @@ func FlushGaItems(slot *SaveSlot) error {
 	delta := newGaSize - oldGaSize
 
 	// 3. Safety check: new section must fit within slot.
-	if GaItemsStart+newGaSize+DynPlayerData > SlotSize {
+	// Use DlcSectionOffset (not SlotSize) as the hard limit — the last 0xB2 bytes
+	// (DLC section + hash) are at fixed positions and must NOT be overwritten.
+	if GaItemsStart+newGaSize+DynPlayerData > DlcSectionOffset {
 		return fmt.Errorf("FlushGaItems: section too large (%d bytes, max %d)",
-			newGaSize, SlotSize-GaItemsStart-DynPlayerData)
+			newGaSize, DlcSectionOffset-GaItemsStart-DynPlayerData)
 	}
 
 	// 4. Shift data after GaItems section if size changed.
+	// Only shift up to DlcSectionOffset — the last 0xB2 bytes (DLC section + hash)
+	// are at fixed positions and must be preserved.
 	if delta != 0 {
 		if delta > 0 {
-			// Section grew — shift right (loses trailing padding bytes at end of slot).
-			copy(slot.Data[oldGaLimit+delta:SlotSize], slot.Data[oldGaLimit:SlotSize-delta])
+			// Section grew — shift right (loses trailing padding bytes before DLC section).
+			copy(slot.Data[oldGaLimit+delta:DlcSectionOffset], slot.Data[oldGaLimit:DlcSectionOffset-delta])
 		} else {
-			// Section shrank — shift left (frees bytes at end of slot).
+			// Section shrank — shift left (frees bytes before DLC section).
 			absDelta := -delta
-			copy(slot.Data[oldGaLimit-absDelta:SlotSize-absDelta], slot.Data[oldGaLimit:SlotSize])
-			// Zero the freed space at the end.
-			for i := SlotSize - absDelta; i < SlotSize; i++ {
+			copy(slot.Data[oldGaLimit-absDelta:DlcSectionOffset-absDelta], slot.Data[oldGaLimit:DlcSectionOffset])
+			// Zero the freed space before DLC section.
+			for i := DlcSectionOffset - absDelta; i < DlcSectionOffset; i++ {
 				slot.Data[i] = 0
 			}
 		}
@@ -651,4 +655,98 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	}
 
 	return nil
+}
+
+// DLCRegionIDs contains the core DLC (Shadow of the Erdtree) region IDs
+// that must be present in the unlocked_regions list for the game to render
+// the DLC map layer and allow FoW reveal.
+var DLCRegionIDs = []uint32{
+	6800000, // DLC warp/entry point
+	6900000, // Gravesite Plain
+	6900010, // Gravesite Plain (sub)
+	6901000, // Scadu Altus
+	6902000, // Southern Shore
+	6902010, // Southern Shore (sub)
+	6920000, // Rauh Ruins
+	6930000, // Abyss
+	6940000, // Cerulean Coast
+}
+
+// AddDLCRegions inserts missing DLC region IDs into the unlocked_regions list.
+// This is required for the game to render the DLC map layer. Without these
+// regions, the DLC map shows black tiles even when visibility flags are set.
+//
+// The insertion shifts all dynamic data (afterRegs, FoW, EventFlags, BST)
+// forward by len(toAdd)*4 bytes. The shift stops at DlcSectionOffset — the
+// fixed DLC section and hash at the end of the slot are preserved/restored.
+// The hash is regenerated during WriteSave.
+func AddDLCRegions(slot *SaveSlot) error {
+	storageEnd := slot.StorageBoxOffset + DynStorageBox
+	gesturesOff := storageEnd + DynStorageToGestures
+
+	if gesturesOff+4 > len(slot.Data) {
+		return fmt.Errorf("gesturesOff out of bounds")
+	}
+
+	regCount := int(binary.LittleEndian.Uint32(slot.Data[gesturesOff : gesturesOff+4]))
+	regListStart := gesturesOff + 4
+
+	// Collect existing region IDs into a set.
+	existing := make(map[uint32]bool, regCount)
+	for i := 0; i < regCount; i++ {
+		off := regListStart + i*4
+		if off+4 > len(slot.Data) {
+			break
+		}
+		existing[binary.LittleEndian.Uint32(slot.Data[off:off+4])] = true
+	}
+
+	// Find which DLC regions are missing.
+	var toAdd []uint32
+	for _, rid := range DLCRegionIDs {
+		if !existing[rid] {
+			toAdd = append(toAdd, rid)
+		}
+	}
+
+	if len(toAdd) == 0 {
+		return nil // all DLC regions already present
+	}
+
+	insertBytes := len(toAdd) * 4
+	insertPos := regListStart + regCount*4
+
+	// Bounds check: the shift must not push dynamic data past DlcSectionOffset.
+	// The gap between EventFlags BST end and DlcSectionOffset is ~600K+ bytes,
+	// so a 36-byte shift (9 regions × 4) is safe. Reject only extreme cases.
+	if insertPos+insertBytes >= DlcSectionOffset {
+		return fmt.Errorf("insertPos 0x%X + %d bytes exceeds DlcSectionOffset 0x%X",
+			insertPos, insertBytes, DlcSectionOffset)
+	}
+
+	// Save the fixed DLC section (50 bytes) before shifting — it's at a fixed
+	// offset from slot end and must not be corrupted by the forward shift.
+	dlcSaved := make([]byte, DlcSectionSize)
+	copy(dlcSaved, slot.Data[DlcSectionOffset:DlcSectionOffset+DlcSectionSize])
+
+	// Shift dynamic data from insertPos to DlcSectionOffset forward by insertBytes.
+	// The last insertBytes bytes before DlcSectionOffset are padding/unused BST
+	// tail — safe to lose (Zofia's save has 10K fewer bytes here and works fine).
+	copy(slot.Data[insertPos+insertBytes:DlcSectionOffset],
+		slot.Data[insertPos:DlcSectionOffset-insertBytes])
+
+	// Write new region IDs at the insert point.
+	for i, rid := range toAdd {
+		binary.LittleEndian.PutUint32(slot.Data[insertPos+i*4:], rid)
+	}
+
+	// Update regCount.
+	newCount := uint32(regCount + len(toAdd))
+	binary.LittleEndian.PutUint32(slot.Data[gesturesOff:], newCount)
+
+	// Restore fixed DLC section.
+	copy(slot.Data[DlcSectionOffset:], dlcSaved)
+
+	// Recalculate all dynamic offsets since everything shifted.
+	return slot.calculateDynamicOffsets()
 }

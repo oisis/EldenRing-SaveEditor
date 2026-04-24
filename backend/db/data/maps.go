@@ -10,6 +10,7 @@ type MapRegionData struct {
 var MapSystem = map[uint32]MapRegionData{
 	62000: {Name: "Allow Map Display", Area: "System"},
 	62001: {Name: "Allow Underground Map Display", Area: "System"},
+	62002: {Name: "Allow Shadow Realm Map Display", Area: "System"},
 	82001: {Name: "Show Underground", Area: "System"},
 	82002: {Name: "Show Shadow Realm Map", Area: "System"},
 }
@@ -44,12 +45,54 @@ var MapVisible = map[uint32]MapRegionData{
 	62063: {Name: "Siofra River", Area: "Underground"},
 	62064: {Name: "Deeproot Depths", Area: "Underground"},
 	// DLC — Shadow of the Erdtree
-	62080: {Name: "Gravesite Plain", Area: "DLC"},
-	62081: {Name: "Scadu Altus", Area: "DLC"},
-	62082: {Name: "Southern Shore", Area: "DLC"},
-	62083: {Name: "Rauh Ruins", Area: "DLC"},
-	62084: {Name: "Abyss", Area: "DLC"},
-	// Dungeon maps
+	62080: {Name: "Gravesite Plain", Area: "Shadow of the Erdtree"},
+	62081: {Name: "Scadu Altus", Area: "Shadow of the Erdtree"},
+	62082: {Name: "Southern Shore", Area: "Shadow of the Erdtree"},
+	62083: {Name: "Rauh Ruins", Area: "Shadow of the Erdtree"},
+	62084: {Name: "Abyss", Area: "Shadow of the Erdtree"},
+	// DLC sub-area map tiles (628xx) — required for DLC map rendering.
+	// Without these, 62080-62084 alone cause black tiles (area enabled but no tiles loaded).
+	// Extracted from a complete DLC playthrough (Zofia, slot 1).
+	62800: {Name: "Gravesite Plain (sub 0)", Area: "Shadow of the Erdtree"},
+	62805: {Name: "Gravesite Plain (sub 5)", Area: "Shadow of the Erdtree"},
+	62806: {Name: "Gravesite Plain (sub 6)", Area: "Shadow of the Erdtree"},
+	62807: {Name: "Gravesite Plain (sub 7)", Area: "Shadow of the Erdtree"},
+	62808: {Name: "Gravesite Plain (sub 8)", Area: "Shadow of the Erdtree"},
+	62809: {Name: "Gravesite Plain (sub 9)", Area: "Shadow of the Erdtree"},
+	62810: {Name: "Gravesite Plain (sub 10)", Area: "Shadow of the Erdtree"},
+	62811: {Name: "Gravesite Plain (sub 11)", Area: "Shadow of the Erdtree"},
+	62812: {Name: "Gravesite Plain (sub 12)", Area: "Shadow of the Erdtree"},
+	62813: {Name: "Gravesite Plain (sub 13)", Area: "Shadow of the Erdtree"},
+	62814: {Name: "Gravesite Plain (sub 14)", Area: "Shadow of the Erdtree"},
+	62815: {Name: "Gravesite Plain (sub 15)", Area: "Shadow of the Erdtree"},
+	62820: {Name: "Scadu Altus (sub 0)", Area: "Shadow of the Erdtree"},
+	62822: {Name: "Scadu Altus (sub 2)", Area: "Shadow of the Erdtree"},
+	62823: {Name: "Scadu Altus (sub 3)", Area: "Shadow of the Erdtree"},
+	62825: {Name: "Scadu Altus (sub 5)", Area: "Shadow of the Erdtree"},
+	62827: {Name: "Scadu Altus (sub 7)", Area: "Shadow of the Erdtree"},
+	62830: {Name: "Scadu Altus (sub 10)", Area: "Shadow of the Erdtree"},
+	62831: {Name: "Scadu Altus (sub 11)", Area: "Shadow of the Erdtree"},
+	62880: {Name: "Southern Shore (sub 0)", Area: "Shadow of the Erdtree"},
+	62881: {Name: "Southern Shore (sub 1)", Area: "Shadow of the Erdtree"},
+	62900: {Name: "Rauh Ruins (sub 0)", Area: "Shadow of the Erdtree"},
+	62902: {Name: "Rauh Ruins (sub 2)", Area: "Shadow of the Erdtree"},
+	62903: {Name: "Rauh Ruins (sub 3)", Area: "Shadow of the Erdtree"},
+	62905: {Name: "Rauh Ruins (sub 5)", Area: "Shadow of the Erdtree"},
+	62906: {Name: "Rauh Ruins (sub 6)", Area: "Shadow of the Erdtree"},
+	62907: {Name: "Rauh Ruins (sub 7)", Area: "Shadow of the Erdtree"},
+	62908: {Name: "Rauh Ruins (sub 8)", Area: "Shadow of the Erdtree"},
+	62909: {Name: "Rauh Ruins (sub 9)", Area: "Shadow of the Erdtree"},
+	62910: {Name: "Rauh Ruins (sub 10)", Area: "Shadow of the Erdtree"},
+	62917: {Name: "Rauh Ruins (sub 17)", Area: "Shadow of the Erdtree"},
+	62920: {Name: "Abyss (sub 0)", Area: "Shadow of the Erdtree"},
+	62931: {Name: "Abyss (sub 11)", Area: "Shadow of the Erdtree"},
+	62932: {Name: "Abyss (sub 12)", Area: "Shadow of the Erdtree"},
+	62940: {Name: "Abyss (sub 20)", Area: "Shadow of the Erdtree"},
+	62941: {Name: "Abyss (sub 21)", Area: "Shadow of the Erdtree"},
+	62942: {Name: "Abyss (sub 22)", Area: "Shadow of the Erdtree"},
+	62980: {Name: "DLC Misc (sub 0)", Area: "Shadow of the Erdtree"},
+	62981: {Name: "DLC Misc (sub 1)", Area: "Shadow of the Erdtree"},
+	// Dungeon maps — base game
 	62102: {Name: "Fringefolk Hero's Cave", Area: "Limgrave"},
 	62103: {Name: "Stormfoot Catacombs", Area: "Limgrave"},
 }
@@ -123,10 +166,15 @@ var MapAcquired = map[uint32]MapRegionData{
 	63062: {Name: "Mohgwyn Palace", Area: "Underground"},
 	63063: {Name: "Siofra River", Area: "Underground"},
 	63064: {Name: "Deeproot Depths", Area: "Underground"},
-	63080: {Name: "Gravesite Plain", Area: "DLC"},
-	63081: {Name: "Scadu Altus", Area: "DLC"},
-	63082: {Name: "Southern Shore", Area: "DLC"},
-	63083: {Name: "Rauh Ruins", Area: "DLC"},
-	63084: {Name: "Abyss", Area: "DLC"},
+	63080: {Name: "Gravesite Plain", Area: "Shadow of the Erdtree"},
+	63081: {Name: "Scadu Altus", Area: "Shadow of the Erdtree"},
+	63082: {Name: "Southern Shore", Area: "Shadow of the Erdtree"},
+	63083: {Name: "Rauh Ruins", Area: "Shadow of the Erdtree"},
+	63084: {Name: "Abyss", Area: "Shadow of the Erdtree"},
 }
 
+// IsDLCMapFlag returns true if the visible flag ID belongs to a DLC (Shadow of the Erdtree) map region.
+func IsDLCMapFlag(flagID uint32) bool {
+	return (flagID >= 62080 && flagID <= 62084) ||
+		(flagID >= 62800 && flagID <= 62999)
+}
