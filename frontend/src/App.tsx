@@ -8,7 +8,6 @@ import {WorldTab} from './components/WorldTab';
 import {ToolsTab} from './components/ToolsTab';
 import {SettingsTab} from './components/SettingsTab';
 import {DatabaseTab} from './components/DatabaseTab';
-import {AccordionSection} from './components/AccordionSection';
 import {ToastBar} from './components/ToastBar';
 import {db} from '../wailsjs/go/models';
 
@@ -418,57 +417,9 @@ function App() {
                                 })()}
                                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                                 {activeTab === 'character' && <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={refreshUndoDepth} />}
-                                {activeTab === 'inventory' && (
-                                    <div className="flex-1 flex flex-col min-h-0 space-y-3">
-                                        <AccordionSection id="inv-add-settings" title="Add Settings" summary={`+${(charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS).upgrade25} / +${(charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS).upgrade10} / Ash +${(charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS).upgradeAsh}`}>
-                                            {(() => {
-                                                const s = charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS;
-                                                const set = (patch: Partial<AddSettings>) => setCharAddSettings(prev => ({...prev, [selectedChar]: {...s, ...patch}}));
-                                                return (
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 py-1">
-                                                        <div className="flex items-center space-x-3">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +25</span>
-                                                            <input type="range" min={0} max={25} value={s.upgrade25} onChange={e => set({upgrade25: parseInt(e.target.value)})}
-                                                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                                                            <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{s.upgrade25}</span>
-                                                        </div>
-                                                        <div className="flex items-center space-x-3">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +10</span>
-                                                            <input type="range" min={0} max={10} value={s.upgrade10} onChange={e => set({upgrade10: parseInt(e.target.value)})}
-                                                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                                                            <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgrade10}</span>
-                                                        </div>
-                                                        <div className="flex items-center space-x-3">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Infuse</span>
-                                                            <select value={s.infuseOffset} onChange={e => set({infuseOffset: parseInt(e.target.value)})}
-                                                                className="flex-1 bg-muted/20 border border-border rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer">
-                                                                {infuseTypes.map(t => <option key={t.offset} value={t.offset}>{t.name}</option>)}
-                                                            </select>
-                                                        </div>
-                                                        <div className="flex items-center space-x-3">
-                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Spirit Ash</span>
-                                                            <input type="range" min={0} max={10} value={s.upgradeAsh} onChange={e => set({upgradeAsh: parseInt(e.target.value)})}
-                                                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                                                            <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgradeAsh}</span>
-                                                        </div>
-                                                    </div>
-                                                );
-                                            })()}
-                                        </AccordionSection>
-                                        <DatabaseTab
-                                            columnVisibility={columnVisibility}
-                                            platform={platform}
-                                            charIndex={selectedChar}
-                                            onItemsAdded={() => setInventoryVersion(v => v + 1)}
-                                            addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
-                                            showFlaggedItems={showFlaggedItems}
-                                            category={category}
-                                            setCategory={setCategory}
-                                        />
-                                    </div>
-                                )}
+                                {activeTab === 'inventory' && <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'world' && <WorldTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
-                                {activeTab === 'tools' && <ToolsTab charIndex={selectedChar} onComplete={refreshSlots} />}
+                                {activeTab === 'tools' && <ToolsTab charIndex={selectedChar} onComplete={refreshSlots} platform={platform} inventoryVersion={inventoryVersion} setInventoryVersion={setInventoryVersion} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} setAddSettings={s => setCharAddSettings(prev => ({...prev, [selectedChar]: s}))} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} infuseTypes={infuseTypes} />}
                                 </div>
                             </div>
                         )}
