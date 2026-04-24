@@ -1,16 +1,13 @@
 import {useEffect, useState} from 'react';
 import toast from 'react-hot-toast';
-import {GetCharacter, SaveCharacter, GetInfuseTypes, ListAppearancePresets, ApplyAppearancePreset, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
-import {vm, db, main} from '../../wailsjs/go/models';
+import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyAppearancePreset, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
+import {vm, main} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
-import type {AddSettings} from '../App';
 
 interface Props {
     charIndex: number;
     onNameChange?: () => void;
     onMutate: () => void;
-    addSettings: AddSettings;
-    setAddSettings: (s: AddSettings) => void;
 }
 
 const ATTRIBUTES = [
@@ -24,16 +21,9 @@ const ATTRIBUTES = [
     { id: 'arcane', label: 'Arcane', abbr: 'Arc' },
 ];
 
-export function CharacterTab({charIndex, onNameChange, onMutate, addSettings, setAddSettings}: Props) {
-    const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
-    const setUpgrade25 = (v: number) => setAddSettings({...addSettings, upgrade25: v});
-    const setUpgrade10 = (v: number) => setAddSettings({...addSettings, upgrade10: v});
-    const setInfuseOffset = (v: number) => setAddSettings({...addSettings, infuseOffset: v});
-    const setUpgradeAsh = (v: number) => setAddSettings({...addSettings, upgradeAsh: v});
-
+export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
     const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
     const [loading, setLoading] = useState(false);
-    const [infuseTypes, setInfuseTypes] = useState<db.InfuseType[]>([]);
 
     // Appearance state
     const [presets, setPresets] = useState<main.PresetInfo[]>([]);
@@ -45,7 +35,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate, addSettings, se
     const [confirmApply, setConfirmApply] = useState(false);
 
     useEffect(() => {
-        GetInfuseTypes().then(res => setInfuseTypes(res || []));
         ListAppearancePresets().then(setPresets).catch(e => toast.error("" + e));
         refreshFavStatus();
     }, []);
@@ -151,8 +140,8 @@ export function CharacterTab({charIndex, onNameChange, onMutate, addSettings, se
         <div className="space-y-3 animate-in fade-in duration-500 max-w-5xl mx-auto">
             {/* ═══ PROFILE ═══ */}
             <AccordionSection
+                id="char-profile"
                 title="Profile"
-                defaultOpen={true}
                 summary={profileSummary}
             >
                 <div className="space-y-4">
@@ -223,14 +212,21 @@ export function CharacterTab({charIndex, onNameChange, onMutate, addSettings, se
                                 <span className="text-xs font-bold">{char.greatRuneOn ? 'Active' : 'Inactive'}</span>
                             </label>
                         </div>
+                        <div className="space-y-1.5">
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
+                                Memory Slots <span className="text-muted-foreground/50 font-mono">—</span>
+                            </label>
+                            <input type="number" min={0} max={12} value={0} disabled title="Not yet implemented"
+                                className="w-full bg-muted/10 border border-border/50 rounded-md px-3 py-2 text-xs font-black font-mono text-muted-foreground/40 cursor-not-allowed" />
+                        </div>
                     </div>
                 </div>
             </AccordionSection>
 
             {/* ═══ ATTRIBUTES ═══ */}
             <AccordionSection
+                id="char-attributes"
                 title="Attributes"
-                defaultOpen={true}
                 summary={attrSummary}
             >
                 <div className="space-y-1">
@@ -258,8 +254,8 @@ export function CharacterTab({charIndex, onNameChange, onMutate, addSettings, se
 
             {/* ═══ APPEARANCE PRESETS ═══ */}
             <AccordionSection
+                id="char-presets"
                 title="Appearance Presets"
-                defaultOpen={false}
                 badge={`${presets.length} presets`}
                 actions={
                     checked.size > 0 ? (
@@ -348,40 +344,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate, addSettings, se
                             </div>
                         </div>
                     )}
-                </div>
-            </AccordionSection>
-
-            {/* ═══ ADD SETTINGS ═══ */}
-            <AccordionSection title="Add Settings" defaultOpen={false} summary="Applied when adding items from Database">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 py-1">
-                    <div className="flex items-center space-x-3">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +25</span>
-                        <input type="range" min={0} max={25} value={upgrade25}
-                            onChange={e => setUpgrade25(parseInt(e.target.value))}
-                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                        <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{upgrade25}</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +10</span>
-                        <input type="range" min={0} max={10} value={upgrade10}
-                            onChange={e => setUpgrade10(parseInt(e.target.value))}
-                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                        <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgrade10}</span>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Infuse</span>
-                        <select value={infuseOffset} onChange={e => setInfuseOffset(parseInt(e.target.value))}
-                            className="flex-1 bg-muted/20 border border-border rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer">
-                            {infuseTypes.map(t => <option key={t.offset} value={t.offset}>{t.name}</option>)}
-                        </select>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Spirit Ash</span>
-                        <input type="range" min={0} max={10} value={upgradeAsh}
-                            onChange={e => setUpgradeAsh(parseInt(e.target.value))}
-                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                        <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{upgradeAsh}</span>
-                    </div>
                 </div>
             </AccordionSection>
 

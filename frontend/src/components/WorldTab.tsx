@@ -228,7 +228,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
             {activeSubTab === 'exploration' && (
                 <div className="space-y-3 animate-in fade-in duration-200">
                     {/* Map & Fog of War */}
-                    <AccordionSection title="Map & Fog of War" progress={{current: enabledMapRegions, total: totalMapRegions}}
+                    <AccordionSection id="world-map" title="Map & Fog of War" progress={{current: enabledMapRegions, total: totalMapRegions}}
                         actions={<>
                             <button onClick={handleRevealAllMap} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Reveal All</button>
                             <button onClick={handleResetMap} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Reset</button>
@@ -265,7 +265,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Sites of Grace */}
-                    <AccordionSection title="Sites of Grace" progress={{current: visitedGraces, total: graces.length}}
+                    <AccordionSection id="world-graces" title="Sites of Grace" progress={{current: visitedGraces, total: graces.length}}
                         actions={<>
                             <button onClick={handleUnlockAllGraces} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
                             <button onClick={handleLockAllGraces} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
@@ -315,7 +315,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Summoning Pools */}
-                    <AccordionSection title="Summoning Pools" progress={{current: activatedPools, total: pools.length}}
+                    <AccordionSection id="world-pools" title="Summoning Pools" progress={{current: activatedPools, total: pools.length}}
                         actions={<button onClick={handleGlobalActivateAllPools} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Activate All</button>}>
                         <div className="accordion-grid">
                             {Object.entries(poolRegions).sort().map(([region, rp]) => {
@@ -350,7 +350,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Colosseums */}
-                    <AccordionSection title="Colosseums" progress={{current: unlockedColosseums, total: colosseums.length}}
+                    <AccordionSection id="world-colosseums" title="Colosseums" progress={{current: unlockedColosseums, total: colosseums.length}}
                         actions={<button onClick={handleUnlockAllColosseums} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>}>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             {colosseums.map(c => (
@@ -373,7 +373,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
             {activeSubTab === 'progress' && (
                 <div className="space-y-3 animate-in fade-in duration-200">
                     {/* Bosses */}
-                    <AccordionSection title="Bosses" defaultOpen={true}
+                    <AccordionSection id="world-bosses" title="Bosses"
                         progress={{current: defeatedBosses, total: bosses.length}}
                         actions={<>
                             <button onClick={handleGlobalKillAll} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Kill All</button>
@@ -421,7 +421,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* NPC Quests */}
-                    <AccordionSection title="NPC Quests" defaultOpen={true} badge={`${questNPCs.length} NPCs`}
+                    <AccordionSection id="world-quests" title="NPC Quests" badge={`${questNPCs.length} NPCs`}
                         actions={<>
                             <select value={selectedNPC} onChange={e => handleSelectNPC(e.target.value)}
                                 className="bg-background border border-border rounded px-2 py-0.5 text-[10px] font-bold text-foreground focus:outline-none focus:border-primary max-w-[200px]">
@@ -499,7 +499,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
             {activeSubTab === 'unlocks' && (
                 <div className="space-y-3 animate-in fade-in duration-200">
                     {/* Gestures */}
-                    <AccordionSection title="Gestures" progress={{current: unlockedGestures, total: gestures.length}}
+                    <AccordionSection id="world-gestures" title="Gestures" progress={{current: unlockedGestures, total: gestures.length}}
                         actions={<>
                             <button onClick={handleUnlockAllGestures} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
                             <button onClick={handleLockAllGestures} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
@@ -515,7 +515,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Cookbooks */}
-                    <AccordionSection title="Cookbooks" progress={{current: unlockedCookbooks, total: cookbooks.length}}
+                    <AccordionSection id="world-cookbooks" title="Cookbooks" progress={{current: unlockedCookbooks, total: cookbooks.length}}
                         actions={<>
                             <button onClick={handleUnlockAllCookbooks} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
                             <button onClick={handleLockAllCookbooks} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
@@ -550,7 +550,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Bell Bearings */}
-                    <AccordionSection title="Bell Bearings" progress={{current: unlockedBBs, total: bellBearings.length}}
+                    <AccordionSection id="world-bells" title="Bell Bearings" progress={{current: unlockedBBs, total: bellBearings.length}}
                         actions={<>
                             <button onClick={handleUnlockAllBBs} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
                             <button onClick={handleLockAllBBs} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
@@ -585,7 +585,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                     </AccordionSection>
 
                     {/* Whetblades */}
-                    <AccordionSection title="Whetblades" progress={{current: unlockedWBs, total: whetblades.length}}>
+                    <AccordionSection id="world-whetblades" title="Whetblades" progress={{current: unlockedWBs, total: whetblades.length}}>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-0.5">
                             {whetblades.map(w => (
                                 <label key={w.id} className="flex items-center space-x-2 py-0.5 px-1 rounded hover:bg-muted/30 cursor-pointer">
