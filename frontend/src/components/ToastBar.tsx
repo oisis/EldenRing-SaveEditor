@@ -46,6 +46,7 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
 
     useEffect(() => {
         globalLogFn = addLog;
+        addLog('info', 'SF SAVEFORGE: by OiSiSk');
         addLog('info', 'SaveForge session started');
         return () => { globalLogFn = null; };
     }, [addLog]);
