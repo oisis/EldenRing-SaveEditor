@@ -67,7 +67,7 @@ export function AccordionSection({
 
                 {!open && pct !== null && (
                     <div className="flex items-center gap-2 flex-1 min-w-0 ml-2">
-                        <div className="flex-1 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                        <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-primary rounded-full transition-all duration-300"
                                 style={{ width: `${pct}%` }}
