@@ -156,13 +156,13 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
                             <input type="text" value={char.name} maxLength={16}
                                 onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value}))}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-bold focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Runes</label>
                             <input type="number" value={char.souls}
                                 onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
@@ -173,7 +173,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                     const v = Math.min(3, Math.max(0, parseInt(e.target.value) || 0));
                                     setChar(vm.CharacterViewModel.createFrom({...char, talismanSlots: v}));
                                 }}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">
@@ -184,7 +184,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                     const v = Math.min(7, Math.max(0, parseInt(e.target.value) || 0));
                                     setChar(vm.CharacterViewModel.createFrom({...char, clearCount: v}));
                                 }}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-black font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
                         </div>
                     </div>
 
@@ -245,7 +245,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                 type="number" min={1} max={99}
                                 value={(char as any)[stat.id]}
                                 onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
-                                className="w-12 bg-muted/30 border border-border rounded text-center text-xs font-black py-1 focus:ring-1 focus:ring-primary/30 outline-none"
+                                className="w-12 bg-muted/30 border border-border rounded text-center text-xs py-1 focus:ring-1 focus:ring-primary/30 outline-none"
                             />
                         </div>
                     ))}
