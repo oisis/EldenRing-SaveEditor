@@ -319,7 +319,7 @@ function App() {
                         </div>
                     )}
                     <div className="flex items-center justify-between text-[8px] font-bold text-muted-foreground uppercase tracking-widest opacity-50">
-                        <span>v0.3.0</span>
+                        <span>v0.5.0</span>
                         <span>System Ready</span>
                     </div>
                 </div>
