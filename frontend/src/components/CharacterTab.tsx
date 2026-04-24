@@ -229,9 +229,9 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                 title="Attributes"
                 summary={attrSummary}
             >
-                <div className="space-y-1">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                     {ATTRIBUTES.map(stat => (
-                        <div key={stat.id} className="flex items-center gap-3 py-1.5 border-b border-border/30 last:border-b-0">
+                        <div key={stat.id} className="flex items-center gap-3 py-1.5 border-b border-border/30">
                             <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-20 flex-shrink-0">
                                 {stat.label}
                             </span>
