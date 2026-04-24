@@ -42,6 +42,16 @@ var WhetbladeRelatedFlags = map[uint32][]uint32{
 	65700: {65710, 65720},         // Poison, Blood
 }
 
+// WhetstoneKnifeFlag is the event flag for the base Whetstone Knife.
+const WhetstoneKnifeFlag uint32 = 60130
+
+// StormStompItemID is the inventory item ID for Ash of War: Storm Stomp,
+// found together with the Whetstone Knife at Gatefront Ruins.
+const StormStompItemID uint32 = 0x8000C418
+
+// StormStompDupFlag is the AoW duplication flag for Storm Stomp.
+const StormStompDupFlag uint32 = 65841
+
 // whetbladeItemIDs is a set of all whetblade inventory item IDs for filtering.
 var whetbladeItemIDs map[uint32]bool
 

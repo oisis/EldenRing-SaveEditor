@@ -1075,7 +1075,23 @@ func (a *App) SetWhetbladeUnlocked(slotIndex int, flagID uint32, unlocked bool) 
 		}
 	}
 
-	// 4. Manage AoW menu flag (65800):
+	// 4. Whetstone Knife bonus: add/remove Storm Stomp AoW + duplication flag.
+	if flagID == data.WhetstoneKnifeFlag {
+		if unlocked {
+			_ = core.AddItemsToSlot(slot, []uint32{data.StormStompItemID}, 1, 0, false)
+			_ = db.SetEventFlag(flags, data.StormStompDupFlag, true)
+		} else {
+			for handle, gID := range slot.GaMap {
+				if gID == data.StormStompItemID {
+					_ = core.RemoveItemFromSlot(slot, handle, true, false)
+					break
+				}
+			}
+			_ = db.SetEventFlag(flags, data.StormStompDupFlag, false)
+		}
+	}
+
+	// 5. Manage AoW menu flag (65800):
 	//    - unlock: always set (at least one whetblade is now active)
 	//    - lock: clear only if no other whetblades remain unlocked
 	if unlocked {
