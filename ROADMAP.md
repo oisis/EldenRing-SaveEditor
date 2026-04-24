@@ -284,8 +284,8 @@ Write presets to in-game Mirror Favorites (CSMenuSystemSaveLoad in UserData10).
 - Undo supported via standard pushUndo mechanism
 
 **Known limitations / TODO:**
-- Male hair mapping incomplete: UI 1-9 confirmed, UI 10-31 unmapped (fallback to UI-1, inaccurate). Need save with styles 10-31 to complete table
-- DLC hair positions approximate (UI 32-37) — need confirmation
+- ✅ Male hair mapping complete: all 37 styles (UI 1-37) confirmed via save slot analysis + Mirror Favorites preset extraction
+- ✅ DLC hair positions (UI 32-37) confirmed
 - Female model IDs (face, hair, eyebrow) not written — mapping is non-sequential, no lookup table yet
 - FaceModel (bone structure) forced to 0 in Favorites — non-zero causes invisible body in Mirror
 - Other model categories (beard, eyebrow, etc.) may also need lookup tables like hair — not yet verified beyond UI-1
