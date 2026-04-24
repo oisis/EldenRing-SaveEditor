@@ -1279,7 +1279,8 @@ func (a *App) SetMapFlag(slotIndex int, flagID uint32, enabled bool) error {
 	return nil
 }
 
-// RevealAllMap sets all map visibility, acquisition, and POI discovery flags to true
+// RevealAllMap reveals all map regions (base game + DLC).
+// Internally delegates to revealBaseMap and revealDLCMap to keep the logic separate.
 func (a *App) RevealAllMap(slotIndex int) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -1295,20 +1296,65 @@ func (a *App) RevealAllMap(slotIndex int) error {
 		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
 	}
 
-	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := revealBaseMap(slot); err != nil {
+		return fmt.Errorf("base map: %w", err)
+	}
+	if err := revealDLCMap(slot); err != nil {
+		return fmt.Errorf("DLC map: %w", err)
+	}
 
-	// System flags
+	return nil
+}
+
+// revealBaseMap sets base game system flags, visible flags, and adds map fragment items.
+func revealBaseMap(slot *core.SaveSlot) error {
+	// Phase 1: Set all event flags (before any data shifts from AddItemsToSlot).
+	flags := slot.Data[slot.EventFlagsOffset:]
 	for id := range data.MapSystem {
 		_ = db.SetEventFlag(flags, id, true)
 	}
-	// Visible flags + map fragment items
+	var items []uint32
 	for id := range data.MapVisible {
+		if data.IsDLCMapFlag(id) {
+			continue
+		}
 		_ = db.SetEventFlag(flags, id, true)
 		if itemID, ok := data.MapFragmentItems[id]; ok {
-			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+			items = append(items, itemID)
 		}
 	}
 
+	// Phase 2: Add map fragment items (shifts slot.Data — flags slice invalidated).
+	for _, itemID := range items {
+		_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+	}
+	return nil
+}
+
+// revealDLCMap sets Shadow of the Erdtree flags and adds DLC map fragment items.
+func revealDLCMap(slot *core.SaveSlot) error {
+	// Phase 1: Set DLC event flags (fresh flags slice — base map may have shifted data).
+	flags := slot.Data[slot.EventFlagsOffset:]
+
+	// System flags for Shadow Realm display
+	_ = db.SetEventFlag(flags, 62002, true) // Allow Shadow Realm Map Display
+	_ = db.SetEventFlag(flags, 82002, true) // Show Shadow Realm Map
+
+	var items []uint32
+	for id := range data.MapVisible {
+		if !data.IsDLCMapFlag(id) {
+			continue
+		}
+		_ = db.SetEventFlag(flags, id, true)
+		if itemID, ok := data.MapFragmentItems[id]; ok {
+			items = append(items, itemID)
+		}
+	}
+
+	// Phase 2: Add DLC map fragment items (shifts slot.Data).
+	for _, itemID := range items {
+		_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+	}
 	return nil
 }
 
