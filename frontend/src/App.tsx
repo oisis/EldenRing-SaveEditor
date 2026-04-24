@@ -210,7 +210,10 @@ function App() {
                             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
                                 <span className="text-primary-foreground font-black text-lg tracking-tighter">SF</span>
                             </div>
-                            <h1 className="text-[10px] font-black uppercase tracking-[0.2em] leading-none">SaveForge</h1>
+                            <div>
+                                <h1 className="text-[10px] font-black uppercase tracking-[0.2em] leading-none">SaveForge</h1>
+                                <p className="text-[7px] text-muted-foreground tracking-wider mt-0.5">by OiSiSk</p>
+                            </div>
                         </div>
                     </div>
 
