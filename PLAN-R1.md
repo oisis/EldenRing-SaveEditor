@@ -87,7 +87,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - PlayerCoordinates struct = 61B (er-save-manager comment of 57B was stale); SpawnPointBlock 15B for v≥66
   - Files: `backend/core/section_player_coords.go`, `backend/core/section_player_coords_test.go`
 - [x] **Step 10** — NetMan section
-  - Commit: pending
+  - Commit: `58c0380`
   - Confirmed fixed 131,076B (u32 + 0x20000B opaque)
   - Files: `backend/core/section_netman.go`, `backend/core/section_netman_test.go`
 - [ ] **Step 11** — Weather + Time + BaseVersion + SteamID + PS5Activity + DLC
