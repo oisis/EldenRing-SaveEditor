@@ -1,8 +1,8 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {GetItemList, GetInfuseTypes, AddItemsToCharacter} from '../../wailsjs/go/main/App';
-import {db} from '../../wailsjs/go/models';
+import {GetItemList, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '../../wailsjs/go/main/App';
+import {db, vm} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
 import {CategorySelect} from './CategorySelect';
 
@@ -13,6 +13,7 @@ interface DatabaseTabProps {
     };
     platform: string | null;
     charIndex: number;
+    inventoryVersion: number;
     onItemsAdded?: () => void;
     addSettings: AddSettings;
     showFlaggedItems: boolean;
@@ -26,7 +27,7 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded, addSettings, showFlaggedItems, category, setCategory, onSelectItem}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVersion, onItemsAdded, addSettings, showFlaggedItems, category, setCategory, onSelectItem}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
@@ -59,9 +60,44 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
     // Detail drawer
     const [detailItem, setDetailItem] = useState<db.ItemEntry | null>(null);
 
+    // Owned items (for "Inventory" / "Storage" columns)
+    const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
+    const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
+
     useEffect(() => {
         GetInfuseTypes().then(res => setInfuseTypes(res || []));
     }, []);
+
+    useEffect(() => {
+        GetCharacter(charIndex).then(res => {
+            setCharInventory(res?.inventory || []);
+            setCharStorage(res?.storage || []);
+        }).catch(() => {
+            setCharInventory([]);
+            setCharStorage([]);
+        });
+    }, [charIndex, inventoryVersion]);
+
+    // Map BaseID → {inv, storage} owned counts.
+    // Stackable items contribute their stack quantity; non-stackable contribute one per copy.
+    // Matching by BaseID groups all upgrade/infusion variants of the same weapon.
+    const ownedByBaseID = useMemo(() => {
+        const m = new Map<number, {inv: number; storage: number}>();
+        const bump = (baseId: number, key: 'inv' | 'storage', n: number) => {
+            const cur = m.get(baseId) ?? {inv: 0, storage: 0};
+            cur[key] += n;
+            m.set(baseId, cur);
+        };
+        charInventory.forEach(it => {
+            const qty = it.maxInventory <= 1 ? 1 : it.quantity;
+            bump(it.baseId || it.id, 'inv', qty);
+        });
+        charStorage.forEach(it => {
+            const qty = it.maxInventory <= 1 ? 1 : it.quantity;
+            bump(it.baseId || it.id, 'storage', qty);
+        });
+        return m;
+    }, [charInventory, charStorage]);
 
     useEffect(() => {
         setLoading(true);
@@ -172,6 +208,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
         estimateSize: () => 52,
         overscan: 20,
     });
+
+    // Header has: checkbox + icon + name (3 fixed) + optional ID + optional Category + Inv/Storage (always 2)
+    const colCount = 5
+        + (columnVisibility.id ? 1 : 0)
+        + (category === 'all' || columnVisibility.category ? 1 : 0);
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
@@ -373,16 +414,18 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                         ID {sortCol === 'id' && (sortDir === 'asc' ? '↑' : '↓')}
                                     </th>
                                 )}
-                                {columnVisibility.category && (
+                                {(category === 'all' || columnVisibility.category) && (
                                     <th className="p-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('category')}>
                                         Category {sortCol === 'category' && (sortDir === 'asc' ? '↑' : '↓')}
                                     </th>
                                 )}
+                                <th className="p-4 text-center w-32">Inventory</th>
+                                <th className="p-4 text-center w-32">Storage</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border/30">
                             {rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getVirtualItems()[0].start > 0 && (
-                                <tr><td colSpan={5} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
+                                <tr><td colSpan={colCount} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
                             )}
                             {rowVirtualizer.getVirtualItems().map(virtualRow => {
                                 const item = filteredItems[virtualRow.index];
@@ -451,13 +494,35 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                         {columnVisibility.id && (
                                             <td className="p-4 text-[10px] font-mono text-muted-foreground">0x{item.id.toString(16).toUpperCase()}</td>
                                         )}
-                                        {columnVisibility.category && (
+                                        {(category === 'all' || columnVisibility.category) && (
                                             <td className="p-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/30 rounded-md text-muted-foreground border border-border/20">
                                                     {item.category === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.category.replace(/_/g, ' ')}
                                                 </span>
                                             </td>
                                         )}
+                                        {(() => {
+                                            const owned = ownedByBaseID.get(item.id) ?? {inv: 0, storage: 0};
+                                            const cellClass = (have: number, max: number): string => {
+                                                if (have === 0) return 'text-muted-foreground/50 bg-muted/20 border-border/30';
+                                                if (max > 0 && have >= max) return 'text-amber-500 bg-amber-500/10 border-amber-500/30';
+                                                return 'text-green-500 bg-green-500/10 border-green-500/30';
+                                            };
+                                            return (
+                                                <>
+                                                    <td className="p-4 text-center">
+                                                        <span className={`inline-block text-[10px] font-black tabular-nums px-2 py-1 rounded border ${cellClass(owned.inv, item.maxInventory)}`}>
+                                                            {owned.inv} / {item.maxInventory}
+                                                        </span>
+                                                    </td>
+                                                    <td className="p-4 text-center">
+                                                        <span className={`inline-block text-[10px] font-black tabular-nums px-2 py-1 rounded border ${cellClass(owned.storage, item.maxStorage)}`}>
+                                                            {owned.storage} / {item.maxStorage}
+                                                        </span>
+                                                    </td>
+                                                </>
+                                            );
+                                        })()}
                                     </tr>
                                 );
                             })}
@@ -466,7 +531,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, onItemsAdded
                                 const paddingBottom = virtualItems.length > 0
                                     ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
                                     : 0;
-                                return paddingBottom > 0 ? <tr><td colSpan={5} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
+                                return paddingBottom > 0 ? <tr><td colSpan={colCount} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
                             })()}
                         </tbody>
                     </table>

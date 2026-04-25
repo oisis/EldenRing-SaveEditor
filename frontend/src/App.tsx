@@ -486,6 +486,7 @@ function App() {
                                                         columnVisibility={columnVisibility}
                                                         platform={platform}
                                                         charIndex={selectedChar}
+                                                        inventoryVersion={inventoryVersion}
                                                         onItemsAdded={() => setInventoryVersion(v => v + 1)}
                                                         addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS}
                                                         showFlaggedItems={showFlaggedItems}
