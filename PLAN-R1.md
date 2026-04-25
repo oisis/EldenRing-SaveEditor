@@ -91,7 +91,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Confirmed fixed 131,076B (u32 + 0x20000B opaque)
   - Files: `backend/core/section_netman.go`, `backend/core/section_netman_test.go`
 - [x] **Step 11** — Weather + Time + BaseVersion + SteamID + PS5Activity + DLC
-  - Commit: pending
+  - Commit: `c46448c`
   - Total fixed 130B (12+12+16+8+32+50). DLCSection renamed to avoid clash with existing DlcSection* offset constants.
   - Files: `backend/core/section_trailing.go`, `backend/core/section_trailing_test.go`
 - [ ] **Step 12** — PlayerGameDataHash (dynamic size) + Rest tail padding
