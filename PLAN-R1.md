@@ -86,10 +86,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Commit: `07066a8`
   - PlayerCoordinates struct = 61B (er-save-manager comment of 57B was stale); SpawnPointBlock 15B for v≥66
   - Files: `backend/core/section_player_coords.go`, `backend/core/section_player_coords_test.go`
-- [ ] **Step 10** — NetMan section
-  - Reference: `parser/world.py` `NetMan`
-  - Likely large fixed-size; opaque inner blob acceptable for Stage 2
-  - Files: `backend/core/section_netman.go`
+- [x] **Step 10** — NetMan section
+  - Commit: pending
+  - Confirmed fixed 131,076B (u32 + 0x20000B opaque)
+  - Files: `backend/core/section_netman.go`, `backend/core/section_netman_test.go`
 - [ ] **Step 11** — Weather + Time + BaseVersion + SteamID + PS5Activity + DLC
   - Trailing fixed-size structs (12B + 12B + 16B + 8B + 32B + 50B)
   - Files: `backend/core/section_trailing.go`
