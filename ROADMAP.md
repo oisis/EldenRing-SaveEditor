@@ -134,28 +134,20 @@ Enable/disable summoning pool (Martyr Effigy) activation via event flags.
 - If round-trip persists → investigate game-side requirements (compare with reference save where pools are activated)
 - If round-trip fails → trace where the bit gets lost in the writer/encryption pipeline
 
-### 🚧 Invasion Regions Toggle 🟡
+### ✅ Invasion Regions Toggle 🟡
 Unlock invasion / blue summon regions (per-slot `unlocked_regions` struct, 78 region IDs).
 
-**Stage 1 — read-only ✅** (branch `feature/invasion-regions`, commit `90db34b`):
-- 78 region entries ported from `er-save-manager/data/regions.py` (`backend/db/data/regions.go`)
-- Parser populates `SaveSlot.UnlockedRegions []uint32` from `gesturesOff + 4`
-- `GetUnlockedRegions(slotIdx)` Wails binding merges DB with slot state
-- UI: "Invasion Regions" accordion in World → Unlocks (read-only checkboxes, per-area expand/collapse)
+**Stage 1 — read-only ✅** (commit `90db34b`):
+- 78 region entries ported from `er-save-manager/data/regions.py`
+- Parser populates `SaveSlot.UnlockedRegions []uint32`
+- UI: "Invasion Regions" accordion in World → Unlocks
 
-**Stage 2 — write ⛔ BLOCKED** (uncommitted, broken):
-- Initial implementation in `core/writer.go::SetUnlockedRegions()` used **shift-based** approach (memmove tail by delta, update downstream offsets)
-- **Failure modes:**
-  1. Typical saves have **0 bytes slack** between dynamic chain end and `DlcSectionOffset` (0x27FF4E) → expand fails for almost any region
-  2. Even when slack check passes (compress, or partial-fit expand for Farum Azula/Haligtree), saves load but game refuses to start: "save corrupted"
-  3. Downstream sections (PS5 activity, net_man checksum, hash region) likely have integrity validation that fails when content is repositioned
-- **Conclusion:** in-place patching cannot work for variable-size sections in this save format
-
-**Path forward:** requires **Full Slot Rebuild (R-1)** — see entry at the bottom of Phase 6. Estimated 6-10h: parsers + serializers for `world_area`, `player_pos` (57B), `net_man` (131,076B), `weather` (12B), `time` (12B), `base_ver` (16B), `steam_id` (8B), `ps5_act` (32B), `dlc` (50B). Reference: `er-save-manager/src/er_save_manager/slot_rebuild.py`.
-
-**Action items before next iteration:**
-- Revert uncommitted Stage 2 changes (`writer.go`, `app.go`, `WorldTab.tsx`, regenerated bindings) to keep `feature/invasion-regions` branch clean — Stage 1 commit `90db34b` is the safe state
-- Decide: implement R-1 first as a generic mechanism, then layer regions write on top
+**Stage 2 — write ✅** (R-1 full slot rebuild, see `PLAN-R1.md` and `CHANGELOG.md`):
+- First attempt (shift-based in-place patching) corrupted saves; rolled back.
+- Final implementation: `core.RebuildSlot` re-serializes every section after `unlocked_regions` from typed structs, zero-pads the tail to `SlotSize`. Each slot has 408–432 KB of zero tail padding that absorbs the size delta on both PS4 and PC.
+- 19 new section types parsed/serialized; round-trip + mutation tests for each.
+- `SetUnlockedRegions` / `BulkSetUnlockedRegions` Wails methods drive UI per-region toggle, per-area `+`/`−`, and global Unlock All / Lock All.
+- Steam Deck verification: PS4 save with 380 regions added loaded correctly, characters intact.
 
 ### ✅ Colosseum Toggle 🟢
 Unlock colosseums via their respective event flags.
