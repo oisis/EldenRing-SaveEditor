@@ -26,7 +26,7 @@ const (
 	OffTalismanSlots       = -241 // AdditionalTalismanSlotsCount (PGD 0xBE, u8, range 0-3)
 	OffScadutreeBlessing   = -187
 	OffShadowRealmBlessing = -186
-	OffVoiceType           = -245 // Voice type (0=Young1, 1=Young2, 2=Mature1, 3=Mature2, 4=Aged1, 5=Aged2)
+	OffVoiceType           = -245   // Voice type (0=Young1, 1=Young2, 2=Mature1, 3=Mature2, 4=Aged1, 5=Aged2)
 	OffCharacterName       = -0x11B // 16 x uint16 UTF-16LE
 
 	// MagicOffset must be at least this value; otherwise negative stat offsets
@@ -60,17 +60,17 @@ const (
 // Inventory layout (relative to MagicOffset).
 // Source: SPEC.md §5.4 Dynamic Offsets.
 const (
-	InvStartFromMagic = 505       // MagicOffset + 505 — points to first common item (common_count header at -4)
-	CommonItemCount   = 0xA80     // 2688 common item slots
-	KeyItemCount      = 0x180     // 384 key item slots
-	StorageItemCount  = 2048      // storage box capacity (read limit for ReadStorage)
-	StorageCommonCount = 0x780    // 1920 actual common item slots in storage
-	StorageKeyCount   = 0x80     // 128 key item slots in storage
-	InvRecordLen      = 12        // bytes per inventory record (handle + qty + index)
-	InvSafetyMargin   = 0x9000    // max distance from invStart to validate section
-	StorageSafetyMarg = 0x6000    // max distance from storageStart to validate section
-	StorageHeaderSkip = 4         // skip 4-byte header at StorageBoxOffset
-	InvKeyCountHeader = 4         // 4-byte key_count header between common and key items
+	InvStartFromMagic  = 505    // MagicOffset + 505 — points to first common item (common_count header at -4)
+	CommonItemCount    = 0xA80  // 2688 common item slots
+	KeyItemCount       = 0x180  // 384 key item slots
+	StorageItemCount   = 2048   // storage box capacity (read limit for ReadStorage)
+	StorageCommonCount = 0x780  // 1920 actual common item slots in storage
+	StorageKeyCount    = 0x80   // 128 key item slots in storage
+	InvRecordLen       = 12     // bytes per inventory record (handle + qty + index)
+	InvSafetyMargin    = 0x9000 // max distance from invStart to validate section
+	StorageSafetyMarg  = 0x6000 // max distance from storageStart to validate section
+	StorageHeaderSkip  = 4      // skip 4-byte header at StorageBoxOffset
+	InvKeyCountHeader  = 4      // 4-byte key_count header between common and key items
 
 	// Offsets of trailing counters relative to (StorageBoxOffset + StorageHeaderSkip).
 	// Layout: StorageCommonCount×12 + key_count(4) + StorageKeyCount×12 + next_equip_index(4) + next_acq_sort_id(4)
@@ -151,14 +151,14 @@ const (
 	FDOffInnerSize = 0x0C // u32 = 0x120 (288)
 
 	// Model IDs (8 × u32, effective u8 + 3 padding each)
-	FDOffFaceModel    = 0x10
-	FDOffHairModel    = 0x14
-	FDOffEyeModel     = 0x18
-	FDOffEyebrowModel = 0x1C
-	FDOffBeardModel   = 0x20
+	FDOffFaceModel     = 0x10
+	FDOffHairModel     = 0x14
+	FDOffEyeModel      = 0x18
+	FDOffEyebrowModel  = 0x1C
+	FDOffBeardModel    = 0x20
 	FDOffEyepatchModel = 0x24
-	FDOffDecalModel   = 0x28 // tattoo/mark
-	FDOffEyelashModel = 0x2C
+	FDOffDecalModel    = 0x28 // tattoo/mark
+	FDOffEyelashModel  = 0x2C
 
 	// Face shape parameters (64 × u8, 0x30-0x6F)
 	FDOffFaceShape = 0x30
@@ -220,38 +220,38 @@ const (
 	FDOffBodyHairG   = 0xE0
 	FDOffBodyHairB   = 0xE1
 	// Right eye
-	FDOffRIrisR      = 0xE2
-	FDOffRIrisG      = 0xE3
-	FDOffRIrisB      = 0xE4
-	FDOffRIrisSize   = 0xE5
-	FDOffRClouding   = 0xE6
-	FDOffRCloudR     = 0xE7
-	FDOffRCloudG     = 0xE8
-	FDOffRCloudB     = 0xE9
-	FDOffRWhiteR     = 0xEA
-	FDOffRWhiteG     = 0xEB
-	FDOffRWhiteB     = 0xEC
-	FDOffREyePos     = 0xED
+	FDOffRIrisR    = 0xE2
+	FDOffRIrisG    = 0xE3
+	FDOffRIrisB    = 0xE4
+	FDOffRIrisSize = 0xE5
+	FDOffRClouding = 0xE6
+	FDOffRCloudR   = 0xE7
+	FDOffRCloudG   = 0xE8
+	FDOffRCloudB   = 0xE9
+	FDOffRWhiteR   = 0xEA
+	FDOffRWhiteG   = 0xEB
+	FDOffRWhiteB   = 0xEC
+	FDOffREyePos   = 0xED
 	// Left eye
-	FDOffLIrisR      = 0xEE
-	FDOffLIrisG      = 0xEF
-	FDOffLIrisB      = 0xF0
-	FDOffLIrisSize   = 0xF1
-	FDOffLClouding   = 0xF2
-	FDOffLCloudR     = 0xF3
-	FDOffLCloudG     = 0xF4
-	FDOffLCloudB     = 0xF5
-	FDOffLWhiteR     = 0xF6
-	FDOffLWhiteG     = 0xF7
-	FDOffLWhiteB     = 0xF8
-	FDOffLEyePos     = 0xF9
+	FDOffLIrisR    = 0xEE
+	FDOffLIrisG    = 0xEF
+	FDOffLIrisB    = 0xF0
+	FDOffLIrisSize = 0xF1
+	FDOffLClouding = 0xF2
+	FDOffLCloudR   = 0xF3
+	FDOffLCloudG   = 0xF4
+	FDOffLCloudB   = 0xF5
+	FDOffLWhiteR   = 0xF6
+	FDOffLWhiteG   = 0xF7
+	FDOffLWhiteB   = 0xF8
+	FDOffLEyePos   = 0xF9
 	// Hair colors
-	FDOffHairR       = 0xFA
-	FDOffHairG       = 0xFB
-	FDOffHairB       = 0xFC
-	FDOffHairLuster  = 0xFD
-	FDOffHairRoot    = 0xFE
-	FDOffHairWhite   = 0xFF
+	FDOffHairR      = 0xFA
+	FDOffHairG      = 0xFB
+	FDOffHairB      = 0xFC
+	FDOffHairLuster = 0xFD
+	FDOffHairRoot   = 0xFE
+	FDOffHairWhite  = 0xFF
 	// Beard colors
 	FDOffBeardR      = 0x100
 	FDOffBeardG      = 0x101
@@ -260,20 +260,20 @@ const (
 	FDOffBeardRoot   = 0x104
 	FDOffBeardWhite  = 0x105
 	// Eyebrow colors
-	FDOffBrowR       = 0x106
-	FDOffBrowG       = 0x107
-	FDOffBrowB       = 0x108
-	FDOffBrowLuster  = 0x109
-	FDOffBrowRoot    = 0x10A
-	FDOffBrowWhite   = 0x10B
+	FDOffBrowR      = 0x106
+	FDOffBrowG      = 0x107
+	FDOffBrowB      = 0x108
+	FDOffBrowLuster = 0x109
+	FDOffBrowRoot   = 0x10A
+	FDOffBrowWhite  = 0x10B
 	// Eyelash colors
-	FDOffLashR       = 0x10C
-	FDOffLashG       = 0x10D
-	FDOffLashB       = 0x10E
+	FDOffLashR = 0x10C
+	FDOffLashG = 0x10D
+	FDOffLashB = 0x10E
 	// Eyepatch colors
-	FDOffPatchR      = 0x10F
-	FDOffPatchG      = 0x110
-	FDOffPatchB      = 0x111
+	FDOffPatchR = 0x10F
+	FDOffPatchG = 0x110
+	FDOffPatchB = 0x111
 )
 
 // Sanity limits for dynamic size reads from untrusted save data.
@@ -293,6 +293,28 @@ const (
 	GaItemDataMaxCount = 7000 // 0x1B58 max entries (matches DynGaItemsOther / GaItemDataEntryLen)
 )
 
+// DLC black tile removal constants.
+// Two position records in the BloodStain section control the DLC map cover layer.
+// Writing DLC-area coordinates here removes the black tile overlay.
+// See spec/29-dlc-black-tiles.md for details.
+const (
+	// Offsets relative to afterRegs (end of unlocked regions array).
+	DLCTileZeroStart = 0x0088 // start of range to zero out before writing coords
+	DLCTileZeroEnd   = 0x0110 // end of range (exclusive)
+
+	// Record 1: DLC map center (2 floats + 1 flag byte)
+	DLCTileRec1X    = 0x008D // f32 X coordinate
+	DLCTileRec1Y    = 0x0091 // f32 Y coordinate
+	DLCTileRec1Flag = 0x0095 // u8 visited flag
+
+	// Record 2: DLC area anchor (4 floats + 1 flag byte)
+	DLCTileRec2X    = 0x00C5 // f32 X
+	DLCTileRec2Y    = 0x00C9 // f32 Y
+	DLCTileRec2Z    = 0x00CD // f32 Z
+	DLCTileRec2W    = 0x00D1 // f32 W
+	DLCTileRec2Flag = 0x00D5 // u8 visited flag
+)
+
 // DLC section constants.
 // CSDlc is 0x32 (50) bytes located at SlotSize - 0xB2 (before PlayerGameDataHash).
 // Byte[0] = pre-order gesture "The Ring"
@@ -300,9 +322,9 @@ const (
 // Bytes[2] = pre-order gesture "Ring of Miquella"
 // Bytes[3-49] = must be 0x00
 const (
-	DlcSectionSize   = 0x32                          // 50 bytes
+	DlcSectionSize   = 0x32                                 // 50 bytes
 	DlcSectionOffset = SlotSize - HashSize - DlcSectionSize // SlotSize - 0xB2
-	DlcEntryFlagByte = 1                              // byte index within DLC section for SotE entry flag
+	DlcEntryFlagByte = 1                                    // byte index within DLC section for SotE entry flag
 )
 
 // InvEquipReservedMax is the highest CSGaItemIns index reserved for equipment slots (0-432).

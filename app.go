@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/binary"
 	"fmt"
+	"math"
 	"os"
 	"strconv"
 	"time"
@@ -1331,9 +1332,11 @@ func revealBaseMap(slot *core.SaveSlot) error {
 	return nil
 }
 
-// revealDLCMap sets Shadow of the Erdtree flags and adds DLC map fragment items.
+// revealDLCMap sets Shadow of the Erdtree flags, adds DLC map fragment items,
+// and removes the DLC black tile overlay by writing discovery coordinates.
+// See spec/29-dlc-black-tiles.md for details.
 func revealDLCMap(slot *core.SaveSlot) error {
-	// Phase 1: Set DLC event flags (fresh flags slice — base map may have shifted data).
+	// Phase 1: Set DLC event flags (before item insertion — offsets are stable).
 	flags := slot.Data[slot.EventFlagsOffset:]
 
 	// System flags for Shadow Realm display
@@ -1355,7 +1358,39 @@ func revealDLCMap(slot *core.SaveSlot) error {
 	for _, itemID := range items {
 		_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
 	}
+
+	// Phase 3: Remove DLC black tiles.
+	// Write DLC-area coordinates into the BloodStain section so the game
+	// treats the DLC map cover layer as discovered.
+	storageEnd := slot.StorageBoxOffset + core.DynStorageBox
+	gesturesOff := storageEnd + core.DynStorageToGestures
+	if gesturesOff+4 > len(slot.Data) {
+		return fmt.Errorf("gesturesOff 0x%X out of bounds", gesturesOff)
+	}
+	regCount := int(binary.LittleEndian.Uint32(slot.Data[gesturesOff : gesturesOff+4]))
+	afterRegs := gesturesOff + 4 + regCount*4
+
+	// Zero out the position data range
+	for i := afterRegs + core.DLCTileZeroStart; i < afterRegs+core.DLCTileZeroEnd; i++ {
+		slot.Data[i] = 0x00
+	}
+	// Record 1: DLC map center coordinates
+	putF32(slot.Data, afterRegs+core.DLCTileRec1X, 9648.0)
+	putF32(slot.Data, afterRegs+core.DLCTileRec1Y, 9124.0)
+	slot.Data[afterRegs+core.DLCTileRec1Flag] = 0x01
+	// Record 2: DLC area anchor coordinates
+	putF32(slot.Data, afterRegs+core.DLCTileRec2X, 3037.0)
+	putF32(slot.Data, afterRegs+core.DLCTileRec2Y, 1869.0)
+	putF32(slot.Data, afterRegs+core.DLCTileRec2Z, 7880.0)
+	putF32(slot.Data, afterRegs+core.DLCTileRec2W, 7803.0)
+	slot.Data[afterRegs+core.DLCTileRec2Flag] = 0x01
+
 	return nil
+}
+
+// putF32 writes a float32 value at the given offset in little-endian format.
+func putF32(d []byte, off int, v float32) {
+	binary.LittleEndian.PutUint32(d[off:], math.Float32bits(v))
 }
 
 // ResetMapExploration clears all map visibility, acquisition, and POI discovery flags
@@ -1732,9 +1767,9 @@ type DiffEntry struct {
 
 // SlotDiffSummary is a quick overview for one slot.
 type SlotDiffSummary struct {
-	SlotIndex  int    `json:"slotIndex"`
-	CharName   string `json:"charName"`
-	ChangeCount int   `json:"changeCount"`
+	SlotIndex   int    `json:"slotIndex"`
+	CharName    string `json:"charName"`
+	ChangeCount int    `json:"changeCount"`
 }
 
 // GetSlotDiff compares the current state of a slot against the original loaded state.
@@ -1813,8 +1848,8 @@ func diffInventory(category string, cur, orig core.EquipInventoryData) []DiffEnt
 
 	// Build maps: GaItemHandle → item for quick lookup
 	type itemInfo struct {
-		qty   uint32
-		name  string
+		qty  uint32
+		name string
 	}
 	buildMap := func(items []core.InventoryItem) map[uint32]itemInfo {
 		m := make(map[uint32]itemInfo, len(items))
@@ -1987,12 +2022,12 @@ func (a *App) GetSaveDiffSummary() ([]SlotDiffSummary, error) {
 
 // SlotCapacity reports used vs max counts for GaItems, Inventory, and Storage.
 type SlotCapacity struct {
-	GaItemsUsed    int `json:"gaItemsUsed"`
-	GaItemsMax     int `json:"gaItemsMax"`
-	InventoryUsed  int `json:"inventoryUsed"`
-	InventoryMax   int `json:"inventoryMax"`
-	StorageUsed    int `json:"storageUsed"`
-	StorageMax     int `json:"storageMax"`
+	GaItemsUsed   int `json:"gaItemsUsed"`
+	GaItemsMax    int `json:"gaItemsMax"`
+	InventoryUsed int `json:"inventoryUsed"`
+	InventoryMax  int `json:"inventoryMax"`
+	StorageUsed   int `json:"storageUsed"`
+	StorageMax    int `json:"storageMax"`
 }
 
 // GetSlotCapacity returns capacity usage for a character slot.
@@ -2366,10 +2401,10 @@ func (a *App) ApplyAppearancePreset(slotIndex int, presetName string) error {
 
 // FavoriteSlotInfo describes a single Favorites slot in the Mirror.
 type FavoriteSlotInfo struct {
-	Index    int    `json:"index"`    // absolute slot index (0-14)
-	Active   bool   `json:"active"`   // true if slot has FACE magic
-	Safe     bool   `json:"safe"`     // true if not colliding with ProfileSummary
-	Name     string `json:"name"`     // preset name if we wrote it, empty otherwise
+	Index  int    `json:"index"`  // absolute slot index (0-14)
+	Active bool   `json:"active"` // true if slot has FACE magic
+	Safe   bool   `json:"safe"`   // true if not colliding with ProfileSummary
+	Name   string `json:"name"`   // preset name if we wrote it, empty otherwise
 }
 
 // GetFavoritesStatus returns the state of all 15 Favorites slots.
