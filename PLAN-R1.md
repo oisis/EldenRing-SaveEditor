@@ -66,9 +66,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
 
 ### Section parsers (full struct, in canonical order)
 
-- [ ] **Step 5** — Horse + control byte + BloodStain + 2 unk u32 metadata
+- [x] **Step 5** — Horse + control byte + BloodStain + 2 unk u32 metadata
+  - Commit: pending
   - Reference: `parser/world.py` `RideGameData`, `BloodStain`
-  - Files: `backend/core/section_world.go`
+  - Files: `backend/core/section_types.go`, `backend/core/section_world.go`, `backend/core/section_world_test.go`
 - [ ] **Step 6** — MenuSaveLoad + TrophyEquipData + GaitemGameData + TutorialData
   - Reference: `parser/world.py`, `parser/inventory.py`
   - Files: `backend/core/section_menu.go`, `backend/core/section_inventory.go`
