@@ -79,7 +79,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - 11 fields (3×u8, u32, i32, u8, u32, u32, u8, u32, u32) = 29B + event_flags 0x1BF99F + 1B terminator
   - Files: `backend/core/section_eventflags.go`, `backend/core/section_eventflags_test.go`
 - [x] **Step 8** — Size-prefixed world sections (5×): field_area, world_area, world_geom_man, world_geom_man2, rend_man
-  - Commit: pending
+  - Commit: `c8e8e11`
   - Round-trip totals: 1.3KB–7.2KB across 7 slots — confirms variable size between slots
   - Files: `backend/core/section_world_geom.go`, `backend/core/section_world_geom_test.go`
 - [ ] **Step 9** — PlayerCoordinates + spawn point + version-gated fields
