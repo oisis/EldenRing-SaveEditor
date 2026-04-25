@@ -198,13 +198,15 @@ type SaveSlot struct {
 	EventFlagsOffset int
 
 	// Dynamic offsets from Python logic
-	PlayerDataOffset   int
-	FaceDataOffset     int
-	StorageBoxOffset   int
-	IngameTimerOffset  int
-	GaItemDataOffset   int // start of GaItemData section (distinct_acquired_items_count header)
-	ClearCountOffset   int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
-	EquipItemsIDOffset int // start of EquippedItemsItemIds section
+	PlayerDataOffset       int
+	FaceDataOffset         int
+	StorageBoxOffset       int
+	IngameTimerOffset      int
+	GaItemDataOffset       int // start of GaItemData section (distinct_acquired_items_count header)
+	ClearCountOffset       int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
+	EquipItemsIDOffset     int // start of EquippedItemsItemIds section
+	UnlockedRegionsOffset  int // start of unlocked_regions struct (count u32 + count*4 IDs)
+	UnlockedRegions        []uint32 // parsed unlocked region IDs (drives invasion / blue-summon eligibility)
 
 	// Tracked indices for type-segregated GaItem placement.
 	// The game expects AoW entries at low indices, then armor, then weapons.
@@ -338,6 +340,15 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	regCount, err := sa.ReadDynamicSize(gesturesOff, MaxUnlockedRegCnt, "regCount")
 	if err != nil {
 		return err
+	}
+	s.UnlockedRegionsOffset = gesturesOff
+	s.UnlockedRegions = make([]uint32, regCount)
+	for i := 0; i < regCount; i++ {
+		v, rerr := sa.ReadU32(gesturesOff + 4 + i*4)
+		if rerr != nil {
+			return rerr
+		}
+		s.UnlockedRegions[i] = v
 	}
 	unlockedRegion := gesturesOff + regCount*4 + 4
 

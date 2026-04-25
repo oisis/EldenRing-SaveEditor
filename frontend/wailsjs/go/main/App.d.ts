@@ -90,6 +90,8 @@ export function GetSummoningPools(arg1:number):Promise<Array<db.SummoningPoolEnt
 
 export function GetUndoDepth(arg1:number):Promise<number>;
 
+export function GetUnlockedRegions(arg1:number):Promise<Array<db.RegionEntry>>;
+
 export function GetWhetblades(arg1:number):Promise<Array<db.WhetbladeEntry>>;
 
 export function ImportCharacter(arg1:number,arg2:number):Promise<void>;

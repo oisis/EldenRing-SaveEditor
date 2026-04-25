@@ -486,6 +486,30 @@ func (a *App) SetSummoningPoolActivated(slotIndex int, poolID uint32, activated 
 	return nil
 }
 
+// GetUnlockedRegions returns every known invasion region annotated with the unlock state
+// from the specified character slot's UnlockedRegions list. Read-only — Set/Bulk methods
+// require variable-size slot rebuild and arrive in a follow-up commit.
+func (a *App) GetUnlockedRegions(slotIndex int) ([]db.RegionEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	entries := db.GetAllRegions()
+
+	unlocked := make(map[uint32]bool, len(slot.UnlockedRegions))
+	for _, id := range slot.UnlockedRegions {
+		unlocked[id] = true
+	}
+	for i := range entries {
+		entries[i].Unlocked = unlocked[entries[i].ID]
+	}
+	return entries, nil
+}
+
 // GetColosseums returns all colosseums with unlock state from the specified character slot
 func (a *App) GetColosseums(slotIndex int) ([]db.ColosseumEntry, error) {
 	if a.save == nil {

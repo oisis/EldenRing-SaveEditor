@@ -170,6 +170,10 @@ export function GetUndoDepth(arg1) {
   return window['go']['main']['App']['GetUndoDepth'](arg1);
 }
 
+export function GetUnlockedRegions(arg1) {
+  return window['go']['main']['App']['GetUnlockedRegions'](arg1);
+}
+
 export function GetWhetblades(arg1) {
   return window['go']['main']['App']['GetWhetblades'](arg1);
 }
