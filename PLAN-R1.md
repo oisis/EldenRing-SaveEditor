@@ -103,11 +103,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
 
 ### Integration
 
-- [ ] **Step 13** — `RebuildSlot` rewrite — sequential write of all sections
-  - Drop hybrid blob path; iterate parsed structs, call `.Write()` per section
-  - Identity test must still pass for unmodified slot
-  - Mutation test: append a region, verify shift + tail-pad absorption
-  - Files: `backend/core/slot_rebuild.go`
+- [x] **Step 13** — `RebuildSlot` rewrite — sequential write of all sections
+  - Commit: pending
+  - Identity round-trip OK for PS4 + PC. Mutation test PC (+50 regions) re-parses cleanly with Level/Souls preserved. Shrink test PS4 (-5 regions) re-parses cleanly.
+  - Files: `backend/core/slot_rebuild.go`, `backend/core/slot_rebuild_test.go`
 - [ ] **Step 14** — Wire `SetUnlockedRegions` to use full rebuild
   - Replace shift-based code in `core/writer.go` with `RebuildSlot` call + offset recompute
   - Round-trip test: Set→Save→Load→Get for PS4 + PC

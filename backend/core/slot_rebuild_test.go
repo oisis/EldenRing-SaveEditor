@@ -145,6 +145,138 @@ func TestSectionMapPC(t *testing.T) {
 	sectionMapInvariants(t, "../../tmp/save/ER0000.sl2", PlatformPC)
 }
 
+// TestRebuildSlotMutationPC verifies that mutating slot.UnlockedRegions and
+// rebuilding produces a slot whose post-mutation parse round-trips the new
+// region list while preserving everything else.
+//
+// PC saves have ~419KB of tail rest, so this test exercises the "grow"
+// path with abundant slack. PS4 saves have zero rest and are exercised in
+// a separate test below (with a shrink mutation that must succeed regardless
+// of slack).
+func TestRebuildSlotMutationPC(t *testing.T) {
+	path := "../../tmp/save/ER0000.sl2"
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Skipf("Test save not found: %s", path)
+	}
+	save, err := LoadSave(path)
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// Pick the first active slot.
+	var slotIdx = -1
+	for i := 0; i < 10; i++ {
+		if save.Slots[i].Version != 0 && save.Slots[i].UnlockedRegionsOffset != 0 {
+			slotIdx = i
+			break
+		}
+	}
+	if slotIdx < 0 {
+		t.Skip("no active slot")
+	}
+	slot := &save.Slots[slotIdx]
+	originalCount := len(slot.UnlockedRegions)
+	originalCopy := append([]uint32(nil), slot.UnlockedRegions...)
+
+	// Append 50 synthetic region IDs (well within PC slack).
+	for k := uint32(0); k < 50; k++ {
+		slot.UnlockedRegions = append(slot.UnlockedRegions, 0xDEAD0000+k)
+	}
+
+	rebuilt, err := RebuildSlot(slot)
+	if err != nil {
+		t.Fatalf("RebuildSlot: %v", err)
+	}
+	if len(rebuilt) != SlotSize {
+		t.Fatalf("rebuilt size %d, want %d", len(rebuilt), SlotSize)
+	}
+
+	// Re-parse the rebuilt slot via a fresh SaveSlot.
+	var verify SaveSlot
+	verify.Data = rebuilt
+	verify.Version = slot.Version
+	r := NewReader(rebuilt)
+	if _, err := r.Seek(0, 0); err != nil {
+		t.Fatal(err)
+	}
+	if err := verify.Read(NewReader(rebuilt), string(save.Platform)); err != nil {
+		t.Fatalf("re-parse rebuilt: %v", err)
+	}
+	if len(verify.UnlockedRegions) != originalCount+50 {
+		t.Errorf("re-parsed UnlockedRegions count %d, want %d",
+			len(verify.UnlockedRegions), originalCount+50)
+	}
+	// First N must equal original list, last 50 must equal what we appended.
+	for i := 0; i < originalCount; i++ {
+		if verify.UnlockedRegions[i] != originalCopy[i] {
+			t.Errorf("region[%d]: %x, want %x", i, verify.UnlockedRegions[i], originalCopy[i])
+			break
+		}
+	}
+	for k := uint32(0); k < 50; k++ {
+		if got := verify.UnlockedRegions[originalCount+int(k)]; got != 0xDEAD0000+k {
+			t.Errorf("appended region[%d]: %x, want %x", k, got, 0xDEAD0000+k)
+			break
+		}
+	}
+
+	// Sanity: a couple of unrelated fields must survive verbatim.
+	if verify.Player.Level != slot.Player.Level {
+		t.Errorf("Player.Level changed: %d → %d", slot.Player.Level, verify.Player.Level)
+	}
+	if verify.Player.Souls != slot.Player.Souls {
+		t.Errorf("Player.Souls changed: %d → %d", slot.Player.Souls, verify.Player.Souls)
+	}
+}
+
+// TestRebuildSlotShrinkPS4 verifies that REMOVING regions works on PS4 saves
+// (which have zero tail slack) — the rebuilt slot must zero-pad the gap and
+// still re-parse correctly.
+func TestRebuildSlotShrinkPS4(t *testing.T) {
+	path := "../../tmp/save/oisis_pl-org.txt"
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		t.Skipf("Test save not found: %s", path)
+	}
+	save, err := LoadSave(path)
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	// Pick the slot with the most regions to maximise the shrink delta.
+	var slotIdx = -1
+	maxRegs := 0
+	for i := 0; i < 10; i++ {
+		if save.Slots[i].Version != 0 && len(save.Slots[i].UnlockedRegions) > maxRegs {
+			slotIdx = i
+			maxRegs = len(save.Slots[i].UnlockedRegions)
+		}
+	}
+	if slotIdx < 0 || maxRegs < 10 {
+		t.Skipf("no slot with >=10 regions (max=%d)", maxRegs)
+	}
+	slot := &save.Slots[slotIdx]
+
+	// Drop the last 5 regions.
+	slot.UnlockedRegions = slot.UnlockedRegions[:len(slot.UnlockedRegions)-5]
+	wantCount := len(slot.UnlockedRegions)
+
+	rebuilt, err := RebuildSlot(slot)
+	if err != nil {
+		t.Fatalf("RebuildSlot: %v", err)
+	}
+
+	var verify SaveSlot
+	if err := verify.Read(NewReader(rebuilt), string(save.Platform)); err != nil {
+		t.Fatalf("re-parse rebuilt: %v", err)
+	}
+	if len(verify.UnlockedRegions) != wantCount {
+		t.Errorf("re-parsed UnlockedRegions count %d, want %d",
+			len(verify.UnlockedRegions), wantCount)
+	}
+	if verify.Player.Level != slot.Player.Level {
+		t.Errorf("Player.Level changed after shrink")
+	}
+}
+
 func TestRebuildSlotNilGuard(t *testing.T) {
 	if _, err := RebuildSlot(nil); err == nil {
 		t.Fatal("RebuildSlot(nil) should error")
