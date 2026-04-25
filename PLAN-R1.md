@@ -83,7 +83,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Round-trip totals: 1.3KB–7.2KB across 7 slots — confirms variable size between slots
   - Files: `backend/core/section_world_geom.go`, `backend/core/section_world_geom_test.go`
 - [x] **Step 9** — PlayerCoordinates + spawn point + version-gated fields
-  - Commit: pending
+  - Commit: `07066a8`
   - PlayerCoordinates struct = 61B (er-save-manager comment of 57B was stale); SpawnPointBlock 15B for v≥66
   - Files: `backend/core/section_player_coords.go`, `backend/core/section_player_coords_test.go`
 - [ ] **Step 10** — NetMan section
