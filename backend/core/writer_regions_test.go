@@ -94,6 +94,67 @@ func TestSetUnlockedRegionsRoundTripPS4(t *testing.T) {
 	}
 }
 
+// TestSetUnlockedRegionsAfterAddItem reproduces a real-world bug: the user
+// added a weapon to inventory, then used Map → Reveal All (which adds DLC
+// fragments via AddItemsToSlot), then unlocked all regions — the resulting
+// save had a corrupted regCount because SetUnlockedRegions used stale
+// UnlockedRegionsOffset (other writers don't refresh it).
+//
+// This test guards against regression: even when slot.Data has been mutated
+// by another writer between Read and SetUnlockedRegions, the rebuild must
+// still reload cleanly.
+func TestSetUnlockedRegionsAfterAddItem(t *testing.T) {
+	src := "../../tmp/save/ER0000.sl2"
+	if _, err := os.Stat(src); os.IsNotExist(err) {
+		t.Skipf("Test save not found: %s", src)
+	}
+	save, err := LoadSave(src)
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	slot := &save.Slots[4]
+	if slot.Version == 0 {
+		t.Skip("slot 4 empty")
+	}
+	originalLevel := slot.Player.Level
+
+	// Step 1: add a weapon (21B GaItem record). Slot.Data shifts by ~13 bytes,
+	// but slot.UnlockedRegionsOffset is NOT refreshed.
+	if err := AddItemsToSlot(slot, []uint32{0x80130880}, 1, 0, false); err != nil {
+		t.Fatalf("AddItemsToSlot: %v", err)
+	}
+
+	// Step 2: SetUnlockedRegions — must internally refresh offsets before
+	// rebuilding, or the resulting save is corrupted.
+	merged := append([]uint32(nil), slot.UnlockedRegions...)
+	for k := uint32(0); k < 75; k++ {
+		merged = append(merged, 0x10000+k)
+	}
+	if err := SetUnlockedRegions(slot, merged); err != nil {
+		t.Fatalf("SetUnlockedRegions: %v", err)
+	}
+
+	// Step 3: persist and reload — no warnings, level preserved, regions match.
+	tmp := filepath.Join(t.TempDir(), "out.sl2")
+	if err := save.SaveFile(tmp); err != nil {
+		t.Fatalf("SaveFile: %v", err)
+	}
+	reloaded, err := LoadSave(tmp)
+	if err != nil {
+		t.Fatalf("reload: %v", err)
+	}
+	rs := &reloaded.Slots[4]
+	if len(rs.Warnings) > 0 {
+		t.Errorf("reloaded slot has warnings: %v", rs.Warnings)
+	}
+	if rs.Player.Level != originalLevel {
+		t.Errorf("Player.Level changed: %d -> %d", originalLevel, rs.Player.Level)
+	}
+	if len(rs.UnlockedRegions) != len(slot.UnlockedRegions) {
+		t.Errorf("regions count: got %d, want %d", len(rs.UnlockedRegions), len(slot.UnlockedRegions))
+	}
+}
+
 func TestSetUnlockedRegionsRoundTripPC(t *testing.T) {
 	src := "../../tmp/save/ER0000.sl2"
 	if _, err := os.Stat(src); os.IsNotExist(err) {

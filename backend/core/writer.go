@@ -669,6 +669,20 @@ func SetUnlockedRegions(slot *SaveSlot, ids []uint32) error {
 		return fmt.Errorf("SetUnlockedRegions: cannot modify empty slot")
 	}
 
+	// Refresh dynamic offsets and SectionMap from the current slot.Data.
+	// Other writers (AddItemsToSlot, FlushGaItems, revealDLCMap, …) mutate
+	// slot.Data without updating slot.UnlockedRegionsOffset or SectionMap, so
+	// without this refresh we would rebuild from stale boundaries and produce
+	// a corrupted save (observed when the user added an item, then revealed
+	// the map, then unlocked regions — slot 4 of ER0000.sl2 corrupted at the
+	// regCount offset).
+	if err := slot.calculateDynamicOffsets(); err != nil {
+		return fmt.Errorf("SetUnlockedRegions: refresh offsets: %w", err)
+	}
+	if err := slot.buildSectionMap(); err != nil {
+		return fmt.Errorf("SetUnlockedRegions: refresh section map: %w", err)
+	}
+
 	// Dedup + sort ascending — matches er-save-manager invariant and ensures
 	// stable output across platforms.
 	seen := make(map[uint32]struct{}, len(ids))
