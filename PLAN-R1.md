@@ -104,7 +104,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
 ### Integration
 
 - [x] **Step 13** — `RebuildSlot` rewrite — sequential write of all sections
-  - Commit: pending
+  - Commit: `8a58852`
   - Identity round-trip OK for PS4 + PC. Mutation test PC (+50 regions) re-parses cleanly with Level/Souls preserved. Shrink test PS4 (-5 regions) re-parses cleanly.
   - Files: `backend/core/slot_rebuild.go`, `backend/core/slot_rebuild_test.go`
 - [ ] **Step 14** — Wire `SetUnlockedRegions` to use full rebuild
