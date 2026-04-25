@@ -160,7 +160,7 @@ var Graces = map[uint32]GraceData{
 	0x00011950: G("Divine Gate Front Staircase (Enir-Ilim)"),
 
 	// --- Shadow of the Erdtree (DLC) — Shadow Keep ---
-	0x000119A5: G("Main Gate Plaza (Shadow Keep)"),
+	0x000119A5: B("Main Gate Plaza (Shadow Keep)"),
 	0x000119A6: G("Shadow Keep Main Gate (Shadow Keep)"),
 	0x000119AA: G("Church District Entrance (Shadow Keep, Church District)"),
 	0x000119AB: G("Sunken Chapel (Shadow Keep, Church District)"),
@@ -176,7 +176,7 @@ var Graces = map[uint32]GraceData{
 	0x000119B8: G("West Rampart (Shadow Keep)"),
 
 	// --- Shadow of the Erdtree (DLC) — Stone Coffin Fissure ---
-	0x00011A08: G("Garden of Deep Purple (Stone Coffin Fissure)"),
+	0x00011A08: B("Garden of Deep Purple (Stone Coffin Fissure)"),
 	0x00011A09: G("Stone Coffin Fissure (Stone Coffin Fissure)"),
 	0x00011A0A: G("Fissure Cross (Stone Coffin Fissure)"),
 	0x00011A0B: G("Fissure Waypoint (Stone Coffin Fissure)"),
@@ -186,7 +186,7 @@ var Graces = map[uint32]GraceData{
 	0x00011B34: B("Finger Birthing Grounds (Cathedral of Manus Metyr)"),
 
 	// --- Shadow of the Erdtree (DLC) — Midra's Manse ---
-	0x00011C60: G("Discussion Chamber (Midra's Manse)"),
+	0x00011C60: B("Discussion Chamber (Midra's Manse)"),
 	0x00011C61: G("Manse Hall (Midra's Manse)"),
 	0x00011C62: G("Midra's Library (Midra's Manse)"),
 	0x00011C63: G("Second Floor Chamber (Midra's Manse)"),
@@ -285,7 +285,7 @@ var Graces = map[uint32]GraceData{
 	0x000121DB: G("Taylew's Ruined Forge (Rauh Base)"),
 	0x0001223C: G("Rivermouth Cave (Gravesite Plain)"),
 	0x0001223D: G("Dragon's Pit (Gravesite Plain)"),
-	0x0001226F: G("Dragon's Pit Terminus (Jagged Peak)"),
+	0x0001226F: B("Dragon's Pit Terminus (Jagged Peak)"),
 
 	// --- Limgrave West ---
 	0x00012944: G("Church of Elleh (Limgrave West)"),
@@ -485,7 +485,7 @@ var Graces = map[uint32]GraceData{
 	// --- Shadow of the Erdtree — Castle Ensis ---
 	0x00012C15: G("Castle Ensis Checkpoint (Castle Ensis)"),
 	0x00012C16: G("Castle-Lord's Chamber (Castle Ensis)"),
-	0x00012C17: G("Ensis Moongazing Grounds (Castle Ensis)"),
+	0x00012C17: B("Ensis Moongazing Grounds (Castle Ensis)"),
 
 	// --- Shadow of the Erdtree — Cerulean Coast ---
 	0x00012C1F: G("Cerulean Coast (Cerulean Coast)"),
@@ -507,7 +507,7 @@ var Graces = map[uint32]GraceData{
 	// --- Shadow of the Erdtree — Abyssal Woods ---
 	0x00012C3C: G("Abyssal Woods (Abyssal Woods)"),
 	0x00012C3D: G("Divided Falls (Abyssal Woods)"),
-	0x00012C3E: G("Forsaken Graveyard (Abyssal Woods)"),
+	0x00012C3E: B("Forsaken Graveyard (Abyssal Woods)"),
 	0x00012C3F: G("Woodland Trail (Abyssal Woods)"),
 	0x00012C40: G("Church Ruins (Abyssal Woods)"),
 
@@ -533,7 +533,7 @@ var Graces = map[uint32]GraceData{
 	0x00012C72: G("Ravine North (Rauh Base)"),
 
 	// --- Shadow of the Erdtree — Scaduview ---
-	0x00012C82: G("Scaduview (Scaduview)"),
+	0x00012C82: B("Scaduview (Scaduview)"),
 	0x00012C83: G("Shadow Keep, Back Gate (Scaduview)"),
 	0x00012C87: G("Hinterland (Scaduview)"),
 	0x00012C88: G("Fingerstone Hill (Scaduview)"),
