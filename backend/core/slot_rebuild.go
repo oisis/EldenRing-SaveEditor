@@ -1,6 +1,9 @@
 package core
 
-import "fmt"
+import (
+	"encoding/binary"
+	"fmt"
+)
 
 // Section names emitted by buildSectionMap. Stable identifiers so callers
 // (rebuild logic, tests, diagnostics) can reference sections by name.
@@ -100,15 +103,24 @@ func validateSectionMap(sections []SectionRange) error {
 
 // RebuildSlot serializes a SaveSlot into a fresh 0x280000-byte buffer.
 //
-// Step 0 (current): identity passthrough — returns a copy of slot.Data.
-// Subsequent steps will replace this with a section-by-section rebuild
-// driven by SaveSlot.SectionMap, with unlocked_regions reserialized from
-// slot.UnlockedRegions (the only true variable-size section we need to
-// mutate for Stage 2 of the Invasion Regions feature).
+// Hybrid blob strategy:
+//   - Most sections are copied verbatim from slot.Data.
+//   - "unlocked_regions" is reserialized from slot.UnlockedRegions so the
+//     count header and id array stay consistent if the slice was mutated.
+//   - "dlc" and "player_data_hash" are anchored to their fixed offsets
+//     (DlcSectionOffset, HashOffset) — they always end the slot.
+//   - The "post_unlocked_regions" blob (everything between regions and DLC)
+//     absorbs any size delta produced by mutating UnlockedRegions:
+//       * regions shrank → blob is right-zero-padded to fill the gap;
+//       * regions grew   → trailing bytes of the blob are trimmed.
+//     Whether trimming is safe depends on slack at the blob's tail
+//     (Step 3 / spec/30 will quantify this).
+//
+// For an unmodified slot (len(UnlockedRegions) unchanged) this produces
+// byte-for-byte identical output to slot.Data.
 //
 // Reference: tmp/repos/er-save-manager/src/er_save_manager/parser/slot_rebuild.py
-// (rebuild_slot_with_map). Our hybrid approach treats most sections as opaque
-// blobs rather than parsing each into a struct.
+// (rebuild_slot_with_map).
 func RebuildSlot(slot *SaveSlot) ([]byte, error) {
 	if slot == nil {
 		return nil, fmt.Errorf("RebuildSlot: nil slot")
@@ -116,8 +128,75 @@ func RebuildSlot(slot *SaveSlot) ([]byte, error) {
 	if len(slot.Data) != SlotSize {
 		return nil, fmt.Errorf("RebuildSlot: slot.Data size %d, want %d", len(slot.Data), SlotSize)
 	}
+	if len(slot.SectionMap) == 0 {
+		return nil, fmt.Errorf("RebuildSlot: SectionMap not populated")
+	}
 
 	out := make([]byte, SlotSize)
-	copy(out, slot.Data)
+
+	// Empty / unparseable slot — single covering section, verbatim copy.
+	if len(slot.SectionMap) == 1 && slot.SectionMap[0].Name == SectionEmptySlot {
+		copy(out, slot.Data)
+		return out, nil
+	}
+
+	cursor := 0
+	for _, sec := range slot.SectionMap {
+		switch sec.Name {
+
+		case SectionUnlockedRegs:
+			if cursor+4+4*len(slot.UnlockedRegions) > DlcSectionOffset {
+				return nil, fmt.Errorf("RebuildSlot: unlocked_regions (count=%d) overflows DlcSectionOffset",
+					len(slot.UnlockedRegions))
+			}
+			binary.LittleEndian.PutUint32(out[cursor:], uint32(len(slot.UnlockedRegions)))
+			cursor += 4
+			for _, id := range slot.UnlockedRegions {
+				binary.LittleEndian.PutUint32(out[cursor:], id)
+				cursor += 4
+			}
+
+		case SectionPostUnlockedRegs:
+			// Stretch / shrink the blob to keep DLC anchored at DlcSectionOffset.
+			avail := DlcSectionOffset - cursor
+			if avail < 0 {
+				return nil, fmt.Errorf("RebuildSlot: cursor 0x%X already past DlcSectionOffset 0x%X",
+					cursor, DlcSectionOffset)
+			}
+			blob := slot.Data[sec.Start:sec.End]
+			n := len(blob)
+			if n > avail {
+				n = avail
+			}
+			copy(out[cursor:], blob[:n])
+			// Bytes [cursor+n, cursor+avail) stay zero (out is zero-initialised).
+			cursor += avail
+
+		case SectionDLC:
+			if cursor != DlcSectionOffset {
+				return nil, fmt.Errorf("RebuildSlot: DLC misaligned — cursor 0x%X, want 0x%X",
+					cursor, DlcSectionOffset)
+			}
+			copy(out[cursor:], slot.Data[sec.Start:sec.End])
+			cursor += sec.Size()
+
+		case SectionHash:
+			if cursor != HashOffset {
+				return nil, fmt.Errorf("RebuildSlot: hash misaligned — cursor 0x%X, want 0x%X",
+					cursor, HashOffset)
+			}
+			copy(out[cursor:], slot.Data[sec.Start:sec.End])
+			cursor += sec.Size()
+
+		default:
+			// Pre-regions blob and any future fixed-size sections.
+			copy(out[cursor:], slot.Data[sec.Start:sec.End])
+			cursor += sec.Size()
+		}
+	}
+
+	if cursor != SlotSize {
+		return nil, fmt.Errorf("RebuildSlot: ended at cursor 0x%X, want SlotSize 0x%X", cursor, SlotSize)
+	}
 	return out, nil
 }
