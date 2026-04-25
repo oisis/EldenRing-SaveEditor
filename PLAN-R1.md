@@ -74,9 +74,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Commit: `0fd1d56`
   - Round-trip: menu=4104B, trophy=52B, gaitem=112008B, tutorial=1032B, total=117196B
   - Files: `backend/core/section_menu.go`, `backend/core/section_menu_test.go`
-- [ ] **Step 7** — Pre-event_flags scalar block + EventFlags + terminator
-  - 9 scalar fields (3×u8, 5×u32, i32, u8); event_flags (0x1BF99F bytes); terminator (u8)
-  - Files: `backend/core/section_eventflags.go`
+- [x] **Step 7** — Pre-event_flags scalar block + EventFlags + terminator
+  - Commit: pending
+  - 11 fields (3×u8, u32, i32, u8, u32, u32, u8, u32, u32) = 29B + event_flags 0x1BF99F + 1B terminator
+  - Files: `backend/core/section_eventflags.go`, `backend/core/section_eventflags_test.go`
 - [ ] **Step 8** — Size-prefixed world sections (5×): field_area, world_area, world_geom_man, world_geom_man2, rend_man
   - Generic `SizePrefixedBlob{Size int32; Data []byte}` struct
   - Files: `backend/core/section_world_geom.go`
