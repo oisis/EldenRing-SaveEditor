@@ -94,10 +94,12 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Commit: `c46448c`
   - Total fixed 130B (12+12+16+8+32+50). DLCSection renamed to avoid clash with existing DlcSection* offset constants.
   - Files: `backend/core/section_trailing.go`, `backend/core/section_trailing_test.go`
-- [ ] **Step 12** — PlayerGameDataHash (dynamic size) + Rest tail padding
-  - Hash size = `slot_end - position_after_dlc`, not fixed 0x80
-  - Update `offset_defs.go`: `HashSize`/`DlcSectionOffset` become defaults, not absolute
-  - Files: `backend/core/section_hash.go`, `backend/core/offset_defs.go`
+- [x] **Step 12** — PlayerGameDataHash (fixed 128B) + Rest tail padding
+  - Commit: pending
+  - **MAJOR finding:** PC saves have hash at ~0x219A77 (NOT pinned to SlotSize-0x80) followed by ~419KB of zero padding. PS4 saves have hash at 0x27FF80 with zero rest.
+  - This means PC saves have ~419KB slack — Stage 2 region grow is unconstrained on PC. PS4 still requires elsewhere.
+  - Hash itself is fixed 128B (11×u32 + 0x54 raw). The "dynamic size" in spec/22 actually refers to the variable tail rest, not the hash itself.
+  - Files: `backend/core/section_hash.go`, `backend/core/section_hash_test.go`
 
 ### Integration
 
