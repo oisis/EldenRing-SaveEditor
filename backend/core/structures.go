@@ -205,8 +205,13 @@ type SaveSlot struct {
 	GaItemDataOffset       int // start of GaItemData section (distinct_acquired_items_count header)
 	ClearCountOffset       int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
 	EquipItemsIDOffset     int // start of EquippedItemsItemIds section
-	UnlockedRegionsOffset  int // start of unlocked_regions struct (count u32 + count*4 IDs)
-	UnlockedRegions        []uint32 // parsed unlocked region IDs (drives invasion / blue-summon eligibility)
+	UnlockedRegionsOffset int      // start of unlocked_regions struct (count u32 + count*4 IDs)
+	UnlockedRegions       []uint32 // parsed unlocked region IDs (drives invasion / blue-summon eligibility)
+
+	// SectionMap holds the section boundaries used by RebuildSlot. Populated
+	// after parsing finishes (or in a degraded form for empty / unparseable slots).
+	// Sections cover [0, SlotSize) contiguously with no gaps or overlaps.
+	SectionMap []SectionRange
 
 	// Tracked indices for type-segregated GaItem placement.
 	// The game expects AoW entries at low indices, then armor, then weapons.
@@ -280,6 +285,12 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	// (after BaseVersion, before PS5Activity), NOT at the fixed SlotSize-8 address.
 	// SlotSize-8 falls inside the PlayerGameDataHash region. The authoritative SteamID
 	// is read from UserData10 by the save_manager and propagated to slots from there.
+
+	// 8. Build section map for RebuildSlot. Failure here is non-fatal — we surface
+	// it as a warning so editing of fixed-offset fields still works.
+	if err := s.buildSectionMap(); err != nil {
+		s.Warnings = append(s.Warnings, "buildSectionMap: "+err.Error())
+	}
 	return nil
 }
 
