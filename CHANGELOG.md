@@ -4,6 +4,23 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feature/database-tab-owned-counts — owned/max counts in Item Database
+
+**Goal:** Show players how many of each item they currently own (in inventory and storage) and the per-slot max, directly in the Item Database tab — without switching to Owned Items.
+
+**Changes:**
+- `backend/vm/character_vm.go`: Added `BaseID` field to `ItemViewModel` so the frontend can match upgrade/infusion variants of the same weapon back to its base DB entry.
+- `frontend/src/components/DatabaseTab.tsx`:
+  - Fetches character via `GetCharacter` (refreshes on `inventoryVersion` bump).
+  - Builds a `Map<BaseID, {inv, storage}>` of owned counts (sums stack quantity for stackable, counts copies for non-stackable).
+  - New columns **Inventory** and **Storage** rendered as `owned / max` in every view (All Categories + per-category).
+  - **Category** column forced visible in "All Categories" regardless of column-visibility setting.
+  - Color coding: gray = 0, green = owned, amber = at/over max.
+- `frontend/src/App.tsx`: Passes `inventoryVersion` to `<DatabaseTab>` for live refresh after Add/Remove.
+- `frontend/wailsjs/go/models.ts`: Auto-regenerated bindings (added `baseId`).
+
+**Tests:** `go test ./backend/...` ✅, round-trip PS4/PC ✅, `tsc --noEmit` ✅, `make build` ✅.
+
 ### Branch: fix/dlc-map-reveal-v2 — DLC black tile removal (SOLVED)
 
 **Problem:** DLC "Shadow of the Erdtree" map had persistent black tiles that could not be removed via event flags, FoW bitfield, map items, or any known mechanism.

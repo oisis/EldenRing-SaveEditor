@@ -649,6 +649,7 @@ export namespace vm {
 	export class ItemViewModel {
 	    handle: number;
 	    id: number;
+	    baseId: number;
 	    name: string;
 	    category: string;
 	    subCategory: string;
@@ -669,6 +670,7 @@ export namespace vm {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.handle = source["handle"];
 	        this.id = source["id"];
+	        this.baseId = source["baseId"];
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.subCategory = source["subCategory"];

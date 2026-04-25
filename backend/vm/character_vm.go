@@ -12,6 +12,7 @@ import (
 type ItemViewModel struct {
 	Handle         uint32   `json:"handle"`
 	ID             uint32   `json:"id"`
+	BaseID         uint32   `json:"baseId"`
 	Name           string   `json:"name"`
 	Category       string   `json:"category"`
 	SubCategory    string   `json:"subCategory"`
@@ -173,6 +174,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 			items = append(items, ItemViewModel{
 				Handle:         item.GaItemHandle,
 				ID:             itemID,
+				BaseID:         baseID,
 				Name:           name,
 				Category:       category,
 				SubCategory:    db.GetItemSubCategory(itemID, itemData, category),
