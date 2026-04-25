@@ -486,6 +486,85 @@ func (a *App) SetSummoningPoolActivated(slotIndex int, poolID uint32, activated 
 	return nil
 }
 
+// GetUnlockedRegions returns every known invasion region annotated with the unlock state
+// from the specified character slot's UnlockedRegions list.
+func (a *App) GetUnlockedRegions(slotIndex int) ([]db.RegionEntry, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+
+	slot := &a.save.Slots[slotIndex]
+	entries := db.GetAllRegions()
+
+	unlocked := make(map[uint32]bool, len(slot.UnlockedRegions))
+	for _, id := range slot.UnlockedRegions {
+		unlocked[id] = true
+	}
+	for i := range entries {
+		entries[i].Unlocked = unlocked[entries[i].ID]
+	}
+	return entries, nil
+}
+
+// SetRegionUnlocked toggles a single invasion region. The slot is rebuilt
+// from scratch via core.SetUnlockedRegions, which dedupes + sorts the IDs
+// and produces a fresh 0x280000-byte buffer that absorbs the size delta in
+// the trailing zero padding.
+func (a *App) SetRegionUnlocked(slotIndex int, regionID uint32, unlocked bool) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.Version == 0 {
+		return fmt.Errorf("slot %d is empty", slotIndex)
+	}
+
+	// Build the new list: existing IDs ± regionID.
+	next := make([]uint32, 0, len(slot.UnlockedRegions)+1)
+	already := false
+	for _, id := range slot.UnlockedRegions {
+		if id == regionID {
+			already = true
+			if unlocked {
+				next = append(next, id)
+			}
+			continue
+		}
+		next = append(next, id)
+	}
+	if unlocked && !already {
+		next = append(next, regionID)
+	}
+	return core.SetUnlockedRegions(slot, next)
+}
+
+// BulkSetUnlockedRegions replaces the slot's region list with the given
+// IDs (deduped + sorted by core.SetUnlockedRegions). Used by the World tab
+// for per-area Unlock/Lock and the global Unlock All / Lock All actions.
+func (a *App) BulkSetUnlockedRegions(slotIndex int, regionIDs []uint32) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if slotIndex < 0 || slotIndex >= 10 {
+		return fmt.Errorf("invalid slot index")
+	}
+	a.pushUndo(slotIndex)
+
+	slot := &a.save.Slots[slotIndex]
+	if slot.Version == 0 {
+		return fmt.Errorf("slot %d is empty", slotIndex)
+	}
+	return core.SetUnlockedRegions(slot, regionIDs)
+}
+
 // GetColosseums returns all colosseums with unlock state from the specified character slot
 func (a *App) GetColosseums(slotIndex int) ([]db.ColosseumEntry, error) {
 	if a.save == nil {

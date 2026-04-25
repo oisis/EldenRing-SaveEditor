@@ -83,6 +83,15 @@ type ColosseumEntry struct {
 	Unlocked bool   `json:"unlocked"`
 }
 
+// RegionEntry represents an "unlocked region" — controls invasion eligibility,
+// blue summons, and the on-screen area label after teleport.
+type RegionEntry struct {
+	ID       uint32 `json:"id"`
+	Name     string `json:"name"`
+	Area     string `json:"area"`
+	Unlocked bool   `json:"unlocked"`
+}
+
 // GestureEntry represents a gesture with its unlock state.
 type GestureEntry struct {
 	ID       uint32 `json:"id"`
@@ -760,6 +769,27 @@ func GetAllColosseums() []ColosseumEntry {
 		return colosseums[i].Name < colosseums[j].Name
 	})
 	return colosseums
+}
+
+// GetAllRegions returns every known invasion-region entry from the database,
+// sorted by Area then Name. Unlocked is left at false; callers fill it in
+// from the per-slot UnlockedRegions list.
+func GetAllRegions() []RegionEntry {
+	entries := make([]RegionEntry, 0, len(data.Regions))
+	for id, r := range data.Regions {
+		entries = append(entries, RegionEntry{
+			ID:   id,
+			Name: r.Name,
+			Area: r.Area,
+		})
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Area != entries[j].Area {
+			return entries[i].Area < entries[j].Area
+		}
+		return entries[i].Name < entries[j].Name
+	})
+	return entries
 }
 
 // GetAllMapEntries returns all map region entries (visible + acquired + system) sorted by area then name.

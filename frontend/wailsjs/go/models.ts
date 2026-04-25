@@ -461,6 +461,24 @@ export namespace db {
 		}
 	}
 	
+	export class RegionEntry {
+	    id: number;
+	    name: string;
+	    area: string;
+	    unlocked: boolean;
+	
+	    static createFrom(source: any = {}) {
+	        return new RegionEntry(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.id = source["id"];
+	        this.name = source["name"];
+	        this.area = source["area"];
+	        this.unlocked = source["unlocked"];
+	    }
+	}
 	export class SummoningPoolEntry {
 	    id: number;
 	    name: string;

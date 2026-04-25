@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 
@@ -59,8 +59,10 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
     const [bossSort, setBossSort] = useState<'name' | 'defeated'>('name');
     const [bellBearings, setBellBearings] = useState<db.BellBearingEntry[]>([]);
     const [whetblades, setWhetblades] = useState<db.WhetbladeEntry[]>([]);
+    const [regionEntries, setRegionEntries] = useState<db.RegionEntry[]>([]);
     const [expandedBBCategories, setExpandedBBCategories] = useState<Record<string, boolean>>({});
     const [expandedCookbookCategories, setExpandedCookbookCategories] = useState<Record<string, boolean>>({});
+    const [expandedRegionAreas, setExpandedRegionAreas] = useState<Record<string, boolean>>({});
     const [expandedMapAreas, setExpandedMapAreas] = useState<Record<string, boolean>>({});
     const [skipBossArenas, setSkipBossArenas] = useState(true);
     const [questNPCs, setQuestNPCs] = useState<string[]>([]);
@@ -94,6 +96,7 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
             GetQuestNPCs().then(res => setQuestNPCs(res || [])),
             GetBellBearings(charIdx).then(res => setBellBearings(res || [])),
             GetWhetblades(charIdx).then(res => setWhetblades(res || [])),
+            GetUnlockedRegions(charIdx).then(res => setRegionEntries(res || [])),
         ]).finally(() => setLoading(false));
     };
     useEffect(() => { loadData(); }, [charIdx]);
@@ -204,6 +207,44 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
     const defeatedMain = mainBosses.filter(b => b.defeated).length;
     const activatedPools = pools.filter(p => p.activated).length;
     const unlockedColosseums = colosseums.filter(c => c.unlocked).length;
+
+    // --- Invasion Regions ---
+    const regionAreas = regionEntries.reduce((acc, r) => {
+        const a = r.area || 'Other';
+        (acc[a] ??= []).push(r);
+        return acc;
+    }, {} as Record<string, db.RegionEntry[]>);
+    const unlockedRegionsCount = regionEntries.filter(r => r.unlocked).length;
+
+    const handleRegionToggle = async (r: db.RegionEntry, unlocked: boolean) => {
+        await SetRegionUnlocked(charIdx, r.id, unlocked);
+        setRegionEntries(prev => prev.map(x => x.id === r.id ? {...x, unlocked} : x));
+        onMutate?.();
+    };
+    const handleUnlockAreaRegions = async (area: string) => {
+        const next = regionEntries.filter(r => r.unlocked || r.area === area).map(r => r.id);
+        await BulkSetUnlockedRegions(charIdx, next);
+        setRegionEntries(prev => prev.map(r => r.area === area ? {...r, unlocked: true} : r));
+        onMutate?.();
+    };
+    const handleLockAreaRegions = async (area: string) => {
+        const next = regionEntries.filter(r => r.unlocked && r.area !== area).map(r => r.id);
+        await BulkSetUnlockedRegions(charIdx, next);
+        setRegionEntries(prev => prev.map(r => r.area === area ? {...r, unlocked: false} : r));
+        onMutate?.();
+    };
+    const handleUnlockAllRegions = async () => {
+        if (!regionEntries.length) return;
+        await BulkSetUnlockedRegions(charIdx, regionEntries.map(r => r.id));
+        setRegionEntries(prev => prev.map(r => ({...r, unlocked: true})));
+        onMutate?.();
+    };
+    const handleLockAllRegions = async () => {
+        if (!regionEntries.some(r => r.unlocked)) return;
+        await BulkSetUnlockedRegions(charIdx, []);
+        setRegionEntries(prev => prev.map(r => ({...r, unlocked: false})));
+        onMutate?.();
+    };
 
     if (loading) return (
         <div className="py-16 flex flex-col items-center justify-center space-y-3">
@@ -611,6 +652,46 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                                     <span className={`text-[10px] truncate font-semibold ${w.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>{w.name}</span>
                                 </label>
                             ))}
+                        </div>
+                    </AccordionSection>
+
+                    {/* Invasion Regions */}
+                    <AccordionSection id="world-regions" title="Invasion Regions" progress={{current: unlockedRegionsCount, total: regionEntries.length}}
+                        actions={<>
+                            <button onClick={handleUnlockAllRegions} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <button onClick={handleLockAllRegions} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        </>}>
+                        <p className="text-[9px] text-muted-foreground/70 italic px-1 pb-2">
+                            Map regions stored in the save's Regions struct. Controls invasion eligibility (PvP / NPC) and blue summons.
+                        </p>
+                        <div className="accordion-grid">
+                            {Object.entries(regionAreas).sort().map(([area, rs]) => {
+                                const uc = rs.filter(r => r.unlocked).length;
+                                return (
+                                    <div key={area} className="accordion-grid-item border border-border/50 rounded-lg overflow-hidden">
+                                        <div className="flex items-center justify-between px-2 py-1.5 bg-muted/10 hover:bg-muted/20 transition-all gap-1">
+                                            <button onClick={() => setExpandedRegionAreas(p => ({...p, [area]: !p[area]}))} className="flex items-center gap-1.5 flex-1 text-left">
+                                                <svg className={`w-2.5 h-2.5 transition-transform ${expandedRegionAreas[area] ? 'rotate-90 text-primary' : 'text-muted-foreground'}`}
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
+                                                <span className="text-[9px] font-bold uppercase tracking-wider">{area}</span>
+                                            </button>
+                                            <MiniProgress current={uc} total={rs.length} />
+                                            <button onClick={() => handleUnlockAreaRegions(area)} className={`${btnSm} ml-1 hover:text-primary hover:border-primary/50`} title="Unlock all in area">+</button>
+                                            <button onClick={() => handleLockAreaRegions(area)} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`} title="Lock all in area">−</button>
+                                        </div>
+                                        {expandedRegionAreas[area] && (
+                                            <div className="px-2 py-1 space-y-0.5">
+                                                {rs.map(r => (
+                                                    <label key={r.id} className="flex items-center space-x-2 py-0.5 px-1 rounded hover:bg-muted/10 cursor-pointer">
+                                                        <Chk checked={r.unlocked} onChange={v => handleRegionToggle(r, v)} />
+                                                        <span className={`text-[10px] truncate font-semibold ${r.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>{r.name}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </div>
                     </AccordionSection>
                 </div>
