@@ -107,10 +107,11 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Commit: `8a58852`
   - Identity round-trip OK for PS4 + PC. Mutation test PC (+50 regions) re-parses cleanly with Level/Souls preserved. Shrink test PS4 (-5 regions) re-parses cleanly.
   - Files: `backend/core/slot_rebuild.go`, `backend/core/slot_rebuild_test.go`
-- [ ] **Step 14** — Wire `SetUnlockedRegions` to use full rebuild
-  - Replace shift-based code in `core/writer.go` with `RebuildSlot` call + offset recompute
-  - Round-trip test: Set→Save→Load→Get for PS4 + PC
-  - Files: `backend/core/writer.go`, `tests/`
+- [x] **Step 14** — Wire `SetUnlockedRegions` to use full rebuild
+  - Commit: pending
+  - Tests: in-memory dedup/sort, round-trip PS4 (+20 regions), round-trip PC (+80 regions). Player.Level + Souls preserved across all.
+  - Discovered ~400KB tail rest on every slot — spec/30 updated; slack is ample on both platforms.
+  - Files: `backend/core/writer.go`, `backend/core/writer_regions_test.go`, `spec/30-slot-rebuild-research.md`
 
 ### Verification & ship
 

@@ -122,3 +122,38 @@ back to Option B (full struct rebuild) and budget accordingly.
 
 Tracking decision in `ROADMAP.md` under
 "Invasion Regions Toggle" → Stage 2 entry.
+
+---
+
+## Update 2026-04-26 — original measurements were misleading
+
+After implementing the full sequential parser (R-1 Steps 4–13), the real
+slack picture turned out to be much more favourable than this section
+suggested. The original measurement looked at the gap between
+`unlocked_regions_end` and the **fixed** `DlcSectionOffset = 0x27FF4E`.
+That offset is a *convention* — every save we have happens to place DLC
+at exactly `SlotSize - 0xB2`, but it is not a pinned game-side offset.
+
+The full parser reaches end-of-data around byte ~2.2 MB for every active
+slot (PS4 + PC), leaving **408KB–432KB of zero tail padding** before the
+end of the 0x280000-byte slot. DLC is just the second-to-last fixed-size
+section *inside* `TrailingFixedBlock`; what looked like a "pinned" DLC
+position is simply where the section ends up on a typical save.
+
+| save             | slot | parsed (pos) | tail rest |
+|------------------|------|--------------|-----------|
+| oisis_pl-org PS4 | 0    | 2,212,520    | 408,920   |
+| oisis_pl-org PS4 | 1    | 2,189,717    | 431,723   |
+| ER0000.sl2 PC    | 0    | 2,202,359    | 419,081   |
+| ER0000.sl2 PC    | 1    | 2,204,780    | 416,660   |
+| ER0000.sl2 PC    | 2    | 2,189,228    | 432,212   |
+| ER0000.sl2 PC    | 3    | 2,196,222    | 425,218   |
+| ER0000.sl2 PC    | 4    | 2,188,767    | 432,673   |
+
+**Implication:** `RebuildSlot` (Step 13) followed by
+`SetUnlockedRegions` (Step 14) supports adding ~100,000 regions on every
+slot tested — Stage 2 is unconstrained for realistic input (≤ 78 regions).
+The Steam Deck test in Step 15 still gates the path, but the "Option B
+costs 15–25 h" budget paid for itself: now we have full sequential
+parsers for every section, ready for future weather/teleport/etc.
+features.

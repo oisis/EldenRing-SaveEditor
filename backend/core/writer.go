@@ -652,3 +652,69 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 
 	return nil
 }
+
+// SetUnlockedRegions replaces the slot's unlocked-regions list with the
+// given IDs (deduplicated, sorted ascending), rebuilds the slot data via
+// RebuildSlot, and refreshes dynamic offsets so subsequent reads/writes see
+// the new layout.
+//
+// This is the write entry point for the Invasion Regions feature. The
+// rebuild path means the call always succeeds regardless of how much
+// "slack" exists at the slot tail (full struct rebuild + tail zero pad).
+func SetUnlockedRegions(slot *SaveSlot, ids []uint32) error {
+	if slot == nil {
+		return fmt.Errorf("SetUnlockedRegions: nil slot")
+	}
+	if slot.Version == 0 {
+		return fmt.Errorf("SetUnlockedRegions: cannot modify empty slot")
+	}
+
+	// Dedup + sort ascending — matches er-save-manager invariant and ensures
+	// stable output across platforms.
+	seen := make(map[uint32]struct{}, len(ids))
+	deduped := make([]uint32, 0, len(ids))
+	for _, id := range ids {
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		deduped = append(deduped, id)
+	}
+	sortUint32Slice(deduped)
+
+	prev := slot.UnlockedRegions
+	prevData := slot.Data
+	slot.UnlockedRegions = deduped
+
+	rebuilt, err := RebuildSlot(slot)
+	if err != nil {
+		slot.UnlockedRegions = prev
+		slot.Data = prevData
+		return fmt.Errorf("SetUnlockedRegions: %w", err)
+	}
+	slot.Data = rebuilt
+
+	// Refresh offsets and section map. Failures here roll back the mutation.
+	if err := slot.calculateDynamicOffsets(); err != nil {
+		slot.UnlockedRegions = prev
+		slot.Data = prevData
+		return fmt.Errorf("SetUnlockedRegions: re-calc offsets: %w", err)
+	}
+	if err := slot.buildSectionMap(); err != nil {
+		// SectionMap rebuild failure is non-fatal — surface as a warning.
+		slot.Warnings = append(slot.Warnings, "SetUnlockedRegions: "+err.Error())
+	}
+	return nil
+}
+
+// sortUint32Slice sorts a []uint32 ascending in place.
+func sortUint32Slice(s []uint32) {
+	for i := 1; i < len(s); i++ {
+		v := s[i]
+		j := i - 1
+		for ; j >= 0 && s[j] > v; j-- {
+			s[j+1] = s[j]
+		}
+		s[j+1] = v
+	}
+}
