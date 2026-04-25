@@ -98,17 +98,41 @@ Unlock/lock individual Sites of Grace. Especially valuable on PS4 where no other
 
 **Known issue:** DLC (Shadow of the Erdtree) Sites of Grace and map regions are not yet supported. See DLC Progress Manager.
 
-### ✅ Summoning Pools Toggle 🟢
+### 🐛 Summoning Pools Toggle — UI works, in-game effect missing 🟡
 Enable/disable summoning pool (Martyr Effigy) activation via event flags.
 
-**Implementation:** `backend/db/data/summoning_pools.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
-- ~162 summoning pools (base game + Shadow of the Erdtree DLC) mapped to event flag IDs
-- Legacy dungeon pools (10000040+) use precomputed lookup table entries already in `event_flags.go`
-- Open-world pools (1035530040+) also covered via lookup table
+**Implementation:** `backend/db/data/summoning_pools.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldTab.tsx`
+- 165 summoning pools (base game + Shadow of the Erdtree DLC) mapped to event flag IDs
+- Legacy dungeon pools (10000040+) use precomputed lookup table entries in `event_flags.go`
+- Open-world pools (1037530040+) also covered via lookup table (275 entries)
 - `SummoningPoolEntry` type with: id, name, region, activated state
 - `GetSummoningPools(slotIndex)` / `SetSummoningPoolActivated(slotIndex, poolID, activated)` in `app.go`
 - UI: region-grouped with expand/collapse, Activate All per region, global Activate All
-- Integrated as "Summoning Pools" sub-tab in World Progress tab
+- Integrated as "Summoning Pools" section in World → Exploration sub-tab
+
+**Bug status (2026-04-25):** UI toggles correctly, no errors, but **toggled pools are not active in-game** (tested offline to avoid bans). All pools affected, not specific ones.
+
+**Diagnostic checklist:**
+- [x] Database covers all pool IDs (165 pools, more than `ClayAmore/ER-Save-Editor` reference of 162)
+- [x] Lookup table `event_flags.go` includes pool IDs with byte/bit offsets bit-for-bit identical to `ER-Save-Editor`
+- [x] BST resolver produces identical offsets (verified `1037530040`, `1051570840`, `1060440040`)
+- [x] `SetEventFlag` flips the correct bit in `slot.Data[EventFlagsOffset:]` slice (backing array — modifications propagate)
+- [x] `SaveSlot.Write()` does NOT overwrite event flag region (only writes level/stats/name/runes)
+- [x] `SaveFile()` serializes `slot.Data` directly without rebuild from parsed structs
+
+**Remaining hypotheses (next steps when revisiting):**
+1. **Persistence test missing** — write integration test: `LoadSave → Set → SaveFile → LoadSave → Get` to verify the bit survives the round-trip. If it doesn't survive, look at `core/writer.go` or encryption pipeline.
+2. **Game requires secondary state** — bit may be set in event_flags but game might also check:
+   - `unlocked_regions` for the pool's map area (suggests dependency on Invasion Regions feature)
+   - Trophy data section (`trophy_data` 52 bytes)
+   - `world_area` / `gaitem_game` cross-references
+3. **Hash region (`CSPlayerGameDataHash`, last 0x80 bytes of slot)** — currently preserved verbatim. Game may validate it against runtime state when DLC is installed (DLC-specific check?).
+4. **PS4-specific** — PS4 saves are unencrypted, but PC SteamID-bound encryption may interact with our flag write.
+
+**Action plan after Invasion Regions (`feature/invasion-regions`) merges:**
+- Write `tests/event_flag_persistence_test.go` covering Set → Save → Load → Get round-trip
+- If round-trip persists → investigate game-side requirements (compare with reference save where pools are activated)
+- If round-trip fails → trace where the bit gets lost in the writer/encryption pipeline
 
 ### ✅ Colosseum Toggle 🟢
 Unlock colosseums via their respective event flags.
