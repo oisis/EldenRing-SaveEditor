@@ -71,7 +71,7 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Reference: `parser/world.py` `RideGameData`, `BloodStain`
   - Files: `backend/core/section_types.go`, `backend/core/section_world.go`, `backend/core/section_world_test.go`
 - [x] **Step 6** — MenuSaveLoad + TrophyEquipData + GaitemGameData + TutorialData
-  - Commit: pending
+  - Commit: `0fd1d56`
   - Round-trip: menu=4104B, trophy=52B, gaitem=112008B, tutorial=1032B, total=117196B
   - Files: `backend/core/section_menu.go`, `backend/core/section_menu_test.go`
 - [ ] **Step 7** — Pre-event_flags scalar block + EventFlags + terminator
