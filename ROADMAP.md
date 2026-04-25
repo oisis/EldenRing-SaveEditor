@@ -134,6 +134,29 @@ Enable/disable summoning pool (Martyr Effigy) activation via event flags.
 - If round-trip persists → investigate game-side requirements (compare with reference save where pools are activated)
 - If round-trip fails → trace where the bit gets lost in the writer/encryption pipeline
 
+### 🚧 Invasion Regions Toggle 🟡
+Unlock invasion / blue summon regions (per-slot `unlocked_regions` struct, 78 region IDs).
+
+**Stage 1 — read-only ✅** (branch `feature/invasion-regions`, commit `90db34b`):
+- 78 region entries ported from `er-save-manager/data/regions.py` (`backend/db/data/regions.go`)
+- Parser populates `SaveSlot.UnlockedRegions []uint32` from `gesturesOff + 4`
+- `GetUnlockedRegions(slotIdx)` Wails binding merges DB with slot state
+- UI: "Invasion Regions" accordion in World → Unlocks (read-only checkboxes, per-area expand/collapse)
+
+**Stage 2 — write ⛔ BLOCKED** (uncommitted, broken):
+- Initial implementation in `core/writer.go::SetUnlockedRegions()` used **shift-based** approach (memmove tail by delta, update downstream offsets)
+- **Failure modes:**
+  1. Typical saves have **0 bytes slack** between dynamic chain end and `DlcSectionOffset` (0x27FF4E) → expand fails for almost any region
+  2. Even when slack check passes (compress, or partial-fit expand for Farum Azula/Haligtree), saves load but game refuses to start: "save corrupted"
+  3. Downstream sections (PS5 activity, net_man checksum, hash region) likely have integrity validation that fails when content is repositioned
+- **Conclusion:** in-place patching cannot work for variable-size sections in this save format
+
+**Path forward:** requires **Full Slot Rebuild (R-1)** — see entry at the bottom of Phase 6. Estimated 6-10h: parsers + serializers for `world_area`, `player_pos` (57B), `net_man` (131,076B), `weather` (12B), `time` (12B), `base_ver` (16B), `steam_id` (8B), `ps5_act` (32B), `dlc` (50B). Reference: `er-save-manager/src/er_save_manager/slot_rebuild.py`.
+
+**Action items before next iteration:**
+- Revert uncommitted Stage 2 changes (`writer.go`, `app.go`, `WorldTab.tsx`, regenerated bindings) to keep `feature/invasion-regions` branch clean — Stage 1 commit `90db34b` is the safe state
+- Decide: implement R-1 first as a generic mechanism, then layer regions write on top
+
 ### ✅ Colosseum Toggle 🟢
 Unlock colosseums via their respective event flags.
 
@@ -234,6 +257,26 @@ Toggle grid for all 64 gestures.
 - Integrated as "Gestures" sub-tab in World Progress tab
 
 **Known issue:** Toggling gestures in the binary array changes the save correctly, but gestures may not appear in-game. The game likely requires BOTH the binary array entry AND the corresponding event flag (range 60800–60849) to be set. Event flag mapping per gesture is not yet implemented — see spec/08-spells-gestures.md. Fixing this requires reverse-engineering the exact flag↔gesture mapping.
+
+### 🔲 AoW Acquisition Flag — auto-mark Ash of War as collected 🟡
+Adding an Ash of War via Item Database puts the AoW into the player's inventory but does NOT mark it as acquired in the world. The original drop (corpse / enemy / chest) still spawns the same AoW in-game, allowing duplicate pickup and corrupting expected progression flow.
+
+**Investigation needed:**
+- Each AoW in the game has a paired "acquired" event flag (similar pattern to map fragments / cookbooks)
+- Reverse-engineer the flag↔AoW item ID mapping from `tmp/repos/er-save-manager` or by binary diff (save before/after picking up AoW in-game)
+- On `AddItemsToCharacter` for an AoW item type, automatically set the corresponding acquisition flag
+- Add reverse logic: removing AoW via UI should clear the flag (optional — may be noisy)
+
+### 🔲 Bell Bearing Merchant Kill Flag — auto-mark merchant as killed 🟡
+Adding a Bell Bearing via Item Database adds the item to inventory but the merchant NPC who originally drops it remains alive in-game. Player can re-kill the merchant for a duplicate bell bearing or trigger broken NPC dialogue. Twin Maiden Husks won't recognize the bell bearing as legitimately acquired.
+
+**Investigation needed:**
+- Map each bell bearing item ID → merchant NPC kill event flag (Nomadic Merchants, Imp statues, Hermit Merchants, etc.)
+- Some bell bearings come from non-merchant sources (boss drops) — distinguish per-item
+- On `AddItemsToCharacter` for a bell bearing, automatically set the merchant's death flag
+- Twin Maiden Husks may also need the "bell bearing turned in" flag to expand their wares — verify in-game
+
+**Reference data:** `tmp/repos/ER-Save-Editor/src/db/items.rs` may have the mapping; otherwise reverse-engineer via binary diff.
 
 ### 🔲 Spirit Ash Upgrade Level Editing 🟢
 Edit upgrade levels (+0 to +10) for spirit ashes already in inventory.
@@ -490,6 +533,21 @@ Reduced tab count for better UX.
 - Click outside to close, contrast backgrounds per theme
 - All `toast.success/error/loading` redirected to console via `lib/toast.ts` wrapper — no popup toasts
 - Session log with colored severity (INFO/WARN/ERROR)
+
+### 🔲 Console Log Order & Auto-Scroll 🟢
+Three related UX issues with the Quake console — log visibility is degraded for long-running operations.
+
+**Bugs:**
+1. **No auto-scroll** — when new logs arrive, the console does not scroll to show the latest entry. User has to manually scroll to bottom on every operation.
+2. **Click-outside collapses console** — currently clicking anywhere outside the console (e.g. on the main UI to interact with the app) closes it. Should stay open until user explicitly toggles via backtick / close button — user wants the console persistent while working.
+3. **Log order should be reversed** — newest log entry should appear at the **top**, not the bottom. Eliminates the need for auto-scroll entirely (latest is always visible) and aligns with how the user reads operation feedback.
+
+**Files:** `frontend/src/components/QuakeConsole.tsx` (or wherever the console renders), `frontend/src/lib/toast.ts` (log buffer ordering).
+
+**Acceptance:**
+- New logs prepended to the visible list (newest on top)
+- Console open state persists across UI clicks; only backtick / explicit close toggles it
+- Verify scroll position is preserved when user has scrolled mid-list (don't jump on new log if user is reading older entries)
 
 ### ✅ Character Tab Enhancements 🟢
 **Implementation:** `frontend/src/components/CharacterTab.tsx`
