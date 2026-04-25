@@ -1,5 +1,5 @@
 import {useEffect, useState} from 'react';
-import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions} from '../../wailsjs/go/main/App';
+import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 
@@ -208,13 +208,43 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
     const activatedPools = pools.filter(p => p.activated).length;
     const unlockedColosseums = colosseums.filter(c => c.unlocked).length;
 
-    // --- Invasion Regions (read-only) ---
+    // --- Invasion Regions ---
     const regionAreas = regionEntries.reduce((acc, r) => {
         const a = r.area || 'Other';
         (acc[a] ??= []).push(r);
         return acc;
     }, {} as Record<string, db.RegionEntry[]>);
     const unlockedRegionsCount = regionEntries.filter(r => r.unlocked).length;
+
+    const handleRegionToggle = async (r: db.RegionEntry, unlocked: boolean) => {
+        await SetRegionUnlocked(charIdx, r.id, unlocked);
+        setRegionEntries(prev => prev.map(x => x.id === r.id ? {...x, unlocked} : x));
+        onMutate?.();
+    };
+    const handleUnlockAreaRegions = async (area: string) => {
+        const next = regionEntries.filter(r => r.unlocked || r.area === area).map(r => r.id);
+        await BulkSetUnlockedRegions(charIdx, next);
+        setRegionEntries(prev => prev.map(r => r.area === area ? {...r, unlocked: true} : r));
+        onMutate?.();
+    };
+    const handleLockAreaRegions = async (area: string) => {
+        const next = regionEntries.filter(r => r.unlocked && r.area !== area).map(r => r.id);
+        await BulkSetUnlockedRegions(charIdx, next);
+        setRegionEntries(prev => prev.map(r => r.area === area ? {...r, unlocked: false} : r));
+        onMutate?.();
+    };
+    const handleUnlockAllRegions = async () => {
+        if (!regionEntries.length) return;
+        await BulkSetUnlockedRegions(charIdx, regionEntries.map(r => r.id));
+        setRegionEntries(prev => prev.map(r => ({...r, unlocked: true})));
+        onMutate?.();
+    };
+    const handleLockAllRegions = async () => {
+        if (!regionEntries.some(r => r.unlocked)) return;
+        await BulkSetUnlockedRegions(charIdx, []);
+        setRegionEntries(prev => prev.map(r => ({...r, unlocked: false})));
+        onMutate?.();
+    };
 
     if (loading) return (
         <div className="py-16 flex flex-col items-center justify-center space-y-3">
@@ -625,31 +655,35 @@ export function WorldTab({charIdx, onMutate}: WorldTabProps) {
                         </div>
                     </AccordionSection>
 
-                    {/* Invasion Regions (read-only — write coming soon) */}
+                    {/* Invasion Regions */}
                     <AccordionSection id="world-regions" title="Invasion Regions" progress={{current: unlockedRegionsCount, total: regionEntries.length}}
-                        actions={<span className="text-[8px] font-black uppercase tracking-widest text-amber-400/80 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded">Read-only</span>}>
+                        actions={<>
+                            <button onClick={handleUnlockAllRegions} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <button onClick={handleLockAllRegions} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
+                        </>}>
                         <p className="text-[9px] text-muted-foreground/70 italic px-1 pb-2">
                             Map regions stored in the save's Regions struct. Controls invasion eligibility (PvP / NPC) and blue summons.
-                            Editing requires variable-size slot rebuild — coming in next commit.
                         </p>
                         <div className="accordion-grid">
                             {Object.entries(regionAreas).sort().map(([area, rs]) => {
                                 const uc = rs.filter(r => r.unlocked).length;
                                 return (
                                     <div key={area} className="accordion-grid-item border border-border/50 rounded-lg overflow-hidden">
-                                        <div className="flex items-center justify-between px-2 py-1.5 bg-muted/10 hover:bg-muted/20 transition-all">
+                                        <div className="flex items-center justify-between px-2 py-1.5 bg-muted/10 hover:bg-muted/20 transition-all gap-1">
                                             <button onClick={() => setExpandedRegionAreas(p => ({...p, [area]: !p[area]}))} className="flex items-center gap-1.5 flex-1 text-left">
                                                 <svg className={`w-2.5 h-2.5 transition-transform ${expandedRegionAreas[area] ? 'rotate-90 text-primary' : 'text-muted-foreground'}`}
                                                     fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M9 5l7 7-7 7" /></svg>
                                                 <span className="text-[9px] font-bold uppercase tracking-wider">{area}</span>
                                             </button>
                                             <MiniProgress current={uc} total={rs.length} />
+                                            <button onClick={() => handleUnlockAreaRegions(area)} className={`${btnSm} ml-1 hover:text-primary hover:border-primary/50`} title="Unlock all in area">+</button>
+                                            <button onClick={() => handleLockAreaRegions(area)} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`} title="Lock all in area">−</button>
                                         </div>
                                         {expandedRegionAreas[area] && (
                                             <div className="px-2 py-1 space-y-0.5">
                                                 {rs.map(r => (
-                                                    <label key={r.id} className="flex items-center space-x-2 py-0.5 px-1 rounded opacity-80 cursor-not-allowed" title="Read-only — write support coming soon">
-                                                        <Chk checked={r.unlocked} onChange={() => {}} />
+                                                    <label key={r.id} className="flex items-center space-x-2 py-0.5 px-1 rounded hover:bg-muted/10 cursor-pointer">
+                                                        <Chk checked={r.unlocked} onChange={v => handleRegionToggle(r, v)} />
                                                         <span className={`text-[10px] truncate font-semibold ${r.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>{r.name}</span>
                                                     </label>
                                                 ))}

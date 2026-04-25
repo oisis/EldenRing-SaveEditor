@@ -26,6 +26,10 @@ export function BulkSetGesturesUnlocked(arg1, arg2, arg3) {
   return window['go']['main']['App']['BulkSetGesturesUnlocked'](arg1, arg2, arg3);
 }
 
+export function BulkSetUnlockedRegions(arg1, arg2) {
+  return window['go']['main']['App']['BulkSetUnlockedRegions'](arg1, arg2);
+}
+
 export function CloneSlot(arg1, arg2) {
   return window['go']['main']['App']['CloneSlot'](arg1, arg2);
 }
@@ -268,6 +272,10 @@ export function SetMapRegionFlags(arg1, arg2, arg3) {
 
 export function SetQuestStep(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetQuestStep'](arg1, arg2, arg3);
+}
+
+export function SetRegionUnlocked(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetRegionUnlocked'](arg1, arg2, arg3);
 }
 
 export function SetSlotActivity(arg1, arg2) {

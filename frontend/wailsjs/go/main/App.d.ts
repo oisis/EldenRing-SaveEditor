@@ -18,6 +18,8 @@ export function BulkSetCookbooksUnlocked(arg1:number,arg2:Array<number>,arg3:boo
 
 export function BulkSetGesturesUnlocked(arg1:number,arg2:Array<number>,arg3:boolean):Promise<void>;
 
+export function BulkSetUnlockedRegions(arg1:number,arg2:Array<number>):Promise<void>;
+
 export function CloneSlot(arg1:number,arg2:number):Promise<void>;
 
 export function CloseAndDownload(arg1:string):Promise<string>;
@@ -139,6 +141,8 @@ export function SetMapFlag(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 export function SetMapRegionFlags(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetQuestStep(arg1:number,arg2:string,arg3:number):Promise<void>;
+
+export function SetRegionUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function SetSlotActivity(arg1:number,arg2:boolean):Promise<void>;
 
