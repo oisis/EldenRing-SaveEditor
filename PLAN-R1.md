@@ -90,9 +90,10 @@ Legend: `[x]` done · `[~]` in progress · `[ ]` pending
   - Commit: `58c0380`
   - Confirmed fixed 131,076B (u32 + 0x20000B opaque)
   - Files: `backend/core/section_netman.go`, `backend/core/section_netman_test.go`
-- [ ] **Step 11** — Weather + Time + BaseVersion + SteamID + PS5Activity + DLC
-  - Trailing fixed-size structs (12B + 12B + 16B + 8B + 32B + 50B)
-  - Files: `backend/core/section_trailing.go`
+- [x] **Step 11** — Weather + Time + BaseVersion + SteamID + PS5Activity + DLC
+  - Commit: pending
+  - Total fixed 130B (12+12+16+8+32+50). DLCSection renamed to avoid clash with existing DlcSection* offset constants.
+  - Files: `backend/core/section_trailing.go`, `backend/core/section_trailing_test.go`
 - [ ] **Step 12** — PlayerGameDataHash (dynamic size) + Rest tail padding
   - Hash size = `slot_end - position_after_dlc`, not fixed 0x80
   - Update `offset_defs.go`: `HashSize`/`DlcSectionOffset` become defaults, not absolute
