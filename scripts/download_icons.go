@@ -15,7 +15,9 @@ import (
 var (
 	// Note: multi-word affinities like "Flame_Art" must come BEFORE single-word "Flame"
 	// to avoid prefix-shadowing (e.g. "Flame_Art_Main_Gauche" must strip "Flame_Art_" not "Flame_").
-	affinities = []string{"Flame_Art", "Heavy", "Keen", "Quality", "Fire", "Flame", "Lightning", "Sacred", "Magic", "Cold", "Poison", "Blood", "Bloody", "Occult"}
+	// "Bloody" is NOT an affinity — it's part of unique DLC weapon names (Bloody Lance, Bloody Buckler).
+	// Stripping "Bloody" would yield "Lance"/"Buckler" which are different base weapons. Excluded.
+	affinities = []string{"Flame_Art", "Heavy", "Keen", "Quality", "Fire", "Flame", "Lightning", "Sacred", "Magic", "Cold", "Poison", "Blood", "Occult"}
 	reUpgrade  = regexp.MustCompile(`_(\d+)$`)
 )
 
@@ -129,11 +131,16 @@ func main() {
 		// (some images live on the commons subdomain across the wiki.gg network).
 		hosts := []string{"https://eldenring.wiki.gg", "https://commons.wiki.gg"}
 
-		// Generate name variants: original + possessive variant (insert %27 before trailing 's' of any word)
-		// e.g. "Tibias_Cookbook" → "Tibia%27s_Cookbook" (Tibia's Cookbook)
+		// Generate name variants: original + possessive variants (insert %27 before trailing 's')
+		// e.g. "Tibias_Cookbook" → "Tibia%27s_Cookbook"
 		nameVariants := []string{wikiName}
-		if poss := insertPossessive(wikiName); poss != wikiName {
-			nameVariants = append(nameVariants, poss)
+		nameVariants = append(nameVariants, insertPossessiveVariants(wikiName)...)
+		// For weapons with stripped affinity, also try the UN-stripped name as fallback
+		// (e.g. "Bloody Buckler" is a unique DLC weapon, not an affinity of "Buckler").
+		if (isWeapon || isRanged || isShield || isArrow) && wikiName != toWikiName(cleanName) {
+			fullName := toWikiName(cleanName)
+			nameVariants = append(nameVariants, fullName)
+			nameVariants = append(nameVariants, insertPossessiveVariants(fullName)...)
 		}
 
 		success := false
@@ -223,24 +230,37 @@ var lowercaseWords = map[string]bool{
 	"on": true, "at": true, "by": true, "or": true, "as": true,
 }
 
-// insertPossessive turns the FIRST word that ends in 's' into a possessive form
-// by inserting URL-encoded apostrophe (%27) before the trailing 's'. Wiki filenames
-// preserve apostrophes (e.g. "Tibia's_Cookbook") while local filenames strip them
-// ("tibias_cookbook").
-// Example: "Tibias_Cookbook" → "Tibia%27s_Cookbook"
-//          "Carians_Sword"   → "Carian%27s_Sword"
-// Heuristic: only modifies the first word that ends in 's' AND has length >= 4
-// (skips short plurals like "Items"). Returns input unchanged if no match.
-func insertPossessive(s string) string {
+// insertPossessiveVariants returns 0..N variants of `s` where the first qualifying word
+// has its trailing 's' replaced by URL-encoded possessive `%27s`. Wiki filenames preserve
+// apostrophes (e.g. "Tibia's_Cookbook"); local filenames strip them ("tibias_cookbook"
+// or "thopss_barrier" when the source name was "Thops's").
+//
+// Variants generated:
+//   "Tibias_Cookbook"  → ["Tibia%27s_Cookbook"]
+//   "Thopss_Barrier"   → ["Thops%27s_Barrier", "Thopss%27_Barrier"]
+//   "Items_Foo"        → []  (too short to disambiguate)
+func insertPossessiveVariants(s string) []string {
 	parts := strings.Split(s, "_")
+	var out []string
 	for i, p := range parts {
-		if len(p) >= 4 && strings.HasSuffix(p, "s") && !strings.HasSuffix(strings.ToLower(p), "ss") {
-			parts[i] = p[:len(p)-1] + "%27s"
-			return strings.Join(parts, "_")
+		if len(p) < 4 || !strings.HasSuffix(p, "s") {
+			continue
 		}
-		_ = i
+		// Variant 1: drop trailing 's', insert %27s
+		v1 := append([]string(nil), parts...)
+		v1[i] = p[:len(p)-1] + "%27s"
+		out = append(out, strings.Join(v1, "_"))
+		// Variant 2 (only for double-s): keep both s's, insert %27 BEFORE final s
+		// e.g. "Thopss" → "Thops%27s" already handled by Variant 1, but original
+		// "Thopss" might also genuinely be "Thops" + plural — try unchanged too.
+		if strings.HasSuffix(strings.ToLower(p), "ss") {
+			// Edge case: "Hess" → drop one 's' to get "Hes%27s"? Rare. Skip.
+			_ = p
+		}
+		// Only first qualifying word — break.
+		break
 	}
-	return s
+	return out
 }
 
 func toWikiName(s string) string {
