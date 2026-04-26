@@ -89,8 +89,9 @@ Gdy gracz wybiera w-grze preset z Mirror Favorites i akceptuje "Apply to charact
    ⚠️ INVERSED względem `preset.BodyType` w naszym `presets.go` (1=male, 0=female).
 4. Wyczyść equipment slot zależny od płci (helmet, chest etc.) — gra zapisuje 0xFFFFFFFF do GaItem handle slotów.
    Powód: oryginalny equipment może nie pasować do nowego modelu ciała.
-5. Adjust trailing FaceData flags (slot[fd+0x12C..0x12E]):
+5. Adjust trailing FaceData flags (slot[fd+0x124..0x126]):
    - Zaobserwowane: M→F apply zmienia `01 01 01` na `01 00 00`. Semantyka tych 2 bitów nieznana.
+   - Source: `tmp/re-character/facedata_dump.txt` (Trailing bytes 0x112..0x12E).
 ```
 
 **Kluczowy wniosek**: aby NASZ edytor poprawnie zaaplikował preset M↔F, musimy mieć dostęp do **prawdziwych internal PartsId** dla każdego modelu (face, hair, eye, eyebrow, beard, eyepatch, decal, eyelash). Te wartości NIE są sekwencyjne i NIE da się ich wyliczyć z UI sliderów typu `1, 2, 3, ...`. Patrz: female hair PartsId 124 (0x7C) dla UI hair index 1 (pierwsza dostępna w-grze opcja).
@@ -123,6 +124,12 @@ Pisze bezpośrednio do FaceData blob slotu. Ten sam problem — bez prawdziwych 
 **B. Nowy feature: "Apply from Mirror Favorites slot N to character".** Gracz tworzy/importuje preset do Mirror Favorites (lub używa już istniejącego), klikamy "Apply to character" i edytor kopiuje bajty z Mirror slotu zgodnie z algorytmem powyżej. **Cross-gender działa automatycznie** bo preset ma prawdziwe PartsId.
 
 Opcja **B** jest tańsza w implementacji i wykorzystuje istniejące presety gracza.
+
+### Status implementacji (Apr 2026)
+
+- ✅ **Apply Mirror Favorites slot N to character** (Opcja B) — zaimplementowane, `app.go::ApplyMirrorFavoriteToCharacter`. Działa poprawnie dla preset stworzonych w-grze (lustro w Roundtable Hold). Test: `app_apply_mirror_test.go` (RE-zweryfikowany na `tmp/re-character/ER0000-before/after.sl2`).
+- ❌ **Add to Mirror dla Type B (żeńskich)** — UI guard w `AppearanceTab.tsx::handleWriteFavorites` blokuje zapis. `WriteSelectedToFavorites` produkuje slot z `Model IDs = 0` (bald + default męska twarz w grze). Naprawa wymaga Opcji A.
+- 🔜 **Re-source `presets.go` jako raw 0x130 B blobs** (Opcja A) — TODO, przyszły task. Po implementacji można usunąć UI guard i `WriteSelectedToFavorites` będzie produkował poprawne Mirror sloty dla obu płci.
 
 ---
 

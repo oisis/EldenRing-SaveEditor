@@ -308,25 +308,27 @@ Edit New Game+ cycle (0-7) with automatic event flag synchronization.
 Apply community-created character appearance presets (face, body, skin, cosmetics, gender, voice).
 Write presets to in-game Mirror Favorites (CSMenuSystemSaveLoad in UserData10).
 
-**Implementation:** `backend/core/offset_defs.go`, `backend/db/data/presets.go`, `backend/db/data/presets_generated.go`, `backend/db/data/hair_mapping.go`, `scripts/parse_presets.go`, `app.go`, `frontend/src/components/AppearanceTab.tsx`
+**Implementation:** `backend/core/offset_defs.go`, `backend/db/data/presets.go`, `backend/db/data/presets_generated.go`, `backend/db/data/hair_mapping.go`, `scripts/parse_presets.go`, `app.go`, `frontend/src/components/CharacterTab.tsx`, `frontend/src/components/AppearanceTab.tsx`, `spec/31-appearance-presets.md`
 - FaceData blob layout fully mapped (303 bytes): header, 8 model IDs, 64 face shape params, 7 body proportions, 91 skin/cosmetics bytes
+- **Mirror Favorites preset slot layout reverse-engineered** (`spec/31`) — 0x130 bytes per slot, 15 slots in CSMenuSystemSaveLoad, 5 segments map directly to FaceData
+- Apply onto character via `ApplyMirrorFavoriteToCharacter(charIdx, mirrorIdx)` — copies bytes from Mirror slot to FaceData (works cross-gender M↔F because Mirror slots hold real PartsIds when preset is created in-game), flips `Gender`, zeros trailing flags `0x125..0x126`, preserves `unk0x6c`. Tested byte-for-byte against in-game apply on `tmp/re-character/`.
 - Hair model IDs use non-sequential lookup table (`hair_mapping.go`) — UI position ≠ PartsId
 - Other male model IDs use PartsId = UI - 1 (bone structure, beard, eyebrow, eyelash, tattoo, eyepatch)
-- Female model IDs skipped entirely (non-sequential mapping unknown for face/hair/eyebrow)
 - VoiceType added to PlayerGameData (offset -245 from MagicOffset)
-- 20 presets from eldensliders.com (parsed by `scripts/parse_presets.go` from `tmp/characters/characters.md`)
-- Mirror Favorites: writes to CSMenuSystemSaveLoad safe slots (0, 10-14) to avoid ProfileSummary collision
+- 20+ presets from eldensliders.com (parsed by `scripts/parse_presets.go` from `tmp/characters/characters.md`)
+- Mirror Favorites: writes to all 15 slots (after ProfileSummary offset fix removed band-aid `FavSafeSlots`)
 - Favorites header: 0xFACE marker, 0x11D0 constant, body_type inverted (0=male, 1=female)
-- FaceModel forced to 0 in Favorites (non-zero causes invisible body in Mirror preview)
-- UI: checkbox selection, image zoom modal, Apply (1 preset) / Add to Mirror (N presets), Remove from Favorites
+- UI (CharacterTab): checkbox selection, image zoom modal, **Add to Mirror** (writes Type A presets) → ✓ on Mirror slot to apply. ✗ to remove from Mirror.
+- UI guard: blocks Add to Mirror for Type B presets (would corrupt slot — see below)
 - Undo supported via standard pushUndo mechanism
 
 **Known limitations / TODO:**
 - ✅ Male hair mapping complete: all 37 styles (UI 1-37) confirmed via save slot analysis + Mirror Favorites preset extraction
 - ✅ DLC hair positions (UI 32-37) confirmed
-- Female model IDs (face, hair, eyebrow) not written — mapping is non-sequential, no lookup table yet
-- FaceModel (bone structure) forced to 0 in Favorites — non-zero causes invisible body in Mirror
-- Other model categories (beard, eyebrow, etc.) may also need lookup tables like hair — not yet verified beyond UI-1
+- ✅ Cross-gender apply works via Mirror Favorites Apply (real PartsIds from in-game presets)
+- ❌ `WriteSelectedToFavorites` skips Model IDs for Type B (no female PartsId mapping in `presets.go`) — UI guard blocks this path until fixed
+- 🔜 Re-source `presets.go` Type B as raw 0x130 B blobs sourced from real save files — would unblock Add to Mirror for female presets
+- Equipment clearing (game zeroes gender-specific gear on apply) intentionally NOT replicated — preserves player's gear at cost of possibly invisible armor for cross-gender slots
 
 ### 🔲 Player Coordinates / Teleportation 🔵
 Edit CSPlayerCoords section (0x3D bytes) — position, mapID, angle.

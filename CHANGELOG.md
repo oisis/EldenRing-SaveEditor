@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/apply-mirror-favorite — Apply in-game Mirror Favorites preset onto character (cross-gender works) + remove buggy direct preset apply
+
+**Goal:** Implement the in-game "apply preset to character" action that the player triggers at the Roundtable Hold mirror, so the editor can do it without launching the game. As a side effect, eliminate the long-standing cross-gender bug where applying a Type B preset produced a bald, male-faced character.
+
+**Why this works (RE):**
+The game's apply algorithm copies five FaceData segments verbatim from a Mirror Favorites preset slot to the character's FaceData blob: 32 B Model IDs (real PartsIds, not UI indices), 64 B face shape, 7 B body proportions, 91 B skin & cosmetics. The 64 B `unk0x6c` block is preserved unchanged (per-character state, not preset-encoded). `slot.Player.Gender` is set from `preset.body_type` (inverted: Mirror `body_type=0` → `Gender=1` male; `body_type=1` → `Gender=0` female). Trailing flags at FaceData `0x125..0x126` are zeroed. Equipment is NOT cleared (game does, but we leave gear intact — user's choice). Verified on real saves (`tmp/re-character/ER0000-{before,after}.sl2` byte-for-byte) and in-game on Steam Deck (cross-gender M↔F applied on slots 0 and 4 with `tmp/re-character/ER0000-2-presets.sl2`).
+
+**Why direct apply was removed:**
+`ApplyAppearancePreset` (the old "Apply to Character" button) skipped Model IDs entirely for Type B presets — there is no female PartsId mapping in `presets.go`, only male hair via `LookupMaleHairPartsID`. Result: every Type B apply produced a character with `face=0, hair=0, ...` which the game renders as default male model + bald, ignoring the female `Gender` field. The new Mirror-Favorites-based apply sidesteps this entirely because Mirror slots hold real game-generated PartsIds (when the player creates the preset in-game). Apply to Character is now redundant — workflow is: Add to Mirror (Type A) or create preset in-game (Type B) → click ✓ on Mirror slot.
+
+**Change:**
+- `app.go`:
+    - **New:** `ApplyMirrorFavoriteToCharacter(charIndex, mirrorSlotIndex)` — validates indices + FACE magic, copies 5 FaceData segments, preserves `unk0x6c`, flips Gender, zeros trailing flags. Pushes undo.
+    - **Removed:** `ApplyAppearancePreset` (~80 lines including `LookupMaleHairPartsID` call site). The lookup table itself is retained — still used by `WriteSelectedToFavorites` for Type A.
+- `backend/core/offset_defs.go`: corrected stale comments (`FavOffMarker`, `FavOffSkin = 91 B not 69 B`, `FavOffUnkBlock`, `FavOffBody`).
+- `frontend/src/components/CharacterTab.tsx`:
+    - Added ✓ button next to × per active Mirror slot → `ApplyMirrorFavoriteToCharacter`.
+    - Added Type B guard in `handleWriteFavorites` (Add to Mirror) — blocks with toast: `Type B (female) presets cannot be written to Mirror — would create bald, male-faced slot. Create the preset in-game instead.`
+    - Removed `handleApplyPreset`, `applyingPreset`/`confirmApply` state, "Apply" + "Confirm" buttons, `ApplyAppearancePreset` import.
+    - Updated tooltip text to describe new flow.
+- `frontend/src/components/AppearanceTab.tsx` (preview-only readOnly tab): mirrored same removals + guard for consistency.
+- `frontend/wailsjs/go/main/App.{d.ts,js}`: regenerated — `ApplyAppearancePreset` removed, `ApplyMirrorFavoriteToCharacter(arg1: number, arg2: number): Promise<void>` added.
+- `spec/31-appearance-presets.md`: corrected trailing-flag offset (`0x124..0x126`, was `0x12C..0x12E` — RE-verified via `tmp/re-character/facedata_dump.txt`); added implementation status section.
+
+**Tests:**
+- `app_apply_mirror_test.go` (new) — `TestApplyMirrorFavoriteToCharacter` reproduces the in-game M→F apply on `ER0000-before.sl2`, asserts byte-for-byte match with `ER0000-after.sl2` for ModelIDs/FaceShape/Body/Skin segments + Gender flip + `unk0x6c` preservation + trailing flags. `TestApplyMirrorFavoriteToCharacter_Errors` covers no-save / bad indices.
+- `go test ./backend/... .` — all suites pass.
+- `make build` — full Wails build OK.
+- **Manual in-game (Steam Deck):** applied Mirror slot 0 (female preset 1) → char slot 4 (male) and Mirror slot 1 (male preset) → char slot 0 (female). Both characters render correctly post-apply, gender flipped, voice changed, model/hair/decals match preset. Other slots untouched, equipment intact, no crashes.
+
+**Known limitations / future:**
+- `WriteSelectedToFavorites` still skips Model IDs for Type B presets (the underlying bug — UI guard now blocks the bad path). Resolved via separate task: re-source `presets.go` Type B as raw 0x130-byte blobs.
+- Equipment clearing (game zeroes gender-specific gear on apply) is intentionally NOT replicated — preserves player's gear at the cost of possibly invisible armor for cross-gender slots (no crash, just visual).
+
 ### Branch: fix/profile-summary-offset — Fix wrong UserData10 ProfileSummary offsets (was corrupting Mirror Favorites slot 1)
 
 **Goal:** Reverse-engineer the real UserData10 layout from real saves and fix our wrong ProfileSummary read/write offsets which had been silently corrupting Mirror Favorites preset slot 1 on every save.
