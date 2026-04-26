@@ -1515,7 +1515,7 @@ func (a *App) ResetMapExploration(slotIndex int) error {
 }
 
 // RemoveFogOfWar fills the exploration bitfield with 0xFF, removing all Fog of War.
-// See spec/27-fog-of-war.md for details.
+// See spec/27-map-reveal.md §4 for details.
 func (a *App) RemoveFogOfWar(slotIndex int) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
