@@ -82,6 +82,10 @@ export function GetAshOfWarFlags(arg1) {
   return window['go']['main']['App']['GetAshOfWarFlags'](arg1);
 }
 
+export function GetBellBearingItemIDs() {
+  return window['go']['main']['App']['GetBellBearingItemIDs']();
+}
+
 export function GetBellBearings(arg1) {
   return window['go']['main']['App']['GetBellBearings'](arg1);
 }

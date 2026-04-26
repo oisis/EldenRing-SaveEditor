@@ -250,28 +250,42 @@ Toggle grid for all 64 gestures.
 
 **Known issue:** Toggling gestures in the binary array changes the save correctly, but gestures may not appear in-game. The game likely requires BOTH the binary array entry AND the corresponding event flag (range 60800–60849) to be set. Event flag mapping per gesture is not yet implemented — see spec/08-spells-gestures.md. Fixing this requires reverse-engineering the exact flag↔gesture mapping.
 
-### 🔲 AoW Acquisition Flag — auto-mark Ash of War as collected 🟡
-Adding an Ash of War via Item Database puts the AoW into the player's inventory but does NOT mark it as acquired in the world. The original drop (corpse / enemy / chest) still spawns the same AoW in-game, allowing duplicate pickup and corrupting expected progression flow.
+### ✅ AoW Acquisition Flag — auto-mark Ash of War as collected 🟡
+Adding an Ash of War via Item Database now also sets the duplication event flag so the AoW is recognised as acquired by the world.
 
-**Investigation needed:**
-- Each AoW in the game has a paired "acquired" event flag (similar pattern to map fragments / cookbooks)
-- Reverse-engineer the flag↔AoW item ID mapping from `tmp/repos/er-save-manager` or by binary diff (save before/after picking up AoW in-game)
-- On `AddItemsToCharacter` for an AoW item type, automatically set the corresponding acquisition flag
-- Add reverse logic: removing AoW via UI should clear the flag (optional — may be noisy)
+**Implementation:** `backend/db/data/ash_of_war_flags.go`, `app.go`
+- `AshOfWarFlags` map (flagID → AoW name, 116 entries from `er-save-manager/event_flags_db.py`)
+- `AoWItemToFlagID` map (item ID → flag ID, 116/116 coverage matching DB)
+- `AddItemsToCharacter` calls `db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)` whenever the added ID is in the map
+- Removing an AoW via UI does **not** clear the flag (intentional — flag is "ever acquired", noise-free)
+
+### ✅ Bell Bearing Acquisition + Inventory Sync — single source of truth 🟡
+Bell Bearings are managed exclusively from **World → Unlocks → Bell Bearings**. The toggle now adds the matching key item to inventory on unlock and removes it from inventory + storage on lock, so the acquisition flag and the inventory item never drift apart.
+
+**Implementation:** `backend/db/data/bell_bearing_flags.go`, `app.go`, `frontend/src/components/DatabaseTab.tsx`, `frontend/src/components/InventoryTab.tsx`
+- `BellBearingItemToFlagID` (62 entries) — generated from name match between `BellBearings` (er-save-manager event_flags_db) and `key_items.go` BB entries; 59 exact matches + 3 manual aliases (Kalé/Kale, Spell-Machinist, String-seller). Cut-content `Nomadic [11]` (ban_risk) excluded.
+- `BellBearingFlagToItemID` — auto-derived reverse map for the World tab toggle.
+- `SetBellBearingUnlocked` / `BulkSetBellBearings` now call `syncBellBearingItem` (mirrors the Whetblade pattern): unlock → add 1 to inventory if absent; lock → remove from inventory **and** storage.
+- `AddItemsToCharacter` keeps the AoW-style flag hook for defense-in-depth, but Bell Bearings are no longer reachable from there.
+- New Wails method `GetBellBearingItemIDs() []uint32`. Frontend uses it to (a) hide BBs from the Item Database and (b) render them as `readOnly` (no Remove / no Select) in the Inventory tab.
+- Test: `bell_bearing_flags_test.go` verifies coverage and flag-existence.
 
 ### 🔲 Bell Bearing Merchant Kill Flag — auto-mark merchant as killed 🟡
-Adding a Bell Bearing via Item Database adds the item to inventory but the merchant NPC who originally drops it remains alive in-game. Player can re-kill the merchant for a duplicate bell bearing or trigger broken NPC dialogue. Twin Maiden Husks won't recognize the bell bearing as legitimately acquired.
+The acquisition flag (above) is enough for Twin Maiden Husks to expand wares, but the **merchant NPC who originally drops the BB remains alive in-game**. Player can re-kill the merchant for a duplicate, or trigger broken NPC dialogue.
 
-**Investigation needed:**
-- Map each bell bearing item ID → merchant NPC kill event flag (Nomadic Merchants, Imp statues, Hermit Merchants, etc.)
-- Some bell bearings come from non-merchant sources (boss drops) — distinguish per-item
-- On `AddItemsToCharacter` for a bell bearing, automatically set the merchant's death flag
-- Twin Maiden Husks may also need the "bell bearing turned in" flag to expand their wares — verify in-game
+**Investigation needed (future work):**
+- Map each merchant BB item ID → merchant NPC kill event flag (Nomadic, Hermit, Imp, etc.)
+- Some BBs come from non-merchant sources (boss drops, dead bodies) — distinguish per-item
+- Likely overlaps with quest_flags_db.py "Picking up X's Bell Bearing" flag groups in `tmp/repos/er-save-manager`
+- Once mapped: extend `AddItemsToCharacter` to set both acquisition flag and kill flag
 
-**Reference data:** `tmp/repos/ER-Save-Editor/src/db/items.rs` may have the mapping; otherwise reverse-engineer via binary diff.
+### ✅ Spirit Ash Upgrade Level Editing 🟢
+Pick the upgrade level (+0 to +10) when adding a spirit ash from the Item Database.
 
-### 🔲 Spirit Ash Upgrade Level Editing 🟢
-Edit upgrade levels (+0 to +10) for spirit ashes already in inventory.
+**Implementation:** `frontend/src/App.tsx`, `frontend/src/components/GeneralTab.tsx`, `frontend/src/components/DatabaseTab.tsx`, `app.go`
+- Each upgrade tier is a distinct item ID in `backend/db/data/ashes.go` (`baseID + N` for `+N`); editing in-place would still rewrite the inventory record, so the simpler “pick on add” flow is what we ship
+- Add Settings exposes an `upgradeAsh` slider (0-10), persisted per-character
+- `AddItemsToCharacter` resolves `finalID = id + uint32(upgradeAsh)` for items with `category == "ashes"`
 
 ### ✅ Talisman Pouch Slots 🟢
 Edit number of unlocked talisman slots (0-3 additional, total 1-4).

@@ -282,6 +282,13 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
 			}
 		}
+
+		// Auto-set Bell Bearing acquisition flag so Twin Maiden Husks expand their wares.
+		if flagID, ok := data.BellBearingItemToFlagID[id]; ok {
+			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
+			}
+		}
 	}
 	return nil
 }
@@ -1071,7 +1078,10 @@ func (a *App) GetBellBearings(slotIndex int) ([]db.BellBearingEntry, error) {
 	return entries, nil
 }
 
-// SetBellBearingUnlocked sets or clears the unlock flag for a bell bearing
+// SetBellBearingUnlocked sets or clears the acquisition flag for a bell bearing
+// and synchronises the corresponding key item in the inventory:
+//   - unlocked=true  → set flag, add 1 of the BB key item to inventory if absent
+//   - unlocked=false → clear flag, remove the BB key item from inventory and storage
 func (a *App) SetBellBearingUnlocked(slotIndex int, flagID uint32, unlocked bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -1084,7 +1094,38 @@ func (a *App) SetBellBearingUnlocked(slotIndex int, flagID uint32, unlocked bool
 	if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
 		return fmt.Errorf("event flags offset not computed for slot %d", slotIndex)
 	}
-	return db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, unlocked)
+	if err := db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, unlocked); err != nil {
+		return err
+	}
+	syncBellBearingItem(slot, flagID, unlocked)
+	return nil
+}
+
+// syncBellBearingItem adds or removes the BB key item from a slot's inventory/storage
+// to keep it in sync with the acquisition flag. No-op when the flag has no item mapping.
+func syncBellBearingItem(slot *core.SaveSlot, flagID uint32, unlocked bool) {
+	itemID, ok := data.BellBearingFlagToItemID[flagID]
+	if !ok {
+		return
+	}
+	if unlocked {
+		alreadyHave := false
+		for _, gID := range slot.GaMap {
+			if gID == itemID {
+				alreadyHave = true
+				break
+			}
+		}
+		if !alreadyHave {
+			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
+		}
+		return
+	}
+	for handle, gID := range slot.GaMap {
+		if gID == itemID {
+			_ = core.RemoveItemFromSlot(slot, handle, true, true)
+		}
+	}
 }
 
 // GetWhetblades returns all whetblades with unlock state from the specified character slot
@@ -1254,7 +1295,8 @@ func (a *App) BulkSetAshOfWarFlags(slotIndex int, flagIDs []uint32, unlocked boo
 	return nil
 }
 
-// BulkSetBellBearings sets multiple bell bearing flags at once (single undo).
+// BulkSetBellBearings sets multiple bell bearing flags at once (single undo)
+// and keeps the matching inventory items in sync via syncBellBearingItem.
 func (a *App) BulkSetBellBearings(slotIndex int, flagIDs []uint32, unlocked bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -1270,8 +1312,20 @@ func (a *App) BulkSetBellBearings(slotIndex int, flagIDs []uint32, unlocked bool
 	flags := slot.Data[slot.EventFlagsOffset:]
 	for _, id := range flagIDs {
 		_ = db.SetEventFlag(flags, id, unlocked)
+		syncBellBearingItem(slot, id, unlocked)
 	}
 	return nil
+}
+
+// GetBellBearingItemIDs returns all bell bearing key-item IDs the editor knows about.
+// The frontend uses this list to (a) hide BBs from the Item Database and
+// (b) render BBs as read-only in the Inventory tab — managed solely via World → Unlocks.
+func (a *App) GetBellBearingItemIDs() []uint32 {
+	out := make([]uint32, 0, len(data.BellBearingItemToFlagID))
+	for id := range data.BellBearingItemToFlagID {
+		out = append(out, id)
+	}
+	return out
 }
 
 // GetMapProgress returns all map region flags with their current state
