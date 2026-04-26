@@ -3,100 +3,98 @@ package data
 // GestureEmptySentinel is the value used for empty gesture slots in the save file.
 const GestureEmptySentinel = uint32(0xFFFFFFFE)
 
-// GestureDef defines a gesture with both possible body-type variant IDs.
-// Some gestures have a fixed ID (same for all characters); others have two
-// variants: EvenID (body type B) and OddID = EvenID+1 (body type A).
-// Source: binary analysis of real save files (PC + PS4), spec/08-spells-gestures.md.
+// GestureDef defines a single gesture. The ID is the canonical save-slot ID
+// the game writes into the gesture array. All vanilla gesture IDs are odd —
+// previous versions of this editor encoded an "EvenID/OddID body type" theory
+// that turned out to be wrong (the game silently ignored even values, leaving
+// edited gestures invisible in-game). Source: er-save-manager/data/gestures.py.
 type GestureDef struct {
 	Name     string
 	Category string
-	EvenID   uint32 // primary ID — used by body type B (or fixed ID for non-variable gestures)
-	OddID    uint32 // alternate ID — EvenID+1 for variable gestures, 0 if fixed
+	ID       uint32   // canonical gesture slot ID written to GestureGameData (always odd)
+	ItemID   uint32   // matching key item ID in the inventory (0x4000xxxx / 0x401EA7xx)
+	Flags    []string // "cut_content" | "pre_order" | "ban_risk" | "dlc_duplicate"
 }
 
-// AllGestures is the canonical list of all known gestures.
-// Order: by category, then by ID.
+// AllGestures is the canonical list of all known gestures (51 base + 6 DLC).
+// Cut-content entries (e.g. "The Carian Oath", "Fetal Position") are kept so
+// existing saves that already contain them can be displayed correctly.
 var AllGestures = []GestureDef{
 	// Greetings
-	{Name: "Bow", Category: "Greetings", EvenID: 1, OddID: 0},                    // fixed odd
-	{Name: "Polite Bow", Category: "Greetings", EvenID: 2, OddID: 3},             // variable
-	{Name: "My Thanks", Category: "Greetings", EvenID: 4, OddID: 5},              // variable
-	{Name: "Curtsy", Category: "Greetings", EvenID: 6, OddID: 7},                 // variable
-	{Name: "Reverential Bow", Category: "Greetings", EvenID: 8, OddID: 9},        // variable
-	{Name: "My Lord", Category: "Greetings", EvenID: 10, OddID: 11},              // variable
-	{Name: "Warm Welcome", Category: "Greetings", EvenID: 13, OddID: 0},          // fixed odd
-	{Name: "Wave", Category: "Greetings", EvenID: 15, OddID: 0},                  // fixed odd
-	{Name: "Casual Greeting", Category: "Greetings", EvenID: 16, OddID: 17},      // variable
-	{Name: "Strength!", Category: "Greetings", EvenID: 18, OddID: 19},            // variable
-	{Name: "As You Wish", Category: "Greetings", EvenID: 20, OddID: 21},          // variable
+	{ID: 1, Name: "Bow", Category: "Greetings", ItemID: 0x40002328},
+	{ID: 3, Name: "Polite Bow", Category: "Greetings", ItemID: 0x40002329},
+	{ID: 5, Name: "My Thanks", Category: "Greetings", ItemID: 0x4000232A},
+	{ID: 7, Name: "Curtsy", Category: "Greetings", ItemID: 0x4000232B},
+	{ID: 9, Name: "Reverential Bow", Category: "Greetings", ItemID: 0x4000232C},
+	{ID: 11, Name: "My Lord", Category: "Greetings", ItemID: 0x4000232D},
+	{ID: 13, Name: "Warm Welcome", Category: "Greetings", ItemID: 0x4000232E},
+	{ID: 15, Name: "Wave", Category: "Greetings", ItemID: 0x4000232F},
+	{ID: 17, Name: "Casual Greeting", Category: "Greetings", ItemID: 0x40002330},
+	{ID: 19, Name: "Strength!", Category: "Greetings", ItemID: 0x40002331},
+	{ID: 21, Name: "As You Wish", Category: "Greetings", ItemID: 0x40002332},
+	{ID: 229, Name: "Let Us Go Together", Category: "Greetings", ItemID: 0x401EA7AB}, // DLC
 	// Gesturing
-	{Name: "Point Forwards", Category: "Gesturing", EvenID: 41, OddID: 0},        // fixed odd
-	{Name: "Point Upwards", Category: "Gesturing", EvenID: 43, OddID: 0},         // fixed odd
-	{Name: "Point Downwards", Category: "Gesturing", EvenID: 45, OddID: 0},       // fixed odd
-	{Name: "Beckon", Category: "Gesturing", EvenID: 47, OddID: 0},                // fixed odd
-	{Name: "Wait!", Category: "Gesturing", EvenID: 49, OddID: 0},                 // fixed odd
-	{Name: "Calm Down!", Category: "Gesturing", EvenID: 50, OddID: 0},            // fixed even
-	{Name: "Nod In Thought", Category: "Gesturing", EvenID: 60, OddID: 61},       // variable
+	{ID: 41, Name: "Point Forwards", Category: "Gesturing", ItemID: 0x40002333},
+	{ID: 43, Name: "Point Upwards", Category: "Gesturing", ItemID: 0x40002334},
+	{ID: 45, Name: "Point Downwards", Category: "Gesturing", ItemID: 0x40002335},
+	{ID: 47, Name: "Beckon", Category: "Gesturing", ItemID: 0x40002336},
+	{ID: 49, Name: "Wait!", Category: "Gesturing", ItemID: 0x40002337},
+	{ID: 51, Name: "Calm Down!", Category: "Gesturing", ItemID: 0x40002338},
+	{ID: 61, Name: "Nod In Thought", Category: "Gesturing", ItemID: 0x40002339},
+	{ID: 225, Name: "The Two Fingers", Category: "Gesturing", ItemID: 0x401EA7AA}, // DLC
 	// Submissive
-	{Name: "Extreme Repentance", Category: "Submissive", EvenID: 80, OddID: 81},  // variable
-	{Name: "Grovel For Mercy", Category: "Submissive", EvenID: 82, OddID: 83},    // variable
+	{ID: 81, Name: "Extreme Repentance", Category: "Submissive", ItemID: 0x4000233A},
+	{ID: 83, Name: "Grovel For Mercy", Category: "Submissive", ItemID: 0x4000233B},
 	// Battle
-	{Name: "Rallying Cry", Category: "Battle", EvenID: 101, OddID: 0},            // fixed odd
-	{Name: "Heartening Cry", Category: "Battle", EvenID: 102, OddID: 0},          // fixed
-	{Name: "By My Sword", Category: "Battle", EvenID: 104, OddID: 105},           // variable
-	{Name: "Hoslow's Oath", Category: "Battle", EvenID: 106, OddID: 107},         // variable
-	{Name: "Fire Spur Me", Category: "Battle", EvenID: 108, OddID: 109},          // variable
-	{Name: "The Carian Oath", Category: "Battle", EvenID: 110, OddID: 0},         // fixed
+	{ID: 101, Name: "Rallying Cry", Category: "Battle", ItemID: 0x4000233C},
+	{ID: 103, Name: "Heartening Cry", Category: "Battle", ItemID: 0x4000233D},
+	{ID: 105, Name: "By My Sword", Category: "Battle", ItemID: 0x4000233E},
+	{ID: 107, Name: "Hoslow's Oath", Category: "Battle", ItemID: 0x4000233F},
+	{ID: 109, Name: "Fire Spur Me", Category: "Battle", ItemID: 0x40002340},
+	{ID: 111, Name: "The Carian Oath", Category: "Battle", ItemID: 0x40002341, Flags: []string{"cut_content", "ban_risk"}},
+	{ID: 223, Name: "May the Best Win", Category: "Battle", ItemID: 0x401EA7A9}, // DLC
 	// Celebration
-	{Name: "Bravo!", Category: "Celebration", EvenID: 120, OddID: 121},            // variable
-	{Name: "Jump for Joy", Category: "Celebration", EvenID: 141, OddID: 0},        // fixed odd
-	{Name: "Triumphant Delight", Category: "Celebration", EvenID: 142, OddID: 143}, // variable
-	{Name: "Fancy Spin", Category: "Celebration", EvenID: 144, OddID: 0},          // fixed
-	{Name: "Finger Snap", Category: "Celebration", EvenID: 146, OddID: 147},       // variable
+	{ID: 121, Name: "Bravo!", Category: "Celebration", ItemID: 0x40002342},
+	{ID: 141, Name: "Jump for Joy", Category: "Celebration", ItemID: 0x40002343},
+	{ID: 143, Name: "Triumphant Delight", Category: "Celebration", ItemID: 0x40002344},
+	{ID: 145, Name: "Fancy Spin", Category: "Celebration", ItemID: 0x40002345},
+	{ID: 147, Name: "Finger Snap", Category: "Celebration", ItemID: 0x40002346},
 	// Emotion
-	{Name: "Dejection", Category: "Emotion", EvenID: 161, OddID: 0},              // fixed odd
-	{Name: "What Do You Want?", Category: "Emotion", EvenID: 196, OddID: 197},    // variable
+	{ID: 161, Name: "Dejection", Category: "Emotion", ItemID: 0x40002347},
+	{ID: 197, Name: "What Do You Want?", Category: "Emotion", ItemID: 0x40002350},
 	// Resting
-	{Name: "Patches' Crouch", Category: "Resting", EvenID: 180, OddID: 181},      // variable
-	{Name: "Crossed Legs", Category: "Resting", EvenID: 182, OddID: 183},         // variable
-	{Name: "Rest", Category: "Resting", EvenID: 185, OddID: 0},                   // fixed odd
-	{Name: "Sitting Sideways", Category: "Resting", EvenID: 186, OddID: 187},     // variable
-	{Name: "Dozing Cross-Legged", Category: "Resting", EvenID: 188, OddID: 189},  // variable
-	{Name: "Spread Out", Category: "Resting", EvenID: 190, OddID: 191},           // variable
-	{Name: "Fetal Position", Category: "Resting", EvenID: 192, OddID: 0},         // fixed
-	{Name: "Balled Up", Category: "Resting", EvenID: 194, OddID: 195},            // variable
+	{ID: 181, Name: "Patches' Crouch", Category: "Resting", ItemID: 0x40002348},
+	{ID: 183, Name: "Crossed Legs", Category: "Resting", ItemID: 0x40002349},
+	{ID: 185, Name: "Rest", Category: "Resting", ItemID: 0x4000234A},
+	{ID: 187, Name: "Sitting Sideways", Category: "Resting", ItemID: 0x4000234B},
+	{ID: 189, Name: "Dozing Cross-Legged", Category: "Resting", ItemID: 0x4000234C},
+	{ID: 191, Name: "Spread Out", Category: "Resting", ItemID: 0x4000234D},
+	{ID: 193, Name: "Fetal Position", Category: "Resting", ItemID: 0x4000234E, Flags: []string{"cut_content", "ban_risk"}},
+	{ID: 195, Name: "Balled Up", Category: "Resting", ItemID: 0x4000234F},
 	// Prayer
-	{Name: "Prayer", Category: "Prayer", EvenID: 200, OddID: 201},                // variable
-	{Name: "Desperate Prayer", Category: "Prayer", EvenID: 202, OddID: 0},        // fixed
-	{Name: "Rapture", Category: "Prayer", EvenID: 204, OddID: 205},               // variable
-	{Name: "Erudition", Category: "Prayer", EvenID: 206, OddID: 207},             // variable
-	{Name: "Outer Order", Category: "Prayer", EvenID: 208, OddID: 0},             // fixed
-	{Name: "Inner Order", Category: "Prayer", EvenID: 210, OddID: 211},           // variable
-	{Name: "Golden Order Totality", Category: "Prayer", EvenID: 212, OddID: 213}, // variable
+	{ID: 201, Name: "Prayer", Category: "Prayer", ItemID: 0x40002351},
+	{ID: 203, Name: "Desperate Prayer", Category: "Prayer", ItemID: 0x40002352},
+	{ID: 205, Name: "Rapture", Category: "Prayer", ItemID: 0x40002353},
+	{ID: 207, Name: "Erudition", Category: "Prayer", ItemID: 0x40002355},
+	{ID: 209, Name: "Outer Order", Category: "Prayer", ItemID: 0x40002356},
+	{ID: 211, Name: "Inner Order", Category: "Prayer", ItemID: 0x40002357},
+	{ID: 213, Name: "Golden Order Totality", Category: "Prayer", ItemID: 0x40002358},
+	{ID: 231, Name: "O Mother", Category: "Prayer", ItemID: 0x401EA7AC}, // DLC
 	// Special
-	{Name: "The Ring", Category: "Special", EvenID: 216, OddID: 0},               // fixed
-	{Name: "The Ring (Co-op)", Category: "Special", EvenID: 218, OddID: 219},     // variable
-	// DLC — Shadow of the Erdtree
-	{Name: "Ring of Miquella", Category: "Special", EvenID: 220, OddID: 0},       // fixed
-	{Name: "May the Best Win", Category: "Battle", EvenID: 222, OddID: 223},      // variable
-	{Name: "The Two Fingers", Category: "Gesturing", EvenID: 224, OddID: 0},      // fixed
-	{Name: "DLC Gesture (226)", Category: "Special", EvenID: 226, OddID: 227},    // variable, unknown name
-	{Name: "Let Us Go Together", Category: "Greetings", EvenID: 228, OddID: 0},   // fixed
-	{Name: "O Mother", Category: "Prayer", EvenID: 230, OddID: 231},              // variable
-	{Name: "DLC Gesture (232)", Category: "Special", EvenID: 232, OddID: 0},      // fixed, unknown name
+	{ID: 217, Name: "The Ring (Pre-Order)", Category: "Special", ItemID: 0x40002359, Flags: []string{"pre_order", "ban_risk"}},
+	{ID: 219, Name: "The Ring (Co-op)", Category: "Special", ItemID: 0x4000235A},
+	{ID: 221, Name: "?GoodsName?", Category: "Special", ItemID: 0x40002354, Flags: []string{"cut_content", "ban_risk"}},
+	{ID: 227, Name: "Ring of Miquella (Pre-Order)", Category: "Special", ItemID: 0x401EA7A8, Flags: []string{"pre_order", "ban_risk"}},
+	{ID: 233, Name: "Ring of Miquella", Category: "Special", ItemID: 0x401EA7A8, Flags: []string{"dlc_duplicate", "ban_risk"}}, // alt slot for ID 227
 }
 
 // gestureByID is a reverse lookup: save slot ID → index in AllGestures.
-// Built once at init, includes both EvenID and OddID entries.
 var gestureByID map[uint32]int
 
 func init() {
-	gestureByID = make(map[uint32]int, len(AllGestures)*2)
+	gestureByID = make(map[uint32]int, len(AllGestures))
 	for i, g := range AllGestures {
-		gestureByID[g.EvenID] = i
-		if g.OddID != 0 {
-			gestureByID[g.OddID] = i
-		}
+		gestureByID[g.ID] = i
 	}
 }
 
@@ -106,34 +104,28 @@ func LookupGestureBySlotID(id uint32) (int, bool) {
 	return idx, ok
 }
 
-// DetectBodyTypeOffset examines existing gesture slot values and returns the
-// body-type offset: 0 for type B (even IDs), 1 for type A (odd IDs).
-// Only checks variable gestures (those with OddID != 0).
-func DetectBodyTypeOffset(slotValues []uint32) uint32 {
-	evenCount := 0
-	oddCount := 0
-	for _, v := range slotValues {
+// SanitizeGestureSlots rewrites the gesture array in-place: any entry that is
+// even but (entry+1) is a known gesture is replaced with (entry+1). This
+// repairs saves written by the previous editor build, which incorrectly used
+// "even/odd body type" variants and produced gestures the game silently
+// ignored. Returns the number of slots changed.
+func SanitizeGestureSlots(slots []uint32) int {
+	changed := 0
+	for i, v := range slots {
 		if v == GestureEmptySentinel || v == 0 {
 			continue
 		}
-		idx, ok := gestureByID[v]
-		if !ok {
-			continue
+		if _, ok := gestureByID[v]; ok {
+			continue // already a known canonical ID
 		}
-		g := AllGestures[idx]
-		if g.OddID == 0 {
-			continue // fixed gesture, skip
-		}
-		if v == g.EvenID {
-			evenCount++
-		} else {
-			oddCount++
+		if v%2 == 0 {
+			if _, ok := gestureByID[v+1]; ok {
+				slots[i] = v + 1
+				changed++
+			}
 		}
 	}
-	if oddCount > evenCount {
-		return 1
-	}
-	return 0
+	return changed
 }
 
 // Gestures is the item database for gestures (for the item browser / DatabaseTab).

@@ -116,25 +116,6 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
         return () => window.removeEventListener('keydown', handler);
     }, []);
 
-    // Click outside to close
-    useEffect(() => {
-        if (!consoleOpen) return;
-        const handler = (e: MouseEvent) => {
-            if (resizingRef.current) return; // don't close while resizing
-            if (consoleRef.current && !consoleRef.current.contains(e.target as Node)) {
-                setConsoleOpen(false);
-            }
-        };
-        // Delay to avoid immediate close from the click that opened it
-        const timer = setTimeout(() => {
-            window.addEventListener('mousedown', handler);
-        }, 100);
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener('mousedown', handler);
-        };
-    }, [consoleOpen]);
-
     // Persist dimensions
     useEffect(() => {
         if (consoleWidth > 0) localStorage.setItem('console:width', String(consoleWidth));
@@ -287,10 +268,10 @@ export function ToastBar({ sidebarWidth = 256 }: ToastBarProps) {
                         </div>
                     </div>
 
-                    {/* Log body */}
+                    {/* Log body — newest entries on top */}
                     <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-2 font-mono text-[11px] space-y-0.5">
-                        {logs.map((entry, i) => (
-                            <div key={i} className="flex gap-2">
+                        {logs.slice().reverse().map((entry, i) => (
+                            <div key={logs.length - 1 - i} className="flex gap-2">
                                 <span className="flex-shrink-0" style={{ color: 'var(--sf-console-text-dim)', opacity: 0.7 }}>{entry.time}</span>
                                 <span className={`uppercase font-bold flex-shrink-0 w-10 ${levelColor(entry.level)}`}>
                                     {entry.level}

@@ -127,8 +127,10 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
 
     // --- Gesture logic ---
     const handleGestureToggle = async (g: db.GestureEntry, unlocked: boolean) => { await SetGestureUnlocked(charIdx, g.id, unlocked); setGesturesList(prev => prev.map(x => x.id === g.id ? {...x, unlocked} : x)); onMutate?.(); };
-    const handleUnlockAllGestures = async () => { const l = gestures.filter(g => !g.unlocked); if (!l.length) return; await BulkSetGesturesUnlocked(charIdx, l.map(g => g.id), true); setGesturesList(prev => prev.map(g => ({...g, unlocked: true}))); onMutate?.(); };
-    const handleLockAllGestures = async () => { const u = gestures.filter(g => g.unlocked); if (!u.length) return; await BulkSetGesturesUnlocked(charIdx, u.map(g => g.id), false); setGesturesList(prev => prev.map(g => ({...g, unlocked: false}))); onMutate?.(); };
+    // Unlock All skips ban-risk entries (cut content, pre-order, DLC duplicate).
+    // Lock All sends every known gesture so legacy "even body-type" garbage in the save also gets cleared.
+    const handleUnlockAllGestures = async () => { const l = gestures.filter(g => !g.unlocked && !g.flags?.includes('ban_risk')); if (!l.length) return; await BulkSetGesturesUnlocked(charIdx, l.map(g => g.id), true); const ids = new Set(l.map(g => g.id)); setGesturesList(prev => prev.map(g => ids.has(g.id) ? {...g, unlocked: true} : g)); onMutate?.(); };
+    const handleLockAllGestures = async () => { await BulkSetGesturesUnlocked(charIdx, gestures.map(g => g.id), false); setGesturesList(prev => prev.map(g => ({...g, unlocked: false}))); onMutate?.(); };
     const unlockedGestures = gestures.filter(g => g.unlocked).length;
 
     // --- Cookbook logic ---
@@ -513,12 +515,21 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
             {activeSection === 'gestures' && (
                 <div className="card overflow-hidden animate-in fade-in duration-200">
                     <div className="px-3 py-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-0.5">
-                        {gestures.map(g => (
-                            <label key={g.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
-                                <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
-                                <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>{g.name}</span>
-                            </label>
-                        ))}
+                        {gestures.map(g => {
+                            const banRisk = g.flags?.includes('ban_risk');
+                            const tip = g.flags?.includes('cut_content') ? 'Cut content — adding may trigger anti-cheat'
+                                : g.flags?.includes('pre_order') ? 'Pre-order DLC bonus — ban risk if not owned'
+                                : g.flags?.includes('dlc_duplicate') ? 'DLC duplicate slot — ban risk' : '';
+                            return (
+                                <label key={g.id} title={tip} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                    <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
+                                    <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                        {g.name}
+                                        {banRisk && <span className="ml-1 text-amber-500" title={tip}>⚠</span>}
+                                    </span>
+                                </label>
+                            );
+                        })}
                     </div>
                 </div>
             )}

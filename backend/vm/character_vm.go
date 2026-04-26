@@ -185,7 +185,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				CurrentUpgrade: currentUpgrade,
 				IconPath:       itemData.IconPath,
 				Flags:          itemData.Flags,
-				ReadOnly:       gamedata.IsCookbookItemID(itemID) || gamedata.IsWhetbladeItemID(itemID),
+				ReadOnly:       gamedata.IsCookbookItemID(itemID) || gamedata.IsWhetbladeItemID(itemID) || gamedata.IsBellBearingItemID(itemID),
 			})
 		}
 	}

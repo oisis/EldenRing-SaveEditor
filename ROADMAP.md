@@ -224,7 +224,7 @@ Visual grid of all cookbooks with unlock status via event flags.
 - UI: category-grouped with expand/collapse, Unlock All / Lock All buttons
 - Integrated as "Cookbooks" sub-tab in World Progress tab
 
-**Known issue:** Toggling a cookbook event flag unlocks crafting recipes, but the physical cookbook item does NOT appear in the player's inventory (Key Items). The game stores cookbook ownership in two places: event flag (recipes) and inventory item (Key Items list). Currently only the event flag is toggled — need to also add/remove the corresponding Key Item (cookbook item IDs TBD).
+**Inventory sync:** `BulkSetCookbooksUnlocked` adds/removes the matching Key Item alongside the event flag via `CookbookFlagToItemID`. Cookbooks are filtered out of the Item Database (`db.GetItemsByCategory` skips `IsCookbookItemID`) and rendered as `ReadOnly` in the Inventory tab (`vm/character_vm.go`).
 
 ### ✅ Great Rune Manager 🟢
 Equipped Great Rune selector + buff toggle.
@@ -239,39 +239,50 @@ Equipped Great Rune selector + buff toggle.
 Toggle grid for all 64 gestures.
 
 **Implementation:** `backend/db/data/gestures.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
-- 57 gestures (base game + DLC) with body-type variant detection (even/odd IDs)
-- GestureGameData: `0x100` bytes (64 × u32) at `StorageBoxOffset + DynStorageBox`
-- Empty sentinel: `0xFFFFFFFE` (not 0)
-- `DetectBodyTypeOffset()` — auto-detects body type A (odd) vs B (even) from existing gestures
-- `GetGestures(slotIndex)` / `SetGestureUnlocked(slotIndex, gestureID, unlocked)` in `app.go`
-- `BulkSetGesturesUnlocked()` — batch operation (single IPC call, single pushUndo)
-- UI: flat grid with Unlock All / Lock All buttons
-- Integrated as "Gestures" sub-tab in World Progress tab
+- 57 gestures (51 base + 6 DLC). All vanilla IDs are odd; the previous "EvenID/OddID body-type variant" theory was wrong (cross-checked with er-save-manager/data/gestures.py).
+- GestureGameData: `0x100` bytes (64 × u32) at `StorageBoxOffset + DynStorageBox`. Empty sentinel: `0xFFFFFFFE`.
+- `GetGestures(slotIndex)` / `SetGestureUnlocked(slotIndex, gestureID, unlocked)` / `BulkSetGesturesUnlocked()` in `app.go`. No event flags involved (er-save-manager confirms only the binary array matters).
+- Read path counts only canonical (odd) IDs as unlocked — legacy "even body-type B" garbage from older builds is intentionally ignored so the UI reflects what the game actually shows.
+- Lock single / Lock All also clears the matching `(id-1)` even slot, freeing all 64 sentinel slots so a follow-up Unlock All never runs out of space.
+- 6 ban-risk entries (`The Carian Oath`, `Fetal Position`, both pre-order Rings, `?GoodsName?`, the Ring of Miquella alt slot) are tagged with `Flags: ["cut_content"|"pre_order"|"dlc_duplicate", "ban_risk"]`. UI marks them with a ⚠ tooltip; **Unlock All skips anything with `ban_risk`** so a single click cannot add cut/pre-order content. Users can still toggle them individually if they truly own the relevant DLC.
+- UI: flat grid with Unlock All / Lock All buttons in World → Unlocks → Gestures and World Progress → Gestures.
 
-**Known issue:** Toggling gestures in the binary array changes the save correctly, but gestures may not appear in-game. The game likely requires BOTH the binary array entry AND the corresponding event flag (range 60800–60849) to be set. Event flag mapping per gesture is not yet implemented — see spec/08-spells-gestures.md. Fixing this requires reverse-engineering the exact flag↔gesture mapping.
+### ✅ AoW Acquisition Flag — auto-mark Ash of War as collected 🟡
+Adding an Ash of War via Item Database now also sets the duplication event flag so the AoW is recognised as acquired by the world.
 
-### 🔲 AoW Acquisition Flag — auto-mark Ash of War as collected 🟡
-Adding an Ash of War via Item Database puts the AoW into the player's inventory but does NOT mark it as acquired in the world. The original drop (corpse / enemy / chest) still spawns the same AoW in-game, allowing duplicate pickup and corrupting expected progression flow.
+**Implementation:** `backend/db/data/ash_of_war_flags.go`, `app.go`
+- `AshOfWarFlags` map (flagID → AoW name, 116 entries from `er-save-manager/event_flags_db.py`)
+- `AoWItemToFlagID` map (item ID → flag ID, 116/116 coverage matching DB)
+- `AddItemsToCharacter` calls `db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)` whenever the added ID is in the map
+- Removing an AoW via UI does **not** clear the flag (intentional — flag is "ever acquired", noise-free)
 
-**Investigation needed:**
-- Each AoW in the game has a paired "acquired" event flag (similar pattern to map fragments / cookbooks)
-- Reverse-engineer the flag↔AoW item ID mapping from `tmp/repos/er-save-manager` or by binary diff (save before/after picking up AoW in-game)
-- On `AddItemsToCharacter` for an AoW item type, automatically set the corresponding acquisition flag
-- Add reverse logic: removing AoW via UI should clear the flag (optional — may be noisy)
+### ✅ Bell Bearing Acquisition + Inventory Sync — single source of truth 🟡
+Bell Bearings are managed exclusively from **World → Unlocks → Bell Bearings**. The toggle now adds the matching key item to inventory on unlock and removes it from inventory + storage on lock, so the acquisition flag and the inventory item never drift apart.
+
+**Implementation:** `backend/db/data/bell_bearing_flags.go`, `app.go`, `frontend/src/components/DatabaseTab.tsx`, `frontend/src/components/InventoryTab.tsx`
+- `BellBearingItemToFlagID` (62 entries) — generated from name match between `BellBearings` (er-save-manager event_flags_db) and `key_items.go` BB entries; 59 exact matches + 3 manual aliases (Kalé/Kale, Spell-Machinist, String-seller). Cut-content `Nomadic [11]` (ban_risk) excluded.
+- `BellBearingFlagToItemID` — auto-derived reverse map for the World tab toggle.
+- `SetBellBearingUnlocked` / `BulkSetBellBearings` now call `syncBellBearingItem` (mirrors the Whetblade pattern): unlock → add 1 to inventory if absent; lock → remove from inventory **and** storage.
+- `AddItemsToCharacter` keeps the AoW-style flag hook for defense-in-depth, but Bell Bearings are no longer reachable from there.
+- `IsBellBearingItemID(id)` helper drives both `db.GetItemsByCategory` (BBs filtered out of the Item Database) and `vm/character_vm.go` `ReadOnly` (Inventory tab disables Remove / Select). Same backend-driven pattern as Cookbooks and Whetblades — no Wails getter or frontend Set required.
+- Test: `bell_bearing_flags_test.go` verifies coverage and flag-existence.
 
 ### 🔲 Bell Bearing Merchant Kill Flag — auto-mark merchant as killed 🟡
-Adding a Bell Bearing via Item Database adds the item to inventory but the merchant NPC who originally drops it remains alive in-game. Player can re-kill the merchant for a duplicate bell bearing or trigger broken NPC dialogue. Twin Maiden Husks won't recognize the bell bearing as legitimately acquired.
+The acquisition flag (above) is enough for Twin Maiden Husks to expand wares, but the **merchant NPC who originally drops the BB remains alive in-game**. Player can re-kill the merchant for a duplicate, or trigger broken NPC dialogue.
 
-**Investigation needed:**
-- Map each bell bearing item ID → merchant NPC kill event flag (Nomadic Merchants, Imp statues, Hermit Merchants, etc.)
-- Some bell bearings come from non-merchant sources (boss drops) — distinguish per-item
-- On `AddItemsToCharacter` for a bell bearing, automatically set the merchant's death flag
-- Twin Maiden Husks may also need the "bell bearing turned in" flag to expand their wares — verify in-game
+**Investigation needed (future work):**
+- Map each merchant BB item ID → merchant NPC kill event flag (Nomadic, Hermit, Imp, etc.)
+- Some BBs come from non-merchant sources (boss drops, dead bodies) — distinguish per-item
+- Likely overlaps with quest_flags_db.py "Picking up X's Bell Bearing" flag groups in `tmp/repos/er-save-manager`
+- Once mapped: extend `AddItemsToCharacter` to set both acquisition flag and kill flag
 
-**Reference data:** `tmp/repos/ER-Save-Editor/src/db/items.rs` may have the mapping; otherwise reverse-engineer via binary diff.
+### ✅ Spirit Ash Upgrade Level Editing 🟢
+Pick the upgrade level (+0 to +10) when adding a spirit ash from the Item Database.
 
-### 🔲 Spirit Ash Upgrade Level Editing 🟢
-Edit upgrade levels (+0 to +10) for spirit ashes already in inventory.
+**Implementation:** `frontend/src/App.tsx`, `frontend/src/components/GeneralTab.tsx`, `frontend/src/components/DatabaseTab.tsx`, `app.go`
+- Each upgrade tier is a distinct item ID in `backend/db/data/ashes.go` (`baseID + N` for `+N`); editing in-place would still rewrite the inventory record, so the simpler “pick on add” flow is what we ship
+- Add Settings exposes an `upgradeAsh` slider (0-10), persisted per-character
+- `AddItemsToCharacter` resolves `finalID = id + uint32(upgradeAsh)` for items with `category == "ashes"`
 
 ### ✅ Talisman Pouch Slots 🟢
 Edit number of unlocked talisman slots (0-3 additional, total 1-4).
@@ -526,20 +537,13 @@ Reduced tab count for better UX.
 - All `toast.success/error/loading` redirected to console via `lib/toast.ts` wrapper — no popup toasts
 - Session log with colored severity (INFO/WARN/ERROR)
 
-### 🔲 Console Log Order & Auto-Scroll 🟢
-Three related UX issues with the Quake console — log visibility is degraded for long-running operations.
+### ✅ Console Log Order & Auto-Scroll 🟢
+Three related UX issues with the Quake console resolved.
 
-**Bugs:**
-1. **No auto-scroll** — when new logs arrive, the console does not scroll to show the latest entry. User has to manually scroll to bottom on every operation.
-2. **Click-outside collapses console** — currently clicking anywhere outside the console (e.g. on the main UI to interact with the app) closes it. Should stay open until user explicitly toggles via backtick / close button — user wants the console persistent while working.
-3. **Log order should be reversed** — newest log entry should appear at the **top**, not the bottom. Eliminates the need for auto-scroll entirely (latest is always visible) and aligns with how the user reads operation feedback.
-
-**Files:** `frontend/src/components/QuakeConsole.tsx` (or wherever the console renders), `frontend/src/lib/toast.ts` (log buffer ordering).
-
-**Acceptance:**
-- New logs prepended to the visible list (newest on top)
-- Console open state persists across UI clicks; only backtick / explicit close toggles it
-- Verify scroll position is preserved when user has scrolled mid-list (don't jump on new log if user is reading older entries)
+**Implementation:** `frontend/src/components/ToastBar.tsx`
+- Logs rendered with newest entry on top (`logs.slice().reverse()`) — no auto-scroll needed, latest is always visible
+- Removed click-outside `useEffect` — console stays open until user explicitly toggles via backtick or X button
+- Scroll position preserved when reading older entries (scrollable inner container untouched on new log)
 
 ### ✅ Character Tab Enhancements 🟢
 **Implementation:** `frontend/src/components/CharacterTab.tsx`
@@ -563,7 +567,6 @@ Three related UX issues with the Quake console — log visibility is degraded fo
 - Theme label: "Elden Ring" (internal key: `golden`)
 
 ### 🔲 Known Bugs (to investigate)
-- **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
 - **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. Requires multi-flag approach — see Boss Kill / Respawn Manager section above for details and reference data.
 
 ### ✅ Bugfixes
