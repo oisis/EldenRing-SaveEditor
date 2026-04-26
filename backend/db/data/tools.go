@@ -16,6 +16,7 @@ var Tools = map[uint32]ItemData{
 	0x401E9196: {Name: "Charming Branch", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/charming_branch.png"},
 	0x400004BA: {Name: "Exalted Flesh", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/exalted_flesh.png"},
 	0x401E8CB4: {Name: "Ancient Dragon's Blessing", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/ancient_dragons_blessing.png"},
+	0x401E90CE: {Name: "Call of Tibia", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/consumables/call_of_tibia.png"},
 	0x400004A6: {Name: "Silver-Pickled Fowl Foot", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/silver_pickled_fowl_foot.png"},
 	0x40000D21: {Name: "Radiant Baldachin's Blessing", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/radiant_baldachins_blessing.png"},
 	0x400004C4: {Name: "Deathsbane Jerky", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/deathsbane_jerky.png", Flags: []string{"cut_content", "ban_risk"}},
