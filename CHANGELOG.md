@@ -4,6 +4,69 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/icon-downloader-improvements — Improve `scripts/download_icons.go` + import 60 icons + DLC flag sweep across DB
+
+**Two related changes shipped together** — both flow from the audit (`tmp/items_audit_report.md`) follow-up.
+
+#### Part 1 — Icon downloader fixes + 60 new PNG imports
+
+**Goal:** Pre-fix run had ~12% success rate on missing icons (15/130). Most failures were script bugs in URL/name generation, not genuinely-missing assets on `eldenring.wiki.gg`.
+
+**Bugs fixed in `scripts/download_icons.go`:**
+1. **Lowercase prepositions** — `toWikiName` capitalized "of"/"the"/"a"/"in"/"to"/"with"/"from"/"for"/"on"/"at"/"by"/"or"/"as"/"and". Wiki URLs keep these lowercase (e.g. `Rain_of_Fire`, not `Rain_Of_Fire`). Added `lowercaseWords` set, applied for non-leading positions.
+2. **Missing prefixes** — `isCrafting` only tried `ER_Icon_Item_`/`ER_Icon_Tool_`. Added category-specific prefixes: `ER_Icon_Crafting_Material_`, `ER_Icon_Bolstering_Material_` (for `bolstering_materials/` paths). For `isTools` added `ER_Icon_Key_Item_` (cookbooks), `ER_Icon_Note_`, `ER_Icon_Info_` (notes/letters), `ER_Icon_Map_`, `ER_Info_` (combined entries like Zorayas's Letter).
+3. **Possessive variant** — many local filenames strip apostrophes (`tibias_cookbook.png`) while wiki uses URL-encoded apostrophe (`Tibia%27s_Cookbook.png`). New `insertPossessive` helper inserts `%27` before trailing `s` of any 4+-char word ending in `s` (skipping double-`s` like "Hess"). Tries both original and possessive variants per prefix.
+4. **`commons.wiki.gg` fallback** — wiki.gg serves some images on the commons subdomain. Added as host fallback after `eldenring.wiki.gg`.
+5. **Affinity stripping** — added missing `Bloody` (DLC infusion variant for some weapons). Added multi-word `Flame_Art` BEFORE single-word `Flame` to avoid prefix-shadowing on names like `Flame_Art_Main_Gauche`.
+
+**Result:** Success rate climbed from ~12% to ~46% (60/130 net icons imported across 4 iterations). Remaining ~80 are mostly genuinely-not-on-wiki assets (cut content like `The Carian Oath` / `Fetal Position`, obscure DLC notes with combined entries on wiki, items with multi-apostrophe names).
+
+**Imports** (sample — 60 total): `revered_spirit_ash.png`, `scadutree_fragment.png`, 7 DLC crafting materials (`frozen_maggot`, `ghostflame_bloom`, etc.), 5 DLC incantations (`furious_blade_of_ansbach`, `dragonbolt_of_florissax`, etc.), 6 sorceries (`rain_of_fire`, `glintstone_nail`, etc.), 5 Prattling Pates, ~15 DLC quest items (cookbooks, keys, maps, notes), various others.
+
+**Not committed:** `missing_icons.txt` (build artifact — regenerated on demand by re-running the script).
+
+#### Part 2 — DLC flag sweep across entire item database
+
+**Goal:** Mark every Elden Ring DLC (Shadow of the Erdtree) item with `Flags: []string{"dlc"}` so future UI can filter. Previously only 16 entries had `"dlc"` (the 14 added in `feat/add-missing-tools-63` plus 2 Crystal Tears in `key_items.go`).
+
+**Implementation:** Subagent ran a one-shot Go script (`/tmp/mark_dlc.go`) that:
+1. Loaded all DLC reference files from `tmp/repos/er-save-manager/.../DLC/**/*.txt` and built a decimal-ID → category map.
+2. For each backend item, computed decimal from hex (after stripping the per-category prefix), looked up in DLC set, edited Flags field if matched.
+3. Preserved existing flags — when an entry already had flags, appended `"dlc"` to the slice; otherwise added `Flags: []string{"dlc"}`.
+4. Skipped entries already containing `"dlc"`.
+
+**Per-file count: 701 new `"dlc"` markers** distributed:
+
+| File | +dlc | File | +dlc |
+|---|---:|---|---:|
+| `ashes.go` | +220 | `arms.go` | +29 |
+| `weapons.go` | +73 | `incantations.go` | +27 |
+| `tools.go` | +72 | `aows.go` | +25 |
+| `helms.go` | +43 | `sorceries.go` | +15 |
+| `chest.go` | +43 | `ranged_and_catalysts.go` | +11 |
+| `key_items.go` | +43 | `shields.go` | +10 |
+| `talismans.go` | +39 | `crafting_materials.go` | +9 |
+| `legs.go` | +30 | `arrows_and_bolts.go` | +5 |
+| | | `gestures.go` | +5 |
+| | | `bolstering_materials.go` | +2 |
+
+Plus 16 pre-existing `"dlc"` flags = **717 total DLC entries marked**.
+
+**Prefix conventions discovered (verified against reference):**
+- `weapons.go`/`shields.go`/`arrows_and_bolts.go`/`ranged_and_catalysts.go`: **no prefix** — backend stores raw decimal as hex (e.g. `0x0016E360` = decimal 1500000 = "Main-gauche").
+- `helms.go`/`chest.go`/`arms.go`/`legs.go`: prefix `0x10000000`.
+- `talismans.go`: prefix `0x20000000`.
+- `aows.go`: prefix `0x80000000`.
+- All Goods (`tools.go`/`key_items.go`/`ashes.go`/`crafting_materials.go`/`bolstering_materials.go`/`cookbooks.go`/`gestures.go`/`sorceries.go`/`incantations.go`): prefix `0x40000000`.
+
+**Flag merge cases:** 1 entry — `tools.go` `Keep Wall Key` → `Flags: []string{"cut_content", "ban_risk", "dlc"}` (was `cut_content, ban_risk`).
+
+**Skipped:** `cookbooks.go` (uses `CookbookData` struct keyed by event-flag IDs, not item IDs — no Flags field). `gestures.go` `AllGestures` slice (`GestureDef` struct, separate from the `Gestures` ItemData map; agent only modified the latter).
+
+**Tests:** `go build ./backend/...` ✅, `go test ./backend/db/...` ✅, `go test ./tests/roundtrip_test.go` ✅, `go vet ./backend/...` ✅.
+
+**App impact:** Zero — `Flags` slice is data-only until UI work consumes it. The new `"dlc"` flag is a marker for future filter functionality (per user direction in this audit cycle: *"chcę mieć te informacje w db, mogą być na razie jako komentarze, później zaimplementujemy w apce"*).
+
 ### Branch: feat/add-missing-tools-63 — Add 63 missing consumables/tools/tears + introduce `dlc` flag
 
 **Goal:** Item-DB audit (`tmp/items_audit_report.md`) flagged 63 items present in `er-save-manager` reference but absent from our backend `tools.go` (and 2 DLC Crystal Tears that belong in `key_items.go` per project convention). Filling these gaps unblocks players who want to add them via the Item Database UI.
