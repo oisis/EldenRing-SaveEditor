@@ -1,7 +1,7 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {GetItemList, GetInfuseTypes, AddItemsToCharacter, GetCharacter, GetBellBearingItemIDs} from '../../wailsjs/go/main/App';
+import {GetItemList, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '../../wailsjs/go/main/App';
 import {db, vm} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
 import {CategorySelect} from './CategorySelect';
@@ -60,16 +60,12 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     // Detail drawer
     const [detailItem, setDetailItem] = useState<db.ItemEntry | null>(null);
 
-    // Bell Bearing item IDs — hidden from the database (managed via World → Unlocks)
-    const [bbItemIDs, setBbItemIDs] = useState<Set<number>>(new Set());
-
     // Owned items (for "Inventory" / "Storage" columns)
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
     const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
 
     useEffect(() => {
         GetInfuseTypes().then(res => setInfuseTypes(res || []));
-        GetBellBearingItemIDs().then(ids => setBbItemIDs(new Set(ids || [])));
     }, []);
 
     useEffect(() => {
@@ -116,7 +112,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     }, [category]);
 
     const filteredItems = useMemo(() => dbItems.filter(item => {
-        if (bbItemIDs.has(item.id)) return false; // BBs are managed via World → Unlocks
         if (!showFlaggedItems && item.flags?.length > 0) return false;
         return item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
@@ -126,7 +121,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
         return 0;
-    }), [dbItems, search, sortCol, sortDir, showFlaggedItems, bbItemIDs]);
+    }), [dbItems, search, sortCol, sortDir, showFlaggedItems]);
 
     const handleSort = (col: string) => {
         if (sortCol === col) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');

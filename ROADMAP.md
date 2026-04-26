@@ -224,7 +224,7 @@ Visual grid of all cookbooks with unlock status via event flags.
 - UI: category-grouped with expand/collapse, Unlock All / Lock All buttons
 - Integrated as "Cookbooks" sub-tab in World Progress tab
 
-**Known issue:** Toggling a cookbook event flag unlocks crafting recipes, but the physical cookbook item does NOT appear in the player's inventory (Key Items). The game stores cookbook ownership in two places: event flag (recipes) and inventory item (Key Items list). Currently only the event flag is toggled — need to also add/remove the corresponding Key Item (cookbook item IDs TBD).
+**Inventory sync:** `BulkSetCookbooksUnlocked` adds/removes the matching Key Item alongside the event flag via `CookbookFlagToItemID`. Cookbooks are filtered out of the Item Database (`db.GetItemsByCategory` skips `IsCookbookItemID`) and rendered as `ReadOnly` in the Inventory tab (`vm/character_vm.go`).
 
 ### ✅ Great Rune Manager 🟢
 Equipped Great Rune selector + buff toggle.
@@ -267,7 +267,7 @@ Bell Bearings are managed exclusively from **World → Unlocks → Bell Bearings
 - `BellBearingFlagToItemID` — auto-derived reverse map for the World tab toggle.
 - `SetBellBearingUnlocked` / `BulkSetBellBearings` now call `syncBellBearingItem` (mirrors the Whetblade pattern): unlock → add 1 to inventory if absent; lock → remove from inventory **and** storage.
 - `AddItemsToCharacter` keeps the AoW-style flag hook for defense-in-depth, but Bell Bearings are no longer reachable from there.
-- New Wails method `GetBellBearingItemIDs() []uint32`. Frontend uses it to (a) hide BBs from the Item Database and (b) render them as `readOnly` (no Remove / no Select) in the Inventory tab.
+- `IsBellBearingItemID(id)` helper drives both `db.GetItemsByCategory` (BBs filtered out of the Item Database) and `vm/character_vm.go` `ReadOnly` (Inventory tab disables Remove / Select). Same backend-driven pattern as Cookbooks and Whetblades — no Wails getter or frontend Set required.
 - Test: `bell_bearing_flags_test.go` verifies coverage and flag-existence.
 
 ### 🔲 Bell Bearing Merchant Kill Flag — auto-mark merchant as killed 🟡

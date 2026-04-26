@@ -1317,17 +1317,6 @@ func (a *App) BulkSetBellBearings(slotIndex int, flagIDs []uint32, unlocked bool
 	return nil
 }
 
-// GetBellBearingItemIDs returns all bell bearing key-item IDs the editor knows about.
-// The frontend uses this list to (a) hide BBs from the Item Database and
-// (b) render BBs as read-only in the Inventory tab — managed solely via World → Unlocks.
-func (a *App) GetBellBearingItemIDs() []uint32 {
-	out := make([]uint32, 0, len(data.BellBearingItemToFlagID))
-	for id := range data.BellBearingItemToFlagID {
-		out = append(out, id)
-	}
-	return out
-}
-
 // GetMapProgress returns all map region flags with their current state
 func (a *App) GetMapProgress(slotIndex int) ([]db.MapEntry, error) {
 	if a.save == nil {

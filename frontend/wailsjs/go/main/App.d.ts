@@ -46,8 +46,6 @@ export function GetAllGraces():Promise<Array<db.GraceEntry>>;
 
 export function GetAshOfWarFlags(arg1:number):Promise<Array<db.AshOfWarFlagEntry>>;
 
-export function GetBellBearingItemIDs():Promise<Array<number>>;
-
 export function GetBellBearings(arg1:number):Promise<Array<db.BellBearingEntry>>;
 
 export function GetBosses(arg1:number):Promise<Array<db.BossEntry>>;

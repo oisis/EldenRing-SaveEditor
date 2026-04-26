@@ -483,7 +483,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 		}
 	case "key_items":
 		for id, item := range data.KeyItems {
-			if item.Name == "" || data.IsCookbookItemID(id) || data.IsWhetbladeItemID(id) {
+			if item.Name == "" || data.IsCookbookItemID(id) || data.IsWhetbladeItemID(id) || data.IsBellBearingItemID(id) {
 				continue
 			}
 			items = append(items, ItemEntry{

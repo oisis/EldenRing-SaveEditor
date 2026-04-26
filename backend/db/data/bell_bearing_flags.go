@@ -81,3 +81,11 @@ var BellBearingFlagToItemID = func() map[uint32]uint32 {
 	}
 	return out
 }()
+
+// IsBellBearingItemID returns true if the item ID is a Bell Bearing key item
+// managed by World → Unlocks. Used to hide BBs from the Item Database and
+// render them read-only in the Inventory tab — mirrors IsCookbookItemID.
+func IsBellBearingItemID(id uint32) bool {
+	_, ok := BellBearingItemToFlagID[id]
+	return ok
+}

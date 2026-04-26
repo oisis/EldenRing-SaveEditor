@@ -1,7 +1,7 @@
 import {useEffect, useState, useMemo, useRef} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetSlotCapacity, GetBellBearingItemIDs} from '../../wailsjs/go/main/App';
+import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetSlotCapacity} from '../../wailsjs/go/main/App';
 import {vm, main} from '../../wailsjs/go/models';
 import {CategorySelect} from './CategorySelect';
 
@@ -41,11 +41,6 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const [isRemoving, setIsRemoving] = useState(false);
     const [brokenIcons, setBrokenIcons] = useState<Set<string>>(new Set());
     const [capacity, setCapacity] = useState<main.SlotCapacity | null>(null);
-    const [bbItemIDs, setBbItemIDs] = useState<Set<number>>(new Set());
-
-    useEffect(() => {
-        GetBellBearingItemIDs().then(ids => setBbItemIDs(new Set(ids || [])));
-    }, []);
 
     const toggleSelect = (key: string) => {
         setSelectedKeys(prev => {
@@ -211,14 +206,14 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                         maxInv: item.maxInventory, maxStorage: item.maxStorage,
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                         flags: item.flags ?? [],
-                        readOnly: (item.readOnly ?? false) || bbItemIDs.has(item.id),
+                        readOnly: item.readOnly ?? false,
                     });
                 }
             }
         });
 
         return [...nonStackableList, ...Array.from(stackableMap.values())];
-    }, [charInventory, charStorage, bbItemIDs]);
+    }, [charInventory, charStorage]);
 
     const handleImageError = (iconPath: string) => {
         setBrokenIcons(prev => new Set(prev).add(iconPath));

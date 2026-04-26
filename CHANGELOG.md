@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: fix/console-ux — BB refactor to backend-driven readOnly + ROADMAP cookbook sync
+
+**Goal:** Drop the BB-specific Wails getter and frontend Set in favour of the same backend pattern already used for Cookbooks and Whetblades. ROADMAP updated to reflect that cookbook inventory sync is in fact already shipped.
+
+**Changes:**
+- `backend/db/data/bell_bearing_flags.go`: new `IsBellBearingItemID(id)` helper.
+- `backend/db/db.go`: `GetItemsByCategory("key_items")` now also skips BB items.
+- `backend/vm/character_vm.go`: `ReadOnly` is now true for BB items as well.
+- `app.go`: removed `GetBellBearingItemIDs()` Wails method (no longer needed).
+- `frontend/src/components/DatabaseTab.tsx`: reverted BB Set + filter (backend already hides them).
+- `frontend/src/components/InventoryTab.tsx`: reverted BB Set + readOnly OR (VM already marks them ReadOnly).
+- `ROADMAP.md`: cookbook entry — replaced “Known issue: physical item missing” with the actual implementation note (`CookbookFlagToItemID` + `IsCookbookItemID` + `ReadOnly` in VM).
+
+**Tests:** `tsc --noEmit` ✅, `go test ./backend/db/data/...` ✅, `make build` ✅.
+
 ### Branch: fix/console-ux — Bell Bearing single source of truth (World tab)
 
 **Goal:** Make Bell Bearings reachable from exactly one place — World → Unlocks → Bell Bearings — and keep the acquisition flag and the matching key item perfectly in sync.
