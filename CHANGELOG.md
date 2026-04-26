@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/dlc-spells-cleanup — DLC sorceries / incantations + miscategorisation cleanup
+
+**Goal:** Add 10 missing DLC spells, move 1 spell to its correct category, and remove 5 historical miscategorisations of DLC spells that lived in `tools.go` and `key_items.go`.
+
+**Verified via Fextralife wiki for every ID before merging.**
+
+**Added — `incantations.go` (+6):**
+- `0x401E9D1C` Furious Blade of Ansbach (was wrongly in `sorceries.go`)
+- `0x401E9E7A` Aspects of the Crucible: Thorns
+- `0x401E9F7E` Dragonbolt of Florissax — Dragon Cult incantation
+- `0x401E9FD8` Bayle's Tyranny — Dragon Cult incantation
+- `0x401EA0AA` Pest-Thread Spears
+- `0x401EA2BC` Divine Bird Feathers
+
+**Added — `sorceries.go` (+4):**
+- `0x401E9614` Glintstone Nail (Finger Sorcery, Ymir)
+- `0x401E961E` Glintstone Nails (Glintstone Sorcery, Ymir)
+- `0x401E96DC` Blades of Stone (Gaius Remembrance Sorcery)
+- `0x401EA17C` Cherishing Fingers (Finger Sorcery, Ymir)
+
+**Removed — `sorceries.go` (-1):**
+- `0x401E9D1C` Furious Blade of Ansbach (incantation, moved to `incantations.go`)
+
+**Removed — miscategorised duplicates (-5):**
+- `key_items.go`: `0x401EA17C` Cherishing Fingers (sorcery, never a key item)
+- `tools.go`: `0x401E9614` Glintstone Nail, `0x401E961E` Glintstone Nails, `0x401E96DC` Blades of Stone (all sorceries, not throwables)
+- `tools.go`: `0x401E9F7E` Dragonbolt of Florissax (incantation, not grease)
+
+**Tests:** `go build ./backend/... ./` ✅, `go test ./backend/...` ✅, `make build` ✅.
+
 ### Branch: fix/console-ux — Gestures: free slots before write + hide ban-risk behind setting
 
 **Follow-up #2 to the gesture bug.** User feedback after the previous build:
