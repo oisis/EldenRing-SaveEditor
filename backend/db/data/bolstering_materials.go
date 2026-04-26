@@ -47,8 +47,8 @@ var BolsteringMaterials = map[uint32]ItemData{
 	// Flask & Blessing Upgrades
 	0x4000271A: {Name: "Golden Seed", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/golden_seed.png"},
 	0x40002724: {Name: "Sacred Tear", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/sacred_tear.png"},
-	0x401EAB90: {Name: "Scadutree Fragment", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/scadutree_fragment.png"},
-	0x401EABF4: {Name: "Revered Spirit Ash", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/revered_spirit_ash.png"},
+	0x401EAB90: {Name: "Scadutree Fragment", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/scadutree_fragment.png", Flags: []string{"dlc"}},
+	0x401EABF4: {Name: "Revered Spirit Ash", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/revered_spirit_ash.png", Flags: []string{"dlc"}},
 
 	// Handles (B0...)
 0x40000B54: {Name: "Golden Rune [1]", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/runes/golden_rune_1.png"},

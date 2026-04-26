@@ -66,13 +66,13 @@ var CraftingMaterials = map[uint32]ItemData{
 	0x40005174: {Name: "Formic Rock", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/formic_rock.png"},
 
 	// DLC Materials
-	0x401ED2A8: {Name: "Yellow Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/yellow_fulgurbloom.png"},
-	0x401ED2AB: {Name: "Scarlet Bud", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/scarlet_bud.png"},
-	0x401ED2AC: {Name: "Sanguine Amaryllis", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sanguine_amaryllis.png"},
-	0x401ED2AD: {Name: "Frozen Maggot", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/frozen_maggot.png"},
-	0x401ED2AE: {Name: "Deep-Purple Lily", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/deep_purple_lily.png"},
-	0x401ED2B5: {Name: "Ghostflame Bloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ghostflame_bloom.png"},
-	0x401ED2B7: {Name: "Dragon's Calorbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/dragons_calorbloom.png"},
-	0x401ED2BB: {Name: "Roundrock", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/roundrock.png"},
-	0x401ED2C0: {Name: "Red Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/red_fulgurbloom.png"},
+	0x401ED2A8: {Name: "Yellow Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/yellow_fulgurbloom.png", Flags: []string{"dlc"}},
+	0x401ED2AB: {Name: "Scarlet Bud", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/scarlet_bud.png", Flags: []string{"dlc"}},
+	0x401ED2AC: {Name: "Sanguine Amaryllis", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sanguine_amaryllis.png", Flags: []string{"dlc"}},
+	0x401ED2AD: {Name: "Frozen Maggot", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/frozen_maggot.png", Flags: []string{"dlc"}},
+	0x401ED2AE: {Name: "Deep-Purple Lily", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/deep_purple_lily.png", Flags: []string{"dlc"}},
+	0x401ED2B5: {Name: "Ghostflame Bloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ghostflame_bloom.png", Flags: []string{"dlc"}},
+	0x401ED2B7: {Name: "Dragon's Calorbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/dragons_calorbloom.png", Flags: []string{"dlc"}},
+	0x401ED2BB: {Name: "Roundrock", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/roundrock.png", Flags: []string{"dlc"}},
+	0x401ED2C0: {Name: "Red Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/red_fulgurbloom.png", Flags: []string{"dlc"}},
 }
