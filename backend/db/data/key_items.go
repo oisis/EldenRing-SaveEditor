@@ -389,4 +389,8 @@ var KeyItems = map[uint32]ItemData{
 	0x401EA3C3: {Name: "Igon's Furled Finger", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/igons_furled_finger.png"},
 	0x40002005: {Name: "Sewer-Gaol Key", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/sewer_gaol_key.png"},
 	0x401ED2B8: {Name: "Finger Mimic", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_mimic.png"},
+
+	// Audit batch — DLC Crystal Tears (icons under items/key_items/, matching project convention for tears in key_items.go)
+	0x401EAFAA: {Name: "Bloodsucking Cracked Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/bloodsucking_cracked_tear.png", Flags: []string{"dlc"}},
+	0x401EAFB4: {Name: "Glovewort Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/glovewort_crystal_tear.png", Flags: []string{"dlc"}},
 }

@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/add-missing-tools-63 — Add 63 missing consumables/tools/tears + introduce `dlc` flag
+
+**Goal:** Item-DB audit (`tmp/items_audit_report.md`) flagged 63 items present in `er-save-manager` reference but absent from our backend `tools.go` (and 2 DLC Crystal Tears that belong in `key_items.go` per project convention). Filling these gaps unblocks players who want to add them via the Item Database UI.
+
+**Cross-validation:**
+- All 63 IDs converted from reference decimal → hex with `0x40000000` prefix and verified.
+- Icons confirmed present for 54 of 63 entries (sampled `find frontend/public/items -iname "<keyword>*"`).
+- 9 Prattling Pates have no icons yet — placeholder paths `items/tools/multiplayer/prattling_pate_*.png` written so a later icon import slots in without code change. Frontend `DatabaseTab` already gracefully handles missing icons (broken-icon "?" placeholder).
+- Empty Crimson/Cerulean flask variants (26) reuse the filled-flask icons (filled flasks already share one icon across all upgrade levels).
+
+**Change:**
+- `backend/db/data/tools.go` — added 61 entries:
+    - Batch 1 (12) — base game consumables: Boiled Prawn, Neutralizing/Thawfrost/Preserving/Rejuvenating/Clarifying Boluses, Pickled Turtle Neck, Gold-Pickled Fowl Foot, Soft Cotton, Baldachin's Blessing, Poison Spraymist, Acid Spraymist.
+    - Batch 2 (27) — empty flask variants: Wondrous Physick (Empty), Crimson Tears (Empty) +0..+12, Cerulean Tears (Empty) +0..+12.
+    - Batch 3 (9) — Prattling Pates: Hello / Thank you / Apologies / Wonderful / Please help / My beloved / Let's get to it / You're beautiful / Lamentation (DLC).
+    - Batch 4 (13) — DLC consumables: Lulling Branch, Dragonscale Flesh, 5 Pickled Livers (Spellproof/Fireproof/Lightningproof/Holyproof/Opaline), Well-Pickled Turtle Neck, Sacred Bloody Flesh, Silver/Golden Horn Tender, Innard Meat, Horned Bairn.
+- `backend/db/data/key_items.go` — added 2 entries: Bloodsucking Cracked Tear (`0x401EAFAA`), Glovewort Crystal Tear (`0x401EAFB4`). Routed to `key_items.go` (not `tools.go` per ref) because the project's existing Crystal Tears all live in `key_items.go` with icons under `items/key_items/`.
+
+**New flag value `"dlc"`:** introduced for the 14 DLC entries added in this branch (batches 3-DLC + 4 + 2 Crystal Tears). Existing flag vocabulary was `cut_content`, `ban_risk`, `dlc_duplicate`, `pre_order`. The new `dlc` flag marks legitimate DLC content (not duplicates) — used for filtering in future UI work. **No app changes in this branch** — flag is data-only for now.
+
+**Defaults applied (all new entries):**
+- Most consumables: `MaxInventory: 99, MaxStorage: 600` (matches existing convention for Stanching Boluses, Pickled livers, etc.).
+- Wondrous Physick (Empty): `1 / 0` (matches filled variant).
+- Crystal Tears: `1 / 0` (matches existing Crystal Tear entries in `key_items.go`).
+- Empty flasks (Crimson/Cerulean): `99 / 600` (matches filled-flask convention; quirky for "1 sacred flask total in game" but not changing existing pattern in this branch).
+
+**Intentionally NOT done in this branch:**
+- 101 "category mismatches" reported by audit (Remembrances, Maps, Notes, Letters classified as `Consumables.txt` in reference but as `key_items.go` in our backend). Our project aligns categories with the in-game UI Inventory tabs; reshuffling would diverge from UI. **Confirmed false-positive.** Memory updated.
+- 2 spell category swaps reported by audit (`Death Lightning`, `Night Maiden's Mist`). Verified against Fextralife: backend was already correct — the reference `Magic.txt` tags are wrong for these entries. **Confirmed false-positive.** Memory updated.
+- 3 cut-content entries flagged in `gestures.go` (`?GoodsName?`, Carian Oath, Fetal Position) are intentionally retained with `cut_content`+`ban_risk` flags per documented design. **Confirmed false-positive.**
+
+**Tests:** `go build ./backend/...` ✅, `go test ./backend/db/...` ✅, `go test ./tests/roundtrip_test.go` ✅.
+
 ### Branch: feat/add-missing-armor-12 — Add 12 base-game armor pieces missing from item DB
 
 **Goal:** Item-DB audit (`tmp/items_audit_report.md`) flagged 12 base-game armor entries present in `er-save-manager` reference but absent from our backend. All 12 already had matching icon assets shipped under `frontend/public/items/{head,chest,arms}/` from a previous icon import — only the Go entries were missing.
