@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/ban-risk-warning-modal — Warn when adding ban-risk-flagged items + minor icon downloader iteration
+
+#### Part 1 — Ban-risk warning modal in `DatabaseTab`
+
+**Goal:** Per user direction — when a user adds an item flagged `"ban_risk"` from the Item Database, gate the regular Add modal behind a warning that explains the risk (Easy Anti-Cheat detection if going online with cut-content / cheat-flagged items in inventory). Modal includes an "Ignore all ban risk warnings" checkbox so power users can opt out permanently.
+
+**Change (`frontend/src/components/DatabaseTab.tsx`):**
+- New state: `banRiskWarning: ItemEntry[] | null` and `ignoreBanRisk: boolean` (initialized from `localStorage["setting:ignoreBanRiskWarning"]`).
+- `openModal(items)` now branches:
+    - If `!ignoreBanRisk && items.some(i => i.flags?.includes('ban_risk'))` → set `banRiskWarning(items)` and return.
+    - Otherwise → call `openConfirmModal(items)` (the previous body of `openModal`, refactored).
+- New "Add Anyway" path: calls `openConfirmModal(items)` directly, bypassing the gate for this batch.
+- New `handleIgnoreBanRiskChange(checked)`: writes the toggle to `localStorage` so it persists across sessions.
+
+**Modal UI (red-themed, z-index above confirmModal):**
+- Triangle alert icon + "Ban Risk Warning" header.
+- Single-item path: bold item name in copy. Multi-item path: count + bullet list of all ban-risk items in the selection (scrollable when long).
+- Checkbox: "Ignore all ban risk warnings" — bound to `ignoreBanRisk` state, persists immediately on toggle.
+- Two actions: "Cancel" (closes warning, no add) vs "Add Anyway" (closes warning, opens regular Add modal).
+
+**No backend changes required:** The `Flags []string` field on `ItemEntry` is already exposed via Wails bindings (used elsewhere in `WorldTab.tsx` / `WorldProgressTab.tsx` for similar filtering). Only frontend logic added.
+
+**Tests:** `cd frontend && npx tsc --noEmit` ✅, `make build` ✅ (Wails generate-bindings + Vite + Go compile + macOS package — 9.3s).
+
+**Manual verification deferred** to user — they confirmed previous UI changes manually after build green.
+
+#### Part 2 — Icon downloader iteration 5 (minor refinements)
+
+**Bugs fixed in `scripts/download_icons.go`:**
+- Removed `"Bloody"` from affinity-strip list — it's NOT an infusion (like Heavy/Keen/Magic) but rather part of unique DLC weapon names ("Bloody Lance", "Bloody Buckler"). Stripping yielded base weapons, breaking lookups.
+- Replaced `insertPossessive` (single-variant) with `insertPossessiveVariants` (returns 0..N variants). Handles double-`s` words like `Thopss` (from "Thops's") that the previous heuristic skipped.
+- Added "un-stripped name" as a fallback variant for weapons/shields/ranged/arrows — when affinity stripping yielded a name and that fails, retries with the full original name (catches cases like "Flame_Art_Main_Gauche" where wiki actually has the full name).
+
+**Imports:** 1 new icon — `frontend/public/items/sorceries/thopss_barrier.png` (Thops's Barrier, double-s possessive case proven).
+
+**Remaining:** ~78 icons still not auto-fetchable — mostly cut-content gestures (no wiki page), DLC notes with combined wiki entries (e.g. Zorayas's & Rogier's Letter on a single page), items with multi-apostrophe names. Manual import or per-item WebFetch needed; defer.
+
 ### Branch: feat/stackable-flag-sweep — Add `stackable` flag to all items with MaxInventory > 1
 
 **Goal:** Per user direction (audit cycle) — explicitly mark which items stack (vs single-instance) so future UI work can filter without re-deriving from `MaxInventory`. Adds `Flags: []string{"stackable"}` to every entry where `MaxInventory > 1`.
