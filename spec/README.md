@@ -71,7 +71,7 @@ Plik save składa się z następujących głównych bloków (w kolejności sekwe
 | 08 | [Spells & Gestures](08-spells-gestures.md) | Zapamiętane zaklęcia, gesty, pociski |
 | 09 | [Face Data](09-face-data.md) | Kreator postaci — parametry wyglądu (303 bajty) |
 | 10 | [Storage Box](10-storage.md) | Skrzynia w grace: common + key items, countery |
-| 11 | [Regions](11-regions.md) | Odblokowane regiony świata (zmienna długość) |
+| 11 | [Regions](11-regions.md) | Lista `unlocked_regions` (fast travel) — format binarny + `core.SetUnlockedRegions` |
 | 12 | [Torrent](12-torrent.md) | Dane konia: pozycja, HP, stan (żywy/martwy/nieaktywny) |
 | 13 | [Blood Stain](13-blood-stain.md) | Plama krwi po śmierci: pozycja, runy, mapa |
 | 14 | [Game State](14-game-state.md) | Menu profile, tutorial data, GameMan bytes, death count, character type, last grace |
@@ -87,6 +87,9 @@ Plik save składa się z następujących głównych bloków (w kolejności sekwe
 | 24 | [UserData11](24-user-data-11.md) | regulation.bin — parametry gry (params) |
 | 25 | [Runtime vs Save](25-runtime-vs-save.md) | Mapowanie offsetów pamięć↔plik, ostrzeżenia |
 | 26 | [Parameter Reference](26-parameter-reference.md) | **Kompletna referencja** wszystkich edytowalnych parametrów |
+| 27 | [Map Reveal](27-map-reveal.md) | 4-warstwowy model odkrywania mapy: regions / event flags 62xxx + Map Fragments / DLC Cover Layer / FoW bitfield |
+| 29 | [DLC Black Tiles](29-dlc-black-tiles.md) | Cover Layer SoE — koordynaty discovery w sekcji BloodStain (`afterRegs+0x0088..0x0110`) |
+| 30 | [Slot Rebuild Research](30-slot-rebuild-research.md) | Slack analysis + przejście od byte-shift do `RebuildSlot` (R-1 Step 13–14) |
 | 99 | [Verification Methodology](99-verification-methodology.md) | Metody testowania, checklista weryfikacji, plan odkryć |
 
 ---

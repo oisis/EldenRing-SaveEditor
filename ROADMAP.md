@@ -165,7 +165,7 @@ Unlock colosseums via their respective event flags.
 ### ✅ Map Exploration & Fog of War 🟡
 Full map reveal with Fog of War removal. **Fully unique feature** — no existing editor touches FoW.
 
-**Implementation:** `app.go`, `backend/db/data/maps.go`, `backend/db/db.go`, `frontend/src/components/WorldProgressTab.tsx`, `spec/27-fog-of-war.md`
+**Implementation:** `app.go`, `backend/db/data/maps.go`, `backend/db/db.go`, `frontend/src/components/WorldProgressTab.tsx`, `spec/27-map-reveal.md`
 - Map visibility (62xxx) + acquisition (63xxx) combined into single toggle per region
 - System flags (62000, 62001, 82001, 82002) as top-level checkboxes
 - `RemoveFogOfWar(slotIndex)` — fills FoW exploration bitfield (2099 bytes at `afterRegs+0x087E..+0x10B0`) with 0xFF
@@ -173,7 +173,7 @@ Full map reveal with Fog of War removal. **Fully unique feature** — no existin
 - FoW automatically removed on any map region toggle or Reveal All
 - Brute-force POI ranges replaced with individual named flags
 - Tested on Steam Deck: full map reveal + FoW removal confirmed working
-- See `spec/27-fog-of-war.md` for full reverse-engineering documentation
+- See `spec/27-map-reveal.md` for full reverse-engineering documentation
 
 ### ✅ Grace Unlock with Boss Arena Filter 🟢
 Global "Unlock All" for Sites of Grace with option to skip boss arena graces.
@@ -459,7 +459,7 @@ One-click workflow: Close Game → Upload Save → Launch Game.
 - Grace Unlock All with Boss Arena filter (db.go, WorldProgressTab.tsx)
 - Summoning Pools Toggle (summoning_pools.go, WorldProgressTab.tsx)
 - Colosseum Toggle (summoning_pools.go, WorldProgressTab.tsx)
-- Map Exploration & Fog of War removal (maps.go, app.go, spec/27-fog-of-war.md)
+- Map Exploration & Fog of War removal (maps.go, app.go, spec/27-map-reveal.md)
 - Combined Map Visible + Acquired toggle, System flags as top-level checkboxes
 
 ### ✅ Phase 4 — Character Progression & Inventory
