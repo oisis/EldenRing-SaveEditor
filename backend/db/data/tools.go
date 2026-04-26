@@ -3,6 +3,7 @@ package data
 var Tools = map[uint32]ItemData{
 	0x401E90D8: {Name: "Surging Frenzied Flame", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/throwables/surging_frenzied_flame.png"},
 	0x401E9100: {Name: "Glinting Nail", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/throwables/glinting_nail.png"},
+	0x401E8932: {Name: "Scorpion Stew", Category: "tools", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/tools/consumables/scorpion_stew.png"},
 	0x401E8933: {Name: "Gourmet Scorpion Stew", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/gourmet_scorpion_stew.png"},
 	0x40000334: {Name: "Boiled Crab", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/boiled_crab.png"},
 	0x401E87A0: {Name: "Spirit Raisin", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/consumables/spirit_raisin.png"},
