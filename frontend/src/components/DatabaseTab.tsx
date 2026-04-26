@@ -117,7 +117,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     }, [category]);
 
     const filteredItems = useMemo(() => dbItems.filter(item => {
-        if (!showFlaggedItems && item.flags?.length > 0) return false;
+        // "Cut & Ban-Risk" toggle hides only risky-flagged items, not informational flags
+        // (dlc, stackable) which are now present on most entries.
+        const RISKY_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
+        if (!showFlaggedItems && item.flags?.some(f => RISKY_FLAGS.includes(f))) return false;
         return item.name.toLowerCase().includes(search.toLowerCase()) ||
             item.id.toString(16).includes(search.toLowerCase());
     }).sort((a, b) => {
