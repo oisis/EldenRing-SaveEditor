@@ -520,7 +520,6 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                         <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
                                                     )}
                                                 </div>
-                                                <span className="text-[9px] font-bold text-muted-foreground/50 uppercase tracking-tighter">0x{item.id.toString(16).toUpperCase()}</span>
                                             </div>
                                         </td>
                                         {columnVisibility.id && (

@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: fix/ui-remove-redundant-hex — Drop hex-below-item-name (duplicates the optional ID column)
+
+**Goal:** When the user enabled the "ID (HEX)" column toggle in Settings, the hex value rendered twice — once below the item name, once in the dedicated column. Per user feedback, remove the always-shown hex below the name. Users who want the hex still get it via the column toggle.
+
+**Change:**
+- `frontend/src/components/DatabaseTab.tsx` — the cell-below-name had a `showPreview ? <preview> : <hex>` ternary. Removed the else-branch so hex is no longer rendered as a fallback. Preview (e.g. `Heavy +25` for upgradeable weapons) still shows when applicable; otherwise the cell is empty.
+- `frontend/src/components/InventoryTab.tsx` — the `<span>` rendering hex below the name was always shown. Removed entirely. The outer `flex flex-col gap-0.5` wrapper now has a single child (the name+flags row); kept as-is — cosmetic, no visual difference.
+
+**No state, props, or styling changes elsewhere.** Settings checkbox `columnVisibility.id` continues to gate the optional "ID (HEX)" column unchanged.
+
+**Tests:** `cd frontend && npx tsc --noEmit` ✅, `make build` ✅.
+
 ### Branch: feat/ban-risk-warning-modal — Warn when adding ban-risk-flagged items + minor icon downloader iteration
 
 #### Part 1 — Ban-risk warning modal in `DatabaseTab`

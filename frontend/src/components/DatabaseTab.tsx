@@ -585,13 +585,9 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                                         <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
                                                     )}
                                                 </div>
-                                                {showPreview ? (
+                                                {showPreview && (
                                                     <span className="text-[8px] font-mono font-bold text-primary/60 uppercase tracking-tight">
                                                         {previewParts.join(' ')}
-                                                    </span>
-                                                ) : (
-                                                    <span className="text-[8px] font-mono text-muted-foreground/50 uppercase tracking-tighter">
-                                                        0x{item.id.toString(16).toUpperCase()}
                                                     </span>
                                                 )}
                                             </div>
