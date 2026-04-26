@@ -253,6 +253,7 @@ export namespace db {
 	    name: string;
 	    category: string;
 	    unlocked: boolean;
+	    flags: string[];
 	
 	    static createFrom(source: any = {}) {
 	        return new GestureEntry(source);
@@ -264,6 +265,7 @@ export namespace db {
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.unlocked = source["unlocked"];
+	        this.flags = source["flags"];
 	    }
 	}
 	export class GraceEntry {

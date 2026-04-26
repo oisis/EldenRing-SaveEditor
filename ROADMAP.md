@@ -239,16 +239,13 @@ Equipped Great Rune selector + buff toggle.
 Toggle grid for all 64 gestures.
 
 **Implementation:** `backend/db/data/gestures.go`, `backend/db/db.go`, `app.go`, `frontend/src/components/WorldProgressTab.tsx`
-- 57 gestures (base game + DLC) with body-type variant detection (even/odd IDs)
-- GestureGameData: `0x100` bytes (64 × u32) at `StorageBoxOffset + DynStorageBox`
-- Empty sentinel: `0xFFFFFFFE` (not 0)
-- `DetectBodyTypeOffset()` — auto-detects body type A (odd) vs B (even) from existing gestures
-- `GetGestures(slotIndex)` / `SetGestureUnlocked(slotIndex, gestureID, unlocked)` in `app.go`
-- `BulkSetGesturesUnlocked()` — batch operation (single IPC call, single pushUndo)
-- UI: flat grid with Unlock All / Lock All buttons
-- Integrated as "Gestures" sub-tab in World Progress tab
-
-**Known issue:** Toggling gestures in the binary array changes the save correctly, but gestures may not appear in-game. The game likely requires BOTH the binary array entry AND the corresponding event flag (range 60800–60849) to be set. Event flag mapping per gesture is not yet implemented — see spec/08-spells-gestures.md. Fixing this requires reverse-engineering the exact flag↔gesture mapping.
+- 57 gestures (51 base + 6 DLC). All vanilla IDs are odd; the previous "EvenID/OddID body-type variant" theory was wrong (cross-checked with er-save-manager/data/gestures.py).
+- GestureGameData: `0x100` bytes (64 × u32) at `StorageBoxOffset + DynStorageBox`. Empty sentinel: `0xFFFFFFFE`.
+- `GetGestures(slotIndex)` / `SetGestureUnlocked(slotIndex, gestureID, unlocked)` / `BulkSetGesturesUnlocked()` in `app.go`. No event flags involved (er-save-manager confirms only the binary array matters).
+- Read path counts only canonical (odd) IDs as unlocked — legacy "even body-type B" garbage from older builds is intentionally ignored so the UI reflects what the game actually shows.
+- Lock single / Lock All also clears the matching `(id-1)` even slot, freeing all 64 sentinel slots so a follow-up Unlock All never runs out of space.
+- 6 ban-risk entries (`The Carian Oath`, `Fetal Position`, both pre-order Rings, `?GoodsName?`, the Ring of Miquella alt slot) are tagged with `Flags: ["cut_content"|"pre_order"|"dlc_duplicate", "ban_risk"]`. UI marks them with a ⚠ tooltip; **Unlock All skips anything with `ban_risk`** so a single click cannot add cut/pre-order content. Users can still toggle them individually if they truly own the relevant DLC.
+- UI: flat grid with Unlock All / Lock All buttons in World → Unlocks → Gestures and World Progress → Gestures.
 
 ### ✅ AoW Acquisition Flag — auto-mark Ash of War as collected 🟡
 Adding an Ash of War via Item Database now also sets the duplication event flag so the AoW is recognised as acquired by the world.

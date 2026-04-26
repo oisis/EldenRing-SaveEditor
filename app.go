@@ -640,21 +640,19 @@ func (a *App) GetGestures(slotIndex int) ([]db.GestureEntry, error) {
 		return gestures, nil // return without unlock state
 	}
 
-	// Read all 64 gesture slots from save, match against both body-type variants
-	unlockedNames := make(map[string]bool, 64)
-	for i := 0; i < 64; i++ {
-		off := gestureDataOff + i*4
-		gID := binary.LittleEndian.Uint32(slot.Data[off : off+4])
+	// Read 64 gesture IDs. Only canonical (odd) IDs are recognised — any
+	// even garbage left over from older builds is intentionally not counted
+	// as "unlocked" because the game itself does not see those entries.
+	gestureSlots := readGestureSlots(slot.Data, gestureDataOff)
+	unlockedIDs := make(map[uint32]bool, 64)
+	for _, gID := range gestureSlots {
 		if gID == data.GestureEmptySentinel || gID == 0 {
 			continue
 		}
-		if idx, ok := data.LookupGestureBySlotID(gID); ok {
-			unlockedNames[data.AllGestures[idx].Name] = true
-		}
+		unlockedIDs[gID] = true
 	}
-
 	for i := range gestures {
-		gestures[i].Unlocked = unlockedNames[gestures[i].Name]
+		gestures[i].Unlocked = unlockedIDs[gestures[i].ID]
 	}
 
 	return gestures, nil
@@ -670,36 +668,12 @@ func readGestureSlots(slotData []byte, gestureDataOff int) []uint32 {
 	return slots
 }
 
-// resolveGestureWriteID determines the correct save-file ID for a gesture,
-// accounting for body-type variants. gestureID is the canonical EvenID from the UI.
-func resolveGestureWriteID(gestureID uint32, bodyTypeOffset uint32) uint32 {
-	for _, g := range data.AllGestures {
-		if g.EvenID == gestureID {
-			if g.OddID != 0 && bodyTypeOffset == 1 {
-				return g.OddID
-			}
-			return g.EvenID
-		}
-	}
-	return gestureID // fallback: use as-is
-}
-
-// gestureMatchesCanonical returns true if saveID corresponds to the gesture with canonical EvenID.
-func gestureMatchesCanonical(saveID, canonicalEvenID uint32) bool {
-	if saveID == canonicalEvenID {
-		return true
-	}
-	// Check if saveID is the OddID variant of this gesture
-	for _, g := range data.AllGestures {
-		if g.EvenID == canonicalEvenID {
-			return g.OddID != 0 && saveID == g.OddID
-		}
-	}
-	return false
-}
-
 // SetGestureUnlocked adds or removes a gesture from the GestureGameData array.
-// gestureID is the canonical EvenID from the UI; body-type variant is resolved automatically.
+// gestureID is the canonical odd save-slot ID.
+//
+// On the lock path we ALSO clear the (id-1) even slot — older builds wrote
+// even "body type B" IDs that the game silently ignored, so without this the
+// garbage entries would linger and eat sentinel slots needed for re-unlock.
 func (a *App) SetGestureUnlocked(slotIndex int, gestureID uint32, unlocked bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -717,37 +691,55 @@ func (a *App) SetGestureUnlocked(slotIndex int, gestureID uint32, unlocked bool)
 	}
 
 	gestureSlots := readGestureSlots(slot.Data, gestureDataOff)
+	purgeUnknownGestures(gestureSlots)
 
 	if unlocked {
-		// Check if already present (either body-type variant)
 		for _, gID := range gestureSlots {
-			if gestureMatchesCanonical(gID, gestureID) {
-				return nil // already unlocked
+			if gID == gestureID {
+				writeGestureSlots(slot.Data, gestureDataOff, gestureSlots)
+				return nil // already present (still flush purge)
 			}
 		}
-		// Detect body type and resolve write ID
-		btOffset := data.DetectBodyTypeOffset(gestureSlots)
-		writeID := resolveGestureWriteID(gestureID, btOffset)
-		// Find first empty slot (sentinel 0xFFFFFFFE)
 		for i, gID := range gestureSlots {
 			if gID == data.GestureEmptySentinel {
-				off := gestureDataOff + i*4
-				binary.LittleEndian.PutUint32(slot.Data[off:off+4], writeID)
+				gestureSlots[i] = gestureID
+				writeGestureSlots(slot.Data, gestureDataOff, gestureSlots)
 				return nil
 			}
 		}
 		return fmt.Errorf("no empty gesture slot available")
 	}
 
-	// Remove: clear matching slot (check both variants)
 	for i, gID := range gestureSlots {
-		if gestureMatchesCanonical(gID, gestureID) {
-			off := gestureDataOff + i*4
-			binary.LittleEndian.PutUint32(slot.Data[off:off+4], data.GestureEmptySentinel)
-			return nil
+		if gID == gestureID {
+			gestureSlots[i] = data.GestureEmptySentinel
 		}
 	}
-	return nil // not found, nothing to remove
+	writeGestureSlots(slot.Data, gestureDataOff, gestureSlots)
+	return nil
+}
+
+// purgeUnknownGestures replaces any slot value that is not the empty sentinel
+// AND not a known canonical (odd) gesture ID with the sentinel. This drops
+// legacy "even body-type B" garbage written by older builds and frees space
+// for legitimate Unlock operations.
+func purgeUnknownGestures(slots []uint32) {
+	for i, gID := range slots {
+		if gID == data.GestureEmptySentinel {
+			continue
+		}
+		if _, ok := data.LookupGestureBySlotID(gID); !ok {
+			slots[i] = data.GestureEmptySentinel
+		}
+	}
+}
+
+// writeGestureSlots writes 64 u32 gesture IDs back to the save data.
+func writeGestureSlots(slotData []byte, gestureDataOff int, slots []uint32) {
+	for i, v := range slots {
+		off := gestureDataOff + i*4
+		binary.LittleEndian.PutUint32(slotData[off:off+4], v)
+	}
 }
 
 // BulkSetGesturesUnlocked adds or removes multiple gestures in a single call.
@@ -772,46 +764,25 @@ func (a *App) BulkSetGesturesUnlocked(slotIndex int, gestureIDs []uint32, unlock
 	}
 
 	gestureSlots := readGestureSlots(slot.Data, gestureDataOff)
+	purgeUnknownGestures(gestureSlots)
 
 	if unlocked {
-		// Build set of already-present gesture names
-		presentNames := make(map[string]bool, 64)
+		present := make(map[uint32]bool, 64)
 		for _, gID := range gestureSlots {
 			if gID == data.GestureEmptySentinel || gID == 0 {
 				continue
 			}
-			if idx, ok := data.LookupGestureBySlotID(gID); ok {
-				presentNames[data.AllGestures[idx].Name] = true
-			}
+			present[gID] = true
 		}
-
-		// Detect body type once for all additions
-		btOffset := data.DetectBodyTypeOffset(gestureSlots)
-
 		for _, gestureID := range gestureIDs {
-			// Resolve gesture name to check if already present
-			gIdx := -1
-			for gi, g := range data.AllGestures {
-				if g.EvenID == gestureID {
-					gIdx = gi
-					break
-				}
+			if present[gestureID] {
+				continue
 			}
-			if gIdx >= 0 && presentNames[data.AllGestures[gIdx].Name] {
-				continue // already unlocked
-			}
-
-			writeID := resolveGestureWriteID(gestureID, btOffset)
-
 			placed := false
 			for i, gID := range gestureSlots {
 				if gID == data.GestureEmptySentinel {
-					off := gestureDataOff + i*4
-					binary.LittleEndian.PutUint32(slot.Data[off:off+4], writeID)
-					gestureSlots[i] = writeID
-					if gIdx >= 0 {
-						presentNames[data.AllGestures[gIdx].Name] = true
-					}
+					gestureSlots[i] = gestureID
+					present[gestureID] = true
 					placed = true
 					break
 				}
@@ -821,30 +792,20 @@ func (a *App) BulkSetGesturesUnlocked(slotIndex int, gestureIDs []uint32, unlock
 			}
 		}
 	} else {
-		// Build name-based lookup for gestures to remove
-		removeNames := make(map[string]bool, len(gestureIDs))
+		// Even legacy IDs were already cleared by purgeUnknownGestures above,
+		// so Lock All only needs to wipe the canonical IDs the caller listed.
+		removeSet := make(map[uint32]bool, len(gestureIDs))
 		for _, id := range gestureIDs {
-			for _, g := range data.AllGestures {
-				if g.EvenID == id {
-					removeNames[g.Name] = true
-					break
-				}
-			}
+			removeSet[id] = true
 		}
 		for i, gID := range gestureSlots {
-			if gID == data.GestureEmptySentinel || gID == 0 {
-				continue
-			}
-			if idx, ok := data.LookupGestureBySlotID(gID); ok {
-				if removeNames[data.AllGestures[idx].Name] {
-					off := gestureDataOff + i*4
-					binary.LittleEndian.PutUint32(slot.Data[off:off+4], data.GestureEmptySentinel)
-					gestureSlots[i] = data.GestureEmptySentinel
-				}
+			if removeSet[gID] {
+				gestureSlots[i] = data.GestureEmptySentinel
 			}
 		}
 	}
 
+	writeGestureSlots(slot.Data, gestureDataOff, gestureSlots)
 	return nil
 }
 

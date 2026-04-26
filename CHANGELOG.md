@@ -4,6 +4,66 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: fix/console-ux — Gestures: free slots before write + hide ban-risk behind setting
+
+**Follow-up #2 to the gesture bug.** User feedback after the previous build:
+1. **First Unlock All did nothing** — save still held 44 legacy even-ID garbage entries plus 13 valid odd, leaving only 7 sentinel slots; backend errored with "no empty gesture slot available" and the frontend silently swallowed it. After Lock All cleared everything, a second Unlock All worked.
+2. **Ban-risk gestures still visible** in the Gestures grid — user wants them gated behind the existing `showFlaggedItems` toggle (Tools / Settings).
+
+**Changes:**
+- `app.go`:
+  - New helper `purgeUnknownGestures(slots)` — replaces any non-canonical slot value (legacy even garbage, unknown IDs) with the empty sentinel.
+  - `SetGestureUnlocked` and `BulkSetGesturesUnlocked` now call `purgeUnknownGestures` first, freeing space so a single Unlock All on a save corrupted by older builds succeeds in one click.
+  - Lock path simplified back to canonical IDs only (the purge already wiped legacy evens, no `id-1` extension needed).
+- `frontend/src/App.tsx`: pipes the existing `showFlaggedItems` setting into `<WorldTab>`.
+- `frontend/src/components/WorldTab.tsx`: new `WorldTabProps.showFlaggedItems`; computes `visibleGestures` (filter out `ban_risk` unless toggle is on) and uses it for both rendering and the Unlock All bulk list. Lock All still iterates all known gestures so the save gets wiped clean. Progress counter switched to `visibleGestures.length`.
+
+**Tests:** `tsc --noEmit` ✅, `make build` ✅, `go build ./backend/... ./` ✅.
+
+### Branch: fix/console-ux — Gestures: stop auto-recovering ghost unlocks + ban-risk filter
+
+**Follow-up to the previous gesture fix.** User feedback after that build:
+1. **Read still showed all 57 unlocked** — auto-`SanitizeGestureSlots` on every `GetGestures` call was rewriting in-memory legacy even IDs to odd, so the UI claimed the user had every gesture even though only ~13 were really unlocked from gameplay.
+2. **Unlock All triggered ban-risk content** — Pre-order Rings, "The Carian Oath", "Fetal Position", "?GoodsName?" appeared in-game with placeholder `ICON` text, indicating cut content / pre-order entries that violate online anti-cheat.
+
+**Changes:**
+- `backend/db/data/gestures.go`: added `Flags []string` to `GestureDef`. Tagged 6 entries with `cut_content` / `pre_order` / `dlc_duplicate` plus a shared `ban_risk` flag (IDs 111, 193, 217, 221, 227, 233).
+- `backend/db/db.go`: `GestureEntry` now carries `Flags`; `GetAllGestureSlots` propagates them.
+- `app.go`:
+  - `GetGestures`: removed sanitize-on-read. Only canonical (odd) IDs count as unlocked, matching what the game actually displays.
+  - `SetGestureUnlocked` lock path: also clears the `(id-1)` even legacy slot.
+  - `BulkSetGesturesUnlocked` lock path: `removeSet` includes both `id` and `(id-1)` for every odd ID, so Lock All wipes the array clean even when previous builds left even garbage behind.
+  - Removed sanitize-on-write call (Lock All extension is sufficient and avoids silently re-adding gestures the user didn't ask for).
+- `frontend/src/components/WorldTab.tsx`, `WorldProgressTab.tsx`:
+  - Unlock All filters `g.flags?.includes('ban_risk')` so ban-risk entries are never bulk-added.
+  - Lock All sends every known gesture (not just unlocked ones) to ensure legacy garbage gets cleared.
+  - Each gesture row shows a ⚠ next to ban-risk entries with a tooltip explaining the risk.
+
+**User flow after the fix:**
+1. Reload save → UI shows only really-unlocked gestures (13 in user's slot 4).
+2. Click Lock All → all 64 entries become sentinel, including legacy even garbage.
+3. Click Unlock All → 51 safe gestures written; the 6 ban-risk ones must be toggled individually if the user truly owns them.
+
+**Tests:** `go test ./backend/...` ✅, `tsc --noEmit` ✅, `make build` ✅.
+
+### Branch: fix/console-ux — Gestures invisible in-game (root cause + auto-repair)
+
+**Bug reported by user:** "Gesty się nie pojawiają pomimo tego że je dodałem w apce" — gestures unlocked via the editor were silently ignored by the game.
+
+**Root cause:** The previous editor build encoded an "EvenID / OddID body-type variant" theory in `AllGestures`. In practice all vanilla gesture slot IDs are odd (verified against `er-save-manager/data/gestures.py`, which only writes odd IDs and is known to work). When the editor wrote the EvenID, the game silently ignored it, so up to 44/57 gestures became invisible in slots edited by previous builds.
+
+**Diagnosis (`tmp/diag-gesture/main.go`):**
+- User's slot 4 contained 13 odd (correct) + 44 even (broken) + 7 sentinel = 64 entries — matches "almost all unlocks invisible in-game" report.
+- All 5 active slots had the same pattern.
+
+**Fix:**
+- `backend/db/data/gestures.go`: rebuilt `GestureDef` with a single canonical `ID` (always odd) plus the matching `ItemID` from er-save-manager. Removed `EvenID`/`OddID`, removed `DetectBodyTypeOffset`. Added `SanitizeGestureSlots(slots)` which rewrites any even slot whose `(id+1)` is a known gesture to `(id+1)` — silent, idempotent migration.
+- `backend/db/db.go`: `GetAllGestureSlots` returns the new canonical ID.
+- `app.go`: `GetGestures` runs `SanitizeGestureSlots` on the in-memory copy before computing unlock state, so the UI immediately reflects the repaired state. `SetGestureUnlocked` and `BulkSetGesturesUnlocked` sanitise the slot before any write so the next save commits the repair to disk. Removed `resolveGestureWriteID` and `gestureMatchesCanonical` (no body-type variants exist). Added `writeGestureSlots` helper.
+- Cut-content / unknown DLC entries kept under their canonical IDs so saves containing them still display correctly.
+
+**Tests:** `go test ./backend/...` ✅, `make build` ✅. Diag verifies sanitize repairs all 5 user slots from {13–45 known + many broken} → {57 known + 0 unmatched}. Manual in-game test required to confirm gestures now appear (user simply reopens the slot and toggles Unlock All / Lock All to commit the repair).
+
 ### Branch: fix/console-ux — BB refactor to backend-driven readOnly + ROADMAP cookbook sync
 
 **Goal:** Drop the BB-specific Wails getter and frontend Set in favour of the same backend pattern already used for Cookbooks and Whetblades. ROADMAP updated to reflect that cookbook inventory sync is in fact already shipped.

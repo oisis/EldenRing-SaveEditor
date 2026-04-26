@@ -94,21 +94,23 @@ type RegionEntry struct {
 
 // GestureEntry represents a gesture with its unlock state.
 type GestureEntry struct {
-	ID       uint32 `json:"id"`
-	Name     string `json:"name"`
-	Category string `json:"category"`
-	Unlocked bool   `json:"unlocked"`
+	ID       uint32   `json:"id"`
+	Name     string   `json:"name"`
+	Category string   `json:"category"`
+	Unlocked bool     `json:"unlocked"`
+	Flags    []string `json:"flags"` // "cut_content" | "pre_order" | "dlc_duplicate" | "ban_risk"
 }
 
 // GetAllGestureSlots returns all known gestures, one entry per gesture.
-// The ID is the canonical EvenID; the backend resolves body-type variants at runtime.
+// ID is the canonical save-slot ID (always odd in vanilla data).
 func GetAllGestureSlots() []GestureEntry {
 	entries := make([]GestureEntry, 0, len(data.AllGestures))
 	for _, g := range data.AllGestures {
 		entries = append(entries, GestureEntry{
-			ID:       g.EvenID,
+			ID:       g.ID,
 			Name:     g.Name,
 			Category: g.Category,
+			Flags:    g.Flags,
 		})
 	}
 	sort.Slice(entries, func(i, j int) bool {

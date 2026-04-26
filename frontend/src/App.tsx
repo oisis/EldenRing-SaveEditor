@@ -505,7 +505,7 @@ function App() {
                                         )}
                                     </div>
                                 )}
-                                {activeTab === 'world' && <WorldTab charIdx={selectedChar} onMutate={refreshUndoDepth} />}
+                                {activeTab === 'world' && <WorldTab charIdx={selectedChar} showFlaggedItems={showFlaggedItems} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'tools' && <ToolsTab charIndex={selectedChar} onComplete={refreshSlots} />}
                                 </div>
                             </div>
