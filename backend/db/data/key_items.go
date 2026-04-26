@@ -389,7 +389,6 @@ var KeyItems = map[uint32]ItemData{
 	0x40000866: {Name: "Mohg's Shackle", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/mohgs_shackle.png"},
 	0x4000229A: {Name: "Two Fingers' Prayerbook", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/two_fingers_prayerbook.png"},
 	0x401E88D6: {Name: "Fingerprint Nostrum", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/fingerprint_nostrum.png"},
-	0x401EA17C: {Name: "Cherishing Fingers", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/cherishing_fingers.png"},
 	0x401EA3C3: {Name: "Igon's Furled Finger", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/igons_furled_finger.png"},
 	0x401ED2B8: {Name: "Finger Mimic", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_mimic.png"},
 }
