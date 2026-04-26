@@ -171,8 +171,10 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		return nil, fmt.Errorf("failed to read SteamID: %w", err)
 	}
 
-	// Active Slots are at 0x310
-	udReader.Seek(0x310, 0)
+	// Active Slots @ 0x1954 (10 × u8); ProfileSummary[i] @ 0x195E + i*0x24C.
+	// Verified Apr 2026 from real saves (tmp/re-character/ + tmp/save/oisisk_ps4.txt).
+	// Layout is identical across PC and PS4. See spec/23-user-data-10.md.
+	udReader.Seek(0x1954, 0)
 	for i := 0; i < 10; i++ {
 		b, err := udReader.ReadU8()
 		if err != nil {
@@ -180,9 +182,6 @@ func loadPCSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 		}
 		save.ActiveSlots[i] = b == 1
 	}
-
-	// Profile Summaries start at 0x31A (ActiveSlots + 10 bytes)
-	// Each summary is 0x100 bytes
 	for i := 0; i < 10; i++ {
 		save.ProfileSummaries[i].Read(udReader)
 	}
@@ -220,8 +219,9 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 	}
 	udReader := NewReader(save.UserData10.Data)
 
-	// PS4: Active Slots are at 0x300, Summaries at 0x30A
-	udReader.Seek(0x300, 0)
+	// PS4 UserData10 layout is identical to PC (verified Apr 2026, oisisk_ps4.txt):
+	// Active Slots @ 0x1954, ProfileSummary[i] @ 0x195E + i*0x24C. See spec/23-user-data-10.md.
+	udReader.Seek(0x1954, 0)
 	for i := 0; i < 10; i++ {
 		b, err := udReader.ReadU8()
 		if err != nil {
@@ -246,30 +246,23 @@ func loadPSSequential(r *Reader, save *SaveFile) (*SaveFile, error) {
 
 // flushMetadata writes in-memory SteamID, ActiveSlots, and ProfileSummaries
 // back to UserData10.Data before serialization.
+//
+// PC and PS4 share the same UserData10 layout — only the SteamID prefix and the
+// PC-only MD5 checksum differ. ActiveSlots @ 0x1954, ProfileSummary[i] @ 0x195E + i*0x24C.
+// Verified Apr 2026 from real saves; see spec/23-user-data-10.md.
 func (s *SaveFile) flushMetadata() {
 	if s.Platform == PlatformPC {
 		binary.LittleEndian.PutUint64(s.UserData10.Data[0:], s.SteamID)
-		for i := 0; i < 10; i++ {
-			if s.ActiveSlots[i] {
-				s.UserData10.Data[0x310+i] = 1
-			} else {
-				s.UserData10.Data[0x310+i] = 0
-			}
+	}
+	for i := 0; i < 10; i++ {
+		if s.ActiveSlots[i] {
+			s.UserData10.Data[0x1954+i] = 1
+		} else {
+			s.UserData10.Data[0x1954+i] = 0
 		}
-		for i := 0; i < 10; i++ {
-			s.ProfileSummaries[i].Serialize(s.UserData10.Data, 0x31A+i*0x100)
-		}
-	} else {
-		for i := 0; i < 10; i++ {
-			if s.ActiveSlots[i] {
-				s.UserData10.Data[0x300+i] = 1
-			} else {
-				s.UserData10.Data[0x300+i] = 0
-			}
-		}
-		for i := 0; i < 10; i++ {
-			s.ProfileSummaries[i].Serialize(s.UserData10.Data, 0x30A+i*0x100)
-		}
+	}
+	for i := 0; i < 10; i++ {
+		s.ProfileSummaries[i].Serialize(s.UserData10.Data, 0x195E+i*0x24C)
 	}
 }
 

@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: fix/profile-summary-offset — Fix wrong UserData10 ProfileSummary offsets (was corrupting Mirror Favorites slot 1)
+
+**Goal:** Reverse-engineer the real UserData10 layout from real saves and fix our wrong ProfileSummary read/write offsets which had been silently corrupting Mirror Favorites preset slot 1 on every save.
+
+**Root cause (RE):**
+Two reference repos (`er-save-manager` Python, `ER-Save-Editor` Rust) place ProfileSummary at `0x1954` post-checksum. Our code read/wrote at `0x310/0x31A` (PC) and `0x300/0x30A` (PS4). Verified on real saves (`tmp/re-character/ER0000-{before,after}.sl2` for PC + `tmp/save/oisisk_ps4.txt` for PS4) — both files show clear ProfileSummary structure starting at `0x195E` (after 10-byte ActiveSlots block at `0x1954`). The offset `0x31A` lies inside Mirror Favorites preset slot 1 (which spans `0x284..0x3B3`), so every metadata flush via our editor injected bytes into that preset slot — explaining the user's reports of "preset 1 looks weird after edit".
+
+**Other findings during RE:**
+- ProfileSummary stride is **`0x24C` bytes** (588 bytes), not the `0x100` we used.
+- ProfileSummary name field is **17 u16** (16 chars + null terminator = 34 bytes), so Level u32 lives at `+0x22`, not `+0x20` as our code assumed.
+- **PC and PS4 share IDENTICAL UserData10 layout** — only the file-level container header and PC-only MD5 checksum differ; the post-checksum data structure is the same. Our code historically had separate offsets for PC vs PS4 (`0x310/0x31A` vs `0x300/0x30A`) which was a coincidental near-match by 0x10-byte difference, not a real platform difference.
+- The 64-byte `unk0x6c` block inside FaceData is **NOT touched** by the game when applying a preset — it's per-character state, not preset-encoded. Our previous attempts to re-derive it for cross-gender apply were unnecessary.
+
+**Change:**
+- `backend/core/save_manager.go`:
+    - PC + PS4 readers: `udReader.Seek(0x310/0x300, 0)` → `udReader.Seek(0x1954, 0)` (unified).
+    - `flushMetadata`: ActiveSlots at `0x1954+i`, ProfileSummary at `0x195E+i*0x24C`. PC/PS4 paths merged (only the SteamID prefix at `0x00` differs between platforms).
+- `backend/core/structures.go`:
+    - `ProfileSummary.Read`: read 16 u16 name, seek to `start+0x22` for Level, advance to `start+0x24C` for next entry.
+    - `ProfileSummary.Serialize`: write name at `+0`, Level at `+0x22`. The remaining 0x226 bytes per slot (face data snapshot, equipment summary, archetype, gift, body_type) are intentionally NOT written by us — they retain the game's last serialized values, which is correct.
+- `backend/core/offset_defs.go`:
+    - `FavSafeSlots` expanded from `[6]int{0, 10..14}` to `[15]int{0..14}`. Slots 1-9 are no longer at risk of corruption; the historical `FavSafeSlots` band-aid is no longer needed (kept for backward compatibility but deprecated).
+- `spec/23-user-data-10.md` — rewrite with correct offsets, mark layout as verified PC+PS4.
+- `spec/31-appearance-presets.md` (new) — full Mirror Favorites preset slot layout + apply algorithm reverse-engineered from real saves, plus implications for `ApplyAppearancePreset` and `WriteSelectedToFavorites`.
+- `spec/README.md` — index entry for #31.
+
+**Tests:**
+- `go test ./backend/...` — all suites pass (core, db, db/data, vm).
+- `make build` — full Wails build OK (frontend tsc + Vite + Go compile + macOS package).
+- Custom round-trip diagnostic on `tmp/re-character/ER0000-before.sl2`: load → save → reload, **0 bytes of diff** in the entire 28.9 MB file. Mirror Favorites slot 1 specifically verified intact (was being corrupted on every save before this fix).
+- Verified parsing: names "[PL] Jagna", "[PL] Zofia", "Tester", "Ada", "Random" with levels 30, 129, 17, 34, 9 — all match in-game ground truth.
+
+**Backward compatibility:**
+Saves edited with the previous (buggy) version of our editor have garbage data at `0x31A+i*0x100` (= mid-stream in Mirror Favorites slots 1-8). With this fix those slots are **no longer touched**, so the corruption stops; existing corruption in slots 1-8 of those saves remains until the user re-creates the affected presets in-game. ProfileSummary at `0x195E+i*0x24C` was always preserved by the game itself across save/reload (game writes it correctly, only our editor was reading/writing the wrong location), so name and level data in the character-select UI are unaffected by the historical bug.
+
+**NOT in this branch (deferred):**
+- New feature "Apply from Mirror Favorites slot N to character" — direct byte-copy preset → FaceData using the algorithm in `spec/31-appearance-presets.md`. Bigger UI + backend work; separate session.
+- Re-sourcing `presets.go` as raw 0x130-byte blobs — large data sourcing effort, separate task.
+
 ### Branch: fix/dbtab-flag-filter-too-broad — Restore visibility of arrows/bolstering/crafting/most tools in Item Database
 
 **Goal:** Regression fix. After the `dlc` (701 entries) and `stackable` (532 entries) flag sweeps, the "Cut & Ban-Risk" toggle in Settings (when off — the default for many users) was hiding **all** items with any flag in `Flags`. That meant nearly every entry in `arrows_and_bolts.go`, `bolstering_materials.go`, `crafting_materials.go`, and most of `tools.go` became invisible in both the Item Database tab and the inventory list.
