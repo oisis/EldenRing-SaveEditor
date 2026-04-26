@@ -225,7 +225,6 @@ var Tools = map[uint32]ItemData{
 	0x40001FED: {Name: "Letter to Bernahl", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/letter_to_bernahl.png"},
 	0x40001FF5: {Name: "Burial Crow's Letter", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/burial_crows_letter.png", Flags: []string{"cut_content", "ban_risk"}},
 	0x40001FFA: {Name: "Imbued Sword Key", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/imbued_sword_key.png"},
-	0x40002005: {Name: "Sewer-Gaol Key", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/sewer_gaol_key.png"},
 	0x4000201D: {Name: "Zorayas's Letter", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/zorayass_letter.png"},
 	0x4000201F: {Name: "Rogier's Letter", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/rogiers_letter.png"},
 	0x40002198: {Name: "Map: Limgrave, West", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_limgrave_west.png"},
@@ -287,5 +286,7 @@ var Tools = map[uint32]ItemData{
 	0x401EA61A: {Name: "Map: Southern Shore", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_southern_shore.png"},
 	0x401EA61B: {Name: "Map: Rauh Ruins", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_rauh_ruins.png"},
 	0x401EA61C: {Name: "Map: Abyss", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_abyss.png"},
-	0x401E90CE: {Name: "Call of Tibia", Category: "incantations", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/consumables/call_of_tibia.png"},
+	0x4000085C: {Name: "Margit's Shackle", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/margits_shackle.png"},
+	0x40000866: {Name: "Mohg's Shackle", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/mohgs_shackle.png"},
+	0x40000870: {Name: "Pureblood Knight's Medal", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/pureblood_knights_medal.png"},
 }
