@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react';
 import toast from '../lib/toast';
-import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyAppearancePreset, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
+import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyMirrorFavoriteToCharacter, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
 import {vm, main} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 
@@ -28,11 +28,9 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
     // Appearance state
     const [presets, setPresets] = useState<main.PresetInfo[]>([]);
     const [checked, setChecked] = useState<Set<string>>(new Set());
-    const [applyingPreset, setApplyingPreset] = useState(false);
     const [writingFav, setWritingFav] = useState(false);
     const [favSlots, setFavSlots] = useState<main.FavoriteSlotInfo[]>([]);
     const [zoomed, setZoomed] = useState<string | null>(null);
-    const [confirmApply, setConfirmApply] = useState(false);
 
     useEffect(() => {
         ListAppearancePresets().then(setPresets).catch(e => toast.error("" + e));
@@ -83,24 +81,19 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
             next.has(name) ? next.delete(name) : next.add(name);
             return next;
         });
-        setConfirmApply(false);
-    };
-
-    const handleApplyPreset = async () => {
-        if (checked.size !== 1) return;
-        const name = Array.from(checked)[0];
-        setApplyingPreset(true);
-        try {
-            await ApplyAppearancePreset(charIndex, name);
-            toast.success(`Applied "${name.split(',')[0]}"`);
-            setConfirmApply(false);
-            onMutate();
-        } catch (e) { toast.error("Failed: " + e); }
-        finally { setApplyingPreset(false); }
     };
 
     const handleWriteFavorites = async () => {
         if (checked.size === 0 || checked.size > freeSlots) return;
+        // Type B presets currently corrupt Mirror slots (Model IDs left at zero by
+        // WriteSelectedToFavorites — see spec/31). Block until presets.go is re-sourced
+        // as raw 0x130-byte blobs. Apply to Character still works for in-game presets.
+        const typeB = Array.from(checked).filter(n =>
+            presets.find(p => p.name === n)?.bodyType === 'Type B');
+        if (typeB.length > 0) {
+            toast.error(`Type B (female) presets cannot be written to Mirror — would create bald, male-faced slot. Create the preset in-game instead.`);
+            return;
+        }
         setWritingFav(true);
         try {
             const count = await WriteSelectedToFavorites(charIndex, Array.from(checked));
@@ -116,6 +109,14 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
             await RemoveFavoritePreset(slotIndex);
             toast.success(`Cleared Favorites slot ${slotIndex + 1}`);
             refreshFavStatus();
+        } catch (e) { toast.error("" + e); }
+    };
+
+    const handleApplyFromMirror = async (slotIndex: number) => {
+        try {
+            await ApplyMirrorFavoriteToCharacter(charIndex, slotIndex);
+            toast.success(`Applied Mirror slot ${slotIndex + 1} to character`);
+            onMutate();
         } catch (e) { toast.error("" + e); }
     };
 
@@ -284,21 +285,9 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                     checked.size > 0 ? (
                         <div className="flex items-center gap-2">
                             <span className="text-[8px] font-bold text-amber-500 uppercase tracking-wider">{checked.size} selected</span>
-                            {checked.size === 1 && !confirmApply && (
-                                <button onClick={() => setConfirmApply(true)}
-                                    className="px-2 py-0.5 bg-foreground text-background rounded text-[8px] font-black uppercase tracking-wider hover:brightness-110 transition-all">
-                                    Apply
-                                </button>
-                            )}
-                            {checked.size === 1 && confirmApply && (
-                                <button onClick={handleApplyPreset} disabled={applyingPreset}
-                                    className="px-2 py-0.5 bg-primary text-primary-foreground rounded text-[8px] font-black uppercase tracking-wider hover:brightness-110 transition-all disabled:opacity-50">
-                                    {applyingPreset ? '...' : 'Confirm'}
-                                </button>
-                            )}
                             <button onClick={handleWriteFavorites} disabled={writingFav || checked.size > freeSlots}
                                 className="px-2 py-0.5 border border-primary/30 text-primary rounded text-[8px] font-black uppercase tracking-wider hover:bg-primary/10 transition-all disabled:opacity-50">
-                                Mirror ({freeSlots} free)
+                                Add to Mirror ({freeSlots} free)
                             </button>
                         </div>
                     ) : undefined
@@ -306,7 +295,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
             >
                 <div className="space-y-3">
                     <p className="text-[10px] text-muted-foreground">
-                        Click image to preview. Checkbox to select. Apply (1 preset) writes to character.
+                        Click image to preview. Checkbox to select. Add to Mirror to make presets available in-game. Apply ✓ on a Mirror slot to copy preset onto current character.
                     </p>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
@@ -356,6 +345,12 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                 {usedSafeSlots.map(s => (
                                     <div key={s.index} className="flex items-center gap-2 bg-muted/30 rounded-md px-3 py-1.5">
                                         <span className="text-[10px] font-bold uppercase tracking-wider">Slot {s.index + 1}</span>
+                                        <button onClick={() => handleApplyFromMirror(s.index)}
+                                            className="text-primary hover:text-primary/80 transition-colors" title="Apply this preset to character">
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </button>
                                         <button onClick={() => handleRemoveFav(s.index)}
                                             className="text-red-400 hover:text-red-300 transition-colors" title="Remove">
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

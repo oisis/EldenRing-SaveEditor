@@ -2398,90 +2398,6 @@ func (a *App) ListAppearancePresets() []PresetInfo {
 	return result
 }
 
-// ApplyAppearancePreset applies a named appearance preset to the given slot.
-// Modifies face shape (64 bytes), body proportions (7 bytes), and skin/cosmetics (91 bytes)
-// directly in the slot's FaceData blob. For male presets (BodyType 1), model IDs are also
-// written using the confirmed PartsId = UI - 1 mapping. Female model IDs are skipped
-// because the mapping is non-sequential and requires a lookup table.
-func (a *App) ApplyAppearancePreset(slotIndex int, presetName string) error {
-	if a.save == nil {
-		return fmt.Errorf("no save loaded")
-	}
-	if slotIndex < 0 || slotIndex >= 10 {
-		return fmt.Errorf("invalid slot index")
-	}
-
-	var preset *data.AppearancePreset
-	for i := range data.Presets {
-		if data.Presets[i].Name == presetName {
-			preset = &data.Presets[i]
-			break
-		}
-	}
-	if preset == nil {
-		return fmt.Errorf("preset not found: %s", presetName)
-	}
-
-	slot := &a.save.Slots[slotIndex]
-	a.pushUndo(slotIndex)
-
-	fd := slot.FaceDataStart()
-	if fd < 0 || fd+core.FaceDataBlobSize > len(slot.Data) {
-		return fmt.Errorf("FaceData blob out of bounds: start=0x%X", fd)
-	}
-
-	// Write face shape (64 bytes at 0x30)
-	copy(slot.Data[fd+core.FDOffFaceShape:], preset.FaceShape[:])
-
-	// Write body proportions (7 bytes at 0xB0)
-	copy(slot.Data[fd+core.FDOffHead:], preset.Body[:])
-
-	// Write skin & cosmetics (91 bytes at 0xB7)
-	copy(slot.Data[fd+core.FDOffSkinR:], preset.Skin[:])
-
-	// Update VoiceType in parsed struct (Write() serializes it back to slot.Data)
-	slot.Player.VoiceType = preset.VoiceType
-
-	// Write model IDs for male presets (BodyType 1 = Type A).
-	// Most categories use PartsId = UI - 1. Hair uses a lookup table because
-	// the game's internal IDs are non-sequential (e.g. UI 9 → PartsId 101).
-	// Female mapping is non-sequential for all categories — skip model IDs.
-	if preset.BodyType == 1 {
-		writeModelID := func(offset int, uiValue uint8) {
-			pos := fd + offset
-			if uiValue > 0 {
-				slot.Data[pos] = uiValue - 1
-			} else {
-				slot.Data[pos] = 0
-			}
-			slot.Data[pos+1] = 0
-			slot.Data[pos+2] = 0
-			slot.Data[pos+3] = 0
-		}
-		writeModelID(core.FDOffFaceModel, preset.FaceModel)
-		// Hair: lookup table first, fallback to UI-1 for unmapped styles
-		{
-			pos := fd + core.FDOffHairModel
-			if partsId, ok := data.LookupMaleHairPartsID(preset.HairModel); ok {
-				slot.Data[pos] = partsId
-			} else if preset.HairModel > 0 {
-				slot.Data[pos] = preset.HairModel - 1 // fallback
-			}
-			slot.Data[pos+1] = 0
-			slot.Data[pos+2] = 0
-			slot.Data[pos+3] = 0
-		}
-		writeModelID(core.FDOffEyeModel, preset.EyeModel)
-		writeModelID(core.FDOffEyebrowModel, preset.EyebrowModel)
-		writeModelID(core.FDOffBeardModel, preset.BeardModel)
-		writeModelID(core.FDOffEyepatchModel, preset.EyepatchModel)
-		writeModelID(core.FDOffDecalModel, preset.DecalModel)
-		writeModelID(core.FDOffEyelashModel, preset.EyelashModel)
-	}
-
-	return nil
-}
-
 // FavoriteSlotInfo describes a single Favorites slot in the Mirror.
 type FavoriteSlotInfo struct {
 	Index  int    `json:"index"`  // absolute slot index (0-14)
@@ -2534,6 +2450,81 @@ func (a *App) RemoveFavoritePreset(slotIndex int) error {
 	for i := 0; i < core.FavSlotSize; i++ {
 		ud[off+i] = 0
 	}
+	return nil
+}
+
+// ApplyMirrorFavoriteToCharacter copies the appearance from a Mirror Favorites slot
+// onto a character's FaceData blob, replicating the in-game "Apply" action.
+//
+// Algorithm (per spec/31):
+//   - Model IDs (32 B), face shape (64 B), body proportions (7 B), and skin & cosmetics
+//     (91 B) are copied verbatim from the preset slot to the character's FaceData blob.
+//   - The unk0x6c block (64 B at FaceData offset 0x70) is preserved; the game does NOT
+//     overwrite it on apply.
+//   - slot.Player.Gender is set from preset body_type (Mirror stores body_type inverted
+//     from the slot's Gender field: body_type=0 → Gender=1 male, body_type=1 → Gender=0 female).
+//   - Trailing flags at FaceData offset 0x12D..0x12E are zeroed (game does this on apply).
+//
+// Equipment handles are NOT cleared. The game zeroes gender-specific equipment to avoid
+// model mismatches; we leave gear intact and let the user decide.
+func (a *App) ApplyMirrorFavoriteToCharacter(charIndex, mirrorSlotIndex int) error {
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIndex < 0 || charIndex >= 10 {
+		return fmt.Errorf("invalid character index")
+	}
+	if mirrorSlotIndex < 0 || mirrorSlotIndex >= core.FavSlotCount {
+		return fmt.Errorf("invalid mirror slot index")
+	}
+
+	ud := a.save.UserData10.Data
+	mirrorOff := core.FavBaseOffset + mirrorSlotIndex*core.FavSlotSize
+	if mirrorOff+core.FavSlotSize > len(ud) {
+		return fmt.Errorf("mirror slot offset out of bounds")
+	}
+	if string(ud[mirrorOff+core.FavOffMagic:mirrorOff+core.FavOffMagic+4]) != "FACE" {
+		return fmt.Errorf("mirror slot %d is empty", mirrorSlotIndex)
+	}
+
+	slot := &a.save.Slots[charIndex]
+	fd := slot.FaceDataStart()
+	if fd < 0 || fd+core.FaceDataBlobSize > len(slot.Data) {
+		return fmt.Errorf("FaceData blob out of bounds: start=0x%X", fd)
+	}
+
+	a.pushUndo(charIndex)
+
+	// Model IDs (32 B): preset[0x24..0x44] → slot[fd+0x10..0x30]
+	copy(slot.Data[fd+core.FDOffFaceModel:fd+core.FDOffFaceModel+32],
+		ud[mirrorOff+core.FavOffModelIDs:mirrorOff+core.FavOffModelIDs+32])
+
+	// FaceShape (64 B): preset[0x44..0x84] → slot[fd+0x30..0x70]
+	copy(slot.Data[fd+core.FDOffFaceShape:fd+core.FDOffFaceShape+64],
+		ud[mirrorOff+core.FavOffFaceShape:mirrorOff+core.FavOffFaceShape+64])
+
+	// PRESERVE unk0x6c at slot[fd+0x70..0xB0] — game does NOT touch this.
+
+	// Body proportions (7 B): preset[0xC4..0xCB] → slot[fd+0xB0..0xB7]
+	copy(slot.Data[fd+core.FDOffHead:fd+core.FDOffHead+7],
+		ud[mirrorOff+core.FavOffBody:mirrorOff+core.FavOffBody+7])
+
+	// Skin & cosmetics (91 B): preset[0xCB..0x126] → slot[fd+0xB7..0x112]
+	copy(slot.Data[fd+core.FDOffSkinR:fd+core.FDOffSkinR+91],
+		ud[mirrorOff+core.FavOffSkin:mirrorOff+core.FavOffSkin+91])
+
+	// Trailing flags: observed game behavior is to zero bytes 0x125 and 0x126 on apply
+	// (byte 0x124 stays 0x01). Semantics unknown — see tmp/re-character/facedata_dump.txt.
+	slot.Data[fd+0x125] = 0
+	slot.Data[fd+0x126] = 0
+
+	// Gender flip — Mirror body_type is INVERTED relative to slot.Gender.
+	if ud[mirrorOff+core.FavOffBodyType] == 0 {
+		slot.Player.Gender = 1 // male
+	} else {
+		slot.Player.Gender = 0 // female
+	}
+
 	return nil
 }
 

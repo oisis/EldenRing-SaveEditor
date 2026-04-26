@@ -120,15 +120,15 @@ const (
 	// Offsets within a single 0x130-byte preset slot
 	FavOffBodyFlag  = 0x08 // u8: body flag
 	FavOffBodyType  = 0x09 // u8: 0=female, 1=male
-	FavOffMarker    = 0x14 // u32: 0xFFFFFFFF
+	FavOffMarker    = 0x14 // i32: -1 (0xFFFFFFFF) = empty, 0 = active (per er-save-manager)
 	FavOffMagic     = 0x18 // "FACE" (4 bytes) — indicates slot is populated
 	FavOffAlignment = 0x1C // u32: 4
 	FavOffInnerSize = 0x20 // u32: 0x120 (288)
 	FavOffModelIDs  = 0x24 // 8 × u32: model IDs (same layout as FaceData blob)
 	FavOffFaceShape = 0x44 // 64 bytes: face shape sliders
-	FavOffUnkBlock  = 0x84 // 64 bytes: unknown block (copy from slot)
-	FavOffBody      = 0xC4 // 7 bytes: body proportions
-	FavOffSkin      = 0xCB // 69 bytes: skin & cosmetics (shorter than slot's 91 — no trailing hair colors?)
+	FavOffUnkBlock  = 0x84 // 64 bytes: unk0x6c — opaque, preserved on apply (game ignores preset's value)
+	FavOffBody      = 0xC4 // 7 bytes: body proportions (head, chest, abdomen, arm_r, leg_r, arm_l, leg_l)
+	FavOffSkin      = 0xCB // 91 bytes: skin & cosmetics (same length as slot's FaceData skin block)
 )
 
 // FavSafeSlots — historic band-aid; slots 1-9 used to collide with our (incorrect)
