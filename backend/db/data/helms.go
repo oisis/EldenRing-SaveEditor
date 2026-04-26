@@ -207,4 +207,11 @@ var Helms = map[uint32]ItemData{
 	0x1010EFF0: {Name: "Octopus Head", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/octopus_head.png"},
 	0x1050B810: {Name: "Divine Beast Head", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/divine_beast_head.png"},
 	0x10515450: {Name: "Imp Head (Lion)", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/imp_head_lion.png"},
+	0x100493E0: {Name: "Great Horned Headband", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/great_horned_headband.png"},
+	0x1004E200: {Name: "Sanguine Noble Hood", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/sanguine_noble_hood.png"},
+	0x10057E40: {Name: "Fire Prelate Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/fire_prelate_helm.png"},
+	0x100704E0: {Name: "Elden Lord Crown", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/elden_lord_crown.png"},
+	0x100975E0: {Name: "Prophet Blindfold", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/prophet_blindfold.png"},
+	0x10108E48: {Name: "Imp Head (Elder)", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/imp_head_elder.png"},
+	0x10113E10: {Name: "Mushroom Head", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/mushroom_head.png"},
 }

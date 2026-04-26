@@ -247,4 +247,8 @@ var Chest = map[uint32]ItemData{
 	0x10506A54: {Name: "Young Lion's Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/young_lion_s_armor.png"},
 	0x10506E3C: {Name: "Young Lion's Armor (Altered)", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/young_lion_s_armor_altered.png"},
 	0x10509164: {Name: "Shadow Militiaman Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/shadow_militiaman_armor.png"},
+	0x100138E4: {Name: "Scaled Armor", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/scaled_armor.png"},
+	0x1004E264: {Name: "Sanguine Noble Robe", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/sanguine_noble_robe.png"},
+	0x10097E14: {Name: "Prophet Robe", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/prophet_robe.png"},
+	0x10113E74: {Name: "Mushroom Body", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/mushroom_body.png"},
 }

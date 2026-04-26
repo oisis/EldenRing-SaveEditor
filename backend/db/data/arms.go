@@ -122,4 +122,5 @@ var Arms = map[uint32]ItemData{
 	0x10105478: {Name: "Zamor Bracelets", Category: "arms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/arms/zamor_bracelets.png"},
 	0x10113ED8: {Name: "Mushroom Arms", Category: "arms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/arms/mushroom_arms.png"},
 	0x104FCE78: {Name: "Gravebird Bracelets", Category: "arms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/arms/gravebird_bracelets.png"},
+	0x10083E28: {Name: "Depraved Perfumer Gloves", Category: "arms", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/arms/depraved_perfumer_gloves.png"},
 }
