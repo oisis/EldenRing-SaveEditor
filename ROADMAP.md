@@ -526,20 +526,13 @@ Reduced tab count for better UX.
 - All `toast.success/error/loading` redirected to console via `lib/toast.ts` wrapper — no popup toasts
 - Session log with colored severity (INFO/WARN/ERROR)
 
-### 🔲 Console Log Order & Auto-Scroll 🟢
-Three related UX issues with the Quake console — log visibility is degraded for long-running operations.
+### ✅ Console Log Order & Auto-Scroll 🟢
+Three related UX issues with the Quake console resolved.
 
-**Bugs:**
-1. **No auto-scroll** — when new logs arrive, the console does not scroll to show the latest entry. User has to manually scroll to bottom on every operation.
-2. **Click-outside collapses console** — currently clicking anywhere outside the console (e.g. on the main UI to interact with the app) closes it. Should stay open until user explicitly toggles via backtick / close button — user wants the console persistent while working.
-3. **Log order should be reversed** — newest log entry should appear at the **top**, not the bottom. Eliminates the need for auto-scroll entirely (latest is always visible) and aligns with how the user reads operation feedback.
-
-**Files:** `frontend/src/components/QuakeConsole.tsx` (or wherever the console renders), `frontend/src/lib/toast.ts` (log buffer ordering).
-
-**Acceptance:**
-- New logs prepended to the visible list (newest on top)
-- Console open state persists across UI clicks; only backtick / explicit close toggles it
-- Verify scroll position is preserved when user has scrolled mid-list (don't jump on new log if user is reading older entries)
+**Implementation:** `frontend/src/components/ToastBar.tsx`
+- Logs rendered with newest entry on top (`logs.slice().reverse()`) — no auto-scroll needed, latest is always visible
+- Removed click-outside `useEffect` — console stays open until user explicitly toggles via backtick or X button
+- Scroll position preserved when reading older entries (scrollable inner container untouched on new log)
 
 ### ✅ Character Tab Enhancements 🟢
 **Implementation:** `frontend/src/components/CharacterTab.tsx`
@@ -563,7 +556,6 @@ Three related UX issues with the Quake console — log visibility is degraded fo
 - Theme label: "Elden Ring" (internal key: `golden`)
 
 ### 🔲 Known Bugs (to investigate)
-- **Spectral Steed Whistle duplicate**: Two entries visible in database — `0x400000B5` (correct, in `tools.go`) and possibly `0x40000082` (only in `descriptions.go`, no item definition). One has wrong icon. Need to verify which IDs appear in GUI and remove/hide the duplicate.
 - **Boss Kill mechanism incomplete**: Toggling boss defeat flag grants runes but the boss still appears alive in-game. Requires multi-flag approach — see Boss Kill / Respawn Manager section above for details and reference data.
 
 ### ✅ Bugfixes

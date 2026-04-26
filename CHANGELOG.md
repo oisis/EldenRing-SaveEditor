@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: fix/console-ux — Quake console UX fixes
+
+**Goal:** Eliminate three UX papercuts in the Quake console that hurt visibility during long-running operations.
+
+**Changes:**
+- `frontend/src/components/ToastBar.tsx`: render logs reversed (`logs.slice().reverse()`) so newest entry is on top — no auto-scroll needed, latest is always in view.
+- Removed click-outside `useEffect` so the console stays open while user interacts with the rest of the UI. Toggle is now strictly via backtick or X button.
+- Cleaned up stale `Spectral Steed Whistle duplicate` ROADMAP entry — the duplicate `0x40000082` no longer exists in `descriptions.go`; only `0x400000B5` (correct entry in `tools.go`) remains.
+
+**Tests:** `tsc --noEmit` ✅, `make build` ✅, manual UI verification by user.
+
 ### Branch: feature/invasion-regions — Stage 2 (write support via R-1 full slot rebuild)
 
 **Goal:** Implement write support for the per-slot Regions struct so players can unlock/lock invasion regions from the editor. Required a full slot rebuild because shift-based in-place patching corrupted saves (first attempt rolled back).
