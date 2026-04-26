@@ -798,19 +798,31 @@ type ProfileSummary struct {
 
 func (p *ProfileSummary) Read(r *Reader) error {
 	start := r.Pos()
+	// Layout (verified Apr 2026 from real saves; see spec/23-user-data-10.md):
+	//   +0x00 .. +0x1F : CharacterName UTF-16LE (16 chars × 2 bytes = 32)
+	//   +0x20 .. +0x21 : null u16 terminator (skipped)
+	//   +0x22          : Level (u32)
+	//   +0x26 .. +0x24B: opaque (face data snapshot, equipment, archetype, etc.)
+	//   Total slot stride: 0x24C bytes.
 	for i := 0; i < 16; i++ {
 		p.CharacterName[i], _ = r.ReadU16()
 	}
+	r.Seek(int64(start+0x22), 0)
 	p.Level, _ = r.ReadU32()
-	r.Seek(int64(start+0x100), 0)
+	r.Seek(int64(start+0x24C), 0)
 	return nil
 }
 
 func (p *ProfileSummary) Serialize(data []byte, offset int) {
+	// We write only Name (+0x00, 32 bytes = 16 u16) and Level (+0x22, u32). The
+	// 2-byte null u16 terminator at +0x20 and the remaining 0x24C-0x26 = 0x226 bytes
+	// (face data snapshot, equipment summary, archetype, gift, body_type) are NOT
+	// written — they retain whatever the game wrote on its last save. This is OK:
+	// the menu reads our updated name+level plus the game's own face snapshot.
 	for i := 0; i < 16; i++ {
 		binary.LittleEndian.PutUint16(data[offset+i*2:], p.CharacterName[i])
 	}
-	binary.LittleEndian.PutUint32(data[offset+32:], p.Level)
+	binary.LittleEndian.PutUint32(data[offset+0x22:], p.Level)
 }
 
 type CSMenuSystemSaveLoad struct {

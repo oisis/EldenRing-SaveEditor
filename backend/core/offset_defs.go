@@ -109,8 +109,9 @@ const (
 
 // CSMenuSystemSaveLoad / Favorites preset constants.
 // Located in UserData10.Data. The game's Mirror at Roundtable Hold reads presets from here.
-// ProfileSummary writes (0x31A+i*0x100) collide with preset slots 1-9.
-// Safe slots: 0, 10, 11, 12, 13, 14 (6 total).
+// All 15 slots (0..14) are safe for use after the ProfileSummary offset fix
+// (ProfileSummary now correctly writes at 0x195E + i*0x24C, well past all preset slots
+// which span 0x154..0x1323). See spec/23-user-data-10.md and spec/31-appearance-presets.md.
 const (
 	FavBaseOffset = 0x154 // first preset slot in UserData10.Data (same for PC and PS4)
 	FavSlotSize   = 0x130 // 304 bytes per preset slot
@@ -130,10 +131,12 @@ const (
 	FavOffSkin      = 0xCB // 69 bytes: skin & cosmetics (shorter than slot's 91 — no trailing hair colors?)
 )
 
-// FavSafeSlots lists preset slot indices that don't collide with ProfileSummary writes.
-// Slot 0 ends at 0x283, first ProfileSummary at 0x30A (PS4) / 0x31A (PC) — no collision.
-// Slots 1-9 collide with ProfileSummary writes. Slots 0, 10-14 are safe.
-var FavSafeSlots = [6]int{0, 10, 11, 12, 13, 14}
+// FavSafeSlots — historic band-aid; slots 1-9 used to collide with our (incorrect)
+// ProfileSummary writes at 0x31A+i*0x100. After the offset fix (Apr 2026 — ProfileSummary
+// now correctly writes at 0x195E+i*0x24C, well past all 15 preset slots), every preset
+// slot index 0..14 is safe. Kept for backward compatibility but should be deprecated.
+// New code should iterate 0..14 directly.
+var FavSafeSlots = [15]int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14}
 
 // FavHeaderUnk is the constant u32 at preset header offset 0x04 (observed in all active presets).
 const FavHeaderUnk = 0x11D0
