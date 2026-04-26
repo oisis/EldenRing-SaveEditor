@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: fix/dbtab-flag-filter-too-broad — Restore visibility of arrows/bolstering/crafting/most tools in Item Database
+
+**Goal:** Regression fix. After the `dlc` (701 entries) and `stackable` (532 entries) flag sweeps, the "Cut & Ban-Risk" toggle in Settings (when off — the default for many users) was hiding **all** items with any flag in `Flags`. That meant nearly every entry in `arrows_and_bolts.go`, `bolstering_materials.go`, `crafting_materials.go`, and most of `tools.go` became invisible in both the Item Database tab and the inventory list.
+
+**Root cause:** `DatabaseTab.tsx:120` and `InventoryTab.tsx:273` had:
+```ts
+if (!showFlaggedItems && item.flags?.length > 0) return false;
+```
+The check is intentionally inverse-of-toggle, but `length > 0` was too broad — it matched any flag including informational ones (`dlc`, `stackable`).
+
+**Fix:** Both files now filter only on the four "risky" flag values that the toggle is actually designed for:
+```ts
+const RISKY_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
+if (!showFlaggedItems && item.flags?.some(f => RISKY_FLAGS.includes(f))) return false;
+```
+
+`WorldTab.tsx` and `WorldProgressTab.tsx` were not affected — they use the narrow check `flags?.includes('ban_risk')` directly.
+
+**Impact:** With the toggle off, users see all stackable consumables/materials/arrows again. Risky items (cut content, ban risk, pre-order, duplicates) remain hidden as before — toggle behavior unchanged.
+
+**Tests:** `cd frontend && npx tsc --noEmit` ✅, `make build` ✅.
+
 ### Branch: fix/ui-remove-redundant-hex — Drop hex-below-item-name (duplicates the optional ID column)
 
 **Goal:** When the user enabled the "ID (HEX)" column toggle in Settings, the hex value rendered twice — once below the item name, once in the dedicated column. Per user feedback, remove the always-shown hex below the name. Users who want the hex still get it via the column toggle.
