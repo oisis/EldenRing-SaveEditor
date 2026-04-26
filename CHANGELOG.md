@@ -4,6 +4,37 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/stackable-flag-sweep — Add `stackable` flag to all items with MaxInventory > 1
+
+**Goal:** Per user direction (audit cycle) — explicitly mark which items stack (vs single-instance) so future UI work can filter without re-deriving from `MaxInventory`. Adds `Flags: []string{"stackable"}` to every entry where `MaxInventory > 1`.
+
+**Implementation:** Subagent ran a one-shot Go script that:
+1. For each backend file, scanned every `0xXX:` map entry.
+2. Matched `MaxInventory: <N>` with `N >= 2`.
+3. Added/merged `"stackable"` into the existing `Flags` slice (preserves existing flags like `dlc`).
+4. Skipped `MaxInventory == 1` entries (intrinsically non-stackable).
+
+**Per-file count: 532 new `"stackable"` markers**
+
+| File | +stackable |
+|---|---:|
+| `tools.go` | +281 (68 merged with existing flags, e.g. `dlc → dlc, stackable`) |
+| `bolstering_materials.go` | +76 (2 merged) |
+| `crafting_materials.go` | +71 (9 merged) |
+| `arrows_and_bolts.go` | +64 (5 merged) |
+| `key_items.go` | +40 (0 merged) |
+
+**Other 13 backend files unchanged:** all entries have `MaxInventory == 1` (equipment, spells, gestures, ashes-of-war, talismans, etc.) — none stackable.
+
+**Total merge cases: 84** — `Flags: ["dlc"]` became `Flags: ["dlc", "stackable"]`. No entries already contained `"stackable"`.
+
+**Verification:**
+- Independent script confirmed 0 `MaxInventory > 1` entries are missing the flag.
+- Spot-checked diffs in 3 files — only Flags changed, no other fields touched.
+- `go build ./backend/...` ✅, `go test ./backend/db/...` ✅.
+
+**App impact:** Zero — flag is data-only marker until UI work consumes it.
+
 ### Branch: feat/icon-downloader-improvements — Improve `scripts/download_icons.go` + import 60 icons + DLC flag sweep across DB
 
 **Two related changes shipped together** — both flow from the audit (`tmp/items_audit_report.md`) follow-up.
