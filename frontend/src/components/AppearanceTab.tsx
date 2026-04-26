@@ -6,9 +6,10 @@ import {main} from '../../wailsjs/go/models';
 interface Props {
     charIndex: number;
     onMutate: () => void;
+    readOnly?: boolean;
 }
 
-export function AppearanceTab({charIndex, onMutate}: Props) {
+export function AppearanceTab({charIndex, onMutate, readOnly = false}: Props) {
     const [presets, setPresets] = useState<main.PresetInfo[]>([]);
     const [checked, setChecked] = useState<Set<string>>(new Set());
     const [loading, setLoading] = useState(false);
@@ -19,8 +20,8 @@ export function AppearanceTab({charIndex, onMutate}: Props) {
 
     useEffect(() => {
         ListAppearancePresets().then(setPresets).catch(e => toast.error("" + e));
-        refreshFavStatus();
-    }, []);
+        if (!readOnly) refreshFavStatus();
+    }, [readOnly]);
 
     const refreshFavStatus = () => {
         GetFavoritesStatus().then(setFavSlots).catch(() => {});
@@ -100,16 +101,22 @@ export function AppearanceTab({charIndex, onMutate}: Props) {
 
             <div className="card p-4 space-y-2">
                 <p className="text-[10px] text-muted-foreground leading-relaxed">
-                    <strong>Click image</strong> to preview. <strong>Checkbox</strong> to select.
-                    <strong> Apply</strong> (1 preset) writes to character.
-                    <strong> Add to Mirror</strong> writes to in-game Favorites.
-                </p>
-                <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-wider">
-                    <span className="text-primary">{freeSlots} free mirror slots</span>
-                    {checked.size > 0 && (
-                        <span className="text-amber-500">{checked.size} selected</span>
+                    {readOnly ? (
+                        <><strong>Click image</strong> to preview. Load a save file to apply presets to a character.</>
+                    ) : (
+                        <><strong>Click image</strong> to preview. <strong>Checkbox</strong> to select.
+                            <strong> Apply</strong> (1 preset) writes to character.
+                            <strong> Add to Mirror</strong> writes to in-game Favorites.</>
                     )}
-                </div>
+                </p>
+                {!readOnly && (
+                    <div className="flex items-center gap-4 text-[9px] font-bold uppercase tracking-wider">
+                        <span className="text-primary">{freeSlots} free mirror slots</span>
+                        {checked.size > 0 && (
+                            <span className="text-amber-500">{checked.size} selected</span>
+                        )}
+                    </div>
+                )}
             </div>
 
             {/* Preset grid */}
@@ -123,19 +130,21 @@ export function AppearanceTab({charIndex, onMutate}: Props) {
                                 ? 'border-primary ring-1 ring-primary shadow-lg shadow-primary/10'
                                 : 'border-border hover:border-primary/30'}
                         `}>
-                            {/* Checkbox */}
-                            <div className="absolute top-2 left-2 z-10 cursor-pointer" onClick={() => toggleCheck(p.name)}>
-                                <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all
-                                    ${isChecked
-                                        ? 'bg-primary border-primary'
-                                        : 'border-white/50 bg-black/40 hover:border-white/80'}`}>
-                                    {isChecked && (
-                                        <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                        </svg>
-                                    )}
+                            {/* Checkbox — hidden in read-only mode */}
+                            {!readOnly && (
+                                <div className="absolute top-2 left-2 z-10 cursor-pointer" onClick={() => toggleCheck(p.name)}>
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all
+                                        ${isChecked
+                                            ? 'bg-primary border-primary'
+                                            : 'border-white/50 bg-black/40 hover:border-white/80'}`}>
+                                        {isChecked && (
+                                            <svg className="w-3 h-3 text-primary-foreground" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                            </svg>
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
                             {/* Image — click to zoom */}
                             <div className="relative aspect-[3/4] bg-muted/30 overflow-hidden cursor-pointer"
@@ -175,7 +184,7 @@ export function AppearanceTab({charIndex, onMutate}: Props) {
             </div>
 
             {/* Action buttons */}
-            {checked.size > 0 && (
+            {!readOnly && checked.size > 0 && (
                 <div className="flex items-center justify-center gap-4 pt-2 flex-wrap animate-in slide-in-from-bottom-2 duration-300">
                     {/* Apply — only when exactly 1 selected */}
                     {checked.size === 1 && (
@@ -223,7 +232,7 @@ export function AppearanceTab({charIndex, onMutate}: Props) {
             )}
 
             {/* Existing Favorites slots */}
-            {usedSafeSlots.length > 0 && (
+            {!readOnly && usedSafeSlots.length > 0 && (
                 <div className="space-y-2 pt-4 border-t border-border">
                     <div className="flex items-center space-x-3">
                         <div className="w-1 h-5 bg-amber-500 rounded-full" />

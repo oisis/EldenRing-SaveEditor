@@ -8,6 +8,7 @@ import {WorldTab} from './components/WorldTab';
 import {ToolsTab} from './components/ToolsTab';
 import {SettingsTab} from './components/SettingsTab';
 import {DatabaseTab} from './components/DatabaseTab';
+import {AppearanceTab} from './components/AppearanceTab';
 import {ItemDetailPanel} from './components/ItemDetailPanel';
 import {AccordionSection} from './components/AccordionSection';
 import {ToastBar} from './components/ToastBar';
@@ -71,7 +72,9 @@ function App() {
 
     useEffect(() => { refreshUndoDepth(); }, [refreshUndoDepth, inventoryVersion]);
 
-    const tabs = ['character', 'inventory', 'world', 'tools', 'settings'];
+    const tabs = platform
+        ? ['character', 'inventory', 'world', 'tools', 'settings']
+        : ['character', 'inventory', 'settings'];
 
     useEffect(() => { localStorage.setItem('setting:theme', theme); }, [theme]);
     useEffect(() => { GetInfuseTypes().then(res => setInfuseTypes(res || [])); }, []);
@@ -387,17 +390,42 @@ function App() {
                                 />
                             </div>
                         ) : !platform ? (
-                            <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 animate-in fade-in zoom-in-95 duration-700">
-                                <div className="w-16 h-16 bg-muted/10 rounded-2xl flex items-center justify-center border border-border/50">
-                                    <svg className="w-8 h-8 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                                <div className="mb-3 flex items-center justify-between gap-3 px-1 shrink-0">
+                                    <p className="text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                                        Preview mode — load a save file to enable editing
+                                    </p>
+                                    <button
+                                        onClick={handleOpenSave}
+                                        className="px-4 py-1.5 bg-primary text-primary-foreground rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-primary/20 hover:brightness-110 active:scale-95"
+                                    >
+                                        Open Save
+                                    </button>
                                 </div>
-                                <h2 className="text-sm font-black uppercase tracking-[0.3em] text-foreground/60">No Save File</h2>
-                                <button
-                                    onClick={handleOpenSave}
-                                    className="px-6 py-2 bg-primary text-primary-foreground rounded-full text-[9px] font-black uppercase tracking-[0.2em] transition-all shadow-lg shadow-primary/20"
-                                >
-                                    Open Save
-                                </button>
+                                <div className="flex-1 overflow-y-auto custom-scrollbar">
+                                    {activeTab === 'character' && (
+                                        <AppearanceTab charIndex={0} onMutate={() => {}} readOnly />
+                                    )}
+                                    {activeTab === 'inventory' && (
+                                        <DatabaseTab
+                                            columnVisibility={columnVisibility}
+                                            platform={null}
+                                            charIndex={0}
+                                            inventoryVersion={0}
+                                            addSettings={DEFAULT_ADD_SETTINGS}
+                                            showFlaggedItems={showFlaggedItems}
+                                            category={category}
+                                            setCategory={setCategory}
+                                            onSelectItem={setDetailItem}
+                                            readOnly
+                                        />
+                                    )}
+                                </div>
+                                {detailItem && (
+                                    <div className="absolute right-6 top-6 bottom-6 w-[40%] z-20 animate-in slide-in-from-right duration-200">
+                                        <ItemDetailPanel item={detailItem} onClose={() => setDetailItem(null)} />
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <div className="flex-1 flex flex-col min-h-0 animate-in fade-in slide-in-from-bottom-2 duration-500">

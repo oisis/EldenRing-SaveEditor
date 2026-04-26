@@ -20,6 +20,7 @@ interface DatabaseTabProps {
     category: string;
     setCategory: (value: string) => void;
     onSelectItem?: (item: db.ItemEntry | null) => void;
+    readOnly?: boolean;
 }
 
 // Determine if ALL selected items are non-stackable (max qty == 1)
@@ -27,7 +28,7 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
-export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVersion, onItemsAdded, addSettings, showFlaggedItems, category, setCategory, onSelectItem}: DatabaseTabProps) {
+export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVersion, onItemsAdded, addSettings, showFlaggedItems, category, setCategory, onSelectItem, readOnly = false}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [search, setSearch] = useState('');
     const [dbItems, setDbItems] = useState<db.ItemEntry[]>([]);
@@ -209,8 +210,9 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         overscan: 20,
     });
 
-    // Header has: checkbox + icon + name (3 fixed) + optional ID + optional Category + Inv/Storage (always 2)
-    const colCount = 5
+    // Header has: (optional checkbox) + icon + name (2 fixed) + optional ID + optional Category + Inv/Storage (always 2)
+    const colCount = 4
+        + (readOnly ? 0 : 1)
         + (columnVisibility.id ? 1 : 0)
         + (category === 'all' || columnVisibility.category ? 1 : 0);
 
@@ -364,7 +366,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                         />
                     </div>
 
-                    {selectedDbItems.size > 0 && (
+                    {!readOnly && selectedDbItems.size > 0 && (
                         <button
                             onClick={() => openModal(dbItems.filter(i => selectedDbItems.has(i.id)))}
                             disabled={!platform}
@@ -396,15 +398,17 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                     <table className="w-full text-left border-collapse">
                         <thead className="sticky top-0 z-20 bg-muted/80 backdrop-blur-md border-b border-border shadow-sm">
                             <tr className="text-[9px] font-black uppercase tracking-[0.15em] text-muted-foreground">
-                                <th className="p-4 w-10">
-                                    <div
-                                        onClick={toggleAll}
-                                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.size === filteredItems.length && filteredItems.length > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
-                                    >
-                                        {selectedDbItems.size === filteredItems.length && filteredItems.length > 0 &&
-                                            <svg className="w-3 h-3 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
-                                    </div>
-                                </th>
+                                {!readOnly && (
+                                    <th className="p-4 w-10">
+                                        <div
+                                            onClick={toggleAll}
+                                            className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.size === filteredItems.length && filteredItems.length > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                        >
+                                            {selectedDbItems.size === filteredItems.length && filteredItems.length > 0 &&
+                                                <svg className="w-3 h-3 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                        </div>
+                                    </th>
+                                )}
                                 <th className="p-4 w-12">Icon</th>
                                 <th className="p-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('name')}>
                                     Name {sortCol === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
@@ -440,15 +444,17 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
 
                                 return (
                                     <tr key={item.id} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.03] transition-colors ${selectedDbItems.has(item.id) ? 'bg-primary/[0.02]' : ''}`}>
-                                        <td className="p-4">
-                                            <div
-                                                onClick={() => toggleItem(item.id)}
-                                                className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.has(item.id) ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}
-                                            >
-                                                {selectedDbItems.has(item.id) &&
-                                                    <svg className="w-3 h-3 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
-                                            </div>
-                                        </td>
+                                        {!readOnly && (
+                                            <td className="p-4">
+                                                <div
+                                                    onClick={() => toggleItem(item.id)}
+                                                    className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.has(item.id) ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}
+                                                >
+                                                    {selectedDbItems.has(item.id) &&
+                                                        <svg className="w-3 h-3 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                                </div>
+                                            </td>
+                                        )}
                                         <td className="px-4 py-0.5">
                                             <div
                                                 className="w-12 h-12 bg-muted/20 rounded-lg border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-zoom-in"
