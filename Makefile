@@ -1,5 +1,5 @@
 # Variables
-BINARY_NAME=ER-Save-Editor
+BINARY_NAME=Elden Ring SaveForge
 VERSION=0.5.0
 BUILD_DIR=build/bin
 WAILS=/Users/oisis/go/bin/wails
@@ -17,7 +17,7 @@ deps:
 # Build the application for the current platform
 build:
 	@echo "🔨 Building $(BINARY_NAME) v$(VERSION)..."
-	$(WAILS) build -o $(BINARY_NAME)
+	$(WAILS) build -o "$(BINARY_NAME)"
 
 # Run Wails in development mode (hot reload)
 dev:
