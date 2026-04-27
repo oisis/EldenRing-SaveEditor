@@ -8,6 +8,20 @@ import (
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 )
 
+// InventoryFullError is returned when an item cannot be inserted because the
+// targeted inventory section has no empty slots left. It carries the section
+// name and its fixed capacity so the UI can render a precise message
+// (e.g. "Storage box · Common items · 1920/1920 slots full") rather than the
+// generic "short buffer".
+type InventoryFullError struct {
+	Section  string
+	Capacity int
+}
+
+func (e *InventoryFullError) Error() string {
+	return fmt.Sprintf("inventory section %q is full (%d slots)", e.Section, e.Capacity)
+}
+
 // upsertGaItemData ensures itemID is present in the GaItemData section.
 // GaItemData tracks all weapons and AoW ever acquired; the game looks up weapon
 // properties (reinforce_type) from this list on load. Adding a weapon without
@@ -120,6 +134,7 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		handle     uint32
 		invQty     uint32
 		storageQty uint32
+		isKeyItem  bool
 	}
 	var pending []pendingInv
 	gaModified := false
@@ -175,6 +190,7 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 			handle:     handle,
 			invQty:     uint32(invQty),
 			storageQty: uint32(storageQty),
+			isKeyItem:  db.IsKeyItem(id),
 		})
 	}
 
@@ -186,14 +202,16 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 	}
 
 	// Phase 3: add to inventory/storage (offsets are now correct).
+	// Key items (Information / Key Items tab) and common items live in separate
+	// inventory sections — see db.IsKeyItem and addToInventory.
 	for _, p := range pending {
 		if p.invQty != 0 {
-			if err := addToInventory(slot, p.handle, p.invQty, false); err != nil {
+			if err := addToInventory(slot, p.handle, p.invQty, false, p.isKeyItem); err != nil {
 				return err
 			}
 		}
 		if p.storageQty != 0 {
-			if err := addToInventory(slot, p.handle, p.storageQty, true); err != nil {
+			if err := addToInventory(slot, p.handle, p.storageQty, true, p.isKeyItem); err != nil {
 				return err
 			}
 		}
@@ -391,7 +409,7 @@ func RemoveItemFromSlot(slot *SaveSlot, handle uint32, fromInventory, fromStorag
 		}
 		for i, item := range slot.Inventory.KeyItems {
 			if item.GaItemHandle == handle {
-				keyStart := invStart + CommonItemCount*InvRecordLen
+				keyStart := invStart + CommonItemCount*InvRecordLen + InvKeyCountHeader
 				slot.Inventory.KeyItems[i] = InventoryItem{GaItemHandle: 0, Quantity: 0, Index: uint32(i)}
 				off := keyStart + i*InvRecordLen
 				if err := sa.CheckBounds(off, InvRecordLen, "RemoveItemFromSlot/key"); err != nil {
@@ -486,15 +504,22 @@ func RemoveItemByBaseID(slot *SaveSlot, itemID uint32) {
 	}
 }
 
-func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) error {
+func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage, isKeyItem bool) error {
 	sa := NewSlotAccessor(slot.Data)
 	var items *[]InventoryItem
 	var startOffset int
 
-	if isStorage {
+	switch {
+	case isStorage && isKeyItem:
+		items = &slot.Storage.KeyItems
+		startOffset = slot.StorageBoxOffset + StorageHeaderSkip + StorageCommonCount*InvRecordLen + InvKeyCountHeader
+	case isStorage:
 		items = &slot.Storage.CommonItems
 		startOffset = slot.StorageBoxOffset + StorageHeaderSkip
-	} else {
+	case isKeyItem:
+		items = &slot.Inventory.KeyItems
+		startOffset = slot.MagicOffset + InvStartFromMagic + CommonItemCount*InvRecordLen + InvKeyCountHeader
+	default:
 		items = &slot.Inventory.CommonItems
 		startOffset = slot.MagicOffset + InvStartFromMagic
 	}
@@ -515,10 +540,13 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 	}
 
 	if isStorage {
-		// Storage is pre-allocated (StorageCommonCount=1920 slots), same as held inventory.
+		// Storage is pre-allocated (1920 common slots / 128 key slots), same as held inventory.
 		// Find first empty slot by scanning the binary data directly (the in-memory list
 		// only contains non-empty items due to ReadStorage skipping gaps).
 		storageCapacity := StorageCommonCount
+		if isKeyItem {
+			storageCapacity = StorageKeyCount
+		}
 		emptyIdx := -1
 		for i := 0; i < storageCapacity; i++ {
 			off := startOffset + i*InvRecordLen
@@ -532,7 +560,11 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			}
 		}
 		if emptyIdx < 0 {
-			return io.ErrShortBuffer // All storage slots occupied
+			section := "storage.common"
+			if isKeyItem {
+				section = "storage.key"
+			}
+			return &InventoryFullError{Section: section, Capacity: storageCapacity}
 		}
 
 		// Use next_equip_index as the Index value (matching Rust ER-Save-Editor behavior).
@@ -580,11 +612,16 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextAcqSortIdOff:], slot.Storage.NextAcquisitionSortId)
 		}
 
-		// Update common_inventory_items_distinct_count header.
-		// The game uses this count to determine how many storage items to load.
-		// Without this update, added items are invisible in-game (count stays 0).
-		// Source: Rust ER-Save-Editor add_to_storage_common_items() increments common_item_count.
-		countOff := slot.StorageBoxOffset // header is at StorageBoxOffset (before items)
+		// Update distinct-count header. The game uses this to determine how many
+		// storage items to load. Without this update, added items are invisible
+		// in-game (count stays 0). Common and key items have separate count headers:
+		//   common: at StorageBoxOffset (before storageStart)
+		//   key:    at storageStart + StorageCommonCount*12 (between common and key arrays)
+		// Source: Rust ER-Save-Editor add_to_storage_{common,key}_items().
+		countOff := slot.StorageBoxOffset
+		if isKeyItem {
+			countOff = slot.StorageBoxOffset + StorageHeaderSkip + StorageCommonCount*InvRecordLen
+		}
 		if err := sa.CheckBounds(countOff, 4, "addToInventory/storage-count"); err == nil {
 			currentCount := binary.LittleEndian.Uint32(slot.Data[countOff:])
 			binary.LittleEndian.PutUint32(slot.Data[countOff:], currentCount+1)
@@ -602,7 +639,13 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool) e
 			}
 		}
 		if emptyIdx < 0 {
-			return io.ErrShortBuffer // All slots occupied
+			section := "inventory.common"
+			capacity := CommonItemCount
+			if isKeyItem {
+				section = "inventory.key"
+				capacity = KeyItemCount
+			}
+			return &InventoryFullError{Section: section, Capacity: capacity}
 		}
 
 		// Use next_equip_index as the Index value (matching Rust ER-Save-Editor).

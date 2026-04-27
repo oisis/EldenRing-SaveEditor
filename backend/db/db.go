@@ -194,6 +194,21 @@ func GetItemData(id uint32) data.ItemData {
 	return data.ItemData{}
 }
 
+// IsKeyItem returns true when the item must be written to the KeyItems section
+// of the inventory rather than CommonItems.
+//
+// Currently always false. Forensic on a real save (tmp/crash) showed the game
+// itself stores info/key_items DB-category entries in CommonItems (Memory of
+// Grace, About * tutorials etc.). Rust ER-Save-Editor routes only entries whose
+// game param `goodsType == KeyItem (1)` to key_items — Information items
+// (goodsType 12) and our broader "key_items" DB category include normal goods
+// that legitimately live in CommonItems. We don't have goodsType data in the
+// DB yet, so the safe default is to route everything to CommonItems and revisit
+// once that param is imported.
+func IsKeyItem(_ uint32) bool {
+	return false
+}
+
 // enrichItemEntry populates Description, Weight, and stat fields from the Descriptions table.
 func enrichItemEntry(e *ItemEntry) {
 	if data.Descriptions == nil {
