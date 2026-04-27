@@ -54,6 +54,10 @@ export type RiskKey =
     | 'quantity_above_max'
     | 'spirit_ash_above_10'
     | 'derived_stat_manual'
+    | 'weapon_upgrade_above_max'
+    // Phase 2 audit — raw save checks
+    | 'unknown_item_id'
+    | 'gaitem_handle_invalid'
     // Phase 4 — bulk actions (Tier 1)
     | 'bulk_grace_unlock'
     | 'bulk_boss_kill'
@@ -234,6 +238,52 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
             'Edit Vigor / Mind / Endurance instead — the editor recalculates HP/FP/Stamina automatically on save.',
         sources: [
             {label: 'r/Eldenring stat consistency analyses'},
+        ],
+    },
+    weapon_upgrade_above_max: {
+        tier: 2,
+        confidence: 'reported',
+        level: 'high',
+        title: 'Weapon Upgrade Above Max',
+        whyBan:
+            'Smithing-stone weapons cap at +25; somber-stone weapons cap at +10. Each upgrade tier is a distinct item ID (baseID + N for +N). IDs above the cap do not exist in regulation params, so the game falls back to invalid entries which EAC flags during inventory sync.',
+        reports:
+            'Analogous mechanism to spirit ash overflow. Reported when invalid +N IDs appear in the save.',
+        mitigation:
+            'Lower the upgrade level to ≤ MaxUpgrade for the weapon type before going online.',
+        sources: [
+            {label: 'er-save-manager weapon upgrade chains'},
+        ],
+    },
+    unknown_item_id: {
+        tier: 1,
+        confidence: 'speculated',
+        level: 'medium',
+        title: 'Unknown Item ID',
+        whyBan:
+            'The item ID present in the save does not appear in this editor\'s catalogue. Possible causes: cut content not yet flagged, IDs from a newer game version, or a fabricated ID injected by another tool. Whether the server keeps a strict allowlist of valid IDs is not publicly documented, but unknown IDs are a strong "this came from elsewhere" signal.',
+        reports:
+            'No direct ban-cluster reports specifically for unknown IDs — but they often co-occur with cut-content soft-bans (the receiver of an injected item).',
+        mitigation:
+            'Remove the item if you do not recognise it. If you suspect it is legitimate cut content the catalogue is missing, file an editor issue with the ID.',
+        sources: [
+            {label: 'spec/35-eac-server-validation §4B'},
+        ],
+    },
+    gaitem_handle_invalid: {
+        tier: 1,
+        confidence: 'confirmed',
+        level: 'high',
+        title: 'Invalid GaItem Handle',
+        whyBan:
+            'NOT a ban-risk concern — this is a save-file integrity issue. Each inventory entry references its catalogue data through a GaItem handle. Handles must use one of four prefixes (0x80 weapon, 0xA0 talisman, 0xB0 goods, 0xC0 ash of war), and Weapon/Armor/AoW handles must additionally be present in the GaItem map. Handles violating either invariant cause the in-game loader to fail or crash the save slot.',
+        reports:
+            'Reproducible binary requirement, RE\'d from the slot loader and corroborated by every open-source save parser. Loading a slot with a malformed handle produces a hang or crash, not a ban.',
+        mitigation:
+            'The save will not load. Restore from backup. If no backup exists, the item entry must be zeroed out manually with a hex editor.',
+        sources: [
+            {label: 'spec/03-gaitem-map.md'},
+            {label: 'spec/35-eac-server-validation §4C'},
         ],
     },
     bulk_grace_unlock: {

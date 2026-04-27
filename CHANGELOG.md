@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/save-audit-phase1 — Phase 2 follow-up: AuditSlot raw checks + weapon upgrade scan
+
+**Goal:** Extend the audit beyond what `CharacterViewModel` exposes. `MapParsedSlotToVM` filters out items with unresolvable handles or unknown IDs at parse time — so Phase 1 audit could not see them. Phase 2 adds a sibling `AuditSlot(*core.SaveSlot, *AuditReport)` that has raw access to `slot.GaMap` and the inventory entries, appending issues to the same report. Plus a weapon-upgrade-over-max check in `AuditCharacter` (analogous to spirit-ash-over-+10).
+
+**Why:**
+- **Catch malformed handles** — Weapon/Armor/AoW handles that are not present in the GaItem map will hang or crash the in-game slot loader. This is integrity (Confirmed confidence), not a ban-risk heuristic. Mitigation: restore from backup.
+- **Catch unknown item IDs** — items whose resolved itemID is not in `backend/db/data/`. Either cut content the catalogue hasn't classified yet, IDs from a newer game version, or fabricated IDs from another tool. Speculated confidence (we don't know whether the server checks against an allowlist) but a strong "this came from elsewhere" signal.
+- **Weapon upgrade overflow** — same mechanism as spirit ash > +10: each tier is a distinct ID; IDs above the cap don't exist in regulation params.
+
+**Backend:**
+- `backend/vm/audit.go` — new `AuditSlot()` entry point. Two new check functions: `checkUnknownItemIDs()` walks raw inventory + storage, resolves handle → itemID via the same logic as `mapItems`, flags resolutions where `db.GetItemDataFuzzy` returns empty name. `checkGaItemHandleIntegrity()` flags handles whose prefix is not 0x80/0xA0/0xB0/0xC0 AND Weapon/Armor/AoW handles missing from GaMap. New `checkWeaponUpgrades()` added to `AuditCharacter` — iterates `Category == "Weapon"` items where `CurrentUpgrade > MaxUpgrade > 0`. Total checks: 8 VM + 2 raw = 10 categories.
+- `backend/vm/audit_test.go` — 7 new tests: weapon upgrade above max (+30 vs cap +25), weapon at somber cap (+10 == max → no issue), AuditSlot clean slot (2 raw checks pass), unknown item ID detection (handle 0xB0BEEFFE → fabricated id), bad handle prefix (0x70... → invalid), orphaned weapon handle (0x80... missing from GaMap), sentinel handles (0xFFFFFFFF and 0x00000000 ignored). Existing `CleanSavePasses` updated to expect 8 VM check categories.
+
+**Wails binding (`app.go`):**
+- `RunAuditSave` now runs `AuditCharacter` then `AuditSlot` on the same report. No new exported method — the existing binding's behavior is extended.
+
+**Frontend (`frontend/src/data/riskInfo.ts`):**
+- 3 new `RiskKey` entries with full Why/Reports/Mitigation/sources copy:
+  - `weapon_upgrade_above_max` — Tier 2 · Reported (analogous to spirit ash overflow)
+  - `unknown_item_id` — Tier 1 · Speculated (no direct ban-cluster reports, but co-occurs with cut-content soft-bans)
+  - `gaitem_handle_invalid` — Tier 1 · Confirmed (binary integrity requirement, RE'd from slot loader; NOT a ban-risk — save will simply fail to load)
+- `RiskKey` union extended with the three new keys; TypeScript enforces full Record completeness.
+
+**Anti-pattern by design (continued from Phase 1):**
+None of the three new checks can be triggered through the editor's own UI — handle integrity is enforced at parse time, unknown IDs are filtered out of the VM, weapon upgrades are clamped in the Database modal. Audit catches saves that came from elsewhere. Per-Phase 1 decision: never claim the save is "safe" — only "no offline-detectable markers found".
+
+**Verification:**
+- `go test ./backend/vm/` — 7 new tests + 13 Phase 1 tests = 20/20 audit tests pass; full vm suite green
+- `go test ./backend/...` — full backend suite green
+- `npm run build` — frontend production build green (375.00 KiB; +2.34 KiB vs Phase 1 from new RISK_INFO entries)
+- `npx tsc --noEmit` — clean
+- Manual reachability (per `spec/35` design): all three new checks can only fire on externally-edited saves; unit tests verify the logic with constructed fixtures.
+
+---
+
 ### Branch: feat/save-audit-phase1 — deterministic save audit with severity × confidence
 
 **Goal:** Give the user a *post-edit* check that scans the loaded slot for offline-detectable ban markers and surfaces them with two orthogonal labels: **Severity** (Tier 0/1/2 from `spec/32`) and **Confidence** (`confirmed` / `reported` / `speculated` from new `spec/35`). Severity says "how bad if true"; Confidence says "how sure we are the detection rule exists at all". The audit never claims the save is *safe* — only that no offline-detectable markers were found. Server-side rules are not publicly documented, so passing the audit is **not** a guarantee.

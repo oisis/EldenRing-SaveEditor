@@ -157,6 +157,7 @@ func (a *App) RunAuditSave(index int) (*vm.AuditReport, error) {
 		return nil, err
 	}
 	report := vm.AuditCharacter(charVM)
+	vm.AuditSlot(&slot, &report)
 	return &report, nil
 }
 

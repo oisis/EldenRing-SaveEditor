@@ -2,6 +2,8 @@ package vm
 
 import (
 	"testing"
+
+	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 )
 
 // cleanCharacter returns a baseline VM that should pass every audit check.
@@ -45,8 +47,8 @@ func TestAuditCharacter_CleanSavePasses(t *testing.T) {
 	if report.PassedChecks != report.TotalChecks {
 		t.Errorf("expected all %d checks to pass, got %d", report.TotalChecks, report.PassedChecks)
 	}
-	if report.TotalChecks != 7 {
-		t.Errorf("expected 7 check categories, got %d", report.TotalChecks)
+	if report.TotalChecks != 8 {
+		t.Errorf("expected 8 check categories, got %d", report.TotalChecks)
 	}
 }
 
@@ -261,5 +263,136 @@ func TestAuditCharacter_MultipleAttributesOver99(t *testing.T) {
 	// Both attributes failing still counts as ONE failed check category
 	if report.PassedChecks != report.TotalChecks-1 {
 		t.Errorf("expected only attributes-check category to fail (PassedChecks=%d, TotalChecks=%d)", report.PassedChecks, report.TotalChecks)
+	}
+}
+
+func TestAuditCharacter_WeaponUpgradeAboveMax(t *testing.T) {
+	c := cleanCharacter()
+	c.Inventory = []ItemViewModel{
+		{
+			Handle:         0x80000010,
+			Name:           "Longsword",
+			Category:       "Weapon",
+			CurrentUpgrade: 30,
+			MaxUpgrade:     25,
+		},
+	}
+	report := AuditCharacter(c)
+	issue := findIssue(report, "weapon_upgrade_above_max")
+	if issue == nil {
+		t.Fatal("expected weapon_upgrade_above_max issue")
+	}
+	if issue.Confidence != ConfidenceReported {
+		t.Errorf("expected ConfidenceReported, got %s", issue.Confidence)
+	}
+}
+
+func TestAuditCharacter_WeaponUpgradeWithinSomberCap(t *testing.T) {
+	c := cleanCharacter()
+	c.Inventory = []ItemViewModel{
+		{
+			Handle:         0x80000011,
+			Name:           "Sacred Relic Sword",
+			Category:       "Weapon",
+			CurrentUpgrade: 10,
+			MaxUpgrade:     10,
+		},
+	}
+	report := AuditCharacter(c)
+	if findIssue(report, "weapon_upgrade_above_max") != nil {
+		t.Fatalf("expected NO weapon upgrade issue (10 == max 10)")
+	}
+}
+
+// minimalSlot returns a SaveSlot with an empty inventory + GaMap, sufficient
+// for AuditSlot tests that only care about specific items being present.
+func minimalSlot() *core.SaveSlot {
+	return &core.SaveSlot{
+		GaMap: map[uint32]uint32{},
+		Inventory: core.EquipInventoryData{
+			CommonItems: []core.InventoryItem{},
+			KeyItems:    []core.InventoryItem{},
+		},
+		Storage: core.EquipInventoryData{
+			CommonItems: []core.InventoryItem{},
+			KeyItems:    []core.InventoryItem{},
+		},
+	}
+}
+
+func TestAuditSlot_CleanSlotPasses(t *testing.T) {
+	slot := minimalSlot()
+	report := AuditReport{Issues: []AuditIssue{}}
+	AuditSlot(slot, &report)
+	if len(report.Issues) != 0 {
+		t.Errorf("expected 0 issues, got %d: %+v", len(report.Issues), report.Issues)
+	}
+	if report.TotalChecks != 2 {
+		t.Errorf("expected 2 raw check categories, got %d", report.TotalChecks)
+	}
+	if report.PassedChecks != 2 {
+		t.Errorf("expected 2 passed, got %d", report.PassedChecks)
+	}
+}
+
+func TestAuditSlot_UnknownItemIDFlagged(t *testing.T) {
+	slot := minimalSlot()
+	// 0xB0... = goods handle prefix → resolved via HandleToItemID.
+	// Lower bits encode an itemID that is not in the catalogue.
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: 0xB0BEEFFE, Quantity: 1},
+	}
+	report := AuditReport{Issues: []AuditIssue{}}
+	AuditSlot(slot, &report)
+	issue := findIssue(report, "unknown_item_id")
+	if issue == nil {
+		t.Fatalf("expected unknown_item_id issue, got: %+v", report.Issues)
+	}
+	if issue.Confidence != ConfidenceSpeculated {
+		t.Errorf("expected ConfidenceSpeculated, got %s", issue.Confidence)
+	}
+}
+
+func TestAuditSlot_BadHandlePrefixFlagged(t *testing.T) {
+	slot := minimalSlot()
+	// 0x70... is none of the known prefixes (0x80/0xA0/0xB0/0xC0).
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: 0x70000001, Quantity: 1},
+	}
+	report := AuditReport{Issues: []AuditIssue{}}
+	AuditSlot(slot, &report)
+	issue := findIssue(report, "gaitem_handle_invalid")
+	if issue == nil {
+		t.Fatalf("expected gaitem_handle_invalid issue, got: %+v", report.Issues)
+	}
+	if issue.Confidence != ConfidenceConfirmed {
+		t.Errorf("expected ConfidenceConfirmed, got %s", issue.Confidence)
+	}
+}
+
+func TestAuditSlot_OrphanedWeaponHandleFlagged(t *testing.T) {
+	slot := minimalSlot()
+	// Weapon handle (0x80...) but missing from GaMap → orphaned reference.
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: 0x80000099, Quantity: 1},
+	}
+	report := AuditReport{Issues: []AuditIssue{}}
+	AuditSlot(slot, &report)
+	issue := findIssue(report, "gaitem_handle_invalid")
+	if issue == nil {
+		t.Fatalf("expected gaitem_handle_invalid issue for orphan, got: %+v", report.Issues)
+	}
+}
+
+func TestAuditSlot_EmptySentinelHandlesIgnored(t *testing.T) {
+	slot := minimalSlot()
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: 0xFFFFFFFF, Quantity: 0},
+		{GaItemHandle: 0x00000000, Quantity: 0},
+	}
+	report := AuditReport{Issues: []AuditIssue{}}
+	AuditSlot(slot, &report)
+	if len(report.Issues) != 0 {
+		t.Errorf("expected sentinel handles to be skipped, got: %+v", report.Issues)
 	}
 }

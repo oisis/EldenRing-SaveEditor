@@ -1,6 +1,11 @@
 package vm
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveEditor/backend/core"
+	"github.com/oisis/EldenRing-SaveEditor/backend/db"
+)
 
 // Severity mirrors spec/32 ban-risk Tier (0=info, 1=caution, 2=high risk).
 type Severity int
@@ -51,9 +56,10 @@ type AuditReport struct {
 	TotalChecks  int          `json:"totalChecks"`
 }
 
-// AuditCharacter runs all Phase-1 checks (4A numeric + 4B partial flag scan)
-// against an already-mapped CharacterViewModel. Operates purely on the VM —
-// does not touch raw save bytes.
+// AuditCharacter runs VM-level checks (4A numeric + 4B partial flag scan +
+// weapon upgrade) against an already-mapped CharacterViewModel. Operates
+// purely on the VM — does not touch raw save bytes. Phase-2 raw checks
+// (unknown item IDs, GaItem handle integrity) live in AuditSlot.
 func AuditCharacter(c *CharacterViewModel) AuditReport {
 	report := AuditReport{Issues: []AuditIssue{}}
 
@@ -63,9 +69,19 @@ func AuditCharacter(c *CharacterViewModel) AuditReport {
 	checkTalismanSlots(c, &report)
 	checkItemQuantities(c, &report)
 	checkSpiritAshUpgrades(c, &report)
+	checkWeaponUpgrades(c, &report)
 	checkItemFlags(c, &report)
 
 	return report
+}
+
+// AuditSlot runs raw-data checks against the SaveSlot and APPENDS results to
+// the existing report. Use this for checks that need access to raw inventory
+// + GaMap (unknown item IDs, malformed handles) — these never reach the VM
+// because MapParsedSlotToVM filters them out at parse time.
+func AuditSlot(slot *core.SaveSlot, report *AuditReport) {
+	checkUnknownItemIDs(slot, report)
+	checkGaItemHandleIntegrity(slot, report)
 }
 
 func checkRunes(c *CharacterViewModel, r *AuditReport) {
@@ -255,6 +271,40 @@ func checkSpiritAshUpgrades(c *CharacterViewModel, r *AuditReport) {
 	}
 }
 
+// checkWeaponUpgrades flags weapons whose CurrentUpgrade exceeds MaxUpgrade.
+// Smithing-stone weapons cap at +25, somber-stone at +10. IDs above the cap
+// don't exist in regulation params, so server-side detection is plausible
+// (analogous to spirit_ash_above_10).
+func checkWeaponUpgrades(c *CharacterViewModel, r *AuditReport) {
+	r.TotalChecks++
+	any := false
+	scan := func(items []ItemViewModel) {
+		for _, item := range items {
+			if item.Category != "Weapon" {
+				continue
+			}
+			if item.MaxUpgrade == 0 || item.CurrentUpgrade <= item.MaxUpgrade {
+				continue
+			}
+			any = true
+			r.Issues = append(r.Issues, AuditIssue{
+				Severity:   SeverityRisk,
+				Confidence: ConfidenceReported,
+				Category:   "inventory",
+				Field:      fmt.Sprintf("%s (handle 0x%X)", item.Name, item.Handle),
+				Message:    fmt.Sprintf("Weapon upgrade +%d exceeds max +%d", item.CurrentUpgrade, item.MaxUpgrade),
+				Mitigation: fmt.Sprintf("Lower upgrade to ≤+%d", item.MaxUpgrade),
+				RiskKey:    "weapon_upgrade_above_max",
+			})
+		}
+	}
+	scan(c.Inventory)
+	scan(c.Storage)
+	if !any {
+		r.PassedChecks++
+	}
+}
+
 // checkItemFlags scans inventory + storage for items carrying ban-risk flags
 // (cut_content, pre_order, dlc_duplicate, ban_risk). cut_content is Confirmed
 // per spec/35 master table; the rest are Reported.
@@ -296,6 +346,119 @@ func checkItemFlags(c *CharacterViewModel, r *AuditReport) {
 	scan(c.Inventory, "inventory")
 	scan(c.Storage, "storage")
 
+	if !any {
+		r.PassedChecks++
+	}
+}
+
+// resolveItemID converts a GaItem handle to the catalogue itemID using the
+// same logic as mapItems in character_vm.go. Returns 0 if the handle cannot
+// be resolved (caller treats this as a separate handle-integrity issue).
+func resolveItemID(handle uint32, gaMap map[uint32]uint32) uint32 {
+	category := db.GetItemCategoryFromHandle(handle)
+	if category == "Weapon" || category == "Armor" || category == "Ash of War" {
+		id, ok := gaMap[handle]
+		if !ok {
+			return 0
+		}
+		return id
+	}
+	if category == "Unknown" {
+		return 0
+	}
+	return db.HandleToItemID(handle)
+}
+
+// checkUnknownItemIDs walks raw inventory + storage and flags items whose
+// resolved itemID is not present in the editor's catalogue. Speculated
+// confidence — we don't know whether the server keeps an allowlist of valid
+// IDs, but unknown IDs are at minimum a strong "this came from elsewhere"
+// signal and at worst a cut-content marker we haven't classified yet.
+func checkUnknownItemIDs(slot *core.SaveSlot, r *AuditReport) {
+	r.TotalChecks++
+	any := false
+	scan := func(items []core.InventoryItem, bucket string) {
+		for i, item := range items {
+			if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+				continue
+			}
+			itemID := resolveItemID(item.GaItemHandle, slot.GaMap)
+			if itemID == 0 || itemID == 110000 {
+				continue // unresolved handle / unarmed sentinel — handled elsewhere
+			}
+			data, _ := db.GetItemDataFuzzy(itemID)
+			if data.Name != "" {
+				continue
+			}
+			any = true
+			r.Issues = append(r.Issues, AuditIssue{
+				Severity:   SeverityWarn,
+				Confidence: ConfidenceSpeculated,
+				Category:   bucket,
+				Field:      fmt.Sprintf("[%d] handle 0x%X (id 0x%X)", i, item.GaItemHandle, itemID),
+				Message:    fmt.Sprintf("Item ID 0x%X not in catalogue — possibly cut content or fabricated ID", itemID),
+				Mitigation: "Remove the item if you do not recognise it",
+				RiskKey:    "unknown_item_id",
+			})
+		}
+	}
+	scan(slot.Inventory.CommonItems, "inventory")
+	scan(slot.Inventory.KeyItems, "inventory")
+	scan(slot.Storage.CommonItems, "storage")
+	scan(slot.Storage.KeyItems, "storage")
+	if !any {
+		r.PassedChecks++
+	}
+}
+
+// checkGaItemHandleIntegrity flags structural problems in inventory handles:
+// (a) handles whose prefix is none of the four known categories (0x80 weapon,
+// 0xA0 talisman, 0xB0 goods, 0xC0 AoW) — these will fail to load in-game;
+// (b) Weapon/Armor/AoW handles that are not present in slot.GaMap — orphaned
+// references that crash the slot loader. Confirmed confidence: this is a
+// binary-level integrity requirement, not a ban-risk heuristic.
+func checkGaItemHandleIntegrity(slot *core.SaveSlot, r *AuditReport) {
+	r.TotalChecks++
+	any := false
+	scan := func(items []core.InventoryItem, bucket string) {
+		for i, item := range items {
+			if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+				continue
+			}
+			category := db.GetItemCategoryFromHandle(item.GaItemHandle)
+			if category == "Unknown" {
+				any = true
+				r.Issues = append(r.Issues, AuditIssue{
+					Severity:   SeverityWarn,
+					Confidence: ConfidenceConfirmed,
+					Category:   bucket,
+					Field:      fmt.Sprintf("[%d] handle 0x%X", i, item.GaItemHandle),
+					Message:    "Handle prefix does not match any known category (expected 0x80 / 0xA0 / 0xB0 / 0xC0)",
+					Mitigation: "Save will fail to load — restore from backup",
+					RiskKey:    "gaitem_handle_invalid",
+				})
+				continue
+			}
+			if category == "Weapon" || category == "Armor" || category == "Ash of War" {
+				if _, ok := slot.GaMap[item.GaItemHandle]; !ok {
+					any = true
+					r.Issues = append(r.Issues, AuditIssue{
+						Severity:   SeverityWarn,
+						Confidence: ConfidenceConfirmed,
+						Category:   bucket,
+						Field:      fmt.Sprintf("[%d] handle 0x%X", i, item.GaItemHandle),
+						Message:    "Handle not present in GaItem map — orphaned reference",
+						Mitigation: "Save will likely crash on load — restore from backup",
+						RiskKey:    "gaitem_handle_invalid",
+					})
+				}
+			}
+		}
+	}
+	scan(slot.Inventory.CommonItems, "inventory")
+	scan(slot.Inventory.KeyItems, "inventory")
+	scan(slot.Storage.CommonItems, "storage")
+	scan(slot.Storage.KeyItems, "storage")
 	if !any {
 		r.PassedChecks++
 	}

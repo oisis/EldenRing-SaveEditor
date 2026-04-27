@@ -391,6 +391,15 @@ Shadow of the Erdtree specific data:
 - **Anti-pattern by design**: most checks (runes, attrs, talisman, qty) cannot be triggered through the editor's own UI because input clamping prevents Tier 2 anomalies upstream. Audit catches saves imported from Cheat Engine, other editors, or invader-dropped illegal items
 - TODO Phase 2: 4B full item-ID whitelist (unknown-IDs scan), 4C internal consistency (GaItem handle validity, derived HP/FP/SP), 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`), weapon upgrade level scan
 
+### ✅ Save Audit (Phase 2) — AuditSlot raw checks 🟡
+**Implementation:** `backend/vm/audit.go` (new `AuditSlot` + `checkWeaponUpgrades`), `backend/vm/audit_test.go`, `app.go` (RunAuditSave now combines AuditCharacter + AuditSlot), `frontend/src/data/riskInfo.ts` (3 new `RiskKey` entries)
+- New `AuditSlot(*core.SaveSlot, *AuditReport)` for checks that need raw inventory + GaMap access (filtered out of `CharacterViewModel` at parse time)
+- `checkUnknownItemIDs` — walks raw inventory + storage, flags items whose resolved itemID is not in `backend/db/data/`. Tier 1 · Speculated
+- `checkGaItemHandleIntegrity` — flags handles with prefix outside 0x80/0xA0/0xB0/0xC0 AND Weapon/Armor/AoW handles missing from GaMap. Tier 1 · **Confirmed** (binary integrity, NOT ban-risk — save will fail to load)
+- `checkWeaponUpgrades` (in AuditCharacter) — flags weapons with `CurrentUpgrade > MaxUpgrade`. Analogous to spirit_ash_above_10. Tier 2 · Reported
+- 7 new unit tests — total 20/20 audit tests passing. Total check categories: 8 VM (was 7) + 2 raw = 10
+- TODO Phase 3: 4C-b derived stat consistency (HP/FP/SP vs `CalcCorrectGraph`), 4C-c ClearCount vs event flags 50-57, 4D dirty-save sidecar (separate WriteSave hook + slot picker badge)
+
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
 - All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session
