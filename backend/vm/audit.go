@@ -85,6 +85,7 @@ func AuditSlot(slot *core.SaveSlot, report *AuditReport) {
 	checkGaItemHandleIntegrity(slot, report)
 	checkDerivedStats(slot, report)
 	checkClearCountFlags(slot, report)
+	checkDlcOwnership(slot, report)
 }
 
 func checkRunes(c *CharacterViewModel, r *AuditReport) {
@@ -613,4 +614,76 @@ func checkClearCountFlags(slot *core.SaveSlot, r *AuditReport) {
 		Mitigation: "Save once via the editor — ClearCount ↔ event flag sync is automatic on write",
 		RiskKey:    "clearcount_flag_mismatch",
 	})
+}
+
+// dlcMismatchThreshold is the minimum DLC item count that triggers an
+// ownership-mismatch issue. A single DLC item could come from a coop
+// pickup or invader drop on a non-DLC character, so we wait until the
+// inventory clearly reflects "stuff that needed DLC content to obtain".
+const dlcMismatchThreshold = 3
+
+// preOrderItemIDs are bonus DLC-tagged entries shipped with the base game
+// pre-order — having them on a non-DLC save is legit. Excluded from the
+// DLC item count.
+var preOrderItemIDs = map[uint32]bool{
+	0x401EA7A8: true, // Ring of Miquella gesture (pre-order bonus)
+}
+
+func checkDlcOwnership(slot *core.SaveSlot, r *AuditReport) {
+	r.TotalChecks++
+
+	flagOff := core.DlcSectionOffset + core.DlcEntryFlagByte
+	if flagOff < 0 || flagOff+1 > len(slot.Data) {
+		r.PassedChecks++
+		return
+	}
+	entryFlag := slot.Data[flagOff]
+
+	count := countDlcItems(slot.Inventory.CommonItems, slot.GaMap) +
+		countDlcItems(slot.Inventory.KeyItems, slot.GaMap) +
+		countDlcItems(slot.Storage.CommonItems, slot.GaMap)
+
+	if count >= dlcMismatchThreshold && entryFlag == 0 {
+		r.Issues = append(r.Issues, AuditIssue{
+			Severity:   SeverityRisk,
+			Confidence: ConfidenceReported,
+			Category:   "ownership",
+			Field:      "DLC items / SotE entry flag",
+			Message: fmt.Sprintf("Inventory holds %d DLC-tagged items but the Shadow of the Erdtree entry flag is unset — character has not entered the DLC",
+				count),
+			Mitigation: "Either remove the DLC items, or load the save in-game and enter Shadow of the Erdtree once to legitimize the flag",
+			RiskKey:    "dlc_ownership_mismatch",
+		})
+		return
+	}
+	r.PassedChecks++
+}
+
+// countDlcItems counts entries whose DB metadata carries the "dlc" flag,
+// excluding pre-order bonuses that ship on non-DLC saves.
+func countDlcItems(items []core.InventoryItem, gaMap map[uint32]uint32) int {
+	count := 0
+	for _, it := range items {
+		if it.GaItemHandle == core.GaHandleEmpty || it.GaItemHandle == core.GaHandleInvalid {
+			continue
+		}
+		id, ok := gaMap[it.GaItemHandle]
+		if !ok {
+			id = (it.GaItemHandle & 0x0FFFFFFF) | 0x40000000
+		}
+		if preOrderItemIDs[id] {
+			continue
+		}
+		meta := db.GetItemData(id)
+		if meta.Name == "" {
+			continue
+		}
+		for _, f := range meta.Flags {
+			if f == "dlc" {
+				count++
+				break
+			}
+		}
+	}
+	return count
 }

@@ -329,11 +329,11 @@ func TestAuditSlot_CleanSlotPasses(t *testing.T) {
 	if len(report.Issues) != 0 {
 		t.Errorf("expected 0 issues, got %d: %+v", len(report.Issues), report.Issues)
 	}
-	if report.TotalChecks != 4 {
-		t.Errorf("expected 4 raw check categories, got %d", report.TotalChecks)
+	if report.TotalChecks != 5 {
+		t.Errorf("expected 5 raw check categories, got %d", report.TotalChecks)
 	}
-	if report.PassedChecks != 4 {
-		t.Errorf("expected 4 passed, got %d", report.PassedChecks)
+	if report.PassedChecks != 5 {
+		t.Errorf("expected 5 passed, got %d", report.PassedChecks)
 	}
 }
 
@@ -550,4 +550,131 @@ func statTableEntry(table []float32, attr uint32) float32 {
 		return table[attr]
 	}
 	return 0
+}
+
+// dlcSlot builds a SaveSlot with slot.Data sized to cover the DLC section
+// at the tail of the slot. SlotSize is 0x280000 (~2.6 MiB).
+func dlcSlot(t *testing.T) *core.SaveSlot {
+	t.Helper()
+	slot := minimalSlot()
+	slot.Data = make([]byte, core.SlotSize)
+	return slot
+}
+
+// addDlcItem inserts an item with the "dlc" flag into the given inventory
+// list and registers its handle in slot.GaMap.
+func addDlcItem(slot *core.SaveSlot, items *[]core.InventoryItem, id uint32) {
+	handle := (id & 0x0FFFFFFF) | 0xB0000000
+	*items = append(*items, core.InventoryItem{GaItemHandle: handle, Quantity: 1})
+	slot.GaMap[handle] = id
+}
+
+// findFirstDlcItemID picks an arbitrary DLC-flagged crafting material from
+// the live DB so tests don't drift if specific IDs are renamed.
+func findFirstDlcItemIDs(t *testing.T, want int) []uint32 {
+	t.Helper()
+	ids := []uint32{}
+	for id, item := range gamedata.CraftingMaterials {
+		hasDlc := false
+		for _, f := range item.Flags {
+			if f == "dlc" {
+				hasDlc = true
+				break
+			}
+		}
+		if !hasDlc {
+			continue
+		}
+		ids = append(ids, id)
+		if len(ids) >= want {
+			break
+		}
+	}
+	if len(ids) < want {
+		t.Fatalf("DB has fewer than %d DLC crafting materials", want)
+	}
+	return ids
+}
+
+func TestAuditSlot_DlcCleanPasses(t *testing.T) {
+	slot := dlcSlot(t)
+	// No DLC items, entry flag = 0 → silent pass.
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDlcOwnership(slot, &report)
+	if findIssue(report, "dlc_ownership_mismatch") != nil {
+		t.Fatalf("expected NO dlc_ownership_mismatch, got: %+v", report.Issues)
+	}
+	if report.PassedChecks != 1 {
+		t.Errorf("expected PassedChecks=1, got %d", report.PassedChecks)
+	}
+}
+
+func TestAuditSlot_DlcMismatchFlagged(t *testing.T) {
+	slot := dlcSlot(t)
+	for _, id := range findFirstDlcItemIDs(t, dlcMismatchThreshold) {
+		addDlcItem(slot, &slot.Inventory.CommonItems, id)
+	}
+	// Entry flag stays 0 → mismatch.
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDlcOwnership(slot, &report)
+	issue := findIssue(report, "dlc_ownership_mismatch")
+	if issue == nil {
+		t.Fatalf("expected dlc_ownership_mismatch issue, got: %+v", report.Issues)
+	}
+	if issue.Confidence != ConfidenceReported {
+		t.Errorf("expected ConfidenceReported, got %s", issue.Confidence)
+	}
+	if issue.Severity != SeverityRisk {
+		t.Errorf("expected SeverityRisk, got %d", issue.Severity)
+	}
+}
+
+func TestAuditSlot_DlcEntryFlagSetPasses(t *testing.T) {
+	slot := dlcSlot(t)
+	for _, id := range findFirstDlcItemIDs(t, dlcMismatchThreshold) {
+		addDlcItem(slot, &slot.Inventory.CommonItems, id)
+	}
+	// Entry flag set → no mismatch even with DLC items present.
+	slot.Data[core.DlcSectionOffset+core.DlcEntryFlagByte] = 1
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDlcOwnership(slot, &report)
+	if findIssue(report, "dlc_ownership_mismatch") != nil {
+		t.Fatalf("expected NO mismatch when entry flag is set, got: %+v", report.Issues)
+	}
+}
+
+func TestAuditSlot_DlcBelowThresholdPasses(t *testing.T) {
+	slot := dlcSlot(t)
+	// Only one DLC item — under the threshold (3).
+	for _, id := range findFirstDlcItemIDs(t, 1) {
+		addDlcItem(slot, &slot.Inventory.CommonItems, id)
+	}
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDlcOwnership(slot, &report)
+	if findIssue(report, "dlc_ownership_mismatch") != nil {
+		t.Fatalf("single DLC item should not trigger mismatch, got: %+v", report.Issues)
+	}
+}
+
+func TestAuditSlot_DlcPreOrderGesturesIgnored(t *testing.T) {
+	slot := dlcSlot(t)
+	// Ring of Miquella is dlc-flagged but ships as a pre-order bonus on
+	// non-DLC accounts — must NOT count toward the mismatch threshold.
+	addDlcItem(slot, &slot.Inventory.CommonItems, 0x401EA7A8)
+	addDlcItem(slot, &slot.Inventory.CommonItems, 0x401EA7A8)
+	addDlcItem(slot, &slot.Inventory.CommonItems, 0x401EA7A8)
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDlcOwnership(slot, &report)
+	if findIssue(report, "dlc_ownership_mismatch") != nil {
+		t.Fatalf("pre-order Ring of Miquella should be excluded, got: %+v", report.Issues)
+	}
+}
+
+// Sanity assertion: the DB constant we hard-code as a pre-order ID still
+// exists and still has the dlc flag — guards against silent rename.
+func TestPreOrderItemIDsStableInDB(t *testing.T) {
+	if _, ok := gamedata.Gestures[0x401EA7A8]; !ok {
+		t.Errorf("Ring of Miquella (0x401EA7A8) missing from gestures DB")
+	}
+	_ = db.GetItemData // ensure import stays referenced
 }

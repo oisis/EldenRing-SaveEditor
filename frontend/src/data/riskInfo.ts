@@ -59,6 +59,8 @@ export type RiskKey =
     | 'unknown_item_id'
     | 'gaitem_handle_invalid'
     | 'clearcount_flag_mismatch'
+    // Phase 5 audit — ownership cross-check
+    | 'dlc_ownership_mismatch'
     // Phase 4 — bulk actions (Tier 1)
     | 'bulk_grace_unlock'
     | 'bulk_boss_kill'
@@ -285,6 +287,23 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
         sources: [
             {label: 'spec/35-eac-server-validation §4C-c'},
             {label: 'app.go SaveCharacter — sync loop for flags 50-57'},
+        ],
+    },
+    dlc_ownership_mismatch: {
+        tier: 2,
+        confidence: 'reported',
+        level: 'high',
+        title: 'DLC Items Without DLC Entry',
+        whyBan:
+            'Inventory holds multiple Shadow of the Erdtree items but the character has never entered the DLC area (the SotE entry flag in the DLC section is unset). Item entitlement on the server is tied to DLC ownership: legitimate DLC items can only be acquired after entering the expansion at least once. A non-DLC save with DLC inventory is the same forensic signature as a pre-order item without entitlement, which Bandai support has confirmed as a tampering marker.',
+        reports:
+            'Multi-source community heuristic: Reddit r/Eldenring threads on softban patterns plus Bandai\'s own EAC support article both flag entitlement mismatches. No FromSoftware document explicitly names the SotE entry flag as a server check, so kept at "Reported" rather than "Confirmed".',
+        mitigation:
+            'Either remove the DLC items from inventory and storage, or load the save in-game and physically enter Shadow of the Erdtree once. Pre-order gestures (Ring of Miquella) ship to non-DLC accounts and are excluded from the count.',
+        sources: [
+            {label: 'spec/35-eac-server-validation §4B (DLC ownership consistency)'},
+            {label: 'spec/21-dlc.md (CSDlc layout)'},
+            {label: 'Bandai Namco — EAC Inappropriate Activity Detected'},
         ],
     },
     gaitem_handle_invalid: {

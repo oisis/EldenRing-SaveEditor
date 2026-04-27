@@ -4,6 +4,44 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/save-audit-phase1 — Phase 5: DLC ownership audit
+
+**Goal:** Detect saves where the inventory holds Shadow of the Erdtree items but the character has never entered the DLC. Item entitlement on the server is tied to DLC ownership, so this configuration carries the same forensic signature as a pre-order item without entitlement.
+
+**Why:** External editor adds DLC items to a save that has never legitimately interacted with the DLC. The save still loads (the entry flag is checked at DLC-region transition, not at boot), but gets flagged when the user goes online. Pre-existing Tier 2 · Reported entry in spec/35 — implemented now.
+
+**Backend (`backend/vm/audit.go`):**
+- New `checkDlcOwnership(slot, r)` invoked from `AuditSlot`
+- Reads SotE entry flag at `core.DlcSectionOffset + core.DlcEntryFlagByte`
+- New `countDlcItems(items, gaMap)` helper — walks an inventory list, resolves each handle via `slot.GaMap` (or stackable handle→ID reconstruction), excludes pre-order bonuses, counts entries with `dlc` flag in DB
+- Constants: `dlcMismatchThreshold = 3` (avoids false-positive on accidental coop pickup), `preOrderItemIDs` set with `Ring of Miquella` (0x401EA7A8)
+- Walks `Inventory.CommonItems`, `Inventory.KeyItems`, and `Storage.CommonItems` for total
+- Issue: new `dlc_ownership_mismatch` riskKey, **Tier 2 · Reported**. Silent skip when slot.Data doesn't reach the DLC section
+- Total raw `AuditSlot` categories: 5 (was 4)
+
+**Backend tests (`backend/vm/audit_test.go`):**
+- 5 new tests + helpers (`dlcSlot`, `addDlcItem`, `findFirstDlcItemIDs`)
+- Coverage: clean save → pass · 3 DLC items + flag 0 → mismatch with correct severity/confidence · DLC items + flag 1 → pass · 1 DLC item below threshold → pass · 3× pre-order Ring of Miquella → still pass (excluded)
+- `TestPreOrderItemIDsStableInDB` guards against silent rename of the pre-order item
+- `TestAuditSlot_CleanSlotPasses` updated: expects 5 raw check categories (was 4)
+- Total audit suite: 32/32 passing
+
+**Frontend (`frontend/src/data/riskInfo.ts`):**
+- 1 new `RiskKey`: `dlc_ownership_mismatch` — Tier 2 · Reported. Sources cite spec/35 §4B and Bandai Namco's EAC support article
+
+**Spec (`spec/35-eac-server-validation.md`):**
+- Renamed loose "IsDlcOwned byte" reference to the correct `SotE entry flag (CSDlc byte[1])`
+- §4B row marked ✅ implemented
+- §6 implementation note updated with threshold + pre-order exclusion rule
+
+**Verification:**
+- `go test ./backend/vm/` — 32/32 audit tests pass
+- `go test ./backend/...` — full backend green
+- `make build` — production Wails build green
+- `npx tsc --noEmit` — clean
+
+---
+
 ### Branch: feat/save-audit-phase1 — Phase 3 follow-up: derived stats + ClearCount flag mirror
 
 **Goal:** Add two consistency checks that detect saves edited outside this editor's write path. Both surface as Tier 2 · Speculated — server-side confirmation is not publicly documented, but each represents a configuration that legitimate gameplay can never produce.

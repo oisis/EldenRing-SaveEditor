@@ -217,7 +217,7 @@ Tier mapuje do `spec/32-ban-risk-system.md`. Wszystkie poniższe są **implement
 |---|---|---|
 | Item-ID whitelist | Każdy GaItem w save musi istnieć w `backend/db/data/`. Unknown ID → flag | ⚠️ **częściowo** — mamy `GetItemDataFuzzy()` ale nie ma audytu pre-write |
 | Flags scan: `cut_content`, `pre_order`, `dlc_duplicate`, `ban_risk` | `RiskBadge` inline w UI; modal "Add Anyway" przed dodaniem | ✅ — patrz `spec/32-ban-risk-system.md` |
-| DLC ownership consistency | Save z DLC items + `IsDlcOwned == 0` byte → flag | ⚠️ **TODO** — patrz `spec/21-dlc.md` |
+| DLC ownership consistency | Save z ≥3 DLC items + SotE entry flag (CSDlc byte[1]) unset → flag (pre-order Ring of Miquella wyłączony) | ✅ — `vm.checkDlcOwnership` (`dlc_ownership_mismatch` riskKey, Tier 2 · Reported) |
 
 ### 4C — Internal-consistency checks (Tier 1)
 
@@ -294,7 +294,7 @@ Co warte zaimplementowania w nadchodzących iteracjach (priorytet zstępujący):
 2. **Item-ID whitelist scan** — iteruj `GaItem map`, dla każdego entry `lookupItem(id)`. Unknown → Tier 2 issue.
 3. **Stat consistency derive** — recompute HP/FP/SP z VIG/MND/END (formula z `CalcCorrectGraph`), jeśli stored != derived → Tier 2 issue.
 4. **Editor-meta sidecar file** — `<save>.sl2.editor-meta.json` z edit history (per §4D).
-5. **DLC ownership cross-check** — `IsDlcOwned` byte vs presence DLC items. Tier 2 jeśli mismatch.
+5. **DLC ownership cross-check** — SotE entry flag (CSDlc byte[1]) vs DLC items in inventory. Tier 2 jeśli mismatch (≥3 DLC items + flag unset; pre-order Ring of Miquella wyłączony). Implemented as `vm.checkDlcOwnership`.
 6. **Weapon upgrade level outline** w EquipmentTab (Tier 2 jeśli > 25 / > 10).
 7. **GaItem handle audit** w `core.LoadSave()` — log warning (nie clamp) jeśli sentinel `0xFFFFFFFF` znaleziony w nieoczekiwanym miejscu.
 

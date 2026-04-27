@@ -408,6 +408,17 @@ Shadow of the Erdtree specific data:
 - Audit suite: 27/27 tests passing
 - TODO Phase 4: 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`) — separate WriteSave/LoadSave hooks + slot picker badge
 
+### ✅ Save Audit (Phase 5) — DLC ownership cross-check 🟡
+**Implementation:** `backend/vm/audit.go` (new `checkDlcOwnership` + `countDlcItems` helper in AuditSlot), `backend/vm/audit_test.go` (5 new tests + helpers), `frontend/src/data/riskInfo.ts` (1 new RiskKey), `spec/35-eac-server-validation.md` (rename "IsDlcOwned" → "SotE entry flag", §4B and §6 updates)
+- Reads SotE entry flag at `core.DlcSectionOffset + core.DlcEntryFlagByte` (CSDlc byte[1])
+- Counts DLC-flagged items in held inventory CommonItems + KeyItems + Storage CommonItems via `countDlcItems` helper. Resolves handle → ID via `slot.GaMap` with stackable handle reconstruction fallback
+- Pre-order Ring of Miquella (0x401EA7A8) excluded from the count (legit pre-order bonus on non-DLC accounts)
+- Threshold: ≥3 DLC items + entry flag unset → Tier 2 · Reported issue (`dlc_ownership_mismatch`). Single-item drop or coop pickup below threshold = no false positive
+- Silent skip when slot.Data doesn't reach the DLC section (small test buffers)
+- Total raw check categories: 5 (was 4). Combined audit: 13 categories
+- Audit suite: 32/32 tests passing
+- TODO Phase 4: 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`) — separate WriteSave/LoadSave hooks + slot picker badge
+
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
 - All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session
