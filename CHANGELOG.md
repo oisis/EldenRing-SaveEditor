@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/save-audit-phase1 — Phase 3 follow-up: derived stats + ClearCount flag mirror
+
+**Goal:** Add two consistency checks that detect saves edited outside this editor's write path. Both surface as Tier 2 · Speculated — server-side confirmation is not publicly documented, but each represents a configuration that legitimate gameplay can never produce.
+
+**Why:**
+- **Derived stats consistency** — `MaxHP / MaxFP / MaxSP` are computed from `Vigor / Mind / Endurance` via fixed lookup tables. Storing values that don't match the table for the current attribute is a strong "manually edited stored value" signal.
+- **ClearCount ↔ event flags 50-57** — `app.go::SaveCharacter` mirrors `ClearCount` into event flags 50-57: exactly one of those flags should be set, and its index should equal ClearCount. Mismatch indicates the save was edited externally (different editor, hex tool) without going through this editor's write path.
+
+**Backend (`backend/vm/audit.go`):**
+- New helpers: `statTableLookup()`, `absDiffU32()`, `validatePlayerGameDataReachable()`
+- New constants: `maxHPOffset = 0x0C`, `maxFPOffset = 0x18`, `maxSPOffset = 0x28` (per spec/04 PlayerGameData layout). `derivedStatTolerance = 1` for float32 → uint32 rounding.
+- `checkDerivedStats(slot, r)` — reads raw `slot.Data[PlayerGameDataOffset + offset]` for each of the three derived stats; compares against `gamedata.HP[Vigor]` / `gamedata.FP[Mind]` / `gamedata.SP[Endurance]` (newly used — these tables existed in `backend/db/data/stats.go` but had no consumers). Issue: `derived_stat_manual` (existing key, Tier 2 · Speculated). Silent skip when slot.Data is too small.
+- `checkClearCountFlags(slot, r)` — uses `db.GetEventFlag(slot.Data[slot.EventFlagsOffset:], 50+i)` for `i` in 0..7. Flags exactly one set + index == ClearCount = pass. Else issue with one of three messages: none set, multiple set, or wrong index. Issue: new `clearcount_flag_mismatch` (Tier 2 · Speculated). Silent skip when EventFlagsOffset is 0.
+- `AuditSlot()` now invokes both new checks. Total raw categories: 4 (was 2). Combined with 8 VM categories → 12 audit categories total.
+
+**Backend tests (`backend/vm/audit_test.go`):**
+- 7 new tests + helpers (`playerSlot`, `writeRawU32`, `gamedataHP/FP/SP`, `statTableEntry`)
+- Coverage: clean derived stats (Vigor=25, Mind=20, Endurance=15 with computed HP/FP/SP) → no issue; HP off by 500 → mismatch with `Field=MaxHP`; data buffer too small → silent skip; ClearCount=2 with flag 52 set → no issue; flag 50 set instead → mismatch; no flags set when ClearCount=1 → mismatch; EventFlagsOffset=0 → silent skip
+- Existing `TestAuditSlot_CleanSlotPasses` updated: expects 4 raw check categories (was 2)
+- Total audit suite: 27/27 passing (8 Phase 1 + 5 Phase 1 helpers + 7 Phase 2 + 7 Phase 3)
+
+**Frontend (`frontend/src/data/riskInfo.ts`):**
+- 1 new `RiskKey`: `clearcount_flag_mismatch` — Tier 2 · Speculated. Why/Reports/Mitigation copy frames it as a strong "edited save" marker; sources point to spec/35 §4C-c and app.go SaveCharacter sync loop. `derived_stat_manual` already existed from Phase 1, so no new entry needed for that branch.
+
+**Anti-pattern by design (continued):**
+Neither check can be triggered through this editor's write path — `SaveCharacter` writes the ClearCount sync atomically, and the editor never edits stored MaxHP/FP/SP directly (these are runtime-derived). The audit catches saves from different sources, including the user's own previous edits made before this consistency logic existed.
+
+**Verification:**
+- `go test ./backend/vm/` — full audit suite green (27/27 tests)
+- `go test ./backend/...` — full backend suite green
+- `npm run build` — frontend production build green (375.97 KiB; +0.97 KiB vs Phase 2 from new RISK_INFO entry)
+- `npx tsc --noEmit` — clean
+
+---
+
 ### Branch: feat/save-audit-phase1 — Phase 2 follow-up: AuditSlot raw checks + weapon upgrade scan
 
 **Goal:** Extend the audit beyond what `CharacterViewModel` exposes. `MapParsedSlotToVM` filters out items with unresolvable handles or unknown IDs at parse time — so Phase 1 audit could not see them. Phase 2 adds a sibling `AuditSlot(*core.SaveSlot, *AuditReport)` that has raw access to `slot.GaMap` and the inventory entries, appending issues to the same report. Plus a weapon-upgrade-over-max check in `AuditCharacter` (analogous to spirit-ash-over-+10).

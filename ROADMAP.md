@@ -400,6 +400,14 @@ Shadow of the Erdtree specific data:
 - 7 new unit tests — total 20/20 audit tests passing. Total check categories: 8 VM (was 7) + 2 raw = 10
 - TODO Phase 3: 4C-b derived stat consistency (HP/FP/SP vs `CalcCorrectGraph`), 4C-c ClearCount vs event flags 50-57, 4D dirty-save sidecar (separate WriteSave hook + slot picker badge)
 
+### ✅ Save Audit (Phase 3) — Consistency checks 🟡
+**Implementation:** `backend/vm/audit.go` (new `checkDerivedStats` + `checkClearCountFlags` in AuditSlot), `backend/vm/audit_test.go` (7 new tests), `frontend/src/data/riskInfo.ts` (1 new RiskKey)
+- `checkDerivedStats` — reads raw `MaxHP / MaxFP / MaxSP` from `slot.Data[PlayerGameDataOffset + 0x0C/0x18/0x28]` and compares against `gamedata.HP[Vigor] / FP[Mind] / SP[Endurance]` lookup tables (which existed in `backend/db/data/stats.go` but were unused until now). Tolerance ±1 for float32→uint32 rounding. Issue → existing `derived_stat_manual` riskKey (Tier 2 · Speculated)
+- `checkClearCountFlags` — verifies that event flags 50-57 mirror ClearCount: exactly one set, index == ClearCount. Uses `db.GetEventFlag` for read. Three failure modes detected: none set, multiple set, wrong index. Issue → new `clearcount_flag_mismatch` riskKey (Tier 2 · Speculated)
+- Total raw check categories: 4 (was 2). Combined audit: 12 categories
+- Audit suite: 27/27 tests passing
+- TODO Phase 4: 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`) — separate WriteSave/LoadSave hooks + slot picker badge
+
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
 - All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session

@@ -58,6 +58,7 @@ export type RiskKey =
     // Phase 2 audit — raw save checks
     | 'unknown_item_id'
     | 'gaitem_handle_invalid'
+    | 'clearcount_flag_mismatch'
     // Phase 4 — bulk actions (Tier 1)
     | 'bulk_grace_unlock'
     | 'bulk_boss_kill'
@@ -268,6 +269,22 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
             'Remove the item if you do not recognise it. If you suspect it is legitimate cut content the catalogue is missing, file an editor issue with the ID.',
         sources: [
             {label: 'spec/35-eac-server-validation §4B'},
+        ],
+    },
+    clearcount_flag_mismatch: {
+        tier: 2,
+        confidence: 'speculated',
+        level: 'high',
+        title: 'NG+ Cycle / Flag Mirror Desync',
+        whyBan:
+            'Save logic mirrors the NG+ cycle counter (ClearCount) into event flags 50-57: exactly one of those flags should be set, and its index should equal ClearCount. Legitimate gameplay always keeps these in sync because the NG+ transition writes both atomically. A desync indicates the save was edited externally without going through the editor\'s write path. Whether the server explicitly checks this mirror is not publicly documented, but the configuration is impossible through normal play.',
+        reports:
+            'No direct ban-cluster reports tied specifically to this desync. Treated as a strong "edited save" marker rather than a confirmed flag.',
+        mitigation:
+            'Save the slot once via the editor — ClearCount ↔ event flag sync is automatic on write.',
+        sources: [
+            {label: 'spec/35-eac-server-validation §4C-c'},
+            {label: 'app.go SaveCharacter — sync loop for flags 50-57'},
         ],
     },
     gaitem_handle_invalid: {

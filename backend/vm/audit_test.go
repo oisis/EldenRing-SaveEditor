@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
+	"github.com/oisis/EldenRing-SaveEditor/backend/db"
+	gamedata "github.com/oisis/EldenRing-SaveEditor/backend/db/data"
 )
 
 // cleanCharacter returns a baseline VM that should pass every audit check.
@@ -327,11 +329,11 @@ func TestAuditSlot_CleanSlotPasses(t *testing.T) {
 	if len(report.Issues) != 0 {
 		t.Errorf("expected 0 issues, got %d: %+v", len(report.Issues), report.Issues)
 	}
-	if report.TotalChecks != 2 {
-		t.Errorf("expected 2 raw check categories, got %d", report.TotalChecks)
+	if report.TotalChecks != 4 {
+		t.Errorf("expected 4 raw check categories, got %d", report.TotalChecks)
 	}
-	if report.PassedChecks != 2 {
-		t.Errorf("expected 2 passed, got %d", report.PassedChecks)
+	if report.PassedChecks != 4 {
+		t.Errorf("expected 4 passed, got %d", report.PassedChecks)
 	}
 }
 
@@ -395,4 +397,157 @@ func TestAuditSlot_EmptySentinelHandlesIgnored(t *testing.T) {
 	if len(report.Issues) != 0 {
 		t.Errorf("expected sentinel handles to be skipped, got: %+v", report.Issues)
 	}
+}
+
+// playerSlot builds a SaveSlot with slot.Data sized to cover PlayerGameData
+// plus the event-flag region (large enough for flag IDs 50-57 wherever the
+// lookup table maps them). Caller can populate Player fields and write raw
+// bytes via core.SlotAccessor.
+func playerSlot(t *testing.T) *core.SaveSlot {
+	t.Helper()
+	const bufSize = 2_000_000 // covers PlayerGameDataOffset + entire flag region
+	slot := minimalSlot()
+	slot.Data = make([]byte, bufSize)
+	slot.EventFlagsOffset = PlayerGameDataOffset + 0x100 // arbitrary, after PGD
+	return slot
+}
+
+// writeRawU32 writes a uint32 into slot.Data at the given offset for tests.
+func writeRawU32(t *testing.T, slot *core.SaveSlot, off int, val uint32) {
+	t.Helper()
+	sa := core.NewSlotAccessor(slot.Data)
+	if err := sa.WriteU32(off, val); err != nil {
+		t.Fatalf("writeRawU32 at 0x%X: %v", off, err)
+	}
+}
+
+func TestAuditSlot_DerivedStatsConsistent(t *testing.T) {
+	slot := playerSlot(t)
+	slot.Player.Vigor = 25
+	slot.Player.Mind = 20
+	slot.Player.Endurance = 15
+	// Write expected MaxHP / MaxFP / MaxSP from the lookup tables.
+	writeRawU32(t, slot, PlayerGameDataOffset+maxHPOffset, uint32(gamedataHP(25)))
+	writeRawU32(t, slot, PlayerGameDataOffset+maxFPOffset, uint32(gamedataFP(20)))
+	writeRawU32(t, slot, PlayerGameDataOffset+maxSPOffset, uint32(gamedataSP(15)))
+
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDerivedStats(slot, &report)
+	if findIssue(report, "derived_stat_manual") != nil {
+		t.Fatalf("expected NO derived_stat_manual issue, got: %+v", report.Issues)
+	}
+}
+
+func TestAuditSlot_DerivedStatMismatch_HP(t *testing.T) {
+	slot := playerSlot(t)
+	slot.Player.Vigor = 25
+	slot.Player.Mind = 20
+	slot.Player.Endurance = 15
+	// Write WRONG MaxHP (off by 500) to trip the mismatch check.
+	writeRawU32(t, slot, PlayerGameDataOffset+maxHPOffset, uint32(gamedataHP(25))+500)
+	writeRawU32(t, slot, PlayerGameDataOffset+maxFPOffset, uint32(gamedataFP(20)))
+	writeRawU32(t, slot, PlayerGameDataOffset+maxSPOffset, uint32(gamedataSP(15)))
+
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDerivedStats(slot, &report)
+	issue := findIssue(report, "derived_stat_manual")
+	if issue == nil {
+		t.Fatalf("expected derived_stat_manual issue, got: %+v", report.Issues)
+	}
+	if issue.Confidence != ConfidenceSpeculated {
+		t.Errorf("expected ConfidenceSpeculated, got %s", issue.Confidence)
+	}
+	if issue.Field != "MaxHP" {
+		t.Errorf("expected Field=MaxHP, got %s", issue.Field)
+	}
+}
+
+func TestAuditSlot_DerivedStatsSkipWhenDataTooSmall(t *testing.T) {
+	slot := minimalSlot()
+	slot.Data = make([]byte, 100) // way too small for PlayerGameDataOffset
+	slot.Player.Vigor = 25
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkDerivedStats(slot, &report)
+	if findIssue(report, "derived_stat_manual") != nil {
+		t.Fatalf("expected silent skip when data too small, got issues: %+v", report.Issues)
+	}
+	if report.PassedChecks != 1 {
+		t.Errorf("expected PassedChecks=1 (silent skip), got %d", report.PassedChecks)
+	}
+}
+
+func TestAuditSlot_ClearCountFlagsMatch(t *testing.T) {
+	slot := playerSlot(t)
+	slot.Player.ClearCount = 2
+	flags := slot.Data[slot.EventFlagsOffset:]
+	if err := db.SetEventFlag(flags, 50+2, true); err != nil {
+		t.Fatalf("SetEventFlag(52): %v", err)
+	}
+
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkClearCountFlags(slot, &report)
+	if findIssue(report, "clearcount_flag_mismatch") != nil {
+		t.Fatalf("expected NO clearcount_flag_mismatch issue, got: %+v", report.Issues)
+	}
+}
+
+func TestAuditSlot_ClearCountFlagsMismatch(t *testing.T) {
+	slot := playerSlot(t)
+	slot.Player.ClearCount = 2
+	flags := slot.Data[slot.EventFlagsOffset:]
+	// Set the wrong flag — ClearCount=2 but flag 50 is set instead of 52.
+	if err := db.SetEventFlag(flags, 50, true); err != nil {
+		t.Fatalf("SetEventFlag(50): %v", err)
+	}
+
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkClearCountFlags(slot, &report)
+	issue := findIssue(report, "clearcount_flag_mismatch")
+	if issue == nil {
+		t.Fatalf("expected clearcount_flag_mismatch issue, got: %+v", report.Issues)
+	}
+	if issue.Confidence != ConfidenceSpeculated {
+		t.Errorf("expected ConfidenceSpeculated, got %s", issue.Confidence)
+	}
+}
+
+func TestAuditSlot_ClearCountFlagsNoneSet(t *testing.T) {
+	slot := playerSlot(t)
+	slot.Player.ClearCount = 1
+	// Do NOT set any flag — ClearCount=1 so flag 51 should have been set.
+
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkClearCountFlags(slot, &report)
+	if findIssue(report, "clearcount_flag_mismatch") == nil {
+		t.Fatalf("expected mismatch issue when flag not set, got: %+v", report.Issues)
+	}
+}
+
+func TestAuditSlot_ClearCountSkipWhenNoFlagsRegion(t *testing.T) {
+	slot := minimalSlot()
+	slot.EventFlagsOffset = 0 // signal: no flag region parsed
+	slot.Player.ClearCount = 3
+
+	report := AuditReport{Issues: []AuditIssue{}}
+	checkClearCountFlags(slot, &report)
+	if findIssue(report, "clearcount_flag_mismatch") != nil {
+		t.Fatalf("expected silent skip when EventFlagsOffset=0, got: %+v", report.Issues)
+	}
+	if report.PassedChecks != 1 {
+		t.Errorf("expected PassedChecks=1 (silent skip), got %d", report.PassedChecks)
+	}
+}
+
+// gamedataHP / gamedataFP / gamedataSP read the same lookup tables that
+// audit.go uses, so the tests' "expected" values stay in sync if the tables
+// ever change.
+func gamedataHP(attr uint32) float32 { return statTableEntry(gamedata.HP, attr) }
+func gamedataFP(attr uint32) float32 { return statTableEntry(gamedata.FP, attr) }
+func gamedataSP(attr uint32) float32 { return statTableEntry(gamedata.SP, attr) }
+
+func statTableEntry(table []float32, attr uint32) float32 {
+	if int(attr) < len(table) {
+		return table[attr]
+	}
+	return 0
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveEditor/backend/core"
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
+	gamedata "github.com/oisis/EldenRing-SaveEditor/backend/db/data"
 )
 
 // Severity mirrors spec/32 ban-risk Tier (0=info, 1=caution, 2=high risk).
@@ -82,6 +83,8 @@ func AuditCharacter(c *CharacterViewModel) AuditReport {
 func AuditSlot(slot *core.SaveSlot, report *AuditReport) {
 	checkUnknownItemIDs(slot, report)
 	checkGaItemHandleIntegrity(slot, report)
+	checkDerivedStats(slot, report)
+	checkClearCountFlags(slot, report)
 }
 
 func checkRunes(c *CharacterViewModel, r *AuditReport) {
@@ -462,4 +465,152 @@ func checkGaItemHandleIntegrity(slot *core.SaveSlot, r *AuditReport) {
 	if !any {
 		r.PassedChecks++
 	}
+}
+
+// derived stat raw offsets within PlayerGameData (per spec/04)
+const (
+	maxHPOffset = 0x0C
+	maxFPOffset = 0x18
+	maxSPOffset = 0x28
+)
+
+// derivedStatTolerance accounts for float32 → uint32 rounding when comparing
+// stored values against table-derived expectations.
+const derivedStatTolerance uint32 = 1
+
+// statTableLookup looks up the expected derived stat for an attribute value,
+// converting the float32 table entry to uint32. Returns (0, false) if the
+// attribute is out of the table's valid range.
+func statTableLookup(table []float32, attr uint32) (uint32, bool) {
+	if attr == 0 || int(attr) >= len(table) {
+		return 0, false
+	}
+	return uint32(table[attr]), true
+}
+
+// absDiffU32 returns |a - b| for unsigned values without underflow.
+func absDiffU32(a, b uint32) uint32 {
+	if a > b {
+		return a - b
+	}
+	return b - a
+}
+
+// checkDerivedStats verifies that stored MaxHP / MaxFP / MaxSP match the
+// values derived from Vigor / Mind / Endurance via the data.HP / FP / SP
+// lookup tables. Mismatch is a "manually edited stored stat" marker.
+// Confidence: Speculated — server-side stat-consistency checks are plausible
+// but not publicly confirmed.
+func checkDerivedStats(slot *core.SaveSlot, r *AuditReport) {
+	r.TotalChecks++
+
+	if !validatePlayerGameDataReachable(slot) {
+		// Cannot read raw bytes — skip silently rather than false-positive.
+		r.PassedChecks++
+		return
+	}
+
+	sa := core.NewSlotAccessor(slot.Data)
+	checks := []struct {
+		field    string
+		offset   int
+		attrName string
+		attrVal  uint32
+		table    []float32
+	}{
+		{"MaxHP", maxHPOffset, "Vigor", slot.Player.Vigor, gamedata.HP},
+		{"MaxFP", maxFPOffset, "Mind", slot.Player.Mind, gamedata.FP},
+		{"MaxSP", maxSPOffset, "Endurance", slot.Player.Endurance, gamedata.SP},
+	}
+
+	any := false
+	for _, c := range checks {
+		stored, err := sa.ReadU32(PlayerGameDataOffset + c.offset)
+		if err != nil {
+			continue
+		}
+		expected, ok := statTableLookup(c.table, c.attrVal)
+		if !ok {
+			continue
+		}
+		if absDiffU32(stored, expected) <= derivedStatTolerance {
+			continue
+		}
+		any = true
+		r.Issues = append(r.Issues, AuditIssue{
+			Severity:   SeverityRisk,
+			Confidence: ConfidenceSpeculated,
+			Category:   "consistency",
+			Field:      c.field,
+			Message:    fmt.Sprintf("%s = %d does not match expected %d (from %s = %d)", c.field, stored, expected, c.attrName, c.attrVal),
+			Mitigation: fmt.Sprintf("Edit %s instead — %s is derived automatically", c.attrName, c.field),
+			RiskKey:    "derived_stat_manual",
+		})
+	}
+	if !any {
+		r.PassedChecks++
+	}
+}
+
+// validatePlayerGameDataReachable checks whether slot.Data is large enough
+// to read the derived-stat region without bounds error.
+func validatePlayerGameDataReachable(slot *core.SaveSlot) bool {
+	return slot != nil && len(slot.Data) >= PlayerGameDataOffset+0x2C
+}
+
+// checkClearCountFlags verifies that event flags 50..57 mirror slot.Player.ClearCount —
+// exactly one of those flags should be set, and its index should equal ClearCount.
+// app.go's SaveCharacter writes this mirror automatically; a mismatch indicates
+// the save was edited externally without going through this editor's write path.
+// Confidence: Speculated — no public report of the server checking this, but
+// it's a strong "edited save" marker because legitimate gameplay can never
+// produce a desync between ClearCount and these flags.
+func checkClearCountFlags(slot *core.SaveSlot, r *AuditReport) {
+	r.TotalChecks++
+
+	if slot == nil || slot.EventFlagsOffset == 0 || slot.EventFlagsOffset >= len(slot.Data) {
+		// Event flags region not parsed — skip silently.
+		r.PassedChecks++
+		return
+	}
+	flags := slot.Data[slot.EventFlagsOffset:]
+
+	setIndices := []uint32{}
+	for i := uint32(0); i <= 7; i++ {
+		v, err := db.GetEventFlag(flags, 50+i)
+		if err != nil {
+			// Flag region malformed — let other checks (or core diagnostics) report it.
+			r.PassedChecks++
+			return
+		}
+		if v {
+			setIndices = append(setIndices, i)
+		}
+	}
+
+	expected := slot.Player.ClearCount
+	if len(setIndices) == 1 && setIndices[0] == expected {
+		r.PassedChecks++
+		return
+	}
+
+	var msg string
+	switch {
+	case len(setIndices) == 0:
+		msg = fmt.Sprintf("ClearCount = %d but none of event flags 50-57 are set", expected)
+	case len(setIndices) > 1:
+		msg = fmt.Sprintf("ClearCount = %d but multiple NG+ flags are set (%v)", expected, setIndices)
+	default:
+		msg = fmt.Sprintf("ClearCount = %d but flag %d is set (expected flag %d)", expected, 50+setIndices[0], 50+expected)
+	}
+
+	r.Issues = append(r.Issues, AuditIssue{
+		Severity:   SeverityRisk,
+		Confidence: ConfidenceSpeculated,
+		Category:   "consistency",
+		Field:      "ClearCount / EventFlags 50-57",
+		Message:    msg,
+		Mitigation: "Save once via the editor — ClearCount ↔ event flag sync is automatic on write",
+		RiskKey:    "clearcount_flag_mismatch",
+	})
 }
