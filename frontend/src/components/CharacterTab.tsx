@@ -274,7 +274,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                 <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-20 flex-shrink-0"
                                     title={`Base: ${statMin}`}>
                                     {stat.label}
-                                    <span className="text-[8px] text-red-400/70 ml-1">{statMin}</span>
                                 </span>
                                 <input
                                     type="range" min={1} max={99}
