@@ -44,13 +44,17 @@ var BolsteringMaterials = map[uint32]ItemData{
 	0x40002AA6: {Name: "Ghost Glovewort [9]", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/ghost_glovewort_9.png", Flags: []string{"stackable"}},
 	0x40002AA7: {Name: "Great Ghost Glovewort", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/great_ghost_glovewort.png", Flags: []string{"stackable"}},
 
-	// Flask & Blessing Upgrades — caps reflect single-playthrough obtainable counts
-	// (Fextralife) and scale with NG+ via scales_with_ng flag.
-	// Sacred Tear cap = 12 (flask potency cap), not 16 (world surplus is unusable).
-	0x4000271A: {Name: "Golden Seed", Category: "bolstering_materials", MaxInventory: 30, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/golden_seed.png", Flags: []string{"stackable", "scales_with_ng"}},
-	0x40002724: {Name: "Sacred Tear", Category: "bolstering_materials", MaxInventory: 12, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/sacred_tear.png", Flags: []string{"stackable", "scales_with_ng"}},
-	0x401EAB90: {Name: "Scadutree Fragment", Category: "bolstering_materials", MaxInventory: 50, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/scadutree_fragment.png", Flags: []string{"dlc", "stackable", "scales_with_ng"}},
-	0x401EABF4: {Name: "Revered Spirit Ash", Category: "bolstering_materials", MaxInventory: 25, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/revered_spirit_ash.png", Flags: []string{"dlc", "stackable", "scales_with_ng"}},
+	// Flask & Blessing Upgrades — caps reflect "max useful" amounts (full flask /
+	// max blessing cumulative cost), not raw world counts. NG+ does not raise the
+	// effective cap because surplus past these limits has zero functional value:
+	//   Golden Seed cap 30 = full flask charges (14)
+	//   Sacred Tear cap 12 = full flask potency (+12)
+	//   Scadutree Fragment cap 50 = max Scadutree Blessing (+20 cumulative cost)
+	//   Revered Spirit Ash cap 25 = max Revered Spirit Ash Blessing (+10 cumulative cost)
+	0x4000271A: {Name: "Golden Seed", Category: "bolstering_materials", MaxInventory: 30, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/golden_seed.png", Flags: []string{"stackable"}},
+	0x40002724: {Name: "Sacred Tear", Category: "bolstering_materials", MaxInventory: 12, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/sacred_tear.png", Flags: []string{"stackable"}},
+	0x401EAB90: {Name: "Scadutree Fragment", Category: "bolstering_materials", MaxInventory: 50, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/scadutree_fragment.png", Flags: []string{"dlc", "stackable"}},
+	0x401EABF4: {Name: "Revered Spirit Ash", Category: "bolstering_materials", MaxInventory: 25, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/revered_spirit_ash.png", Flags: []string{"dlc", "stackable"}},
 
 	// Handles (B0...)
 0x40000B54: {Name: "Golden Rune [1]", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/runes/golden_rune_1.png", Flags: []string{"stackable"}},

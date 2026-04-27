@@ -229,7 +229,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setAddToInv(true);
         setInvMax(false);
         setInvQtyVal(1);
-        setAddToStorage(true);
+        // If any selected item has MaxStorage=0, leave storage off — backend would skip it anyway,
+        // and showing it enabled lets the user think they're storing copies that won't appear.
+        const anyZeroStorage = items.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) === 0);
+        setAddToStorage(!anyZeroStorage);
         setStorageMax(false);
         setStorageQtyVal(1);
         setConfirmModal(items);
@@ -436,28 +439,31 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                 )}
                             </div>
 
-                            {/* Storage row */}
-                            <div className="flex items-center space-x-3">
+                            {/* Storage row — completely disabled when MaxStorage=0 (item not allowed in storage at all) */}
+                            <div className={`flex items-center space-x-3 ${modalMaxStorage === 0 ? 'opacity-40 pointer-events-none' : ''}`}>
                                 <div
-                                    onClick={() => setAddToStorage(!addToStorage)}
-                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                    onClick={() => modalMaxStorage > 0 && setAddToStorage(!addToStorage)}
+                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage && modalMaxStorage > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
                                 >
-                                    {addToStorage && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                    {addToStorage && modalMaxStorage > 0 && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
                                 <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Storage</span>
                                 <input
                                     type="number"
                                     min={1}
                                     max={modalNonStackable ? 99 : modalMaxStorage}
-                                    value={storageMax ? modalMaxStorage : storageQtyVal}
-                                    disabled={!addToStorage || storageMax}
+                                    value={modalMaxStorage === 0 ? 0 : storageMax ? modalMaxStorage : storageQtyVal}
+                                    disabled={!addToStorage || storageMax || modalMaxStorage === 0}
                                     onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorage, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
-                                {modalNonStackable && (
+                                {modalMaxStorage === 0 && (
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-red-500/70">Not allowed</span>
+                                )}
+                                {modalMaxStorage > 0 && modalNonStackable && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
                                 )}
-                                {!modalNonStackable && modalMaxStorage > 1 && (
+                                {modalMaxStorage > 0 && !modalNonStackable && modalMaxStorage > 1 && (
                                     <div
                                         onClick={() => addToStorage && setStorageMax(!storageMax)}
                                         className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}

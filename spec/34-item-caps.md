@@ -32,15 +32,11 @@ Wszystkie z bazą per single playthrough zgodnie z Fextralife (v1.16):
 
 | Item | Plik | Base cap | Source |
 |---|---|---|---|
-| Stonesword Key | `key_items.go` | 55 | ~47 base + ~10 DLC purchases/drops |
-| Dragon Heart | `key_items.go` | 22 | ~16 base (Greyoll 5 + named dragons) + ~6 DLC |
-| Larval Tear | `key_items.go` | 24 | 18 base + 6 DLC |
-| Golden Seed | `bolstering_materials.go` | 30 | 30 base; DLC 0 (uses Scadutree Fragment instead) |
-| Sacred Tear | `bolstering_materials.go` | 12 | 12 base = flask potency cap (world surplus 4 z DLC nieużywalne, świadomie pominięte) |
-| Scadutree Fragment | `bolstering_materials.go` | 50 | 50 DLC (= max blessing cost cumulative; zero surplus) |
-| Revered Spirit Ash | `bolstering_materials.go` | 25 | 25 DLC (= max revered ash blessing cost) |
+| Stonesword Key | `key_items.go` | 55 | ~47 base + ~10 DLC purchases/drops; NG+ respawnuje imp statues |
+| Dragon Heart | `key_items.go` | 22 | ~16 base (Greyoll 5 + named dragons) + ~6 DLC; NG+ respawnuje smoki |
+| Larval Tear | `key_items.go` | 24 | 18 base + 6 DLC; NG+ respawnuje Albinaurics i drops |
 
-## Item-y z hard cap (bez scaling)
+## Item-y z hard cap (bez scaling) — caps to "max useful"
 
 Cap nie zmienia się z NG+ — limit gry, nie limit zbieralności:
 
@@ -48,6 +44,12 @@ Cap nie zmienia się z NG+ — limit gry, nie limit zbieralności:
 |---|---|---|
 | Memory Stone | 8 | Spell slot cap = 8 (game hard limit) |
 | Talisman Pouch | 3 | Talisman slot count = 3 (game hard limit) |
+| Golden Seed | 30 | Pełne ładunki flaski (14 charges, kumulatywny koszt 30 ziaren) |
+| Sacred Tear | 12 | Pełna potency flaski (+12) |
+| Scadutree Fragment | 50 | Max Scadutree Blessing (+20, kumulatywny koszt 50) |
+| Revered Spirit Ash | 25 | Max Revered Spirit Ash Blessing (+10, kumulatywny koszt 25) |
+
+**Zasada projektowa**: jeśli cap = "max useful" (przekroczenie nie daje funkcjonalnego zysku), nie skalujemy z NG+. Nawet po Elden Beast w NG+1, gracz ma już +12 potency / +14 flask charges / +20 blessing — kolejne ziarna/łzy/fragmenty są bezużyteczne.
 
 ## Item-y z cap 1/0 (unique drops)
 

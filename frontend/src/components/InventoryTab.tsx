@@ -278,7 +278,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
                             item.id.toString(16).toLowerCase().includes(search.toLowerCase());
 
-        if (category === 'all') return matchesSearch && (item.subCategory !== 'key_items' || item.readOnly);
+        if (category === 'all') return matchesSearch;
 
         return item.subCategory === category && matchesSearch;
     })), [mergedOwnedItems, search, category, sortCol, sortDir, showFlaggedItems]);

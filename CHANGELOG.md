@@ -37,6 +37,12 @@ where `ClearCount` is the save's NG+ cycle counter (0 = NG, 1 = NG+1, …, 7 = N
 - `npx tsc --noEmit && npm run build` — pass
 - Manual: Database modal pokazuje cap 55 dla Stonesword Key na NG, 110 na NG+1, 999 z chaos mode. Cookbooks pokazują 1. Paintings/notes pokazują 1.
 
+**Round 2 fixes (po user testach):**
+- **Bug:** Information items (paintings/notes/letters) były dodawane do save ale niewidoczne w UI inventory — `data.Information` mapy brakowało w `globalItemIndex` (`backend/db/db.go:168-176`), więc `GetItemDataFuzzy` zwracał empty i `mapItems` skipował. **Fix:** dodano `data.Information` do listy maps w `init()`.
+- **Bug:** Dragon Heart, Larval Tear, Crystal Tears nie były widoczne w "All" view zakładki Inventory — pre-existing filtr `(item.subCategory !== 'key_items' || item.readOnly)` w `InventoryTab.tsx:281` ukrywał editable key_items, co miało sens dla story keys ale nie dla nowych usable item types. **Fix:** filtr w 'all' view uproszczony do samego `matchesSearch`.
+- **Bug:** Storage row był aktywny dla itemów z MaxStorage=0 (paintings/cookbooks/etc.), pozwalając użytkownikowi odhaczyć "dodaj do storage" co było silentnie ignorowane przez backend resolveQty. **Fix:** modal Storage row teraz `pointer-events-none + opacity-40` i pokazuje *"Not allowed"* gdy `modalMaxStorage===0`; `openConfirmModal` automatycznie ustawia `addToStorage=false` jeśli którykolwiek z wybranych itemów ma cap storage 0.
+- **Bug:** Scadutree Fragment skalował z NG+ (50 → 100 na NG+1) mimo że nadwyżka jest bezużyteczna (50 = max blessing cumulative cost). **Fix:** zdjęto `scales_with_ng` z 4 itemów których cap to "max useful" zamiast "world count": Golden Seed (30 = full flask), Sacred Tear (12 = full potency), Scadutree Fragment (50 = max blessing), Revered Spirit Ash (25 = max ash blessing). Scaling pozostaje na: Stonesword Key, Dragon Heart, Larval Tear (consumable z otwartym usage).
+
 ---
 
 ### Branch: feat/db-info-category — extract Information tab + DB-wide categorization audit
