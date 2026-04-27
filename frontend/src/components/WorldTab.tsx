@@ -4,6 +4,7 @@ import {db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 import {RiskInfoIcon} from './RiskInfoIcon';
 import {RiskActionButton} from './RiskActionButton';
+import {RiskSectionBanner} from './RiskSectionBanner';
 import {RiskKey} from '../data/riskInfo';
 
 interface WorldTabProps {
@@ -296,6 +297,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                             <RiskActionButton riskKey="map_reveal_full" onConfirm={handleRevealAllMap} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Reveal All</RiskActionButton>
                             <button onClick={handleResetMap} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Reset</button>
                         </>}>
+                        <RiskSectionBanner riskKey="map_reveal_full" className="mb-3" />
                         {mapSystemEntries.length > 0 && (
                             <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mb-2 pb-2 border-b border-border/30">
                                 {mapSystemEntries.map(e => (
@@ -493,6 +495,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                             </select>
                             {questProgress && <span className="text-[8px] font-bold text-muted-foreground">{questCompletedSteps}/{questTotalSteps}</span>}
                         </>}>
+                        <RiskSectionBanner riskKey="quest_step_skip" className="mb-3" />
                         {!selectedNPC && (
                             <div className="py-6 text-center">
                                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Select an NPC to view quest progress</p>

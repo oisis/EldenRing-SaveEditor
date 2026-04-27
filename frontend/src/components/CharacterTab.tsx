@@ -5,6 +5,9 @@ import {vm, main} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 import {RiskInfoIcon} from './RiskInfoIcon';
 import {getRunesRiskKey} from '../data/riskInfo';
+import {useSafetyMode} from '../state/safetyMode';
+
+const RUNES_LEGAL_MAX = 999_999_999;
 
 interface Props {
     charIndex: number;
@@ -24,6 +27,7 @@ const ATTRIBUTES = [
 ];
 
 export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
+    const safetyMode = useSafetyMode();
     const [char, setChar] = useState<vm.CharacterViewModel | null>(null);
     const [loading, setLoading] = useState(false);
 
@@ -181,7 +185,15 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                 {getRunesRiskKey(char.souls) && <RiskInfoIcon riskKey={getRunesRiskKey(char.souls)!} />}
                             </label>
                             <input type="number" value={char.souls}
-                                onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
+                                onChange={e => {
+                                    let v = parseInt(e.target.value) || 0;
+                                    if (safetyMode.enabled && v > RUNES_LEGAL_MAX) {
+                                        v = RUNES_LEGAL_MAX;
+                                        toast.error(`Online Safety Mode: clamped to legal max ${RUNES_LEGAL_MAX.toLocaleString()}`);
+                                    }
+                                    setChar(vm.CharacterViewModel.createFrom({...char, souls: v}));
+                                }}
+                                title={safetyMode.enabled ? `Online Safety Mode caps Runes at ${RUNES_LEGAL_MAX.toLocaleString()}` : undefined}
                                 className={
                                     getRunesRiskKey(char.souls)
                                         ? 'w-full bg-red-500/10 border-2 border-red-500 rounded-md px-3 py-2 text-xs font-mono text-red-300 focus:ring-2 focus:ring-red-500/40 outline-none transition-all'
