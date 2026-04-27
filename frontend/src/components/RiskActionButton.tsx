@@ -35,9 +35,9 @@ export function RiskActionButton({riskKey, onConfirm, children, className, disab
     const [showModal, setShowModal] = useState(false);
     const safetyMode = useSafetyMode();
     const entry = riskKey ? RISK_INFO[riskKey] : null;
-    const dismissedKey = riskKey ? `setting:dismissedRisk:${riskKey}` : '';
-    const isDismissed = riskKey ? localStorage.getItem(dismissedKey) === 'true' : false;
-    const requiresConfirm = !!entry && (!isDismissed || safetyMode.requireConfirmFor(entry.tier));
+    // Modal is gated entirely on Online Safety Mode — when it's off, action runs immediately.
+    // The ⚠ info icon next to the button stays as the always-available educational affordance.
+    const requiresConfirm = !!entry && safetyMode.requireConfirmFor(entry.tier);
 
     const handleClick = () => {
         if (disabled) return;
@@ -66,18 +66,10 @@ export function RiskActionButton({riskKey, onConfirm, children, className, disab
                 <RiskActionModal
                     entry={entry}
                     onCancel={() => setShowModal(false)}
-                    onProceed={(dontShowAgain) => {
-                        if (dontShowAgain && !safetyMode.enabled) {
-                            try {
-                                localStorage.setItem(dismissedKey, 'true');
-                            } catch {
-                                // localStorage unavailable — proceed anyway
-                            }
-                        }
+                    onProceed={() => {
                         setShowModal(false);
                         onConfirm();
                     }}
-                    allowDismiss={!safetyMode.enabled}
                 />
             )}
         </>
@@ -87,13 +79,10 @@ export function RiskActionButton({riskKey, onConfirm, children, className, disab
 interface ModalProps {
     entry: typeof RISK_INFO[RiskKey];
     onCancel: () => void;
-    onProceed: (dontShowAgain: boolean) => void;
-    allowDismiss: boolean;
+    onProceed: () => void;
 }
 
-function RiskActionModal({entry, onCancel, onProceed, allowDismiss}: ModalProps) {
-    const [dontShowAgain, setDontShowAgain] = useState(false);
-
+function RiskActionModal({entry, onCancel, onProceed}: ModalProps) {
     return createPortal(
         <div
             className="fixed inset-0 z-[150] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-200"
@@ -119,25 +108,9 @@ function RiskActionModal({entry, onCancel, onProceed, allowDismiss}: ModalProps)
                     <ModalSection heading="How to mitigate" body={entry.mitigation} />
                 </div>
 
-                {allowDismiss && (
-                    <label className="flex items-center justify-between gap-3 p-2.5 rounded bg-muted/20 border border-border/40 cursor-pointer hover:bg-muted/30 transition-all">
-                        <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                            Don't ask again for this action
-                        </span>
-                        <input
-                            type="checkbox"
-                            checked={dontShowAgain}
-                            onChange={e => setDontShowAgain(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20"
-                        />
-                    </label>
-                )}
-
-                {!allowDismiss && (
-                    <p className="text-[9px] font-bold uppercase tracking-widest text-amber-400 px-1">
-                        Online Safety Mode is on — confirmation cannot be dismissed.
-                    </p>
-                )}
+                <p className="text-[9px] font-bold uppercase tracking-widest text-amber-400 px-1">
+                    Online Safety Mode is on — confirmation required.
+                </p>
 
                 <div className="flex gap-2 pt-1">
                     <button
@@ -147,7 +120,7 @@ function RiskActionModal({entry, onCancel, onProceed, allowDismiss}: ModalProps)
                         Cancel
                     </button>
                     <button
-                        onClick={() => onProceed(dontShowAgain)}
+                        onClick={onProceed}
                         className="flex-1 px-4 py-2.5 bg-foreground text-background rounded-md text-[10px] font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all"
                     >
                         Proceed
