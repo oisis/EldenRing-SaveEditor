@@ -214,7 +214,7 @@ function App() {
                                 <span className="text-primary-foreground font-black text-lg tracking-tighter">ER</span>
                             </div>
                             <div>
-                                <h1 className="text-[10px] font-black tracking-[0.2em] leading-none">SaveForge</h1>
+                                <h1 className="text-[10px] font-black tracking-[0.2em] leading-none">Elden Ring SaveForge</h1>
                                 <p className="text-[7px] text-primary tracking-wider mt-0.5">by OiSiSk</p>
                             </div>
                         </div>

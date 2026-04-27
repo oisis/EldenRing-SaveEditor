@@ -6,9 +6,9 @@
     "0000": {
       "ProductVersion": "0.1.0.0",
       "CompanyName": "OiSiS",
-      "FileDescription": "Elden Ring Save Editor",
+      "FileDescription": "Elden Ring SaveForge",
       "LegalCopyright": "Copyright (c) 2024-2026 OiSiS",
-      "ProductName": "ER-Save-Editor",
+      "ProductName": "Elden Ring SaveForge",
       "Comments": "Elden Ring save file editor for PC and PS4"
     }
   }
