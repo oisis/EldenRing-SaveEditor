@@ -33,14 +33,28 @@ export type RiskKey =
     | 'pre_order'
     | 'dlc_duplicate'
     | 'ban_risk'
-    // Phase 3 — per-action / per-field
+    // Phase 3 — per-action / per-field (Tier 2)
     | 'runes_above_999m'
     | 'stat_above_99'
     | 'level_above_713'
     | 'talisman_pouch_above_3'
     | 'quantity_above_max'
     | 'spirit_ash_above_10'
-    | 'derived_stat_manual';
+    | 'derived_stat_manual'
+    // Phase 4 — bulk actions (Tier 1)
+    | 'bulk_grace_unlock'
+    | 'bulk_boss_kill'
+    | 'bulk_cookbook'
+    | 'bulk_bell_bearing'
+    | 'bulk_gestures_unlock'
+    | 'bulk_region_unlock'
+    | 'bulk_summoning_pool'
+    | 'bulk_colosseum'
+    | 'map_reveal_full'
+    | 'fow_remove'
+    | 'quest_step_skip'
+    | 'ng_plus_write'
+    | 'character_import';
 
 export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     cut_content: {
@@ -197,6 +211,162 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
         sources: [
             {label: 'r/Eldenring stat consistency analyses'},
         ],
+    },
+    bulk_grace_unlock: {
+        tier: 1,
+        level: 'low',
+        title: 'Bulk Grace Unlock',
+        whyBan:
+            'Unlocking many Sites of Grace at once via event flags creates a discovery state that does not match a normal exploration timeline. EAC may correlate grace flags with map reveal and combat history during online sync.',
+        reports:
+            'Occasional reports, almost always combined with map reveal or other bulk unlocks. Standalone bulk grace unlock has not been a frequently reported cause.',
+        mitigation:
+            'Do this offline. If concerned, keep the "Skip Boss Arenas" filter on so the timeline stays plausible, or unlock graces individually as you progress.',
+        sources: [{label: 'Community discussions on grace flag editing'}],
+    },
+    bulk_boss_kill: {
+        tier: 1,
+        level: 'medium',
+        title: 'Bulk Boss Defeat Flags',
+        whyBan:
+            'Setting many boss-defeated flags at once shifts rune rewards, NPC quest gates, and arena states in ways inconsistent with the player\'s combat history. Some boss flags trigger world-state cascades that EAC inspects during sync.',
+        reports:
+            'Mid-volume reports. More frequent when combined with attribute overflows or rune injection.',
+        mitigation:
+            'Use offline only. Defeat key bosses normally; use this for replay convenience on saves you do not intend to take online.',
+        sources: [{label: 'r/Eldenring boss flag investigations'}],
+    },
+    bulk_cookbook: {
+        tier: 1,
+        level: 'low',
+        title: 'Bulk Cookbook Unlock',
+        whyBan:
+            'Cookbooks tie to specific merchants and quest lines. Unlocking many at once skips merchant interactions and crafting progression that the game expects to see in the save.',
+        reports:
+            'Very few reports tied specifically to cookbook unlocks. Aggregate-only signal.',
+        mitigation:
+            'Low standalone risk. Combine cautiously with bulk grace or quest skip flags.',
+        sources: [],
+    },
+    bulk_bell_bearing: {
+        tier: 1,
+        level: 'low',
+        title: 'Bulk Bell Bearing Unlock',
+        whyBan:
+            'Bell Bearings expand merchant wares. Bulk unlocking sets the acquisition flags directly, skipping merchant kills or pickups that normally produce them.',
+        reports:
+            'Few standalone reports.',
+        mitigation:
+            'Low standalone risk. Consider unlocking individually to preserve merchant interactions.',
+        sources: [],
+    },
+    bulk_gestures_unlock: {
+        tier: 1,
+        level: 'low',
+        title: 'Bulk Gesture Unlock',
+        whyBan:
+            'Gestures are stored in a fixed array of unlocked IDs. Bulk unlocking adds them all without the in-game NPC interactions that normally grant them. The "Unlock All" button intentionally skips ban-risk gestures (cut content / pre-order / DLC duplicates).',
+        reports:
+            'Very few standalone reports. Risk concentrates in the individual ban-risk entries that "Unlock All" already excludes.',
+        mitigation:
+            'Low risk for vanilla gestures. Do not manually toggle the ban-risk gestures (cut / pre-order / DLC duplicate).',
+        sources: [],
+    },
+    bulk_region_unlock: {
+        tier: 1,
+        level: 'low',
+        title: 'Bulk Invasion Region Unlock',
+        whyBan:
+            'Unlocked invasion regions affect online matchmaking pools and phantom slot availability. Mass unlocking the entire region list creates a state most players reach only after very long playtime.',
+        reports:
+            'Very few reports.',
+        mitigation:
+            'Low risk for solo play. If you actively play online invasions, prefer naturally discovered regions.',
+        sources: [],
+    },
+    bulk_summoning_pool: {
+        tier: 1,
+        level: 'medium',
+        title: 'Bulk Summoning Pool Activation',
+        whyBan:
+            'Summoning pools (Martyr Effigies) tie to co-op matchmaking. Activating them all at once exposes the character to summon ranges that do not match their progression — EAC may correlate during online sync.',
+        reports:
+            'Sporadic. This feature is also flagged as buggy in this editor (UI toggles but in-game state may not update).',
+        mitigation:
+            'Activate offline only. For online co-op, activate gradually with progression.',
+        sources: [],
+    },
+    bulk_colosseum: {
+        tier: 1,
+        level: 'low',
+        title: 'Bulk Colosseum Unlock',
+        whyBan:
+            'Colosseum unlock flags only affect availability of arena multiplayer modes.',
+        reports:
+            'Reported as having no visible in-game effect when toggled offline. Risk likely low.',
+        mitigation:
+            'Low risk.',
+        sources: [],
+    },
+    map_reveal_full: {
+        tier: 1,
+        level: 'low',
+        title: 'Full Map Reveal',
+        whyBan:
+            'Setting all map fragment + acquisition flags reveals every region without exploration. EAC sees the discovery state during sync but the reveal is widely used in the community.',
+        reports:
+            'Almost no specific ban reports tied to map reveal alone.',
+        mitigation:
+            'Generally safe. Mostly a spoiler concern rather than a ban concern.',
+        sources: [],
+    },
+    fow_remove: {
+        tier: 1,
+        level: 'low',
+        title: 'Remove Fog of War',
+        whyBan:
+            'Removing the Fog of War exploration bitfield (2099 bytes filled with 0xFF) reveals every map tile without walking it.',
+        reports:
+            'No specific ban reports tied to FoW removal alone.',
+        mitigation:
+            'Low risk. Cosmetic detection is theoretically possible but not widely seen.',
+        sources: [],
+    },
+    quest_step_skip: {
+        tier: 1,
+        level: 'medium',
+        title: 'Quest Step Skip',
+        whyBan:
+            'Setting quest flags out of order or jumping to a late step can break NPC dialogue trees, lock out follow-up steps, or produce conflicting world states. EAC checks some flag combinations against expected sequences during sync; the more common failure mode is breaking the questline itself.',
+        reports:
+            'Occasional reports when combined with other bulk flag edits. Most damage is to the in-game questline, not the account.',
+        mitigation:
+            'Backup before skipping. Avoid jumping past quest gates that NPCs expect to see in order.',
+        sources: [],
+    },
+    ng_plus_write: {
+        tier: 1,
+        level: 'low',
+        title: 'Set NG+ Cycle',
+        whyBan:
+            'Changing the NG+ cycle directly skips the ending sequence that normally advances cycles. Mass NG+ jumps combined with rune totals and other progression flags can look anomalous.',
+        reports:
+            'Few standalone reports.',
+        mitigation:
+            'Low standalone risk. Avoid combining with rune injection or attribute overflows.',
+        sources: [],
+    },
+    character_import: {
+        tier: 1,
+        level: 'medium',
+        title: 'Character Import',
+        whyBan:
+            'Importing a character from another save copies stats, items, and progression flags wholesale. If the source save contains cut content, illegal stats, or other risky edits, those problems transfer to the destination.',
+        reports:
+            'Risk depends entirely on the source save. Clean source = low risk; edited source with cut content = high risk.',
+        mitigation:
+            'Audit the source save first. After import, scan the destination for ban badges (CUT / ⚠ BAN) and Tier 2 outlines, and clean before going online.',
+        sources: [],
     },
 };
 
