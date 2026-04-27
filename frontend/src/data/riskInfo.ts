@@ -1,5 +1,6 @@
 // Ban-risk awareness dictionary.
-// Phase 1: per-flag baseline (4 entries). Per-action keys are added in later phases.
+// Phase 1: per-flag baseline (4 entries — cut_content, pre_order, dlc_duplicate, ban_risk).
+// Phase 3: per-action entries (stat overflows, runes, pouch, etc.) for field-level outlines.
 //
 // Editorial guidance:
 //   - Frame statements as community-reported, not officially confirmed by FromSoftware.
@@ -27,10 +28,19 @@ export interface RiskEntry {
 }
 
 export type RiskKey =
+    // Phase 1 — per-flag baseline (matches backend item flags)
     | 'cut_content'
     | 'pre_order'
     | 'dlc_duplicate'
-    | 'ban_risk';
+    | 'ban_risk'
+    // Phase 3 — per-action / per-field
+    | 'runes_above_999m'
+    | 'stat_above_99'
+    | 'level_above_713'
+    | 'talisman_pouch_above_3'
+    | 'quantity_above_max'
+    | 'spirit_ash_above_10'
+    | 'derived_stat_manual';
 
 export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     cut_content: {
@@ -90,4 +100,131 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
             {label: 'Aggregate community ban reports'},
         ],
     },
+    runes_above_999m: {
+        tier: 2,
+        level: 'high',
+        title: 'Runes Above 999,999,999',
+        whyBan:
+            'The in-game maximum total runes a character can hold is 999,999,999 (≈1 billion). Values above this cap are not producible through any farming or item use — Easy Anti-Cheat reads the rune total during online sync and flags overflows as injected.',
+        reports:
+            'Consistently reported across Souls editor communities. Typical bans follow within hours of the first multiplayer match.',
+        mitigation:
+            'Keep total runes ≤ 999,999,999. If you need more for an offline run, raise temporarily then lower before going online.',
+        sources: [
+            {label: 'r/Eldenring rune cap discussions'},
+        ],
+    },
+    stat_above_99: {
+        tier: 2,
+        level: 'high',
+        title: 'Attribute Above 99',
+        whyBan:
+            'Each character attribute (Vigor, Mind, Endurance, Strength, Dexterity, Intelligence, Faith, Arcane) is hard-capped at 99 in-game. EAC validates per-attribute caps during online sync. Any value above 99 is impossible through legitimate level-ups.',
+        reports:
+            'High volume of reports — overflowing attributes is one of the oldest and most-detected save edits across the Souls series.',
+        mitigation:
+            'Keep every attribute in the 1-99 range. The level total derives automatically from the sum of attributes.',
+        sources: [
+            {label: 'r/Eldenring stat cap reports'},
+        ],
+    },
+    level_above_713: {
+        tier: 2,
+        level: 'high',
+        title: 'Character Level Above 713',
+        whyBan:
+            'The legal maximum character level is 713 = Σ(attribute caps 99×8) − 79 (starting class base). Any level above 713 implies an attribute over the 99 cap or a corrupted level value.',
+        reports:
+            'Detected together with attribute overflows; both flags often appear in the same ban incidents.',
+        mitigation:
+            'Let the editor recalculate level from attributes (level = sum(attrs) − 79). Do not manually override the level field.',
+        sources: [
+            {label: 'r/Eldenring level cap analysis'},
+        ],
+    },
+    talisman_pouch_above_3: {
+        tier: 2,
+        level: 'high',
+        title: 'Talisman Pouch Above 3',
+        whyBan:
+            'The maximum number of additional talisman slots is 3 (4 total including the starting slot), unlocked through specific Stonesword Key gates and boss rewards. A pouch count above 3 is impossible in retail play.',
+        reports:
+            'Less common than stat overflows but reported when used together with other illegal modifications.',
+        mitigation:
+            'Keep additional pouch ≤ 3.',
+        sources: [
+            {label: 'Fextralife — Talisman Pouch progression'},
+        ],
+    },
+    quantity_above_max: {
+        tier: 2,
+        level: 'medium',
+        title: 'Quantity Above MaxInventory',
+        whyBan:
+            'Each item has a per-inventory cap defined in regulation params (e.g. flasks 14, most consumables 99). Quantities above the cap are not producible through normal play and are visible to EAC during inventory sync.',
+        reports:
+            'Reported alongside cut content and stat overflows. Lower individual visibility but compounds with other flags.',
+        mitigation:
+            'Keep each stack ≤ the item\'s MaxInventory value. Use storage for excess.',
+        sources: [
+            {label: 'er-save-manager regulation cap notes'},
+        ],
+    },
+    spirit_ash_above_10: {
+        tier: 2,
+        level: 'high',
+        title: 'Spirit Ash Upgrade Above +10',
+        whyBan:
+            'Spirit Ashes max out at +10 in retail. Each tier is a distinct item ID (baseID + N for +N). IDs beyond +10 do not exist in regulation, so the game falls back to invalid entries which EAC flags.',
+        reports:
+            'Specific to spirit ash upgrade edits. Reported when invalid +N IDs appear in the inventory.',
+        mitigation:
+            'Keep upgrade level in the 0-10 range when adding spirit ashes from the database.',
+        sources: [
+            {label: 'er-save-manager spirit ash upgrade chains'},
+        ],
+    },
+    derived_stat_manual: {
+        tier: 2,
+        level: 'high',
+        title: 'Manually Overridden Derived Stat',
+        whyBan:
+            'HP, FP, and Stamina are computed at runtime from Vigor, Mind, and Endurance using fixed formulas. Manually overriding the stored values produces a save inconsistent with the attribute breakdown — EAC compares stored vs. derived during sync and flags mismatches.',
+        reports:
+            'Detected indirectly through stat-consistency checks. Pairs with attribute overflows in most ban incidents.',
+        mitigation:
+            'Edit Vigor / Mind / Endurance instead — the editor recalculates HP/FP/Stamina automatically on save.',
+        sources: [
+            {label: 'r/Eldenring stat consistency analyses'},
+        ],
+    },
 };
+
+// Helper: visual styling for fields whose current value falls into a Tier 2 risk.
+// Concatenate with the field's existing class string when riskKey is non-null.
+export const RISK_FIELD_CLASS = 'border-red-500/60 ring-1 ring-red-500/30 focus:border-red-500 focus:ring-red-500/40';
+
+// Helpers for evaluating common Tier 2 conditions.
+export function getRunesRiskKey(runes: number): RiskKey | null {
+    return runes > 999_999_999 ? 'runes_above_999m' : null;
+}
+
+export function getAttributeRiskKey(value: number): RiskKey | null {
+    return value > 99 ? 'stat_above_99' : null;
+}
+
+export function getLevelRiskKey(level: number): RiskKey | null {
+    return level > 713 ? 'level_above_713' : null;
+}
+
+export function getTalismanPouchRiskKey(additionalSlots: number): RiskKey | null {
+    return additionalSlots > 3 ? 'talisman_pouch_above_3' : null;
+}
+
+export function getQuantityRiskKey(qty: number, maxInventory: number): RiskKey | null {
+    return maxInventory > 0 && qty > maxInventory ? 'quantity_above_max' : null;
+}
+
+export function getSpiritAshRiskKey(upgrade: number): RiskKey | null {
+    return upgrade > 10 ? 'spirit_ash_above_10' : null;
+}

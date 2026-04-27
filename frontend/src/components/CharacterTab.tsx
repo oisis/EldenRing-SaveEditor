@@ -3,6 +3,8 @@ import toast from '../lib/toast';
 import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyMirrorFavoriteToCharacter, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset} from '../../wailsjs/go/main/App';
 import {vm, main} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
+import {RiskInfoIcon} from './RiskInfoIcon';
+import {getRunesRiskKey} from '../data/riskInfo';
 
 interface Props {
     charIndex: number;
@@ -174,10 +176,17 @@ export function CharacterTab({charIndex, onNameChange, onMutate}: Props) {
                                 className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
                         </div>
                         <div className="space-y-1.5">
-                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Runes</label>
+                            <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1 flex items-center gap-1.5">
+                                <span>Runes</span>
+                                {getRunesRiskKey(char.souls) && <RiskInfoIcon riskKey={getRunesRiskKey(char.souls)!} />}
+                            </label>
                             <input type="number" value={char.souls}
                                 onChange={e => setChar(vm.CharacterViewModel.createFrom({...char, souls: parseInt(e.target.value) || 0}))}
-                                className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
+                                className={
+                                    getRunesRiskKey(char.souls)
+                                        ? 'w-full bg-red-500/10 border-2 border-red-500 rounded-md px-3 py-2 text-xs font-mono text-red-300 focus:ring-2 focus:ring-red-500/40 outline-none transition-all'
+                                        : 'w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all'
+                                } />
                         </div>
                         <div className="space-y-1.5">
                             <label className="text-[9px] font-bold text-muted-foreground uppercase tracking-tight ml-1">

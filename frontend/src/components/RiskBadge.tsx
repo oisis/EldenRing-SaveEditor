@@ -12,7 +12,9 @@ interface BadgeStyle {
     classes: string;
 }
 
-const STYLE: Record<RiskKey, BadgeStyle> = {
+// Only the per-flag RiskKeys have a dedicated badge label. Per-action keys
+// (stat_above_99, runes_above_999m, ...) surface only the (?) icon, not a badge.
+const STYLE: Partial<Record<RiskKey, BadgeStyle>> = {
     cut_content: {
         label: 'CUT',
         classes: 'bg-amber-500/15 text-amber-400 border-amber-500/30',

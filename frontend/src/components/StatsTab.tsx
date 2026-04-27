@@ -80,15 +80,15 @@ export function StatsTab({charIndex, onMutate}: Props) {
                                     <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest group-hover:text-foreground transition-colors">
                                         {stat.label}
                                     </label>
-                                    <input 
-                                        type="number" 
+                                    <input
+                                        type="number"
                                         min="1" max="99"
-                                        value={(char as any)[stat.id]} 
+                                        value={(char as any)[stat.id]}
                                         onChange={e => updateStat(stat.id, parseInt(e.target.value) || 1)}
                                         className="w-10 bg-muted/30 border border-border rounded text-center text-xs font-black focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all py-1"
                                     />
                                 </div>
-                                <input 
+                                <input
                                     type="range"
                                     min="1" max="99"
                                     value={(char as any)[stat.id]}
