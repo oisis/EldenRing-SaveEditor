@@ -1,6 +1,13 @@
 package data
 
 var CraftingMaterials = map[uint32]ItemData{
+	// ─── Materials moved from tools.go (in-game Materials sub-tab) ──────
+	0x40005154: {Name: "Golden Centipede", Category: "crafting_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/crafting_materials/golden_centipede.png", Flags: []string{"stackable"}},
+	0x4000513B: {Name: "Sanctuary Stone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/sanctuary_stone.png", Flags: []string{"stackable"}},
+	0x4000514C: {Name: "Glintstone Firefly", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/glintstone_firefly.png", Flags: []string{"stackable"}},
+	0x40005172: {Name: "Volcanic Stone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/volcanic_stone.png", Flags: []string{"stackable"}},
+	0x40005177: {Name: "Gravel Stone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/gravel_stone.png", Flags: []string{"stackable"}},
+
 	// Base Game Materials
 	0x400006E0: {Name: "Ruin Fragment", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ruin_fragment.png", Flags: []string{"stackable"}},
 	0x40002710: {Name: "Glass Shard", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/glass_shard.png", Flags: []string{"stackable"}},

@@ -602,7 +602,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         {(category === 'all' || columnVisibility.category) && (
                                             <td className="p-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/30 rounded-md text-muted-foreground border border-border/20">
-                                                    {item.category === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.category.replace(/_/g, ' ')}
+                                                    {item.category === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.category === 'info' ? 'Information' : item.category.replace(/_/g, ' ')}
                                                 </span>
                                             </td>
                                         )}
@@ -663,7 +663,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                             <div className="flex-1 min-w-0">
                                 <h3 className="text-sm font-black uppercase tracking-widest text-foreground truncate">{detailItem.name}</h3>
                                 <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mt-0.5">
-                                    {detailItem.category.replace(/_/g, ' ')}
+                                    {detailItem.category === 'info' ? 'Information' : detailItem.category.replace(/_/g, ' ')}
                                 </p>
                                 <p className="text-[9px] font-mono text-muted-foreground/60 mt-0.5">
                                     0x{detailItem.id.toString(16).toUpperCase()}
