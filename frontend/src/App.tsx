@@ -33,6 +33,7 @@ function App() {
     const [selectedChar, setSelectedChar] = useState<number>(0);
     const [activeTab, setActiveTab] = useState('character');
     const [inventoryVersion, setInventoryVersion] = useState(0);
+    const [saveLoadKey, setSaveLoadKey] = useState(0);
     const [theme, setTheme] = useState<Theme>(() => {
         return (localStorage.getItem('setting:theme') as Theme) || 'dark';
     });
@@ -119,6 +120,7 @@ function App() {
         try {
             const plat = await SelectAndOpenSave();
             setPlatform(plat);
+            setSaveLoadKey(k => k + 1);
             refreshSlots();
         } catch (err) {
             toast.error(String(err));
@@ -536,7 +538,7 @@ function App() {
                                         )}
                                     </div>
                                 )}
-                                {activeTab === 'world' && <WorldTab charIdx={selectedChar} showFlaggedItems={showFlaggedItems} onMutate={refreshUndoDepth} />}
+                                {activeTab === 'world' && <WorldTab charIdx={selectedChar} showFlaggedItems={showFlaggedItems} saveLoadKey={saveLoadKey} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'tools' && <ToolsTab charIndex={selectedChar} onComplete={refreshSlots} />}
                                 </div>
                             </div>

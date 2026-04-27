@@ -363,6 +363,15 @@ Shadow of the Erdtree specific data:
 - **Coverage**: 11 bulk actions in `WorldTab` (Unlock All / Activate All / Kill All / Reveal All / Set quest step), `CharacterImporter` confirm, Runes input outline + clamp, Database/Inventory ban-risk badges, Gestures ⚠ icons. Section banners on Map and Quests
 - **Cleanup during this work**: removed dead `GeneralTab.tsx`, `StatsTab.tsx`, `WorldProgressTab.tsx` (legacy components no longer routed from `App.tsx`)
 
+### ✅ World Tab Collapsed Actions & Per-Session State 🟢
+**Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
+- All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session
+- Bulk action buttons (Unlock All / Lock All / Reveal All / Reset / Activate All / Deactivate All / Kill All / Respawn All) sit on the collapsed header next to the progress bar — single-click bulk edits without an extra expand step
+- New `resetSignal` prop on `AccordionSection` — when defined, state lives in `sessionStorage` and resets to `defaultOpen` whenever the value changes; equality-guarded ref protects against React 18 StrictMode double-invoked effects
+- Pools: added "Deactivate All". Colosseums: added "Lock All". "Map & Fog of War" → "Map". Bosses "Respawn" → "Respawn All"
+- `btnSm` style updated to `border-foreground/30 bg-foreground/5` so action button borders are readable in both light and dark themes
+- Online Safety Mode contract simplified: confirmation modals appear only when Safety Mode is on; off-mode click runs the action immediately. Dismissal plumbing (`localStorage.setItem('setting:dismissedRisk:…')`, `Don't ask again` checkbox, `allowDismiss` prop) removed. ⚠ info icon next to each action stays as the always-on educational affordance
+
 ### 🔲 Save Corruption Detection / Repair 🟢
 Comprehensive slot diagnostics with corruption detection.
 

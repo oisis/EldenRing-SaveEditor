@@ -4,7 +4,52 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Branch: feat/ban-risk-system — 3-tier ban-risk awareness UI + Online Safety Mode + cleanup of dead components
+### Branch: feat/world-collapsed-actions — World tab UX polish + SafetyMode-only modal gating
+
+**Goal:** Make the World tab usable without expanding every section. Each section's bulk actions (Unlock All / Lock All / Reveal All / Reset / Activate All / Deactivate All / Kill All / Respawn All) now sit on the collapsed header next to the progress bar, so single-click bulk edits no longer require an extra expand step. Section open/closed state is per-session and resets when a different save is loaded — clean baseline on every fresh load. Also reworked the Online Safety Mode contract: confirmation modals now appear only when Safety Mode is enabled.
+
+**Why these changes:**
+- The previous behavior persisted accordion state in `localStorage` indefinitely and forced expansion to access bulk actions — clunky for users who routinely toggle one or two flags per session.
+- The previous Online Safety Mode contract showed Tier 1 modals on first use even when Safety Mode was off, then suppressed them after "Don't ask again". Inconsistent: users got an unexpected modal once per action, then nothing. The new contract is binary and predictable: Safety Mode off = no modals (info ⚠ icon stays for on-demand education); Safety Mode on = always modal.
+
+**Change:**
+- `frontend/src/components/AccordionSection.tsx`:
+    - New `resetSignal?: number | string` prop. When defined, state persists in `sessionStorage` (survives tab switches / remounts) but resets to `defaultOpen` and wipes its session entry whenever the value changes.
+    - Equality-guarded reset (`lastResetSignalRef`) instead of "first run" boolean — needed because React 18 StrictMode double-invokes effects in dev, which would otherwise collapse a section on every remount.
+    - `actions` prop is now rendered in the **collapsed** state too, between the progress bar and the `current/total` counter (previously only visible when open).
+- `frontend/src/App.tsx`: new `saveLoadKey` state, incremented after `SelectAndOpenSave()` succeeds. Passed to `<WorldTab>`.
+- `frontend/src/components/WorldTab.tsx`:
+    - `saveLoadKey` prop wired into all 11 `<AccordionSection resetSignal={…}>` calls (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions).
+    - Renamed "Map & Fog of War" → "Map".
+    - Pools: added `handleGlobalDeactivateAllPools` + "Deactivate All" button.
+    - Colosseums: added `handleLockAllColosseums` + "Lock All" button.
+    - Bosses: renamed global "Respawn" → "Respawn All" for consistency.
+    - `btnSm` style: `border-border/50` → `border-foreground/30 bg-foreground/5` — kept readable in both light and dark themes (previous `border-border` washed out in light mode).
+- `frontend/src/components/RiskActionButton.tsx`:
+    - Confirmation gating simplified to `requiresConfirm = !!entry && safetyMode.requireConfirmFor(entry.tier)`. Removed `dismissedKey` / `isDismissed` / `localStorage.setItem('setting:dismissedRisk:…')` plumbing — no longer needed because dismissal only existed to suppress the off-mode modal that no longer fires.
+    - Modal: dropped "Don't ask again" checkbox + `allowDismiss` prop; replaced two-branch (allowDismiss true / false) UI with a single fixed amber notice "Online Safety Mode is on — confirmation required".
+    - The ⚠ info icon next to each action is unchanged — still always-on, click-to-popover.
+
+**Test plan executed:**
+- `npx tsc --noEmit` — clean.
+- `make build` — full Wails build OK.
+- Manual (`make dev`):
+    - Load save → all 11 World sections collapsed ✅
+    - Expand Map → switch to Character tab → switch back to World → Map still expanded ✅ (the StrictMode double-effect bug surfaced and was fixed mid-iteration)
+    - Load a different save → all sections collapsed again, including Map ✅
+    - Collapsed-state actions: Unlock All / Lock All / Reveal All / Reset / Activate All / Deactivate All / Kill All / Respawn All all execute without expanding ✅
+    - Light theme: button borders clearly visible ✅
+    - Safety Mode off → click Gestures → Unlock All → action runs immediately, no modal ✅
+    - Safety Mode on → same click → modal appears ✅
+
+**Bug surfaced and fixed during this branch:**
+- First implementation of the reset gate used a `firstResetRef` "skip first invocation" boolean. In React 18 dev StrictMode, every `useEffect` fires twice on mount (mount → simulated unmount → mount). The first invocation flipped `firstResetRef.current` to `false`, the second invocation passed the gate and called `setOpen(defaultOpen)` — collapsing the section on every remount, including returning to the World tab. Replaced with a value-comparison ref (`lastResetSignalRef`): only collapse when the actual `resetSignal` value differs from the last seen value. StrictMode double-invocations no longer trigger a reset because the value is unchanged.
+
+**Decisions during planning (recorded so we don't reopen them):**
+- Kept "Reveal All" instead of normalising to "Unlock All" for the Map section — semantically a map is *revealed*, not *unlocked*; "Unlock map" reads like a DLC purchase. Pools stay on "Activate All / Deactivate All", Bosses stay on "Kill All / Respawn All" — same reasoning, the verbs match the underlying state.
+- NPC Quests deliberately has no global bulk button (per-NPC step-set is the only sensible operation; a "complete all quests" would be both incoherent and high-risk).
+
+
 
 **Goal:** Educate the user about which save edits are commonly reported to trigger Easy Anti-Cheat detection during online sync, instead of silently allowing or hard-blocking them. Cover the full UI: Item Database, Inventory, Character, World (graces / bosses / quests / map / gestures / cookbooks / bell bearings / regions / colosseums / summoning pools), Tools (Character Importer), Settings.
 

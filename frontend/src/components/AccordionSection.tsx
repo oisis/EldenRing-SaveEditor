@@ -1,4 +1,4 @@
-import {useState, ReactNode, useEffect} from 'react';
+import {useState, ReactNode, useEffect, useRef} from 'react';
 
 interface AccordionSectionProps {
     id?: string;
@@ -11,6 +11,10 @@ interface AccordionSectionProps {
     headerRight?: ReactNode;
     children: ReactNode;
     className?: string;
+    // When defined, section state persists in sessionStorage (survives tab switches /
+    // remounts) but resets to defaultOpen whenever this value changes — used to wipe
+    // expansion when a different save file is loaded.
+    resetSignal?: number | string;
 }
 
 export function AccordionSection({
@@ -24,20 +28,42 @@ export function AccordionSection({
     headerRight,
     children,
     className = '',
+    resetSignal,
 }: AccordionSectionProps) {
-    const storageKey = id ? `accordion:${id}` : null;
+    const useLocal = id !== undefined && resetSignal === undefined;
+    const useSession = id !== undefined && resetSignal !== undefined;
+    const localKey = useLocal ? `accordion:${id}` : null;
+    const sessionKey = useSession ? `accordion:${id}` : null;
 
     const [open, setOpen] = useState(() => {
-        if (storageKey) {
-            const saved = localStorage.getItem(storageKey);
+        if (localKey) {
+            const saved = localStorage.getItem(localKey);
+            if (saved !== null) return saved === '1';
+        }
+        if (sessionKey) {
+            const saved = sessionStorage.getItem(sessionKey);
             if (saved !== null) return saved === '1';
         }
         return defaultOpen;
     });
 
     useEffect(() => {
-        if (storageKey) localStorage.setItem(storageKey, open ? '1' : '0');
-    }, [open, storageKey]);
+        if (localKey) localStorage.setItem(localKey, open ? '1' : '0');
+        else if (sessionKey) sessionStorage.setItem(sessionKey, open ? '1' : '0');
+    }, [open, localKey, sessionKey]);
+
+    // Track last seen resetSignal — only collapse when the value actually changes.
+    // Using a ref-based equality guard (instead of "first run" boolean) so StrictMode's
+    // double-invoked effects in dev don't accidentally trigger a reset on remount.
+    const lastResetSignalRef = useRef(resetSignal);
+    useEffect(() => {
+        if (resetSignal === undefined) return;
+        if (lastResetSignalRef.current === resetSignal) return;
+        lastResetSignalRef.current = resetSignal;
+        setOpen(defaultOpen);
+        if (sessionKey) sessionStorage.removeItem(sessionKey);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [resetSignal]);
 
     const pct = progress ? Math.round((progress.current / Math.max(progress.total, 1)) * 100) : null;
 
@@ -73,6 +99,11 @@ export function AccordionSection({
                                 style={{ width: `${pct}%` }}
                             />
                         </div>
+                        {actions && (
+                            <div className="flex items-center gap-1 flex-shrink-0" onClick={e => e.stopPropagation()}>
+                                {actions}
+                            </div>
+                        )}
                         <span className="text-[9px] font-mono text-muted-foreground flex-shrink-0">
                             {progress!.current}/{progress!.total}
                         </span>
