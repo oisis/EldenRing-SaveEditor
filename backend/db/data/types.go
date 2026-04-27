@@ -1,6 +1,18 @@
 package data
 
 // ItemData represents the metadata for an item in the game database.
+//
+// Flags reference (string set; combine freely):
+//   - "stackable"       — item stacks in a single inventory slot (vs. unique drops)
+//   - "dlc"             — Shadow of the Erdtree content
+//   - "cut_content"     — never shipped legitimately; spawning may flag EAC
+//   - "ban_risk"        — adding this item carries elevated EAC ban risk
+//   - "scales_with_ng"  — vanilla obtainable count scales linearly with NG+ cycle:
+//                          effective_cap = MaxInventory * (ClearCount + 1)
+//                          (ClearCount: 0 = NG, 1 = NG+1, ..., 7 = NG+7)
+//                          Used for: Stonesword Key, Dragon Heart, Larval Tear,
+//                          Golden Seed, Sacred Tear, Scadutree Fragment,
+//                          Revered Spirit Ash. See spec/34-item-caps.md.
 type ItemData struct {
 	Name         string
 	Category     string
