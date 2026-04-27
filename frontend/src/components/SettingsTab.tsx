@@ -7,6 +7,7 @@ import {
     LaunchRemoteGame, CloseRemoteGame, DeployAndLaunch, CloseAndDownload,
 } from '../../wailsjs/go/main/App';
 import {deploy} from '../../wailsjs/go/models';
+import {useSafetyMode} from '../state/safetyMode';
 
 interface SettingsTabProps {
     theme: 'light' | 'dark' | 'golden';
@@ -44,6 +45,7 @@ export function SettingsTab({
     platform, setPlatform, refreshSlots,
     selectedDeployTarget: selectedTarget, setSelectedDeployTarget: setSelectedTarget,
 }: SettingsTabProps) {
+    const safetyMode = useSafetyMode();
     const [steamIdInput, setSteamIdInput] = useState('');
     const [steamIdSaved, setSteamIdSaved] = useState('');
     const [steamIdError, setSteamIdError] = useState('');
@@ -201,17 +203,49 @@ export function SettingsTab({
                         </div>
                     </div>
                     <div className="border-t border-border/40 pt-2.5">
-                        <div className="grid grid-cols-2 gap-2">
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Cut & Ban-Risk</span>
-                                <input type="checkbox" checked={showFlaggedItems} onChange={e => setShowFlaggedItems(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
-                            </label>
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
-                                <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
-                            </label>
-                        </div>
+                        <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
+                            <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
+                        </label>
                     </div>
+                </div>
+            </section>
+
+            {/* Safety */}
+            <section className="space-y-3">
+                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Safety</h2></div>
+                <div className="card px-4 py-3 space-y-2">
+                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                        <div className="flex-1 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground block">Online Safety Mode</span>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <strong>Action gating.</strong> When enabled: Tier 2 edits (cut content, illegal stat values, runes &gt; 999M) are <strong>disabled</strong>;
+                                Tier 1 actions (bulk grace unlock, map reveal, etc.) <strong>require explicit confirmation</strong> every time.
+                                Recommended when actively playing online.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={safetyMode.enabled}
+                            onChange={e => safetyMode.setEnabled(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
+                        />
+                    </label>
+                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                        <div className="flex-1 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground block">Show Cut &amp; Ban-Risk Items</span>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <strong>List visibility.</strong> When enabled, cut content and ban-risk items appear in Item Database, Inventory and Gestures lists (with the ⚠ marker).
+                                Disable to hide them from view entirely. Independent from Online Safety Mode.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={showFlaggedItems}
+                            onChange={e => setShowFlaggedItems(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
+                        />
+                    </label>
                 </div>
             </section>
 
