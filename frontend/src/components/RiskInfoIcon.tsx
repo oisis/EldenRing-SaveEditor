@@ -1,4 +1,5 @@
 import {useEffect, useRef, useState} from 'react';
+import {createPortal} from 'react-dom';
 import {RISK_INFO, RiskKey, RiskLevel} from '../data/riskInfo';
 
 interface Props {
@@ -6,10 +7,10 @@ interface Props {
     className?: string;
 }
 
-const ICON_COLOR: Record<RiskLevel, string> = {
-    low: 'text-yellow-400 hover:text-yellow-300 border-yellow-500/40 hover:border-yellow-400/60',
-    medium: 'text-orange-400 hover:text-orange-300 border-orange-500/40 hover:border-orange-400/60',
-    high: 'text-red-400 hover:text-red-300 border-red-500/40 hover:border-red-400/60',
+const ICON_TRI_COLOR: Record<RiskLevel, string> = {
+    low: 'text-yellow-400 hover:text-yellow-300',
+    medium: 'text-orange-400 hover:text-orange-300',
+    high: 'text-red-400 hover:text-red-300',
 };
 
 const DOTS_COLOR: Record<RiskLevel, string> = {
@@ -82,18 +83,19 @@ export function RiskInfoIcon({riskKey, className = ''}: Props) {
                 ref={buttonRef}
                 type="button"
                 onClick={handleToggle}
+                onMouseDown={(e) => e.stopPropagation()}
                 aria-label={`Why is this risky? — ${entry.title}`}
-                className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded-full border text-[8px] font-black leading-none transition-colors bg-background/40 ${ICON_COLOR[entry.level]} ${className}`}
+                className={`inline-flex items-center justify-center text-[11px] leading-none transition-all hover:scale-125 cursor-pointer ${ICON_TRI_COLOR[entry.level]} ${className}`}
             >
-                ?
+                ⚠
             </button>
-            {open && pos && (
+            {open && pos && createPortal(
                 <div
                     ref={popoverRef}
                     role="dialog"
                     aria-label={entry.title}
-                    style={{position: 'fixed', top: pos.top, left: pos.left, width: POPOVER_WIDTH}}
-                    className="z-[200] rounded-lg border border-border bg-popover text-foreground shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150"
+                    style={{position: 'fixed', top: pos.top, left: pos.left, width: POPOVER_WIDTH, zIndex: 9999}}
+                    className="rounded-lg border border-border bg-popover text-foreground shadow-2xl p-4 animate-in fade-in zoom-in-95 duration-150"
                 >
                     <div className="flex items-start justify-between gap-3 mb-3">
                         <h4 className="text-[10px] font-black uppercase tracking-[0.15em]">{entry.title}</h4>
@@ -135,7 +137,8 @@ export function RiskInfoIcon({riskKey, className = ''}: Props) {
                     <p className="mt-3 pt-3 border-t border-border/40 text-[8px] uppercase tracking-widest text-muted-foreground/70">
                         Press Esc to close
                     </p>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

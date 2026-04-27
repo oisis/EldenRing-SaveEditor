@@ -524,14 +524,15 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                                 : g.flags?.includes('dlc_duplicate') ? 'dlc_duplicate'
                                 : banRisk ? 'ban_risk' : null;
                             return (
-                                <label key={g.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
-                                    <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
-                                    <span className={`text-[10px] truncate font-semibold flex items-center gap-1 ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                                        <span className="truncate">{g.name}</span>
-                                        {banRisk && <span className="text-amber-500 leading-none">⚠</span>}
-                                        {riskKey && <RiskInfoIcon riskKey={riskKey} />}
-                                    </span>
-                                </label>
+                                <div key={g.id} className="flex items-center space-x-2 group py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                    <label className="flex items-center space-x-2 flex-1 min-w-0 cursor-pointer">
+                                        <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
+                                        <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                            {g.name}
+                                        </span>
+                                    </label>
+                                    {riskKey && <RiskInfoIcon riskKey={riskKey} />}
+                                </div>
                             );
                         })}
                     </div>
