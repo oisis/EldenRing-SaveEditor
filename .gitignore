@@ -151,9 +151,10 @@ venv/
 *.db-journal
 *.db-wal
 # data/
-# Allow backend/db/data/ but ignore other data/ dirs if needed
+# Allow backend/db/data/ and frontend/src/data/ but ignore other data/ dirs if needed
 data/
 !backend/db/data/
+!frontend/src/data/
 
 # Gemini CLI local settings and state
 # .gemini/

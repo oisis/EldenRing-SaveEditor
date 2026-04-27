@@ -4,6 +4,63 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/ban-risk-system — 3-tier ban-risk awareness UI + Online Safety Mode + cleanup of dead components
+
+**Goal:** Educate the user about which save edits are commonly reported to trigger Easy Anti-Cheat detection during online sync, instead of silently allowing or hard-blocking them. Cover the full UI: Item Database, Inventory, Character, World (graces / bosses / quests / map / gestures / cookbooks / bell bearings / regions / colosseums / summoning pools), Tools (Character Importer), Settings.
+
+**Why this approach:**
+EAC detection is probabilistic and undocumented. Hard blocks would be paternalistic; silent allow leaves users uninformed. A 3-tier system with explicit "why" descriptions framed as community-reported (not officially confirmed) lets users make informed decisions. Online Safety Mode toggle gives a one-click switch for users actively playing online — Tier 2 edits are clamped to legal values, Tier 1 actions force confirmation regardless of prior "Don't ask again" dismissals.
+
+**Architecture:**
+- **Tier 0** (cosmetic / read-only): no marking
+- **Tier 1** (caution: bulk grace unlock, map reveal, quest step skip, character import …): modal-confirm with per-action `localStorage` opt-out
+- **Tier 2** (high risk: cut content, attribute > 99, runes > 999M, talisman pouch > 3 …): modal-confirm + field outline + (under Online Safety Mode) auto-clamp/disabled
+- **`RISK_INFO` dictionary** (`frontend/src/data/riskInfo.ts`) — 24 entries, each with `tier / level / title / whyBan / reports / mitigation / sources[]`. Source URLs intentionally left optional/empty when not verified
+- **Online Safety Mode** — `useSafetyMode()` hook (Context + `localStorage`) exposes `enabled / setEnabled / isDisabledFor(tier) / requireConfirmFor(tier)`. Global amber banner at top of app when active
+
+**Components added:**
+- `RiskInfoIcon.tsx` — clickable ⚠ trojkąt + popover via `createPortal(document.body)` (Why / Reports / Mitigation / Sources, ESC + outside-click dismissal)
+- `RiskBadge.tsx` — inline `CUT` / `⚠ BAN` / `PRE-ORDER` / `DLC DUP` tag + adjacent `RiskInfoIcon`
+- `RiskActionButton.tsx` — wraps `<button>`, shows confirm modal with opt-out checkbox; under Online Safety Mode the dismissal checkbox is replaced by a notice and prior dismissals are ignored
+- `RiskSectionBanner.tsx` — colored bar above sections (Map, Quests) with first-sentence summary + info icon
+- `SafetyModeBanner.tsx` — global top-of-app banner when Online Safety Mode is on
+- `state/safetyMode.tsx` — Context + Provider, wired in `main.tsx` around `<App/>`
+
+**Coverage rollout (5 phases):**
+- **Phase 1** — `RISK_INFO` baseline (4 per-flag entries) + `RiskInfoIcon` + `RiskBadge`. Refactored existing inline `CUT` / `⚠ BAN` tags in `DatabaseTab`, `InventoryTab` and gestures (in `WorldTab`) to the shared component
+- **Phase 2** — `useSafetyMode()` hook + global `SafetyModeBanner` + Settings toggle. Reorganized Settings: split out a dedicated "Safety" section, moved "Show Cut & Ban-Risk Items" filter from "UI Customization" to live next to Online Safety Mode (independent — one is list visibility, the other is action gating)
+- **Phase 3** — 7 per-action Tier 2 entries + `getRunesRiskKey` / `getAttributeRiskKey` / etc. helpers. Wired Runes input in `CharacterTab` to show red outline + ⚠ icon when value exceeds 999M. (Other inputs already clamped 1-99 / 0-3 / etc. — outline would be dead, kept the dictionary entries for future use if clamping is ever lifted)
+- **Phase 4** — 13 per-action Tier 1 entries + `RiskActionButton` component. Wired 11 bulk action buttons in `WorldTab` (Reveal All, Unlock All Graces / Cookbooks / Bell Bearings / Regions / Gestures, Activate All Pools, Unlock All Colosseums, Kill All Bosses, Set quest step) and `CharacterImporter` Confirm Import
+- **Phase 5** — section banners on `World → Map` (`map_reveal_full`) and `World → Quests` (`quest_step_skip`); Runes input clamping under Online Safety Mode (auto-cap to 999,999,999 with toast)
+- **Phase 6** — this changelog entry, ROADMAP entry, `spec/32-ban-risk-system.md` reference doc
+
+**Cleanup (chore commits during this branch):**
+- Removed `frontend/src/components/GeneralTab.tsx` (legacy "Character" tab — not imported anywhere)
+- Removed `frontend/src/components/StatsTab.tsx` (legacy "Stats" tab — not imported anywhere)
+- Removed `frontend/src/components/WorldProgressTab.tsx` (legacy "World Progress" tab — not imported anywhere)
+  These were leftovers from a UI refactor; Grep for "Runes" / "Unlock All" / "Reveal All" surfaced them and led to two iterations of edits landing in dead code before the user pointed it out. Updated `~/.claude/projects/.../memory/feedback_react_component_mapping.md` with explicit list of dead components to ignore + a map of preview-mode vs editing-mode component routing in `App.tsx`
+
+**Bug fixes during the branch:**
+- `RiskInfoIcon` initial implementation used `position: fixed` inside the React tree — overflow/transform on ancestor elements clipped the popover, plus Tailwind 4 arbitrary `z-[200]` was unreliable. Switched to `createPortal(document.body)` + inline `zIndex: 9999` — popover now renders above everything regardless of layout
+- `RiskInfoIcon` inside a `<label>` element in gestures sub-tab: native HTML label-for-control behavior captured the click on the icon and toggled the checkbox without React's `stopPropagation` ever running. Restructured the gesture row: the `<label>` now wraps only checkbox + name; the `RiskInfoIcon` lives as a sibling outside the label
+- Phase 1 changes initially landed only in dead `WorldProgressTab.tsx`; after user reported the icons missing in the live "World" tab, mirrored the changes to `WorldTab.tsx`
+- Phase 3 changes initially landed in dead `GeneralTab.tsx`; after user pointed it out, moved to `CharacterTab.tsx`
+
+**Tests:**
+- `npx tsc --noEmit` — clean across all phases
+- `make build` — full Wails build successful (verified after Phase 1)
+- Manual verification per phase: load real save → exercise each tab → confirm popover / modal / outline / banner / clamp behavior matches phase test plan. User confirmed each phase before commit
+
+**UX preferences captured (saved to memory):**
+- User runs the app via `make dev` and fully restarts the dev server after every change (Cmd+R doesn't work in Wails dev on macOS) — don't suggest HMR-only refresh
+- When grep surfaces multiple components matching a feature, always start from `frontend/src/App.tsx` routes to identify the active one. Editing dead code wastes a round trip with the user
+
+**Known limitations / future work (Phase 6+):**
+- `RISK_INFO.sources[]` URLs are mostly empty placeholders — to be filled with verified links
+- No automated test that grep-checks every `riskKey="..."` literal in `*.tsx` against the `RiskKey` union (TypeScript catches it at compile time, but a CI safety net would help)
+- Boss kill flag still single-flag (see open ROADMAP item) — bulk_boss_kill warning is correct in spirit but the in-game effect is limited until the multi-flag boss defeat refactor lands
+- ToolsTab placeholders (Save Comparison, Diagnostics, Backup Manager) are not yet implemented; once they are, evaluate whether they need risk markers
+
 ### Branch: feat/apply-mirror-favorite — Apply in-game Mirror Favorites preset onto character (cross-gender works) + remove buggy direct preset apply
 
 **Goal:** Implement the in-game "apply preset to character" action that the player triggers at the Roundtable Hold mirror, so the editor can do it without launching the game. As a side effect, eliminate the long-standing cross-gender bug where applying a Type B preset produced a bald, male-faced character.

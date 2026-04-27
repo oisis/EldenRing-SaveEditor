@@ -1,6 +1,7 @@
 import {useState} from 'react';
 import toast from '../lib/toast';
 import {SelectAndOpenSourceSave, GetSourceActiveSlots, ImportCharacter} from '../../wailsjs/go/main/App';
+import {RiskActionButton} from './RiskActionButton';
 
 interface Props {
     destSlot: number;
@@ -108,16 +109,17 @@ export function CharacterImporter({destSlot, onComplete}: Props) {
                                 >
                                     Cancel
                                 </button>
-                                <button 
+                                <RiskActionButton
+                                    riskKey="character_import"
                                     disabled={selectedSourceSlot === null || loading}
-                                    onClick={handleImport}
+                                    onConfirm={handleImport}
                                     className={`
                                         bg-foreground text-background hover:scale-[1.02] active:scale-[0.98] transition-all font-black px-8 py-3 rounded-md text-[11px] shadow-xl uppercase tracking-[0.2em]
                                         ${(selectedSourceSlot === null || loading) ? 'opacity-50 cursor-not-allowed' : ''}
                                     `}
                                 >
                                     {loading ? 'Importing...' : `Confirm Import`}
-                                </button>
+                                </RiskActionButton>
                             </div>
                         </div>
                     )}

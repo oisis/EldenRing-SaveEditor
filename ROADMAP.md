@@ -352,6 +352,17 @@ Shadow of the Erdtree specific data:
 
 ## Phase 6 — Save Management & Safety
 
+### ✅ Ban-Risk Awareness System 🟡
+3-tier UI system that educates the user about which edits are likely to trigger Easy Anti-Cheat detection during online sync, instead of silently allowing or hard-blocking them.
+
+**Implementation:** `frontend/src/data/riskInfo.ts`, `frontend/src/state/safetyMode.tsx`, `frontend/src/components/Risk{InfoIcon,Badge,ActionButton,SectionBanner}.tsx`, `frontend/src/components/SafetyModeBanner.tsx`, `spec/32-ban-risk-system.md`
+- **Tier 0 / 1 / 2**: cosmetic / caution (modal-confirm with per-action opt-out) / high-risk (modal + field outline + clamping under Online Safety Mode)
+- **`RISK_INFO` dictionary** — 24 entries: 4 per-flag (`cut_content`, `pre_order`, `dlc_duplicate`, `ban_risk`), 7 per-field (Tier 2 — `runes_above_999m`, `stat_above_99`, …), 13 per-bulk-action (Tier 1 — `bulk_grace_unlock`, `map_reveal_full`, `quest_step_skip`, `character_import`, …). Each entry has `whyBan / reports / mitigation / sources` framed as community-reported, not officially confirmed
+- **Online Safety Mode** — global toggle in Settings → Safety; when enabled: top-level amber banner, Tier 1 forces confirmation modal regardless of "Don't ask again", Tier 2 inputs auto-clamp to legal max (e.g. Runes ≤ 999,999,999) with toast
+- **Components**: `<RiskInfoIcon>` (clickable ⚠ + popover via `createPortal`), `<RiskBadge>` (CUT / ⚠ BAN inline tag), `<RiskActionButton>` (button + confirm modal + per-action `localStorage` dismissal), `<RiskSectionBanner>` (warning bar above whole sections)
+- **Coverage**: 11 bulk actions in `WorldTab` (Unlock All / Activate All / Kill All / Reveal All / Set quest step), `CharacterImporter` confirm, Runes input outline + clamp, Database/Inventory ban-risk badges, Gestures ⚠ icons. Section banners on Map and Quests
+- **Cleanup during this work**: removed dead `GeneralTab.tsx`, `StatsTab.tsx`, `WorldProgressTab.tsx` (legacy components no longer routed from `App.tsx`)
+
 ### 🔲 Save Corruption Detection / Repair 🟢
 Comprehensive slot diagnostics with corruption detection.
 

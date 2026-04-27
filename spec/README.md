@@ -91,6 +91,7 @@ Plik save składa się z następujących głównych bloków (w kolejności sekwe
 | 29 | [DLC Black Tiles](29-dlc-black-tiles.md) | Cover Layer SoE — koordynaty discovery w sekcji BloodStain (`afterRegs+0x0088..0x0110`) |
 | 30 | [Slot Rebuild Research](30-slot-rebuild-research.md) | Slack analysis + przejście od byte-shift do `RebuildSlot` (R-1 Step 13–14) |
 | 31 | [Appearance Presets](31-appearance-presets.md) | Mirror Favorites preset slot layout (0x130 bytes), apply algorithm preset → FaceData, cross-gender M↔F handling — RE'd from real saves |
+| 32 | [Ban-Risk System](32-ban-risk-system.md) | UI architektura: Tier 0/1/2 + Online Safety Mode + dictionary `RISK_INFO` + komponenty `Risk*` (Phase 6) |
 | 99 | [Verification Methodology](99-verification-methodology.md) | Metody testowania, checklista weryfikacji, plan odkryć |
 
 ---

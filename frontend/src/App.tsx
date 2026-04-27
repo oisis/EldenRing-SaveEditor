@@ -12,6 +12,7 @@ import {AppearanceTab} from './components/AppearanceTab';
 import {ItemDetailPanel} from './components/ItemDetailPanel';
 import {AccordionSection} from './components/AccordionSection';
 import {ToastBar} from './components/ToastBar';
+import {SafetyModeBanner} from './components/SafetyModeBanner';
 import {db} from '../wailsjs/go/models';
 
 type Theme = 'light' | 'dark' | 'golden';
@@ -204,7 +205,9 @@ function App() {
     };
 
     return (
-        <div className="flex h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-300">
+        <div className="flex flex-col h-screen bg-background text-foreground overflow-hidden font-sans selection:bg-primary/30 transition-colors duration-300">
+            <SafetyModeBanner />
+            <div className="flex flex-1 min-h-0">
             {/* Sidebar */}
             <aside className="w-64 border-r border-border bg-muted/5 flex flex-col z-20">
                 <div className="p-5 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
@@ -661,6 +664,7 @@ function App() {
             </div>
         )}
         <ToastBar sidebarWidth={256} />
+        </div>
         </div>
     );
 }

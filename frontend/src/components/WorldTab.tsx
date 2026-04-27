@@ -2,6 +2,10 @@ import {useEffect, useState} from 'react';
 import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked, GetUnlockedRegions, SetRegionUnlocked, BulkSetUnlockedRegions} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
+import {RiskInfoIcon} from './RiskInfoIcon';
+import {RiskActionButton} from './RiskActionButton';
+import {RiskSectionBanner} from './RiskSectionBanner';
+import {RiskKey} from '../data/riskInfo';
 
 interface WorldTabProps {
     charIdx: number;
@@ -290,9 +294,10 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     {/* Map & Fog of War */}
                     <AccordionSection id="world-map" title="Map & Fog of War" progress={{current: enabledMapRegions, total: totalMapRegions}}
                         actions={<>
-                            <button onClick={handleRevealAllMap} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Reveal All</button>
+                            <RiskActionButton riskKey="map_reveal_full" onConfirm={handleRevealAllMap} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Reveal All</RiskActionButton>
                             <button onClick={handleResetMap} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Reset</button>
                         </>}>
+                        <RiskSectionBanner riskKey="map_reveal_full" className="mb-3" />
                         {mapSystemEntries.length > 0 && (
                             <div className="flex items-center flex-wrap gap-x-4 gap-y-1 mb-2 pb-2 border-b border-border/30">
                                 {mapSystemEntries.map(e => (
@@ -327,7 +332,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     {/* Sites of Grace */}
                     <AccordionSection id="world-graces" title="Sites of Grace" progress={{current: visitedGraces, total: graces.length}}
                         actions={<>
-                            <button onClick={handleUnlockAllGraces} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <RiskActionButton riskKey="bulk_grace_unlock" onConfirm={handleUnlockAllGraces} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
                             <button onClick={handleLockAllGraces} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                             <label className="flex items-center space-x-1 cursor-pointer">
                                 <Chk checked={skipBossArenas} onChange={setSkipBossArenas} />
@@ -376,7 +381,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
 
                     {/* Summoning Pools */}
                     <AccordionSection id="world-pools" title="Summoning Pools" progress={{current: activatedPools, total: pools.length}}
-                        actions={<button onClick={handleGlobalActivateAllPools} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Activate All</button>}>
+                        actions={<RiskActionButton riskKey="bulk_summoning_pool" onConfirm={handleGlobalActivateAllPools} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Activate All</RiskActionButton>}>
                         <div className="accordion-grid">
                             {Object.entries(poolRegions).sort().map(([region, rp]) => {
                                 const ac = rp.filter(p => p.activated).length;
@@ -411,7 +416,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
 
                     {/* Colosseums */}
                     <AccordionSection id="world-colosseums" title="Colosseums" progress={{current: unlockedColosseums, total: colosseums.length}}
-                        actions={<button onClick={handleUnlockAllColosseums} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>}>
+                        actions={<RiskActionButton riskKey="bulk_colosseum" onConfirm={handleUnlockAllColosseums} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>}>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
                             {colosseums.map(c => (
                                 <label key={c.id} className="flex items-center space-x-3 cursor-pointer py-2 px-3 rounded border border-border hover:border-primary/40 transition-all">
@@ -436,7 +441,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     <AccordionSection id="world-bosses" title="Bosses"
                         progress={{current: defeatedBosses, total: bosses.length}}
                         actions={<>
-                            <button onClick={handleGlobalKillAll} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Kill All</button>
+                            <RiskActionButton riskKey="bulk_boss_kill" onConfirm={handleGlobalKillAll} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Kill All</RiskActionButton>
                             <button onClick={handleGlobalRespawnAll} className={`${btnSm} hover:text-green-400 hover:border-green-400/50`}>Respawn</button>
                             <div className="w-px h-3 bg-border/50" />
                             {(['all', 'main', 'field'] as const).map(f => (
@@ -490,6 +495,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                             </select>
                             {questProgress && <span className="text-[8px] font-bold text-muted-foreground">{questCompletedSteps}/{questTotalSteps}</span>}
                         </>}>
+                        <RiskSectionBanner riskKey="quest_step_skip" className="mb-3" />
                         {!selectedNPC && (
                             <div className="py-6 text-center">
                                 <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Select an NPC to view quest progress</p>
@@ -525,7 +531,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                                                             {matchedFlags}/{totalFlags}
                                                         </button>
                                                     )}
-                                                    {!step.complete && <button onClick={() => handleSetQuestStep(idx)} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Set</button>}
+                                                    {!step.complete && <RiskActionButton riskKey="quest_step_skip" onConfirm={() => handleSetQuestStep(idx)} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Set</RiskActionButton>}
                                                 </div>
                                             </div>
                                             {isExpanded && step.flags && step.flags.length > 0 && (
@@ -561,23 +567,26 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     {/* Gestures */}
                     <AccordionSection id="world-gestures" title="Gestures" progress={{current: unlockedGestures, total: visibleGestures.length}}
                         actions={<>
-                            <button onClick={handleUnlockAllGestures} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <RiskActionButton riskKey="bulk_gestures_unlock" onConfirm={handleUnlockAllGestures} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
                             <button onClick={handleLockAllGestures} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         </>}>
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-0.5">
                             {visibleGestures.map(g => {
                                 const banRisk = g.flags?.includes('ban_risk');
-                                const tip = g.flags?.includes('cut_content') ? 'Cut content — adding may trigger anti-cheat'
-                                    : g.flags?.includes('pre_order') ? 'Pre-order DLC bonus — ban risk if not owned'
-                                    : g.flags?.includes('dlc_duplicate') ? 'DLC duplicate slot — ban risk' : '';
+                                const riskKey: RiskKey | null = g.flags?.includes('cut_content') ? 'cut_content'
+                                    : g.flags?.includes('pre_order') ? 'pre_order'
+                                    : g.flags?.includes('dlc_duplicate') ? 'dlc_duplicate'
+                                    : banRisk ? 'ban_risk' : null;
                                 return (
-                                    <label key={g.id} title={tip} className="flex items-center space-x-2 py-0.5 px-1 rounded hover:bg-muted/30 cursor-pointer">
-                                        <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
-                                        <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
-                                            {g.name}
-                                            {banRisk && <span className="ml-1 text-amber-500" title={tip}>⚠</span>}
-                                        </span>
-                                    </label>
+                                    <div key={g.id} className="flex items-center space-x-2 py-0.5 px-1 rounded hover:bg-muted/30">
+                                        <label className="flex items-center space-x-2 flex-1 min-w-0 cursor-pointer">
+                                            <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
+                                            <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                {g.name}
+                                            </span>
+                                        </label>
+                                        {riskKey && <RiskInfoIcon riskKey={riskKey} />}
+                                    </div>
                                 );
                             })}
                         </div>
@@ -586,7 +595,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     {/* Cookbooks */}
                     <AccordionSection id="world-cookbooks" title="Cookbooks" progress={{current: unlockedCookbooks, total: cookbooks.length}}
                         actions={<>
-                            <button onClick={handleUnlockAllCookbooks} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <RiskActionButton riskKey="bulk_cookbook" onConfirm={handleUnlockAllCookbooks} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
                             <button onClick={handleLockAllCookbooks} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         </>}>
                         <div className="accordion-grid">
@@ -621,7 +630,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     {/* Bell Bearings */}
                     <AccordionSection id="world-bells" title="Bell Bearings" progress={{current: unlockedBBs, total: bellBearings.length}}
                         actions={<>
-                            <button onClick={handleUnlockAllBBs} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <RiskActionButton riskKey="bulk_bell_bearing" onConfirm={handleUnlockAllBBs} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
                             <button onClick={handleLockAllBBs} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         </>}>
                         <div className="accordion-grid">
@@ -672,7 +681,7 @@ export function WorldTab({charIdx, showFlaggedItems, onMutate}: WorldTabProps) {
                     {/* Invasion Regions */}
                     <AccordionSection id="world-regions" title="Invasion Regions" progress={{current: unlockedRegionsCount, total: regionEntries.length}}
                         actions={<>
-                            <button onClick={handleUnlockAllRegions} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</button>
+                            <RiskActionButton riskKey="bulk_region_unlock" onConfirm={handleUnlockAllRegions} className={`${btnSm} hover:text-primary hover:border-primary/50`}>Unlock All</RiskActionButton>
                             <button onClick={handleLockAllRegions} className={`${btnSm} hover:text-red-400 hover:border-red-400/50`}>Lock All</button>
                         </>}>
                         <p className="text-[9px] text-muted-foreground/70 italic px-1 pb-2">
