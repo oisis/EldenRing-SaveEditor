@@ -4,7 +4,69 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-### Branch: feat/world-collapsed-actions — World tab UX polish + SafetyMode-only modal gating
+### Branch: feat/db-info-category — extract Information tab + DB-wide categorization audit
+
+**Goal:** Make the Database tab's category dropdown match the actual in-game inventory tabs. Previously `key_items.go` and `tools.go` were used as catch-all dumping grounds — items that the game shows on the **Information** tab (Polish: Informacje), under **Items > Multiplayer Items**, **Items > Remembrances**, etc. were scattered across both. Now each item lives in the file matching its real game tab.
+
+**Why:**
+The user, while exploring the Database tab, kept finding items in the wrong dropdown bucket: 38 "About *" tutorials sitting in Key Items but actually shown on Information; Letters (Volcano Manor, Patches, Bernahl, etc.) sitting in Tools but shown on Information; Bloody Finger / Tarnished's Furled Finger / Remembrances sitting in Key Items but shown on Items > Multiplayer / Items > Remembrances. The misclassifications stem from `tmp/repos/er-save-manager`'s own categorization being a community taxonomy, not 1:1 with what the game UI shows. Source of truth was switched to **Fextralife per-item pages** (breadcrumb category) cross-checked with in-game observation by the user.
+
+**Architecture:**
+- New `backend/db/data/info.go` — `var Information map[uint32]ItemData` with **114 entries**: 35 base-game About tutorials + 7 Paintings + 19 Maps + 17 Notes + 6 Letters + 1 Mirage Riddle, plus DLC: 2 About + 5 Maps + 3 Paintings + 2 Notes + 8 Cross/Diary/Message items + 6 misc.
+- New `info` category in `backend/db/db.go` `GetItemsByCategory` dispatch + appended to `GetAllItems` list.
+- New `<option value="info">Information</option>` in `frontend/src/components/CategorySelect.tsx` under the "Items" optgroup.
+- Pretty rendering in `frontend/src/components/DatabaseTab.tsx` — `info` → "Information" in both Category column and detail panel header.
+- `tools.go` / `key_items.go` / `crafting_materials.go` reorganized to match in-game tabs.
+
+**Migrations performed:**
+- **52 entries `key_items.go` → `info.go`** (35 About tutorials, 7 Paintings, 1 Map: Dragonbarrow, 2 DLC About, 7 DLC info messages: Castle Cross / Ancient Ruins Cross / Monk's Missive / Storehouse Cross / Torn Diary / Message from Leda / Tower of Shadow).
+- **53 entries `tools.go` → `info.go`** (1 About the Map, 19 base + 5 DLC region maps, 6 Letters: Volcano Manor / Patches / Bernahl / Burial Crow's / Zorayas's / Rogier's, 17 Notes range 0x4000222E–0x4000223D + Miquella's Needle + Lord of Frenzied Flame, 1 DLC Letter for Freyja, 2 DLC Notes, 3 DLC Paintings).
+- **6 more `tools.go` → `info.go`** after user verification of the first migration uncovered additional misclassifications: Irina's Letter, Red Letter, Cross Map (DLC), 3× Ruins Map (DLC).
+- **13 entries `tools.go` → `key_items.go`** — Stonesword Key, Rusty Key, Drawing-Room Key, Imbued Sword Key, Royal House Scroll, Well Depths Key (DLC), Gaol Upper/Lower Level Key (DLC), Storeroom Key (DLC), Secret Rite Scroll (DLC), Keep Wall Key (DLC, cut+ban_risk preserved), Prayer Room Key (DLC, **icon TODO**), Academy Glintstone Key.
+- **11 entries `tools.go` → `key_items.go` (Crystal Tears)** — Speckled / Crimson / Opaline (Bubble + Hard) / Leaden / Crimsonwhorl / Cerulean Hidden + DLC Viridian Hidden / Crimsonburst Dried / Oil-Soaked / Deflecting Hardtear. Fextralife: *"Crystal Tears in Elden Ring are Key Items that can be mixed in the Flask of Wondrous Physick."* User confirmed.
+- **7 entries `tools.go` → `key_items.go`** — Whetstone Knife, Glintstone Whetblade, Conspectus Scroll, Academy Scroll, Margit's Shackle, Mohg's Shackle, Pureblood Knight's Medal. Five had IconPath already pointing at `items/key_items/`.
+- **5 entries `tools.go` → `crafting_materials.go`** — Golden Centipede, Sanctuary Stone, Glintstone Firefly, Volcanic Stone, Gravel Stone.
+- **13 entries `key_items.go` → `tools.go`** (Multiplayer Items) — Bloody Finger, Tarnished's/Phantom Bloody Finger, Tarnished's/Phantom Recusant Finger, Recusant Finger, Festering Bloody Finger, Tarnished's Wizened Finger, Tarnished's Furled Finger, Duelist's Furled Finger, Igon's Furled Finger (DLC), Furlcalling Finger Remedy, Small Golden/Red Effigy, Taunter's Tongue. Fextralife breadcrumb: *Equipment & Magic / Items / Multiplayer Items*.
+- **25 entries `key_items.go` → `tools.go`** (Remembrances) — 15 base-game + 10 DLC. Fextralife breadcrumb: *Equipment & Magic / Items / Remembrances*.
+
+**Cut-content / ban-risk audit performed during this work:**
+- `0x400023EB` "About Multiplayer" — confirmed truly cut (Fextralife: "Unavailable", spawned copies prefixed `[ERROR]`). Kept `cut_content + ban_risk`.
+- `0x400023A7` "About Monument Icon" — **NOT** cut content (shipped on disc v1.0); broken in patch 1.06. Dropped `cut_content`, kept `ban_risk` because EAC doesn't whitelist by version. Comment explains the distinction.
+- `0x4000229D` "Erdtree Codex" — confirmed cut (Fextralife/Fandom/GameRant unanimous). Kept `cut_content + ban_risk`. Stays in `key_items.go` (Fextralife taxonomy = Key Item, not Information).
+- `0x40001FF5` "Burial Crow's Letter" — Fextralife says cut Key Item, but user verified in-game that on a save that received it, it shows on Information tab. Kept `cut_content + ban_risk`, classified Information.
+- `0x401EA3CF` "Letter for Freyja" — Fextralife master list says Information, per-item page says Key Item. Tagged Information per master list with TODO comment to verify in-game.
+
+**Items intentionally NOT moved:**
+- Empty Flasks (Flask of Cerulean/Crimson Tears (Empty), Flask of Wondrous Physick (Empty)) — Fextralife says "Items / Consumables" which equals our `tools.go` semantically. User confirmed.
+- Dragon Heart (`0x4000274C`) — Fextralife: "Dragon Heart is a Key Item". User confirmed. Stays in `key_items.go`.
+- 5 borderline pot/bottle/kit items (Cracked Pot, Ritual Pot, Hefty Cracked Pot, Perfume Bottle, Crafting Kit) — Fextralife says "Key Item, Crafting Material, and optional Keepsake" for Cracked Pot. User decision: stay in `key_items.go`.
+- Cookbooks / Bell Bearings / Whetblades / 3 Igon's quest items — intentionally remain in `key_items.go` (data home for these is filtered separately via `IsCookbookItemID` / `IsBellBearingItemID` / `IsWhetbladeItemID` in `db.go`).
+
+**Known issue / TODO:**
+- `frontend/public/items/tools/quest/prayer_room_key.png` — the icon for Prayer Room Key is currently a binary copy of `frontend/public/items/gestures/prayer.png` (both 8762 bytes, identical bytes). Someone substituted the gesture's prayer-emote icon for the actual key artwork. Fextralife / Fandom CDNs block direct curl, so the real artwork couldn't be fetched in this branch. TODO comment added at the entry; user will manually drop in the correct artwork later.
+
+**Counts (after migration):**
+| File | Before | After | Δ |
+|---|---|---|---|
+| `info.go` (new) | — | 114 | +114 |
+| `key_items.go` | 396 | 343 | -53 |
+| `tools.go` | 364 | 315 | -49 |
+| `crafting_materials.go` | 80 | 85 | +5 |
+
+**Tests:**
+- `go vet ./backend/...` — clean.
+- `go test ./backend/db/...` — passes.
+- `npx tsc --noEmit` (frontend) — clean.
+- `make build` — full Wails build successful.
+- Manual `make dev` verification by user, performed iteratively across the migration. User signed off on each batch.
+
+**Research methodology:**
+- **Primary source**: Fextralife wiki per-item pages (breadcrumb category, e.g. *Equipment & Magic / Items / Multiplayer Items*). Cross-verified with the Fextralife master "Info Items" / "Multiplayer Items" / "Crystal Tears" pages.
+- **Discarded as authoritative**: `tmp/repos/er-save-manager/.../Goods/*.txt` — community taxonomy, not 1:1 with in-game UI. The user's in-game observation overrode er-save-manager's `KeyItems.txt` placement of Letters that actually live on Information.
+- **In-game verification**: user spot-checked every batch by loading a save, opening Database, and matching the displayed dropdown against the in-game inventory tabs.
+- **Cross-file duplicates check**: `awk` aggregation across all 19 ItemData maps in `backend/db/data/` confirmed zero ID collisions across files.
+
+
 
 **Goal:** Make the World tab usable without expanding every section. Each section's bulk actions (Unlock All / Lock All / Reveal All / Reset / Activate All / Deactivate All / Kill All / Respawn All) now sit on the collapsed header next to the progress bar, so single-click bulk edits no longer require an extra expand step. Section open/closed state is per-session and resets when a different save is loaded — clean baseline on every fresh load. Also reworked the Online Safety Mode contract: confirmation modals now appear only when Safety Mode is enabled.
 
