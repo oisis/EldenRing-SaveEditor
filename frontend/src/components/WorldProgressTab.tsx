@@ -1,6 +1,8 @@
 import {useEffect, useState} from 'react';
 import {GetGraces, SetGraceVisited, GetBosses, SetBossDefeated, GetSummoningPools, SetSummoningPoolActivated, GetColosseums, SetColosseumUnlocked, GetMapProgress, SetMapFlag, SetMapRegionFlags, RevealAllMap, ResetMapExploration, RemoveFogOfWar, GetCookbooks, SetCookbookUnlocked, BulkSetCookbooksUnlocked, GetGestures, SetGestureUnlocked, BulkSetGesturesUnlocked, GetQuestNPCs, GetQuestProgress, SetQuestStep, GetBellBearings, SetBellBearingUnlocked, BulkSetBellBearings, GetWhetblades, SetWhetbladeUnlocked} from '../../wailsjs/go/main/App';
 import {db} from '../../wailsjs/go/models';
+import {RiskInfoIcon} from './RiskInfoIcon';
+import {RiskKey} from '../data/riskInfo';
 
 interface WorldProgressTabProps {
     charIdx: number;
@@ -517,15 +519,17 @@ export function WorldProgressTab({charIdx, onMutate}: WorldProgressTabProps) {
                     <div className="px-3 py-2 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-6 gap-y-0.5">
                         {gestures.map(g => {
                             const banRisk = g.flags?.includes('ban_risk');
-                            const tip = g.flags?.includes('cut_content') ? 'Cut content — adding may trigger anti-cheat'
-                                : g.flags?.includes('pre_order') ? 'Pre-order DLC bonus — ban risk if not owned'
-                                : g.flags?.includes('dlc_duplicate') ? 'DLC duplicate slot — ban risk' : '';
+                            const riskKey: RiskKey | null = g.flags?.includes('cut_content') ? 'cut_content'
+                                : g.flags?.includes('pre_order') ? 'pre_order'
+                                : g.flags?.includes('dlc_duplicate') ? 'dlc_duplicate'
+                                : banRisk ? 'ban_risk' : null;
                             return (
-                                <label key={g.id} title={tip} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
+                                <label key={g.id} className="flex items-center space-x-2 group cursor-pointer py-0.5 px-1.5 rounded hover:bg-muted/40 transition-all">
                                     <Chk checked={g.unlocked} onChange={v => handleGestureToggle(g, v)} />
-                                    <span className={`text-[10px] truncate font-semibold ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                                        {g.name}
-                                        {banRisk && <span className="ml-1 text-amber-500" title={tip}>⚠</span>}
+                                    <span className={`text-[10px] truncate font-semibold flex items-center gap-1 ${g.unlocked ? 'text-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
+                                        <span className="truncate">{g.name}</span>
+                                        {banRisk && <span className="text-amber-500 leading-none">⚠</span>}
+                                        {riskKey && <RiskInfoIcon riskKey={riskKey} />}
                                     </span>
                                 </label>
                             );

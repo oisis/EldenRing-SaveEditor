@@ -5,6 +5,7 @@ import {GetItemList, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '..
 import {db, vm} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
 import {CategorySelect} from './CategorySelect';
+import {RiskBadge} from './RiskBadge';
 
 interface DatabaseTabProps {
     columnVisibility: {
@@ -582,10 +583,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                                         onClick={e => { e.stopPropagation(); onSelectItem ? onSelectItem(item) : setDetailItem(item); }}
                                                     >{item.name}</span>
                                                     {item.flags?.includes('cut_content') && (
-                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
+                                                        <RiskBadge flag="cut_content" />
                                                     )}
                                                     {item.flags?.includes('ban_risk') && (
-                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
+                                                        <RiskBadge flag="ban_risk" />
                                                     )}
                                                 </div>
                                                 {showPreview && (

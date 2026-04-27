@@ -4,6 +4,7 @@ import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetSlotCapacity} from '../../wailsjs/go/main/App';
 import {vm, main} from '../../wailsjs/go/models';
 import {CategorySelect} from './CategorySelect';
+import {RiskBadge} from './RiskBadge';
 
 interface InventoryTabProps {
     charIndex: number;
@@ -517,10 +518,10 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors">{item.name}</span>
                                                     {item.flags?.includes('cut_content') && (
-                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">CUT</span>
+                                                        <RiskBadge flag="cut_content" />
                                                     )}
                                                     {item.flags?.includes('ban_risk') && (
-                                                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded bg-red-500/15 text-red-400 border border-red-500/30">⚠ BAN</span>
+                                                        <RiskBadge flag="ban_risk" />
                                                     )}
                                                 </div>
                                             </div>
