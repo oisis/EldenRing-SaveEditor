@@ -140,6 +140,26 @@ func (a *App) GetCharacter(index int) (*vm.CharacterViewModel, error) {
 	return vm.MapParsedSlotToVM(&slot)
 }
 
+// RunAuditSave runs the deterministic save audit (spec/35) on the current
+// in-memory slot and returns issues with severity + confidence tagging.
+// NEVER claims the save is "safe" — only that no offline-detectable
+// markers were found.
+func (a *App) RunAuditSave(index int) (*vm.AuditReport, error) {
+	if a.save == nil {
+		return nil, fmt.Errorf("no save loaded")
+	}
+	if index < 0 || index >= 10 {
+		return nil, fmt.Errorf("invalid slot index")
+	}
+	slot := a.save.Slots[index]
+	charVM, err := vm.MapParsedSlotToVM(&slot)
+	if err != nil {
+		return nil, err
+	}
+	report := vm.AuditCharacter(charVM)
+	return &report, nil
+}
+
 // SaveCharacter updates the raw slot data from the ViewModel
 func (a *App) SaveCharacter(index int, charVM vm.CharacterViewModel) error {
 	if a.save == nil {

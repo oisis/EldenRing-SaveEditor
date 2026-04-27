@@ -381,6 +381,16 @@ Shadow of the Erdtree specific data:
 - Clamp enforced **only at user-add** (DatabaseTab modal min/max + handleAdd) — load/save paths untouched, so legacy saves with high item counts are not retroactively clipped
 - TODO: verify `ClearCount` semantic on real save (when does ClearCount increment — at Elden Beast kill or after entering NG+ menu? Current implementation assumes 0 = pre-Elden-Beast first cycle)
 
+### ✅ Save Audit (Phase 1) — Severity × Confidence 🟡
+**Implementation:** `backend/vm/audit.go`, `backend/vm/audit_test.go`, `app.go`, `frontend/src/components/AuditPanel.tsx`, `frontend/src/components/SettingsTab.tsx`, `frontend/src/components/RiskInfoIcon.tsx`, `frontend/src/data/riskInfo.ts`, `frontend/src/App.tsx`, `spec/35-eac-server-validation.md`
+- New `AuditCharacter()` runs 7 deterministic check categories (4A numeric + 4B partial flag scan): runes ≤ 999M, 8 attributes ≤ 99, level ≤ 713 + matches stat sum, talisman pouch ≤ 3, item qty ≤ effectiveCap (NG+ aware per `spec/34`), spirit ash upgrade ≤ +10, item flag scan (`cut_content` / `pre_order` / `dlc_duplicate` / `ban_risk`)
+- Each issue has both **Severity** (Tier 0/1/2 from `spec/32`) and **Confidence** (`confirmed` / `reported` / `speculated` per new `spec/35` taxonomy). Two-axis labeling: severity = how bad if true, confidence = how sure we are the rule exists
+- Frontend `AuditPanel` in Settings → Safety: slot picker, Run button, issue list with both badges + clickable ⚠ for full RiskInfoIcon popover. Empty state: *"No deterministic ban markers detected · server-side rules unknown — this is not a guarantee"* (intentional anti-false-positive UX — never claim "CLEAN ✓")
+- 22 existing `RISK_INFO` entries populated with `confidence` field. Only `cut_content` is **Confirmed** (RE'd from paramdex + Malcolm Reynolds case); rest are Reported or Speculated. RiskInfoIcon popover header now shows `[Tier X][Confidence]` badges
+- 13 unit tests in `audit_test.go` cover clean save (0 issues), each individual check trigger, NG+ scaling cap correctness, and PassedChecks math (multiple attribute failures still count as one failed check category)
+- **Anti-pattern by design**: most checks (runes, attrs, talisman, qty) cannot be triggered through the editor's own UI because input clamping prevents Tier 2 anomalies upstream. Audit catches saves imported from Cheat Engine, other editors, or invader-dropped illegal items
+- TODO Phase 2: 4B full item-ID whitelist (unknown-IDs scan), 4C internal consistency (GaItem handle validity, derived HP/FP/SP), 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`), weapon upgrade level scan
+
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
 - All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session

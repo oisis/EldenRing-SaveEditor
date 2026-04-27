@@ -11,6 +11,11 @@
 
 export type RiskLevel = 'low' | 'medium' | 'high';
 export type RiskTier = 0 | 1 | 2;
+// Confidence axis — see spec/35 §"Confidence Classification System".
+// 'confirmed':  vendor-published OR independently RE'd from binary/protocol.
+// 'reported':   multiple independent community sources, no technical proof.
+// 'speculated': single source, theoretical model, or heuristic.
+export type Confidence = 'confirmed' | 'reported' | 'speculated';
 
 export interface RiskSource {
     label: string;
@@ -19,6 +24,7 @@ export interface RiskSource {
 
 export interface RiskEntry {
     tier: RiskTier;
+    confidence: Confidence;
     level: RiskLevel;
     title: string;
     whyBan: string;
@@ -26,6 +32,13 @@ export interface RiskEntry {
     mitigation: string;
     sources: RiskSource[];
 }
+
+// UI styling for the confidence badge rendered next to severity tier.
+export const CONFIDENCE_STYLE: Record<Confidence, {label: string; classes: string}> = {
+    confirmed: {label: 'Confirmed', classes: 'bg-red-500/20 text-red-200 border-red-500/40'},
+    reported: {label: 'Reported', classes: 'bg-orange-500/20 text-orange-200 border-orange-500/40'},
+    speculated: {label: 'Speculated', classes: 'bg-zinc-500/20 text-zinc-300 border-zinc-500/40'},
+};
 
 export type RiskKey =
     // Phase 1 — per-flag baseline (matches backend item flags)
@@ -59,6 +72,7 @@ export type RiskKey =
 export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     cut_content: {
         tier: 2,
+        confidence: 'confirmed',
         level: 'high',
         title: 'Cut Content',
         whyBan:
@@ -74,6 +88,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     pre_order: {
         tier: 2,
+        confidence: 'reported',
         level: 'medium',
         title: 'Pre-Order Bonus',
         whyBan:
@@ -88,6 +103,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     dlc_duplicate: {
         tier: 2,
+        confidence: 'reported',
         level: 'medium',
         title: 'DLC Duplicate ID',
         whyBan:
@@ -102,6 +118,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     ban_risk: {
         tier: 2,
+        confidence: 'reported',
         level: 'high',
         title: 'Ban Risk (Generic)',
         whyBan:
@@ -116,6 +133,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     runes_above_999m: {
         tier: 2,
+        confidence: 'reported',
         level: 'high',
         title: 'Runes Above 999,999,999',
         whyBan:
@@ -130,6 +148,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     stat_above_99: {
         tier: 2,
+        confidence: 'reported',
         level: 'high',
         title: 'Attribute Above 99',
         whyBan:
@@ -144,6 +163,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     level_above_713: {
         tier: 2,
+        confidence: 'reported',
         level: 'high',
         title: 'Character Level Above 713',
         whyBan:
@@ -158,6 +178,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     talisman_pouch_above_3: {
         tier: 2,
+        confidence: 'reported',
         level: 'high',
         title: 'Talisman Pouch Above 3',
         whyBan:
@@ -172,6 +193,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     quantity_above_max: {
         tier: 2,
+        confidence: 'reported',
         level: 'medium',
         title: 'Quantity Above MaxInventory',
         whyBan:
@@ -186,6 +208,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     spirit_ash_above_10: {
         tier: 2,
+        confidence: 'reported',
         level: 'high',
         title: 'Spirit Ash Upgrade Above +10',
         whyBan:
@@ -200,6 +223,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     derived_stat_manual: {
         tier: 2,
+        confidence: 'speculated',
         level: 'high',
         title: 'Manually Overridden Derived Stat',
         whyBan:
@@ -214,6 +238,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_grace_unlock: {
         tier: 1,
+        confidence: 'reported',
         level: 'low',
         title: 'Bulk Grace Unlock',
         whyBan:
@@ -226,6 +251,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_boss_kill: {
         tier: 1,
+        confidence: 'reported',
         level: 'medium',
         title: 'Bulk Boss Defeat Flags',
         whyBan:
@@ -238,6 +264,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_cookbook: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Bulk Cookbook Unlock',
         whyBan:
@@ -250,6 +277,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_bell_bearing: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Bulk Bell Bearing Unlock',
         whyBan:
@@ -262,6 +290,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_gestures_unlock: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Bulk Gesture Unlock',
         whyBan:
@@ -274,6 +303,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_region_unlock: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Bulk Invasion Region Unlock',
         whyBan:
@@ -286,6 +316,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_summoning_pool: {
         tier: 1,
+        confidence: 'reported',
         level: 'medium',
         title: 'Bulk Summoning Pool Activation',
         whyBan:
@@ -298,6 +329,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     bulk_colosseum: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Bulk Colosseum Unlock',
         whyBan:
@@ -310,6 +342,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     map_reveal_full: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Full Map Reveal',
         whyBan:
@@ -322,6 +355,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     fow_remove: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Remove Fog of War',
         whyBan:
@@ -334,6 +368,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     quest_step_skip: {
         tier: 1,
+        confidence: 'reported',
         level: 'medium',
         title: 'Quest Step Skip',
         whyBan:
@@ -346,6 +381,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     ng_plus_write: {
         tier: 1,
+        confidence: 'speculated',
         level: 'low',
         title: 'Set NG+ Cycle',
         whyBan:
@@ -358,6 +394,7 @@ export const RISK_INFO: Record<RiskKey, RiskEntry> = {
     },
     character_import: {
         tier: 1,
+        confidence: 'reported',
         level: 'medium',
         title: 'Character Import',
         whyBan:

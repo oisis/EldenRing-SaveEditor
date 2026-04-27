@@ -4,6 +4,45 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/save-audit-phase1 — deterministic save audit with severity × confidence
+
+**Goal:** Give the user a *post-edit* check that scans the loaded slot for offline-detectable ban markers and surfaces them with two orthogonal labels: **Severity** (Tier 0/1/2 from `spec/32`) and **Confidence** (`confirmed` / `reported` / `speculated` from new `spec/35`). Severity says "how bad if true"; Confidence says "how sure we are the detection rule exists at all". The audit never claims the save is *safe* — only that no offline-detectable markers were found. Server-side rules are not publicly documented, so passing the audit is **not** a guarantee.
+
+**Why:**
+- **Catch external-edit anomalies** — the editor's own UI clamps runes ≤ 999M, attributes ≤ 99, item qty ≤ effective cap, etc. So the audit's primary value is on saves imported from Cheat Engine, other editors, or items dropped by invaders (the Malcolm Reynolds 2022 vector).
+- **Honest UX** — refuses to use words like "CLEAN ✓". Empty result reads *"No deterministic ban markers detected · server-side rules unknown — this is not a guarantee. Last edit may still trigger detection on first online sync."*
+- **Two-axis labeling** — older systems collapsed severity and confidence into one tier. They are independent. A Tier 2 issue can be Confirmed (cut content) or Speculated (theoretical stat-consistency check). UI surfaces both.
+
+**Backend (`backend/vm/`):**
+- `audit.go` — new file. `AuditCharacter(*CharacterViewModel) AuditReport`. Runs 7 check categories: runes ≤ 999,999,999; 8 attributes ≤ 99; level ≤ 713 *and* matches sum(attrs) − 79; talisman pouch ≤ 3; per-item quantity ≤ `itemEffectiveCap()` (mirrors frontend `effectiveCap` from `spec/34` — NG+ aware via `scales_with_ng` flag); spirit ash upgrade ≤ +10; item flag scan for `cut_content` / `pre_order` / `dlc_duplicate` / `ban_risk`. `AuditIssue{Severity, Confidence, Category, Field, Message, Mitigation, RiskKey}`. `PassedChecks/TotalChecks` count check categories, not items — scanning 1500 inventory entries is one check, not 1500.
+- `audit_test.go` — 13 unit tests: clean save (0 issues), runes overflow, single attribute > 99, level > 713, level inconsistent with attribute sum, talisman pouch > 3, qty > effective cap, qty within NG+ scaling (160 SSK at NG+2 with cap 165 → no issue), cut content (Confirmed), pre-order (Reported in storage), spirit ash > +10, PassedChecks math, multiple attributes failing one check category.
+
+**Wails binding (`app.go`):**
+- `RunAuditSave(slotIdx int) (*vm.AuditReport, error)` — loads the in-memory slot, runs `MapParsedSlotToVM` + `AuditCharacter`, returns the report. Auto-generated TypeScript bindings in `frontend/wailsjs/go/main/App.{d.ts,js}` and `frontend/wailsjs/go/models.ts` (new `vm.AuditIssue`, `vm.AuditReport` classes).
+
+**Frontend:**
+- `frontend/src/data/riskInfo.ts` — new `Confidence = 'confirmed' | 'reported' | 'speculated'` type + `CONFIDENCE_STYLE` map (red/orange/zinc). `RiskEntry` extended with required `confidence` field. All 22 existing entries classified per `spec/35` master table — only `cut_content` is **Confirmed** (RE'd from paramdex + Malcolm Reynolds case); the rest are Reported or Speculated.
+- `frontend/src/components/AuditPanel.tsx` — new component. Slot picker (disabled options for empty slots), Run button, error display, `ReportView` with empty-state emerald banner + issue list. `IssueRow` shows `[Tier X][Confidence]` badges + clickable ⚠ icon (when riskKey known) + field name + message + Mitigation line.
+- `frontend/src/components/SettingsTab.tsx` — `<AuditPanel/>` mounted in Safety section under Full Chaos Mode toggle. New `selectedChar` and `activeSlots` props, piped through from App.tsx.
+- `frontend/src/components/RiskInfoIcon.tsx` — popover header now renders both `Tier N` and confidence badges (using `CONFIDENCE_STYLE` classes) below the title.
+- `frontend/src/App.tsx` — pipes `selectedChar` + `activeSlots` props to `<SettingsTab/>`.
+
+**Spec:**
+- `spec/35-eac-server-validation.md` — new section "Confidence Classification System (Severity × Confidence)" defines the 3-tier umbrella (Confirmed / Reported / Speculated) and maps it onto the existing source-type tags (`OFFICIAL` / `RE` / `COMMUNITY` / `SPECULATION`). Master table with 28 known rules and their classifications (cut content is the only Confirmed-source-Tier-2 in the entire database).
+- `spec/README.md` — entry 35 added to documentation index.
+
+**Anti-pattern by design:**
+Most numeric checks (runes, attributes, talisman, qty) cannot be triggered through this editor's UI because the modal clamps inputs upstream. The audit's *primary use case* is detecting saves that came from elsewhere — Cheat Engine, other editors, or items dropped by invaders. UI prevention is the first line of defense; audit is the second (catch-import).
+
+**Verification:**
+- `go test ./backend/vm/` — 13/13 audit tests pass; full vm suite green
+- `go test ./backend/...` — full backend suite green
+- `npm run build` — frontend production build green (372.66 KiB)
+- `npx tsc --noEmit` — clean
+- Manual (per user 2026-04-27 session): Clean save → emerald empty banner. Cut content item add → `[Tier 2][Confirmed]` red badge issue with clickable ⚠ that opens RiskInfoIcon popover with full Why/Reports/Mitigation. Slot picker correctly disables empty slots. Numeric paths (runes/attrs/talisman) confirmed unreachable through UI by user testing — feature, not bug.
+
+---
+
 ### Branch: feat/inventory-caps-enforcement — vanilla-realistic item caps + NG+ scaling + Full Chaos Mode
 
 **Goal:** Reduce EAC ban risk by tightening `MaxInventory` / `MaxStorage` caps for items where the previous numbers (e.g. 999/999 cookbooks, 99/600 paintings) were anomalously above what a single playthrough can yield. Caps now reflect Fextralife-verified single-playthrough obtainable counts. For items that scale per NG+ cycle, a new `scales_with_ng` flag drives `effective_cap = base × (ClearCount + 1)` so caps grow naturally on NG+1...NG+7. A new **Full Chaos Mode** Settings toggle bypasses all caps for power users (max 999), with a clearly red-flagged ban-risk warning.

@@ -392,6 +392,8 @@ function App() {
                                     refreshSlots={refreshSlots}
                                     selectedDeployTarget={selectedDeployTarget}
                                     setSelectedDeployTarget={setSelectedDeployTarget}
+                                    selectedChar={selectedChar}
+                                    activeSlots={activeSlots}
                                 />
                             </div>
                         ) : !platform ? (

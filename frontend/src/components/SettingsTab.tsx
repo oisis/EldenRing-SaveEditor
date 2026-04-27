@@ -8,6 +8,7 @@ import {
 } from '../../wailsjs/go/main/App';
 import {deploy} from '../../wailsjs/go/models';
 import {useSafetyMode} from '../state/safetyMode';
+import {AuditPanel} from './AuditPanel';
 
 interface SettingsTabProps {
     theme: 'light' | 'dark' | 'golden';
@@ -23,6 +24,8 @@ interface SettingsTabProps {
     refreshSlots: () => void;
     selectedDeployTarget: string;
     setSelectedDeployTarget: (v: string) => void;
+    selectedChar: number;
+    activeSlots: boolean[];
 }
 
 const EMPTY_SSH_TARGET: deploy.Target = new deploy.Target({
@@ -44,6 +47,7 @@ export function SettingsTab({
     showFlaggedItems, setShowFlaggedItems, debugMode, setDebugMode,
     platform, setPlatform, refreshSlots,
     selectedDeployTarget: selectedTarget, setSelectedDeployTarget: setSelectedTarget,
+    selectedChar, activeSlots,
 }: SettingsTabProps) {
     const safetyMode = useSafetyMode();
     const [steamIdInput, setSteamIdInput] = useState('');
@@ -271,6 +275,7 @@ export function SettingsTab({
                         />
                     </label>
                 </div>
+                <AuditPanel selectedChar={selectedChar} activeSlots={activeSlots} />
             </section>
 
             {/* Deploy */}

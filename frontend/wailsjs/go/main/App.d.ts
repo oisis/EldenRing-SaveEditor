@@ -114,6 +114,8 @@ export function RevealAllMap(arg1:number):Promise<void>;
 
 export function RevertSlot(arg1:number):Promise<void>;
 
+export function RunAuditSave(arg1:number):Promise<vm.AuditReport>;
+
 export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<void>;
 
 export function SaveDeployTarget(arg1:deploy.Target):Promise<void>;

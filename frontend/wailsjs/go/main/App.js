@@ -218,6 +218,10 @@ export function RevertSlot(arg1) {
   return window['go']['main']['App']['RevertSlot'](arg1);
 }
 
+export function RunAuditSave(arg1) {
+  return window['go']['main']['App']['RunAuditSave'](arg1);
+}
+
 export function SaveCharacter(arg1, arg2) {
   return window['go']['main']['App']['SaveCharacter'](arg1, arg2);
 }

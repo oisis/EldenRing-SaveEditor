@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
-import {RISK_INFO, RiskKey, RiskLevel} from '../data/riskInfo';
+import {RISK_INFO, RiskKey, RiskLevel, CONFIDENCE_STYLE} from '../data/riskInfo';
 
 interface Props {
     riskKey: RiskKey;
@@ -104,6 +104,17 @@ export function RiskInfoIcon({riskKey, className = ''}: Props) {
                             title={`Risk level: ${entry.level}`}
                         >
                             {DOTS[entry.level]}
+                        </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mb-3 flex-wrap">
+                        <span className="text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border border-border/50 text-muted-foreground">
+                            Tier {entry.tier}
+                        </span>
+                        <span
+                            className={`text-[8px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded border ${CONFIDENCE_STYLE[entry.confidence].classes}`}
+                            title="Confidence in detection rule — see spec/35"
+                        >
+                            {CONFIDENCE_STYLE[entry.confidence].label}
                         </span>
                     </div>
                     <div className="space-y-3 text-[10px] leading-relaxed text-muted-foreground">
