@@ -390,6 +390,122 @@ Shadow of the Erdtree specific data:
 - `btnSm` style updated to `border-foreground/30 bg-foreground/5` so action button borders are readable in both light and dark themes
 - Online Safety Mode contract simplified: confirmation modals appear only when Safety Mode is on; off-mode click runs the action immediately. Dismissal plumbing (`localStorage.setItem('setting:dismissedRisk:…')`, `Don't ask again` checkbox, `allowDismiss` prop) removed. ⚠ info icon next to each action stays as the always-on educational affordance
 
+### 🔲 DB Cleanup, Cut-Content Registry & Multiplayer Dedup 🟡
+Comprehensive cleanup of in-app Item Database based on user-reported in-game evidence (2026-04-28). Many items appear with `[ERROR]` prefix in-game (missing FMG entries), in wrong inventory section (ban risk), or as visual duplicates (filled+empty flask variants, multiplayer active/inactive states). Branch: `fix/db-error-items-and-duplicates`.
+
+**Source of truth:** user in-game screenshots:
+- `tmp/Zrzut ekranu 2026-04-28 o 00.08.14.png` — character wearing unidentified light "Altered" hood + chest set, showing in-game without crash → cut content suspect
+- `tmp/Zrzut ekranu 2026-04-28 o 00.11.57.png` — Crimson Tears Flask appears multiple times in Tools menu (filled+empty variants treated as separate items)
+- `tmp/Zrzut ekranu 2026-04-28 o 00.13.11.png` — multiplayer items (Wizened Finger, Furled Finger, Effigies) appear with active+inactive icons of same item
+- `tmp/Zrzut ekranu 2026-04-28 o 00.14.24.png` — Database tab shows "ICON" placeholders for Notes (missing icon files)
+
+**User decisions (2026-04-28):**
+- Filled+empty flask variants ARE duplicates — verify save section/offset routing
+- Multiplayer active/inactive: dedup before adding (skip if any variant present)
+- Items showing `[ERROR]` in-game are either cut_content OR saved in wrong section (ban risk) — flag liberally
+- Notes auto-given at game start (Great Coffins, Revenants, Gateway) — remove from DB entirely
+- Unknown helmet/armor from screenshot → mark cut_content
+- All uncertain items → mark cut_content + list in spec/ for later verification
+
+---
+
+#### Phase A — Empty Flask variants cleanup
+**File:** `backend/db/data/tools.go`
+
+1. Verify in `tmp/erdb/1.10.0/EquipParamGoods.csv` whether `(Empty)` IDs (e.g. 0x400003E8) have distinct game params or are placeholder duplicates of `(Filled)` IDs.
+2. If verified as redundant: remove ~27 `(Empty)` entries from `tools.go`:
+   - Crimson Tears Flask Empty: 0x400003E8 + 12 upgrade variants
+   - Cerulean Tears Flask Empty: base + 12 upgrade variants
+   - Wondrous Physick Flask Empty: 0x400000FA
+3. Cross-check `goodsType` column (NormalItem=0 vs ReinforceMaterial vs other) — writer routing may depend on type.
+
+#### Phase B — Multiplayer active/inactive dedup
+**Files:** `backend/core/writer.go`, `backend/db/db.go`
+
+**Hypothesis:** save stores separate handles for "inactive" (held) vs "active" (deployed/used) state of multiplayer items. Game auto-rewrites handle on activation. Our writer adds inactive handle even when active variant exists → user sees 2 in-game.
+
+1. Forensic on `tmp/crash/ER0000.sl2` — search CommonItems for known multiplayer pairs to identify active-state IDs (probably handles near 0x4000006A, 0x400000B3, etc.).
+2. Build `MultiplayerStatePairs map[uint32]uint32` (active→inactive) in `db/db.go`.
+3. In `addToInventory`: before insert, check if active OR inactive variant already present. Skip if yes.
+4. Affected items (per user report): Tarnished's Wizened Finger (0x4000006A), Tarnished's Furled Finger (0x400000AA), Small Golden Effigy (0x400000B3), Small Red Effigy (0x400000B4) + likely all 11 multiplayer items in `tools.go:7-19`.
+
+#### Phase C — Cut-content registry + flag uncertain items
+**Files:** `backend/db/data/info.go`, `backend/db/data/tools.go`, `backend/db/data/key_items.go`, `spec/36-cut-content-registry.md` (new)
+
+Items to flag `cut_content, ban_risk` (user reported `[ERROR]` icon in-game OR wrong save section):
+
+**Notes (info.go) — flag, keep in DB:**
+| ID | Name |
+|---|---|
+| 0x4000222E | Note: Hidden Cave |
+| 0x4000222F | Note: Imp Shades |
+| 0x40002230 | Note: Flask of Wondrous Physick |
+| 0x40002231 | Note: Stonedigger Trolls |
+| 0x40002232 | Note: Walking Mausoleum |
+| 0x40002233 | Note: Unseen Assassins |
+| 0x40002235 | Note: Flame Chariots |
+| 0x40002236 | Note: Demi-human Mobs (Half-Wolves PL) |
+| 0x40002237 | Note: Land Squirts |
+| 0x40002238 | Note: Gravity's Advantage |
+| 0x4000223A | Note: Waypoint Ruins |
+| 0x4000223D | Note: Frenzied Flame Village |
+
+**Tools (tools.go) — flag:**
+- 0x40000BCC Miranda's Prayer (user reported `[Error]Modlitwa Mirandy` in-game)
+- 0x400000B5 Spectral Steed Whistle — wrong icon reported, verify icon file vs game render
+
+**Key Items (key_items.go) — flag:**
+- 0x4000229E Golden Order Principia (candidate for `[ERROR]Zasady Złotego Porządku` reported by user)
+
+**Helms/Chest — unidentified set from screenshot 00.08.14:**
+- Mark as cut_content after identifying via Fextralife cross-check + EquipParamProtector.csv comparison
+- Suspects: dark cloth/leather "Altered" sets that exist in DB but aren't standard armor pieces
+
+**Spec doc `spec/36-cut-content-registry.md`:**
+- Table: `ID | Name | Section (info/tools/key/helm/chest) | DB file:line | Source verification (Fextralife / Unobtainable list / user in-game) | Status (confirmed/suspected)`
+- Per-item Fextralife links
+- Cross-references to existing flag locations
+
+#### Phase D — Remove auto-given notes
+**File:** `backend/db/data/info.go`
+
+Player receives these automatically at game start (user-confirmed) and cannot remove → no value in DB:
+- 0x40002234 Note: Great Coffins (icon file missing anyway)
+- 0x40002239 Note: Revenants (icon file missing)
+- 0x4000223B Note: Gateway (icon file missing)
+
+Also check `presets/`, `audit/`, tests for references before removing.
+
+#### Phase E — Memory of Grace duplicate investigation
+**File:** `backend/core/writer.go`
+
+User reports Memory of Grace (0x40000073) appears 2× in in-game inventory after add, despite single DB entry and existing dedup logic in `addToInventory:505-515`. Hypothesis: legacy duplicate from pre-fix writer version persists in user's save. Options:
+1. Add load-time deduplicator: scan CommonItems for duplicate handles, merge stacks
+2. Add save-time validator: warn if duplicate handles detected
+3. Document as "fix on next clean save" if too risky
+
+#### Phase F — Tests + build verification
+1. `go test -v ./backend/db/...`
+2. `go test -v ./backend/core/...` (multiplayer dedup unit tests)
+3. `cd frontend && npx tsc --noEmit && npm run lint`
+4. `make build`
+
+#### Phase G — Docs
+1. `CHANGELOG.md` — entry per phase
+2. This ROADMAP entry → mark phases ✅ as completed
+3. `spec/36-cut-content-registry.md` linked from spec/README
+
+---
+
+**Open questions before implementation:**
+- Helmet/chest item from screenshot 00.08.14.png — exact EN name needed (user to provide via game language switch or inventory screenshot with cursor-on item)
+- Whether Phase B (multiplayer dedup) requires separate "active state" IDs in DB or just runtime save inspection
+- Whether to keep flagged-but-not-removed notes in DB (current proposal) or move to a separate `cut_content_archive.go` file
+
+**Effort estimate:** 4-6 iterations (Phase A trivial, B+C+D+E investigation-heavy)
+
+---
+
 ### 🔲 Save Corruption Detection / Repair 🟢
 Comprehensive slot diagnostics with corruption detection.
 
