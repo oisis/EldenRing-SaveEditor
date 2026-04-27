@@ -39,6 +39,7 @@ export function CategorySelect({ value, onChange, className }: CategorySelectPro
                     <option value="crafting_materials">Crafting Materials</option>
                     <option value="bolstering_materials">Bolstering Materials</option>
                     <option value="key_items">Key Items</option>
+                    <option value="info">Information</option>
                 </optgroup>
             </select>
             <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-muted-foreground">

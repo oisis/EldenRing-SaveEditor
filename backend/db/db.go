@@ -499,6 +499,22 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 				Flags:        item.Flags,
 			})
 		}
+	case "info":
+		for id, item := range data.Information {
+			if item.Name == "" {
+				continue
+			}
+			items = append(items, ItemEntry{
+				ID:           id,
+				Name:         item.Name,
+				Category:     "info",
+				MaxInventory: item.MaxInventory,
+				MaxStorage:   item.MaxStorage,
+				MaxUpgrade:   item.MaxUpgrade,
+				IconPath:     item.IconPath,
+				Flags:        item.Flags,
+			})
+		}
 	}
 
 	sort.Slice(items, func(i, j int) bool {
@@ -539,7 +555,7 @@ func GetAllItems(platform string) []ItemEntry {
 		"ashes",
 		"sorceries", "incantations", "crafting_materials",
 		"bolstering_materials", "key_items",
-		"tools",
+		"tools", "info",
 	}
 	for _, cat := range cats {
 		all = append(all, GetItemsByCategory(cat, platform)...)

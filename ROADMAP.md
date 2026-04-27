@@ -363,6 +363,14 @@ Shadow of the Erdtree specific data:
 - **Coverage**: 11 bulk actions in `WorldTab` (Unlock All / Activate All / Kill All / Reveal All / Set quest step), `CharacterImporter` confirm, Runes input outline + clamp, Database/Inventory ban-risk badges, Gestures ⚠ icons. Section banners on Map and Quests
 - **Cleanup during this work**: removed dead `GeneralTab.tsx`, `StatsTab.tsx`, `WorldProgressTab.tsx` (legacy components no longer routed from `App.tsx`)
 
+### ✅ Information Tab + DB Categorization Audit 🟡
+**Implementation:** `backend/db/data/info.go` (new), `backend/db/data/key_items.go`, `backend/db/data/tools.go`, `backend/db/data/crafting_materials.go`, `backend/db/db.go`, `frontend/src/components/CategorySelect.tsx`, `frontend/src/components/DatabaseTab.tsx`, `spec/33-db-categorization-audit.md`
+- Created `Information` category matching the in-game Informacje/Information tab — 114 entries spanning About tutorials, Notes, Letters, Maps, Paintings, Cross/Diary messages
+- Migrated 105 misclassified items across `tools.go` ↔ `key_items.go` ↔ `crafting_materials.go`: Multiplayer Items (13) + Remembrances (25) → tools, Crystal Tears (11) + 7 keys/scrolls → key_items, 5 crafting materials → crafting_materials
+- Cut/ban-risk flag audit: dropped `cut_content` from `0x400023A7 About Monument Icon` (was reachable on disc v1.0, removed in patch 1.06 — kept `ban_risk` since EAC doesn't whitelist by version), preserved on confirmed cut items (About Multiplayer, Erdtree Codex, Burial Crow's Letter, Keep Wall Key)
+- Source of truth: **Fextralife per-item breadcrumb categories** + in-game user verification. er-save-manager's `KeyItems.txt`/`NotesPaintings.txt` proved unreliable (community taxonomy ≠ in-game UI placement)
+- Known issue: `Prayer Room Key` icon is a binary copy of `gestures/prayer.png` (identical bytes); needs manual artwork replacement (TODO comment in code)
+
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
 - All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session
