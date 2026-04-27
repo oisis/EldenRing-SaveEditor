@@ -627,3 +627,20 @@ Three related UX issues with the Quake console resolved.
   - DLC byte[1] (Shadow of the Erdtree entry flag) zeroed on PS4↔PC conversion
   - Prevents infinite loading when target platform/account doesn't own DLC
   - Constants: `DlcSectionOffset`, `DlcSectionSize`, `DlcEntryFlagByte` in `offset_defs.go`
+
+---
+
+## 🔚 Final Cleanup (do końcu wszystkich pozostałych prac)
+
+> Te zadania robimy dopiero na końcu, po zamknięciu wszystkich feature'ów z roadmapy.
+
+### 🔲 Dead code audit
+- Pełny przegląd `frontend/src/` i `backend/` pod kątem nieużywanego kodu (komponenty, eksporty, helpery, stałe).
+- Tooling: `npx ts-prune` dla TS + `staticcheck` / `golangci-lint --enable=unused` dla Go.
+- Wcześniejsze straty (GeneralTab, StatsTab, WorldProgressTab) sugerują że warto powtarzać ten audyt przed każdym mergem do `main`.
+
+### 🔲 Refactor — przyspieszenie aplikacji
+- Profilowanie: cold start, czas otwarcia save'a, czas przełączania zakładek, render dużych list (Item Database, Event Flags).
+- Frontend: `React.memo`, virtualization (react-virtual / react-window) dla list >500 elementów, lazy-loading zakładek (`React.lazy`).
+- Backend: profilowanie `core/reader.go` + `writer.go` (`go test -bench` / `pprof`), eliminacja zbędnych alokacji w hot path parsing.
+- Cel: <1s open save, <100ms tab switch, brak jankov przy filtrowaniu Database.
