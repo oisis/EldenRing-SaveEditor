@@ -51,6 +51,14 @@ export function SettingsTab({
     const [steamIdError, setSteamIdError] = useState('');
     const [steamIdApplying, setSteamIdApplying] = useState(false);
 
+    const [fullChaosMode, setFullChaosMode] = useState<boolean>(() =>
+        localStorage.getItem('setting:fullChaosMode') === 'true');
+    const handleChaosToggle = (checked: boolean) => {
+        setFullChaosMode(checked);
+        localStorage.setItem('setting:fullChaosMode', String(checked));
+        window.dispatchEvent(new CustomEvent('fullChaosModeChanged', { detail: checked }));
+    };
+
     // Deploy state
     const [targets, setTargets] = useState<deploy.Target[]>([]);
     const [editTarget, setEditTarget] = useState<deploy.Target>(new deploy.Target(EMPTY_SSH_TARGET));
@@ -244,6 +252,22 @@ export function SettingsTab({
                             checked={showFlaggedItems}
                             onChange={e => setShowFlaggedItems(e.target.checked)}
                             className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
+                        />
+                    </label>
+                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-red-500/5 border border-red-500/30 cursor-pointer hover:bg-red-500/10 transition-all">
+                        <div className="flex-1 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 block">Full Chaos Mode</span>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <strong className="text-red-500/90">Bypasses all item caps.</strong> When enabled, the Item Database modal allows
+                                adding any quantity ignoring vanilla single-playthrough limits and NG+ scaling.
+                                <strong> Strongly increases EAC ban risk.</strong> Use only on offline / experimental saves.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={fullChaosMode}
+                            onChange={e => handleChaosToggle(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-red-500/40 text-red-500 focus:ring-red-500/20 shrink-0 mt-1"
                         />
                     </label>
                 </div>
