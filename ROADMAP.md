@@ -406,7 +406,6 @@ Shadow of the Erdtree specific data:
 - `checkClearCountFlags` — verifies that event flags 50-57 mirror ClearCount: exactly one set, index == ClearCount. Uses `db.GetEventFlag` for read. Three failure modes detected: none set, multiple set, wrong index. Issue → new `clearcount_flag_mismatch` riskKey (Tier 2 · Speculated)
 - Total raw check categories: 4 (was 2). Combined audit: 12 categories
 - Audit suite: 27/27 tests passing
-- TODO Phase 4: 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`) — separate WriteSave/LoadSave hooks + slot picker badge
 
 ### ✅ Save Audit (Phase 5) — DLC ownership cross-check 🟡
 **Implementation:** `backend/vm/audit.go` (new `checkDlcOwnership` + `countDlcItems` helper in AuditSlot), `backend/vm/audit_test.go` (5 new tests + helpers), `frontend/src/data/riskInfo.ts` (1 new RiskKey), `spec/35-eac-server-validation.md` (rename "IsDlcOwned" → "SotE entry flag", §4B and §6 updates)
@@ -417,7 +416,7 @@ Shadow of the Erdtree specific data:
 - Silent skip when slot.Data doesn't reach the DLC section (small test buffers)
 - Total raw check categories: 5 (was 4). Combined audit: 13 categories
 - Audit suite: 32/32 tests passing
-- TODO Phase 4: 4D dirty-save sidecar (`<save>.sl2.editor-meta.json`) — separate WriteSave/LoadSave hooks + slot picker badge
+- ❌ **Dropped**: Phase 4 (4D dirty-save sidecar). Static save filename (`ER0000.sl2`) + Steam Cloud Sync excludes the JSON + trivial removal by user → zero forensic value. The audit panel scans the save itself, which is the unbypassable equivalent. See spec/35 §4D for the full rationale.
 
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`

@@ -232,14 +232,18 @@ NIE są server-checked, ale corrupted layout = EAC kick przy load.
 | Event-flag plausibility | "Boss killed" flag bez prerekwizytów (encountered, area unlocked) = anomalia. **Brak public report** że serwer to checkuje, ale tani enforcement |
 | GameClearCount monotonicity | NG+ counter nie maleje. Patrz `spec/14-game-state.md` |
 
-### 4D — "Dirty save" detection
+### 4D — "Dirty save" detection — **NOT IMPLEMENTED, NOT PLANNED**
 
-**Rekomendacja**: trzymaj flag **POZA** kanonicznym save'm — np. metadata file obok `.sl2` w katalogu edytora. NIE wpisuj custom bytes do save'a (third-party scanners / serwer mogą flagować unknown bytes).
+**Wcześniejszy pomysł**: sidecar `<save>.sl2.editor-meta.json` z historią edycji + UI badge na slot pickerze.
 
-UI behaviour:
-- Po każdym `WriteSave()` zapisz `<save>.sl2.editor-meta.json` z `{lastEdit: timestamp, editorVersion, editsApplied: [list]}`.
-- Surface w slot picker jako badge *"Last modified: 2026-04-27 by EldenRing-SaveEditor v1.x"*.
-- Po imporcie save od innego usera (cross-account) — automatic Tier 1 confirm + scan na ban_risk flagi.
+**Powód rezygnacji**: zerowa wartość forensic. Save'y ER mają **statyczną nazwę** (`ER0000.sl2`), więc sidecar:
+1. Steam Cloud Sync nie synchronizuje go między maszynami → user kopiuje save, sidecar zostaje
+2. Backup/restore odtwarza save ale nie sidecar (lub odwrotnie) → desync
+3. Każdy user może go skasować przed pójściem online → security theater
+
+UI badge byłby informacją tylko dla bardzo zdyscyplinowanego użytkownika. Cel "świadomość że save jest edytowany" jest realizowany przez **`AuditPanel`** (Phase 1-5) który skanuje **sam save** w deterministyczny sposób — nie da się ominąć przez usunięcie pliku.
+
+Jeśli kiedyś pojawi się use-case, prawidłowy nośnik metadanych to **bytes wewnątrz save** w obszarze toleranowym przez game loader (np. unused padding w UserData10), nie zewnętrzny plik. Ale to byłoby wpisywanie unknown bytes do save'a — exact pattern którego user-protection ma unikać. Więc temat zamknięty.
 
 ### 4E — Player Data Hash recalculation
 
@@ -255,7 +259,7 @@ Posortowane po efektywności:
 |---|---|---|
 | 1 | **Backup przed edycją** — core funkcjonalność. UWAGA: Steam cloud sync runs przy `Steam exit`. Zamknij Steam **przed** edycją | ✅ — `core.BackupSave()` |
 | 2 | **Online Safety Mode** (Tier 2 disabled, Tier 1 modal-confirm) | ✅ — patrz `spec/32-ban-risk-system.md` |
-| 3 | **"Dirty save" badge** w slot picker (per §4D) | ❌ TODO |
+| 3 | ~~"Dirty save" badge w slot picker (per §4D)~~ | ❌ **dropped** — zero forensic value, see §4D |
 | 4 | **Refuse to write Tier 2 changes z Online Safety Mode ON** | ✅ |
 | 5 | **Offline-only-after-edit nudge**: toast *"Recommended: stay offline ≥ 7 days before next online session"*. UWAGA: 7 dni to **heuristic**, nie published rule | ❌ TODO (consider) |
 | 6 | **Cross-user save import**: NIGDY auto. Wymagaj SteamID rewrite + Tier 2 confirm + ban_risk scan | ✅ — `character_import` riskKey + `RiskActionButton` |
@@ -293,7 +297,7 @@ Co warte zaimplementowania w nadchodzących iteracjach (priorytet zstępujący):
 1. **Pre-write audit pipeline** (`backend/vm/preflight.go`) — pojedynczy `Audit(save) → []Issue` zwracający listę problemów z severity (Tier 1/2). Wywołany przy `SaveBtn.click` jeśli `OnlineSafetyMode == true`.
 2. **Item-ID whitelist scan** — iteruj `GaItem map`, dla każdego entry `lookupItem(id)`. Unknown → Tier 2 issue.
 3. **Stat consistency derive** — recompute HP/FP/SP z VIG/MND/END (formula z `CalcCorrectGraph`), jeśli stored != derived → Tier 2 issue.
-4. **Editor-meta sidecar file** — `<save>.sl2.editor-meta.json` z edit history (per §4D).
+4. ~~**Editor-meta sidecar file**~~ — **dropped**. Static save filename + Steam Cloud Sync exclusion + trivial removal by user → zero forensic value. See §4D.
 5. **DLC ownership cross-check** — SotE entry flag (CSDlc byte[1]) vs DLC items in inventory. Tier 2 jeśli mismatch (≥3 DLC items + flag unset; pre-order Ring of Miquella wyłączony). Implemented as `vm.checkDlcOwnership`.
 6. **Weapon upgrade level outline** w EquipmentTab (Tier 2 jeśli > 25 / > 10).
 7. **GaItem handle audit** w `core.LoadSave()` — log warning (nie clamp) jeśli sentinel `0xFFFFFFFF` znaleziony w nieoczekiwanym miejscu.
