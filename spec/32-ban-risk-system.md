@@ -19,8 +19,8 @@ Easy Anti-Cheat (EAC) waliduje stan save'a podczas synchronizacji online i flagu
 | Tier | Znaczenie | Reakcja UI |
 |---|---|---|
 | **0** | Cosmetic / read-only / safe | Brak oznaczenia |
-| **1** | Caution — popularne ale wykrywalne (bulk grace, map reveal, quest skip) | Modal-confirm z opt-out per akcja w `localStorage` |
-| **2** | High risk — znane z banów (cut content, stat >99, runy >999M) | Modal-confirm + outline pól + (gdy Online Safety Mode) clamping/disabled |
+| **1** | Caution — popularne ale wykrywalne (bulk grace, map reveal, quest skip) | Modal-confirm wyłącznie gdy Online Safety Mode włączony; off-mode = akcja od razu |
+| **2** | High risk — znane z banów (cut content, stat >99, runy >999M) | Modal-confirm (gdy Safety Mode) + outline pól + clamping na inputach |
 
 ---
 
@@ -30,10 +30,14 @@ Globalny przełącznik w `Settings → Safety`. Stan: `localStorage.setItem('set
 
 Gdy aktywny:
 - **Globalny banner** na górze aplikacji (żółty pasek `SafetyModeBanner.tsx`)
-- **Tier 1**: każda akcja z `RiskActionButton` wymusza modal **mimo** wcześniejszego "Don't ask again" (checkbox jest ukryty w modalu, zamiast niego napis informujący)
-- **Tier 2**: edycje są clampowane do legalnych wartości (np. Runes auto-cap do `999_999_999` z toast); w przyszłości można rozszerzyć na `disabled`
+- **Tier 1 / Tier 2**: każda akcja z `RiskActionButton` pokazuje modal-confirm; modal nie ma checkboxa "Don't ask again" — zamiast tego stała notka "Online Safety Mode is on — confirmation required"
+- **Tier 2 inputs**: edycje są clampowane do legalnych wartości (np. Runes auto-cap do `999_999_999` z toast)
 
-Hook: `useSafetyMode()` z `frontend/src/state/safetyMode.tsx` zwraca `{enabled, setEnabled, isDisabledFor(tier), requireConfirmFor(tier)}`.
+Gdy wyłączony:
+- **Brak modali** dla `RiskActionButton` — kliknięcie wywołuje akcję od razu. Edukacja pozostaje dostępna na żądanie przez ⚠ info icon obok każdego przycisku
+- **Inputy** dalej walidują/clampują (Tier 2 nie potrzebuje modala — UI nie pozwala wpisać wartości spoza zakresu)
+
+Hook: `useSafetyMode()` z `frontend/src/state/safetyMode.tsx` zwraca `{enabled, setEnabled, isDisabledFor(tier), requireConfirmFor(tier)}`. `requireConfirmFor` zwraca `true` tylko gdy `enabled && tier >= 1`.
 
 ---
 
@@ -105,10 +109,9 @@ Plik: `RiskActionButton.tsx`.
 
 Wrapper na `<button>`:
 - Renderuje button + obok klikalną ikonę ⚠ (osobny target — klik ikony NIE odpala akcji)
-- Klik buttona: jeśli `RISK_INFO[riskKey]` istnieje i (`!isDismissed || requireConfirmFor(tier)`) → modal-confirm
-- Modal: opis z dictionary, opcjonalny checkbox "Don't ask again for this action", buttony Cancel/Proceed
-- `localStorage.setItem('setting:dismissedRisk:<riskKey>', 'true')` zapamiętuje wybór
-- Gdy `safetyMode.enabled` → checkbox "Don't ask again" jest ukryty + napis informujący; wcześniejszy dismiss jest ignorowany
+- Klik buttona: jeśli `RISK_INFO[riskKey]` istnieje i `safetyMode.requireConfirmFor(tier)` → modal-confirm; w przeciwnym razie `onConfirm()` od razu
+- Modal: opis z dictionary, stała notka "Online Safety Mode is on — confirmation required", buttony Cancel/Proceed
+- Bez SafetyMode → ⚠ ikona obok pozostaje jako edukacyjna afordancja na żądanie
 
 ### `<RiskSectionBanner riskKey="..."/>`
 Plik: `RiskSectionBanner.tsx`.
