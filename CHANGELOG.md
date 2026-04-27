@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/inventory-caps-enforcement — vanilla-realistic item caps + NG+ scaling + Full Chaos Mode
+
+**Goal:** Reduce EAC ban risk by tightening `MaxInventory` / `MaxStorage` caps for items where the previous numbers (e.g. 999/999 cookbooks, 99/600 paintings) were anomalously above what a single playthrough can yield. Caps now reflect Fextralife-verified single-playthrough obtainable counts. For items that scale per NG+ cycle, a new `scales_with_ng` flag drives `effective_cap = base × (ClearCount + 1)` so caps grow naturally on NG+1...NG+7. A new **Full Chaos Mode** Settings toggle bypasses all caps for power users (max 999), with a clearly red-flagged ban-risk warning.
+
+**Why:**
+- **Ban risk reduction** — EAC pattern detection flags statistically anomalous quantities. 22 Dragon Hearts looks vanilla; 999 does not.
+- **In-game realism** — caps now match what the player can actually collect, making the editor a transparent "vanilla-aligned" tool rather than a chaos generator.
+- **No data loss for existing saves** — clamp is enforced **only at user-add** (the Database tab modal); legacy save loads/writes are untouched. `vm/character_vm.go` clamp behavior intentionally not changed.
+
+**Backend data (`backend/db/data/`):**
+- `types.go` — documented new flag set including `scales_with_ng`.
+- `info.go` — 29 paintings/notes 99/600 → 1/0, removed `stackable`.
+- `key_items.go` — 11 Crystal Tears 99/600 → 1/0; **109 cookbooks** (Greater Potentate's, Glintstone Craftsman's, Perfumer's) varied caps → 1/0; **Stonesword Key** 99/600 → 55/0 + scales_with_ng; **Dragon Heart** 99/600 → 22/0 + scales_with_ng; **Larval Tear** 99/600 → 24/0 + scales_with_ng.
+- `bolstering_materials.go` — **Golden Seed** 30/0 + scales_with_ng (DLC adds 0); **Sacred Tear** 12/0 + scales_with_ng (capped at flask potency limit, world surplus is unusable); **Scadutree Fragment** 999/999 → 50/0 + scales_with_ng; **Revered Spirit Ash** 99/600 → 25/0 + scales_with_ng.
+- **Mohg's Great Rune** moved `bolstering_materials.go` → `key_items.go` (correct in-game tab).
+
+**NG+ scaling formula:**
+```
+effective_cap = MaxInventory × (ClearCount + 1)
+```
+where `ClearCount` is the save's NG+ cycle counter (0 = NG, 1 = NG+1, …, 7 = NG+7), already exposed via `CharacterViewModel.clearCount`.
+
+**Frontend:**
+- `DatabaseTab.tsx` — `effectiveCap()` helper computes per-item cap with chaos override + scales_with_ng multiplier; modal min/max inputs use effective cap; new banner shows *"NG+ Scaling · Vanilla NG: X · NG+Y: Z · Adding more increases EAC ban risk"* when any selected item has the flag, and a red **Full Chaos Mode** banner when bypass is active. Listens for `'fullChaosModeChanged'` window CustomEvent.
+- `SettingsTab.tsx` — new **Full Chaos Mode** toggle in Safety section (red-bordered, dangerous) with explicit ban-risk copy. Persists to `localStorage:setting:fullChaosMode` and dispatches `'fullChaosModeChanged'` event for cross-component sync.
+
+**Counts source:** Fextralife wiki per-item Locations sections, cross-checked with Game8 / PowerPyx / GamesRadar for Scadutree Fragment, Revered Spirit Ash, Stonesword Key, Dragon Heart, Larval Tear, Golden Seed, Sacred Tear (all v1.16 patch).
+
+**Verification:**
+- `go test ./backend/...` — pass
+- `npx tsc --noEmit && npm run build` — pass
+- Manual: Database modal pokazuje cap 55 dla Stonesword Key na NG, 110 na NG+1, 999 z chaos mode. Cookbooks pokazują 1. Paintings/notes pokazują 1.
+
+**Round 2 fixes (po user testach):**
+- **Bug:** Information items (paintings/notes/letters) były dodawane do save ale niewidoczne w UI inventory — `data.Information` mapy brakowało w `globalItemIndex` (`backend/db/db.go:168-176`), więc `GetItemDataFuzzy` zwracał empty i `mapItems` skipował. **Fix:** dodano `data.Information` do listy maps w `init()`.
+- **Bug:** Dragon Heart, Larval Tear, Crystal Tears nie były widoczne w "All" view zakładki Inventory — pre-existing filtr `(item.subCategory !== 'key_items' || item.readOnly)` w `InventoryTab.tsx:281` ukrywał editable key_items, co miało sens dla story keys ale nie dla nowych usable item types. **Fix:** filtr w 'all' view uproszczony do samego `matchesSearch`.
+- **Bug:** Storage row był aktywny dla itemów z MaxStorage=0 (paintings/cookbooks/etc.), pozwalając użytkownikowi odhaczyć "dodaj do storage" co było silentnie ignorowane przez backend resolveQty. **Fix:** modal Storage row teraz `pointer-events-none + opacity-40` i pokazuje *"Not allowed"* gdy `modalMaxStorage===0`; `openConfirmModal` automatycznie ustawia `addToStorage=false` jeśli którykolwiek z wybranych itemów ma cap storage 0.
+- **Bug:** Scadutree Fragment skalował z NG+ (50 → 100 na NG+1) mimo że nadwyżka jest bezużyteczna (50 = max blessing cumulative cost). **Fix:** zdjęto `scales_with_ng` z 4 itemów których cap to "max useful" zamiast "world count": Golden Seed (30 = full flask), Sacred Tear (12 = full potency), Scadutree Fragment (50 = max blessing), Revered Spirit Ash (25 = max ash blessing). Scaling pozostaje na: Stonesword Key, Dragon Heart, Larval Tear (consumable z otwartym usage).
+
+---
+
 ### Branch: feat/db-info-category — extract Information tab + DB-wide categorization audit
 
 **Goal:** Make the Database tab's category dropdown match the actual in-game inventory tabs. Previously `key_items.go` and `tools.go` were used as catch-all dumping grounds — items that the game shows on the **Information** tab (Polish: Informacje), under **Items > Multiplayer Items**, **Items > Remembrances**, etc. were scattered across both. Now each item lives in the file matching its real game tab.

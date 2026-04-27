@@ -172,7 +172,7 @@ func init() {
 		data.StandardAshes,
 		data.Sorceries, data.Incantations, data.CraftingMaterials,
 		data.BolsteringMaterials, data.KeyItems,
-		data.Tools,
+		data.Tools, data.Information,
 	}
 	size := 0
 	for _, m := range allMaps {

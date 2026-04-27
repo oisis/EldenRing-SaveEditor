@@ -29,6 +29,14 @@ function allNonStackable(items: db.ItemEntry[]): boolean {
     return items.every(i => i.maxInventory <= 1);
 }
 
+// Effective cap honors: chaos mode override, scales_with_ng flag (cap × (NG+1)).
+function effectiveCap(item: db.ItemEntry, kind: 'inv' | 'storage', clearCount: number, chaos: boolean): number {
+    if (chaos) return 999;
+    const base = kind === 'inv' ? item.maxInventory : item.maxStorage;
+    if (item.flags?.includes('scales_with_ng')) return base * (clearCount + 1);
+    return base;
+}
+
 export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVersion, onItemsAdded, addSettings, showFlaggedItems, category, setCategory, onSelectItem, readOnly = false}: DatabaseTabProps) {
     const {upgrade25, upgrade10, infuseOffset, upgradeAsh} = addSettings;
     const [search, setSearch] = useState('');
@@ -69,6 +77,17 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     // Owned items (for "Inventory" / "Storage" columns)
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
     const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
+    const [clearCount, setClearCount] = useState<number>(0);
+
+    // Full Chaos Mode bypasses all caps. Cross-component sync via custom event from SettingsTab.
+    const [fullChaosMode, setFullChaosMode] = useState<boolean>(() =>
+        localStorage.getItem('setting:fullChaosMode') === 'true');
+
+    useEffect(() => {
+        const handler = (e: Event) => setFullChaosMode((e as CustomEvent<boolean>).detail);
+        window.addEventListener('fullChaosModeChanged', handler);
+        return () => window.removeEventListener('fullChaosModeChanged', handler);
+    }, []);
 
     useEffect(() => {
         GetInfuseTypes().then(res => setInfuseTypes(res || []));
@@ -78,9 +97,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         GetCharacter(charIndex).then(res => {
             setCharInventory(res?.inventory || []);
             setCharStorage(res?.storage || []);
+            setClearCount(res?.clearCount || 0);
         }).catch(() => {
             setCharInventory([]);
             setCharStorage([]);
+            setClearCount(0);
         });
     }, [charIndex, inventoryVersion]);
 
@@ -208,7 +229,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setAddToInv(true);
         setInvMax(false);
         setInvQtyVal(1);
-        setAddToStorage(true);
+        // If any selected item has MaxStorage=0, leave storage off — backend would skip it anyway,
+        // and showing it enabled lets the user think they're storing copies that won't appear.
+        const anyZeroStorage = items.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) === 0);
+        setAddToStorage(!anyZeroStorage);
         setStorageMax(false);
         setStorageQtyVal(1);
         setConfirmModal(items);
@@ -241,10 +265,14 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
-    const modalMaxInv = confirmModal ? Math.min(...confirmModal.map(i => i.maxInventory)) : 1;
-    const modalMaxStorage = confirmModal ? Math.min(...confirmModal.map(i => i.maxStorage)) : 1;
+    const modalMaxInv = confirmModal ? Math.min(...confirmModal.map(i => effectiveCap(i, 'inv', clearCount, fullChaosMode))) : 1;
+    const modalMaxStorage = confirmModal ? Math.min(...confirmModal.map(i => effectiveCap(i, 'storage', clearCount, fullChaosMode))) : 1;
     const modalMixedMaxes = confirmModal && confirmModal.length > 1 && !modalNonStackable &&
         (new Set(confirmModal.map(i => i.maxInventory)).size > 1 || new Set(confirmModal.map(i => i.maxStorage)).size > 1);
+    // True if any selected item has scales_with_ng flag (drives tooltip rendering).
+    const modalHasNgScaling = !!confirmModal && confirmModal.some(i => i.flags?.includes('scales_with_ng'));
+    // Vanilla NG cap (clearCount=0) used to show "Vanilla NG: X / NG+Y: Z" tooltip.
+    const modalVanillaInv = confirmModal ? Math.min(...confirmModal.map(i => i.maxInventory)) : 1;
 
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-3">
@@ -361,6 +389,21 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                             )}
                         </div>
 
+                        {/* Cap info banners */}
+                        {fullChaosMode && (
+                            <p className="text-[9px] font-black uppercase tracking-widest text-red-500 bg-red-500/10 border border-red-500/30 rounded px-3 py-1.5">
+                                ⚠ Full Chaos Mode — caps bypassed (max 999)
+                            </p>
+                        )}
+                        {!fullChaosMode && modalHasNgScaling && (
+                            <p className="text-[9px] font-bold text-primary/90 bg-primary/5 border border-primary/20 rounded px-3 py-1.5 leading-relaxed">
+                                <span className="font-black uppercase tracking-widest">NG+ Scaling</span>
+                                {' · '}Vanilla NG: <strong>{modalVanillaInv}</strong>
+                                {clearCount > 0 && <> · NG+{clearCount}: <strong>{modalVanillaInv * (clearCount + 1)}</strong></>}
+                                <span className="block text-muted-foreground mt-0.5">Adding more increases EAC ban risk.</span>
+                            </p>
+                        )}
+
                         {/* Inventory row */}
                         <div className="space-y-3">
                             <div className="flex items-center space-x-3">
@@ -396,28 +439,31 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                 )}
                             </div>
 
-                            {/* Storage row */}
-                            <div className="flex items-center space-x-3">
+                            {/* Storage row — completely disabled when MaxStorage=0 (item not allowed in storage at all) */}
+                            <div className={`flex items-center space-x-3 ${modalMaxStorage === 0 ? 'opacity-40 pointer-events-none' : ''}`}>
                                 <div
-                                    onClick={() => setAddToStorage(!addToStorage)}
-                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                    onClick={() => modalMaxStorage > 0 && setAddToStorage(!addToStorage)}
+                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage && modalMaxStorage > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
                                 >
-                                    {addToStorage && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                    {addToStorage && modalMaxStorage > 0 && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
                                 <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Storage</span>
                                 <input
                                     type="number"
                                     min={1}
                                     max={modalNonStackable ? 99 : modalMaxStorage}
-                                    value={storageMax ? modalMaxStorage : storageQtyVal}
-                                    disabled={!addToStorage || storageMax}
+                                    value={modalMaxStorage === 0 ? 0 : storageMax ? modalMaxStorage : storageQtyVal}
+                                    disabled={!addToStorage || storageMax || modalMaxStorage === 0}
                                     onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorage, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
-                                {modalNonStackable && (
+                                {modalMaxStorage === 0 && (
+                                    <span className="text-[9px] font-black uppercase tracking-widest text-red-500/70">Not allowed</span>
+                                )}
+                                {modalMaxStorage > 0 && modalNonStackable && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
                                 )}
-                                {!modalNonStackable && modalMaxStorage > 1 && (
+                                {modalMaxStorage > 0 && !modalNonStackable && modalMaxStorage > 1 && (
                                     <div
                                         onClick={() => addToStorage && setStorageMax(!storageMax)}
                                         className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}

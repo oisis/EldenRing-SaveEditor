@@ -44,11 +44,17 @@ var BolsteringMaterials = map[uint32]ItemData{
 	0x40002AA6: {Name: "Ghost Glovewort [9]", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/ghost_glovewort_9.png", Flags: []string{"stackable"}},
 	0x40002AA7: {Name: "Great Ghost Glovewort", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/great_ghost_glovewort.png", Flags: []string{"stackable"}},
 
-	// Flask & Blessing Upgrades
-	0x4000271A: {Name: "Golden Seed", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/golden_seed.png", Flags: []string{"stackable"}},
-	0x40002724: {Name: "Sacred Tear", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/sacred_tear.png", Flags: []string{"stackable"}},
-	0x401EAB90: {Name: "Scadutree Fragment", Category: "bolstering_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/bolstering_materials/scadutree_fragment.png", Flags: []string{"dlc", "stackable"}},
-	0x401EABF4: {Name: "Revered Spirit Ash", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/bolstering_materials/revered_spirit_ash.png", Flags: []string{"dlc", "stackable"}},
+	// Flask & Blessing Upgrades — caps reflect "max useful" amounts (full flask /
+	// max blessing cumulative cost), not raw world counts. NG+ does not raise the
+	// effective cap because surplus past these limits has zero functional value:
+	//   Golden Seed cap 30 = full flask charges (14)
+	//   Sacred Tear cap 12 = full flask potency (+12)
+	//   Scadutree Fragment cap 50 = max Scadutree Blessing (+20 cumulative cost)
+	//   Revered Spirit Ash cap 25 = max Revered Spirit Ash Blessing (+10 cumulative cost)
+	0x4000271A: {Name: "Golden Seed", Category: "bolstering_materials", MaxInventory: 30, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/golden_seed.png", Flags: []string{"stackable"}},
+	0x40002724: {Name: "Sacred Tear", Category: "bolstering_materials", MaxInventory: 12, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/sacred_tear.png", Flags: []string{"stackable"}},
+	0x401EAB90: {Name: "Scadutree Fragment", Category: "bolstering_materials", MaxInventory: 50, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/scadutree_fragment.png", Flags: []string{"dlc", "stackable"}},
+	0x401EABF4: {Name: "Revered Spirit Ash", Category: "bolstering_materials", MaxInventory: 25, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/bolstering_materials/revered_spirit_ash.png", Flags: []string{"dlc", "stackable"}},
 
 	// Handles (B0...)
 0x40000B54: {Name: "Golden Rune [1]", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/runes/golden_rune_1.png", Flags: []string{"stackable"}},
@@ -83,6 +89,6 @@ var BolsteringMaterials = map[uint32]ItemData{
 	0x401E900F: {Name: "Rune of an Unsung Hero", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/runes/rune_of_an_unsung_hero.png", Flags: []string{"stackable"}},
 	0x401E9007: {Name: "Broken Rune", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/runes/broken_rune.png", Flags: []string{"stackable"}},
 	0x401E9006: {Name: "Leda's Rune", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/runes/ledas_rune.png", Flags: []string{"stackable"}},
-	0x40001FD8: {Name: "Mohg's Great Rune", Category: "bolstering_materials", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/runes/mohgs_great_rune.png"},
+	// 0x40001FD8 Mohg's Great Rune — relocated to key_items.go (correct in-game tab is Key Items).
 	0x400000BE: {Name: "Rune Arc", Category: "bolstering_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/runes/rune_arc.png", Flags: []string{"stackable"}},
 }
