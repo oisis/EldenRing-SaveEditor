@@ -93,6 +93,7 @@ Plik save składa się z następujących głównych bloków (w kolejności sekwe
 | 31 | [Appearance Presets](31-appearance-presets.md) | Mirror Favorites preset slot layout (0x130 bytes), apply algorithm preset → FaceData, cross-gender M↔F handling — RE'd from real saves |
 | 32 | [Ban-Risk System](32-ban-risk-system.md) | UI architektura: Tier 0/1/2 + Online Safety Mode + dictionary `RISK_INFO` + komponenty `Risk*` (Phase 6) |
 | 33 | [DB Categorization Audit](33-db-categorization-audit.md) | Information tab extraction + reklasyfikacja Multiplayer/Remembrances/Crystal Tears/Materials zgodnie z Fextralife per-item breadcrumb |
+| 34 | [Item Caps Enforcement](34-item-caps.md) | Vanilla-realistic MaxInventory/MaxStorage + `scales_with_ng` flag (effective_cap = base × (ClearCount+1)) + Full Chaos Mode bypass toggle |
 | 99 | [Verification Methodology](99-verification-methodology.md) | Metody testowania, checklista weryfikacji, plan odkryć |
 
 ---

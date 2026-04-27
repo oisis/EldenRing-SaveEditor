@@ -371,6 +371,16 @@ Shadow of the Erdtree specific data:
 - Source of truth: **Fextralife per-item breadcrumb categories** + in-game user verification. er-save-manager's `KeyItems.txt`/`NotesPaintings.txt` proved unreliable (community taxonomy ≠ in-game UI placement)
 - Known issue: `Prayer Room Key` icon is a binary copy of `gestures/prayer.png` (identical bytes); needs manual artwork replacement (TODO comment in code)
 
+### ✅ Item Caps Enforcement + NG+ Scaling + Full Chaos Mode 🟡
+**Implementation:** `backend/db/data/types.go`, `backend/db/data/info.go`, `backend/db/data/key_items.go`, `backend/db/data/bolstering_materials.go`, `frontend/src/components/DatabaseTab.tsx`, `frontend/src/components/SettingsTab.tsx`, `spec/34-item-caps.md`
+- Tightened MaxInventory/MaxStorage caps for ~155 items so they reflect Fextralife single-playthrough obtainable counts: 29 paintings/notes 99/600 → 1/0, 11 Crystal Tears 99/600 → 1/0, 109 cookbooks (varied) → 1/0
+- New `scales_with_ng` flag for 7 items (Stonesword Key 55, Dragon Heart 22, Larval Tear 24, Golden Seed 30, Sacred Tear 12, Scadutree Fragment 50, Revered Spirit Ash 25) — effective cap = base × (ClearCount + 1) so NG+1 doubles the cap, NG+7 multiplies by 8
+- `Mohg's Great Rune` relocated `bolstering_materials.go` → `key_items.go` (correct in-game tab)
+- New **Full Chaos Mode** Settings toggle (red-bordered, in Safety section) bypasses all caps to 999 with explicit ban-risk copy. Cross-component sync via `'fullChaosModeChanged'` window CustomEvent
+- Modal banner shows live "Vanilla NG: X · NG+Y: Z · Adding more increases EAC ban risk" when any selected item has the `scales_with_ng` flag
+- Clamp enforced **only at user-add** (DatabaseTab modal min/max + handleAdd) — load/save paths untouched, so legacy saves with high item counts are not retroactively clipped
+- TODO: verify `ClearCount` semantic on real save (when does ClearCount increment — at Elden Beast kill or after entering NG+ menu? Current implementation assumes 0 = pre-Elden-Beast first cycle)
+
 ### ✅ World Tab Collapsed Actions & Per-Session State 🟢
 **Implementation:** `frontend/src/components/AccordionSection.tsx`, `frontend/src/components/WorldTab.tsx`, `frontend/src/App.tsx`, `frontend/src/components/RiskActionButton.tsx`
 - All 11 World sections (map / graces / pools / colosseums / bosses / quests / gestures / cookbooks / bells / whetblades / regions) start collapsed on every save load and only persist their open/closed state for the current session
