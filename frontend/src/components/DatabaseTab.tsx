@@ -54,6 +54,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     // Modal state
     const [confirmModal, setConfirmModal] = useState<db.ItemEntry[] | null>(null);
     const [banRiskWarning, setBanRiskWarning] = useState<db.ItemEntry[] | null>(null);
+    const [inventoryFull, setInventoryFull] = useState<{section: string; capacity: number} | null>(null);
     const [ignoreBanRisk, setIgnoreBanRisk] = useState<boolean>(() => {
         return localStorage.getItem('setting:ignoreBanRiskWarning') === 'true';
     });
@@ -209,13 +210,32 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
             setSelectedDbItems(new Set());
             onItemsAdded?.();
         } catch (err) {
-            toast.error('Failed to add items: ' + err);
+            const msg = String(err);
+            const m = msg.match(/inventory section "([^"]+)" is full \((\d+) slots\)/);
+            if (m) {
+                setInventoryFull({section: m[1], capacity: parseInt(m[2], 10)});
+            } else {
+                toast.error('Failed to add items: ' + err);
+            }
         } finally {
             setIsSaving(false);
         }
     };
 
     const openModal = (items: db.ItemEntry[]) => {
+        // Hard-block on bulk: cut_content items (e.g. "[ERROR]" prefix at runtime) are
+        // never added through a multi-item selection. The Add Anyway flow can be ignored
+        // by users who toggled "Ignore all ban risk warnings", so a separate, non-bypassable
+        // filter is needed for items that exist in regulation.bin without an FMG entry.
+        if (items.length > 1) {
+            const filtered = items.filter(i => !i.flags?.includes('cut_content'));
+            const skipped = items.length - filtered.length;
+            if (skipped > 0) {
+                toast.error(`Skipped ${skipped} cut-content item(s). Add them individually if needed.`);
+            }
+            if (filtered.length === 0) return;
+            items = filtered;
+        }
         // Gate: if any selected item is ban_risk-flagged AND user hasn't opted out, show warning first.
         // The warning modal's "Add Anyway" calls openConfirmModal directly to bypass this check.
         if (!ignoreBanRisk && items.some(i => i.flags?.includes('ban_risk'))) {
@@ -274,8 +294,51 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     // Vanilla NG cap (clearCount=0) used to show "Vanilla NG: X / NG+Y: Z" tooltip.
     const modalVanillaInv = confirmModal ? Math.min(...confirmModal.map(i => i.maxInventory)) : 1;
 
+    const sectionLabel = (section: string): string => {
+        switch (section) {
+            case 'inventory.common': return 'Held inventory · Tools & Goods';
+            case 'inventory.key':    return 'Held inventory · Key Items & Information';
+            case 'storage.common':   return 'Storage box · Tools & Goods';
+            case 'storage.key':      return 'Storage box · Key Items & Information';
+            default:                 return section;
+        }
+    };
+
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-3">
+            {/* Inventory-Full Modal — surfaced when addToInventory hits the section's slot cap */}
+            {inventoryFull && (
+                <div className="fixed inset-0 z-[130] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-card p-8 rounded-2xl border-2 border-amber-500/40 flex flex-col space-y-5 max-w-md w-full mx-4 shadow-2xl shadow-amber-500/20 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 rounded-full bg-amber-500/15 border border-amber-500/40 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 className="text-sm font-black uppercase tracking-[0.15em] text-amber-500">Inventory Full</h3>
+                                <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest">Section reached its slot cap</p>
+                            </div>
+                        </div>
+                        <p className="text-[11px] text-foreground leading-relaxed">
+                            <strong>{sectionLabel(inventoryFull.section)}</strong> has no free slot left
+                            (<strong>{inventoryFull.capacity}/{inventoryFull.capacity}</strong> occupied).
+                            Some or all of the selected items were not added.
+                        </p>
+                        <p className="text-[10px] text-muted-foreground leading-relaxed">
+                            Remove unused items from this section first, or move stackables to the storage box, then retry.
+                            The cap is fixed by the save format and cannot be raised.
+                        </p>
+                        <button
+                            onClick={() => setInventoryFull(null)}
+                            className="w-full px-4 py-2.5 bg-amber-500 text-white rounded-md text-[10px] font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
             {/* Ban-risk Warning Modal — gates confirmModal when any selected item has ban_risk flag */}
             {banRiskWarning && (() => {
                 const banRiskItems = banRiskWarning.filter(i => i.flags?.includes('ban_risk'));
