@@ -2,10 +2,10 @@ package data
 
 var CraftingMaterials = map[uint32]ItemData{
 	// ─── Materials moved from tools.go (in-game Materials sub-tab) ──────
-	0x40005154: {Name: "Golden Centipede", Category: "crafting_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/crafting_materials/golden_centipede.png", Flags: []string{"stackable"}},
-	0x4000513B: {Name: "Sanctuary Stone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/sanctuary_stone.png", Flags: []string{"stackable"}},
-	0x4000514C: {Name: "Glintstone Firefly", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/glintstone_firefly.png", Flags: []string{"stackable"}},
-	0x40005172: {Name: "Volcanic Stone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/volcanic_stone.png", Flags: []string{"stackable"}},
+	0x40005154: {Name: "Golden Centipede", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/golden_centipede.png", Flags: []string{"stackable"}},
+	0x4000513B: {Name: "Sanctuary Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/throwables/sanctuary_stone.png", Flags: []string{"stackable"}},
+	0x4000514C: {Name: "Glintstone Firefly", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/throwables/glintstone_firefly.png", Flags: []string{"stackable"}},
+	0x40005172: {Name: "Volcanic Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/throwables/volcanic_stone.png", Flags: []string{"stackable"}},
 	0x40005177: {Name: "Gravel Stone", Category: "crafting_materials", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/gravel_stone.png", Flags: []string{"stackable"}},
 
 	// Base Game Materials
@@ -72,14 +72,48 @@ var CraftingMaterials = map[uint32]ItemData{
 	0x4000516D: {Name: "Yellow Ember", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/yellow_ember.png", Flags: []string{"stackable"}},
 	0x40005174: {Name: "Formic Rock", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/formic_rock.png", Flags: []string{"stackable"}},
 
-	// DLC Materials
+	// DLC Materials — block 0x401EBF (param 2015xxx, large/beast)
+	// Source: tmp/repos/Elden-Ring-Save-Editor/src/Resources/Json/goods.json + DLCCraftingMaterials.txt
+	0x401EBF18: {Name: "Beast Horn", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/beast_horn.png", Flags: []string{"dlc", "stackable"}},
+	0x401EBF22: {Name: "Spirit Calculus", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/spirit_calculus.png", Flags: []string{"dlc", "stackable"}},
+	0x401EBF2C: {Name: "Pearlescent Scale", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/pearlescent_scale.png", Flags: []string{"dlc", "stackable"}},
+	0x401EBF36: {Name: "Scorpion Liver", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/scorpion_liver.png", Flags: []string{"dlc", "stackable"}},
+	0x401EBF40: {Name: "Fly Mold", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/fly_mold.png", Flags: []string{"dlc", "stackable"}},
+
+	// DLC Materials — block 0x401ED2 (param 2020xxx)
+	0x401ED2A1: {Name: "Rada Fruit", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/rada_fruit.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A2: {Name: "Redflesh Mushroom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/redflesh_mushroom.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A3: {Name: "Whiteflesh Mushroom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/whiteflesh_mushroom.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A4: {Name: "Knot Resin", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/knot_resin.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A5: {Name: "Dewgem", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/dewgem.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A6: {Name: "Black Pyrefly", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/black_pyrefly.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A7: {Name: "Glintslab Firefly", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/glintslab_firefly.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2A8: {Name: "Yellow Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/yellow_fulgurbloom.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2A9: {Name: "Shadow Sunflower", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/shadow_sunflower.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2AA: {Name: "Toxic Mossling", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/toxic_mossling.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2AB: {Name: "Scarlet Bud", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/scarlet_bud.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2AC: {Name: "Sanguine Amaryllis", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sanguine_amaryllis.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2AD: {Name: "Frozen Maggot", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/frozen_maggot.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2AE: {Name: "Deep-Purple Lily", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/deep_purple_lily.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2AF: {Name: "Nectarblood Burgeon", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/nectarblood_burgeon.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B0: {Name: "Winter-Lantern Fly", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/winter_lantern_fly.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B1: {Name: "Swollen Grape", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/swollen_grape.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B2: {Name: "Grave Keeper's Brainpan", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/grave_keepers_brainpan.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B3: {Name: "Horn-Strewn Excrement", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/horn_strewn_excrement.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B4: {Name: "Gas Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/gas_stone.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2B5: {Name: "Ghostflame Bloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ghostflame_bloom.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B6: {Name: "Grave Cricket", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/grave_cricket.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2B7: {Name: "Dragon's Calorbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/dragons_calorbloom.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B8: {Name: "Finger Mimic", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/finger_mimic.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2B9: {Name: "Empyrean-Blood Burgeon", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/empyrean_blood_burgeon.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2BA: {Name: "Congealed Putrescence", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/congealed_putrescence.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2BB: {Name: "Roundrock", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/roundrock.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2BC: {Name: "Spiritgrave Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/spiritgrave_stone.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2BD: {Name: "Rauh Burrow", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/rauh_burrow.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2BE: {Name: "Ember of Messmer", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ember_of_messmer.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2BF: {Name: "Blessed Bone Shard", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/blessed_bone_shard.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2C0: {Name: "Red Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/red_fulgurbloom.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2C1: {Name: "Nailstone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/nailstone.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2C2: {Name: "Sharp Gravel Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sharp_gravel_stone.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2C3: {Name: "Furnace Visage", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/furnace_visage.png", Flags: []string{"dlc", "stackable"}},
 }

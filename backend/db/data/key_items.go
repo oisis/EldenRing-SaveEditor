@@ -50,7 +50,7 @@ var KeyItems = map[uint32]ItemData{
 	0x400004D8: {Name: "Shabriri Grape", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/shabriri_grape.png"},
 	0x400022A1: {Name: "Ancient Dragon Prayerbook", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/ancient_dragon_prayerbook.png"},
 	0x401EA3C0: {Name: "Miquella's Great Rune", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/miquellas_great_rune.png", Flags: []string{"dlc"}},
-	0x401ED2B2: {Name: "Grave Keeper's Brainpan", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/grave_keepers_brainpan.png"},
+	// 0x401ED2B2 Grave Keeper's Brainpan — moved to crafting_materials.go (DLC, 999/999).
 	0x40001FD9: {Name: "Malenia's Great Rune", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/malenias_great_rune.png"},
 	0x4000229F: {Name: "Golden Order Principles", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/golden_order_principles.png"},
 	0x40002310: {Name: "Unalloyed Gold Needle", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/unalloyed_gold_needle.png"},
@@ -342,7 +342,7 @@ var KeyItems = map[uint32]ItemData{
 	0x4000229A: {Name: "Two Fingers' Prayerbook", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/two_fingers_prayerbook.png"},
 	0x401E88D6: {Name: "Fingerprint Nostrum", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/fingerprint_nostrum.png", Flags: []string{"dlc"}},
 	0x40002005: {Name: "Sewer-Gaol Key", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/sewer_gaol_key.png"},
-	0x401ED2B8: {Name: "Finger Mimic", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/multiplayer/finger_mimic.png"},
+	// 0x401ED2B8 Finger Mimic — moved to crafting_materials.go (DLC, 999/999).
 
 	// Audit batch — DLC Crystal Tears (icons under items/key_items/, matching project convention for tears in key_items.go)
 	0x401EAFAA: {Name: "Bloodsucking Cracked Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/bloodsucking_cracked_tear.png", Flags: []string{"dlc"}},

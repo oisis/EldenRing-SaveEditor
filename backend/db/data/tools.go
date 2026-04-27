@@ -193,10 +193,10 @@ var Tools = map[uint32]ItemData{
 	0x401E9039: {Name: "Spritestone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/spritestone.png", Flags: []string{"dlc", "stackable"}},
 	0x401E90F6: {Name: "Fire Spritestone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/fire_spritestone.png", Flags: []string{"dlc", "stackable"}},
 	0x401E916E: {Name: "Sunwarmth Stone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/sunwarmth_stone.png", Flags: []string{"dlc", "stackable"}},
-	0x401ED2B4: {Name: "Gas Stone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/gas_stone.png", Flags: []string{"stackable"}},
-	0x401ED2BC: {Name: "Spiritgrave Stone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/spiritgrave_stone.png", Flags: []string{"stackable"}},
-	0x401ED2C1: {Name: "Nailstone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/nailstone.png", Flags: []string{"stackable"}},
-	0x401ED2C2: {Name: "Sharp Gravel Stone", Category: "tools", MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/sharp_gravel_stone.png", Flags: []string{"stackable"}},
+	// 0x401ED2B4 Gas Stone, 0x401ED2BC Spiritgrave Stone, 0x401ED2C1 Nailstone,
+	// 0x401ED2C2 Sharp Gravel Stone — moved to crafting_materials.go (caps 999/999
+	// per Fextralife / er-save-manager DLCCraftingMaterials.txt). Keeping them here
+	// would let init()'s last-wins iteration overwrite the correct caps with 10/600.
 	0x400006A4: {Name: "Throwing Dagger", Category: "tools", MaxInventory: 40, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/throwing_dagger.png", Flags: []string{"stackable"}},
 	0x401E8B2E: {Name: "Dragon Communion Harpoon", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/dragon_communion_harpoon.png", Flags: []string{"dlc", "stackable"}},
 	0x401E90EC: {Name: "Fire Coil", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/throwables/fire_coil.png", Flags: []string{"dlc", "stackable"}},
@@ -237,7 +237,7 @@ var Tools = map[uint32]ItemData{
 	0x400007F8: {Name: "Telescope", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/misc/telescope.png"},
 	0x40000816: {Name: "Lantern", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/misc/lantern.png"},
 	0x40000BE0: {Name: "Mimic's Veil", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/misc/mimics_veil.png"},
-	0x401ED2B0: {Name: "Winter-Lantern Fly", Category: "tools", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/misc/winter_lantern_fly.png"},
+	// 0x401ED2B0 Winter-Lantern Fly — moved to crafting_materials.go (DLC, 999/999).
 	0x40000BCC: {Name: "Miranda's Prayer", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/misc/mirandas_prayer.png", Flags: []string{"stackable"}},
 	0x40000BB8: {Name: "Ancestral Infant's Head", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/misc/ancestral_infants_head.png", Flags: []string{"stackable"}},
 	0x40000BC3: {Name: "Regal Omen Bairn", Category: "tools", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/misc/regal_omen_bairn.png", Flags: []string{"stackable"}},
