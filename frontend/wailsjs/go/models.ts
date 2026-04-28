@@ -308,6 +308,7 @@ export namespace db {
 	    id: number;
 	    name: string;
 	    category: string;
+	    subCategory?: string;
 	    maxInventory: number;
 	    maxStorage: number;
 	    maxUpgrade: number;
@@ -328,6 +329,7 @@ export namespace db {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.category = source["category"];
+	        this.subCategory = source["subCategory"];
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];
 	        this.maxUpgrade = source["maxUpgrade"];
