@@ -428,5 +428,4 @@ var Weapons = map[uint32]ItemData{
 	0x04153A20: {Name: "Beast Claw", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/incantations/beast_claw.png", Flags: []string{"dlc"}},
 	0x04153C14: {Name: "Flame Art Beast Claw", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/flame_art_beast_claw.png"},
 	0x04156130: {Name: "Red Bear's Claw", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/red_bears_claw.png", Flags: []string{"dlc"}},
-	0x00F55C80: {Name: "Torchpole", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/torchpole.png"},
 }
