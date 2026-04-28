@@ -299,10 +299,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setAddToInv(true);
         setInvMax(false);
         setInvQtyVal(1);
-        // If any selected item has MaxStorage=0, leave storage off — backend would skip it anyway,
-        // and showing it enabled lets the user think they're storing copies that won't appear.
-        const anyZeroStorage = items.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) === 0);
-        setAddToStorage(!anyZeroStorage);
+        // Storage on by default if at least one selected item allows storage (>0 cap).
+        // Backend skips items with cap 0 per-item, so it's safe to enable storage even
+        // when the selection is mixed (e.g. Glovewort + Sacred Flask).
+        const anyStorageAllowed = items.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) > 0);
+        setAddToStorage(anyStorageAllowed);
         setStorageMax(false);
         setStorageQtyVal(1);
         setConfirmModal(items);
@@ -335,8 +336,14 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
-    const modalMaxInv = confirmModal ? Math.min(...confirmModal.map(i => effectiveCap(i, 'inv', clearCount, fullChaosMode))) : 1;
-    const modalMaxStorage = confirmModal ? Math.min(...confirmModal.map(i => effectiveCap(i, 'storage', clearCount, fullChaosMode))) : 1;
+    // "Hi" caps = max effective cap in the selection. Used for input upper bounds and the Max checkbox label.
+    // Backend clamps per item (resolveQty), so UI must expose the highest cap; ratcheting to the lowest
+    // would prevent a Glovewort (cap 999) from receiving its full stack just because a Remembrance (cap 1)
+    // is also selected. Items with cap 0 are skipped server-side.
+    const modalMaxInvHi = confirmModal ? Math.max(...confirmModal.map(i => effectiveCap(i, 'inv', clearCount, fullChaosMode))) : 1;
+    const modalMaxStorageHi = confirmModal ? Math.max(...confirmModal.map(i => effectiveCap(i, 'storage', clearCount, fullChaosMode))) : 1;
+    const modalAnyInvAllowed = !!confirmModal && confirmModal.some(i => effectiveCap(i, 'inv', clearCount, fullChaosMode) > 0);
+    const modalAnyStorageAllowed = !!confirmModal && confirmModal.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) > 0);
     const modalMixedMaxes = confirmModal && confirmModal.length > 1 && !modalNonStackable &&
         (new Set(confirmModal.map(i => i.maxInventory)).size > 1 || new Set(confirmModal.map(i => i.maxStorage)).size > 1);
     // True if any selected item has scales_with_ng flag (drives tooltip rendering).
@@ -487,61 +494,64 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                 <input
                                     type="number"
                                     min={1}
-                                    max={modalNonStackable ? 99 : modalMaxInv}
-                                    value={invMax ? modalMaxInv : invQtyVal}
+                                    max={modalNonStackable ? 99 : modalMaxInvHi}
+                                    value={invMax ? modalMaxInvHi : invQtyVal}
                                     disabled={!addToInv || invMax}
-                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxInv, parseInt(e.target.value) || 1)))}
+                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxInvHi, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
                                 {modalNonStackable && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
                                 )}
-                                {!modalNonStackable && modalMaxInv > 1 && (
+                                {!modalNonStackable && modalMaxInvHi > 1 && (
                                     <div
                                         onClick={() => addToInv && setInvMax(!invMax)}
                                         className={`flex items-center space-x-1.5 cursor-pointer group ${!addToInv ? 'opacity-40 pointer-events-none' : ''}`}
+                                        title={modalMixedMaxes ? 'Apply each item\'s own vanilla cap (NG+ scaled if applicable)' : `Cap: ${modalMaxInvHi}`}
                                     >
                                         <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${invMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
                                             {invMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                         </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max ({modalMaxInv})</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{modalMixedMaxes ? 'Max (per item)' : `Max (${modalMaxInvHi})`}</span>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Storage row — completely disabled when MaxStorage=0 (item not allowed in storage at all) */}
-                            <div className={`flex items-center space-x-3 ${modalMaxStorage === 0 ? 'opacity-40 pointer-events-none' : ''}`}>
+                            {/* Storage row — disabled only when NO selected item allows storage (every cap=0).
+                                Mixed selection: enabled, backend skips items with cap 0 per-item. */}
+                            <div className={`flex items-center space-x-3 ${!modalAnyStorageAllowed ? 'opacity-40 pointer-events-none' : ''}`}>
                                 <div
-                                    onClick={() => modalMaxStorage > 0 && setAddToStorage(!addToStorage)}
-                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage && modalMaxStorage > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                    onClick={() => modalAnyStorageAllowed && setAddToStorage(!addToStorage)}
+                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage && modalAnyStorageAllowed ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
                                 >
-                                    {addToStorage && modalMaxStorage > 0 && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                    {addToStorage && modalAnyStorageAllowed && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
                                 <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Storage</span>
                                 <input
                                     type="number"
                                     min={1}
-                                    max={modalNonStackable ? 99 : modalMaxStorage}
-                                    value={modalMaxStorage === 0 ? 0 : storageMax ? modalMaxStorage : storageQtyVal}
-                                    disabled={!addToStorage || storageMax || modalMaxStorage === 0}
-                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorage, parseInt(e.target.value) || 1)))}
+                                    max={modalNonStackable ? 99 : modalMaxStorageHi}
+                                    value={!modalAnyStorageAllowed ? 0 : storageMax ? modalMaxStorageHi : storageQtyVal}
+                                    disabled={!addToStorage || storageMax || !modalAnyStorageAllowed}
+                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorageHi, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
-                                {modalMaxStorage === 0 && (
+                                {!modalAnyStorageAllowed && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-red-500/70">Not allowed</span>
                                 )}
-                                {modalMaxStorage > 0 && modalNonStackable && (
+                                {modalAnyStorageAllowed && modalNonStackable && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
                                 )}
-                                {modalMaxStorage > 0 && !modalNonStackable && modalMaxStorage > 1 && (
+                                {modalAnyStorageAllowed && !modalNonStackable && modalMaxStorageHi > 1 && (
                                     <div
                                         onClick={() => addToStorage && setStorageMax(!storageMax)}
                                         className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}
+                                        title={modalMixedMaxes ? 'Apply each item\'s own vanilla storage cap (skip items with cap 0)' : `Cap: ${modalMaxStorageHi}`}
                                     >
                                         <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${storageMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
                                             {storageMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                         </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max ({modalMaxStorage})</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{modalMixedMaxes ? 'Max (per item)' : `Max (${modalMaxStorageHi})`}</span>
                                     </div>
                                 )}
                             </div>
@@ -549,7 +559,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
 
                         {modalMixedMaxes && (
                             <p className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5">
-                                Qty capped to lowest max: Inv {modalMaxInv}, Storage {modalMaxStorage}
+                                Mixed caps in selection — backend applies each item's own vanilla cap (highest in group: Inv {modalMaxInvHi}{modalAnyStorageAllowed ? `, Storage ${modalMaxStorageHi}` : ''}). Items with cap 0 skipped.
                             </p>
                         )}
 
