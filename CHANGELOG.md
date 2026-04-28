@@ -17,6 +17,9 @@ All notable changes to this project will be documented in this file.
   - Was `0x400000B5` (item ID 181 — duplicate sitting in the Multiplayer items block 170–184; in-game render mapped to the wrong icon).
   - Fixed to `0x40000082` (item ID 130 — canonical entry, paired with Phantom Great Rune 135). Cross-checked against er-save-manager `AllGoods.txt` and ER-Save-Editor `item_name.rs` — both reference projects list both IDs but only 130 is the actual fabular Whistle from Melina.
 - **Lulling Branch caps** (`tools.go`): MaxInventory 99 → 10 (storage 600 unchanged) per user audit.
+- **Cured Meat caps** (`tools.go`): all 8 entries (Immunizing/Clarifying/Dappled/Invigorating + 4 White variants) 99/600 → 10/999 per user audit.
+- **Pickled / Fowl / Turtle caps** (`tools.go`): Silver-Pickled Fowl Foot, Gold-Pickled Fowl Foot, Pickled Turtle Neck, Well-Pickled Turtle Neck (DLC) — all 99/600 → 10/999 per user audit.
+- **Deathsbane White Jerky** (`tools.go`): added `cut_content` + `ban_risk` flags (parity with Deathsbane Jerky `0x400004C4`).
 
 ### Branch: feat/inventory-game-accurate-categories — 1:1 game-aligned Inventory & Item Database
 
