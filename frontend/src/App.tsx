@@ -1,6 +1,6 @@
 import {useState, useEffect, useCallback} from 'react';
 import toast from './lib/toast';
-import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetSlotDiff, GetSaveDiffSummary, GetInfuseTypes} from '../wailsjs/go/main/App';
+import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetSlotDiff, GetSaveDiffSummary, GetInfuseTypes, GetSlotCapacity} from '../wailsjs/go/main/App';
 import {main} from '../wailsjs/go/models';
 import {CharacterTab} from './components/CharacterTab';
 import {InventoryTab} from './components/InventoryTab';
@@ -66,6 +66,7 @@ function App() {
     const [invView, setInvView] = useState<'inventory' | 'database'>('inventory');
     const [detailItem, setDetailItem] = useState<db.ItemEntry | null>(null);
     const [exporting, setExporting] = useState(false);
+    const [capacity, setCapacity] = useState<main.SlotCapacity | null>(null);
 
     const refreshUndoDepth = useCallback(() => {
         if (!platform) { setUndoDepth(0); return; }
@@ -115,6 +116,13 @@ function App() {
             setCharWarnings(char?.warnings || []);
         }).catch(() => setCharWarnings([]));
     }, [selectedChar, platform]);
+
+    // Capacity bar — fetched centrally so it can be rendered next to the
+    // Inventory/Database toggle pills (header consolidation, spec/36).
+    useEffect(() => {
+        if (!platform) { setCapacity(null); return; }
+        GetSlotCapacity(selectedChar).then(setCapacity).catch(() => setCapacity(null));
+    }, [selectedChar, platform, inventoryVersion]);
 
     const handleOpenSave = async () => {
         try {
@@ -454,23 +462,102 @@ function App() {
                                 {activeTab === 'character' && <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={refreshUndoDepth} />}
                                 {activeTab === 'inventory' && (
                                     <div className="flex-1 flex flex-col min-h-0">
-                                        {/* Toggle bar */}
-                                        <div className="flex items-center justify-between mb-3 shrink-0">
-                                            <div className="flex items-center gap-1">
-                                                {(['inventory', 'database'] as const).map(v => (
-                                                    <button key={v} onClick={() => { setInvView(v); if (v === 'inventory') setDetailItem(null); }}
-                                                        className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.12em] transition-all ${invView === v ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}>
-                                                        {v === 'inventory' ? 'Inventory' : 'Item Database'}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            {invView === 'database' && detailItem && (
-                                                <button onClick={() => setDetailItem(null)}
-                                                    className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
-                                                    Close Detail
-                                                </button>
-                                            )}
-                                        </div>
+                                        {/* Header consolidation (spec/36): toggle pills + capacity bar (Inventory) OR
+                                            Add Settings accordion (Database) on a single row. */}
+                                        {(() => {
+                                            const togglePills = (
+                                                <div className="flex items-center gap-1 shrink-0">
+                                                    {(['inventory', 'database'] as const).map(v => (
+                                                        <button key={v} onClick={() => { setInvView(v); if (v === 'inventory') setDetailItem(null); }}
+                                                            className={`px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-[0.12em] transition-all ${invView === v ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'text-muted-foreground hover:text-foreground hover:bg-muted/30'}`}>
+                                                            {v === 'inventory' ? 'Inventory' : 'Item Database'}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            );
+
+                                            if (invView === 'inventory') {
+                                                return (
+                                                    <div className="flex items-center gap-4 mb-3 shrink-0">
+                                                        {togglePills}
+                                                        {capacity && (
+                                                            <div className="flex flex-wrap items-center gap-3 flex-1">
+                                                                {[
+                                                                    { label: 'All Items', used: capacity.gaItemsUsed, max: capacity.gaItemsMax },
+                                                                    { label: 'Inventory', used: capacity.inventoryUsed, max: capacity.inventoryMax },
+                                                                    { label: 'Storage', used: capacity.storageUsed, max: capacity.storageMax },
+                                                                ].map(({ label, used, max }) => {
+                                                                    const pct = max > 0 ? (used / max) * 100 : 0;
+                                                                    const color = pct >= 95 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-primary';
+                                                                    return (
+                                                                        <div key={label} className="flex items-center gap-2 min-w-[170px]">
+                                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-14 text-right">{label}</span>
+                                                                            <div className="flex-1 h-1.5 bg-muted/30 rounded-full overflow-hidden">
+                                                                                <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${Math.min(pct, 100)}%` }} />
+                                                                            </div>
+                                                                            <span className={`text-[9px] font-bold tabular-nums ${pct >= 95 ? 'text-red-400' : 'text-muted-foreground'}`}>{used}/{max}</span>
+                                                                        </div>
+                                                                    );
+                                                                })}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            }
+
+                                            // Database view: pills + Add Settings accordion (4-param summary).
+                                            const s = charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS;
+                                            const infuseName = infuseTypes.find(t => t.offset === s.infuseOffset)?.name ?? 'Standard';
+                                            return (
+                                                <div className="flex items-start gap-4 mb-3 shrink-0">
+                                                    <div className="pt-2">{togglePills}</div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <AccordionSection id="inv-add-settings" title="Add Settings"
+                                                            summary={`+${s.upgrade25} · +${s.upgrade10} · ${infuseName} · Ash +${s.upgradeAsh}`}
+                                                            className=""
+                                                            headerRight={detailItem ? (
+                                                                <button onClick={() => setDetailItem(null)}
+                                                                    className="text-[8px] font-bold uppercase tracking-widest text-muted-foreground hover:text-foreground transition-colors">
+                                                                    Close Detail
+                                                                </button>
+                                                            ) : undefined}>
+                                                            {(() => {
+                                                                const set = (patch: Partial<AddSettings>) => setCharAddSettings(prev => ({...prev, [selectedChar]: {...s, ...patch}}));
+                                                                return (
+                                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 py-1">
+                                                                        <div className="flex items-center space-x-3">
+                                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +25</span>
+                                                                            <input type="range" min={0} max={25} value={s.upgrade25} onChange={e => set({upgrade25: parseInt(e.target.value)})}
+                                                                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
+                                                                            <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{s.upgrade25}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center space-x-3">
+                                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +10</span>
+                                                                            <input type="range" min={0} max={10} value={s.upgrade10} onChange={e => set({upgrade10: parseInt(e.target.value)})}
+                                                                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
+                                                                            <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgrade10}</span>
+                                                                        </div>
+                                                                        <div className="flex items-center space-x-3">
+                                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Infuse</span>
+                                                                            <select value={s.infuseOffset} onChange={e => set({infuseOffset: parseInt(e.target.value)})}
+                                                                                className="flex-1 bg-muted/20 border border-border rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer">
+                                                                                {infuseTypes.map(t => <option key={t.offset} value={t.offset}>{t.name}</option>)}
+                                                                            </select>
+                                                                        </div>
+                                                                        <div className="flex items-center space-x-3">
+                                                                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Spirit Ash</span>
+                                                                            <input type="range" min={0} max={10} value={s.upgradeAsh} onChange={e => set({upgradeAsh: parseInt(e.target.value)})}
+                                                                                className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
+                                                                            <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgradeAsh}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                );
+                                                            })()}
+                                                        </AccordionSection>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
 
                                         {invView === 'inventory' ? (
                                             <InventoryTab charIndex={selectedChar} inventoryVersion={inventoryVersion} columnVisibility={columnVisibility} showFlaggedItems={showFlaggedItems} category={category} setCategory={setCategory} onMutate={refreshUndoDepth} />
@@ -478,43 +565,6 @@ function App() {
                                             <div className="flex-1 flex min-h-0">
                                                 {/* Database list */}
                                                 <div className={`flex-1 flex flex-col min-h-0 min-w-0 ${detailItem ? 'max-w-[60%]' : ''}`}>
-                                                    <AccordionSection id="inv-add-settings" title="Add Settings"
-                                                        summary={`+${(charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS).upgrade25} / +${(charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS).upgrade10} / Ash +${(charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS).upgradeAsh}`}
-                                                        className="mb-3 shrink-0">
-                                                        {(() => {
-                                                            const s = charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS;
-                                                            const set = (patch: Partial<AddSettings>) => setCharAddSettings(prev => ({...prev, [selectedChar]: {...s, ...patch}}));
-                                                            return (
-                                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-4 py-1">
-                                                                    <div className="flex items-center space-x-3">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +25</span>
-                                                                        <input type="range" min={0} max={25} value={s.upgrade25} onChange={e => set({upgrade25: parseInt(e.target.value)})}
-                                                                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                                                                        <span className="text-[10px] font-mono font-bold text-primary w-6 text-right">+{s.upgrade25}</span>
-                                                                    </div>
-                                                                    <div className="flex items-center space-x-3">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Weapon +10</span>
-                                                                        <input type="range" min={0} max={10} value={s.upgrade10} onChange={e => set({upgrade10: parseInt(e.target.value)})}
-                                                                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                                                                        <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgrade10}</span>
-                                                                    </div>
-                                                                    <div className="flex items-center space-x-3">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Infuse</span>
-                                                                        <select value={s.infuseOffset} onChange={e => set({infuseOffset: parseInt(e.target.value)})}
-                                                                            className="flex-1 bg-muted/20 border border-border rounded-md px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider focus:ring-1 focus:ring-primary/30 outline-none transition-all cursor-pointer">
-                                                                            {infuseTypes.map(t => <option key={t.offset} value={t.offset}>{t.name}</option>)}
-                                                                        </select>
-                                                                    </div>
-                                                                    <div className="flex items-center space-x-3">
-                                                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-24 shrink-0">Spirit Ash</span>
-                                                                        <input type="range" min={0} max={10} value={s.upgradeAsh} onChange={e => set({upgradeAsh: parseInt(e.target.value)})}
-                                                                            className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
-                                                                        <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgradeAsh}</span>
-                                                                    </div>
-                                                                </div>
-                                                            );
-                                                        })()}
-                                                    </AccordionSection>
                                                     <DatabaseTab
                                                         columnVisibility={columnVisibility}
                                                         platform={platform}
