@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Item Database fixes (post spec/36)
+
+- **DatabaseTab "Add Selected" modal — respect per-item caps in mixed selections** (`frontend/src/components/DatabaseTab.tsx`):
+  - Replaced `Math.min(...)` aggregations (`modalMaxInv`/`modalMaxStorage`) with `*Hi` = `Math.max(...)` and `modalAny*Allowed` = `some(>0)` semantics.
+  - Storage row no longer disabled wholesale when *one* selected item has `MaxStorage=0`; gate now keys off `modalAnyStorageAllowed`. Backend (`resolveQty`) already skips items with cap 0 per-item.
+  - "Max" checkbox visible whenever the highest cap in the group exceeds 1 (previously hidden when min cap was 1, e.g. mixing Glovewort + Remembrance).
+  - `openConfirmModal` enables Storage by default if any selected item allows it (was: only when none had cap 0).
+  - Numerical input upper bound + clamp now follows `*Hi` cap. Mixed-cap banner copy reworded: "backend applies each item's own vanilla cap".
+  - Single-item flow unchanged.
+- **Spectral Steed Whistle — wrong hex** (`backend/db/data/tools.go`, `descriptions.go`):
+  - Was `0x400000B5` (item ID 181 — duplicate sitting in the Multiplayer items block 170–184; in-game render mapped to the wrong icon).
+  - Fixed to `0x40000082` (item ID 130 — canonical entry, paired with Phantom Great Rune 135). Cross-checked against er-save-manager `AllGoods.txt` and ER-Save-Editor `item_name.rs` — both reference projects list both IDs but only 130 is the actual fabular Whistle from Melina.
+- **Lulling Branch caps** (`tools.go`): MaxInventory 99 → 10 (storage 600 unchanged) per user audit.
+
 ### Branch: feat/inventory-game-accurate-categories — 1:1 game-aligned Inventory & Item Database
 
 **Goal:** Drop the last technical/community-taxonomy seams between the editor's category dropdown and the in-game inventory layout. After spec/33 introduced the `Information` tab and migrated Multiplayer/Remembrances/Crystal Tears, the dropdown was still partly Eldenring.wiki-flavoured (no sub-groups, alphabetical-ish order, "Information" instead of "Info", `&` instead of `/`). Phase 36 finishes the alignment: 18 tabs in exact in-game order, sub-grouping per tab where the game has them, reclassifications driven by Fextralife per-item breadcrumb + in-game user verification.
