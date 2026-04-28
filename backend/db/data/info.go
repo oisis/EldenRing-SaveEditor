@@ -123,31 +123,8 @@ var Information = map[uint32]ItemData{
 	0x401EA3D9: {Name: "Furnace Keeper's Note", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/furnace_keepers_note.png", Flags: []string{"dlc"}},
 	0x401EA443: {Name: "Note: Sealed Spiritsprings", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/note_sealed_spiritsprings.png", Flags: []string{"dlc"}},
 
-	// ─── Region maps (base) ─────────────────────────────────────────────
-	0x40002198: {Name: "Map: Limgrave, West", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_limgrave_west.png"},
-	0x40002199: {Name: "Map: Weeping Peninsula", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_weeping_peninsula.png"},
-	0x4000219A: {Name: "Map: Limgrave, East", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_limgrave_east.png"},
-	0x4000219B: {Name: "Map: Liurnia, East", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_liurnia_east.png"},
-	0x4000219C: {Name: "Map: Liurnia, North", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_liurnia_north.png"},
-	0x4000219D: {Name: "Map: Liurnia, West", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_liurnia_west.png"},
-	0x4000219E: {Name: "Map: Altus Plateau", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_altus_plateau.png"},
-	0x4000219F: {Name: "Map: Leyndell, Royal Capital", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_leyndell_royal_capital.png"},
-	0x400021A0: {Name: "Map: Mt. Gelmir", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_mt_gelmir.png"},
-	0x400021A1: {Name: "Map: Caelid", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_caelid.png"},
-	0x400021A2: {Name: "Map: Dragonbarrow", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/map_dragonbarrow.png"},
-	0x400021A3: {Name: "Map: Mountaintops of the Giants, West", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_mountaintops_of_the_giants_west.png"},
-	0x400021A4: {Name: "Map: Mountaintops of the Giants, East", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_mountaintops_of_the_giants_east.png"},
-	0x400021A5: {Name: "Map: Ainsel River", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_ainsel_river.png"},
-	0x400021A6: {Name: "Map: Lake of Rot", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_lake_of_rot.png"},
-	0x400021A7: {Name: "Map: Siofra River", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_siofra_river.png"},
-	0x400021A8: {Name: "Map: Mohgwyn Palace", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_mohgwyn_palace.png"},
-	0x400021A9: {Name: "Map: Deeproot Depths", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_deeproot_depths.png"},
-	0x400021AA: {Name: "Map: Consecrated Snowfield", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_consecrated_snowfield.png"},
-
-	// ─── Region maps (DLC) ──────────────────────────────────────────────
-	0x401EA618: {Name: "Map: Gravesite Plain", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_gravesite_plain.png", Flags: []string{"dlc"}},
-	0x401EA619: {Name: "Map: Scadu Altus", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_scadu_altus.png", Flags: []string{"dlc"}},
-	0x401EA61A: {Name: "Map: Southern Shore", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_southern_shore.png", Flags: []string{"dlc"}},
-	0x401EA61B: {Name: "Map: Rauh Ruins", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_rauh_ruins.png", Flags: []string{"dlc"}},
-	0x401EA61C: {Name: "Map: Abyss", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/quest/map_abyss.png", Flags: []string{"dlc"}},
 }
+
+// Note: Region/World Maps (Map: Limgrave West, Map: Caelid, etc.) — relocated
+// to key_items.go per spec/36 (correct in-game tab is Key Items > World Maps).
+// Single source of truth — do NOT duplicate here.
