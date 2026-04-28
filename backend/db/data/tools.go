@@ -49,17 +49,23 @@ var Tools = map[uint32]ItemData{
 
 	0x401E90D8: {Name: "Surging Frenzied Flame", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/surging_frenzied_flame.png", Flags: []string{"dlc"}},
 	0x401E9100: {Name: "Glinting Nail", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/glinting_nail.png", Flags: []string{"dlc"}},
+	// TODO: er-save-manager DLCConsumables.txt lists 4 Stew variants (2001200..2001203) —
+	// duplicate names with separate IDs (likely base vs reward / NG+ variants). We have
+	// only the first two (0x401E8932 = 2001200, 0x401E8933 = 2001201). Missing:
+	//   0x401E8934 = 2001202 "Scorpion Stew"
+	//   0x401E8935 = 2001203 "Gourmet Scorpion Stew"
+	// User reports 3 visible in-game; needs in-game verification of which IDs actually drop.
 	0x401E8932: {Name: "Scorpion Stew", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/tools/scorpion_stew.png", Flags: []string{"dlc"}},
 	0x401E8933: {Name: "Gourmet Scorpion Stew", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/tools/gourmet_scorpion_stew.png", Flags: []string{"dlc"}},
 	0x40000334: {Name: "Boiled Crab", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/boiled_crab.png", Flags: []string{"stackable"}},
 	0x401E87A0: {Name: "Spirit Raisin", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/spirit_raisin.png", Flags: []string{"dlc", "stackable"}},
 	0x40000546: {Name: "Deathsbane White Jerky", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/deathsbane_white_jerky.png", Flags: []string{"cut_content", "ban_risk", "stackable"}},
 	0x40000D16: {Name: "Bewitching Branch", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/bewitching_branch.png", Flags: []string{"stackable"}},
-	0x401E88CC: {Name: "Dragon Communion Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/dragon_communion_flesh.png", Flags: []string{"dlc", "stackable"}},
+	0x401E88CC: {Name: "Dragon Communion Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/dragon_communion_flesh.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8CDC: {Name: "Thiollier's Concoction", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/thiolliers_concoction.png", Flags: []string{"dlc", "stackable"}},
 	0x4000032B: {Name: "Sweet Raisin", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sweet_raisin.png", Flags: []string{"stackable"}},
 	0x401E9196: {Name: "Charming Branch", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/charming_branch.png", Flags: []string{"dlc", "stackable"}},
-	0x400004BA: {Name: "Exalted Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/exalted_flesh.png", Flags: []string{"stackable"}},
+	0x400004BA: {Name: "Exalted Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/exalted_flesh.png", Flags: []string{"stackable"}},
 	0x401E8CB4: {Name: "Ancient Dragon's Blessing", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/ancient_dragons_blessing.png", Flags: []string{"dlc"}},
 	0x401E8804: {Name: "Blessing of Marika", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/blessing_of_marika.png", Flags: []string{"dlc"}},
 	0x401E90CE: {Name: "Call of Tibia", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/call_of_tibia.png", Flags: []string{"dlc"}},
@@ -266,16 +272,16 @@ var Tools = map[uint32]ItemData{
 
 	// Audit batch 4 — DLC consumables (icons present); all flagged "dlc"
 	0x401E880E: {Name: "Lulling Branch", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/lulling_branch.png", Flags: []string{"dlc", "stackable"}},
-	0x401E88D1: {Name: "Dragonscale Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/dragonscale_flesh.png", Flags: []string{"dlc", "stackable"}},
+	0x401E88D1: {Name: "Dragonscale Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/dragonscale_flesh.png", Flags: []string{"dlc", "stackable"}},
 	0x401E88E0: {Name: "Spellproof Pickled Liver", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 5, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/spellproof_pickled_liver.png", Flags: []string{"dlc", "stackable"}},
 	0x401E88EA: {Name: "Fireproof Pickled Liver", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 5, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/fireproof_pickled_liver.png", Flags: []string{"dlc", "stackable"}},
 	0x401E88F4: {Name: "Lightningproof Pickled Liver", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 5, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/lightningproof_pickled_liver.png", Flags: []string{"dlc", "stackable"}},
 	0x401E88FE: {Name: "Holyproof Pickled Liver", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 5, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/holyproof_pickled_liver.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8908: {Name: "Opaline Pickled Liver", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 5, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/opaline_pickled_liver.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8912: {Name: "Well-Pickled Turtle Neck", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/well_pickled_turtle_neck.png", Flags: []string{"dlc", "stackable"}},
-	0x401E893A: {Name: "Sacred Bloody Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_bloody_flesh.png", Flags: []string{"dlc", "stackable"}},
-	0x401E8944: {Name: "Silver Horn Tender", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/silver_horn_tender.png", Flags: []string{"dlc", "stackable"}},
-	0x401E894E: {Name: "Golden Horn Tender", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/golden_horn_tender.png", Flags: []string{"dlc", "stackable"}},
+	0x401E893A: {Name: "Sacred Bloody Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/sacred_bloody_flesh.png", Flags: []string{"dlc", "stackable"}},
+	0x401E8944: {Name: "Silver Horn Tender", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/silver_horn_tender.png", Flags: []string{"dlc", "stackable"}},
+	0x401E894E: {Name: "Golden Horn Tender", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/golden_horn_tender.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8B24: {Name: "Innard Meat", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/innard_meat.png", Flags: []string{"dlc", "stackable"}},
 	0x401E90BA: {Name: "Horned Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/horned_bairn.png", Flags: []string{"dlc", "stackable"}},
 

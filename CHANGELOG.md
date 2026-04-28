@@ -20,6 +20,9 @@ All notable changes to this project will be documented in this file.
 - **Cured Meat caps** (`tools.go`): all 8 entries (Immunizing/Clarifying/Dappled/Invigorating + 4 White variants) 99/600 → 10/999 per user audit.
 - **Pickled / Fowl / Turtle caps** (`tools.go`): Silver-Pickled Fowl Foot, Gold-Pickled Fowl Foot, Pickled Turtle Neck, Well-Pickled Turtle Neck (DLC) — all 99/600 → 10/999 per user audit.
 - **Deathsbane White Jerky** (`tools.go`): added `cut_content` + `ban_risk` flags (parity with Deathsbane Jerky `0x400004C4`).
+- **Flesh / Meat caps** (`tools.go`): Exalted Flesh, Dragon Communion Flesh (DLC), Dragonscale Flesh (DLC), Sacred Bloody Flesh (DLC) — 99/600 → 10/999 per user audit. Innard Meat (DLC) kept at 99/600.
+- **Horn Tender caps** (`tools.go`): Silver Horn Tender (DLC), Golden Horn Tender (DLC) — 99/600 → 10/999 per user audit (DLC odpowiednik Pickled Fowl Foot, rune + item discovery booster).
+- **Scorpion Stew DLC variants TODO** (`tools.go`, `ROADMAP.md`): er-save-manager DLCConsumables.txt lists 4 IDs (2001200..2001203) with duplicate names; we currently expose only `0x401E8932` and `0x401E8933`. Missing IDs flagged for in-game verification: `0x401E8934`, `0x401E8935`.
 
 ### Branch: feat/inventory-game-accurate-categories — 1:1 game-aligned Inventory & Item Database
 
