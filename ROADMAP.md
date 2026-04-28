@@ -467,6 +467,7 @@ Items to flag `cut_content, ban_risk` (user reported `[ERROR]` icon in-game OR w
 - 0x40000BCC Miranda's Prayer (user reported `[Error]Modlitwa Mirandy` in-game)
 - ✅ Spectral Steed Whistle — fixed: hex `0x400000B5` was the duplicate entry from the Multiplayer block; canonical ID is `0x40000082` (item 130 per er-save-manager / ER-Save-Editor reference). Updated in `tools.go` + `descriptions.go`.
 - Scorpion Stew (DLC) — user reports 3 visible in-game; we have 2 (`0x401E8932`, `0x401E8933`). er-save-manager DLCConsumables.txt lists 4 IDs (2001200..2001203) with duplicate names — likely base vs reward/NG+ variants. Missing IDs to verify in-game: `0x401E8934` (2001202 Scorpion Stew), `0x401E8935` (2001203 Gourmet Scorpion Stew). TODO comment added at the entry in `tools.go`.
+- ✅ Innard Meat `0x401E8B24` (2001700) — fixed: the item is a throwable bait (DLC), present in-game in Tools/Throwables sub-tab alongside Bone Darts. Initially mis-classified as Consumables based on the name; user verified in-game position. Reclassified to `SubcatToolsThrowables` in `tools.go`. (Note: er-save-manager DLCConsumables.txt mixes throwables with edibles — file name is misleading.)
 
 **Key Items (key_items.go) — flag:**
 - 0x4000229E Golden Order Principia (candidate for `[ERROR]Zasady Złotego Porządku` reported by user)

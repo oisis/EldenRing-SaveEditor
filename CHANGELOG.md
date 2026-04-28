@@ -23,6 +23,10 @@ All notable changes to this project will be documented in this file.
 - **Flesh / Meat caps** (`tools.go`): Exalted Flesh, Dragon Communion Flesh (DLC), Dragonscale Flesh (DLC), Sacred Bloody Flesh (DLC) — 99/600 → 10/999 per user audit. Innard Meat (DLC) kept at 99/600.
 - **Horn Tender caps** (`tools.go`): Silver Horn Tender (DLC), Golden Horn Tender (DLC) — 99/600 → 10/999 per user audit (DLC odpowiednik Pickled Fowl Foot, rune + item discovery booster).
 - **Scorpion Stew DLC variants TODO** (`tools.go`, `ROADMAP.md`): er-save-manager DLCConsumables.txt lists 4 IDs (2001200..2001203) with duplicate names; we currently expose only `0x401E8932` and `0x401E8933`. Missing IDs flagged for in-game verification: `0x401E8934`, `0x401E8935`.
+- **Innard Meat reclassified** (`tools.go`): moved from `SubcatToolsConsumables` to `SubcatToolsThrowables` (cap 40/600). User verified in-game position: it's a throwable bait in Tools/Throwables sub-tab alongside Bone Darts. er-save-manager DLCConsumables.txt was misleading (file mixes throwables with edibles). My earlier "cut content" diagnosis was wrong — fixed.
+- **Throwing Pots reorganized by container** (`tools.go`): grouped per crafting container (Cracked Pot / Ritual Pot / Hefty Cracked Pot) with section comments. Source: erdb 1.10.0 `EquipParamGoods.csv` field `potGroupId` (1=Cracked, 3=Ritual). DLC pots classified per Fextralife per-item recipe pages.
+- **Ancient Dragonbolt Pot reclassified** (`tools.go`): moved from `SubcatToolsConsumables` to `SubcatToolsThrowingPots`. erdb potGroupId=3 (Ritual Pot recipe) confirmed by user — it's a Ritual Pot variant, not a generic consumable.
+- **Ritual Pot caps audit** (`tools.go`): all 12 Ritual Pot recipe items (Redmane Fire / Giantsflame Fire / Ancient Dragonbolt / Sacred Order / Freezing / Alluring / Beastlure / Albinauric / Cursed-Blood / Academy Magic / Rot + DLC Eternal Sleep) — MaxInventory 20 → 10 per user audit (matches in-game cap).
 
 ### Branch: feat/inventory-game-accurate-categories — 1:1 game-aligned Inventory & Item Database
 

@@ -115,20 +115,28 @@ var Tools = map[uint32]ItemData{
 	0x4000042F: {Name: "Flask of Cerulean Tears +10", Category: "tools", SubCategory: SubcatToolsFlasks, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/flask_of_cerulean_tears.png", Flags: []string{"stackable"}},
 	0x40000431: {Name: "Flask of Cerulean Tears +11", Category: "tools", SubCategory: SubcatToolsFlasks, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/flask_of_cerulean_tears.png", Flags: []string{"stackable"}},
 	0x40000433: {Name: "Flask of Cerulean Tears +12", Category: "tools", SubCategory: SubcatToolsFlasks, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/flask_of_cerulean_tears.png", Flags: []string{"stackable"}},
-	0x40000141: {Name: "Ancient Dragonbolt Pot", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/ancient_dragonbolt_pot.png", Flags: []string{"stackable"}},
+	// === THROWING POTS — grouped by container ===
+	// Source of truth for base game: erdb 1.10.0 EquipParamGoods.csv field potGroupId
+	//   potGroupId=1 → Cracked Pot (0x4000251C)
+	//   potGroupId=3 → Ritual Pot  (0x4000251D)
+	// DLC pots (not in erdb 1.10.0) classified per Fextralife per-item recipe pages.
+	// Hefty Cracked Pot (0x401EA99C) = DLC big container; all "Hefty *" pots use it.
+
+	// --- Cracked Pot (Pęknięty garnek) — standard pots ---
 	0x4000012C: {Name: "Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/fire_pot.png", Flags: []string{"stackable"}},
-	0x4000012D: {Name: "Redmane Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/redmane_fire_pot.png", Flags: []string{"stackable"}},
-	0x4000012E: {Name: "Giantsflame Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/giantsflame_fire_pot.png", Flags: []string{"stackable"}},
 	0x40000140: {Name: "Lightning Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/lightning_pot.png", Flags: []string{"stackable"}},
 	0x4000014A: {Name: "Fetid Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/fetid_pot.png", Flags: []string{"stackable"}},
 	0x40000154: {Name: "Swarm Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/swarm_pot.png", Flags: []string{"stackable"}},
 	0x4000015E: {Name: "Holy Water Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/holy_water_pot.png", Flags: []string{"stackable"}},
-	0x4000015F: {Name: "Sacred Order Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_order_pot.png", Flags: []string{"stackable"}},
-	0x40000168: {Name: "Freezing Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/freezing_pot.png", Flags: []string{"stackable"}},
 	0x40000172: {Name: "Poison Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/poison_pot.png", Flags: []string{"stackable"}},
 	0x4000017C: {Name: "Oil Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/oil_pot.png", Flags: []string{"stackable"}},
-	0x40000186: {Name: "Alluring Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/alluring_pot.png", Flags: []string{"stackable"}},
-	0x40000187: {Name: "Beastlure Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/beastlure_pot.png", Flags: []string{"stackable"}},
+	0x40000258: {Name: "Volcano Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/volcano_pot.png", Flags: []string{"stackable"}},
+	0x40000280: {Name: "Sleep Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sleep_pot.png", Flags: []string{"stackable"}},
+	0x4000028A: {Name: "Rancor Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/rancor_pot.png", Flags: []string{"stackable"}},
+	0x40000294: {Name: "Magic Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/magic_pot.png", Flags: []string{"stackable"}},
+	0x40000727: {Name: "Explosive Stone Clump", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/explosive_stone_clump.png", Flags: []string{"stackable"}},
+
+	// --- Cracked Pot — Roped variants (base game) ---
 	0x40000190: {Name: "Roped Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_fire_pot.png", Flags: []string{"stackable"}},
 	0x400001A4: {Name: "Roped Lightning Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_lightning_pot.png", Flags: []string{"stackable"}},
 	0x400001AE: {Name: "Roped Fetid Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_fetid_pot.png", Flags: []string{"stackable"}},
@@ -139,17 +147,29 @@ var Tools = map[uint32]ItemData{
 	0x400001E0: {Name: "Roped Freezing Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_freezing_pot.png", Flags: []string{"cut_content", "ban_risk", "stackable"}},
 	0x400001EA: {Name: "Roped Volcano Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_volcano_pot.png", Flags: []string{"stackable"}},
 	0x400001FE: {Name: "Roped Holy Water Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_holy_water_pot.png", Flags: []string{"stackable"}},
-	0x40000258: {Name: "Volcano Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/volcano_pot.png", Flags: []string{"stackable"}},
-	0x40000262: {Name: "Albinauric Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/albinauric_pot.png", Flags: []string{"stackable"}},
-	0x40000276: {Name: "Cursed-Blood Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/cursed_blood_pot.png", Flags: []string{"stackable"}},
-	0x40000280: {Name: "Sleep Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sleep_pot.png", Flags: []string{"stackable"}},
-	0x4000028A: {Name: "Rancor Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/rancor_pot.png", Flags: []string{"stackable"}},
-	0x40000294: {Name: "Magic Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/magic_pot.png", Flags: []string{"stackable"}},
-	0x40000295: {Name: "Academy Magic Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/academy_magic_pot.png", Flags: []string{"stackable"}},
-	0x4000029E: {Name: "Rot Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/rot_pot.png", Flags: []string{"stackable"}},
-	0x40000727: {Name: "Explosive Stone Clump", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/explosive_stone_clump.png", Flags: []string{"stackable"}},
-	0x40000731: {Name: "Poisoned Stone Clump", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/poisoned_stone_clump.png", Flags: []string{"stackable"}},
-	0x4000D17E: {Name: "?GoodsName? Holy Water Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/goodsname_holy_water_pot.png", Flags: []string{"cut_content", "ban_risk", "stackable"}},
+
+	// --- Cracked Pot — DLC pots (Fextralife: recipe uses Cracked Pot) ---
+	0x401E873C: {Name: "Red Lightning Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/red_lightning_pot.png", Flags: []string{"dlc", "stackable"}},
+	0x401E8746: {Name: "Frenzied Flame Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/frenzied_flame_pot.png", Flags: []string{"dlc", "stackable"}},
+	0x401E8778: {Name: "Roped Frenzied Flame Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_frenzied_flame_pot.png", Flags: []string{"dlc", "stackable"}},
+
+	// --- Ritual Pot (Rytualny garnek) — base game (11) ---
+	0x4000012D: {Name: "Redmane Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/redmane_fire_pot.png", Flags: []string{"stackable"}},
+	0x40000141: {Name: "Ancient Dragonbolt Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/ancient_dragonbolt_pot.png", Flags: []string{"stackable"}},
+	0x4000012E: {Name: "Giantsflame Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/giantsflame_fire_pot.png", Flags: []string{"stackable"}},
+	0x4000015F: {Name: "Sacred Order Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sacred_order_pot.png", Flags: []string{"stackable"}},
+	0x40000168: {Name: "Freezing Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/freezing_pot.png", Flags: []string{"stackable"}},
+	0x40000186: {Name: "Alluring Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/alluring_pot.png", Flags: []string{"stackable"}},
+	0x40000187: {Name: "Beastlure Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/beastlure_pot.png", Flags: []string{"stackable"}},
+	0x40000262: {Name: "Albinauric Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/albinauric_pot.png", Flags: []string{"stackable"}},
+	0x40000276: {Name: "Cursed-Blood Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/cursed_blood_pot.png", Flags: []string{"stackable"}},
+	0x40000295: {Name: "Academy Magic Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/academy_magic_pot.png", Flags: []string{"stackable"}},
+	0x4000029E: {Name: "Rot Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/rot_pot.png", Flags: []string{"stackable"}},
+
+	// --- Ritual Pot — DLC ---
+	0x401E8764: {Name: "Eternal Sleep Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/eternal_sleep_pot.png", Flags: []string{"dlc", "stackable"}},
+
+	// --- Hefty Cracked Pot (Duży pęknięty garnek) — DLC big pots ---
 	0x401E85AC: {Name: "Hefty Fire Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/hefty_fire_pot.png", Flags: []string{"dlc", "stackable"}},
 	0x401E85B6: {Name: "Hefty Rock Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/hefty_rock_pot.png", Flags: []string{"dlc", "stackable"}},
 	0x401E85C0: {Name: "Hefty Lightning Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/hefty_lightning_pot.png", Flags: []string{"dlc", "stackable"}},
@@ -165,10 +185,14 @@ var Tools = map[uint32]ItemData{
 	0x401E871E: {Name: "Hefty Rot Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/hefty_rot_pot.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8728: {Name: "Hefty Furnace Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/hefty_furnace_pot.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8732: {Name: "Hefty Red Lightning Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/hefty_red_lightning_pot.png", Flags: []string{"dlc", "stackable"}},
-	0x401E873C: {Name: "Red Lightning Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/red_lightning_pot.png", Flags: []string{"dlc", "stackable"}},
-	0x401E8746: {Name: "Frenzied Flame Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/frenzied_flame_pot.png", Flags: []string{"dlc", "stackable"}},
-	0x401E8764: {Name: "Eternal Sleep Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/eternal_sleep_pot.png", Flags: []string{"dlc", "stackable"}},
-	0x401E8778: {Name: "Roped Frenzied Flame Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/roped_frenzied_flame_pot.png", Flags: []string{"dlc", "stackable"}},
+
+	// --- Throwing Pots — cut content / unused param ---
+	0x4000D17E: {Name: "?GoodsName? Holy Water Pot", Category: "tools", SubCategory: SubcatToolsThrowingPots, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/goodsname_holy_water_pot.png", Flags: []string{"cut_content", "ban_risk", "stackable"}},
+
+	// === END THROWING POTS ===
+
+	// Throwables (Stone Clumps — bone darts and similar, NOT pots)
+	0x40000731: {Name: "Poisoned Stone Clump", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/poisoned_stone_clump.png", Flags: []string{"stackable"}},
 	0x40000DAC: {Name: "Uplifting Aromatic", Category: "tools", SubCategory: SubcatToolsPerfumeArts, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/uplifting_aromatic.png", Flags: []string{"stackable"}},
 	0x40000DB6: {Name: "Spark Aromatic", Category: "tools", SubCategory: SubcatToolsPerfumeArts, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/spark_aromatic.png", Flags: []string{"stackable"}},
 	0x40000DC0: {Name: "Ironjar Aromatic", Category: "tools", SubCategory: SubcatToolsPerfumeArts, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/ironjar_aromatic.png", Flags: []string{"stackable"}},
@@ -282,7 +306,11 @@ var Tools = map[uint32]ItemData{
 	0x401E893A: {Name: "Sacred Bloody Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/sacred_bloody_flesh.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8944: {Name: "Silver Horn Tender", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/silver_horn_tender.png", Flags: []string{"dlc", "stackable"}},
 	0x401E894E: {Name: "Golden Horn Tender", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/golden_horn_tender.png", Flags: []string{"dlc", "stackable"}},
-	0x401E8B24: {Name: "Innard Meat", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/innard_meat.png", Flags: []string{"dlc", "stackable"}},
+	// Innard Meat: throwable bait (DLC) — in-game category is Throwables (alongside Bone Darts),
+	// NOT Consumables. Initially mis-classified as Consumables based on name; user verified
+	// in-game position. Reclassified to SubcatToolsThrowables (er-save-manager DLCConsumables.txt
+	// is misleading — that file mixes throwables with edibles).
+	0x401E8B24: {Name: "Innard Meat", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 40, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/innard_meat.png", Flags: []string{"dlc", "stackable"}},
 	0x401E90BA: {Name: "Horned Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/horned_bairn.png", Flags: []string{"dlc", "stackable"}},
 
 	// ─── Golden Runes — relocated from bolstering_materials.go (correct in-game tab is Tools) ───
