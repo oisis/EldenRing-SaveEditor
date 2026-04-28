@@ -3,6 +3,13 @@
 > **Zakres**: Audyt i migracja itemów w `backend/db/data/*.go` po stronie kategoryzacji per-tab gry. Stworzenie nowej kategorii `info` (Information / Informacje), reorganizacja `tools.go`, `key_items.go`, `crafting_materials.go`. Audyt flag `cut_content` / `ban_risk` przy okazji.
 
 > **Status**: ✅ Wdrożone na `feat/db-info-category` (Apr 2026).
+>
+> **Rozszerzone przez**: [spec/36 — Inventory Categories: Game-Accurate Order &
+> Sub-Grouping](36-inventory-categories-game-order.md). Spec/33 ustaliło source-of-truth
+> (Fextralife per-item) i wyciągnęło Information tab; spec/36 dokończa pracę
+> definiując 18 zakładek głównych w kolejności z gry, mapując sub-grupy i
+> przenosząc ostatnie misclassifications (Larval Tears, Torches, Region Maps,
+> Golden Runes, Whetblades/Cookbooks visibility).
 
 ---
 

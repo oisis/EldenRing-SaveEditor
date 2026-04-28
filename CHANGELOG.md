@@ -4,6 +4,74 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Branch: feat/inventory-game-accurate-categories — 1:1 game-aligned Inventory & Item Database
+
+**Goal:** Drop the last technical/community-taxonomy seams between the editor's category dropdown and the in-game inventory layout. After spec/33 introduced the `Information` tab and migrated Multiplayer/Remembrances/Crystal Tears, the dropdown was still partly Eldenring.wiki-flavoured (no sub-groups, alphabetical-ish order, "Information" instead of "Info", `&` instead of `/`). Phase 36 finishes the alignment: 18 tabs in exact in-game order, sub-grouping per tab where the game has them, reclassifications driven by Fextralife per-item breadcrumb + in-game user verification.
+
+**Why:**
+- Player toggling between editor and game shouldn't translate names — `Ashes` not "Spirit Ashes", `Info` not "Information", `/` not `&`.
+- Larval Tears living under Bolstering Materials was historical; the game shows them in Key Items / Larval Tears + Deathroot. Torches under Melee Armaments was wrong — game shows them in Shields. Region Maps were duplicated across `info.go` / `tools.go` / `key_items.go`. Golden Runes were under Bolstering but the game lists them in Tools.
+- "All Categories" view in Item Database loaded ~1530 items synchronously, blocking the UI thread for ~600 ms on Steam Deck. Progressive 18× chunked load makes first items visible <100 ms with non-blocking scroll.
+
+**Backend (`backend/db/data/`):**
+- `types.go` — added `SubCategory string` field to `ItemData`.
+- `subcategories.go` (new) — single source of truth for ~70 sub-category constants across 8 tabs that have sub-grouping (Tools 12, Bolstering 6, Key Items 9, Melee 30, Ranged 7, Arrows/Bolts 4, Shields 4, Info 3).
+- `weapons.go` → `melee_armaments.go`, `aows.go` → `ashes_of_war.go`, `helms.go` → `head.go` (file renames only — var symbols stay to avoid `db.go` cascade).
+- `melee_subcat.go` (new, 408 lines) — curated lookup tables for 30 weapon classes + suffix fallback. Strips infusion prefixes (Heavy/Keen/Cold/Sacred/Fire/…) before lookup. Bastard Sword → Greatswords, Bolt of Gransax → Great Spears, Bloody Helice → Heavy Thrusting Swords (corrected from initial Straight Swords catch-all).
+- `key_items_subcat.go` (new) — Crystal Tears curated ID set; Cookbook/Container/Larval/SpellScroll/DLCKey name patterns; fallback to "Inactive Great Runes + Keys + Medallions".
+- `info_subcat.go` (new) — `"About "` prefix + `"Note: "` → Mechanics/Locations; `dlc` flag → DLC Letters/Maps; else base Letters/Maps/Paintings.
+- `ranged_and_catalysts_subcat.go` (new) — suffix-based (Greatbow/Bow/Crossbow/Ballista/Staff/Seal).
+- `shields_subcat.go` (new) — name-based curated lookup, 4 sets.
+- `tools.go` — all 328 entries inline `SubCategory: SubcatXxx` (Phase 2f generator inlined and flattened IconPath in single pass; old `tools_subcat.go` removed).
+- `bolstering_materials.go` — rewritten with 6 inline sub-groups; **33 Golden Runes moved to `tools.go`** (sub: Golden Runes — game-accurate placement).
+- `arrows_and_bolts.go` — rewritten with 4 inline sub-groups (Arrows 33, Greatarrows 6, Bolts 20, Greatbolts 5). Fixed Igon's Harpoon mislabel (was Greatarrows, is Bolt).
+- `key_items.go` — added 24 Region Maps (sub: World Maps — moved from `info.go`, no duplication). Surface Cookbooks + Whetblades by removing `IsCookbookItemID` / `IsWhetbladeItemID` filters from `db.GetItemsByCategory`. Bell Bearings stay filtered (managed exclusively from World → Bell Bearings UI per user decision 2026-04-28).
+- `info.go` — 24 Region Maps removed (relocated to key_items). IconPath updated `items/key_items/X.png` → `items/info/X.png` for the 49 info icons that were actually info, not key items.
+- `shields.go` — added stray Torchpole `0x00F55C80` (was in `weapons.go` despite `Category: "shields"`).
+
+**Frontend:**
+- `CategorySelect.tsx` — flat 18 `<option>` (no `<optgroup>`) in canonical in-game order. Exports `CATEGORY_VALUES` for the progressive loader. Display labels match game UI: `Ashes` (not "Spirit Ashes"), `Info` (not "Information"), `/` separator (not `&`).
+- `InventoryTab.tsx` — top bar restructure `[Cat][Owned/Total badge][Search]`; `Category` column → `Sub-Category` (hidden for tabs without sub-cats: Talismans/Sorceries/Incantations/Ashes/Crafting/Head/Chest/Arms/Legs/AshesOfWar; main category shown as fallback in `'all'` view); 200 ms search debounce via `useDeferredValue`. Capacity bar lifted out (now in App.tsx).
+- `DatabaseTab.tsx` — same top bar + column rules as InventoryTab. Progressive load: replace single `GetItemList('all')` with 18× `GetItemListChunk(cat)` loop; thin progress strip above table (`pointer-events: none` — scroll works during load).
+- `App.tsx` — Inventory header: `[toggle pills][global capacity bar]` one row. Database header: `[toggle pills][▶ Add Settings accordion]` one row. Add Settings summary now shows 4 params (`+25 · +10 · Standard · Ash +10`, was 3 missing Infuse).
+
+**Backend API:**
+- `app.go` — new `GetItemListChunk(category string) []db.ItemEntry`. Wails bindings regenerated.
+- `db.go` — `ItemEntry` now carries `SubCategory string` (propagated through `GetItemsByCategory`).
+- `vm/character_vm.go` — `ItemViewModel` adds `SubGroup string` field (true sub-cat). `Category`/`SubCategory` semantics on the VM left intact (broad type / main tab) to avoid touching every consumer.
+
+**Icons:**
+- `frontend/public/items/tools/<11 sub-folders>/` — flattened to `frontend/public/items/tools/`. IconPath strings in `tools.go` updated by the same Phase 2f generator (sed regex). One conflict resolved (`celestial_dew.png` existed in both `tools/` and `tools/misc/` with identical MD5 — kept root, removed `misc/` copy).
+- `frontend/public/items/info/` (new) — 49 info icons moved from `key_items/`. 2 pre-existing absent on disk (`message_from_leda.png`, `tower_of_shadow_message.png` — DLC; need manual Fextralife CDN drop-in).
+
+**Counts (per tab, after refactor):**
+| Tab | Count |
+|---|---|
+| Tools | 328 |
+| Bolstering Materials | 43 |
+| Key Items | 356 |
+| Melee Armaments | 427 (30 weapon classes) |
+| Ranged / Catalysts | 69 (7 sub-groups) |
+| Arrows / Bolts | 64 |
+| Shields | 166 (Torches 9, Small 49, Medium 68, Greatshields 40) |
+| Info | 87 (Base 15, DLC 15, Mechanics 57) |
+
+**Verification:**
+- `go test -v ./backend/...` — pass
+- `cd frontend && npx tsc --noEmit && npm run build` — pass
+- Manual verification in `make dev` pending — Phase 4 checklist in `spec/36`.
+
+**Source of truth:** Eldenpedia inventory tab list (canonical 18 tabs) + Fextralife per-item breadcrumb + in-game observation (PC make dev + Steam Deck verification). er-save-manager `Goods/*.txt` continues to be used as initial hint only — its taxonomy is community, not 1:1 with game UI.
+
+**Spec doc:** [spec/36-inventory-categories-game-order.md](spec/36-inventory-categories-game-order.md) (extends spec/33).
+
+**Known limitations / future work:**
+- Active vs Inactive Great Runes — DB doesn't distinguish; sub-group "Active Great Runes" currently empty.
+- Quest Tools sub-group empty — quest items live in `info.go` (Notes/Letters) and `key_items.go` (story keys).
+- Best-effort Melee placements — 427 weapons through curated lookup + suffix fallback; some exotic DLC weapons may land in wrong class. Verification pending in `make dev` (Phase 4) — user reports drive `melee_subcat.go` patches.
+
+---
+
 ### Branch: feat/inventory-caps-enforcement — vanilla-realistic item caps + NG+ scaling + Full Chaos Mode
 
 **Goal:** Reduce EAC ban risk by tightening `MaxInventory` / `MaxStorage` caps for items where the previous numbers (e.g. 999/999 cookbooks, 99/600 paintings) were anomalously above what a single playthrough can yield. Caps now reflect Fextralife-verified single-playthrough obtainable counts. For items that scale per NG+ cycle, a new `scales_with_ng` flag drives `effective_cap = base × (ClearCount + 1)` so caps grow naturally on NG+1...NG+7. A new **Full Chaos Mode** Settings toggle bypasses all caps for power users (max 999), with a clearly red-flagged ban-risk warning.
