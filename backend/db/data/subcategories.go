@@ -7,7 +7,7 @@ package data
 //   Ashes, Crafting Materials, Sorceries, Incantations, Ashes of War,
 //   Head, Chest, Arms, Legs, Talismans
 
-// Tools (12 sub-groups, in-game order)
+// Tools (13 sub-groups, in-game order)
 const (
 	SubcatToolsFlasks         = "Sacred Flasks, Reusable Tools & FP Regenerators"
 	SubcatToolsConsumables    = "Consumables"
@@ -16,6 +16,7 @@ const (
 	SubcatToolsThrowables     = "Throwables"
 	SubcatToolsCatalystTools  = "Catalyst Tools"
 	SubcatToolsGrease         = "Grease"
+	SubcatToolsReusable       = "Reusable Tools"
 	SubcatToolsMisc           = "Miscellaneous Tools"
 	SubcatToolsQuest          = "Quest Tools"
 	SubcatToolsGoldenRunes    = "Golden Runes"
