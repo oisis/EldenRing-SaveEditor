@@ -61,7 +61,7 @@ var dlcKeyNames = map[string]struct{}{
 	"Cross-Marked Map": {}, // physical map key for DLC area access
 }
 
-func hasFlag(flags []string, want string) bool {
+func itemHasFlag(flags []string, want string) bool {
 	for _, f := range flags {
 		if f == want {
 			return true
@@ -106,7 +106,7 @@ func classifyKeyItem(id uint32, item ItemData) string {
 	if _, ok := dlcKeyNames[name]; ok {
 		return SubcatKeyDLCKeys
 	}
-	if hasFlag(item.Flags, "dlc") && strings.HasSuffix(name, "Key") {
+	if itemHasFlag(item.Flags, "dlc") && strings.HasSuffix(name, "Key") {
 		return SubcatKeyDLCKeys
 	}
 	// 7. Catch-all: Inactive Great Runes + Keys + Medallions
