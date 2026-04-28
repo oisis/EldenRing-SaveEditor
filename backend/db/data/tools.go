@@ -66,11 +66,11 @@ var Tools = map[uint32]ItemData{
 	0x4000032B: {Name: "Sweet Raisin", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sweet_raisin.png", Flags: []string{"stackable"}},
 	0x401E9196: {Name: "Charming Branch", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/charming_branch.png", Flags: []string{"dlc", "stackable"}},
 	0x400004BA: {Name: "Exalted Flesh", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/exalted_flesh.png", Flags: []string{"stackable"}},
-	0x401E8CB4: {Name: "Ancient Dragon's Blessing", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/ancient_dragons_blessing.png", Flags: []string{"dlc"}},
+	0x401E8CB4: {Name: "Ancient Dragon's Blessing", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/ancient_dragons_blessing.png", Flags: []string{"dlc"}},
 	0x401E8804: {Name: "Blessing of Marika", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/blessing_of_marika.png", Flags: []string{"dlc"}},
 	0x401E90CE: {Name: "Call of Tibia", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/call_of_tibia.png", Flags: []string{"dlc"}},
 	0x400004A6: {Name: "Silver-Pickled Fowl Foot", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/silver_pickled_fowl_foot.png", Flags: []string{"stackable"}},
-	0x40000D21: {Name: "Radiant Baldachin's Blessing", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/radiant_baldachins_blessing.png", Flags: []string{"stackable"}},
+	0x40000D21: {Name: "Radiant Baldachin's Blessing", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/radiant_baldachins_blessing.png", Flags: []string{"stackable"}},
 	0x400004C4: {Name: "Deathsbane Jerky", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/deathsbane_jerky.png", Flags: []string{"cut_content", "ban_risk", "stackable"}},
 	0x40000802: {Name: "Grace Mimic", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/grace_mimic.png", Flags: []string{"stackable"}},
 	0x40000848: {Name: "Soap", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/soap.png", Flags: []string{"stackable"}},
@@ -258,14 +258,14 @@ var Tools = map[uint32]ItemData{
 	0x401E8A7A: {Name: "Drawstring Golden Grease", Category: "tools", SubCategory: SubcatToolsGrease, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/drawstring_golden_grease.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8A8E: {Name: "Drawstring Eternal Sleep Grease", Category: "tools", SubCategory: SubcatToolsGrease, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/drawstring_eternal_sleep_grease.png", Flags: []string{"dlc", "stackable"}},
 	0x401E8AC0: {Name: "Festive Grease", Category: "tools", SubCategory: SubcatToolsGrease, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/festive_grease.png", Flags: []string{"dlc", "stackable"}},
-	0x40000082: {Name: "Spectral Steed Whistle", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/spectral_steed_whistle.png"},
-	0x400007F8: {Name: "Telescope", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/telescope.png"},
-	0x40000816: {Name: "Lantern", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/lantern.png"},
-	0x40000BE0: {Name: "Mimic's Veil", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/mimics_veil.png"},
+	0x40000082: {Name: "Spectral Steed Whistle", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/spectral_steed_whistle.png"},
+	0x400007F8: {Name: "Telescope", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/telescope.png"},
+	0x40000816: {Name: "Lantern", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/lantern.png"},
+	0x40000BE0: {Name: "Mimic's Veil", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/mimics_veil.png"},
 	0x40000BB8: {Name: "Ancestral Infant's Head", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/ancestral_infants_head.png"},
-	0x40000BC3: {Name: "Regal Omen Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/regal_omen_bairn.png", Flags: []string{"stackable"}},
-	0x40000BC2: {Name: "Omen Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/omen_bairn.png", Flags: []string{"stackable"}},
-	0x40000C08: {Name: "Wraith Calling Bell", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/wraith_calling_bell.png", Flags: []string{"stackable"}},
+	0x40000BC3: {Name: "Regal Omen Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/regal_omen_bairn.png", Flags: []string{"stackable"}},
+	0x40000BC2: {Name: "Omen Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/omen_bairn.png", Flags: []string{"stackable"}},
+	0x40000C08: {Name: "Wraith Calling Bell", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/wraith_calling_bell.png", Flags: []string{"stackable"}},
 
 	// Audit batch 1 — base game consumables missing from item DB (icons present)
 	0x4000033E: {Name: "Boiled Prawn", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/boiled_prawn.png", Flags: []string{"stackable"}},
@@ -279,7 +279,7 @@ var Tools = map[uint32]ItemData{
 	0x4000044C: {Name: "Pickled Turtle Neck", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/pickled_turtle_neck.png", Flags: []string{"stackable"}},
 	0x400004B0: {Name: "Gold-Pickled Fowl Foot", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 10, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/tools/gold_pickled_fowl_foot.png", Flags: []string{"stackable"}},
 	0x40000834: {Name: "Soft Cotton", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/soft_cotton.png", Flags: []string{"stackable"}},
-	0x40000D20: {Name: "Baldachin's Blessing", Category: "tools", SubCategory: SubcatToolsConsumables, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/baldachins_blessing.png", Flags: []string{"stackable"}},
+	0x40000D20: {Name: "Baldachin's Blessing", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/baldachins_blessing.png", Flags: []string{"stackable"}},
 	0x40000DFC: {Name: "Poison Spraymist", Category: "tools", SubCategory: SubcatToolsPerfumeArts, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/poison_spraymist.png", Flags: []string{"stackable"}},
 	0x40000E1A: {Name: "Acid Spraymist", Category: "tools", SubCategory: SubcatToolsPerfumeArts, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/acid_spraymist.png", Flags: []string{"stackable"}},
 
@@ -311,7 +311,7 @@ var Tools = map[uint32]ItemData{
 	// in-game position. Reclassified to SubcatToolsThrowables (er-save-manager DLCConsumables.txt
 	// is misleading — that file mixes throwables with edibles).
 	0x401E8B24: {Name: "Innard Meat", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 40, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/innard_meat.png", Flags: []string{"dlc", "stackable"}},
-	0x401E90BA: {Name: "Horned Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/horned_bairn.png", Flags: []string{"dlc", "stackable"}},
+	0x401E90BA: {Name: "Horned Bairn", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/horned_bairn.png", Flags: []string{"dlc", "stackable"}},
 
 	// ─── Golden Runes — relocated from bolstering_materials.go (correct in-game tab is Tools) ───
 	0x40000B54: {Name: "Golden Rune [1]", Category: "tools", SubCategory: SubcatToolsGoldenRunes, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/golden_rune_1.png", Flags: []string{"stackable"}},
