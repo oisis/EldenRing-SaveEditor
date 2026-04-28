@@ -488,8 +488,10 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 			})
 		}
 	case "key_items":
+		// Bell Bearings remain filtered: managed via dedicated Bell Bearings UI.
+		// Cookbooks and Whetblades are surfaced here per in-game UI (sub-group: Cookbooks).
 		for id, item := range data.KeyItems {
-			if item.Name == "" || data.IsCookbookItemID(id) || data.IsWhetbladeItemID(id) || data.IsBellBearingItemID(id) {
+			if item.Name == "" || data.IsBellBearingItemID(id) {
 				continue
 			}
 			items = append(items, ItemEntry{
