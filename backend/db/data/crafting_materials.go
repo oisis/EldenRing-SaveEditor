@@ -83,16 +83,11 @@ var CraftingMaterials = map[uint32]ItemData{
 	0x401ED2BB: {Name: "Roundrock", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/roundrock.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2C0: {Name: "Red Fulgurbloom", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/red_fulgurbloom.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2B0: {Name: "Winter-Lantern Fly", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/winter_lantern_fly.png", Flags: []string{"dlc", "stackable"}},
-	0x40002779: {Name: "Gravekeeper's Brain", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/gravekeepers_brain.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2B8: {Name: "Finger Mimic", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/finger_mimic.png", Flags: []string{"dlc", "stackable"}},
-	0x40002775: {Name: "Spirit Grave Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/spirit_grave_stone.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2B4: {Name: "Gas Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/gas_stone.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2C1: {Name: "Nailstone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/nailstone.png", Flags: []string{"dlc", "stackable"}},
 	0x401ED2C2: {Name: "Sharp Gravel Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sharp_gravel_stone.png", Flags: []string{"dlc", "stackable"}},
+	0x401ED2BC: {Name: "Spiritgrave Stone", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/spiritgrave_stone.png", Flags: []string{"dlc", "stackable"}},
+	// TODO: Grave Keeper's Brainpan — DLC crafting material, correct 0x401Exxxx ID unknown; 0x40002779 conflicts with Smithing Stone [6]
+	// TODO: Spirit Grave Stone — DLC crafting material, correct 0x401Exxxx ID unknown; 0x40002775 conflicts with Smithing Stone [2]
 }
-
-// 0x401ED2B4: {Name: "Gas Stone", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/gas_stone.png", Flags: []string{"stackable"}},
-// 0x401ED2C1: {Name: "Nailstone", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/nailstone.png", Flags: []string{"stackable"}},
-// 0x401ED2C2: {Name: "Sharp Gravel Stone", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/sharp_gravel_stone.png", Flags: []string{"stackable"}},
-// 0x401ED2B0: {Name: "Winter-Lantern Fly", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/winter_lantern_fly.png"},
-// 0x401ED2B8: {Name: "Finger Mimic", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/finger_mimic.png"},
