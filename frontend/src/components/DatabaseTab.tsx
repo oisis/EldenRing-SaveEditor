@@ -246,6 +246,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setIsSaving(true);
         try {
             const baseIds = confirmModal.map(i => i.id);
+            type Skip = { itemID: number; cutQty: number };
+            const allSkipped: Skip[] = [];
 
             if (modalNonStackable) {
                 // Non-stackable: each copy needs its own GaItem handle in the backend.
@@ -253,26 +255,37 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                 // both locations share the same handle (prevents duplicate GaItem records).
                 const bothActive = addToInv && invQtyVal > 0 && addToStorage && storageQtyVal > 0;
                 if (bothActive && invQtyVal === 1 && storageQtyVal === 1) {
-                    await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1);
+                    const skipped = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1);
+                    if (skipped) allSkipped.push(...skipped);
                 } else {
                     if (addToInv && invQtyVal > 0) {
                         const ids = invQtyVal > 1
                             ? confirmModal.flatMap(i => Array<number>(invQtyVal).fill(i.id))
                             : baseIds;
-                        await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
+                        const skipped = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
+                        if (skipped) allSkipped.push(...skipped);
                     }
                     if (addToStorage && storageQtyVal > 0) {
                         const ids = storageQtyVal > 1
                             ? confirmModal.flatMap(i => Array<number>(storageQtyVal).fill(i.id))
                             : baseIds;
-                        await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                        const skipped = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                        if (skipped) allSkipped.push(...skipped);
                     }
                 }
             } else {
                 // Stackable: single call with qty values.
                 const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
                 const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
-                await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty);
+                const skipped = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty);
+                if (skipped) allSkipped.push(...skipped);
+            }
+
+            // Surface container-cap cuts to the user (sum CutQty across the batch).
+            if (allSkipped.length > 0) {
+                const totalCut = allSkipped.reduce((sum, s) => sum + s.cutQty, 0);
+                const distinctItems = new Set(allSkipped.map(s => s.itemID)).size;
+                toast(`Cut ${totalCut} unit(s) across ${distinctItems} item(s) from Inventory — container cap reached. Storage unaffected.`);
             }
 
             setConfirmModal(null);

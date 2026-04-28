@@ -609,6 +609,20 @@ export namespace main {
 	        this.bodyType = source["bodyType"];
 	    }
 	}
+	export class SkippedAdd {
+	    itemID: number;
+	    cutQty: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SkippedAdd(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemID = source["itemID"];
+	        this.cutQty = source["cutQty"];
+	    }
+	}
 	export class SlotCapacity {
 	    gaItemsUsed: number;
 	    gaItemsMax: number;

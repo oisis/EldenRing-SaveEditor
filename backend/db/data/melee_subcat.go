@@ -213,7 +213,8 @@ var meleeColossalWeapons = setOf(
 // perfumeBottlesWeapon — DLC weapon class.
 var meleePerfumeBottlesWeapon = setOf(
 	"Firespark Perfume Bottle", "Chilling Perfume Bottle",
-	"Frenzyflame Perfume Bottle", "Deadly Poison Perfume Bottle",
+	"Frenzyflame Perfume Bottle", "Lightning Perfume Bottle",
+	"Deadly Poison Perfume Bottle",
 )
 
 // throwingBlades — DLC class.

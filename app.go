@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"sort"
 	"strconv"
 	"time"
 
@@ -246,25 +247,97 @@ func (a *App) GetItemListChunk(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category, platform)
 }
 
+// SkippedAdd reports an item whose requested inventory qty was reduced because
+// its container's total-quantity cap was exhausted. CutQty is the number of
+// units removed from the requested add (e.g. asked for 12, got 8 → CutQty=4).
+type SkippedAdd struct {
+	ItemID uint32 `json:"itemID"`
+	CutQty int    `json:"cutQty"`
+}
+
 // AddItemsToCharacter adds multiple items from the database to a character slot.
 // upgrade25 applies to weapons/bows/shields/staffs/seals with maxUpgrade=25.
 // upgrade10 applies to weapons with maxUpgrade=10 (boss weapons, cannot be infused).
 // infuseOffset is added to infusable weapons (maxUpgrade=25) as a weapon affinity offset.
 // upgradeAsh applies to spirit ashes (category="ashes").
 // invQty / storageQty: 0 = skip, -1 = item's MaxInventory/MaxStorage, >0 = exact qty (capped to max).
-func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storageQty int) error {
+//
+// Container enforcement: items with a RequiredContainer (Throwing Pots, Aromatics)
+// are limited to N TOTAL UNITS in inventory where N = container key item's
+// MaxInventory cap (Cracked Pot=20, Ritual Pot=10, Hefty Cracked Pot=10,
+// Perfume Bottle=10). Each unit of pot/aromatic in inventory consumes one
+// container "slot". Items exceeding the cap have their inv qty trimmed and
+// the trim is reported in `skipped`; storage has no cap. Containers used
+// by the batch are auto-added to Key Items with qty = total pots in
+// inventory after the batch (or kept at the existing value if higher).
+func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storageQty int) (skipped []SkippedAdd, err error) {
 	if a.save == nil {
-		return fmt.Errorf("no save loaded")
+		return nil, fmt.Errorf("no save loaded")
 	}
 	if charIdx < 0 || charIdx >= 10 {
-		return fmt.Errorf("invalid character index")
+		return nil, fmt.Errorf("invalid character index")
 	}
 
 	a.pushUndo(charIdx)
 
 	slot := &a.save.Slots[charIdx]
 
-	for _, id := range itemIDs {
+	// Build maps from current inventory state:
+	// - existingItemQty: per-item stack qty (used to compute SET delta)
+	// - existingByContainer: total pot/aromatic units per container
+	existingItemQty := make(map[uint32]int)
+	existingByContainer := make(map[uint32]int)
+	for _, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			continue
+		}
+		invID := db.HandleToItemID(item.GaItemHandle)
+		_, baseID := db.GetItemDataFuzzy(invID)
+		qty := int(item.Quantity & 0x7FFFFFFF)
+		existingItemQty[baseID] += qty
+		if cID, ok := data.GetRequiredContainer(baseID); ok {
+			existingByContainer[cID] += qty
+		}
+	}
+
+	// Existing container key item qtys (so we don't lower them).
+	existingKeyItemQty := make(map[uint32]int)
+	for _, item := range slot.Inventory.KeyItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			continue
+		}
+		keyID := db.HandleToItemID(item.GaItemHandle)
+		_, keyBaseID := db.GetItemDataFuzzy(keyID)
+		existingKeyItemQty[keyBaseID] = int(item.Quantity & 0x7FFFFFFF)
+	}
+
+	containerCap := func(c uint32) int {
+		cData, _ := db.GetItemDataFuzzy(c)
+		return int(cData.MaxInventory)
+	}
+
+	// Track containers touched by this batch (need auto-update of qty).
+	usedContainers := make(map[uint32]bool)
+
+	// FCFS distribution for container caps must be deterministic and intuitive:
+	// gated items are processed in ascending ID order so canonical first-of-group
+	// (e.g. Fire Pot 0x4000012C) wins the cap, regardless of frontend sort. Non-
+	// gated items keep their original order — cap doesn't affect them.
+	sortedIDs := make([]uint32, len(itemIDs))
+	copy(sortedIDs, itemIDs)
+	sort.SliceStable(sortedIDs, func(i, j int) bool {
+		_, gI := data.GetRequiredContainer(sortedIDs[i])
+		_, gJ := data.GetRequiredContainer(sortedIDs[j])
+		if gI != gJ {
+			return gI // gated items first
+		}
+		if gI {
+			return sortedIDs[i] < sortedIDs[j] // gated by ID asc
+		}
+		return false // non-gated stable
+	})
+
+	for _, id := range sortedIDs {
 		itemData, _ := db.GetItemDataFuzzy(id)
 		finalID := id
 		switch {
@@ -276,15 +349,29 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 			finalID = id + uint32(upgrade10)
 		}
 
-		// Resolve actual quantities for this item
+		// Resolve actual quantities for this item (per-item caps applied).
 		actualInv := resolveQty(invQty, int(itemData.MaxInventory))
 		actualStorage := resolveQty(storageQty, int(itemData.MaxStorage))
+
+		// Container enforcement (inventory only — storage has no cap).
+		if _, gated := data.GetRequiredContainer(id); gated && actualInv > 0 {
+			d := data.ApplyContainerCap(id, actualInv, existingItemQty, existingByContainer, containerCap)
+			actualInv = d.EffectiveQty
+			if d.CutQty > 0 {
+				skipped = append(skipped, SkippedAdd{ItemID: id, CutQty: d.CutQty})
+			}
+		}
+
+		// Mark container as used regardless of cap outcome (storage adds also need a container).
+		if cID, gated := data.GetRequiredContainer(id); gated && (actualInv > 0 || actualStorage > 0) {
+			usedContainers[cID] = true
+		}
 
 		// Arrows/bolts are stackable despite weapon-like IDs (0x02.../0x03...).
 		forceStackable := db.IsArrowID(finalID)
 
 		if err := core.AddItemsToSlot(slot, []uint32{finalID}, actualInv, actualStorage, forceStackable); err != nil {
-			return err
+			return skipped, err
 		}
 
 		// Auto-set AoW duplication flag when adding an Ash of War item.
@@ -301,7 +388,59 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 			}
 		}
 	}
-	return nil
+
+	// Auto-add / update container key item quantities. Each unit of pot/aromatic
+	// in inventory consumes one container slot, so container qty must cover the
+	// total pots after this batch. We never reduce an existing higher qty.
+	//
+	// After updating qty, ALSO flip the world-pickup event flags for that
+	// container so the game treats those container key items as "already
+	// collected from the world" — this prevents duplicate pickups (which would
+	// also be a potential anti-cheat / ban trigger).
+	for cID := range usedContainers {
+		desired := existingByContainer[cID]
+		current := existingKeyItemQty[cID]
+		finalQty := desired
+		if current > finalQty {
+			finalQty = current
+		}
+		if desired > current {
+			// addToInventory SETS qty (see core/writer.go), so passing desired places
+			// the right value whether or not the container key item already exists.
+			if err := core.AddItemsToSlot(slot, []uint32{cID}, desired, 0, false); err != nil {
+				return skipped, err
+			}
+			existingKeyItemQty[cID] = desired
+		}
+
+		// Flip pickup gating flags 1..finalQty. Source: er-save-manager
+		// event_flags_db.py — flags 66000+ in step-10 groups per container.
+		// Setting flag N marks the Nth world pickup as collected.
+		if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
+			continue
+		}
+		flags := slot.Data[slot.EventFlagsOffset:]
+		if flagList, ok := data.ContainerPickupFlags[cID]; ok {
+			n := finalQty
+			if n > len(flagList) {
+				n = len(flagList)
+			}
+			for i := 0; i < n; i++ {
+				_ = db.SetEventFlag(flags, flagList[i], true)
+			}
+		}
+
+		// Also flip vendor purchase flags so vanilla vendors (e.g. Kale's
+		// Cracked Pot) stop offering this container in their stock for the
+		// current NG cycle. NG+ will reset these — that's vanilla behavior.
+		if vendorFlags, ok := data.ContainerVendorPurchaseFlags[cID]; ok {
+			for _, f := range vendorFlags {
+				_ = db.SetEventFlag(flags, f, true)
+			}
+		}
+	}
+
+	return skipped, nil
 }
 
 // RemoveItemsFromCharacter removes items by handle from inventory, storage, or both.

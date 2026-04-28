@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Container enforcement for Throwing Pots & Aromatics
+
+- **New `backend/db/data/container_requirements.go`**: maps each gated craftable (24 Cracked Pot pots + 12 Ritual Pot pots + 15 Hefty Cracked Pot pots + 7 Aromatics) to its container key item (`Cracked Pot 0x4000251C` cap 20, `Ritual Pot 0x4000251D` cap 10, `Hefty Cracked Pot 0x401EA99C` cap 10, `Perfume Bottle 0x40002526` cap 10). Pure helper `ApplyContainerCap` performs partial-add bookkeeping for unit-testability.
+- **Cap semantics**: each unit of pot/aromatic in inventory consumes one container slot. Cap is on TOTAL UNITS across all stacks per container (NOT distinct types). Example: Cracked Pot cap 20 → max 20 individual pot units in inventory in any combination of pot types.
+- **`AddItemsToCharacter` signature change** (`app.go`): now returns `(skipped []SkippedAdd, err error)`. Each `SkippedAdd{ItemID, CutQty}` reports an item whose requested inventory qty was trimmed because the container's total-quantity cap was reached. Storage adds are unaffected (storage has no cap).
+- **FCFS-by-ID iteration**: gated items in the batch are processed in ascending item-ID order (Fire Pot 0x4000012C wins Cracked Pot cap, Redmane Fire Pot wins Ritual, etc.) regardless of frontend sort. Non-gated items keep their original order. This makes `Add All Tools / Max` predictable: canonical first-of-group always wins the inventory slot.
+- **Container key items auto-added** to Key Items with qty = total pots in inventory after the batch (never lowered if existing qty is higher).
+- **Pickup flag gating (ban-proof)** — new `backend/db/data/container_pickup_flags.go`: maps each container to its 10–20 world-pickup event flags (Cracked Pot 66000–66190, Ritual 66400–66490, Perfume Bottle 66700–66790, Hefty Cracked Pot 66900–66990, source er-save-manager `event_flags_db.py`). After auto-updating container key item qty to N, `AddItemsToCharacter` flips flags `1..N` to TRUE so the game won't offer those world pickups again — eliminates the duplicate-stack-via-pickup attack surface that anti-cheat could flag as inconsistent state.
+- **Vendor purchase flag gating** — same file adds `ContainerVendorPurchaseFlags` map. Vanilla vendors track stock via separate flags from world pickups; the only container sold by a merchant in vanilla is Cracked Pot at Kale (Church of Elleh, Limgrave) — flag `710580` "Purchasing Cracked Pot" (source er-save-manager quest_flags_db.py). After pickup flags, `AddItemsToCharacter` flips vendor flags too so Kale stops listing Cracked Pot for the current NG cycle. Note: NG+ resets these flags (vanilla behavior, beyond editor reach).
+- **`DatabaseTab.tsx`**: handles new return type, sums `cutQty` across the batch, surfaces a toast like "Cut N unit(s) across M item(s) from Inventory — container cap reached. Storage unaffected."
+- **`tests/`**: 13 unit tests covering map consistency, container-key existence/caps, first-add fits, partial-cut across batch (user point #3: 2×12 → cut 4), independent caps per container, SET-semantic merge, non-gated pass-through, no-op delta, pickup-flag count match (one per pickup), step-10 spacing, no-overlap between containers, full container coverage, Kale Cracked Pot vendor flag (710580), and absence of vendor flags for the three container types vanilla doesn't sell (`container_requirements_test.go` + `container_pickup_flags_test.go`).
+- **Pre-fixes bundled**:
+  - `tools.go:200` Perfumed Oil of Ranah `MaxInventory` 10 → 1 (per user / Fextralife: it's a single-shot perfume art, not stackable like Spark / Bloodboil).
+  - `melee_armaments.go` + `melee_subcat.go`: added missing **Lightning Perfume Bottle** (`0x03AADF90`, DLC weapon, cap 1/1) — 5th Perfume Bottle weapon, was missing from DB despite presence in er-save-manager `AllWeapons.txt:2921`.
+
 ### Item Database fixes (post spec/36)
 
 - **DatabaseTab "Add Selected" modal — respect per-item caps in mixed selections** (`frontend/src/components/DatabaseTab.tsx`):
