@@ -675,6 +675,7 @@ export namespace vm {
 	    name: string;
 	    category: string;
 	    subCategory: string;
+	    subGroup: string;
 	    quantity: number;
 	    maxInventory: number;
 	    maxStorage: number;
@@ -696,6 +697,7 @@ export namespace vm {
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.subCategory = source["subCategory"];
+	        this.subGroup = source["subGroup"];
 	        this.quantity = source["quantity"];
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];

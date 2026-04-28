@@ -70,6 +70,8 @@ export function GetInfuseTypes():Promise<Array<db.InfuseType>>;
 
 export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 
+export function GetItemListChunk(arg1:string):Promise<Array<db.ItemEntry>>;
+
 export function GetMapProgress(arg1:number):Promise<Array<db.MapEntry>>;
 
 export function GetQuestNPCs():Promise<Array<string>>;

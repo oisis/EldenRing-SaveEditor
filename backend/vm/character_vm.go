@@ -14,8 +14,9 @@ type ItemViewModel struct {
 	ID             uint32   `json:"id"`
 	BaseID         uint32   `json:"baseId"`
 	Name           string   `json:"name"`
-	Category       string   `json:"category"`
-	SubCategory    string   `json:"subCategory"`
+	Category       string   `json:"category"`    // broad type from handle prefix: "Weapon"/"Armor"/"Talisman"/"Item"/"Ash of War"
+	SubCategory    string   `json:"subCategory"` // main game tab: "tools", "key_items", "melee_armaments", ...
+	SubGroup       string   `json:"subGroup"`    // sub-grouping within tab: "Sacred Flasks", "Daggers", ...
 	Quantity       uint32   `json:"quantity"`
 	MaxInventory   uint32   `json:"maxInventory"`
 	MaxStorage     uint32   `json:"maxStorage"`
@@ -178,6 +179,7 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32) []ItemViewM
 				Name:           name,
 				Category:       category,
 				SubCategory:    db.GetItemSubCategory(itemID, itemData, category),
+				SubGroup:       itemData.SubCategory,
 				Quantity:       displayQuantity,
 				MaxInventory:   itemData.MaxInventory,
 				MaxStorage:     itemData.MaxStorage,

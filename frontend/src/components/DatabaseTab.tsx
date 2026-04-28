@@ -1,11 +1,27 @@
-import {useEffect, useState, useMemo, useRef} from 'react';
+import {useEffect, useState, useMemo, useRef, useDeferredValue} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {GetItemList, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '../../wailsjs/go/main/App';
+import {GetItemList, GetItemListChunk, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '../../wailsjs/go/main/App';
 import {db, vm} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
-import {CategorySelect} from './CategorySelect';
+import {CategorySelect, CATEGORY_VALUES} from './CategorySelect';
 import {RiskBadge} from './RiskBadge';
+
+// Categories whose tab has sub-groupings — drives the Sub-Category column visibility.
+const CATEGORIES_WITH_SUBGROUPS = new Set([
+    'tools', 'bolstering_materials', 'key_items',
+    'melee_armaments', 'ranged_and_catalysts', 'arrows_and_bolts', 'shields', 'info',
+]);
+
+const CATEGORY_LABEL: Record<string, string> = {
+    tools: 'Tools', ashes: 'Ashes', crafting_materials: 'Crafting Materials',
+    bolstering_materials: 'Bolstering Materials', key_items: 'Key Items',
+    sorceries: 'Sorceries', incantations: 'Incantations', ashes_of_war: 'Ashes of War',
+    melee_armaments: 'Melee Armaments', ranged_and_catalysts: 'Ranged Weapons / Catalysts',
+    arrows_and_bolts: 'Arrows / Bolts', shields: 'Shields',
+    head: 'Head', chest: 'Chest', arms: 'Arms', legs: 'Legs',
+    talismans: 'Talismans', info: 'Info',
+};
 
 interface DatabaseTabProps {
     columnVisibility: {
@@ -126,32 +142,86 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         return m;
     }, [charInventory, charStorage]);
 
+    // Progressive loading: for "all", fetch one category per IPC roundtrip and
+    // append as chunks arrive — the UI stays responsive on a 5000-item dataset.
+    // For a single category, fall back to the original blocking call.
+    const [chunkProgress, setChunkProgress] = useState<{ done: number; total: number } | null>(null);
     useEffect(() => {
-        setLoading(true);
+        let cancelled = false;
         setSelectedDbItems(new Set());
-        GetItemList(category).then(res => {
-            setDbItems(res || []);
-            setLoading(false);
-        }).catch(err => {
-            console.error("Failed to load items:", err);
-            setLoading(false);
-        });
+
+        if (category !== 'all') {
+            setLoading(true);
+            setChunkProgress(null);
+            GetItemList(category).then(res => {
+                if (cancelled) return;
+                setDbItems(res || []);
+                setLoading(false);
+            }).catch(err => {
+                if (cancelled) return;
+                console.error("Failed to load items:", err);
+                setLoading(false);
+            });
+            return () => { cancelled = true; };
+        }
+
+        // Progressive 'all' load.
+        setDbItems([]);
+        setLoading(false); // no overlay — progress strip handles status
+        setChunkProgress({ done: 0, total: CATEGORY_VALUES.length });
+        (async () => {
+            const accumulated: db.ItemEntry[] = [];
+            for (let i = 0; i < CATEGORY_VALUES.length; i++) {
+                if (cancelled) return;
+                try {
+                    const chunk = await GetItemListChunk(CATEGORY_VALUES[i]);
+                    if (cancelled) return;
+                    accumulated.push(...(chunk || []));
+                    setDbItems([...accumulated]);
+                } catch (err) {
+                    console.error(`Failed to load chunk ${CATEGORY_VALUES[i]}:`, err);
+                }
+                setChunkProgress({ done: i + 1, total: CATEGORY_VALUES.length });
+                // Yield to the event loop so React can flush + UI can scroll.
+                await new Promise(r => setTimeout(r, 0));
+            }
+            if (!cancelled) setChunkProgress(null);
+        })();
+        return () => { cancelled = true; };
     }, [category]);
+
+    const deferredSearch = useDeferredValue(search);
 
     const filteredItems = useMemo(() => dbItems.filter(item => {
         // "Cut & Ban-Risk" toggle hides only risky-flagged items, not informational flags
         // (dlc, stackable) which are now present on most entries.
         const RISKY_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
         if (!showFlaggedItems && item.flags?.some(f => RISKY_FLAGS.includes(f))) return false;
-        return item.name.toLowerCase().includes(search.toLowerCase()) ||
-            item.id.toString(16).includes(search.toLowerCase());
+        const q = deferredSearch.toLowerCase();
+        if (!q) return true;
+        return item.name.toLowerCase().includes(q) || item.id.toString(16).includes(q);
     }).sort((a, b) => {
         const aVal = a[sortCol as keyof db.ItemEntry] ?? '';
         const bVal = b[sortCol as keyof db.ItemEntry] ?? '';
         if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
         return 0;
-    }), [dbItems, search, sortCol, sortDir, showFlaggedItems]);
+    }), [dbItems, deferredSearch, sortCol, sortDir, showFlaggedItems]);
+
+    // Owned count: items with at least 1 in inventory or storage in current category.
+    const ownedCount = useMemo(() => {
+        const matching = category === 'all' ? dbItems : dbItems.filter(i => i.category === category);
+        return matching.filter(i => {
+            const o = ownedByBaseID.get(i.id);
+            return !!o && (o.inv > 0 || o.storage > 0);
+        }).length;
+    }, [dbItems, ownedByBaseID, category]);
+
+    const totalCount = useMemo(() =>
+        category === 'all' ? dbItems.length : dbItems.filter(i => i.category === category).length,
+        [dbItems, category]);
+
+    const showSubGroupColumn = category === 'all' || CATEGORIES_WITH_SUBGROUPS.has(category);
 
     const handleSort = (col: string) => {
         if (sortCol === col) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -257,11 +327,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         overscan: 20,
     });
 
-    // Header has: (optional checkbox) + icon + name (2 fixed) + optional ID + optional Category + Inv/Storage (always 2)
+    // Header has: (optional checkbox) + icon + name (2 fixed) + optional ID + optional Sub-Category + Inv/Storage (always 2)
     const colCount = 4
         + (readOnly ? 0 : 1)
         + (columnVisibility.id ? 1 : 0)
-        + (category === 'all' || columnVisibility.category ? 1 : 0);
+        + (columnVisibility.category && showSubGroupColumn ? 1 : 0);
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
@@ -495,13 +565,20 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                 </div>
             )}
 
-            {/* Search / Category bar — filter BEFORE search */}
+            {/* Top Bar: [Category] [Owned/Total badge] [Search] */}
             <div className="flex items-center justify-between bg-muted/10 p-4 rounded-xl border border-border/50 backdrop-blur-sm sticky top-0 z-20">
                 <div className="flex items-center space-x-4 flex-1">
-                    {/* Filter (first) */}
                     <CategorySelect value={category} onChange={setCategory} className="w-56 shrink-0" />
 
-                    {/* Search (second) */}
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/20 border border-border/50">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                            {category === 'all' ? 'Owned' : (CATEGORY_LABEL[category] ?? category)}
+                        </span>
+                        <span className="text-[10px] font-bold tabular-nums text-foreground">
+                            {ownedCount}/{totalCount}
+                        </span>
+                    </div>
+
                     <div className="relative flex-1 max-w-md group">
                         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                             <svg className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -525,12 +602,19 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                         </button>
                     )}
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted/20 px-3 py-1.5 rounded-full border border-border/30">
-                        {filteredItems.length} Items
+            </div>
+
+            {/* Progressive-load progress strip — non-blocking, lets user scroll while remaining categories load. */}
+            {chunkProgress && chunkProgress.done < chunkProgress.total && (
+                <div className="px-4 py-1 flex items-center gap-3 pointer-events-none">
+                    <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full transition-all duration-200" style={{ width: `${(chunkProgress.done / chunkProgress.total) * 100}%` }} />
+                    </div>
+                    <span className="text-[9px] font-bold tabular-nums text-muted-foreground">
+                        {chunkProgress.done}/{chunkProgress.total} categories
                     </span>
                 </div>
-            </div>
+            )}
 
             {/* Table */}
             <div className="flex-1 bg-muted/5 rounded-xl border border-border/50 overflow-hidden flex flex-col relative">
@@ -567,9 +651,9 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         ID {sortCol === 'id' && (sortDir === 'asc' ? '↑' : '↓')}
                                     </th>
                                 )}
-                                {(category === 'all' || columnVisibility.category) && (
-                                    <th className="p-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('category')}>
-                                        Category {sortCol === 'category' && (sortDir === 'asc' ? '↑' : '↓')}
+                                {columnVisibility.category && showSubGroupColumn && (
+                                    <th className="p-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort(category === 'all' ? 'category' : 'subCategory')}>
+                                        Sub-Category {sortCol === (category === 'all' ? 'category' : 'subCategory') && (sortDir === 'asc' ? '↑' : '↓')}
                                     </th>
                                 )}
                                 <th className="p-4 text-center w-32">Inventory</th>
@@ -645,10 +729,12 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         {columnVisibility.id && (
                                             <td className="p-4 text-[10px] font-mono text-muted-foreground">0x{item.id.toString(16).toUpperCase()}</td>
                                         )}
-                                        {(category === 'all' || columnVisibility.category) && (
+                                        {columnVisibility.category && showSubGroupColumn && (
                                             <td className="p-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/30 rounded-md text-muted-foreground border border-border/20">
-                                                    {item.category === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.category === 'info' ? 'Information' : item.category.replace(/_/g, ' ')}
+                                                    {category === 'all'
+                                                        ? (CATEGORY_LABEL[item.category] ?? item.category.replace(/_/g, ' '))
+                                                        : (item.subCategory || '—')}
                                                 </span>
                                             </td>
                                         )}

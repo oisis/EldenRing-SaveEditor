@@ -235,6 +235,17 @@ func (a *App) GetItemList(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category, platform)
 }
 
+// GetItemListChunk returns items for a single category. Used by the frontend
+// to load the "All Categories" view progressively (one chunk per category)
+// instead of blocking on a single large IPC roundtrip.
+func (a *App) GetItemListChunk(category string) []db.ItemEntry {
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetItemsByCategory(category, platform)
+}
+
 // AddItemsToCharacter adds multiple items from the database to a character slot.
 // upgrade25 applies to weapons/bows/shields/staffs/seals with maxUpgrade=25.
 // upgrade10 applies to weapons with maxUpgrade=10 (boss weapons, cannot be infused).
