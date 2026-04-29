@@ -105,7 +105,10 @@ jobs:
         if: matrix.platform == 'darwin'
         run: |
           cd build/bin
-          zip -r "${{ matrix.artifact }}.zip" "Elden Ring SaveForge.app"
+          ls -la
+          APP_BUNDLE=$(ls -d *.app | head -1)
+          echo "Packaging: $APP_BUNDLE"
+          zip -r "${{ matrix.artifact }}.zip" "$APP_BUNDLE"
 
       - name: Upload artifact (macOS)
         if: matrix.platform == 'darwin'
@@ -119,7 +122,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
-          path: build/bin/Elden Ring SaveForge.exe
+          path: build/bin/*.exe
 
   release:
     needs: build
