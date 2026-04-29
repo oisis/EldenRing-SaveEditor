@@ -267,6 +267,31 @@ Bell Bearings are managed exclusively from **World → Unlocks → Bell Bearings
 - `IsBellBearingItemID(id)` helper drives both `db.GetItemsByCategory` (BBs filtered out of the Item Database) and `vm/character_vm.go` `ReadOnly` (Inventory tab disables Remove / Select). Same backend-driven pattern as Cookbooks and Whetblades — no Wails getter or frontend Set required.
 - Test: `bell_bearing_flags_test.go` verifies coverage and flag-existence.
 
+### 🔲 Info-tab item ground drop — investigation paused 🟡
+**Symptom:** Adding 1/0-cap items from the **Info tab** (Notes, About * tutorials, Letters, Maps, Cookbooks…) via the editor causes the world copy to drop on the ground when the player walks past the trigger location in-game (e.g. Crafting Kit purchase at Kalé spawns "Tworzenie przedmiotów" on the ground because the player already has it). Cosmetic clutter only — **no ban risk** (vanilla NG+ produces the same behaviour when the player carries the item across cycles).
+
+**What we tried (2026-04-29, branch `feat/inventory-game-accurate-categories`):**
+1. **`WorldPickupFlagID`** map (308 entries) — extracted `getItemFlagId` from `ItemLotParam_map` (cat=1) and `eventFlag_forStock` from `ShopLineupParam` (equipType=3) in regulation.bin. Hooked into `AddItemsToCharacter` to set the flag for the world copy. Result: **flag set correctly in save, item still drops in-game**. Confirmed by save diff (flag 550130 for About Item Crafting written via `db.SetEventFlag`, no effect on EMEVD spawn check).
+2. **`AboutTutorialID`** map (1 entry, expandable) — discovered `TutorialDataChunk` block (0x408 bytes) at `slot.TutorialDataOffset`, between `GaitemGameData` and `event_flags`. Layout: `unk0x0 u16 | unk0x2 u16 | size u32 | count u32 | u32 IDs[count]`. Buying Crafting Kit appended ID `2010` to the list (verified by save diff). Pre-populating via `core.AppendTutorialID` (clean save edit confirmed: count `8 → 9`, surgical 13-byte change). Result: **list correctly modified in save, item still drops in-game**. Tutorial ID 2010 controls the popup text appearance, not the item-give EMEVD action.
+
+**Conclusion:** The give/spawn action for Info-tab tutorial items is gated by a check we have not yet identified. Likely candidates:
+- Hardcoded EMEVD instruction (`event/m??_??_??_??.emevd.dcx` inside `Data0.bdt`) that bypasses both `getItemFlagId` and `TutorialDataChunk`.
+- A separate region-state bitset somewhere in slot.Data we have not located.
+- A flag in the EMEVD-emitted "tutorialFlagId" range (710xxx, 720xxx) that we have not exhaustively tried.
+
+**Next investigation steps (when resumed):**
+- Extract `Data0.bdt` from Steam Deck (`~/.local/share/Steam/steamapps/common/ELDEN RING/Game/`), decrypt BHD with public RSA key, decompile `event/common.emevd.dcx` (and area-specific `event/m11_*.emevd.dcx` for Stranded Graveyard / Limgrave) using community tools.
+- Search EMEVD for `give_item(9113, 1)` / `give_item(9135, 1)` patterns and identify the gating flag.
+- Alternative: empirical save-diff matrix — for each About item, take BEFORE save → trigger EXACTLY one item in-game → diff and find the unique byte change outside `cs_net_data_chunks` noise (need a save where player is fully stationary to minimize noise).
+
+**Files retained for resumption:**
+- `backend/core/tutorial_data.go` (parser/writer for `TutorialDataChunk`) — works as designed, just doesn't gate the right thing.
+- `backend/db/data/tutorial_ids.go` (`AboutTutorialID` map) — populate as future findings come in.
+- `backend/db/data/world_pickup_flags.go` (`WorldPickupFlagID` map) — 308 entries; useful for items where the flag *does* gate the spawn (Notes that drop from world chests/lots, not from EMEVD scripts), so kept in the codebase.
+- `app.go` `AddItemsToCharacter` hooks for both maps — harmless if the gating mechanism isn't triggered, beneficial when we identify it.
+
+**Ban-risk assessment:** None. Setting a flag the game doesn't read is a no-op. Appending a tutorial ID is what the game itself does on first play. Items dropping on the ground is a vanilla pickup-cap interaction.
+
 ### 🔲 Bell Bearing Merchant Kill Flag — auto-mark merchant as killed 🟡
 The acquisition flag (above) is enough for Twin Maiden Husks to expand wares, but the **merchant NPC who originally drops the BB remains alive in-game**. Player can re-kill the merchant for a duplicate, or trigger broken NPC dialogue.
 
