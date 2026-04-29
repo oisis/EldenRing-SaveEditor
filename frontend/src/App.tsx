@@ -22,9 +22,10 @@ export type AddSettings = {
     upgrade10: number;
     infuseOffset: number;
     upgradeAsh: number;
+    talismansHighestOnly: boolean;
 };
 
-const DEFAULT_ADD_SETTINGS: AddSettings = { upgrade25: 0, upgrade10: 0, infuseOffset: 0, upgradeAsh: 0 };
+const DEFAULT_ADD_SETTINGS: AddSettings = { upgrade25: 0, upgrade10: 0, infuseOffset: 0, upgradeAsh: 0, talismansHighestOnly: false };
 
 function App() {
     const [platform, setPlatform] = useState<string | null>(null);
@@ -104,6 +105,7 @@ function App() {
                     upgrade10: maxOf(i => i.maxUpgrade === 10 && i.category === 'Weapon'),
                     infuseOffset: 0,
                     upgradeAsh: maxOf(i => i.subCategory === 'ashes'),
+                    talismansHighestOnly: false,
                 },
             }));
         }).catch(() => {});
@@ -549,6 +551,13 @@ function App() {
                                                                                 className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-runnable-track]:bg-border [&::-webkit-slider-runnable-track]:rounded-lg" />
                                                                             <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{s.upgradeAsh}</span>
                                                                         </div>
+                                                                        {category === 'talismans' && (
+                                                                            <label title="When enabled, only the highest-tier variant of each talisman family (Greatshield, Golden Braid, +3 medallions, Two-Headed Turtle, Soreseals etc.) is shown — lower upgrade levels are hidden." className="flex items-center space-x-3 cursor-pointer md:col-span-2">
+                                                                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-fit shrink-0">Talismans: highest only</span>
+                                                                                <input type="checkbox" checked={s.talismansHighestOnly} onChange={e => set({talismansHighestOnly: e.target.checked})}
+                                                                                    className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
+                                                                            </label>
+                                                                        )}
                                                                     </div>
                                                                 );
                                                             })()}

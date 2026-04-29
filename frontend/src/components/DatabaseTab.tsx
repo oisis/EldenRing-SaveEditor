@@ -6,6 +6,7 @@ import {db, vm} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
 import {CategorySelect, CATEGORY_VALUES} from './CategorySelect';
 import {RiskBadge} from './RiskBadge';
+import {isLowerTierTalisman} from '../lib/talismanFamilies';
 
 // Categories whose tab has sub-groupings — drives the Sub-Category column visibility.
 const CATEGORIES_WITH_SUBGROUPS = new Set([
@@ -197,6 +198,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         // (dlc, stackable) which are now present on most entries.
         const RISKY_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
         if (!showFlaggedItems && item.flags?.some(f => RISKY_FLAGS.includes(f))) return false;
+        // "Talismans: highest only" toggle hides lower-tier variants of upgrade families.
+        if (category === 'talismans' && addSettings.talismansHighestOnly && isLowerTierTalisman(item.id)) return false;
         const q = deferredSearch.toLowerCase();
         if (!q) return true;
         return item.name.toLowerCase().includes(q) || item.id.toString(16).includes(q);
@@ -206,7 +209,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
         return 0;
-    }), [dbItems, deferredSearch, sortCol, sortDir, showFlaggedItems]);
+    }), [dbItems, deferredSearch, sortCol, sortDir, showFlaggedItems, category, addSettings.talismansHighestOnly]);
 
     // Owned count: items with at least 1 in inventory or storage in current category.
     const ownedCount = useMemo(() => {
