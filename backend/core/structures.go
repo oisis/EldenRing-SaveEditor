@@ -203,6 +203,7 @@ type SaveSlot struct {
 	StorageBoxOffset       int
 	IngameTimerOffset      int
 	GaItemDataOffset       int // start of GaItemData section (distinct_acquired_items_count header)
+	TutorialDataOffset     int // start of TutorialData block (header at offset, per er-save-manager world.py)
 	ClearCountOffset       int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
 	EquipItemsIDOffset     int // start of EquippedItemsItemIds section
 	UnlockedRegionsOffset int      // start of unlocked_regions struct (count u32 + count*4 IDs)
@@ -370,6 +371,7 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	gaItemsOther := menuProfile + DynGaItemsOther
 	s.GaItemDataOffset = gaItemsOther // GaItemData (ga_item_data) starts here — see Rust save_slot.rs read sequence
 	tutorialData := gaItemsOther + DynTutorialData
+	s.TutorialDataOffset = gaItemsOther // TutorialData block starts immediately after GaItemData (verified via save diff at slot 5)
 	s.IngameTimerOffset = tutorialData + DynIngameTimer
 	s.EventFlagsOffset = s.IngameTimerOffset + DynEventFlags
 

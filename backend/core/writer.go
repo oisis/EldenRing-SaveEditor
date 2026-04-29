@@ -341,6 +341,9 @@ func FlushGaItems(slot *SaveSlot) error {
 		slot.FaceDataOffset += delta
 		slot.StorageBoxOffset += delta
 		slot.GaItemDataOffset += delta
+		if slot.TutorialDataOffset > 0 {
+			slot.TutorialDataOffset += delta
+		}
 		slot.IngameTimerOffset += delta
 		if slot.EventFlagsOffset > 0 {
 			slot.EventFlagsOffset += delta

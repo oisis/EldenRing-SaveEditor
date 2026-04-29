@@ -381,6 +381,26 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 			}
 		}
 
+		// Auto-set world pickup flag when adding a 1/0-cap item that has a
+		// fixed world location (Notes, About * tutorials, Maps, Letters,
+		// Paintings, Cookbooks, Whetblades, Crystal Tears, quest items).
+		// Without this flag, the game spawns the world copy on the ground
+		// because the existing inventory copy blocks the pickup.
+		if flagID, ok := data.WorldPickupFlagID[id]; ok {
+			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
+			}
+		}
+
+		// Auto-append tutorial ID to TutorialData list when adding an About
+		// item or other tutorial-bound Goods. The game checks this list
+		// before triggering the popup-and-give EMEVD action — pre-populating
+		// the entry prevents the duplicate-on-ground spawn even when the
+		// regulation lot flag is checked through a different code path.
+		if tutorialID, ok := data.AboutTutorialID[id]; ok {
+			_ = core.AppendTutorialID(slot, tutorialID)
+		}
+
 		// Bell Bearings: do NOT auto-set the acquisition flag. Having the BB
 		// in inventory and the flag being set are mutually exclusive states —
 		// the player must "give" the BB to Twin Maiden Husks, which consumes
