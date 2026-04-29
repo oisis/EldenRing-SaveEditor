@@ -46,8 +46,7 @@ function App() {
         } catch { return { id: false, category: true }; }
     });
     const [showFlaggedItems, setShowFlaggedItems] = useState<boolean>(() => {
-        const saved = localStorage.getItem('setting:showFlaggedItems');
-        return saved === null ? true : saved === 'true';
+        return localStorage.getItem('setting:showFlaggedItems') === 'true';
     });
     const [category, setCategory] = useState('all');
     const [charWarnings, setCharWarnings] = useState<string[]>([]);

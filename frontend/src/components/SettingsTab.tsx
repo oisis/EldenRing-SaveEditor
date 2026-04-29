@@ -156,10 +156,10 @@ export function SettingsTab({
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-            {/* Appearance + SteamID */}
+            {/* Appearance + SteamID + UI Customization */}
             <section className="space-y-3">
                 <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Appearance & Steam ID</h2></div>
-                <div className="card px-4 py-3">
+                <div className="card px-4 py-3 space-y-3">
                     <div className="flex items-center gap-6 flex-wrap">
                         {/* Theme */}
                         <div className="flex items-center gap-3">
@@ -190,86 +190,22 @@ export function SettingsTab({
                             </>)}
                         </div>
                     </div>
-                </div>
-            </section>
-
-            {/* UI Customization */}
-            <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>UI Customization</h2></div>
-                <div className="card px-4 py-3 space-y-3">
-                    <div className="space-y-2">
-                        <p className="text-[10px] font-bold text-foreground">Inventory Columns</p>
-                        <div className="grid grid-cols-2 gap-2">
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">ID (HEX)</span>
-                                <input type="checkbox" checked={columnVisibility.id} onChange={e => setColumnVisibility({ ...columnVisibility, id: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
-                            </label>
-                            <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Category</span>
-                                <input type="checkbox" checked={columnVisibility.category} onChange={e => setColumnVisibility({ ...columnVisibility, category: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
-                            </label>
-                        </div>
-                    </div>
-                    <div className="border-t border-border/40 pt-2.5">
-                        <label className="flex items-center justify-between p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                    {/* UI Customization — all toggles inline */}
+                    <div className="flex items-center gap-3 flex-wrap pt-3 border-t border-border/40">
+                        <p className="text-[10px] font-bold text-foreground">UI</p>
+                        <label title="Show the hexadecimal item ID column in Inventory and Item Database tables." className="flex items-center gap-2 px-2.5 py-1.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Show ID (HEX)</span>
+                            <input type="checkbox" checked={columnVisibility.id} onChange={e => setColumnVisibility({ ...columnVisibility, id: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
+                        </label>
+                        <label title="Show the Category column in Inventory and Item Database tables." className="flex items-center gap-2 px-2.5 py-1.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                            <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Show Category Column</span>
+                            <input type="checkbox" checked={columnVisibility.category} onChange={e => setColumnVisibility({ ...columnVisibility, category: e.target.checked })} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
+                        </label>
+                        <label title="Enable verbose diagnostic logs and developer-only UI helpers." className="flex items-center gap-2 px-2.5 py-1.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
                             <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Debug Mode</span>
-                            <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 ml-2" />
+                            <input type="checkbox" checked={debugMode} onChange={e => setDebugMode(e.target.checked)} className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
                         </label>
                     </div>
-                </div>
-            </section>
-
-            {/* Safety */}
-            <section className="space-y-3">
-                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Safety</h2></div>
-                <div className="card px-4 py-3 space-y-2">
-                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                        <div className="flex-1 space-y-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground block">Online Safety Mode</span>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                                <strong>Action gating.</strong> When enabled: Tier 2 edits (cut content, illegal stat values, runes &gt; 999M) are <strong>disabled</strong>;
-                                Tier 1 actions (bulk grace unlock, map reveal, etc.) <strong>require explicit confirmation</strong> every time.
-                                Recommended when actively playing online.
-                            </p>
-                        </div>
-                        <input
-                            type="checkbox"
-                            checked={safetyMode.enabled}
-                            onChange={e => safetyMode.setEnabled(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
-                        />
-                    </label>
-                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
-                        <div className="flex-1 space-y-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground block">Show Cut &amp; Ban-Risk Items</span>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                                <strong>List visibility.</strong> When enabled, cut content and ban-risk items appear in Item Database, Inventory and Gestures lists (with the ⚠ marker).
-                                Disable to hide them from view entirely. Independent from Online Safety Mode.
-                            </p>
-                        </div>
-                        <input
-                            type="checkbox"
-                            checked={showFlaggedItems}
-                            onChange={e => setShowFlaggedItems(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
-                        />
-                    </label>
-                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-red-500/5 border border-red-500/30 cursor-pointer hover:bg-red-500/10 transition-all">
-                        <div className="flex-1 space-y-1">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 block">Full Chaos Mode</span>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">
-                                <strong className="text-red-500/90">Bypasses all item caps.</strong> When enabled, the Item Database modal allows
-                                adding any quantity ignoring vanilla single-playthrough limits and NG+ scaling.
-                                <strong> Strongly increases EAC ban risk.</strong> Use only on offline / experimental saves.
-                            </p>
-                        </div>
-                        <input
-                            type="checkbox"
-                            checked={fullChaosMode}
-                            onChange={e => handleChaosToggle(e.target.checked)}
-                            className="w-3.5 h-3.5 rounded border-red-500/40 text-red-500 focus:ring-red-500/20 shrink-0 mt-1"
-                        />
-                    </label>
                 </div>
             </section>
 
@@ -342,6 +278,60 @@ export function SettingsTab({
                             </div>
                         </div>
                     )}
+                </div>
+            </section>
+
+            {/* Safety */}
+            <section className="space-y-3">
+                <div className={sectionHdr}><div className={dot} /><h2 className={hdrText}>Safety</h2></div>
+                <div className="card px-4 py-3 space-y-2">
+                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                        <div className="flex-1 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground block">Online Safety Mode</span>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <strong>Action gating.</strong> When enabled: Tier 2 edits (cut content, illegal stat values, runes &gt; 999M) are <strong>disabled</strong>;
+                                Tier 1 actions (bulk grace unlock, map reveal, etc.) <strong>require explicit confirmation</strong> every time.
+                                Recommended when actively playing online.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={safetyMode.enabled}
+                            onChange={e => safetyMode.setEnabled(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
+                        />
+                    </label>
+                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-muted/20 border border-border/50 cursor-pointer hover:bg-muted/30 transition-all">
+                        <div className="flex-1 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-foreground block">Show Cut &amp; Ban-Risk Items</span>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <strong>List visibility.</strong> When enabled, cut content and ban-risk items appear in Item Database, Inventory and Gestures lists (with the ⚠ marker).
+                                Disable to hide them from view entirely. Independent from Online Safety Mode.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={showFlaggedItems}
+                            onChange={e => setShowFlaggedItems(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20 shrink-0 mt-1"
+                        />
+                    </label>
+                    <label className="flex items-start justify-between gap-4 p-2.5 rounded bg-red-500/5 border border-red-500/30 cursor-pointer hover:bg-red-500/10 transition-all">
+                        <div className="flex-1 space-y-1">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-red-500 block">Full Chaos Mode</span>
+                            <p className="text-[10px] text-muted-foreground leading-relaxed">
+                                <strong className="text-red-500/90">Bypasses all item caps.</strong> When enabled, the Item Database modal allows
+                                adding any quantity ignoring vanilla single-playthrough limits and NG+ scaling.
+                                <strong> Strongly increases EAC ban risk.</strong> Use only on offline / experimental saves.
+                            </p>
+                        </div>
+                        <input
+                            type="checkbox"
+                            checked={fullChaosMode}
+                            onChange={e => handleChaosToggle(e.target.checked)}
+                            className="w-3.5 h-3.5 rounded border-red-500/40 text-red-500 focus:ring-red-500/20 shrink-0 mt-1"
+                        />
+                    </label>
                 </div>
             </section>
         </div>
