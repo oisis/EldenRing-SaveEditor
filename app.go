@@ -381,12 +381,11 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 			}
 		}
 
-		// Auto-set Bell Bearing acquisition flag so Twin Maiden Husks expand their wares.
-		if flagID, ok := data.BellBearingItemToFlagID[id]; ok {
-			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
-				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
-			}
-		}
+		// Bell Bearings: do NOT auto-set the acquisition flag. Having the BB
+		// in inventory and the flag being set are mutually exclusive states —
+		// the player must "give" the BB to Twin Maiden Husks, which consumes
+		// the item. Use the World → Bell Bearings "Unlocked" toggle to apply
+		// the post-give state (flag set + item removed) — see syncBellBearingItem.
 	}
 
 	// Auto-add / update container key item quantities. Each unit of pot/aromatic
@@ -1189,10 +1188,11 @@ func (a *App) GetBellBearings(slotIndex int) ([]db.BellBearingEntry, error) {
 	return entries, nil
 }
 
-// SetBellBearingUnlocked sets or clears the acquisition flag for a bell bearing
-// and synchronises the corresponding key item in the inventory:
-//   - unlocked=true  → set flag, add 1 of the BB key item to inventory if absent
-//   - unlocked=false → clear flag, remove the BB key item from inventory and storage
+// SetBellBearingUnlocked sets or clears the acquisition flag for a bell bearing.
+// "Unlocked" represents the post-give state — the BB has been turned in to the
+// Twin Maiden Husks, which sets the flag AND consumes the key item from inventory.
+//   - unlocked=true  → set flag, remove the BB key item from inventory/storage
+//   - unlocked=false → clear flag, leave inventory untouched
 func (a *App) SetBellBearingUnlocked(slotIndex int, flagID uint32, unlocked bool) error {
 	if a.save == nil {
 		return fmt.Errorf("no save loaded")
@@ -1212,24 +1212,18 @@ func (a *App) SetBellBearingUnlocked(slotIndex int, flagID uint32, unlocked bool
 	return nil
 }
 
-// syncBellBearingItem adds or removes the BB key item from a slot's inventory/storage
-// to keep it in sync with the acquisition flag. No-op when the flag has no item mapping.
+// syncBellBearingItem applies the inventory-side effect of the acquisition flag.
+// "Unlocked" represents giving the BB to the Twin Maidens, which consumes the
+// key item — so unlocked=true removes it. unlocked=false (re-locking the BB)
+// leaves inventory untouched: the user can spawn the BB key item separately
+// via the Item Database if they want to model the pre-give state.
+// No-op when the flag has no item mapping.
 func syncBellBearingItem(slot *core.SaveSlot, flagID uint32, unlocked bool) {
 	itemID, ok := data.BellBearingFlagToItemID[flagID]
 	if !ok {
 		return
 	}
-	if unlocked {
-		alreadyHave := false
-		for _, gID := range slot.GaMap {
-			if gID == itemID {
-				alreadyHave = true
-				break
-			}
-		}
-		if !alreadyHave {
-			_ = core.AddItemsToSlot(slot, []uint32{itemID}, 1, 0, false)
-		}
+	if !unlocked {
 		return
 	}
 	for handle, gID := range slot.GaMap {
