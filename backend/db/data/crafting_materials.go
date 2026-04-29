@@ -10,7 +10,7 @@ var CraftingMaterials = map[uint32]ItemData{
 
 	// Base Game Materials
 	0x400006E0: {Name: "Ruin Fragment", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/ruin_fragment.png", Flags: []string{"stackable"}},
-	0x40002710: {Name: "Glass Shard", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/glass_shard.png", Flags: []string{"stackable"}},
+	0x40002710: {Name: "Glass Shard", Category: "crafting_materials", MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/crafting_materials/glass_shard.png", Flags: []string{"stackable"}},
 	0x40003A98: {Name: "Sliver of Meat", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/sliver_of_meat.png", Flags: []string{"stackable"}},
 	0x40003AA2: {Name: "Beast Liver", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/beast_liver.png", Flags: []string{"stackable"}},
 	0x40003AAC: {Name: "Lump of Flesh", Category: "crafting_materials", MaxInventory: 999, MaxStorage: 999, MaxUpgrade: 0, IconPath: "items/crafting_materials/lump_of_flesh.png", Flags: []string{"stackable"}},
