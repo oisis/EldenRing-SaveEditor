@@ -4,6 +4,48 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Critical fix — FlushGaItems in-place shift overwriting DLC + Hash regions (game crash)
+
+User-reported game crash (`EXCEPTION_ACCESS_VIOLATION` at `eldenring.exe+0x1EB9989`) after adding many weapons / armor pieces in a single session. Game read DLC entry-flag byte as non-zero (interpreted as "player entered DLC"), tried to load DLC area state with stale prerequisites, dereferenced NULL pointer.
+
+**Root cause** — `backend/core/writer.go::FlushGaItems`:
+- When adding non-stackable items (weapons 21B, armor 16B replacing empty 8B slots), GaItems section grew by `delta` bytes.
+- FlushGaItems shifted slot.Data right by `delta` via `copy(slot.Data[oldGaLimit+delta:SlotSize], slot.Data[oldGaLimit:SlotSize-delta])`.
+- Comment claimed "loses trailing padding bytes at end of slot" — but the tail is **NOT** padding: it contains DLC section (50 B at `SlotSize-0xB2`) and PlayerGameDataHash (128 B at `SlotSize-0x80`).
+- Whenever `delta > 0x132` (306 B), DLC + Hash bytes were overwritten by data from preceding sections (often ASCII resource names from EventFlags region — user's debug save had `Ride_Enemy_Attack3018_CMSG` written into DLC offset).
+- Phase 1 ROADMAP explicitly required PlayerGameDataHash region preservation verbatim — FlushGaItems silently violated this for every batch with growth.
+
+**Diagnostic helper** — `tmp/scripts/inspect_slot4.go` (deep-dive sanity check on key offsets), `tmp/scripts/find_pattern.go` (locate ASCII pattern occurrences), `tmp/scripts/rebuild_identity_debug.go` (RebuildSlot identity check on debug save). All in `tmp/scripts/` for repro.
+
+**Fix** — replaced `FlushGaItems` in `AddItemsToSlot` Phase 2 with new `RebuildSlotFull` (full from-scratch slot rebuild, no in-place shift):
+
+- **`backend/core/slot_rebuild.go`** — new `RebuildSlotFull(slot)` function (~120 lines):
+  - Serializes new GaItems from `slot.GaItems` array
+  - Copies pre-regions blob (between GaItems end and UnlockedRegions) verbatim
+  - Re-serializes regions via `slot.UnlockedRegions` slice
+  - Re-serializes all post-regions typed sections (head/menu/trophy/gaitem/tut/scalars/ef/wgb/pc/sp/nm/trail/hash) from structs parsed at slot.Read() time
+  - Copies tail rest verbatim (truncated if needed to fit SlotSize)
+  - Pads to SlotSize with zeros
+  - **Final step (critical):** copies original DLC section + PlayerGameDataHash bytes verbatim from `slot.Data` to fixed end-of-slot positions. Typed `trail.Read`/`hash.Read` parse bytes at a position INSIDE the typed-section span (around SlotSize - 419 KB), but the game reads DLC at `SlotSize-0xB2` and Hash at `SlotSize-0x80` — both inside the tailRest region. When mutation grew GaItems, tailRest was trimmed from end, dropping original DLC+Hash. Explicit verbatim copy restores them.
+- **`backend/core/writer.go::AddItemsToSlot` Phase 2** — replaced `FlushGaItems(slot)` call with `RebuildSlotFull` + state refresh:
+  - Snapshot `slot.GaMap` + `NextAoWIndex` / `NextArmamentIndex` / `NextGaItemHandle` before rebuild (parseFromData rebuilds GaMap from GaItem records only, dropping stackable handles which aren't backed by GaItem records; tracked indices are advanced past rescanned values from Phase 1 `allocateGaItem` mutations)
+  - `copy(slot.Data, rebuilt)` — replace slot bytes
+  - `slot.parseFromData()` — re-parse all derived state (MagicOffset re-located via FindPattern, dynamic offsets recomputed, inventory counter offsets refreshed for Phase 3)
+  - Re-merge stackable handles dropped by GaMap rebuild
+  - Restore tracked indices that are higher than rescanned values
+- **`backend/core/structures.go`** — extracted `parseFromData()` from `Read()`. `Read()` now does ReadBytes + parseFromData. parseFromData mirrors original Read() body 1:1 but operates on existing `s.Data` buffer (no ReadBytes).
+- **`backend/core/writer.go::FlushGaItems`** — marked `Deprecated:` in doc comment. Kept for backward compatibility with external callers; no in-tree callers remain after AddItemsToSlot migration.
+
+**New tests** in `backend/core/slot_rebuild_test.go`:
+- `TestRebuildSlotFullIdentityPC` / `TestRebuildSlotFullIdentityPS4` — RebuildSlotFull on unmutated slot must produce byte-identical output (sanity check + invariant)
+- `TestAddItemsPreservesDLCAndHash` — load PC save, snapshot DLC + Hash, add 30 weapons (force GaItems growth ~390 B = above 0x132 threshold), verify DLC bytes at `[SlotSize-0xB2..SlotSize-0x80)` and Hash bytes at `[SlotSize-0x80..SlotSize)` are unchanged. Direct regression for the reported crash.
+
+**Test results**: full `go test ./backend/...` passes. `go test ./tests/...` has 3 pre-existing failures (`TestMassiveAddAllCategories`, `TestMaxCapacityFill`, `TestBulkAddPerCategory`) that try to add more items than fit in the 5120-entry GaItems array — these failed identically on master before the fix and are not regressed. `TestArrowsRustCompatibility` is pre-existing flaky (Go map iteration randomness in test assertion — fails ~40% on both master and current branch). Wails app builds cleanly via `make build`.
+
+**Recovery for users with corrupted saves**: saves edited with a pre-fix build that crashed in-game cannot be fully repaired — the original DLC + Hash bytes were overwritten in slot.Data and cannot be reconstructed. Restore from a backup (`*.sl2.YYYYMMDD_HHMMSS.bkp` files in the save directory, created automatically by the editor before each save) made BEFORE heavy weapon/armor additions.
+
+**Known related concern**: `RebuildSlot` (the existing function for unlocked-regions mutations) had the same latent bug for region growth — it never showed in tests because TestRebuildSlotMutationPC checks Player.Level / Souls but not DLC / Hash. The RebuildSlot path is now also patched (DLC + Hash verbatim restore at end). Region-only mutations will benefit equally.
+
 ### Container enforcement for Throwing Pots & Aromatics
 
 - **New `backend/db/data/container_requirements.go`**: maps each gated craftable (24 Cracked Pot pots + 12 Ritual Pot pots + 15 Hefty Cracked Pot pots + 7 Aromatics) to its container key item (`Cracked Pot 0x4000251C` cap 20, `Ritual Pot 0x4000251D` cap 10, `Hefty Cracked Pot 0x401EA99C` cap 10, `Perfume Bottle 0x40002526` cap 10). Pure helper `ApplyContainerCap` performs partial-add bookkeeping for unit-testability.

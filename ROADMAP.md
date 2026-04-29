@@ -15,6 +15,17 @@
 
 ## Phase 1 — Safety & Integrity (Critical)
 
+### ✅ FlushGaItems → RebuildSlotFull (DLC + Hash overwrite fix) 🔴
+**Post-mortem:** user-reported `EXCEPTION_ACCESS_VIOLATION` at `eldenring.exe+0x1EB9989` after adding many weapons in v0.7.0.
+
+**Root cause:** `FlushGaItems` (`backend/core/writer.go`) shifted slot.Data right by `delta` bytes whenever GaItems section grew (replacing 8 B empty slots with 21 B weapons / 16 B armor). The shift overwrote the last `delta` bytes of slot — DLC section (50 B at `SlotSize-0xB2`) and PlayerGameDataHash (128 B at `SlotSize-0x80`). Comment claimed those bytes are "trailing padding" — they aren't. When delta exceeded `0x132 = 306` bytes, DLC + Hash were catastrophically replaced with bytes from preceding sections (often ASCII resource names from EventFlags region — observed `Ride_Enemy_Attack3018_CMSG` written into DLC offset on user's debug save). Game read non-zero DLC entry flag → loaded DLC area state with stale prerequisites → NULL pointer deref → crash.
+
+**Fix:** `AddItemsToSlot` Phase 2 now calls new `RebuildSlotFull` (full from-scratch typed rebuild) instead of `FlushGaItems`. Both `RebuildSlotFull` and existing `RebuildSlot` end with explicit verbatim copy of DLC + Hash regions from `slot.Data` to fixed end-of-slot positions — defense in depth against any future mutation path that trims tailRest. `FlushGaItems` deprecated (kept for backward compat).
+
+**Files:** `backend/core/slot_rebuild.go` (new `RebuildSlotFull` + DLC/Hash patch in both rebuild paths), `backend/core/writer.go` (Phase 2 rewrite + GaMap snapshot/restore), `backend/core/structures.go` (extracted `parseFromData()` from `Read()` for re-parse after rebuild). Tests: `TestRebuildSlotFullIdentityPC/PS4`, `TestAddItemsPreservesDLCAndHash` regress the bug. See CHANGELOG entry for full details.
+
+**Recovery:** saves edited with the broken build cannot be safely repaired (DLC/Hash bytes were overwritten and original values lost). Restore from backup made before heavy edits.
+
 ### ✅ CSPlayerGameDataHash — Preserved (NOT recomputed) 🔴
 The last 0x80 bytes of each save slot are preserved verbatim from the original file. **Do not recompute.**
 

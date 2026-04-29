@@ -198,14 +198,14 @@ type SaveSlot struct {
 	EventFlagsOffset int
 
 	// Dynamic offsets from Python logic
-	PlayerDataOffset       int
-	FaceDataOffset         int
-	StorageBoxOffset       int
-	IngameTimerOffset      int
-	GaItemDataOffset       int // start of GaItemData section (distinct_acquired_items_count header)
-	TutorialDataOffset     int // start of TutorialData block (header at offset, per er-save-manager world.py)
-	ClearCountOffset       int // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
-	EquipItemsIDOffset     int // start of EquippedItemsItemIds section
+	PlayerDataOffset      int
+	FaceDataOffset        int
+	StorageBoxOffset      int
+	IngameTimerOffset     int
+	GaItemDataOffset      int      // start of GaItemData section (distinct_acquired_items_count header)
+	TutorialDataOffset    int      // start of TutorialData block (header at offset, per er-save-manager world.py)
+	ClearCountOffset      int      // NG+ cycle counter (uint32) — after BloodStain in dynamic chain
+	EquipItemsIDOffset    int      // start of EquippedItemsItemIds section
 	UnlockedRegionsOffset int      // start of unlocked_regions struct (count u32 + count*4 IDs)
 	UnlockedRegions       []uint32 // parsed unlocked region IDs (drives invasion / blue-summon eligibility)
 
@@ -217,10 +217,10 @@ type SaveSlot struct {
 	// Tracked indices for type-segregated GaItem placement.
 	// The game expects AoW entries at low indices, then armor, then weapons.
 	// Matching Rust ER-Save-Editor's next_aow_index / next_armament_or_armor_index.
-	NextAoWIndex       int    // next free index for AoW entries (after last AoW + 1)
-	NextArmamentIndex  int    // next free index for weapon/armor entries (after highest-counter entry + 1)
-	NextGaItemHandle   uint32 // global handle counter (lower 16 bits), next value to assign
-	PartGaItemHandle   uint8  // part_id (bits 16-23 of handle), extracted from first entry
+	NextAoWIndex      int    // next free index for AoW entries (after last AoW + 1)
+	NextArmamentIndex int    // next free index for weapon/armor entries (after highest-counter entry + 1)
+	NextGaItemHandle  uint32 // global handle counter (lower 16 bits), next value to assign
+	PartGaItemHandle  uint8  // part_id (bits 16-23 of handle), extracted from first entry
 }
 
 func (s *SaveSlot) Read(r *Reader, platform string) error {
@@ -229,7 +229,18 @@ func (s *SaveSlot) Read(r *Reader, platform string) error {
 	if err != nil {
 		return err
 	}
+	return s.parseFromData()
+}
 
+// parseFromData populates SaveSlot fields from s.Data. Used by Read() after
+// reading slot bytes, and by AddItemsToSlot after RebuildSlotFull replaces
+// s.Data with a re-serialized buffer (where MagicPattern position, GaItems
+// boundary, and all dynamic offsets have shifted relative to the previous
+// state).
+//
+// Steps mirror the original Read() body 1:1; the only difference is that
+// s.Data is assumed to already hold SlotSize bytes — no ReadBytes call.
+func (s *SaveSlot) parseFromData() error {
 	// 0. Read slot version (offset 0x00). Version 0 = empty/unused slot.
 	s.Version = binary.LittleEndian.Uint32(s.Data[0:4])
 
@@ -368,10 +379,10 @@ func (s *SaveSlot) calculateDynamicOffsets() error {
 	s.ClearCountOffset = horse + DynClearCount
 	bloodStain := horse + DynBloodStain
 	menuProfile := bloodStain + DynMenuProfile
+	s.GaItemDataOffset = menuProfile // GaitemGameData starts here (i64 count + 7000×16-byte entries)
 	gaItemsOther := menuProfile + DynGaItemsOther
-	s.GaItemDataOffset = gaItemsOther // GaItemData (ga_item_data) starts here — see Rust save_slot.rs read sequence
 	tutorialData := gaItemsOther + DynTutorialData
-	s.TutorialDataOffset = gaItemsOther // TutorialData block starts immediately after GaItemData (verified via save diff at slot 5)
+	s.TutorialDataOffset = gaItemsOther // TutorialData block starts at end of GaitemGameData
 	s.IngameTimerOffset = tutorialData + DynIngameTimer
 	s.EventFlagsOffset = s.IngameTimerOffset + DynEventFlags
 

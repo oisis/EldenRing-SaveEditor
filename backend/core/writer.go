@@ -8,44 +8,30 @@ import (
 	"github.com/oisis/EldenRing-SaveEditor/backend/db"
 )
 
-// upsertGaItemData ensures itemID is present in the GaItemData section.
-// GaItemData tracks all weapons and AoW ever acquired; the game looks up weapon
-// properties (reinforce_type) from this list on load. Adding a weapon without
-// a corresponding GaItemData entry causes EXCEPTION_ACCESS_VIOLATION on load.
+// upsertGaItemData ensures itemID is present in the GaitemGameData section.
+// The game looks up weapon/AoW properties from this list on load. Adding a
+// weapon without a corresponding entry causes EXCEPTION_ACCESS_VIOLATION.
 //
-// Source: ER-Save-Editor src/vm/inventory/add_single.rs upsert_gaitem_data_list()
+// Layout (at slot.GaItemDataOffset = start of GaitemGameData):
 //
-// Layout (at slot.GaItemDataOffset):
-//   [0]   distinct_acquired_items_count (i32)
-//   [4]   unk1 (i32) — preserve unchanged
-//   [8+]  GaItem2 array: id(4) + unk(4) + reinforce_type(4) + unk1(4) per entry
-// reinforceTypeFromItemID extracts the reinforce_type (upgrade level) from a weapon item ID.
-// Weapon IDs encode upgrade level as: baseID + infuseOffset + upgradeLevel
-// where infuseOffset is a multiple of 100 (0=Standard, 100=Heavy, ..., 1200=Occult)
-// and upgradeLevel is 0-25 (normal weapons) or 0-10 (boss/unique weapons).
-// The reinforce_type stored in GaItemData equals the upgrade level.
-// Source: ER-Save-Editor upsert_gaitem_data_list() uses item's reinforce_type_id from regulation.
-func reinforceTypeFromItemID(itemID uint32) uint32 {
-	return itemID % 100
-}
-
+//	[0:8]  count (i64) — number of valid entries
+//	[8+]   GaitemGameDataEntry array: 7000 × 16 bytes
+//	        per entry: id(4) + unk0x4(1) + pad(3) + nextItemID(4) + unk0xc(1) + pad(3)
 func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
 	off := slot.GaItemDataOffset
 	if off <= 0 {
-		return nil // offset chain failed or not computed — skip silently
+		return nil
 	}
 	sa := NewSlotAccessor(slot.Data)
 
-	// Read current count (first 4 bytes of GaItemData)
-	if err := sa.CheckBounds(off, 4, "upsertGaItemData/count"); err != nil {
-		return nil // non-fatal
+	if err := sa.CheckBounds(off, GaItemDataArrayOff, "upsertGaItemData/header"); err != nil {
+		return nil
 	}
 	count := int(int32(binary.LittleEndian.Uint32(slot.Data[off:])))
 	if count < 0 || count >= GaItemDataMaxCount {
-		return nil // corrupt or full — skip
+		return nil
 	}
 
-	// Scan existing entries for this itemID (only scan [0..count-1])
 	arrayBase := off + GaItemDataArrayOff
 	for i := 0; i < count; i++ {
 		entryOff := arrayBase + i*GaItemDataEntryLen
@@ -53,21 +39,25 @@ func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
 			return nil
 		}
 		if binary.LittleEndian.Uint32(slot.Data[entryOff:]) == itemID {
-			return nil // already present
+			return nil
 		}
 	}
 
-	// Append new entry at position [count]
 	newEntryOff := arrayBase + count*GaItemDataEntryLen
 	if err := sa.CheckBounds(newEntryOff, GaItemDataEntryLen, "upsertGaItemData/write"); err != nil {
-		return nil // non-fatal: no room
+		return nil
 	}
 	binary.LittleEndian.PutUint32(slot.Data[newEntryOff:], itemID)
-	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+4:], 0)                          // unk
-	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+8:], reinforceTypeFromItemID(itemID)) // reinforce_type
-	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+12:], 0)                         // unk1
+	slot.Data[newEntryOff+4] = 1
+	slot.Data[newEntryOff+5] = 0
+	slot.Data[newEntryOff+6] = 0
+	slot.Data[newEntryOff+7] = 0
+	binary.LittleEndian.PutUint32(slot.Data[newEntryOff+8:], itemID)
+	slot.Data[newEntryOff+12] = 1
+	slot.Data[newEntryOff+13] = 0
+	slot.Data[newEntryOff+14] = 0
+	slot.Data[newEntryOff+15] = 0
 
-	// Write updated count
 	binary.LittleEndian.PutUint32(slot.Data[off:], uint32(count+1))
 
 	return nil
@@ -112,9 +102,10 @@ func (w *Writer) WriteBytes(v []byte) error {
 // Used for arrows/bolts which have weapon-like IDs but are stackable in inventory.
 //
 // Algorithm (Plan D — GaItems Section Re-serialization):
-//   Phase 1: Allocate GaItem entries in-memory array + write GaItemData at old offsets.
-//   Phase 2: FlushGaItems — serialize array, compute size delta, single shift, update offsets.
-//   Phase 3: Add to inventory/storage (offsets now correct after flush).
+//
+//	Phase 1: Allocate GaItem entries in-memory array + write GaItemData at old offsets.
+//	Phase 2: FlushGaItems — serialize array, compute size delta, single shift, update offsets.
+//	Phase 3: Add to inventory/storage (offsets now correct after flush).
 func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, forceStackable bool) error {
 	type pendingInv struct {
 		handle     uint32
@@ -178,10 +169,55 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 		})
 	}
 
-	// Phase 2: flush GaItems array to binary (serialize + shift + update offsets).
+	// Phase 2: rebuild slot from scratch with new GaItems (no in-place shift).
+	// FlushGaItems used to shift slot.Data right by `delta` bytes, which
+	// overwrote the last `delta` bytes of the slot (DLC + Hash regions) when
+	// delta > 0x132. RebuildSlotFull writes a fresh SlotSize buffer with DLC
+	// and Hash placed via typed Write paths at their correct fixed positions.
 	if gaModified {
-		if err := FlushGaItems(slot); err != nil {
-			return err
+		// Snapshot GaMap before rebuild — parseFromData rebuilds it from GaItem
+		// records only via scanGaItems(), dropping stackable handles (talismans,
+		// goods) which aren't backed by GaItem records. We re-merge them after.
+		savedGaMap := make(map[uint32]uint32, len(slot.GaMap))
+		for k, v := range slot.GaMap {
+			savedGaMap[k] = v
+		}
+		// Snapshot type-segregation indices — same reason: parseFromData re-scans
+		// these from GaItem records, but Phase 3 / future calls need the values
+		// we computed in Phase 1 (after allocateGaItem mutations).
+		savedNextAoW := slot.NextAoWIndex
+		savedNextArmament := slot.NextArmamentIndex
+		savedNextHandle := slot.NextGaItemHandle
+
+		rebuilt, err := RebuildSlotFull(slot)
+		if err != nil {
+			return fmt.Errorf("AddItemsToSlot: rebuild: %w", err)
+		}
+		copy(slot.Data, rebuilt)
+		// Re-parse all derived state from the new layout. parseFromData mirrors
+		// the post-ReadBytes flow of slot.Read — re-finds MagicPattern (whose
+		// absolute position shifted with GaItems growth), re-scans GaItems,
+		// recomputes dynamic offsets, and refreshes inventory counter offsets
+		// that Phase 3 will write to.
+		if err := slot.parseFromData(); err != nil {
+			return fmt.Errorf("AddItemsToSlot: re-parse after rebuild: %w", err)
+		}
+
+		// Re-merge stackable handles dropped by GaMap rebuild.
+		for h, id := range savedGaMap {
+			if _, ok := slot.GaMap[h]; !ok {
+				slot.GaMap[h] = id
+			}
+		}
+		// Restore tracked indices that Phase 1 advanced past the rescanned values.
+		if savedNextAoW > slot.NextAoWIndex {
+			slot.NextAoWIndex = savedNextAoW
+		}
+		if savedNextArmament > slot.NextArmamentIndex {
+			slot.NextArmamentIndex = savedNextArmament
+		}
+		if savedNextHandle > slot.NextGaItemHandle {
+			slot.NextGaItemHandle = savedNextHandle
 		}
 	}
 
@@ -292,7 +328,14 @@ func allocateGaItem(slot *SaveSlot, handle, itemID uint32) error {
 // FlushGaItems serializes the entire in-memory GaItems array back to slot.Data.
 // If the total byte size changed (e.g. empty 8B slot replaced by 21B weapon),
 // shifts all data after the GaItems section and updates all downstream offsets.
-// This is the Plan D approach: one serialization + one shift per batch of additions.
+//
+// Deprecated: this function uses an in-place data shift that overwrites the
+// last `delta` bytes of slot.Data — including DLC section (50 B at SlotSize-0xB2)
+// and PlayerGameDataHash (128 B at SlotSize-0x80) — whenever delta > 0x132.
+// Use RebuildSlotFull (called from AddItemsToSlot Phase 2) instead. Kept for
+// backward compatibility with any external callers; will be removed once no
+// callers remain. See CHANGELOG entry for the FlushGaItems DLC+Hash overwrite
+// post-mortem.
 func FlushGaItems(slot *SaveSlot) error {
 	// 1. Serialize all GaItem entries into a temporary buffer.
 	// Max possible size: all entries as weapons (21B each).
