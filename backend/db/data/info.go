@@ -109,7 +109,17 @@ var Information = map[uint32]ItemData{
 	0x400021FF: {Name: "Note: Stonedigger Trolls", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_stonedigger_trolls.png"},
 	0x40002200: {Name: "Note: Walking Mausoleum", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_walking_mausoleum.png"},
 	0x40002201: {Name: "Note: Unseen Assassins", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_unseen_assassins.png"},
-	0x40002202: {Name: "Note: Great Coffins", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_great_coffins.png"},
+	// 0x40002202: Note: Great Coffins — VERIFIED cut/inaccessible content via
+	// regulation.bin param dump (post-DLC build):
+	//   • ZERO references in ItemLotParam_map, ItemLotParam_enemy,
+	//     ShopLineupParam, EnvObjLotParam — never given to player in shipped game
+	//   • Only reference: CharaInitParam row 8515 (dev/debug NPC template
+	//     hardcoded with all 10 Notes 8700–8709 as starting items)
+	//   • Polish FMG localization broken: in-game name renders as
+	//     "[ERROR]List: Wielkie sarkofagi" — FromSoftware removed the
+	//     Polish text entry, confirming the item was cut from shipped product
+	// Spawning this is a likely EAC trigger. Flagged ban_risk + cut_content.
+	0x40002202: {Name: "Note: Great Coffins", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_great_coffins.png", Flags: []string{"cut_content", "ban_risk"}},
 	0x40002203: {Name: "Note: Flame Chariots", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_flame_chariots.png"},
 	0x40002204: {Name: "Note: Demi-human Mobs", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_demi_human_mobs.png"},
 	0x40002205: {Name: "Note: Land Squirts", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_land_squirts.png"},
@@ -124,7 +134,11 @@ var Information = map[uint32]ItemData{
 
 	// ─── Notes (DLC) ────────────────────────────────────────────────────
 	0x401EA3D9: {Name: "Furnace Keeper's Note", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/furnace_keepers_note.png", Flags: []string{"dlc"}},
-	0x401EA443: {Name: "Note: Sealed Spiritsprings", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_sealed_spiritsprings.png", Flags: []string{"dlc"}},
+	// 0x401EA443: Note: Sealed Spiritsprings — DLC entry exists but params
+	// are unfinished (no iconId, no goodsType=12). Spawning produces broken
+	// in-game state: appears as "ICON" placeholder in Tools tab instead of
+	// Info tab. Verified against regulation.bin post-DLC build via param dump.
+	0x401EA443: {Name: "Note: Sealed Spiritsprings", Category: "info", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/tools/note_sealed_spiritsprings.png", Flags: []string{"dlc", "cut_content", "ban_risk"}},
 }
 
 // Note: Region/World Maps (Map: Limgrave West, Map: Caelid, etc.) — relocated
