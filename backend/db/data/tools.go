@@ -209,6 +209,7 @@ var Tools = map[uint32]ItemData{
 	0x400006D6: {Name: "Fan Daggers", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 40, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/fan_daggers.png", Flags: []string{"stackable"}},
 	0x40000726: {Name: "Explosive Stone", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/explosive_stone.png", Flags: []string{"stackable"}},
 	0x40000730: {Name: "Poisoned Stone", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 20, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/poisoned_stone.png", Flags: []string{"stackable"}},
+	0x40002710: {Name: "Glass Shard", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/glass_shard.png", Flags: []string{"stackable"}},
 	0x400007E4: {Name: "Rainbow Stone", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/rainbow_stone.png", Flags: []string{"stackable"}},
 	0x400007EE: {Name: "Glowstone", Category: "tools", SubCategory: SubcatToolsMisc, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/glowstone.png", Flags: []string{"stackable"}},
 	0x40000BD6: {Name: "Cuckoo Glintstone", Category: "tools", SubCategory: SubcatToolsThrowables, MaxInventory: 10, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/tools/cuckoo_glintstone.png", Flags: []string{"stackable"}},
