@@ -13,8 +13,8 @@ const (
 // many distinct items mapping to it the character may carry in Inventory.
 // Storage is NOT subject to this cap.
 var RequiredContainer = map[uint32]uint32{
-	// === Cracked Pot (cap 20) — 24 Throwing Pots ===
-	// Standard (12)
+	// === Cracked Pot (cap 20) — 23 Throwing Pots ===
+	// Standard (11)
 	0x4000012C: CrackedPotKeyItemID, // Fire Pot
 	0x40000140: CrackedPotKeyItemID, // Lightning Pot
 	0x4000014A: CrackedPotKeyItemID, // Fetid Pot
@@ -26,7 +26,6 @@ var RequiredContainer = map[uint32]uint32{
 	0x40000280: CrackedPotKeyItemID, // Sleep Pot
 	0x4000028A: CrackedPotKeyItemID, // Rancor Pot
 	0x40000294: CrackedPotKeyItemID, // Magic Pot
-	0x40000727: CrackedPotKeyItemID, // Explosive Stone Clump
 	// Roped (9)
 	0x40000190: CrackedPotKeyItemID, // Roped Fire Pot
 	0x400001A4: CrackedPotKeyItemID, // Roped Lightning Pot
