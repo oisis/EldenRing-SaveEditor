@@ -1,10 +1,27 @@
-import {useEffect, useState, useMemo, useRef} from 'react';
+import {useEffect, useState, useMemo, useRef, useDeferredValue} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetSlotCapacity} from '../../wailsjs/go/main/App';
-import {vm, main} from '../../wailsjs/go/models';
+import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetItemList} from '../../wailsjs/go/main/App';
+import {vm} from '../../wailsjs/go/models';
 import {CategorySelect} from './CategorySelect';
 import {RiskBadge} from './RiskBadge';
+
+// Categories with sub-groupings — drives the Sub-Category column visibility.
+const CATEGORIES_WITH_SUBGROUPS = new Set([
+    'tools', 'bolstering_materials', 'key_items',
+    'melee_armaments', 'ranged_and_catalysts', 'arrows_and_bolts', 'shields', 'info',
+]);
+
+// Display labels for main categories (used as fallback when 'all' is selected).
+const CATEGORY_LABEL: Record<string, string> = {
+    tools: 'Tools', ashes: 'Ashes', crafting_materials: 'Crafting Materials',
+    bolstering_materials: 'Bolstering Materials', key_items: 'Key Items',
+    sorceries: 'Sorceries', incantations: 'Incantations', ashes_of_war: 'Ashes of War',
+    melee_armaments: 'Melee Armaments', ranged_and_catalysts: 'Ranged Weapons / Catalysts',
+    arrows_and_bolts: 'Arrows / Bolts', shields: 'Shields',
+    head: 'Head', chest: 'Chest', arms: 'Arms', legs: 'Legs',
+    talismans: 'Talismans', info: 'Info',
+};
 
 interface InventoryTabProps {
     charIndex: number;
@@ -41,7 +58,6 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const [removeModal, setRemoveModal] = useState<{handles: number[], names: string[]} | null>(null);
     const [isRemoving, setIsRemoving] = useState(false);
     const [brokenIcons, setBrokenIcons] = useState<Set<string>>(new Set());
-    const [capacity, setCapacity] = useState<main.SlotCapacity | null>(null);
 
     const toggleSelect = (key: string) => {
         setSelectedKeys(prev => {
@@ -129,7 +145,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     };
 
     type MergedItem = {
-        id: number; name: string; category: string; subCategory: string;
+        id: number; name: string; category: string; subCategory: string; subGroup: string;
         nonStackable: boolean; inInventory: boolean; inStorage: boolean;
         invHandle: number; storageHandle: number;
         invQty: number; storageQty: number;
@@ -154,7 +170,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             if (item.maxInventory <= 1) {
                 nonStackableList.push({
                     id: item.id, name: item.name,
-                    category: item.category, subCategory: item.subCategory,
+                    category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
                     nonStackable: true, inInventory: true, inStorage: false,
                     invHandle: item.handle, storageHandle: 0,
                     invQty: 1, storageQty: 0,
@@ -166,7 +182,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             } else {
                 stackableMap.set(item.id, {
                     id: item.id, name: item.name,
-                    category: item.category, subCategory: item.subCategory,
+                    category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
                     nonStackable: false, inInventory: true, inStorage: false,
                     invHandle: item.handle, storageHandle: 0,
                     invQty: item.quantity, storageQty: 0,
@@ -182,7 +198,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             if (item.maxInventory <= 1) {
                 nonStackableList.push({
                     id: item.id, name: item.name,
-                    category: item.category, subCategory: item.subCategory,
+                    category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
                     nonStackable: true, inInventory: false, inStorage: true,
                     invHandle: 0, storageHandle: item.handle,
                     invQty: 0, storageQty: 1,
@@ -200,7 +216,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                 } else {
                     stackableMap.set(item.id, {
                         id: item.id, name: item.name,
-                        category: item.category, subCategory: item.subCategory,
+                        category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
                         nonStackable: false, inInventory: false, inStorage: true,
                         invHandle: 0, storageHandle: item.handle,
                         invQty: 0, storageQty: item.quantity,
@@ -222,13 +238,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
 
     useEffect(() => {
         setLoading(true);
-        Promise.all([
-            GetCharacter(charIndex),
-            GetSlotCapacity(charIndex),
-        ]).then(([res, cap]) => {
+        GetCharacter(charIndex).then(res => {
             setCharInventory(res?.inventory || []);
             setCharStorage(res?.storage || []);
-            setCapacity(cap);
         }).finally(() => setLoading(false));
     }, [charIndex, inventoryVersion]);
 
@@ -270,18 +282,43 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         });
     };
 
+    const deferredSearch = useDeferredValue(search);
+
     const filteredOwnedItems = useMemo(() => sortItems(mergedOwnedItems.filter(item => {
         // "Cut & Ban-Risk" toggle hides only risky-flagged items, not informational flags
         // (dlc, stackable) which are now present on most entries.
         const RISKY_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
         if (!showFlaggedItems && item.flags?.some(f => RISKY_FLAGS.includes(f))) return false;
-        const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) ||
-                            item.id.toString(16).toLowerCase().includes(search.toLowerCase());
+        const q = deferredSearch.toLowerCase();
+        const matchesSearch = !q ||
+            item.name.toLowerCase().includes(q) ||
+            item.id.toString(16).toLowerCase().includes(q);
 
         if (category === 'all') return matchesSearch;
 
         return item.subCategory === category && matchesSearch;
-    })), [mergedOwnedItems, search, category, sortCol, sortDir, showFlaggedItems]);
+    })), [mergedOwnedItems, deferredSearch, category, sortCol, sortDir, showFlaggedItems]);
+
+    // Total items in selected category from the database (for the Owned/Total badge).
+    const [categoryTotal, setCategoryTotal] = useState<number>(0);
+    useEffect(() => {
+        if (category === 'all') {
+            setCategoryTotal(0);
+            return;
+        }
+        let cancelled = false;
+        GetItemList(category).then(items => {
+            if (!cancelled) setCategoryTotal((items || []).length);
+        }).catch(() => { if (!cancelled) setCategoryTotal(0); });
+        return () => { cancelled = true; };
+    }, [category]);
+
+    const ownedCount = useMemo(() => {
+        if (category === 'all') return mergedOwnedItems.length;
+        return mergedOwnedItems.filter(i => i.subCategory === category).length;
+    }, [mergedOwnedItems, category]);
+
+    const showSubGroupColumn = category === 'all' || CATEGORIES_WITH_SUBGROUPS.has(category);
 
     const SortIndicator = ({ col }: { col: string }) => {
         if (sortCol !== col) return <span className="ml-1 opacity-20">↕</span>;
@@ -361,32 +398,20 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                 </div>
             )}
 
-            {/* Capacity Bar */}
-            {capacity && (
-                <div className="flex flex-wrap gap-4 shrink-0">
-                    {[
-                        { label: 'All Items', used: capacity.gaItemsUsed, max: capacity.gaItemsMax },
-                        { label: 'Inventory', used: capacity.inventoryUsed, max: capacity.inventoryMax },
-                        { label: 'Storage', used: capacity.storageUsed, max: capacity.storageMax },
-                    ].map(({ label, used, max }) => {
-                        const pct = max > 0 ? (used / max) * 100 : 0;
-                        const color = pct >= 95 ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-primary';
-                        return (
-                            <div key={label} className="flex items-center gap-2 min-w-[180px]">
-                                <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground w-16 text-right">{label}</span>
-                                <div className="flex-1 h-1.5 bg-muted/30 rounded-full overflow-hidden">
-                                    <div className={`h-full ${color} rounded-full transition-all duration-500`} style={{ width: `${Math.min(pct, 100)}%` }} />
-                                </div>
-                                <span className={`text-[9px] font-bold tabular-nums ${pct >= 95 ? 'text-red-400' : 'text-muted-foreground'}`}>{used}/{max}</span>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
+            {/* Capacity bar moved to App.tsx (header consolidation, spec/36) */}
 
-            {/* Search Bar & Actions */}
+            {/* Top Bar: [Category] [Owned/Total badge] [Search] */}
             <div className="flex flex-col md:flex-row gap-4 shrink-0 items-center">
                 <CategorySelect value={category} onChange={setCategory} className="w-full md:w-56" />
+
+                <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/20 border border-border/50">
+                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                        {category === 'all' ? 'Owned' : CATEGORY_LABEL[category] ?? category}
+                    </span>
+                    <span className="text-[10px] font-bold tabular-nums text-foreground">
+                        {ownedCount}{category !== 'all' ? `/${categoryTotal}` : ''}
+                    </span>
+                </div>
 
                 {(Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
                     <button
@@ -407,10 +432,10 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                 )}
 
                 <div className="flex-1" />
-                
+
                 <div className="relative w-full max-w-xs">
-                    <input 
-                        type="text" 
+                    <input
+                        type="text"
                         placeholder="Search owned items..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
@@ -446,9 +471,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                         ID <SortIndicator col="id" />
                                     </th>
                                 )}
-                                {columnVisibility.category && (
-                                    <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('category')}>
-                                        Category <SortIndicator col="category" />
+                                {columnVisibility.category && showSubGroupColumn && (
+                                    <th className="px-6 py-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('subGroup')}>
+                                        Sub-Category <SortIndicator col="subGroup" />
                                     </th>
                                 )}
                                 <th className="px-6 py-4 text-center cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('currentUpgrade')}>
@@ -529,10 +554,12 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                         {columnVisibility.id && (
                                             <td className="px-6 py-4 font-mono text-[10px] text-muted-foreground">0x{item.id.toString(16).toUpperCase()}</td>
                                         )}
-                                        {columnVisibility.category && (
+                                        {columnVisibility.category && showSubGroupColumn && (
                                             <td className="px-6 py-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/50 rounded border border-border/50 text-muted-foreground">
-                                                    {item.subCategory === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.subCategory.replace(/_/g, ' ')}
+                                                    {category === 'all'
+                                                        ? (CATEGORY_LABEL[item.subCategory] ?? item.subCategory.replace(/_/g, ' '))
+                                                        : (item.subGroup || '—')}
                                                 </span>
                                             </td>
                                         )}

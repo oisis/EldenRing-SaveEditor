@@ -1,11 +1,27 @@
-import {useEffect, useState, useMemo, useRef} from 'react';
+import {useEffect, useState, useMemo, useRef, useDeferredValue} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
-import {GetItemList, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '../../wailsjs/go/main/App';
+import {GetItemList, GetItemListChunk, GetInfuseTypes, AddItemsToCharacter, GetCharacter} from '../../wailsjs/go/main/App';
 import {db, vm} from '../../wailsjs/go/models';
 import type {AddSettings} from '../App';
-import {CategorySelect} from './CategorySelect';
+import {CategorySelect, CATEGORY_VALUES} from './CategorySelect';
 import {RiskBadge} from './RiskBadge';
+
+// Categories whose tab has sub-groupings — drives the Sub-Category column visibility.
+const CATEGORIES_WITH_SUBGROUPS = new Set([
+    'tools', 'bolstering_materials', 'key_items',
+    'melee_armaments', 'ranged_and_catalysts', 'arrows_and_bolts', 'shields', 'info',
+]);
+
+const CATEGORY_LABEL: Record<string, string> = {
+    tools: 'Tools', ashes: 'Ashes', crafting_materials: 'Crafting Materials',
+    bolstering_materials: 'Bolstering Materials', key_items: 'Key Items',
+    sorceries: 'Sorceries', incantations: 'Incantations', ashes_of_war: 'Ashes of War',
+    melee_armaments: 'Melee Armaments', ranged_and_catalysts: 'Ranged Weapons / Catalysts',
+    arrows_and_bolts: 'Arrows / Bolts', shields: 'Shields',
+    head: 'Head', chest: 'Chest', arms: 'Arms', legs: 'Legs',
+    talismans: 'Talismans', info: 'Info',
+};
 
 interface DatabaseTabProps {
     columnVisibility: {
@@ -126,32 +142,86 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         return m;
     }, [charInventory, charStorage]);
 
+    // Progressive loading: for "all", fetch one category per IPC roundtrip and
+    // append as chunks arrive — the UI stays responsive on a 5000-item dataset.
+    // For a single category, fall back to the original blocking call.
+    const [chunkProgress, setChunkProgress] = useState<{ done: number; total: number } | null>(null);
     useEffect(() => {
-        setLoading(true);
+        let cancelled = false;
         setSelectedDbItems(new Set());
-        GetItemList(category).then(res => {
-            setDbItems(res || []);
-            setLoading(false);
-        }).catch(err => {
-            console.error("Failed to load items:", err);
-            setLoading(false);
-        });
+
+        if (category !== 'all') {
+            setLoading(true);
+            setChunkProgress(null);
+            GetItemList(category).then(res => {
+                if (cancelled) return;
+                setDbItems(res || []);
+                setLoading(false);
+            }).catch(err => {
+                if (cancelled) return;
+                console.error("Failed to load items:", err);
+                setLoading(false);
+            });
+            return () => { cancelled = true; };
+        }
+
+        // Progressive 'all' load.
+        setDbItems([]);
+        setLoading(false); // no overlay — progress strip handles status
+        setChunkProgress({ done: 0, total: CATEGORY_VALUES.length });
+        (async () => {
+            const accumulated: db.ItemEntry[] = [];
+            for (let i = 0; i < CATEGORY_VALUES.length; i++) {
+                if (cancelled) return;
+                try {
+                    const chunk = await GetItemListChunk(CATEGORY_VALUES[i]);
+                    if (cancelled) return;
+                    accumulated.push(...(chunk || []));
+                    setDbItems([...accumulated]);
+                } catch (err) {
+                    console.error(`Failed to load chunk ${CATEGORY_VALUES[i]}:`, err);
+                }
+                setChunkProgress({ done: i + 1, total: CATEGORY_VALUES.length });
+                // Yield to the event loop so React can flush + UI can scroll.
+                await new Promise(r => setTimeout(r, 0));
+            }
+            if (!cancelled) setChunkProgress(null);
+        })();
+        return () => { cancelled = true; };
     }, [category]);
+
+    const deferredSearch = useDeferredValue(search);
 
     const filteredItems = useMemo(() => dbItems.filter(item => {
         // "Cut & Ban-Risk" toggle hides only risky-flagged items, not informational flags
         // (dlc, stackable) which are now present on most entries.
         const RISKY_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
         if (!showFlaggedItems && item.flags?.some(f => RISKY_FLAGS.includes(f))) return false;
-        return item.name.toLowerCase().includes(search.toLowerCase()) ||
-            item.id.toString(16).includes(search.toLowerCase());
+        const q = deferredSearch.toLowerCase();
+        if (!q) return true;
+        return item.name.toLowerCase().includes(q) || item.id.toString(16).includes(q);
     }).sort((a, b) => {
         const aVal = a[sortCol as keyof db.ItemEntry] ?? '';
         const bVal = b[sortCol as keyof db.ItemEntry] ?? '';
         if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
         if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
         return 0;
-    }), [dbItems, search, sortCol, sortDir, showFlaggedItems]);
+    }), [dbItems, deferredSearch, sortCol, sortDir, showFlaggedItems]);
+
+    // Owned count: items with at least 1 in inventory or storage in current category.
+    const ownedCount = useMemo(() => {
+        const matching = category === 'all' ? dbItems : dbItems.filter(i => i.category === category);
+        return matching.filter(i => {
+            const o = ownedByBaseID.get(i.id);
+            return !!o && (o.inv > 0 || o.storage > 0);
+        }).length;
+    }, [dbItems, ownedByBaseID, category]);
+
+    const totalCount = useMemo(() =>
+        category === 'all' ? dbItems.length : dbItems.filter(i => i.category === category).length,
+        [dbItems, category]);
+
+    const showSubGroupColumn = category === 'all' || CATEGORIES_WITH_SUBGROUPS.has(category);
 
     const handleSort = (col: string) => {
         if (sortCol === col) setSortDir(sortDir === 'asc' ? 'desc' : 'asc');
@@ -176,6 +246,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setIsSaving(true);
         try {
             const baseIds = confirmModal.map(i => i.id);
+            type Skip = { itemID: number; cutQty: number };
+            const allSkipped: Skip[] = [];
 
             if (modalNonStackable) {
                 // Non-stackable: each copy needs its own GaItem handle in the backend.
@@ -183,26 +255,37 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                 // both locations share the same handle (prevents duplicate GaItem records).
                 const bothActive = addToInv && invQtyVal > 0 && addToStorage && storageQtyVal > 0;
                 if (bothActive && invQtyVal === 1 && storageQtyVal === 1) {
-                    await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1);
+                    const skipped = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1);
+                    if (skipped) allSkipped.push(...skipped);
                 } else {
                     if (addToInv && invQtyVal > 0) {
                         const ids = invQtyVal > 1
                             ? confirmModal.flatMap(i => Array<number>(invQtyVal).fill(i.id))
                             : baseIds;
-                        await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
+                        const skipped = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
+                        if (skipped) allSkipped.push(...skipped);
                     }
                     if (addToStorage && storageQtyVal > 0) {
                         const ids = storageQtyVal > 1
                             ? confirmModal.flatMap(i => Array<number>(storageQtyVal).fill(i.id))
                             : baseIds;
-                        await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                        const skipped = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
+                        if (skipped) allSkipped.push(...skipped);
                     }
                 }
             } else {
                 // Stackable: single call with qty values.
                 const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
                 const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
-                await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty);
+                const skipped = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty);
+                if (skipped) allSkipped.push(...skipped);
+            }
+
+            // Surface container-cap cuts to the user (sum CutQty across the batch).
+            if (allSkipped.length > 0) {
+                const totalCut = allSkipped.reduce((sum, s) => sum + s.cutQty, 0);
+                const distinctItems = new Set(allSkipped.map(s => s.itemID)).size;
+                toast(`Cut ${totalCut} unit(s) across ${distinctItems} item(s) from Inventory — container cap reached. Storage unaffected.`);
             }
 
             setConfirmModal(null);
@@ -229,10 +312,11 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setAddToInv(true);
         setInvMax(false);
         setInvQtyVal(1);
-        // If any selected item has MaxStorage=0, leave storage off — backend would skip it anyway,
-        // and showing it enabled lets the user think they're storing copies that won't appear.
-        const anyZeroStorage = items.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) === 0);
-        setAddToStorage(!anyZeroStorage);
+        // Storage on by default if at least one selected item allows storage (>0 cap).
+        // Backend skips items with cap 0 per-item, so it's safe to enable storage even
+        // when the selection is mixed (e.g. Glovewort + Sacred Flask).
+        const anyStorageAllowed = items.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) > 0);
+        setAddToStorage(anyStorageAllowed);
         setStorageMax(false);
         setStorageQtyVal(1);
         setConfirmModal(items);
@@ -257,16 +341,22 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         overscan: 20,
     });
 
-    // Header has: (optional checkbox) + icon + name (2 fixed) + optional ID + optional Category + Inv/Storage (always 2)
+    // Header has: (optional checkbox) + icon + name (2 fixed) + optional ID + optional Sub-Category + Inv/Storage (always 2)
     const colCount = 4
         + (readOnly ? 0 : 1)
         + (columnVisibility.id ? 1 : 0)
-        + (category === 'all' || columnVisibility.category ? 1 : 0);
+        + (columnVisibility.category && showSubGroupColumn ? 1 : 0);
 
     // Whether the modal items are all non-stackable (weapons/armor/talismans)
     const modalNonStackable = confirmModal ? allNonStackable(confirmModal) : true;
-    const modalMaxInv = confirmModal ? Math.min(...confirmModal.map(i => effectiveCap(i, 'inv', clearCount, fullChaosMode))) : 1;
-    const modalMaxStorage = confirmModal ? Math.min(...confirmModal.map(i => effectiveCap(i, 'storage', clearCount, fullChaosMode))) : 1;
+    // "Hi" caps = max effective cap in the selection. Used for input upper bounds and the Max checkbox label.
+    // Backend clamps per item (resolveQty), so UI must expose the highest cap; ratcheting to the lowest
+    // would prevent a Glovewort (cap 999) from receiving its full stack just because a Remembrance (cap 1)
+    // is also selected. Items with cap 0 are skipped server-side.
+    const modalMaxInvHi = confirmModal ? Math.max(...confirmModal.map(i => effectiveCap(i, 'inv', clearCount, fullChaosMode))) : 1;
+    const modalMaxStorageHi = confirmModal ? Math.max(...confirmModal.map(i => effectiveCap(i, 'storage', clearCount, fullChaosMode))) : 1;
+    const modalAnyInvAllowed = !!confirmModal && confirmModal.some(i => effectiveCap(i, 'inv', clearCount, fullChaosMode) > 0);
+    const modalAnyStorageAllowed = !!confirmModal && confirmModal.some(i => effectiveCap(i, 'storage', clearCount, fullChaosMode) > 0);
     const modalMixedMaxes = confirmModal && confirmModal.length > 1 && !modalNonStackable &&
         (new Set(confirmModal.map(i => i.maxInventory)).size > 1 || new Set(confirmModal.map(i => i.maxStorage)).size > 1);
     // True if any selected item has scales_with_ng flag (drives tooltip rendering).
@@ -417,61 +507,64 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                 <input
                                     type="number"
                                     min={1}
-                                    max={modalNonStackable ? 99 : modalMaxInv}
-                                    value={invMax ? modalMaxInv : invQtyVal}
+                                    max={modalNonStackable ? 99 : modalMaxInvHi}
+                                    value={invMax ? modalMaxInvHi : invQtyVal}
                                     disabled={!addToInv || invMax}
-                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxInv, parseInt(e.target.value) || 1)))}
+                                    onChange={e => setInvQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxInvHi, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
                                 {modalNonStackable && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
                                 )}
-                                {!modalNonStackable && modalMaxInv > 1 && (
+                                {!modalNonStackable && modalMaxInvHi > 1 && (
                                     <div
                                         onClick={() => addToInv && setInvMax(!invMax)}
                                         className={`flex items-center space-x-1.5 cursor-pointer group ${!addToInv ? 'opacity-40 pointer-events-none' : ''}`}
+                                        title={modalMixedMaxes ? 'Apply each item\'s own vanilla cap (NG+ scaled if applicable)' : `Cap: ${modalMaxInvHi}`}
                                     >
                                         <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${invMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
                                             {invMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                         </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max ({modalMaxInv})</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{modalMixedMaxes ? 'Max (per item)' : `Max (${modalMaxInvHi})`}</span>
                                     </div>
                                 )}
                             </div>
 
-                            {/* Storage row — completely disabled when MaxStorage=0 (item not allowed in storage at all) */}
-                            <div className={`flex items-center space-x-3 ${modalMaxStorage === 0 ? 'opacity-40 pointer-events-none' : ''}`}>
+                            {/* Storage row — disabled only when NO selected item allows storage (every cap=0).
+                                Mixed selection: enabled, backend skips items with cap 0 per-item. */}
+                            <div className={`flex items-center space-x-3 ${!modalAnyStorageAllowed ? 'opacity-40 pointer-events-none' : ''}`}>
                                 <div
-                                    onClick={() => modalMaxStorage > 0 && setAddToStorage(!addToStorage)}
-                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage && modalMaxStorage > 0 ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
+                                    onClick={() => modalAnyStorageAllowed && setAddToStorage(!addToStorage)}
+                                    className={`w-5 h-5 rounded border flex items-center justify-center transition-all cursor-pointer shrink-0 ${addToStorage && modalAnyStorageAllowed ? 'bg-primary border-primary' : 'bg-muted/30 border-border hover:border-primary/50'}`}
                                 >
-                                    {addToStorage && modalMaxStorage > 0 && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
+                                    {addToStorage && modalAnyStorageAllowed && <svg className="w-3.5 h-3.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                 </div>
                                 <span className="text-[11px] font-bold uppercase tracking-widest text-foreground/80 w-20 shrink-0">Storage</span>
                                 <input
                                     type="number"
                                     min={1}
-                                    max={modalNonStackable ? 99 : modalMaxStorage}
-                                    value={modalMaxStorage === 0 ? 0 : storageMax ? modalMaxStorage : storageQtyVal}
-                                    disabled={!addToStorage || storageMax || modalMaxStorage === 0}
-                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorage, parseInt(e.target.value) || 1)))}
+                                    max={modalNonStackable ? 99 : modalMaxStorageHi}
+                                    value={!modalAnyStorageAllowed ? 0 : storageMax ? modalMaxStorageHi : storageQtyVal}
+                                    disabled={!addToStorage || storageMax || !modalAnyStorageAllowed}
+                                    onChange={e => setStorageQtyVal(Math.max(1, Math.min(modalNonStackable ? 99 : modalMaxStorageHi, parseInt(e.target.value) || 1)))}
                                     className="w-20 bg-background border border-border/50 rounded px-2 py-1 text-[10px] font-mono text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all disabled:opacity-40"
                                 />
-                                {modalMaxStorage === 0 && (
+                                {!modalAnyStorageAllowed && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-red-500/70">Not allowed</span>
                                 )}
-                                {modalMaxStorage > 0 && modalNonStackable && (
+                                {modalAnyStorageAllowed && modalNonStackable && (
                                     <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Copies</span>
                                 )}
-                                {modalMaxStorage > 0 && !modalNonStackable && modalMaxStorage > 1 && (
+                                {modalAnyStorageAllowed && !modalNonStackable && modalMaxStorageHi > 1 && (
                                     <div
                                         onClick={() => addToStorage && setStorageMax(!storageMax)}
                                         className={`flex items-center space-x-1.5 cursor-pointer group ${!addToStorage ? 'opacity-40 pointer-events-none' : ''}`}
+                                        title={modalMixedMaxes ? 'Apply each item\'s own vanilla storage cap (skip items with cap 0)' : `Cap: ${modalMaxStorageHi}`}
                                     >
                                         <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all ${storageMax ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}>
                                             {storageMax && <svg className="w-2.5 h-2.5 text-primary-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                         </div>
-                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">Max ({modalMaxStorage})</span>
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">{modalMixedMaxes ? 'Max (per item)' : `Max (${modalMaxStorageHi})`}</span>
                                     </div>
                                 )}
                             </div>
@@ -479,7 +572,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
 
                         {modalMixedMaxes && (
                             <p className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded px-3 py-1.5">
-                                Qty capped to lowest max: Inv {modalMaxInv}, Storage {modalMaxStorage}
+                                Mixed caps in selection — backend applies each item's own vanilla cap (highest in group: Inv {modalMaxInvHi}{modalAnyStorageAllowed ? `, Storage ${modalMaxStorageHi}` : ''}). Items with cap 0 skipped.
                             </p>
                         )}
 
@@ -495,13 +588,20 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                 </div>
             )}
 
-            {/* Search / Category bar — filter BEFORE search */}
+            {/* Top Bar: [Category] [Owned/Total badge] [Search] */}
             <div className="flex items-center justify-between bg-muted/10 p-4 rounded-xl border border-border/50 backdrop-blur-sm sticky top-0 z-20">
                 <div className="flex items-center space-x-4 flex-1">
-                    {/* Filter (first) */}
                     <CategorySelect value={category} onChange={setCategory} className="w-56 shrink-0" />
 
-                    {/* Search (second) */}
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-muted/20 border border-border/50">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground">
+                            {category === 'all' ? 'Owned' : (CATEGORY_LABEL[category] ?? category)}
+                        </span>
+                        <span className="text-[10px] font-bold tabular-nums text-foreground">
+                            {ownedCount}/{totalCount}
+                        </span>
+                    </div>
+
                     <div className="relative flex-1 max-w-md group">
                         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
                             <svg className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
@@ -525,12 +625,19 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                         </button>
                     )}
                 </div>
-                <div className="flex items-center space-x-2 ml-4">
-                    <span className="text-[9px] font-black uppercase tracking-widest text-muted-foreground bg-muted/20 px-3 py-1.5 rounded-full border border-border/30">
-                        {filteredItems.length} Items
+            </div>
+
+            {/* Progressive-load progress strip — non-blocking, lets user scroll while remaining categories load. */}
+            {chunkProgress && chunkProgress.done < chunkProgress.total && (
+                <div className="px-4 py-1 flex items-center gap-3 pointer-events-none">
+                    <div className="flex-1 h-1 bg-muted/30 rounded-full overflow-hidden">
+                        <div className="h-full bg-primary rounded-full transition-all duration-200" style={{ width: `${(chunkProgress.done / chunkProgress.total) * 100}%` }} />
+                    </div>
+                    <span className="text-[9px] font-bold tabular-nums text-muted-foreground">
+                        {chunkProgress.done}/{chunkProgress.total} categories
                     </span>
                 </div>
-            </div>
+            )}
 
             {/* Table */}
             <div className="flex-1 bg-muted/5 rounded-xl border border-border/50 overflow-hidden flex flex-col relative">
@@ -567,9 +674,9 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         ID {sortCol === 'id' && (sortDir === 'asc' ? '↑' : '↓')}
                                     </th>
                                 )}
-                                {(category === 'all' || columnVisibility.category) && (
-                                    <th className="p-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('category')}>
-                                        Category {sortCol === 'category' && (sortDir === 'asc' ? '↑' : '↓')}
+                                {columnVisibility.category && showSubGroupColumn && (
+                                    <th className="p-4 cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort(category === 'all' ? 'category' : 'subCategory')}>
+                                        Sub-Category {sortCol === (category === 'all' ? 'category' : 'subCategory') && (sortDir === 'asc' ? '↑' : '↓')}
                                     </th>
                                 )}
                                 <th className="p-4 text-center w-32">Inventory</th>
@@ -645,10 +752,12 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         {columnVisibility.id && (
                                             <td className="p-4 text-[10px] font-mono text-muted-foreground">0x{item.id.toString(16).toUpperCase()}</td>
                                         )}
-                                        {(category === 'all' || columnVisibility.category) && (
+                                        {columnVisibility.category && showSubGroupColumn && (
                                             <td className="p-4">
                                                 <span className="text-[8px] font-black uppercase tracking-widest px-2 py-1 bg-muted/30 rounded-md text-muted-foreground border border-border/20">
-                                                    {item.category === 'arrows_and_bolts' ? 'Arrows & Bolts' : item.category === 'info' ? 'Information' : item.category.replace(/_/g, ' ')}
+                                                    {category === 'all'
+                                                        ? (CATEGORY_LABEL[item.category] ?? item.category.replace(/_/g, ' '))
+                                                        : (item.subCategory || '—')}
                                                 </span>
                                             </td>
                                         )}

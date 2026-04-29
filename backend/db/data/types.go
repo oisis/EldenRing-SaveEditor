@@ -16,6 +16,7 @@ package data
 type ItemData struct {
 	Name         string
 	Category     string
+	SubCategory  string // sub-category within Category (1:1 with in-game grouping); empty = no sub-grouping
 	MaxInventory uint32
 	MaxStorage   uint32
 	MaxUpgrade   uint32

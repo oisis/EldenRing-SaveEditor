@@ -308,6 +308,7 @@ export namespace db {
 	    id: number;
 	    name: string;
 	    category: string;
+	    subCategory?: string;
 	    maxInventory: number;
 	    maxStorage: number;
 	    maxUpgrade: number;
@@ -328,6 +329,7 @@ export namespace db {
 	        this.id = source["id"];
 	        this.name = source["name"];
 	        this.category = source["category"];
+	        this.subCategory = source["subCategory"];
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];
 	        this.maxUpgrade = source["maxUpgrade"];
@@ -607,6 +609,20 @@ export namespace main {
 	        this.bodyType = source["bodyType"];
 	    }
 	}
+	export class SkippedAdd {
+	    itemID: number;
+	    cutQty: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SkippedAdd(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemID = source["itemID"];
+	        this.cutQty = source["cutQty"];
+	    }
+	}
 	export class SlotCapacity {
 	    gaItemsUsed: number;
 	    gaItemsMax: number;
@@ -673,6 +689,7 @@ export namespace vm {
 	    name: string;
 	    category: string;
 	    subCategory: string;
+	    subGroup: string;
 	    quantity: number;
 	    maxInventory: number;
 	    maxStorage: number;
@@ -694,6 +711,7 @@ export namespace vm {
 	        this.name = source["name"];
 	        this.category = source["category"];
 	        this.subCategory = source["subCategory"];
+	        this.subGroup = source["subGroup"];
 	        this.quantity = source["quantity"];
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];

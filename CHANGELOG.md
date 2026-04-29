@@ -4,6 +4,113 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### Container enforcement for Throwing Pots & Aromatics
+
+- **New `backend/db/data/container_requirements.go`**: maps each gated craftable (24 Cracked Pot pots + 12 Ritual Pot pots + 15 Hefty Cracked Pot pots + 7 Aromatics) to its container key item (`Cracked Pot 0x4000251C` cap 20, `Ritual Pot 0x4000251D` cap 10, `Hefty Cracked Pot 0x401EA99C` cap 10, `Perfume Bottle 0x40002526` cap 10). Pure helper `ApplyContainerCap` performs partial-add bookkeeping for unit-testability.
+- **Cap semantics**: each unit of pot/aromatic in inventory consumes one container slot. Cap is on TOTAL UNITS across all stacks per container (NOT distinct types). Example: Cracked Pot cap 20 → max 20 individual pot units in inventory in any combination of pot types.
+- **`AddItemsToCharacter` signature change** (`app.go`): now returns `(skipped []SkippedAdd, err error)`. Each `SkippedAdd{ItemID, CutQty}` reports an item whose requested inventory qty was trimmed because the container's total-quantity cap was reached. Storage adds are unaffected (storage has no cap).
+- **FCFS-by-ID iteration**: gated items in the batch are processed in ascending item-ID order (Fire Pot 0x4000012C wins Cracked Pot cap, Redmane Fire Pot wins Ritual, etc.) regardless of frontend sort. Non-gated items keep their original order. This makes `Add All Tools / Max` predictable: canonical first-of-group always wins the inventory slot.
+- **Container key items auto-added** to Key Items with qty = total pots in inventory after the batch (never lowered if existing qty is higher).
+- **Pickup flag gating (ban-proof)** — new `backend/db/data/container_pickup_flags.go`: maps each container to its 10–20 world-pickup event flags (Cracked Pot 66000–66190, Ritual 66400–66490, Perfume Bottle 66700–66790, Hefty Cracked Pot 66900–66990, source er-save-manager `event_flags_db.py`). After auto-updating container key item qty to N, `AddItemsToCharacter` flips flags `1..N` to TRUE so the game won't offer those world pickups again — eliminates the duplicate-stack-via-pickup attack surface that anti-cheat could flag as inconsistent state.
+- **Vendor purchase flag gating** — same file adds `ContainerVendorPurchaseFlags` map. Vanilla vendors track stock via separate flags from world pickups; the only container sold by a merchant in vanilla is Cracked Pot at Kale (Church of Elleh, Limgrave) — flag `710580` "Purchasing Cracked Pot" (source er-save-manager quest_flags_db.py). After pickup flags, `AddItemsToCharacter` flips vendor flags too so Kale stops listing Cracked Pot for the current NG cycle. Note: NG+ resets these flags (vanilla behavior, beyond editor reach).
+- **`DatabaseTab.tsx`**: handles new return type, sums `cutQty` across the batch, surfaces a toast like "Cut N unit(s) across M item(s) from Inventory — container cap reached. Storage unaffected."
+- **`tests/`**: 13 unit tests covering map consistency, container-key existence/caps, first-add fits, partial-cut across batch (user point #3: 2×12 → cut 4), independent caps per container, SET-semantic merge, non-gated pass-through, no-op delta, pickup-flag count match (one per pickup), step-10 spacing, no-overlap between containers, full container coverage, Kale Cracked Pot vendor flag (710580), and absence of vendor flags for the three container types vanilla doesn't sell (`container_requirements_test.go` + `container_pickup_flags_test.go`).
+- **Pre-fixes bundled**:
+  - `tools.go:200` Perfumed Oil of Ranah `MaxInventory` 10 → 1 (per user / Fextralife: it's a single-shot perfume art, not stackable like Spark / Bloodboil).
+  - `melee_armaments.go` + `melee_subcat.go`: added missing **Lightning Perfume Bottle** (`0x03AADF90`, DLC weapon, cap 1/1) — 5th Perfume Bottle weapon, was missing from DB despite presence in er-save-manager `AllWeapons.txt:2921`.
+
+### Item Database fixes (post spec/36)
+
+- **DatabaseTab "Add Selected" modal — respect per-item caps in mixed selections** (`frontend/src/components/DatabaseTab.tsx`):
+  - Replaced `Math.min(...)` aggregations (`modalMaxInv`/`modalMaxStorage`) with `*Hi` = `Math.max(...)` and `modalAny*Allowed` = `some(>0)` semantics.
+  - Storage row no longer disabled wholesale when *one* selected item has `MaxStorage=0`; gate now keys off `modalAnyStorageAllowed`. Backend (`resolveQty`) already skips items with cap 0 per-item.
+  - "Max" checkbox visible whenever the highest cap in the group exceeds 1 (previously hidden when min cap was 1, e.g. mixing Glovewort + Remembrance).
+  - `openConfirmModal` enables Storage by default if any selected item allows it (was: only when none had cap 0).
+  - Numerical input upper bound + clamp now follows `*Hi` cap. Mixed-cap banner copy reworded: "backend applies each item's own vanilla cap".
+  - Single-item flow unchanged.
+- **Spectral Steed Whistle — wrong hex** (`backend/db/data/tools.go`, `descriptions.go`):
+  - Was `0x400000B5` (item ID 181 — duplicate sitting in the Multiplayer items block 170–184; in-game render mapped to the wrong icon).
+  - Fixed to `0x40000082` (item ID 130 — canonical entry, paired with Phantom Great Rune 135). Cross-checked against er-save-manager `AllGoods.txt` and ER-Save-Editor `item_name.rs` — both reference projects list both IDs but only 130 is the actual fabular Whistle from Melina.
+- **Lulling Branch caps** (`tools.go`): MaxInventory 99 → 10 (storage 600 unchanged) per user audit.
+- **Cured Meat caps** (`tools.go`): all 8 entries (Immunizing/Clarifying/Dappled/Invigorating + 4 White variants) 99/600 → 10/999 per user audit.
+- **Pickled / Fowl / Turtle caps** (`tools.go`): Silver-Pickled Fowl Foot, Gold-Pickled Fowl Foot, Pickled Turtle Neck, Well-Pickled Turtle Neck (DLC) — all 99/600 → 10/999 per user audit.
+- **Deathsbane White Jerky** (`tools.go`): added `cut_content` + `ban_risk` flags (parity with Deathsbane Jerky `0x400004C4`).
+- **Flesh / Meat caps** (`tools.go`): Exalted Flesh, Dragon Communion Flesh (DLC), Dragonscale Flesh (DLC), Sacred Bloody Flesh (DLC) — 99/600 → 10/999 per user audit. Innard Meat (DLC) kept at 99/600.
+- **Horn Tender caps** (`tools.go`): Silver Horn Tender (DLC), Golden Horn Tender (DLC) — 99/600 → 10/999 per user audit (DLC odpowiednik Pickled Fowl Foot, rune + item discovery booster).
+- **Scorpion Stew DLC variants TODO** (`tools.go`, `ROADMAP.md`): er-save-manager DLCConsumables.txt lists 4 IDs (2001200..2001203) with duplicate names; we currently expose only `0x401E8932` and `0x401E8933`. Missing IDs flagged for in-game verification: `0x401E8934`, `0x401E8935`.
+- **Innard Meat reclassified** (`tools.go`): moved from `SubcatToolsConsumables` to `SubcatToolsThrowables` (cap 40/600). User verified in-game position: it's a throwable bait in Tools/Throwables sub-tab alongside Bone Darts. er-save-manager DLCConsumables.txt was misleading (file mixes throwables with edibles). My earlier "cut content" diagnosis was wrong — fixed.
+- **Throwing Pots reorganized by container** (`tools.go`): grouped per crafting container (Cracked Pot / Ritual Pot / Hefty Cracked Pot) with section comments. Source: erdb 1.10.0 `EquipParamGoods.csv` field `potGroupId` (1=Cracked, 3=Ritual). DLC pots classified per Fextralife per-item recipe pages.
+- **Ancient Dragonbolt Pot reclassified** (`tools.go`): moved from `SubcatToolsConsumables` to `SubcatToolsThrowingPots`. erdb potGroupId=3 (Ritual Pot recipe) confirmed by user — it's a Ritual Pot variant, not a generic consumable.
+- **Ritual Pot caps audit** (`tools.go`): all 12 Ritual Pot recipe items (Redmane Fire / Giantsflame Fire / Ancient Dragonbolt / Sacred Order / Freezing / Alluring / Beastlure / Albinauric / Cursed-Blood / Academy Magic / Rot + DLC Eternal Sleep) — MaxInventory 20 → 10 per user audit (matches in-game cap).
+
+### Branch: feat/inventory-game-accurate-categories — 1:1 game-aligned Inventory & Item Database
+
+**Goal:** Drop the last technical/community-taxonomy seams between the editor's category dropdown and the in-game inventory layout. After spec/33 introduced the `Information` tab and migrated Multiplayer/Remembrances/Crystal Tears, the dropdown was still partly Eldenring.wiki-flavoured (no sub-groups, alphabetical-ish order, "Information" instead of "Info", `&` instead of `/`). Phase 36 finishes the alignment: 18 tabs in exact in-game order, sub-grouping per tab where the game has them, reclassifications driven by Fextralife per-item breadcrumb + in-game user verification.
+
+**Why:**
+- Player toggling between editor and game shouldn't translate names — `Ashes` not "Spirit Ashes", `Info` not "Information", `/` not `&`.
+- Larval Tears living under Bolstering Materials was historical; the game shows them in Key Items / Larval Tears + Deathroot. Torches under Melee Armaments was wrong — game shows them in Shields. Region Maps were duplicated across `info.go` / `tools.go` / `key_items.go`. Golden Runes were under Bolstering but the game lists them in Tools.
+- "All Categories" view in Item Database loaded ~1530 items synchronously, blocking the UI thread for ~600 ms on Steam Deck. Progressive 18× chunked load makes first items visible <100 ms with non-blocking scroll.
+
+**Backend (`backend/db/data/`):**
+- `types.go` — added `SubCategory string` field to `ItemData`.
+- `subcategories.go` (new) — single source of truth for ~70 sub-category constants across 8 tabs that have sub-grouping (Tools 12, Bolstering 6, Key Items 9, Melee 30, Ranged 7, Arrows/Bolts 4, Shields 4, Info 3).
+- `weapons.go` → `melee_armaments.go`, `aows.go` → `ashes_of_war.go`, `helms.go` → `head.go` (file renames only — var symbols stay to avoid `db.go` cascade).
+- `melee_subcat.go` (new, 408 lines) — curated lookup tables for 30 weapon classes + suffix fallback. Strips infusion prefixes (Heavy/Keen/Cold/Sacred/Fire/…) before lookup. Bastard Sword → Greatswords, Bolt of Gransax → Great Spears, Bloody Helice → Heavy Thrusting Swords (corrected from initial Straight Swords catch-all).
+- `key_items_subcat.go` (new) — Crystal Tears curated ID set; Cookbook/Container/Larval/SpellScroll/DLCKey name patterns; fallback to "Inactive Great Runes + Keys + Medallions".
+- `info_subcat.go` (new) — `"About "` prefix + `"Note: "` → Mechanics/Locations; `dlc` flag → DLC Letters/Maps; else base Letters/Maps/Paintings.
+- `ranged_and_catalysts_subcat.go` (new) — suffix-based (Greatbow/Bow/Crossbow/Ballista/Staff/Seal).
+- `shields_subcat.go` (new) — name-based curated lookup, 4 sets.
+- `tools.go` — all 328 entries inline `SubCategory: SubcatXxx` (Phase 2f generator inlined and flattened IconPath in single pass; old `tools_subcat.go` removed).
+- `bolstering_materials.go` — rewritten with 6 inline sub-groups; **33 Golden Runes moved to `tools.go`** (sub: Golden Runes — game-accurate placement).
+- `arrows_and_bolts.go` — rewritten with 4 inline sub-groups (Arrows 33, Greatarrows 6, Bolts 20, Greatbolts 5). Fixed Igon's Harpoon mislabel (was Greatarrows, is Bolt).
+- `key_items.go` — added 24 Region Maps (sub: World Maps — moved from `info.go`, no duplication). Surface Cookbooks + Whetblades by removing `IsCookbookItemID` / `IsWhetbladeItemID` filters from `db.GetItemsByCategory`. Bell Bearings stay filtered (managed exclusively from World → Bell Bearings UI per user decision 2026-04-28).
+- `info.go` — 24 Region Maps removed (relocated to key_items). IconPath updated `items/key_items/X.png` → `items/info/X.png` for the 49 info icons that were actually info, not key items.
+- `shields.go` — added stray Torchpole `0x00F55C80` (was in `weapons.go` despite `Category: "shields"`).
+
+**Frontend:**
+- `CategorySelect.tsx` — flat 18 `<option>` (no `<optgroup>`) in canonical in-game order. Exports `CATEGORY_VALUES` for the progressive loader. Display labels match game UI: `Ashes` (not "Spirit Ashes"), `Info` (not "Information"), `/` separator (not `&`).
+- `InventoryTab.tsx` — top bar restructure `[Cat][Owned/Total badge][Search]`; `Category` column → `Sub-Category` (hidden for tabs without sub-cats: Talismans/Sorceries/Incantations/Ashes/Crafting/Head/Chest/Arms/Legs/AshesOfWar; main category shown as fallback in `'all'` view); 200 ms search debounce via `useDeferredValue`. Capacity bar lifted out (now in App.tsx).
+- `DatabaseTab.tsx` — same top bar + column rules as InventoryTab. Progressive load: replace single `GetItemList('all')` with 18× `GetItemListChunk(cat)` loop; thin progress strip above table (`pointer-events: none` — scroll works during load).
+- `App.tsx` — Inventory header: `[toggle pills][global capacity bar]` one row. Database header: `[toggle pills][▶ Add Settings accordion]` one row. Add Settings summary now shows 4 params (`+25 · +10 · Standard · Ash +10`, was 3 missing Infuse).
+
+**Backend API:**
+- `app.go` — new `GetItemListChunk(category string) []db.ItemEntry`. Wails bindings regenerated.
+- `db.go` — `ItemEntry` now carries `SubCategory string` (propagated through `GetItemsByCategory`).
+- `vm/character_vm.go` — `ItemViewModel` adds `SubGroup string` field (true sub-cat). `Category`/`SubCategory` semantics on the VM left intact (broad type / main tab) to avoid touching every consumer.
+
+**Icons:**
+- `frontend/public/items/tools/<11 sub-folders>/` — flattened to `frontend/public/items/tools/`. IconPath strings in `tools.go` updated by the same Phase 2f generator (sed regex). One conflict resolved (`celestial_dew.png` existed in both `tools/` and `tools/misc/` with identical MD5 — kept root, removed `misc/` copy).
+- `frontend/public/items/info/` (new) — 49 info icons moved from `key_items/`. 2 pre-existing absent on disk (`message_from_leda.png`, `tower_of_shadow_message.png` — DLC; need manual Fextralife CDN drop-in).
+
+**Counts (per tab, after refactor):**
+| Tab | Count |
+|---|---|
+| Tools | 328 |
+| Bolstering Materials | 43 |
+| Key Items | 356 |
+| Melee Armaments | 427 (30 weapon classes) |
+| Ranged / Catalysts | 69 (7 sub-groups) |
+| Arrows / Bolts | 64 |
+| Shields | 166 (Torches 9, Small 49, Medium 68, Greatshields 40) |
+| Info | 87 (Base 15, DLC 15, Mechanics 57) |
+
+**Verification:**
+- `go test -v ./backend/...` — pass
+- `cd frontend && npx tsc --noEmit && npm run build` — pass
+- Manual verification in `make dev` pending — Phase 4 checklist in `spec/36`.
+
+**Source of truth:** Eldenpedia inventory tab list (canonical 18 tabs) + Fextralife per-item breadcrumb + in-game observation (PC make dev + Steam Deck verification). er-save-manager `Goods/*.txt` continues to be used as initial hint only — its taxonomy is community, not 1:1 with game UI.
+
+**Spec doc:** [spec/36-inventory-categories-game-order.md](spec/36-inventory-categories-game-order.md) (extends spec/33).
+
+**Known limitations / future work:**
+- Active vs Inactive Great Runes — DB doesn't distinguish; sub-group "Active Great Runes" currently empty.
+- Quest Tools sub-group empty — quest items live in `info.go` (Notes/Letters) and `key_items.go` (story keys).
+- Best-effort Melee placements — 427 weapons through curated lookup + suffix fallback; some exotic DLC weapons may land in wrong class. Verification pending in `make dev` (Phase 4) — user reports drive `melee_subcat.go` patches.
+
+---
+
 ### Branch: feat/inventory-caps-enforcement — vanilla-realistic item caps + NG+ scaling + Full Chaos Mode
 
 **Goal:** Reduce EAC ban risk by tightening `MaxInventory` / `MaxStorage` caps for items where the previous numbers (e.g. 999/999 cookbooks, 99/600 paintings) were anomalously above what a single playthrough can yield. Caps now reflect Fextralife-verified single-playthrough obtainable counts. For items that scale per NG+ cycle, a new `scales_with_ng` flag drives `effective_cap = base × (ClearCount + 1)` so caps grow naturally on NG+1...NG+7. A new **Full Chaos Mode** Settings toggle bypasses all caps for power users (max 999), with a clearly red-flagged ban-risk warning.

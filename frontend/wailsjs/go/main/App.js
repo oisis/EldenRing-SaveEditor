@@ -130,6 +130,10 @@ export function GetItemList(arg1) {
   return window['go']['main']['App']['GetItemList'](arg1);
 }
 
+export function GetItemListChunk(arg1) {
+  return window['go']['main']['App']['GetItemListChunk'](arg1);
+}
+
 export function GetMapProgress(arg1) {
   return window['go']['main']['App']['GetMapProgress'](arg1);
 }

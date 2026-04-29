@@ -12,6 +12,7 @@ type ItemEntry struct {
 	ID           uint32       `json:"id"`
 	Name         string       `json:"name"`
 	Category     string       `json:"category"`
+	SubCategory  string       `json:"subCategory,omitempty"`
 	MaxInventory uint32       `json:"maxInventory"`
 	MaxStorage   uint32       `json:"maxStorage"`
 	MaxUpgrade   uint32       `json:"maxUpgrade"`
@@ -400,6 +401,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 				ID:           id,
 				Name:         item.Name,
 				Category:     catName,
+				SubCategory:  item.SubCategory,
 				MaxInventory: item.MaxInventory,
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
@@ -444,6 +446,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 				ID:           id,
 				Name:         item.Name,
 				Category:     "ashes",
+				SubCategory:  item.SubCategory,
 				MaxInventory: item.MaxInventory,
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
@@ -476,6 +479,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 				ID:           id,
 				Name:         item.Name,
 				Category:     "tools",
+				SubCategory:  item.SubCategory,
 				MaxInventory: item.MaxInventory,
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
@@ -484,14 +488,17 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 			})
 		}
 	case "key_items":
+		// Bell Bearings remain filtered: managed via dedicated Bell Bearings UI.
+		// Cookbooks and Whetblades are surfaced here per in-game UI (sub-group: Cookbooks).
 		for id, item := range data.KeyItems {
-			if item.Name == "" || data.IsCookbookItemID(id) || data.IsWhetbladeItemID(id) || data.IsBellBearingItemID(id) {
+			if item.Name == "" || data.IsBellBearingItemID(id) {
 				continue
 			}
 			items = append(items, ItemEntry{
 				ID:           id,
 				Name:         item.Name,
 				Category:     "key_items",
+				SubCategory:  item.SubCategory,
 				MaxInventory: item.MaxInventory,
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,
@@ -508,6 +515,7 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 				ID:           id,
 				Name:         item.Name,
 				Category:     "info",
+				SubCategory:  item.SubCategory,
 				MaxInventory: item.MaxInventory,
 				MaxStorage:   item.MaxStorage,
 				MaxUpgrade:   item.MaxUpgrade,

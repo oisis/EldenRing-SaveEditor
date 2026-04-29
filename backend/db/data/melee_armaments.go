@@ -409,6 +409,7 @@ var Weapons = map[uint32]ItemData{
 	0x03AA6A60: {Name: "Firespark Perfume Bottle", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/firespark_perfume_bottle.png", Flags: []string{"dlc"}},
 	0x03AA9170: {Name: "Chilling Perfume Bottle", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/chilling_perfume_bottle.png", Flags: []string{"dlc"}},
 	0x03AAB880: {Name: "Frenzyflame Perfume Bottle", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/frenzyflame_perfume_bottle.png", Flags: []string{"dlc"}},
+	0x03AADF90: {Name: "Lightning Perfume Bottle", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/lightning_perfume_bottle.png", Flags: []string{"dlc"}},
 	0x03AB06A0: {Name: "Deadly Poison Perfume Bottle", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/deadly_poison_perfume_bottle.png", Flags: []string{"dlc"}},
 	0x03C8EEE0: {Name: "Smithscript Dagger", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/smithscript_dagger.png", Flags: []string{"dlc"}},
 	0x03C8F0D4: {Name: "Flame Art Smithscript Dagger", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/flame_art_smithscript_dagger.png"},
@@ -428,5 +429,4 @@ var Weapons = map[uint32]ItemData{
 	0x04153A20: {Name: "Beast Claw", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/incantations/beast_claw.png", Flags: []string{"dlc"}},
 	0x04153C14: {Name: "Flame Art Beast Claw", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/flame_art_beast_claw.png"},
 	0x04156130: {Name: "Red Bear's Claw", Category: "melee_armaments", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 10, IconPath: "items/melee_armaments/red_bears_claw.png", Flags: []string{"dlc"}},
-	0x00F55C80: {Name: "Torchpole", Category: "shields", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 25, IconPath: "items/melee_armaments/torchpole.png"},
 }
