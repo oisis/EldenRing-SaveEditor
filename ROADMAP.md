@@ -316,6 +316,169 @@ Edit number of unlocked talisman slots (0-3 additional, total 1-4).
 - `AdditionalTalismanSlotsCount` at PGD offset 0xBE → MagicOffset-241 (u8, clamped 0-3)
 - UI: number input with arrows in GeneralTab profile row
 
+### 🔲 Inventory Custom Order — Sort Modes + Drag & Drop Grid 🟡
+Pozwolić graczowi wybrać sposób sortowania ekwipunku (Acquisition / Alphabetical / Item Type / Weight / Attack Power / Upgrade) i ułożyć itemy w **dowolnej kolejności drag & drop** w siatce w stylu in-game UI gry. Scope startowy: **bronie + zbroja + talizmany** (niestackable). Tarcze + AoW + Ashes — opcjonalnie w follow-upie.
+
+**Mechanika (zweryfikowana w research, BEFORE coding wymaga Phase 0 in-game test):**
+- W save jest pole `acquisition_index` (offset `0x08` w 12-bajtowym `InventoryItem`, u nas `core.InventoryItem.Index` w `structures.go:90`). To **globalny licznik** inkrementowany przy każdym pickup (`next_acquisition_sort_id` przy końcu sekcji — `structures.go:97`)
+- **To pole kontroluje sortowanie "Acquisition Order"** w grze. Custom porządek można ustawić TYLKO przez manipulację `acquisition_index`
+- Inne sortowania w grze (Item Type / Weight / Attack Power / Alphabetical) są **liczone runtime z `regulation.bin` params** (`EquipParamWeapon.sortGroupId`/`sortId`, `EquipParamProtector.sortGroupId`, `EquipParamAccessory.sortId`) — **NIE są w save'ie**, edytora ich nie zmieni
+- Konsekwencja: nasz custom order jest widoczny tylko gdy gracz w grze ma sortowanie ustawione na "Acquisition Order" (default po fresh load — verified w `er-save-manager/parser/equipment.py:196,229`). Przełączenie w grze na inne sortowanie ignoruje nasze indeksy (gra liczy z params); powrót na Acquisition Order odzyska nasz porządek
+
+**Pułapki:**
+- **Reserved index range 0-432** (`InvEquipReservedMax`, `core/diagnostics.go:158`) — zarezerwowane dla equipment slotów (broń aktywna L/R, zbroja active, talizmany active, gestures, quick items). Custom order MUSI używać `Index >= 433` — najlepiej `base = max(NextAcquisitionSortId, 1000)` jako bufor
+- **Reorder per kategoria** — gra pokazuje sub-zakładki (Tools / Melee / Shields / Head / Chest / Talismans...), sort jest per-tab. `sortGroupId` definiuje grupę. Ułożenie kolejności broni nie wpływa na talizmany — każda kategoria osobny zakres `acquisition_index`
+- **Stackables** (consumables, materiały, AoW) — gra może je grupować inaczej (po `goodsType`); scope startowy zawęża się do niestackable equipment, gdzie mechanika `acquisition_index` jest zweryfikowana
+- **Brak danych do innych sort modes** — `ItemData` nie ma obecnie pól `Weight` / `AttackPower` / `SortGroupId`. Trzeba zaimportować z `tmp/erdb/1.10.0/EquipParam*.csv` przez `scripts/import_erdb.go`
+
+**Reference editors**: ani `er-save-manager` ani `ER-Save-Editor/Rust` nie mają takiego feature'u — edytują `acquisition_index` per row w spreadsheet view, brak drag&drop / grid view. Byłby to **unique feature** (jak map reveal / FoW / SSH deploy)
+
+---
+
+#### Phase 0 — Verify in-game (1-2h, KRYTYCZNE przed kodowaniem)
+
+Test:
+1. Save z 5 broniami w slotach
+2. Hex edit `acquisition_index` 5 broni → 1000, 1001, 1002, 1003, 1004
+3. Steam Deck deploy (memory feedback `reference_steam_deck_deploy.md`) → wczytaj save
+4. W grze: przełącz sortowanie na Acquisition Order
+5. Sprawdź czy bronie są w kolejności [1000..1004] ascending
+6. Pickup nowego itemu w grze → sprawdź czy nasze 5 broni zachowuje porządek (nowy item na końcu jako `next_acquisition_sort_id`)
+
+Jeśli nie potwierdza → **abort** całego feature'u (nasza hipoteza o `acquisition_index` jest błędna). Jeśli OK → kontynuuj.
+
+---
+
+#### Phase 1 — Backend reorder API + 2 sort modes (3-5h)
+
+**Pliki**: `app.go`, nowy `tests/inventory_reorder_test.go`
+
+```go
+// Returns ordered handle list per category for current state.
+func (a *App) GetInventoryOrder(charIdx int, category string) ([]uint32, error)
+
+// Sets new acquisition_index per handle in given order.
+// Indices: base, base+1, base+2... where base = max(NextAcquisitionSortId, 1000)
+// Updates next_acquisition_sort_id counter on completion.
+func (a *App) ReorderInventory(charIdx int, category string, orderedHandles []uint32) error
+
+// Bulk sort by mode. Phase 1 supports: "acquisition" | "alphabetical".
+// Phase 2 adds: "weight" | "attackPower" | "sortGroupId" | "upgradeLevel".
+func (a *App) SortInventory(charIdx int, category string, sortMode string) error
+```
+
+**Kategorie (Phase 1 scope)**: `"melee_armaments"`, `"head"`, `"chest"`, `"arms"`, `"legs"`, `"talismans"` (mapping na `db.GetItemDataFuzzy(itemID).Category`).
+
+**Implementacja `ReorderInventory`:**
+1. `pushUndo(charIdx)`
+2. Walidacja: każdy handle istnieje w `slot.Inventory.CommonItems`, należy do podanej kategorii
+3. Zarezerwuj zakres: `base = max(slot.Inventory.NextAcquisitionSortId, 1000)` (bufor żeby nie kolidować z reserved range 0-432)
+4. Per handle w `orderedHandles`: znajdź slot w `CommonItems`, ustaw `Index = base + i`, write-back przez `SlotAccessor.WriteU32` na `commonStart + slotIdx*12 + 8`
+5. Update `slot.Inventory.NextAcquisitionSortId = base + len(orderedHandles)`, write-back na `nextAcqSortIdOff`
+
+**Tests:**
+- Reorder 5 broni → reload save → kolejność zgodna
+- Reorder respektuje reserved range (`Index >= 433` zawsze)
+- Mixing categories: reorder broni nie zmienia indeksów talizmanów
+- `next_acquisition_sort_id` poprawnie zaktualizowany
+- Round-trip preservation: `Save → Reorder → Write → Read → indices match`
+
+---
+
+#### Phase 2 — Import danych do pozostałych sort modes (2-3h)
+
+**Pliki**: `backend/db/data/types.go` (rozszerzyć `ItemData`), `scripts/import_erdb.go` (rozszerzyć), `backend/db/data/{melee_armaments,head,chest,arms,legs,talismans}.go` (regenerate)
+
+Pobrać z `tmp/erdb/1.10.0/EquipParam*.csv`:
+- `weight` (broń + zbroja) → `ItemData.Weight float32`
+- `attackBasePhysics` (broń) → `ItemData.AttackPower uint32` (aproksymacja)
+- `sortGroupId` (broń + zbroja) → `ItemData.SortGroupId uint32` — kolejność by Item Type w grze
+
+Test: `SortInventory(weight)` → top 10 broni musi się zgadzać z manualnym in-game sortem.
+
+---
+
+#### Phase 3 — In-game-style grid UI + drag&drop (8-12h)
+
+**Nowa zakładka**: w `InventoryTab.tsx` toggle **List view / Grid view** (analog do istniejącego Inventory/Database toggle).
+
+**Nowe komponenty:**
+- `frontend/src/components/InventoryGrid.tsx` — siatka 6×N w stylu gry: ciemne tło, golden border na hover, ikona + qty + upgrade w prawym dolnym rogu
+- `frontend/src/components/InventoryGridCell.tsx` — pojedyncza komórka, draggable
+- Sub-tabs w grid view: tylko Phase 1 scope (Melee Armaments / Head / Chest / Arms / Legs / Talismans). Inne tabki disable z toastem "Reordering supported only for equipment items"
+
+**Biblioteka DnD:**
+- `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (~30KB combined, modern + accessible)
+- W projekcie obecnie nie ma żadnej DnD libki — **będzie to pierwsza** (`npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities`)
+
+**State flow:**
+```ts
+const [sortMode, setSortMode] = useState<SortMode>('acquisition');
+const [items, setItems] = useState<ItemViewModel[]>([]);
+
+// On sortMode change → SortInventory(charIdx, cat, sortMode), refresh
+// On drag end (DndContext.onDragEnd) → optimistic local reorder + ReorderInventory(charIdx, cat, newHandles)
+// "Reset to default" button → SortInventory(charIdx, cat, 'sortGroupId')
+```
+
+**Wizualne detale (in-game look):**
+- Tło: `bg-zinc-900` z lekkim grain pattern (CSS `radial-gradient`)
+- Komórka: `64x64px`, golden border `1px solid var(--primary)` na selected/hovered
+- Ikona: 56x56 centered (reuse `IconPath` z `ItemViewModel`)
+- Quantity badge: prawy dolny róg, `text-xs font-black`
+- Upgrade badge: lewy dolny róg, `text-[10px] text-amber-400`
+- Drag preview: półprzezroczysta kopia (`opacity-50`)
+- Drop indicator: golden vertical line między komórkami
+- Empty cells na końcu siatki dla wizualnej spójności (jak w grze)
+
+**Obsługa:**
+- Click → preview w `ItemDetailPanel` (już istnieje)
+- Drag → reorder
+- Right-click / long-press → context menu (Remove / Set Quantity / Upgrade — reuse z `InventoryTab`)
+
+---
+
+#### Phase 4 (opcjonalna) — Per-character preset persistence (2-3h)
+
+Integracja z **Character Preset Export/Import** (Phase 6 — Character Preset Export/Import (JSON profile)):
+- Dodaj `inventoryOrder: { weapons: [handle1, ...], armor: [...], talismans: [...] }` do `CharacterPreset`
+- Apply: po `AddItemsToCharacter` → wywołaj `ReorderInventory` per kategoria
+
+---
+
+### Phase summary
+
+| Phase | Czas |
+|---|---|
+| **0** Verify in-game (krytyczne!) | 1-2h |
+| **1** Backend API + 2 sort modes (acquisition/alphabetical) | 3-5h |
+| **2** Import erdb + 4 sort modes (weight/attack/type/upgrade) | 2-3h |
+| **3** Grid UI + drag&drop + in-game look | 8-12h |
+| 4 (opcj.) Preset persistence | 2-3h |
+| **Total minimum (0+1+3)** | **12-19h** |
+| **Total full (0-3)** | **14-22h** |
+| **Z presetami (0-4)** | **16-25h** |
+
+---
+
+### Open questions before Phase 0
+
+1. **Phase 0 weryfikacja**: user przygotowuje save z hex-editem sam, czy edytor ma wyprodukować test save (możliwe ale wymaga ad-hoc Go scriptu)?
+2. **Scope kategorii**: bronie + zbroja + talizmany only (jak user prosił), czy też shieldy / Ashes of War / Ashes / consumables?
+3. **Sort modes** dostępne w UI:
+   - `Acquisition Order` (default, no extra data) — Phase 1
+   - `Alphabetical` — Phase 1
+   - `Item Type` (`sortGroupId`) — Phase 2 (wymaga erdb import)
+   - `Weight` — Phase 2
+   - `Attack Power` (broń) / `Defense` (zbroja) — Phase 2
+   - `Upgrade Level` — Phase 1 (mamy już `currentUpgrade` w VM)
+   - `Custom (drag&drop)` — Phase 3 (zawsze dostępny)
+4. **Reset button** behavior: wraca do `sortGroupId` (in-game default), `acquisition` (oryginalny pickup order), czy disable po użyciu drag&drop?
+5. **Persistence after `WriteSave`**: zachowujemy custom porządek na zawsze (aż user kliknie Reset), czy invalid'ujemy po jakiejś akcji (np. Add Items)?
+6. **Sloty 0-432 reserved**: nasz reorder pomija je (sugerowane) czy też przeindexowuje? Sugeruję NIE ruszać `Index <= 432` — to fizycznie equipped items, gra je kontroluje przez osobne offsety
+
+**Status**: 🔲 Planned — paused; przed startem wymagana decyzja Phase 0 (in-game weryfikacja `acquisition_index` semantyki).
+
 ---
 
 ## Phase 5 — Character & World
@@ -561,6 +724,260 @@ Comprehensive slot diagnostics with corruption detection.
 - Detect common corruption patterns (zeroed magic, broken GaItem handles)
 - Frontend UI for diagnostics results display
 - Auto-repair for recoverable issues
+
+### 🔲 Character Preset Export / Import (JSON profile) 🟡
+Human-readable JSON dump of a character profile (stats + inventory + storage + opcjonalnie wygląd / world flags) z możliwością re-importu na inny slot, oraz edycja presetu offline (bez ładowania save'a).
+
+**Why:**
+- Share builds — gracze wymieniają się buildami w community bez kopiowania całych `.sl2`
+- Backup przed eksperymentami — szybki snapshot postaci do JSON, restore w 1 kliku
+- Replace dla aktualnie wyłączonego `App.ImportCharacter` (`app.go:1719`, "temporarily disabled during architecture refactor") — nowa ścieżka jest cleaner (po BaseID, nie po surowych bajtach)
+- Standalone editing — power-user planuje build w aplikacji bez load'owania save'a, później aplikuje jednym kliknięciem
+
+**Source of truth:** istniejący `vm.CharacterViewModel` (już ma `json:` tagi) + spec/31 (FaceData layout) + spec/34 (item caps + NG+ scaling, walidacja przy apply).
+
+**Format pliku:** JSON z `formatVersion: 1` i `appVersion` w nagłówku — versioned dla backward-compat. **Nie YAML** (nowa zależność `gopkg.in/yaml.v3`), **nie TXT** (nieparsowalny w drugą stronę). Items identyfikowane po `BaseID + upgrade + infuse + quantity` (NIE po runtime handle — handles są re-generowane przy apply).
+
+```json
+{
+  "formatVersion": 1,
+  "exportedAt": "2026-04-29T20:14:00Z",
+  "appVersion": "0.7.0",
+  "character": {
+    "name": "OiSiSk", "class": 0, "className": "Vagabond",
+    "level": 150, "souls": 999999999,
+    "vigor": 60, "mind": 25, "endurance": 40,
+    "strength": 50, "dexterity": 30, "intelligence": 9, "faith": 7, "arcane": 9,
+    "talismanSlots": 3, "clearCount": 0,
+    "greatRuneOn": true, "equippedGreatRune": 1073741909,
+    "scadutreeBlessing": 20, "shadowRealmBlessing": 13
+  },
+  "inventory": [
+    { "baseId": 134218848, "name": "Uchigatana", "quantity": 1, "upgrade": 25, "infuse": 800 },
+    { "baseId": 1073741857, "name": "Crimson Tears Flask", "quantity": 14, "upgrade": 12 }
+  ],
+  "storage": [ /* ... */ ]
+}
+```
+
+**Spec doc:** `spec/37-character-presets.md` (TBD — utworzyć w Phase 1).
+
+---
+
+#### Phase 1 — Export MVP (stats + inventory + storage) — ~4-6h
+
+**Backend** (~80 linii, nowy plik `backend/vm/preset.go`):
+```go
+type CharacterPreset struct {
+    FormatVersion int                 `json:"formatVersion"`  // 1
+    ExportedAt    string              `json:"exportedAt"`     // RFC3339 UTC
+    AppVersion    string              `json:"appVersion"`     // "0.7.0"
+    Character     CharacterPresetCore `json:"character"`
+    Inventory     []PresetItem        `json:"inventory"`
+    Storage       []PresetItem        `json:"storage"`
+}
+
+type CharacterPresetCore struct {
+    Name string `json:"name"`
+    Class uint8 `json:"class"`
+    ClassName string `json:"className"`
+    Level uint32 `json:"level"`
+    Souls uint32 `json:"souls"`
+    Vigor uint32 `json:"vigor"`
+    Mind uint32 `json:"mind"`
+    Endurance uint32 `json:"endurance"`
+    Strength uint32 `json:"strength"`
+    Dexterity uint32 `json:"dexterity"`
+    Intelligence uint32 `json:"intelligence"`
+    Faith uint32 `json:"faith"`
+    Arcane uint32 `json:"arcane"`
+    TalismanSlots uint8 `json:"talismanSlots"`
+    ClearCount uint32 `json:"clearCount"`
+    GreatRuneOn bool `json:"greatRuneOn"`
+    EquippedGreatRune uint32 `json:"equippedGreatRune"`
+    ScadutreeBlessing uint8 `json:"scadutreeBlessing"`
+    ShadowRealmBlessing uint8 `json:"shadowRealmBlessing"`
+}
+
+type PresetItem struct {
+    BaseID         uint32 `json:"baseId"`
+    Name           string `json:"name"`
+    Quantity       uint32 `json:"quantity"`
+    CurrentUpgrade uint32 `json:"upgrade"`
+    InfuseOffset   uint32 `json:"infuse,omitempty"`
+}
+
+// VMToPreset / PresetToVM / NewEmptyPreset(class uint8) — pure functions, testowalne
+```
+
+**App methods** (`app.go`):
+- `ExportCharacterPreset(charIdx int) (*vm.CharacterPreset, error)` — zwraca strukturę (Wails serializuje do JS auto)
+- `ExportCharacterPresetToFile(charIdx int) (string, error)` — `runtime.SaveFileDialog` + `os.WriteFile` z `json.MarshalIndent`. Default filename: `<CharacterName>_<level>_<className>.preset.json`
+
+**Frontend** (~30 linii, `CharacterTab.tsx`):
+- Przycisk "Export Preset" w sekcji Profile (obok Add to Mirror)
+- Toast: "Preset exported to: {path}"
+
+**Tests** (`backend/vm/preset_test.go`):
+- VMToPreset → PresetToVM round-trip preserves all fields
+- JSON serialization stable (golden file)
+- Item identity: BaseID extraction strips upgrade/infuse correctly
+
+---
+
+#### Phase 2 — Import / Apply do slotu — ~6-8h
+
+**Backend** (`backend/vm/preset.go` + `app.go`, ~150 linii):
+
+```go
+type ApplyOptions struct {
+    ReplaceStats     bool `json:"replaceStats"`
+    ReplaceInventory bool `json:"replaceInventory"`
+    ReplaceStorage   bool `json:"replaceStorage"`
+    KeepName         bool `json:"keepName"`         // jeśli true, nie nadpisuj imienia w slocie
+    KeepClass        bool `json:"keepClass"`        // domyślnie true — class wpływa na stat floor
+}
+
+type ApplyResult struct {
+    StatsApplied      bool     `json:"statsApplied"`
+    ItemsAdded        int      `json:"itemsAdded"`
+    ItemsRemoved      int      `json:"itemsRemoved"`
+    Warnings          []string `json:"warnings"`    // unknown item IDs, qty cap clamps, class mismatch, ...
+}
+```
+
+**App methods:**
+- `LoadCharacterPresetFromFile() (*vm.CharacterPreset, error)` — `runtime.OpenFileDialog` (filtr `*.preset.json,*.json`) + `json.Unmarshal` + walidacja `FormatVersion == 1`
+- `ValidateCharacterPreset(preset vm.CharacterPreset) []string` — pre-flight check przed apply: unknown BaseIDs (`db.GetItemDataFuzzy`), qty > MaxInventory × (ClearCount+1) per spec/34, stat floor klasy mismatch
+- `ApplyCharacterPreset(charIdx int, preset vm.CharacterPreset, opts ApplyOptions) (*ApplyResult, error)`:
+  1. `pushUndo(charIdx)`
+  2. Jeśli `opts.ReplaceStats` → `ApplyVMToParsedSlot` z core fields presetu (skip Name jeśli `KeepName`, skip Class jeśli `KeepClass`)
+  3. Jeśli `opts.ReplaceInventory` → zbierz wszystkie handles z `slot.Inventory.CommonItems` + `KeyItems` → `RemoveItemsFromCharacter(charIdx, handles, true, false)`
+  4. Loop po `preset.Inventory` → `core.AddItemsToSlot(slot, finalID, qty, 0, forceStackable)` z `finalID = baseID + upgrade + infuse`
+  5. Analogicznie dla `preset.Storage` (z `actualInv=0, actualStorage=qty`)
+  6. Reuse logiki AoW flag / world pickup flag / container key item / tutorial ID z istniejącego `AddItemsToCharacter` — wyciągnąć do `addOneItemToSlotWithFlags()` helper'a, używanego przez oba code paths
+
+**Frontend** (~120 linii, nowy `frontend/src/components/PresetImporter.tsx` w `ToolsTab`):
+- "Import Preset" button → `LoadCharacterPresetFromFile()` → preview card (postać X, level Y, items: Z inv + W storage)
+- Checkboxes dla `ApplyOptions` (default: `ReplaceStats=true, ReplaceInventory=true, ReplaceStorage=false, KeepName=false, KeepClass=true`)
+- Dropdown wyboru slotu docelowego
+- Pre-flight warnings z `ValidateCharacterPreset` — lista "⚠ Unknown item ID 0xXXXX (skipped)", "⚠ Qty 999 capped to 600 (NG cap)"
+- `RiskActionButton` z `riskKey="character_import"` (Tier 1 — bulk inventory replace, już istnieje w `riskInfo.ts`)
+- Toast podsumowujący `ApplyResult`: "Applied: 240 items added, 12 stats, 3 warnings"
+
+**Cleanup:**
+- Usunąć dead `App.ImportCharacter` stub (`app.go:1719`) — preset import zastępuje
+- Usunąć dead `CharacterImporter.tsx` route z `ToolsTab` jeśli nie używamy do niczego innego (lub przepisać żeby używał preset flow)
+
+**Tests** (`tests/preset_apply_test.go`):
+- Apply preset na czysty slot — stats + items się zgadzają
+- ReplaceInventory clear+add — końcowa lista handles = preset items (po nowych handles)
+- Round-trip Export → Apply na drugi slot → Export → diff zerowy (oprócz Name/Class jeśli KeepName/KeepClass)
+- Walidacja qty cap: preset z `qty: 999` na itemie z MaxInventory=10 → po apply qty=10, warning w ApplyResult
+
+---
+
+#### Phase 3 — Standalone preset editor (offline, bez save'a) — ~10h
+
+**Frontend-heavy refactor.** Backend już wspiera (`GetItemList`, `GetItemListChunk`, `GetInfuseTypes`, `GetClassStats` nie wymagają `save != nil`).
+
+**State management** (`App.tsx`):
+```ts
+type EditorMode = 'save' | 'preset';
+const [editorMode, setEditorMode] = useState<EditorMode>('save');
+const [editingPreset, setEditingPreset] = useState<CharacterPreset | null>(null);
+```
+
+Gdy `editorMode === 'preset'`: nie wywołuj `GetCharacter(slot)` / `GetActiveSlots()`; selectory `currentChar`/`currentInventory` zwracają shimmed VM z `presetToVM(editingPreset)`. Większość komponentów (`CharacterTab`, `InventoryTab`, `DatabaseTab`) już bierze VM przez propsy a nie z globalnego state — refactor głównie w `App.tsx` selectorach.
+
+**Backend helpers** (`app.go`, ~30 linii):
+- `NewBlankPreset(class uint8) vm.CharacterPreset` — domyślny preset dla danej klasy startowej (stats z `db.GetClassStats(class)`, level computed z formuły, empty inventory/storage)
+- `SavePresetToFile(preset vm.CharacterPreset) (string, error)` — file dialog + write
+- `ApplyToPresetItem(preset *vm.CharacterPreset, itemIDs []uint32, qty int, ...)` — analog `AddItemsToCharacter` ale modyfikujący `CharacterPreset` zamiast `SaveSlot`. Wraps `AddItemsToCharacter` semantykę (container caps, AoW flag tracking — tylko stat-tracking, bez writes do save data).
+
+**UI changes:**
+- Top bar: nowy toggle "Save / Preset Workspace" obok Open Save button
+- W trybie Preset: sidebar pokazuje "Active Preset: <name>" + buttony [New Preset] [Load Preset] [Save Preset] [Apply to current Save Slot →] (ostatni disabled jeśli `save === null`)
+- "New Preset" → modal wyboru klasy (10 klas) → `NewBlankPreset` → wpadamy w edycję
+- Tabki Character + Inventory + Item Database działają normalnie; World/Tools/Settings — disabled lub ukryte (nie mają sensu bez save'a)
+- "Save Preset" zapisuje stan `editingPreset` do JSON
+- "Apply to current Save Slot" — gdy save loaded, wywołuje `ApplyCharacterPreset` (Phase 2 path) z aktualnym `editingPreset` → ten sam dialog z opcjami co Phase 2
+
+**Refactor risk:** `selectedChar` indeks slotu i `editingPreset` to dwa różne źródła truth. Trzeba zrobić abstrakcję "currentVM" w `App.tsx`. Sugerowany pattern: `useCurrentVM()` hook zwracający `{ vm, source: 'slot'|'preset', refresh, applyChange }` — wszystkie tabki przepinamy na ten hook.
+
+**Tests** (frontend — `vitest`):
+- `presetToVM` / `vmToPreset` round-trip (lib)
+- New blank preset for each class has correct base stats
+- Apply preset to save slot triggers `ApplyCharacterPreset` z prawidłowymi argumentami
+
+---
+
+#### Phase 4 (opcjonalna) — Appearance (FaceData blob) — ~3-4h
+
+**Co dochodzi do presetu:**
+```go
+type CharacterPresetCore struct {
+    // ... istniejące pola
+    Gender      uint8  `json:"gender,omitempty"`       // 0=female, 1=male
+    VoiceType   uint8  `json:"voiceType,omitempty"`    // 0-5
+    FaceDataB64 string `json:"faceDataB64,omitempty"`  // 303 B → base64 (404 chars)
+}
+```
+
+**Implementation:**
+- Export: `slot.Data[FaceDataStart():FaceDataStart()+core.FaceDataBlobSize]` → `base64.StdEncoding.EncodeToString`
+- Apply: precedens 1:1 z `ApplyMirrorFavoriteToCharacter` (`app.go:2634`) — copy 303 B w te same 5 segmentów (model IDs 32B, face shape 64B, body 7B, skin 91B + flag zeros + Gender flip)
+- UI: nowy checkbox `ReplaceAppearance` w `ApplyOptions`
+- Preset filename suffix `.face.json` jeśli zawiera FaceData (pure-stats vs full-character)
+
+**Caveat:** cross-gender Type B preset wymaga PartsId mapping (jest `hair_mapping.go`); dla zwykłego raw blob copy gra obsługuje bez problemów (tak działa ApplyMirrorFavorite). UI ostrzeżenie gdy `preset.gender != slot.gender` (precedens: `WriteSelectedToFavorites` guard).
+
+---
+
+#### Phase 5 (opcjonalna) — World flags (graces / bosses / quests / maps / cookbooks / bell bearings / whetblades / AoW / gestures / regions) — ~12-16h
+
+**Co dochodzi do presetu:**
+```go
+type CharacterPresetWorld struct {
+    Graces          []uint32 `json:"graces,omitempty"`           // unlocked grace IDs
+    Bosses          []uint32 `json:"bosses,omitempty"`           // defeated boss IDs
+    Quests          map[string]int `json:"quests,omitempty"`     // npcName → stepIndex
+    MapRegions      []uint32 `json:"mapRegions,omitempty"`       // visible region flag IDs
+    Cookbooks       []uint32 `json:"cookbooks,omitempty"`        // unlocked cookbook IDs
+    BellBearings    []uint32 `json:"bellBearings,omitempty"`     // unlocked BB flag IDs
+    Whetblades      []uint32 `json:"whetblades,omitempty"`       // unlocked whetblade flag IDs
+    AshOfWarFlags   []uint32 `json:"ashOfWarFlags,omitempty"`    // acquired AoW flags
+    Gestures        []uint32 `json:"gestures,omitempty"`         // unlocked gesture IDs
+    UnlockedRegions []uint32 `json:"unlockedRegions,omitempty"`  // invasion region IDs
+    FogOfWarRemoved bool     `json:"fogOfWarRemoved,omitempty"`
+}
+```
+
+Ekstrakcja (export): per-kategoria `Get*` → filtruj `unlocked/defeated/visible: true` → zapisz IDs.
+Apply: per-kategoria `BulkSet*` (już istnieją). Diff vs current state, by nie touchować nieznanych IDs.
+
+**Why opcjonalne:** to robi się "full save clone via JSON" co jest sporym scope creep — najczęściej user chce share'ować builda (stats + items), nie cały world progress. Decision deferred do user feedback po Phase 1+2.
+
+---
+
+### Phase summary
+
+| Phase | Czas | Wartość |
+|---|---|---|
+| **1** Export MVP | 4-6h | Snapshot postaci → JSON |
+| **2** Import / Apply | 6-8h | Bidir. preset workflow, replace dla wyłączonego ImportCharacter |
+| **1+2 (rekomendowany start)** | **10-14h** | 80% wartości feature'u |
+| 3 Standalone editor | +10h | Edycja offline bez save'a |
+| 4 Appearance blob | +3-4h | Pełen visual transfer |
+| 5 World flags | +12-16h | Full character clone |
+
+### Open questions / decisions to confirm before Phase 1
+
+1. **Equipped items w MVP**: pominąć (gracz re-equipuje z inwentarza po apply) czy dodać sekcję `equipped: { weapon1, helm, ring1, ... }` z item handles? — sugeruję pominąć w v1, dodać w Phase 4 razem z appearance jeśli okaże się potrzebne.
+2. **Class change przy apply**: domyślnie `KeepClass=true` (precedens: spec/34 mówi że class wpływa na stat floor walidację). Override checkbox dostępny.
+3. **NG+ scaling przy walidacji**: efektywny cap dla item w preset = `MaxInventory × (preset.ClearCount + 1)` czy `MaxInventory × (slot.ClearCount + 1)`? Sugeruję slot's NG+ cycle (gracz aplikujący na NG+5 dostaje NG+5 capy mimo że preset zrobiony na NG).
+4. **Fail-fast vs best-effort przy apply**: jeśli 5/240 item IDs nieznanych → kontynuuj z warningami czy abort? Sugeruję best-effort z warningami w `ApplyResult` (precedens: `AddItemsToCharacter` zwraca `[]SkippedAdd`).
+5. **Backup przed apply**: zwykły `pushUndo(charIdx)` (5-deep stack) czy też auto-export presetu obecnej postaci do `<savePath>.preset.bak.json` przed nadpisaniem? Sugeruję ten drugi — szybki rollback poza limit undo.
 
 ### 🔲 Save File Merging 🔵
 Combine data from two different saves into one. **Fully unique** — no editor does this.
