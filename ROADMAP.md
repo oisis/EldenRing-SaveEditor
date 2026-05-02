@@ -1241,11 +1241,13 @@ Three related UX issues with the Quake console resolved.
 
 ---
 
-## Phase 9 — Transactional Item Adding (Crash Prevention) 🔴
+## Phase 9 — Transactional Item Adding (Crash Prevention) ✅ `v0.7.2`
 
 > **Problem:** `AddItemsToCharacter` modyfikuje slot bez walidacji capacity i bez rollbacku. Partial failure (pełny inventory, pełna tablica GaItems, pełny GaItemData) zostawia slot w niespójnym stanie: orphaned GaItems, handle bez inventory entry, uszkodzony counter. Gra crashuje przy ładowaniu (`EXCEPTION_ACCESS_VIOLATION`).
 
 > **Design principle:** ALL-OR-NOTHING — albo wszystkie żądane itemy zostają dodane, albo żaden. Partial write = corrupted save = niedopuszczalny.
+
+> **Implemented:** pre-flight capacity check (`CheckAddCapacity`), snapshot/rollback (`SnapshotSlot`/`RestoreSlot`), batch mutation (`AddItemsToSlotBatch` — 1 `RebuildSlotFull` instead of N), post-mutation validation (`ValidatePostMutation`), storage header reconciliation, `upsertGaItemData` overflow fix, skip-already-max-qty, container-gated items best-effort trim, error modal with overflow details, Wails events for QConsole logging. 12 new tests in `capacity_test.go`.
 
 ### Architektura rozwiązania
 
