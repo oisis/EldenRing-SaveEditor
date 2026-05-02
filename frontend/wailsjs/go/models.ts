@@ -555,6 +555,64 @@ export namespace deploy {
 
 export namespace main {
 	
+	export class SkippedAdd {
+	    itemID: number;
+	    cutQty: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new SkippedAdd(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.itemID = source["itemID"];
+	        this.cutQty = source["cutQty"];
+	    }
+	}
+	export class AddResult {
+	    added: number;
+	    requested: number;
+	    trimmed: SkippedAdd[];
+	    capHit: string;
+	    freeInv: number;
+	    freeStore: number;
+	    neededInv: number;
+	    neededStore: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new AddResult(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.added = source["added"];
+	        this.requested = source["requested"];
+	        this.trimmed = this.convertValues(source["trimmed"], SkippedAdd);
+	        this.capHit = source["capHit"];
+	        this.freeInv = source["freeInv"];
+	        this.freeStore = source["freeStore"];
+	        this.neededInv = source["neededInv"];
+	        this.neededStore = source["neededStore"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class DiffEntry {
 	    category: string;
 	    action: string;
@@ -609,20 +667,7 @@ export namespace main {
 	        this.bodyType = source["bodyType"];
 	    }
 	}
-	export class SkippedAdd {
-	    itemID: number;
-	    cutQty: number;
 	
-	    static createFrom(source: any = {}) {
-	        return new SkippedAdd(source);
-	    }
-	
-	    constructor(source: any = {}) {
-	        if ('string' === typeof source) source = JSON.parse(source);
-	        this.itemID = source["itemID"];
-	        this.cutQty = source["cutQty"];
-	    }
-	}
 	export class SlotCapacity {
 	    gaItemsUsed: number;
 	    gaItemsMax: number;

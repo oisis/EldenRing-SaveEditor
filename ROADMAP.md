@@ -1241,6 +1241,264 @@ Three related UX issues with the Quake console resolved.
 
 ---
 
+## Phase 9 — Transactional Item Adding (Crash Prevention) 🔴
+
+> **Problem:** `AddItemsToCharacter` modyfikuje slot bez walidacji capacity i bez rollbacku. Partial failure (pełny inventory, pełna tablica GaItems, pełny GaItemData) zostawia slot w niespójnym stanie: orphaned GaItems, handle bez inventory entry, uszkodzony counter. Gra crashuje przy ładowaniu (`EXCEPTION_ACCESS_VIOLATION`).
+
+> **Design principle:** ALL-OR-NOTHING — albo wszystkie żądane itemy zostają dodane, albo żaden. Partial write = corrupted save = niedopuszczalny.
+
+### Architektura rozwiązania
+
+```
+     ┌─────────────────────────────────────────────────────────┐
+     │               AddItemsToCharacter (app.go)              │
+     │                                                         │
+     │  1. PRE-COMPUTE: finalIDs, quantities, container caps   │
+     │  2. PRE-FLIGHT: CheckSlotCapacity() — all fit?          │
+     │     └─ NO  → return AddResult{CapHit, 0 added}         │
+     │     └─ YES → continue                                   │
+     │  3. SNAPSHOT: deep copy slot state                       │
+     │  4. MUTATE: AddItemsToSlotBatch() — one rebuild         │
+     │  5. POST-FLAGS: event flags, tutorials, containers      │
+     │  6. VALIDATE: ValidateSlotIntegrity() — invariants OK?  │
+     │     └─ NO  → ROLLBACK to snapshot, return error         │
+     │     └─ YES → commit, return AddResult{success}          │
+     └─────────────────────────────────────────────────────────┘
+```
+
+### Step 1 — Fix `upsertGaItemData` silent overflow 🔴
+
+**Problem:** `writer.go:31` — when `count >= GaItemDataMaxCount (7000)`, returns `nil` instead of error. GaItem gets created but never registered in GaItemData → orphaned metadata → game crash.
+
+**Fix:** Return `fmt.Errorf(...)` instead of `nil`. Error propagates through `AddItemsToSlot` → caller handles it.
+
+**Files:** `backend/core/writer.go`
+**Tests:** Unit test: call `upsertGaItemData` on slot with count=6999 (success) and count=7000 (error).
+
+---
+
+### Step 2 — Pre-flight capacity check 🔴
+
+**New function:** `CheckAddCapacity(slot, items []ItemToAdd) (canFitAll bool, details CapacityReport)`
+
+**Logic:**
+- Count free slots: inventory CommonItems (2688 - used), storage CommonItems (1920 - used), GaItems array (5120 - used), GaItemData (7000 - count header)
+- For each item in the request: classify as stackable vs non-stackable, compute how many GaItem entries needed (non-stackable: 1 per unit, stackable: 0 if handle exists, 1 if new), compute inventory/storage slots needed (stackable existing: 0, stackable new: 1, non-stackable: 1 per unit)
+- Return: whether ALL items fit + which limit would be exceeded first
+
+**Reuses:** existing `GetSlotCapacity()` (app.go:2280) for counting used slots — extract counting logic into `core.CountSlotUsage()` shared by both.
+
+**Files:** `backend/core/capacity.go` (new), `app.go` (integration)
+**Tests:** Unit test with mock slot at various fill levels (empty, 50%, 99%, full). Test with mixed stackable/non-stackable items.
+
+---
+
+### Step 3 — `AddResult` return type + all-or-nothing semantics 🔴
+
+**Replace** `([]SkippedAdd, error)` with:
+
+```go
+type AddResult struct {
+    Added     int          `json:"added"`
+    Requested int          `json:"requested"`
+    Skipped   []SkippedAdd `json:"skipped"`   // container cap trims (game mechanic, not capacity)
+    CapHit    string       `json:"capHit"`     // "" | "inventory_full" | "storage_full" | "gaitem_full" | "gaitemdata_full"
+    FreeInv   int          `json:"freeInv"`    // free slots after operation
+    FreeStore int          `json:"freeStore"`  // free slots after operation
+}
+```
+
+**Semantics:**
+- If pre-flight says not all fit → `AddResult{Added: 0, Requested: N, CapHit: "..."}`, no mutation
+- Container cap trims (pots/aromatics) are reported in `Skipped` but don't trigger rollback — they're game rules, not capacity failures
+- `CapHit = ""` means all items added successfully
+
+**Files:** `app.go` (type change + logic), `frontend/src/wailsjs/` (auto-regenerated)
+**Tests:** Integration test: add items to near-full slot, verify AddResult fields.
+
+---
+
+### Step 4 — Snapshot + rollback in `AddItemsToCharacter` 🔴
+
+**Before mutation:**
+```go
+snapshot := snapshotSlot(slot)  // deep copy: Data, GaItems, GaMap, Inventory, Storage, all indices
+```
+
+**After mutation (if any error in steps 4–6):**
+```go
+restoreSlot(slot, snapshot)     // restore all fields from snapshot
+return AddResult{...}, fmt.Errorf("rollback: %w", err)
+```
+
+**Snapshot scope:** `slot.Data` ([]byte), `slot.GaItems` ([]GaItemFull), `slot.GaMap` (map), `slot.Inventory` (deep clone via existing `Clone()`), `slot.Storage` (deep clone), `slot.NextAoWIndex`, `slot.NextArmamentIndex`, `slot.NextGaItemHandle`, `slot.PartGaItemHandle`, `slot.GaItemDataOffset`, `slot.MagicOffset`, `slot.StorageBoxOffset`, `slot.EventFlagsOffset`.
+
+**Note:** `pushUndo()` already does a similar deep copy for UI undo — snapshot/rollback is a separate, internal safety mechanism that doesn't touch the undo stack.
+
+**Files:** `backend/core/snapshot.go` (new — `SnapshotSlot()` / `RestoreSlot()`), `app.go` (integration)
+**Tests:** Unit test: corrupt mid-add, verify slot.Data matches pre-add snapshot byte-for-byte.
+
+---
+
+### Step 5 — Batch rebuild (`AddItemsToSlotBatch`) 🟡
+
+**Problem:** Current flow calls `AddItemsToSlot` per-item (app.go:373). Each non-stackable item triggers `RebuildSlotFull` (~50-100ms). 50 weapons = 50 rebuilds = 2.5-5s. Batching = 1 rebuild = ~100ms.
+
+**New function:**
+
+```go
+type ItemToAdd struct {
+    ItemID         uint32
+    InvQty         int
+    StorageQty     int
+    ForceStackable bool
+}
+
+func AddItemsToSlotBatch(slot *SaveSlot, items []ItemToAdd) error {
+    // Phase 1: allocate ALL GaItems + GaItemData entries
+    // Phase 2: ONE RebuildSlotFull (if any non-stackable)
+    // Phase 3: add ALL to inventory/storage
+}
+```
+
+**Refactor in `app.go`:**
+1. Pre-compute all `finalID`, `actualInv`, `actualStorage`, `forceStackable` in a loop (lines 340-368 current logic) → collect into `[]ItemToAdd`
+2. Call `AddItemsToSlotBatch(slot, items)` once
+3. Post-batch: set event flags, tutorial IDs, container key items in separate loops (safe to defer — no dependency on add order)
+
+**Container cap logic stays per-item** (stateful FCFS distribution) but runs BEFORE the batch call, not inside it.
+
+**Files:** `backend/core/writer.go` (new `AddItemsToSlotBatch`, keep old `AddItemsToSlot` for single-item callers), `app.go` (refactor loop)
+**Tests:** Benchmark test: batch 50 weapons vs per-item, verify <200ms. Roundtrip test: batch add 50 mixed items, verify all survive reload.
+
+---
+
+### Step 6 — Post-write validation (`ValidateSlotIntegrity`) 🔴
+
+**Extend existing `diagnostics.go`** with a fast, focused invariant check run AFTER every mutation (not full diagnostic — only crash-causing invariants):
+
+```go
+func ValidatePostMutation(slot *SaveSlot) []IntegrityError {
+    // 1. Every non-empty inventory handle exists in GaMap
+    // 2. Every non-stackable GaMap entry has a GaItem record
+    // 3. No duplicate Index values across inventory CommonItems + KeyItems
+    // 4. NextEquipIndex > max(all item indices) — for both inventory and storage
+    // 5. GaItemData count header matches actual non-zero entries
+    // 6. Storage count header matches actual non-empty storage items
+    // 7. NextAoWIndex <= NextArmamentIndex <= len(GaItems)
+    // 8. No handle in GaMap references itemID=0
+}
+```
+
+**If any check fails → trigger rollback (step 4).** This is the safety net for bugs we haven't found yet.
+
+**Performance target:** <10ms (only iterate in-memory structures, no I/O).
+
+**Files:** `backend/core/diagnostics.go` (new `ValidatePostMutation`), `app.go` (call after mutation, before commit)
+**Tests:** Unit test: manually corrupt each invariant, verify detection. Benchmark: verify <10ms on full slot.
+
+---
+
+### Step 7 — Event flag error classification 🟡
+
+**Audit all `_ = db.SetEventFlag(...)` sites** in `app.go` (6 locations):
+- **Non-critical** (log to console, don't block): AoW duplication flag (line 380), world pickup flag (line 391), tutorial ID (line 401), container pickup flags (line 448), vendor purchase flags (line 457)
+- **Critical** (block add + rollback): none currently — event flags are convenience features, not structural integrity
+
+**Implementation:** Replace `_ =` with `if err := ...; err != nil { runtime.LogWarningf(ctx, "event flag %d: %v", flagID, err) }`. Frontend console already receives Wails runtime logs.
+
+**Files:** `app.go`
+**Tests:** No new tests needed — existing event flag tests cover SetEventFlag correctness.
+
+---
+
+### Step 8 — Frontend `AddResult` handling 🟡
+
+**DatabaseTab.tsx changes:**
+
+1. **Type update:** `AddItemsToCharacter` returns `AddResult` instead of `SkippedAdd[]`
+2. **Capacity failure (capHit non-empty):**
+   ```typescript
+   if (result.capHit) {
+       toast.error(`Cannot add items: ${result.capHit}. 0/${result.requested} added.`);
+   }
+   ```
+3. **Container cap trims (skipped non-empty):**
+   ```typescript
+   if (result.skipped.length > 0) {
+       console.log(`Trimmed ${totalCut} units due to container caps`);
+   }
+   ```
+4. **Success path:**
+   ```typescript
+   console.log(`Added ${result.added}/${result.requested} items`);
+   toast.success(`Added ${result.added} items`);
+   ```
+5. **Modal always closes, `onItemsAdded?.()` always fires** (refresh UI regardless of outcome)
+6. **`isSaving` guard** prevents double-click (already exists — verify it covers all paths)
+
+**Files:** `frontend/src/components/DatabaseTab.tsx`
+**Tests:** Manual test: add items to near-full inventory, verify toast shows correct message.
+
+---
+
+### Step 9 — Storage count header reconciliation 🟡
+
+**Problem:** `addToInventory` (writer.go:636) blindly increments `currentCount + 1`. If header is already wrong (e.g. from external editor), each add worsens the mismatch.
+
+**Fix:** After batch add, reconcile storage count header with actual non-empty item count (same scan as `checkStorageHeader` in diagnostics.go). Write correct count. This runs as part of `ValidatePostMutation` (step 6) auto-repair path.
+
+**Files:** `backend/core/writer.go` (reconcile function), `backend/core/diagnostics.go` (extend validation)
+**Tests:** Unit test: set header to wrong value, add item, verify header corrected.
+
+---
+
+### Step 10 — Tests 🔴
+
+New test file: `tests/capacity_test.go`
+
+| Test | What it verifies |
+|------|-----------------|
+| `TestPreFlightCapacity_Empty` | Pre-flight on empty slot, all items fit |
+| `TestPreFlightCapacity_NearFull` | Pre-flight on 99% full slot, reports correct free count |
+| `TestPreFlightCapacity_Full` | Pre-flight on full slot, reports 0 capacity, capHit set |
+| `TestPreFlightCapacity_MixedStackable` | Stackable items reuse handles, non-stackable need new GaItems |
+| `TestAllOrNothing_CapacityExceeded` | Request 50, capacity for 30 → 0 added, slot unchanged |
+| `TestAllOrNothing_MidAddError` | Force error mid-batch → full rollback, slot matches snapshot |
+| `TestBatchRebuild_SingleVsMultiple` | Batch 20 items produces identical slot.Data as 20 single adds |
+| `TestBatchRebuild_Performance` | Batch 50 weapons: <200ms (vs ~2500ms per-item) |
+| `TestPostValidation_OrphanHandle` | Inject orphan handle → ValidatePostMutation detects it |
+| `TestPostValidation_DuplicateIndex` | Inject duplicate index → detected |
+| `TestPostValidation_CounterMismatch` | Inject wrong NextEquipIndex → detected |
+| `TestStorageHeaderReconcile` | Wrong header count → corrected after add |
+| `TestGaItemDataFull_ErrorNotSilent` | upsertGaItemData at count=7000 → returns error |
+| `TestRoundtrip_FullInventory` | Fill inventory to 100%, save, reload → identical |
+| `TestRoundtrip_BatchAdd300Items` | Add 300 mixed items in one batch, roundtrip → all survive |
+| `TestAddResult_ContainerCapTrim` | Container cap trims reported in Skipped, not in CapHit |
+
+**Files:** `tests/capacity_test.go` (new), `backend/core/writer_test.go` (extend), `backend/core/diagnostics_test.go` (extend)
+
+---
+
+### Implementation order
+
+| Order | Step | Priority | Est. time | Dependency |
+|-------|------|----------|-----------|------------|
+| 1 | Step 1 — upsertGaItemData fix | 🔴 | 15 min | none |
+| 2 | Step 4 — Snapshot/rollback | 🔴 | 1-2h | none |
+| 3 | Step 2 — Pre-flight capacity | 🔴 | 2-3h | none |
+| 4 | Step 6 — Post-write validation | 🔴 | 2-3h | none |
+| 5 | Step 3 — AddResult type | 🔴 | 1-2h | steps 2, 3 |
+| 6 | Step 7 — Event flag logging | 🟡 | 30 min | none |
+| 7 | Step 9 — Storage header reconcile | 🟡 | 1h | step 6 |
+| 8 | Step 5 — Batch rebuild | 🟡 | 3-4h | steps 2, 3, 4, 5 |
+| 9 | Step 8 — Frontend AddResult | 🟡 | 1-2h | step 5 |
+| 10 | Step 10 — Full test suite | 🔴 | 3-4h | all above |
+
+**Total estimate:** 15-22h
+
+---
+
 ## 🔚 Final Cleanup (do końcu wszystkich pozostałych prac)
 
 > Te zadania robimy dopiero na końcu, po zamknięciu wszystkich feature'ów z roadmapy.

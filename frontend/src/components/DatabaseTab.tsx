@@ -76,6 +76,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
     });
     const [isSaving, setIsSaving] = useState(false);
     const [brokenIcons, setBrokenIcons] = useState<Set<string>>(new Set());
+    const [errorModal, setErrorModal] = useState<{title: string; message: string; items?: string[]} | null>(null);
 
     // Quantity state for modal
     const [addToInv, setAddToInv] = useState(true);
@@ -249,53 +250,86 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
         setIsSaving(true);
         try {
             const baseIds = confirmModal.map(i => i.id);
-            type Skip = { itemID: number; cutQty: number };
-            const allSkipped: Skip[] = [];
+            type AddRes = { added: number; requested: number; trimmed: { itemID: number; cutQty: number }[]; capHit: string; freeInv: number; freeStore: number; neededInv: number; neededStore: number };
+            let lastResult: AddRes | null = null;
+            const allTrimmed: { itemID: number; cutQty: number }[] = [];
 
             if (modalNonStackable) {
-                // Non-stackable: each copy needs its own GaItem handle in the backend.
-                // When adding exactly 1 copy to both inv and storage, use a single call so
-                // both locations share the same handle (prevents duplicate GaItem records).
                 const bothActive = addToInv && invQtyVal > 0 && addToStorage && storageQtyVal > 0;
                 if (bothActive && invQtyVal === 1 && storageQtyVal === 1) {
-                    const skipped = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1);
-                    if (skipped) allSkipped.push(...skipped);
+                    const res = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 1) as AddRes;
+                    lastResult = res;
+                    if (res?.trimmed) allTrimmed.push(...res.trimmed);
                 } else {
                     if (addToInv && invQtyVal > 0) {
                         const ids = invQtyVal > 1
                             ? confirmModal.flatMap(i => Array<number>(invQtyVal).fill(i.id))
                             : baseIds;
-                        const skipped = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0);
-                        if (skipped) allSkipped.push(...skipped);
+                        const res = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 1, 0) as AddRes;
+                        lastResult = res;
+                        if (res?.trimmed) allTrimmed.push(...res.trimmed);
                     }
-                    if (addToStorage && storageQtyVal > 0) {
+                    if (!lastResult?.capHit && addToStorage && storageQtyVal > 0) {
                         const ids = storageQtyVal > 1
                             ? confirmModal.flatMap(i => Array<number>(storageQtyVal).fill(i.id))
                             : baseIds;
-                        const skipped = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1);
-                        if (skipped) allSkipped.push(...skipped);
+                        const res = await AddItemsToCharacter(charIndex, ids, upgrade25, upgrade10, infuseOffset, upgradeAsh, 0, 1) as AddRes;
+                        lastResult = res;
+                        if (res?.trimmed) allTrimmed.push(...res.trimmed);
                     }
                 }
             } else {
-                // Stackable: single call with qty values.
                 const invQty = !addToInv ? 0 : invMax ? -1 : invQtyVal;
                 const storQty = !addToStorage ? 0 : storageMax ? -1 : storageQtyVal;
-                const skipped = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty);
-                if (skipped) allSkipped.push(...skipped);
+                const res = await AddItemsToCharacter(charIndex, baseIds, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storQty) as AddRes;
+                lastResult = res;
+                if (res?.trimmed) allTrimmed.push(...res.trimmed);
             }
 
-            // Surface container-cap cuts to the user (sum CutQty across the batch).
-            if (allSkipped.length > 0) {
-                const totalCut = allSkipped.reduce((sum, s) => sum + s.cutQty, 0);
-                const distinctItems = new Set(allSkipped.map(s => s.itemID)).size;
-                toast(`Cut ${totalCut} unit(s) across ${distinctItems} item(s) from Inventory — container cap reached. Storage unaffected.`);
+            if (lastResult?.capHit) {
+                const labels: Record<string, string> = {
+                    inventory_full: 'Inventory Full',
+                    storage_full: 'Storage Full',
+                    gaitem_full: 'GaItem Slots Full',
+                    gaitemdata_full: 'GaItemData Full',
+                };
+                const showInv = lastResult.neededInv > 0;
+                const showStore = lastResult.neededStore > 0;
+                const invOverflow = Math.max(0, lastResult.neededInv - lastResult.freeInv);
+                const storeOverflow = Math.max(0, lastResult.neededStore - lastResult.freeStore);
+                const overflow = lastResult.capHit === 'inventory_full' ? invOverflow
+                    : lastResult.capHit === 'storage_full' ? storeOverflow : 0;
+
+                const parts: string[] = [];
+                if (showInv) parts.push(`Inventory: need ${lastResult.neededInv}, free ${lastResult.freeInv}`);
+                if (showStore) parts.push(`Storage: need ${lastResult.neededStore}, free ${lastResult.freeStore}`);
+                if (overflow > 0) parts.push(`\nRemove at least ${overflow} item(s) to make room.`);
+                parts.push(`\n0 / ${lastResult.requested} items added.`);
+
+                setConfirmModal(null);
+                setErrorModal({
+                    title: labels[lastResult.capHit] || 'Capacity Exceeded',
+                    message: parts.join('\n'),
+                });
+                return;
             }
 
+            let msg = `Added ${lastResult?.added ?? 0} / ${lastResult?.requested ?? 0} item(s) successfully.`;
+            if (allTrimmed.length > 0) {
+                const totalCut = allTrimmed.reduce((sum, s) => sum + s.cutQty, 0);
+                const distinctItems = new Set(allTrimmed.map(s => s.itemID)).size;
+                msg += ` ${distinctItems} pot/perfume type(s) trimmed by container cap (−${totalCut} units).`;
+            }
+            toast.success(msg);
             setConfirmModal(null);
             setSelectedDbItems(new Set());
             onItemsAdded?.();
         } catch (err) {
-            toast.error('Failed to add items: ' + err);
+            setConfirmModal(null);
+            setErrorModal({
+                title: 'Add Failed',
+                message: String(err),
+            });
         } finally {
             setIsSaving(false);
         }
@@ -448,6 +482,36 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                     </div>
                 );
             })()}
+
+            {/* Error Modal — capacity / container cap / add failure */}
+            {errorModal && (
+                <div className="fixed inset-0 z-[130] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-card p-8 rounded-2xl border-2 border-red-500/40 flex flex-col space-y-5 max-w-md w-full mx-4 shadow-2xl shadow-red-500/20 animate-in zoom-in-95 duration-300">
+                        <div className="flex items-center space-x-3">
+                            <div className="w-10 h-10 rounded-full bg-red-500/15 border border-red-500/40 flex items-center justify-center">
+                                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                            <h3 className="text-sm font-black uppercase tracking-[0.15em] text-red-500">{errorModal.title}</h3>
+                        </div>
+                        <p className="text-[11px] text-foreground leading-relaxed whitespace-pre-line">{errorModal.message}</p>
+                        {errorModal.items && errorModal.items.length > 0 && (
+                            <div className="bg-red-500/5 border border-red-500/20 rounded-md p-3 max-h-40 overflow-y-auto custom-scrollbar">
+                                <ul className="text-[10px] text-red-500/90 list-disc list-inside space-y-0.5">
+                                    {errorModal.items.map((name, i) => <li key={i}>{name}</li>)}
+                                </ul>
+                            </div>
+                        )}
+                        <button
+                            onClick={() => setErrorModal(null)}
+                            className="w-full px-4 py-2.5 bg-red-500 text-white rounded-md text-[10px] font-black uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Confirm Modal */}
             {confirmModal && (

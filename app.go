@@ -78,6 +78,18 @@ func (a *App) startup(ctx context.Context) {
 	a.deployLocal = deploy.NewLocalManager(store)
 }
 
+func (a *App) logInfo(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	runtime.LogInfof(a.ctx, "%s", msg)
+	runtime.EventsEmit(a.ctx, "app:log", "info", msg)
+}
+
+func (a *App) logError(format string, args ...interface{}) {
+	msg := fmt.Sprintf(format, args...)
+	runtime.LogErrorf(a.ctx, "%s", msg)
+	runtime.EventsEmit(a.ctx, "app:log", "error", msg)
+}
+
 // SelectAndOpenSave opens a native file dialog and loads the selected save
 func (a *App) SelectAndOpenSave() (string, error) {
 	path, err := runtime.OpenFileDialog(a.ctx, runtime.OpenDialogOptions{
@@ -255,36 +267,41 @@ type SkippedAdd struct {
 	CutQty int    `json:"cutQty"`
 }
 
+// AddResult reports the outcome of an AddItemsToCharacter operation.
+type AddResult struct {
+	Added       int          `json:"added"`
+	Requested   int          `json:"requested"`
+	Trimmed     []SkippedAdd `json:"trimmed"`
+	CapHit      string       `json:"capHit"`
+	FreeInv     int          `json:"freeInv"`
+	FreeStore   int          `json:"freeStore"`
+	NeededInv   int          `json:"neededInv"`
+	NeededStore int          `json:"neededStore"`
+}
+
 // AddItemsToCharacter adds multiple items from the database to a character slot.
-// upgrade25 applies to weapons/bows/shields/staffs/seals with maxUpgrade=25.
-// upgrade10 applies to weapons with maxUpgrade=10 (boss weapons, cannot be infused).
-// infuseOffset is added to infusable weapons (maxUpgrade=25) as a weapon affinity offset.
-// upgradeAsh applies to spirit ashes (category="ashes").
-// invQty / storageQty: 0 = skip, -1 = item's MaxInventory/MaxStorage, >0 = exact qty (capped to max).
+// ALL-OR-NOTHING for capacity: either all items are added or none. If capacity is
+// insufficient, returns AddResult with CapHit set and Added=0 — no mutation occurs.
 //
-// Container enforcement: items with a RequiredContainer (Throwing Pots, Aromatics)
-// are limited to N TOTAL UNITS in inventory where N = container key item's
-// MaxInventory cap (Cracked Pot=20, Ritual Pot=10, Hefty Cracked Pot=10,
-// Perfume Bottle=10). Each unit of pot/aromatic in inventory consumes one
-// container "slot". Items exceeding the cap have their inv qty trimmed and
-// the trim is reported in `skipped`; storage has no cap. Containers used
-// by the batch are auto-added to Key Items with qty = total pots in
-// inventory after the batch (or kept at the existing value if higher).
-func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storageQty int) (skipped []SkippedAdd, err error) {
+// Container-gated items (Throwing Pots, Aromatics) are best-effort: qty is trimmed
+// to fit the container cap without blocking the batch. Trimmed items are reported
+// in AddResult.Trimmed.
+func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgrade10, infuseOffset, upgradeAsh, invQty, storageQty int) (AddResult, error) {
+	result := AddResult{Requested: len(itemIDs)}
+
 	if a.save == nil {
-		return nil, fmt.Errorf("no save loaded")
+		return result, fmt.Errorf("no save loaded")
 	}
 	if charIdx < 0 || charIdx >= 10 {
-		return nil, fmt.Errorf("invalid character index")
+		return result, fmt.Errorf("invalid character index")
 	}
-
-	a.pushUndo(charIdx)
 
 	slot := &a.save.Slots[charIdx]
 
-	// Build maps from current inventory state:
-	// - existingItemQty: per-item stack qty (used to compute SET delta)
+	// Build maps from current inventory/storage state:
+	// - existingItemQty: per-item stack qty in inventory (used to compute SET delta)
 	// - existingByContainer: total pot/aromatic units per container
+	// - existingStorageQty: per-item stack qty in storage
 	existingItemQty := make(map[uint32]int)
 	existingByContainer := make(map[uint32]int)
 	for _, item := range slot.Inventory.CommonItems {
@@ -298,6 +315,16 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		if cID, ok := data.GetRequiredContainer(baseID); ok {
 			existingByContainer[cID] += qty
 		}
+	}
+
+	existingStorageQty := make(map[uint32]int)
+	for _, item := range slot.Storage.CommonItems {
+		if item.GaItemHandle == 0 || item.GaItemHandle == 0xFFFFFFFF {
+			continue
+		}
+		sID := db.HandleToItemID(item.GaItemHandle)
+		_, sBaseID := db.GetItemDataFuzzy(sID)
+		existingStorageQty[sBaseID] += int(item.Quantity & 0x7FFFFFFF)
 	}
 
 	// Existing container key item qtys (so we don't lower them).
@@ -337,6 +364,18 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 		return false // non-gated stable
 	})
 
+	// Pre-compute all items to add (finalIDs, quantities, container caps).
+	type preparedItem struct {
+		baseID         uint32
+		finalID        uint32
+		actualInv      int
+		actualStorage  int
+		forceStackable bool
+		isStackable    bool
+	}
+	var prepared []preparedItem
+	var trimmed []SkippedAdd
+
 	for _, id := range sortedIDs {
 		itemData, _ := db.GetItemDataFuzzy(id)
 		finalID := id
@@ -349,73 +388,110 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 			finalID = id + uint32(upgrade10)
 		}
 
-		// Resolve actual quantities for this item (per-item caps applied).
 		actualInv := resolveQty(invQty, int(itemData.MaxInventory))
 		actualStorage := resolveQty(storageQty, int(itemData.MaxStorage))
 
+		// Skip stackable items already at max qty.
+		handlePrefix := db.ItemIDToHandlePrefix(finalID)
+		isStackable := handlePrefix == core.ItemTypeItem || handlePrefix == core.ItemTypeAccessory || db.IsArrowID(finalID)
+		if isStackable {
+			if actualInv > 0 && existingItemQty[id] >= int(itemData.MaxInventory) {
+				a.logInfo("already max inv qty %d/%d — skipping %s (0x%08X)", existingItemQty[id], itemData.MaxInventory, itemData.Name, id)
+				actualInv = 0
+			}
+			if actualStorage > 0 && existingStorageQty[id] >= int(itemData.MaxStorage) {
+				a.logInfo("already max storage qty %d/%d — skipping %s (0x%08X)", existingStorageQty[id], itemData.MaxStorage, itemData.Name, id)
+				actualStorage = 0
+			}
+		}
+
 		// Container enforcement (inventory only — storage has no cap).
+		// Best-effort: trim qty to fit container, don't block the batch.
 		if _, gated := data.GetRequiredContainer(id); gated && actualInv > 0 {
 			d := data.ApplyContainerCap(id, actualInv, existingItemQty, existingByContainer, containerCap)
 			actualInv = d.EffectiveQty
 			if d.CutQty > 0 {
-				skipped = append(skipped, SkippedAdd{ItemID: id, CutQty: d.CutQty})
+				trimmed = append(trimmed, SkippedAdd{ItemID: id, CutQty: d.CutQty})
 			}
 		}
 
-		// Mark container as used regardless of cap outcome (storage adds also need a container).
 		if cID, gated := data.GetRequiredContainer(id); gated && (actualInv > 0 || actualStorage > 0) {
 			usedContainers[cID] = true
 		}
 
-		// Arrows/bolts are stackable despite weapon-like IDs (0x02.../0x03...).
 		forceStackable := db.IsArrowID(finalID)
 
-		if err := core.AddItemsToSlot(slot, []uint32{finalID}, actualInv, actualStorage, forceStackable); err != nil {
-			return skipped, err
-		}
-
-		// Auto-set AoW duplication flag when adding an Ash of War item.
-		if flagID, ok := data.AoWItemToFlagID[id]; ok {
-			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
-				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
-			}
-		}
-
-		// Auto-set world pickup flag when adding a 1/0-cap item that has a
-		// fixed world location (Notes, About * tutorials, Maps, Letters,
-		// Paintings, Cookbooks, Whetblades, Crystal Tears, quest items).
-		// Without this flag, the game spawns the world copy on the ground
-		// because the existing inventory copy blocks the pickup.
-		if flagID, ok := data.WorldPickupFlagID[id]; ok {
-			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
-				_ = db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true)
-			}
-		}
-
-		// Auto-append tutorial ID to TutorialData list when adding an About
-		// item or other tutorial-bound Goods. The game checks this list
-		// before triggering the popup-and-give EMEVD action — pre-populating
-		// the entry prevents the duplicate-on-ground spawn even when the
-		// regulation lot flag is checked through a different code path.
-		if tutorialID, ok := data.AboutTutorialID[id]; ok {
-			_ = core.AppendTutorialID(slot, tutorialID)
-		}
-
-		// Bell Bearings: do NOT auto-set the acquisition flag. Having the BB
-		// in inventory and the flag being set are mutually exclusive states —
-		// the player must "give" the BB to Twin Maiden Husks, which consumes
-		// the item. Use the World → Bell Bearings "Unlocked" toggle to apply
-		// the post-give state (flag set + item removed) — see syncBellBearingItem.
+		prepared = append(prepared, preparedItem{
+			baseID:         id,
+			finalID:        finalID,
+			actualInv:      actualInv,
+			actualStorage:  actualStorage,
+			forceStackable: forceStackable,
+			isStackable:    isStackable || forceStackable,
+		})
 	}
 
-	// Auto-add / update container key item quantities. Each unit of pot/aromatic
-	// in inventory consumes one container slot, so container qty must cover the
-	// total pots after this batch. We never reduce an existing higher qty.
-	//
-	// After updating qty, ALSO flip the world-pickup event flags for that
-	// container so the game treats those container key items as "already
-	// collected from the world" — this prevents duplicate pickups (which would
-	// also be a potential anti-cheat / ban trigger).
+	// PRE-FLIGHT: check if all items fit.
+	var capacityItems []core.ItemToAdd
+	for _, p := range prepared {
+		if p.actualInv == 0 && p.actualStorage == 0 {
+			continue
+		}
+		capacityItems = append(capacityItems, core.ItemToAdd{
+			ItemID:         p.finalID,
+			InvQty:         p.actualInv,
+			StorageQty:     p.actualStorage,
+			ForceStackable: p.forceStackable,
+			IsStackable:    p.isStackable,
+		})
+	}
+
+	capReport := core.CheckAddCapacity(slot, capacityItems)
+	if !capReport.CanFitAll {
+		a.logError("[AddItems] %s: need inv=%d store=%d, free inv=%d store=%d, requested=%d",
+			capReport.CapHit, capReport.NeededInv, capReport.NeededStorage, capReport.FreeInv, capReport.FreeStorage, len(itemIDs))
+		result.CapHit = capReport.CapHit
+		result.FreeInv = capReport.FreeInv
+		result.FreeStore = capReport.FreeStorage
+		result.NeededInv = capReport.NeededInv
+		result.NeededStore = capReport.NeededStorage
+		return result, nil
+	}
+
+	// SNAPSHOT: deep copy slot state before mutation.
+	a.pushUndo(charIdx)
+	snapshot := core.SnapshotSlot(slot)
+
+	// MUTATE: batch add all items (one RebuildSlotFull instead of N).
+	if err := core.AddItemsToSlotBatch(slot, capacityItems); err != nil {
+		core.RestoreSlot(slot, snapshot)
+		return result, fmt.Errorf("rollback after batch add: %w", err)
+	}
+
+	// POST-FLAGS: event flags, tutorial IDs (safe to set after batch add).
+	for _, p := range prepared {
+		if flagID, ok := data.AoWItemToFlagID[p.baseID]; ok {
+			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+				if err := db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true); err != nil {
+					runtime.LogWarningf(a.ctx, "event flag AoW %d: %v", flagID, err)
+				}
+			}
+		}
+		if flagID, ok := data.WorldPickupFlagID[p.baseID]; ok {
+			if slot.EventFlagsOffset > 0 && slot.EventFlagsOffset < len(slot.Data) {
+				if err := db.SetEventFlag(slot.Data[slot.EventFlagsOffset:], flagID, true); err != nil {
+					runtime.LogWarningf(a.ctx, "event flag pickup %d: %v", flagID, err)
+				}
+			}
+		}
+		if tutorialID, ok := data.AboutTutorialID[p.baseID]; ok {
+			if err := core.AppendTutorialID(slot, tutorialID); err != nil {
+				runtime.LogWarningf(a.ctx, "tutorial ID %d: %v", tutorialID, err)
+			}
+		}
+	}
+
+	// Auto-add / update container key item quantities.
 	for cID := range usedContainers {
 		desired := existingByContainer[cID]
 		current := existingKeyItemQty[cID]
@@ -424,17 +500,13 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 			finalQty = current
 		}
 		if desired > current {
-			// addToInventory SETS qty (see core/writer.go), so passing desired places
-			// the right value whether or not the container key item already exists.
 			if err := core.AddItemsToSlot(slot, []uint32{cID}, desired, 0, false); err != nil {
-				return skipped, err
+				core.RestoreSlot(slot, snapshot)
+				return result, fmt.Errorf("rollback after container add: %w", err)
 			}
 			existingKeyItemQty[cID] = desired
 		}
 
-		// Flip pickup gating flags 1..finalQty. Source: er-save-manager
-		// event_flags_db.py — flags 66000+ in step-10 groups per container.
-		// Setting flag N marks the Nth world pickup as collected.
 		if slot.EventFlagsOffset <= 0 || slot.EventFlagsOffset >= len(slot.Data) {
 			continue
 		}
@@ -445,21 +517,43 @@ func (a *App) AddItemsToCharacter(charIdx int, itemIDs []uint32, upgrade25, upgr
 				n = len(flagList)
 			}
 			for i := 0; i < n; i++ {
-				_ = db.SetEventFlag(flags, flagList[i], true)
+				if err := db.SetEventFlag(flags, flagList[i], true); err != nil {
+					runtime.LogWarningf(a.ctx, "container pickup flag %d: %v", flagList[i], err)
+				}
 			}
 		}
 
-		// Also flip vendor purchase flags so vanilla vendors (e.g. Kale's
-		// Cracked Pot) stop offering this container in their stock for the
-		// current NG cycle. NG+ will reset these — that's vanilla behavior.
 		if vendorFlags, ok := data.ContainerVendorPurchaseFlags[cID]; ok {
 			for _, f := range vendorFlags {
-				_ = db.SetEventFlag(flags, f, true)
+				if err := db.SetEventFlag(flags, f, true); err != nil {
+					runtime.LogWarningf(a.ctx, "vendor purchase flag %d: %v", f, err)
+				}
 			}
 		}
 	}
 
-	return skipped, nil
+	// RECONCILE: fix storage header count (blind +1 increment may drift).
+	core.ReconcileStorageHeader(slot)
+
+	// POST-VALIDATION: check invariants after mutation.
+	if violations := core.ValidatePostMutation(slot); len(violations) > 0 {
+		core.RestoreSlot(slot, snapshot)
+		return result, fmt.Errorf("rollback: post-mutation validation failed: %s", violations[0].Error())
+	}
+
+	// SUCCESS: compute final capacity and return.
+	finalUsage := core.CountSlotUsage(slot)
+	added := 0
+	for _, p := range prepared {
+		if p.actualInv > 0 || p.actualStorage > 0 {
+			added++
+		}
+	}
+	result.Added = added
+	result.Trimmed = trimmed
+	result.FreeInv = finalUsage.InventoryMax - finalUsage.InventoryUsed
+	result.FreeStore = finalUsage.StorageMax - finalUsage.StorageUsed
+	return result, nil
 }
 
 // RemoveItemsFromCharacter removes items by handle from inventory, storage, or both.
@@ -2286,45 +2380,14 @@ func (a *App) GetSlotCapacity(charIdx int) (*SlotCapacity, error) {
 		return nil, fmt.Errorf("invalid slot index")
 	}
 
-	slot := &a.save.Slots[charIdx]
-
-	// GaItems: count non-empty entries
-	gaUsed := 0
-	for _, g := range slot.GaItems {
-		if !g.IsEmpty() {
-			gaUsed++
-		}
-	}
-
-	// Inventory: count non-empty common items
-	invUsed := 0
-	for _, item := range slot.Inventory.CommonItems {
-		if item.GaItemHandle != 0 && item.GaItemHandle != core.GaHandleInvalid {
-			invUsed++
-		}
-	}
-
-	// Storage: count non-empty common items from binary data (in-memory list skips gaps)
-	storageUsed := 0
-	storageStart := slot.StorageBoxOffset + core.StorageHeaderSkip
-	for i := 0; i < core.StorageCommonCount; i++ {
-		off := storageStart + i*core.InvRecordLen
-		if off+core.InvRecordLen > len(slot.Data) {
-			break
-		}
-		h := binary.LittleEndian.Uint32(slot.Data[off:])
-		if h != core.GaHandleEmpty && h != core.GaHandleInvalid {
-			storageUsed++
-		}
-	}
-
+	usage := core.CountSlotUsage(&a.save.Slots[charIdx])
 	return &SlotCapacity{
-		GaItemsUsed:   gaUsed,
-		GaItemsMax:    len(slot.GaItems),
-		InventoryUsed: invUsed,
-		InventoryMax:  core.CommonItemCount,
-		StorageUsed:   storageUsed,
-		StorageMax:    core.StorageCommonCount,
+		GaItemsUsed:   usage.GaItemsUsed,
+		GaItemsMax:    usage.GaItemsMax,
+		InventoryUsed: usage.InventoryUsed,
+		InventoryMax:  usage.InventoryMax,
+		StorageUsed:   usage.StorageUsed,
+		StorageMax:    usage.StorageMax,
 	}, nil
 }
 

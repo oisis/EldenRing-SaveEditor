@@ -1,4 +1,5 @@
 import {useState, useEffect, useCallback} from 'react';
+import {EventsOn} from '../wailsjs/runtime/runtime';
 import toast from './lib/toast';
 import {SelectAndOpenSave, GetActiveSlots, SetSlotActivity, GetCharacterNames, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetSlotDiff, GetSaveDiffSummary, GetInfuseTypes, GetSlotCapacity} from '../wailsjs/go/main/App';
 import {main} from '../wailsjs/go/models';
@@ -85,6 +86,13 @@ function App() {
     useEffect(() => { localStorage.setItem('setting:showFlaggedItems', String(showFlaggedItems)); }, [showFlaggedItems]);
     useEffect(() => { localStorage.setItem('setting:debugMode', String(debugMode)); }, [debugMode]);
     useEffect(() => { localStorage.setItem('selectedDeployTarget', selectedDeployTarget); }, [selectedDeployTarget]);
+
+    useEffect(() => {
+        return EventsOn('app:log', (level: string, msg: string) => {
+            if (level === 'error') toast.error(msg);
+            else toast(msg);
+        });
+    }, []);
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);

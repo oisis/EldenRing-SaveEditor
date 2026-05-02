@@ -11,7 +11,7 @@ type DiagnosticSeverity string
 const (
 	SeverityCritical DiagnosticSeverity = "critical" // save will crash the game
 	SeverityWarning  DiagnosticSeverity = "warning"  // save may behave unexpectedly
-	SeverityInfo     DiagnosticSeverity = "info"      // observation, not necessarily harmful
+	SeverityInfo     DiagnosticSeverity = "info"     // observation, not necessarily harmful
 )
 
 // DiagnosticIssue represents a single corruption finding.
@@ -280,4 +280,124 @@ func (d *SlotDiagnostics) checkStorageHeader(slot *SaveSlot) {
 	if headerCount != actualCount {
 		d.addWarning("storage", "storage header count %d != actual items %d", headerCount, actualCount)
 	}
+}
+
+// IntegrityError describes a single post-mutation invariant violation.
+type IntegrityError struct {
+	Check   string `json:"check"`
+	Message string `json:"message"`
+}
+
+func (e IntegrityError) Error() string {
+	return fmt.Sprintf("%s: %s", e.Check, e.Message)
+}
+
+// ValidatePostMutation performs fast invariant checks after a slot mutation.
+// Only checks crash-causing conditions — not full diagnostic scan.
+// Returns nil if all checks pass, or a slice of violations.
+func ValidatePostMutation(slot *SaveSlot) []IntegrityError {
+	var errs []IntegrityError
+
+	// 1. Every non-empty inventory handle must exist in GaMap (for non-stackable types).
+	for i, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
+			continue
+		}
+		typeBits := item.GaItemHandle & GaHandleTypeMask
+		if typeBits == ItemTypeWeapon || typeBits == ItemTypeArmor || typeBits == ItemTypeAow {
+			if _, ok := slot.GaMap[item.GaItemHandle]; !ok {
+				errs = append(errs, IntegrityError{
+					Check:   "orphan_handle",
+					Message: fmt.Sprintf("inventory[%d] handle 0x%08X not in GaMap", i, item.GaItemHandle),
+				})
+			}
+		}
+	}
+
+	// 2. No duplicate Index values across inventory CommonItems + KeyItems.
+	indexSeen := make(map[uint32]bool)
+	for _, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
+			continue
+		}
+		if indexSeen[item.Index] {
+			errs = append(errs, IntegrityError{
+				Check:   "duplicate_index",
+				Message: fmt.Sprintf("duplicate Index %d in inventory common (handle 0x%08X)", item.Index, item.GaItemHandle),
+			})
+		}
+		indexSeen[item.Index] = true
+	}
+	for _, item := range slot.Inventory.KeyItems {
+		if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
+			continue
+		}
+		if indexSeen[item.Index] {
+			errs = append(errs, IntegrityError{
+				Check:   "duplicate_index",
+				Message: fmt.Sprintf("duplicate Index %d in inventory key (handle 0x%08X)", item.Index, item.GaItemHandle),
+			})
+		}
+		indexSeen[item.Index] = true
+	}
+
+	// 3. GaItemData count header within bounds.
+	if slot.GaItemDataOffset > 0 && slot.GaItemDataOffset+4 <= len(slot.Data) {
+		count := binary.LittleEndian.Uint32(slot.Data[slot.GaItemDataOffset:])
+		if count > GaItemDataMaxCount {
+			errs = append(errs, IntegrityError{
+				Check:   "gaitemdata_count",
+				Message: fmt.Sprintf("GaItemData count %d > max %d", count, GaItemDataMaxCount),
+			})
+		}
+	}
+
+	// 5. Storage count header matches actual non-empty items.
+	if slot.StorageBoxOffset > 0 && slot.StorageBoxOffset+4 <= len(slot.Data) {
+		headerCount := binary.LittleEndian.Uint32(slot.Data[slot.StorageBoxOffset:])
+		actualCount := uint32(0)
+		storageStart := slot.StorageBoxOffset + StorageHeaderSkip
+		for i := 0; i < StorageCommonCount; i++ {
+			off := storageStart + i*InvRecordLen
+			if off+InvRecordLen > len(slot.Data) {
+				break
+			}
+			h := binary.LittleEndian.Uint32(slot.Data[off:])
+			if h != GaHandleEmpty && h != GaHandleInvalid {
+				actualCount++
+			}
+		}
+		if headerCount != actualCount {
+			errs = append(errs, IntegrityError{
+				Check:   "storage_count",
+				Message: fmt.Sprintf("storage header count %d != actual %d", headerCount, actualCount),
+			})
+		}
+	}
+
+	// 6. NextAoWIndex <= NextArmamentIndex <= len(GaItems).
+	if slot.NextAoWIndex > slot.NextArmamentIndex {
+		errs = append(errs, IntegrityError{
+			Check:   "gaitem_indices",
+			Message: fmt.Sprintf("NextAoWIndex %d > NextArmamentIndex %d", slot.NextAoWIndex, slot.NextArmamentIndex),
+		})
+	}
+	if slot.NextArmamentIndex > len(slot.GaItems) {
+		errs = append(errs, IntegrityError{
+			Check:   "gaitem_indices",
+			Message: fmt.Sprintf("NextArmamentIndex %d > len(GaItems) %d", slot.NextArmamentIndex, len(slot.GaItems)),
+		})
+	}
+
+	// 7. No GaMap entry references itemID=0.
+	for handle, itemID := range slot.GaMap {
+		if itemID == 0 {
+			errs = append(errs, IntegrityError{
+				Check:   "gamap_zero_id",
+				Message: fmt.Sprintf("GaMap handle 0x%08X maps to itemID=0", handle),
+			})
+		}
+	}
+
+	return errs
 }

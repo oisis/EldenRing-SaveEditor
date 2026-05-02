@@ -25,18 +25,18 @@ func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
 	sa := NewSlotAccessor(slot.Data)
 
 	if err := sa.CheckBounds(off, GaItemDataArrayOff, "upsertGaItemData/header"); err != nil {
-		return nil
+		return fmt.Errorf("upsertGaItemData: header bounds check failed: %w", err)
 	}
 	count := int(int32(binary.LittleEndian.Uint32(slot.Data[off:])))
 	if count < 0 || count >= GaItemDataMaxCount {
-		return nil
+		return fmt.Errorf("upsertGaItemData: count %d out of range [0, %d)", count, GaItemDataMaxCount)
 	}
 
 	arrayBase := off + GaItemDataArrayOff
 	for i := 0; i < count; i++ {
 		entryOff := arrayBase + i*GaItemDataEntryLen
 		if err := sa.CheckBounds(entryOff, 4, "upsertGaItemData/scan"); err != nil {
-			return nil
+			return fmt.Errorf("upsertGaItemData: scan bounds check at entry %d: %w", i, err)
 		}
 		if binary.LittleEndian.Uint32(slot.Data[entryOff:]) == itemID {
 			return nil
@@ -45,7 +45,7 @@ func upsertGaItemData(slot *SaveSlot, itemID uint32) error {
 
 	newEntryOff := arrayBase + count*GaItemDataEntryLen
 	if err := sa.CheckBounds(newEntryOff, GaItemDataEntryLen, "upsertGaItemData/write"); err != nil {
-		return nil
+		return fmt.Errorf("upsertGaItemData: write bounds check at count %d: %w", count, err)
 	}
 	binary.LittleEndian.PutUint32(slot.Data[newEntryOff:], itemID)
 	slot.Data[newEntryOff+4] = 1
@@ -222,6 +222,113 @@ func AddItemsToSlot(slot *SaveSlot, itemIDs []uint32, invQty, storageQty int, fo
 	}
 
 	// Phase 3: add to inventory/storage (offsets are now correct).
+	for _, p := range pending {
+		if p.invQty != 0 {
+			if err := addToInventory(slot, p.handle, p.invQty, false); err != nil {
+				return err
+			}
+		}
+		if p.storageQty != 0 {
+			if err := addToInventory(slot, p.handle, p.storageQty, true); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// AddItemsToSlotBatch adds a batch of items with per-item qty/stackable settings.
+// All GaItem allocations happen in Phase 1, then ONE RebuildSlotFull in Phase 2,
+// then all inventory/storage writes in Phase 3. This is O(1) rebuilds instead of O(N).
+func AddItemsToSlotBatch(slot *SaveSlot, items []ItemToAdd) error {
+	type pendingInv struct {
+		handle     uint32
+		invQty     uint32
+		storageQty uint32
+	}
+	var pending []pendingInv
+	gaModified := false
+
+	for _, item := range items {
+		handlePrefix := db.ItemIDToHandlePrefix(item.ItemID)
+		isStackable := handlePrefix == ItemTypeItem || handlePrefix == ItemTypeAccessory
+
+		handle := uint32(0)
+		if isStackable || item.ForceStackable {
+			for h, id := range slot.GaMap {
+				if id == item.ItemID {
+					handle = h
+					break
+				}
+			}
+		}
+
+		if handle == 0 {
+			if isStackable {
+				handle = (item.ItemID & 0x0FFFFFFF) | handlePrefix
+				slot.GaMap[handle] = item.ItemID
+			} else {
+				var err error
+				handle, err = generateUniqueHandle(slot, handlePrefix)
+				if err != nil {
+					return err
+				}
+				if err := allocateGaItem(slot, handle, item.ItemID); err != nil {
+					return err
+				}
+				gaModified = true
+				slot.GaMap[handle] = item.ItemID
+
+				if (handlePrefix == ItemTypeWeapon && !db.IsArrowID(item.ItemID)) || handlePrefix == ItemTypeAow {
+					if err := upsertGaItemData(slot, item.ItemID); err != nil {
+						return err
+					}
+				}
+			}
+		}
+
+		pending = append(pending, pendingInv{
+			handle:     handle,
+			invQty:     uint32(item.InvQty),
+			storageQty: uint32(item.StorageQty),
+		})
+	}
+
+	if gaModified {
+		savedGaMap := make(map[uint32]uint32, len(slot.GaMap))
+		for k, v := range slot.GaMap {
+			savedGaMap[k] = v
+		}
+		savedNextAoW := slot.NextAoWIndex
+		savedNextArmament := slot.NextArmamentIndex
+		savedNextHandle := slot.NextGaItemHandle
+
+		rebuilt, err := RebuildSlotFull(slot)
+		if err != nil {
+			return fmt.Errorf("AddItemsToSlotBatch: rebuild: %w", err)
+		}
+		copy(slot.Data, rebuilt)
+		if err := slot.parseFromData(); err != nil {
+			return fmt.Errorf("AddItemsToSlotBatch: re-parse after rebuild: %w", err)
+		}
+
+		for h, id := range savedGaMap {
+			if _, ok := slot.GaMap[h]; !ok {
+				slot.GaMap[h] = id
+			}
+		}
+		if savedNextAoW > slot.NextAoWIndex {
+			slot.NextAoWIndex = savedNextAoW
+		}
+		if savedNextArmament > slot.NextArmamentIndex {
+			slot.NextArmamentIndex = savedNextArmament
+		}
+		if savedNextHandle > slot.NextGaItemHandle {
+			slot.NextGaItemHandle = savedNextHandle
+		}
+	}
+
 	for _, p := range pending {
 		if p.invQty != 0 {
 			if err := addToInventory(slot, p.handle, p.invQty, false); err != nil {
@@ -765,6 +872,28 @@ func SetUnlockedRegions(slot *SaveSlot, ids []uint32) error {
 		slot.Warnings = append(slot.Warnings, "SetUnlockedRegions: "+err.Error())
 	}
 	return nil
+}
+
+// ReconcileStorageHeader sets the storage header count to the actual number
+// of non-empty items in the storage array. Fixes mismatch from blind +1
+// increments in addToInventory when the header was already wrong.
+func ReconcileStorageHeader(slot *SaveSlot) {
+	if slot.StorageBoxOffset <= 0 || slot.StorageBoxOffset+4 >= len(slot.Data) {
+		return
+	}
+	actualCount := uint32(0)
+	storageStart := slot.StorageBoxOffset + StorageHeaderSkip
+	for i := 0; i < StorageCommonCount; i++ {
+		off := storageStart + i*InvRecordLen
+		if off+InvRecordLen > len(slot.Data) {
+			break
+		}
+		h := binary.LittleEndian.Uint32(slot.Data[off:])
+		if h != GaHandleEmpty && h != GaHandleInvalid {
+			actualCount++
+		}
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.StorageBoxOffset:], actualCount)
 }
 
 // sortUint32Slice sorts a []uint32 ascending in place.
