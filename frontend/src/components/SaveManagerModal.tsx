@@ -71,7 +71,11 @@ export function SaveManagerModal({targets, initialTarget, platform, onAfterLoad,
     useEffect(() => { loadBackups(selectedTarget); }, [selectedTarget, loadBackups]);
 
     useEffect(() => {
-        const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !confirm) onClose(); };
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key !== 'Escape') return;
+            if (confirm) setConfirm(null);
+            else onClose();
+        };
         document.addEventListener('keydown', onKey);
         return () => document.removeEventListener('keydown', onKey);
     }, [onClose, confirm]);

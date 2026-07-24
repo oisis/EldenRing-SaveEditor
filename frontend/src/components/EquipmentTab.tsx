@@ -1,6 +1,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
 import type { main } from '../../wailsjs/go/models';
+import { EquipmentItemPickerModal } from './EquipmentItemPickerModal';
 
 type EquippedItem = main.EquipmentSlotView;
 
@@ -123,21 +124,6 @@ function PhysickSlot({ label, onOpen }: { label: string; onOpen: (label: string)
                 <img className="h-[51px] w-[51px] object-contain opacity-[var(--eq-ghost-opacity)]" src="/equipment/physick-tear-placeholder.png" alt="" />
             </span>
         </button>
-    );
-}
-
-function EmptyEquipmentModal({ onClose }: { onClose: () => void }) {
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClose}>
-            <div role="dialog" aria-modal="true" aria-label="Equipment slot" className="flex h-36 w-full max-w-sm items-end justify-end gap-2 rounded-xl border border-border bg-card p-4 shadow-2xl" onClick={(event) => event.stopPropagation()}>
-                <button type="button" onClick={onClose} className="rounded border border-border px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted/40">
-                    Cancel
-                </button>
-                <button type="button" onClick={onClose} className="rounded bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary-foreground hover:opacity-90">
-                    Ok
-                </button>
-            </div>
-        </div>
     );
 }
 
@@ -286,7 +272,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision }: { char
                 <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
                 <button type="button" className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90">Save changes</button>
             </div>
-            {modalOpen && <EmptyEquipmentModal onClose={() => setModalOpen(false)} />}
+            {modalOpen && <EquipmentItemPickerModal slotLabel={selectedSlot} charIdx={charIdx} onClose={() => setModalOpen(false)} />}
         </section>
     );
 }

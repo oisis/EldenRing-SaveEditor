@@ -1,10 +1,38 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EquipmentTab } from './EquipmentTab';
-import { GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
+import {
+    GetArmsSlotEligibleItems,
+    GetArrowSlotEligibleItems,
+    GetBoltSlotEligibleItems,
+    GetCharacter,
+    GetChestSlotEligibleItems,
+    GetEquipmentSnapshot,
+    GetHandArmamentEligibleItems,
+    GetHeadSlotEligibleItems,
+    GetItemList,
+    GetLegsSlotEligibleItems,
+    GetPhysickEligibleItems,
+    GetPouchEligibleItems,
+    GetQuickItemEligibleItems,
+    GetTalismanSlotEligibleItems,
+} from '../../wailsjs/go/main/App';
 
 vi.mock('../../wailsjs/go/main/App', () => ({
     GetEquipmentSnapshot: vi.fn(),
+    GetCharacter: vi.fn(),
+    GetHandArmamentEligibleItems: vi.fn(),
+    GetArrowSlotEligibleItems: vi.fn(),
+    GetBoltSlotEligibleItems: vi.fn(),
+    GetHeadSlotEligibleItems: vi.fn(),
+    GetChestSlotEligibleItems: vi.fn(),
+    GetArmsSlotEligibleItems: vi.fn(),
+    GetLegsSlotEligibleItems: vi.fn(),
+    GetTalismanSlotEligibleItems: vi.fn(),
+    GetQuickItemEligibleItems: vi.fn(),
+    GetPouchEligibleItems: vi.fn(),
+    GetPhysickEligibleItems: vi.fn(),
+    GetItemList: vi.fn(),
 }));
 
 const emptyView = { occupied: false, rawId: 0, name: '', iconPath: '', resolved: false };
@@ -35,6 +63,26 @@ function makeSnapshot(over: Record<string, unknown> = {}) {
 beforeEach(() => {
     vi.mocked(GetEquipmentSnapshot).mockReset();
     vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot() as never);
+    const eligibilityEndpoints = [
+        GetHandArmamentEligibleItems,
+        GetArrowSlotEligibleItems,
+        GetBoltSlotEligibleItems,
+        GetHeadSlotEligibleItems,
+        GetChestSlotEligibleItems,
+        GetArmsSlotEligibleItems,
+        GetLegsSlotEligibleItems,
+        GetTalismanSlotEligibleItems,
+        GetQuickItemEligibleItems,
+        GetPouchEligibleItems,
+        GetPhysickEligibleItems,
+        GetItemList,
+    ];
+    eligibilityEndpoints.forEach(endpoint => {
+        vi.mocked(endpoint).mockReset();
+        vi.mocked(endpoint).mockResolvedValue([] as never);
+    });
+    vi.mocked(GetCharacter).mockReset();
+    vi.mocked(GetCharacter).mockResolvedValue({ inventory: [] } as never);
 });
 
 describe('EquipmentTab', () => {
@@ -49,18 +97,128 @@ describe('EquipmentTab', () => {
         expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
     });
 
-    it('opens an empty modal from every equipment field and closes it with both actions', () => {
+    it('opens the item picker from every equipment field and closes it with both actions', () => {
         render(<EquipmentTab />);
 
         fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 2' }));
-        expect(screen.getByRole('dialog', { name: 'Equipment slot' })).toBeInTheDocument();
+        expect(screen.getByRole('dialog', { name: 'Select equipment item' })).toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-        expect(screen.queryByRole('dialog', { name: 'Equipment slot' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
         fireEvent.click(screen.getByRole('button', { name: 'Ok' }));
-        expect(screen.queryByRole('dialog', { name: 'Equipment slot' })).not.toBeInTheDocument();
+        expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
+    });
+
+    it('filters owned items by slot eligibility and exposes the database picker controls', async () => {
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: 0x1234, name: 'Database Claymore', category: 'melee_armaments', iconPath: 'items/weapons/claymore.png' },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { id: 0x1234, baseId: 0x1234, name: 'Owned Claymore', category: 'melee_armaments', iconPath: 'items/weapons/claymore.png', quantity: 1 },
+                { id: 0x5678, baseId: 0x5678, name: 'Ineligible Tool', category: 'tools', iconPath: 'items/tools/lantern.png', quantity: 1 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 1' }));
+        await screen.findByPlaceholderText('Search items...');
+        expect(await screen.findByText('Owned Claymore')).toBeInTheDocument();
+        expect(screen.queryByText('Ineligible Tool')).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
+        expect(await screen.findByText('Database Claymore')).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: 'Add & Equip' })).not.toBeInTheDocument();
+        expect(screen.getByText('Items from Item Database will be added to Inventory before equipping.')).toBeInTheDocument();
+        expect(screen.getByAltText('Database Claymore')).toHaveClass('h-20', 'w-20');
+        expect(screen.getByTestId('equipment-picker-toolbar')).toHaveClass('justify-start');
+        expect(screen.getByPlaceholderText('Search items...')).toHaveClass('h-[32px]', 'w-[448px]');
+        expect(screen.getByPlaceholderText('Search items...')).toHaveClass('max-w-full');
+        expect(screen.getByLabelText('Item source')).toHaveClass('ml-auto');
+        expect(screen.getByLabelText('Sort items')).toHaveValue('alphabetical');
+        expect(screen.getByLabelText('Sort items')).toHaveClass('h-[32px]');
+        expect(screen.getByLabelText('View mode')).toHaveClass('h-[32px]');
+        expect(screen.getByLabelText('Item source')).toHaveClass('h-[32px]');
+
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+        expect(screen.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('button', { name: 'Select Database Claymore' }).querySelector('img')).toHaveClass('h-12', 'w-12');
+    });
+
+    it('closes the item picker with Escape', () => {
+        render(<EquipmentTab />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 1' }));
+        expect(screen.getByRole('dialog', { name: 'Select equipment item' })).toBeInTheDocument();
+
+        fireEvent.keyDown(window, { key: 'Escape' });
+        expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
+    });
+
+    it('shows an icon-view quantity only for stackable owned items', async () => {
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: 1, name: 'Stackable item', category: 'tools', iconPath: 'items/tools/a.png', maxInventory: 99 },
+            { id: 2, name: 'Single item', category: 'melee_armaments', iconPath: 'items/weapons/b.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { id: 1, baseId: 1, name: 'Stackable item', category: 'tools', iconPath: 'items/tools/a.png', quantity: 1, maxInventory: 99 },
+                { id: 2, baseId: 2, name: 'Single item', category: 'melee_armaments', iconPath: 'items/weapons/b.png', quantity: 1, maxInventory: 1 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 1' }));
+        await screen.findByText('Stackable item');
+
+        expect(screen.getAllByText('×1')).toHaveLength(1);
+        expect(screen.getByText('×1')).toHaveClass('absolute', 'right-2', 'top-2', 'text-xs');
+    });
+
+    it('renders duplicate inventory instances as icon cards after switching from list view', async () => {
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: 0x1234, name: 'Duplicate armor', category: 'chest', iconPath: 'items/chest/duplicate.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { handle: 11, id: 0x1234, baseId: 0x1234, name: 'Duplicate armor', category: 'chest', iconPath: 'items/chest/duplicate.png', quantity: 1, maxInventory: 1 },
+                { handle: 12, id: 0x1234, baseId: 0x1234, name: 'Duplicate armor', category: 'chest', iconPath: 'items/chest/duplicate.png', quantity: 1, maxInventory: 1 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 1' }));
+        await screen.findAllByText('Duplicate armor');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Icon view' }));
+
+        const cards = screen.getAllByRole('button', { name: 'Select Duplicate armor' });
+        expect(cards).toHaveLength(2);
+        cards.forEach(card => expect(card).toHaveClass('flex-col'));
+    });
+
+    it('hides risky eligible items in Safe Mode from both picker sources', async () => {
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: 1, name: 'Safe item', category: 'melee_armaments', iconPath: 'items/weapons/safe.png' },
+            { id: 2, name: 'Cut item', category: 'melee_armaments', iconPath: 'items/weapons/cut.png', flags: ['cut_content', 'ban_risk'] },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { handle: 11, id: 1, baseId: 1, name: 'Safe item', category: 'melee_armaments', iconPath: 'items/weapons/safe.png', quantity: 1, maxInventory: 1 },
+                { handle: 12, id: 2, baseId: 2, name: 'Cut item', category: 'melee_armaments', iconPath: 'items/weapons/cut.png', quantity: 1, maxInventory: 1 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 1' }));
+        expect(await screen.findByText('Safe item')).toBeInTheDocument();
+        expect(screen.queryByText('Cut item')).not.toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
+        expect(await screen.findByText('Safe item')).toBeInTheDocument();
+        expect(screen.queryByText('Cut item')).not.toBeInTheDocument();
     });
 
     it('shows the eligible item types in a tooltip for each slot family', () => {

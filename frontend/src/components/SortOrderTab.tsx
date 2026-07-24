@@ -1323,6 +1323,14 @@ interface ConfirmModalProps {
 }
 
 function ConfirmModal({ title, body, confirmLabel, confirmTone, onConfirm, onCancel }: ConfirmModalProps) {
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') onCancel();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [onCancel]);
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onCancel}>
             <div className="bg-background border border-border rounded-xl p-6 w-[460px] shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -1435,6 +1443,14 @@ function AddItemModal({ tab, target, onClose, onAdd }: AddItemModalProps) {
     const [quantity, setQuantity] = useState(1);
     const [container, setContainer] = useState<ContainerKind>(target);
     const [adding, setAdding] = useState(false);
+
+    useEffect(() => {
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape' && !adding) onClose();
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [adding, onClose]);
 
     useEffect(() => {
         setLoadingList(true);
