@@ -43,6 +43,7 @@ describe('EquipmentTab', () => {
         expect(screen.getByText('Equipment slots')).toBeInTheDocument();
         expect(screen.getByText('Quick pouch')).toBeInTheDocument();
         expect(screen.getByText('Wondrous Physick flask')).toBeInTheDocument();
+        expect(screen.getByText('Spell slots')).toBeInTheDocument();
         expect(screen.getByText('Equip Load', { exact: false })).toBeInTheDocument();
         expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
     });
@@ -74,6 +75,7 @@ describe('EquipmentTab', () => {
         expect(screen.getAllByRole('tooltip', { name: 'Talismans' })).toHaveLength(4);
         expect(screen.getAllByRole('tooltip', { name: 'Tools and Spirit Ashes' })).toHaveLength(16);
         expect(screen.getAllByRole('tooltip', { name: 'Crystal Tears' })).toHaveLength(2);
+        expect(screen.getAllByRole('tooltip', { name: 'Sorceries and Incantations' })).toHaveLength(12);
     });
 
     it('keeps rows 3–6 on the fixed-width mockup grid', () => {
@@ -88,8 +90,9 @@ describe('EquipmentTab', () => {
     it('keeps equal spacing on both sides of the section divider', () => {
         render(<EquipmentTab />);
 
-        expect(screen.getByText('Equipment slots').parentElement?.parentElement).toHaveClass('grid-cols-[499px_255px]');
+        expect(screen.getByText('Equipment slots').parentElement?.parentElement).toHaveClass('mx-auto', 'grid-cols-[499px_255px_199px]');
         expect(screen.getByText('Quick pouch').parentElement).toHaveClass('pl-[26px]');
+        expect(screen.getByText('Spell slots').parentElement).toHaveClass('border-l', 'pl-[26px]');
     });
 
     it('matches quick-pouch fields to the equipment-slot size', () => {
@@ -112,6 +115,33 @@ describe('EquipmentTab', () => {
 
         expect(screen.getByText('Quick pouch')).toHaveClass('w-[173px]');
         expect(screen.getByText('Wondrous Physick flask')).toHaveClass('w-[173px]');
+        expect(screen.getByText('Spell slots')).toHaveClass('w-[173px]');
+    });
+
+    it('lays out spell slots top-to-bottom in two six-slot columns with mixed spell placeholders', () => {
+        render(<EquipmentTab />);
+
+        const grid = screen.getByRole('button', { name: 'Spell slot 1' }).parentElement;
+        expect(grid).toHaveClass('grid-flow-col', 'grid-cols-[repeat(2,82px)]', 'grid-rows-[repeat(6,82px)]');
+        const placeholderSources = [
+            '/items/sorceries/comet_azur.png',
+            '/items/incantations/dragonfire.png',
+            '/items/sorceries/carian_slicer.png',
+            '/items/incantations/scarlet_aeonia.png',
+            '/items/sorceries/rock_sling.png',
+            '/items/incantations/lightning_spear.png',
+            '/items/sorceries/rennalas_full_moon.png',
+            '/items/incantations/black_flame.png',
+            '/items/sorceries/oracle_bubbles.png',
+            '/items/incantations/heal.png',
+            '/items/sorceries/founding_rain_of_stars.png',
+            '/items/incantations/frenzied_burst.png',
+        ];
+        for (let index = 1; index <= 12; index++) {
+            const slot = screen.getByRole('button', { name: `Spell slot ${index}` });
+            expect(slot).toBeInTheDocument();
+            expect(slot.querySelector('img')).toHaveAttribute('src', placeholderSources[index - 1]);
+        }
     });
 
     it('drives visuals from theme tokens instead of hard-coded light colors', () => {

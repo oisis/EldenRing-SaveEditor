@@ -182,6 +182,23 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
         ['Companion Jar', '/items/talismans/companion_jar.png'],
         ['Gold Scarab', '/items/talismans/gold_scarab.png'],
     ] as const;
+    // Mixed sorceries and incantations give every empty spell field a distinct
+    // in-game silhouette while keeping the icon in the same subdued placeholder
+    // treatment as the rest of the Equipment screen.
+    const spellSlots = [
+        ['Spell slot 1', '/items/sorceries/comet_azur.png'],
+        ['Spell slot 2', '/items/incantations/dragonfire.png'],
+        ['Spell slot 3', '/items/sorceries/carian_slicer.png'],
+        ['Spell slot 4', '/items/incantations/scarlet_aeonia.png'],
+        ['Spell slot 5', '/items/sorceries/rock_sling.png'],
+        ['Spell slot 6', '/items/incantations/lightning_spear.png'],
+        ['Spell slot 7', '/items/sorceries/rennalas_full_moon.png'],
+        ['Spell slot 8', '/items/incantations/black_flame.png'],
+        ['Spell slot 9', '/items/sorceries/oracle_bubbles.png'],
+        ['Spell slot 10', '/items/incantations/heal.png'],
+        ['Spell slot 11', '/items/sorceries/founding_rain_of_stars.png'],
+        ['Spell slot 12', '/items/incantations/frenzied_burst.png'],
+    ] as const;
     // A save can unlock one to four talisman slots. Until the read-only snapshot
     // arrives, retain the mockup's four-slot layout; once loaded, locked slots
     // disappear from the right and cannot be opened.
@@ -198,7 +215,7 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
 
     return (
         <section className="w-full shrink-0 overflow-auto rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-scrollbar">
-            <div className="mx-auto grid w-fit grid-cols-[499px_255px] px-5 py-5">
+            <div className="mx-auto grid w-fit grid-cols-[499px_255px_199px] px-5 py-5">
                 <div>
                     <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Equipment slots</h2>
                     <div className="grid gap-[10px]">
@@ -245,6 +262,13 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PhysickSlot label="Physick tear 1" onOpen={openSlot} />
                         <PhysickSlot label="Physick tear 2" onOpen={openSlot} />
+                    </div>
+                </div>
+
+                <div className="border-l border-border pl-[26px]">
+                    <h2 className="mb-3 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Spell slots</h2>
+                    <div className="grid grid-flow-col grid-cols-[repeat(2,82px)] grid-rows-[repeat(6,82px)] gap-[9px]">
+                        {spellSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
                     </div>
                 </div>
             </div>
