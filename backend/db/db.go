@@ -983,6 +983,31 @@ func GetQuickItemEligibleItems(platform string) []ItemEntry {
 	return GetPouchEligibleItems(platform)
 }
 
+// handArmamentEligibleCategories is the single source of truth for which DB
+// item categories may be equipped in a right- or left-hand armament slot
+// (rows 1–2, slots 1–3). Both hands share the exact same policy: melee
+// armaments, ranged weapons + catalysts (bows, crossbows, ballistas, staves,
+// Sacred Seals) and shields (including torches). Everything else — arrows/
+// bolts, armour, talismans, Tools, Ashes, Crystal Tears, spells, Ashes of War,
+// key items — is intentionally excluded.
+var handArmamentEligibleCategories = []string{"melee_armaments", "ranged_and_catalysts", "shields"}
+
+// GetHandArmamentEligibleItems returns every DB-known item that may be equipped
+// in a hand (right or left) armament slot, in deterministic name order. It
+// reuses GetItemsByCategory so category membership (and its per-category
+// filtering) stays defined in exactly one place. Left and right hands share
+// this single policy — callers must not re-derive or split it per hand.
+func GetHandArmamentEligibleItems(platform string) []ItemEntry {
+	var items []ItemEntry
+	for _, cat := range handArmamentEligibleCategories {
+		items = append(items, GetItemsByCategory(cat, platform)...)
+	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
+	return items
+}
+
 // GetPhysickEligibleItems returns every DB-known Crystal Tear eligible for a
 // Flask of Wondrous Physick slot, in deterministic name order. Membership is
 // the canonical data.SubcatKeyCrystalTears set (EquipParamGoods.goodsType == 10,

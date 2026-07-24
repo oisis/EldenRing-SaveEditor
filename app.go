@@ -602,6 +602,20 @@ func (a *App) GetQuickItemEligibleItems() []db.ItemEntry {
 	return db.GetQuickItemEligibleItems(platform)
 }
 
+// GetHandArmamentEligibleItems returns the DB-known items that may be equipped
+// in a right- or left-hand armament slot (melee armaments, ranged weapons /
+// catalysts, shields), filtered by the loaded save's platform and sorted by
+// name. Both hands share one policy, which lives entirely in the db package.
+func (a *App) GetHandArmamentEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetHandArmamentEligibleItems(platform)
+}
+
 // GetPhysickEligibleItems returns the DB-known Crystal Tears that may be placed
 // in a Flask of Wondrous Physick slot, filtered by the loaded save's platform
 // and sorted by name. The eligibility policy lives entirely in the db package.
