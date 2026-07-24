@@ -70,7 +70,14 @@ describe('EquipmentTab', () => {
     it('uses the standard heading spacing above Physick fields', () => {
         render(<EquipmentTab />);
 
-        expect(screen.getByText('Wondrous Physick flask')).toHaveClass('mb-3');
+        expect(screen.getByText('Wondrous Physick flask')).toHaveClass('mb-3', 'whitespace-pre-line');
+    });
+
+    it('aligns right-side headings to their two-slot grids', () => {
+        render(<EquipmentTab />);
+
+        expect(screen.getByText('Quick pouch')).toHaveClass('w-[173px]');
+        expect(screen.getByText('Wondrous Physick flask')).toHaveClass('w-[173px]');
     });
 
     it('drives visuals from theme tokens instead of hard-coded light colors', () => {

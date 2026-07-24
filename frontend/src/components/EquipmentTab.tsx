@@ -180,7 +180,7 @@ export function EquipmentTab() {
                 </div>
 
                 <div className="border-l border-border pl-[26px]">
-                    <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Quick pouch</h2>
+                    <h2 className="mb-3 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Quick pouch</h2>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} />
@@ -190,7 +190,7 @@ export function EquipmentTab() {
                         <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} />
                     </div>
                     <div aria-hidden="true" className="mt-[6px] h-[14px]" />
-                    <h3 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">Wondrous Physick flask</h3>
+                    <h3 className="mb-3 w-[173px] whitespace-pre-line text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">{'Wondrous\nPhysick flask'}</h3>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PhysickSlot label="Physick tear 1" onOpen={openSlot} />
                         <PhysickSlot label="Physick tear 2" onOpen={openSlot} />
