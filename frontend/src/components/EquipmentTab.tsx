@@ -6,18 +6,30 @@ const slotSurface: CSSProperties = {
     boxShadow: 'inset 0 0 0 2px rgba(255,255,255,.65), inset 0 0 12px rgba(111,127,142,.09), 0 2px 4px #d4d9de',
 };
 
-const slotClass = 'relative flex h-[82px] w-[82px] items-center justify-center overflow-hidden rounded-lg border border-[#d2dce6] p-[5px] transition-colors hover:border-[#75c994]';
+const slotClass = 'group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[#d2dce6] p-[5px] transition-colors hover:border-[#75c994]';
 const ghostClass = 'h-[62px] w-[62px] object-contain opacity-[.22] grayscale contrast-75';
 const toolsPlaceholder = '/equipment/tools-slot-placeholder.webp';
 
 type SlotProps = {
     label: string;
+    eligibleItems: string;
     onOpen: (label: string) => void;
     selected?: boolean;
     children: ReactNode;
 };
 
-function EquipmentSlot({ label, onOpen, selected = false, children }: SlotProps) {
+function SlotTooltip({ eligibleItems }: { eligibleItems: string }) {
+    return (
+        <span
+            role="tooltip"
+            className="pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-30 w-max max-w-[170px] -translate-x-1/2 rounded-md bg-[#303a47] px-2 py-1 text-center text-[9px] font-bold leading-tight text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+        >
+            {eligibleItems}
+        </span>
+    );
+}
+
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, children }: SlotProps) {
     return (
         <button
             type="button"
@@ -27,6 +39,7 @@ function EquipmentSlot({ label, onOpen, selected = false, children }: SlotProps)
             className={`${slotClass} ${selected ? 'border-2 border-[#37b66c] shadow-[inset_0_0_0_2px_rgba(255,255,255,.65),inset_0_0_12px_rgba(111,127,142,.09),0_0_0_2px_#d3f5de]' : ''}`}
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[#8e9ba9]/15" />
+            <SlotTooltip eligibleItems={eligibleItems} />
             {children}
         </button>
     );
@@ -53,8 +66,8 @@ function DPad({ active }: { active: 'up' | 'right' | 'down' | 'left' }) {
 function PouchPlaceholder() {
     return (
         <>
-            <span className="pointer-events-none absolute left-1/2 top-[30px] h-[39px] w-[42px] -translate-x-1/2 rounded-[10px_10px_14px_14px] bg-[#667586] opacity-20 shadow-[inset_0_5px_0_rgba(255,255,255,.18),inset_0_-5px_0_rgba(56,68,81,.2)]" />
-            <span className="pointer-events-none absolute left-1/2 top-[22px] z-10 h-[14px] w-[27px] -translate-x-1/2 rounded-t-[14px] border-[5px] border-b-0 border-[#667586]/25" />
+            <span className="pointer-events-none absolute left-1/2 top-[27px] h-[35px] w-[38px] -translate-x-1/2 rounded-[9px_9px_13px_13px] bg-[#667586] opacity-20 shadow-[inset_0_5px_0_rgba(255,255,255,.18),inset_0_-5px_0_rgba(56,68,81,.2)]" />
+            <span className="pointer-events-none absolute left-1/2 top-[19px] z-10 h-[13px] w-[24px] -translate-x-1/2 rounded-t-[13px] border-[4px] border-b-0 border-[#667586]/25" />
         </>
     );
 }
@@ -66,9 +79,10 @@ function PouchSlot({ label, active, onOpen }: { label: string; active?: 'up' | '
             aria-label={label}
             onClick={() => onOpen(label)}
             style={slotSurface}
-            className="relative flex min-h-[92px] items-center justify-center overflow-hidden rounded-lg border border-[#d2dce6] p-1.5 hover:border-[#75c994]"
+            className="group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[#d2dce6] p-[5px] hover:border-[#75c994]"
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[#8e9ba9]/15" />
+            <SlotTooltip eligibleItems="Tools and Spirit Ashes" />
             {active && <DPad active={active} />}
             <PouchPlaceholder />
         </button>
@@ -82,11 +96,12 @@ function PhysickSlot({ label, onOpen }: { label: string; onOpen: (label: string)
             aria-label={label}
             onClick={() => onOpen(label)}
             style={slotSurface}
-            className="flex min-h-[136px] flex-col rounded-lg border border-[#d2dce6] p-[9px] text-[#15803d] hover:border-[#75c994]"
+            className="group relative flex h-[82px] w-[82px] flex-col rounded-lg border border-[#d2dce6] p-[5px] text-[#15803d] hover:border-[#75c994]"
         >
-            <span className="line-clamp-2 min-h-[29px] text-center text-[10px] font-extrabold leading-[1.18]">Physick tear</span>
-            <span className="flex h-[83px] items-center justify-center">
-                <img className="h-[83px] w-[83px] object-contain opacity-25" src="/equipment/physick-tear-placeholder.png" alt="" />
+            <SlotTooltip eligibleItems="Crystal Tears" />
+            <span className="line-clamp-2 min-h-[21px] text-center text-[8px] font-extrabold leading-[1.15]">Physick tear</span>
+            <span className="flex h-[51px] items-center justify-center">
+                <img className="h-[51px] w-[51px] object-contain opacity-25" src="/equipment/physick-tear-placeholder.png" alt="" />
             </span>
         </button>
     );
@@ -133,31 +148,31 @@ export function EquipmentTab() {
 
     return (
         <section className="w-full shrink-0 overflow-auto rounded-xl border border-[#d6e0ea] bg-white shadow-sm custom-scrollbar">
-            <div className="mx-auto grid w-fit grid-cols-[520px_255px] px-5 py-5">
+            <div className="mx-auto grid w-fit grid-cols-[499px_255px] px-5 py-5">
                 <div>
                     <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-[#5a6574]">Equipment slots</h2>
                     <div className="grid gap-[10px]">
                         <div className="grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
-                            {weaponSlots.map((label) => <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
+                            {weaponSlots.map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
                             <span aria-hidden="true" />
-                            {['Arrow slot 1', 'Arrow slot 2'].map((label) => <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
+                            {['Arrow slot 1', 'Arrow slot 2'].map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
                         </div>
                         <div className="-mt-[7px] grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
-                            {rangedSlots.map((label) => <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>)}
+                            {rangedSlots.map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>)}
                             <span aria-hidden="true" />
-                            {['Bolt slot 1', 'Bolt slot 2'].map((label) => <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
+                            {['Bolt slot 1', 'Bolt slot 2'].map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
                         </div>
-                        <div className="mt-[5px] grid grid-cols-4 gap-[9px]">
-                            {armorSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                        <div className="mt-[5px] grid grid-cols-[repeat(4,82px)] gap-[9px]">
+                            {armorSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
-                        <div className="grid grid-cols-4 gap-[9px]">
-                            {talismanSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                        <div className="grid grid-cols-[repeat(4,82px)] gap-[9px]">
+                            {talismanSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         {[0, 1].map((row) => (
-                            <div key={row} className="grid grid-cols-5 gap-[9px]">
+                            <div key={row} className="grid grid-cols-[repeat(5,82px)] gap-[9px]">
                                 {Array.from({ length: 5 }, (_, index) => {
                                     const label = `Quick item ${row * 5 + index + 1}`;
-                                    return <EquipmentSlot key={label} label={label} selected={selected(label)} onOpen={openSlot}><GhostIcon src={toolsPlaceholder} /></EquipmentSlot>;
+                                    return <EquipmentSlot key={label} label={label} eligibleItems="Tools and Spirit Ashes" selected={selected(label)} onOpen={openSlot}><GhostIcon src={toolsPlaceholder} /></EquipmentSlot>;
                                 })}
                             </div>
                         ))}
@@ -166,15 +181,17 @@ export function EquipmentTab() {
 
                 <div className="border-l border-[#d6e0ea] pl-[26px]">
                     <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-[#5a6574]">Quick pouch</h2>
-                    <div className="grid grid-cols-[112px_112px] gap-[9px]">
+                    <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch left" active="left" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch down" active="down" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch slot 5" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} />
-                        <div aria-hidden="true" className="col-span-2 mt-[6px] h-[14px]" />
-                        <h3 className="col-span-2 mb-[-2px] text-center text-[10px] font-black uppercase tracking-[0.1em] text-[#5a6574]">Wondrous Physick flask</h3>
+                    </div>
+                    <div aria-hidden="true" className="mt-[6px] h-[14px]" />
+                    <h3 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.1em] text-[#5a6574]">Wondrous Physick flask</h3>
+                    <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PhysickSlot label="Physick tear 1" onOpen={openSlot} />
                         <PhysickSlot label="Physick tear 2" onOpen={openSlot} />
                     </div>
