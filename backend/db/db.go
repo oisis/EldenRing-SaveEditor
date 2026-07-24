@@ -1089,6 +1089,16 @@ func GetLegsSlotEligibleItems(platform string) []ItemEntry {
 	return equipmentSlotEligibleItems("legs", platform)
 }
 
+// GetTalismanSlotEligibleItems returns every DB-known item that may occupy any
+// of the four Talisman slots (equipment row 4, slots 1–4), in deterministic
+// name order. All four slots share this single policy: the "talismans"
+// category only. It delegates to GetItemsByCategory so category membership (and
+// its name sort) stays defined in exactly one place — callers must not
+// re-derive or split it per slot.
+func GetTalismanSlotEligibleItems(platform string) []ItemEntry {
+	return GetItemsByCategory("talismans", platform)
+}
+
 // GetAllGraces returns all Sites of Grace as a flat list.
 var getAllGraces = sync.OnceValue(func() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))
