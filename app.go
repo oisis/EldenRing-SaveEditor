@@ -588,6 +588,20 @@ func (a *App) GetPouchEligibleItems() []db.ItemEntry {
 	return db.GetPouchEligibleItems(platform)
 }
 
+// GetQuickItemEligibleItems returns the DB-known items that may be placed in a
+// bottom D-pad Quick Item slot, filtered by the loaded save's platform and
+// sorted by name. Quick Items share the Quick pouch eligibility policy, which
+// lives entirely in the db package.
+func (a *App) GetQuickItemEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetQuickItemEligibleItems(platform)
+}
+
 // GetPhysickEligibleItems returns the DB-known Crystal Tears that may be placed
 // in a Flask of Wondrous Physick slot, filtered by the loaded save's platform
 // and sorted by name. The eligibility policy lives entirely in the db package.

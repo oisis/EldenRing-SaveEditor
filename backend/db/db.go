@@ -975,6 +975,14 @@ func GetPouchEligibleItems(platform string) []ItemEntry {
 	return items
 }
 
+// GetQuickItemEligibleItems returns every DB-known item eligible for a bottom
+// D-pad Quick Item slot. Quick Items share the exact same eligibility policy as
+// the Quick pouch, so this delegates to GetPouchEligibleItems rather than
+// duplicating the category allowlist.
+func GetQuickItemEligibleItems(platform string) []ItemEntry {
+	return GetPouchEligibleItems(platform)
+}
+
 // GetPhysickEligibleItems returns every DB-known Crystal Tear eligible for a
 // Flask of Wondrous Physick slot, in deterministic name order. Membership is
 // the canonical data.SubcatKeyCrystalTears set (EquipParamGoods.goodsType == 10,
