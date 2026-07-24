@@ -1754,6 +1754,70 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class EquipmentSlotView {
+	    occupied: boolean;
+	    rawId: number;
+	    name: string;
+	    iconPath: string;
+	    resolved: boolean;
+
+	    static createFrom(source: any = {}) {
+	        return new EquipmentSlotView(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.occupied = source["occupied"];
+	        this.rawId = source["rawId"];
+	        this.name = source["name"];
+	        this.iconPath = source["iconPath"];
+	        this.resolved = source["resolved"];
+	    }
+	}
+	export class EquipmentSnapshot {
+	    rightHandArmaments: EquipmentSlotView[];
+	    leftHandArmaments: EquipmentSlotView[];
+	    arrows: EquipmentSlotView[];
+	    bolts: EquipmentSlotView[];
+	    armor: EquipmentSlotView[];
+	    talismans: EquipmentSlotView[];
+	    quickItems: EquipmentSlotView[];
+	    pouch: EquipmentSlotView[];
+
+	    static createFrom(source: any = {}) {
+	        return new EquipmentSnapshot(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.rightHandArmaments = this.convertValues(source["rightHandArmaments"], EquipmentSlotView);
+	        this.leftHandArmaments = this.convertValues(source["leftHandArmaments"], EquipmentSlotView);
+	        this.arrows = this.convertValues(source["arrows"], EquipmentSlotView);
+	        this.bolts = this.convertValues(source["bolts"], EquipmentSlotView);
+	        this.armor = this.convertValues(source["armor"], EquipmentSlotView);
+	        this.talismans = this.convertValues(source["talismans"], EquipmentSlotView);
+	        this.quickItems = this.convertValues(source["quickItems"], EquipmentSlotView);
+	        this.pouch = this.convertValues(source["pouch"], EquipmentSlotView);
+	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class FavoriteSlotInfo {
 	    index: number;
 	    active: boolean;

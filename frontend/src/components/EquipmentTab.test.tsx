@@ -1,6 +1,35 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EquipmentTab } from './EquipmentTab';
+import { GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
+
+vi.mock('../../wailsjs/go/main/App', () => ({
+    GetEquipmentSnapshot: vi.fn(),
+}));
+
+const emptyView = { occupied: false, rawId: 0, name: '', iconPath: '', resolved: false };
+const view = (over: Partial<typeof emptyView>) => ({ ...emptyView, ...over });
+const fill = (n: number, over?: Partial<typeof emptyView>) =>
+    Array.from({ length: n }, (_, i) => (i === 0 && over ? view(over) : { ...emptyView }));
+
+function makeSnapshot(over: Record<string, unknown> = {}) {
+    return {
+        rightHandArmaments: fill(3),
+        leftHandArmaments: fill(3),
+        arrows: fill(2),
+        bolts: fill(2),
+        armor: fill(4),
+        talismans: fill(4),
+        quickItems: fill(10),
+        pouch: fill(6),
+        ...over,
+    };
+}
+
+beforeEach(() => {
+    vi.mocked(GetEquipmentSnapshot).mockReset();
+    vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot() as never);
+});
 
 describe('EquipmentTab', () => {
     it('renders the approved equipment layout', () => {
@@ -91,5 +120,58 @@ describe('EquipmentTab', () => {
 
         // Equipment-specific visuals resolve to the per-theme --eq-* tokens.
         expect(screen.getByRole('button', { name: 'Weapon slot 1' })).toHaveClass('border-[color:var(--eq-slot-border)]');
+    });
+});
+
+describe('EquipmentTab equipped-item projection', () => {
+    it('renders a populated equipment slot with its icon and item-name tooltip', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            rightHandArmaments: fill(3, { occupied: true, resolved: true, name: 'Claymore +12', iconPath: 'items/weapons/claymore.png', rawId: 0x80abcdef }),
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        const icon = await screen.findByAltText('Claymore +12');
+        expect(icon).toHaveAttribute('src', '/items/weapons/claymore.png');
+        expect(screen.getByRole('tooltip', { name: 'Claymore +12' })).toBeInTheDocument();
+    });
+
+    it('renders a populated quick pouch slot with its icon and item-name tooltip', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            pouch: fill(6, { occupied: true, resolved: true, name: 'Spirit Jellyfish Ashes', iconPath: 'items/ashes/spirit_jellyfish.png', rawId: 0xb0000123 }),
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        const icon = await screen.findByAltText('Spirit Jellyfish Ashes');
+        expect(icon).toHaveAttribute('src', '/items/ashes/spirit_jellyfish.png');
+        expect(screen.getByRole('tooltip', { name: 'Spirit Jellyfish Ashes' })).toBeInTheDocument();
+    });
+
+    it('shows the raw-ID label for a populated but unresolved slot', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            talismans: fill(4, { occupied: true, resolved: false, name: 'Unknown item (0x2000FFFF)', rawId: 0x2000ffff }),
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        expect(await screen.findByRole('tooltip', { name: 'Unknown item (0x2000FFFF)' })).toBeInTheDocument();
+    });
+
+    it('keeps the eligibility tooltip on an empty slot', async () => {
+        render(<EquipmentTab charIdx={0} />);
+        // All-empty snapshot: weapon slots keep their eligibility text.
+        expect(await screen.findAllByRole('tooltip', { name: 'Weapons, shields, staves, seals and torches' })).toHaveLength(6);
+    });
+
+    it('leaves Physick unchanged when a snapshot loads', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            rightHandArmaments: fill(3, { occupied: true, resolved: true, name: 'Claymore', iconPath: 'items/weapons/claymore.png' }),
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+        await screen.findByAltText('Claymore');
+
+        expect(screen.getAllByRole('tooltip', { name: 'Crystal Tears' })).toHaveLength(2);
     });
 });

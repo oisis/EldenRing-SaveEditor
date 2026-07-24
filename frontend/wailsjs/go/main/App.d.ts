@@ -132,6 +132,8 @@ export function GetDeployTargets():Promise<Array<deploy.Target>>;
 
 export function GetDiagnosticLogTail():Promise<string>;
 
+export function GetEquipmentSnapshot(arg1:number):Promise<main.EquipmentSnapshot>;
+
 export function GetFavoritesStatus():Promise<Array<main.FavoriteSlotInfo>>;
 
 export function GetGestures(arg1:number):Promise<Array<db.GestureEntry>>;

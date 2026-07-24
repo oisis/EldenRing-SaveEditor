@@ -811,7 +811,7 @@ function App() {
                                                 onToggleFavorites={() => setShowOnlyFavorites(v => !v)}
                                             />
                                         ) : invView === 'equipment' ? (
-                                            <EquipmentTab />
+                                            <EquipmentTab charIdx={selectedChar} saveLoadKey={saveLoadKey} />
                                         ) : (
                                             <SortOrderTab
                                                 charIndex={selectedChar}

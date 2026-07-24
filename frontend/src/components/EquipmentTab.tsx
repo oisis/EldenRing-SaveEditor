@@ -1,4 +1,12 @@
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
+import { GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
+import type { main } from '../../wailsjs/go/models';
+
+type EquippedItem = main.EquipmentSlotView;
+
+// Item icon paths in the DB are stored without a leading slash; the public
+// assets are served from the root, so normalize to an absolute path.
+const iconSrc = (path: string) => (path.startsWith('/') ? path : `/${path}`);
 
 const slotSurface: CSSProperties = {
     backgroundColor: 'var(--eq-slot-bg)',
@@ -15,6 +23,7 @@ type SlotProps = {
     eligibleItems: string;
     onOpen: (label: string) => void;
     selected?: boolean;
+    item?: EquippedItem;
     children: ReactNode;
 };
 
@@ -29,7 +38,10 @@ function SlotTooltip({ eligibleItems }: { eligibleItems: string }) {
     );
 }
 
-function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, children }: SlotProps) {
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, item, children }: SlotProps) {
+    // Occupied + resolved: real icon and item name. Occupied + unknown:
+    // placeholder with the raw-ID name. Empty: placeholder + eligibility text.
+    const tooltip = item?.occupied ? item.name : eligibleItems;
     return (
         <button
             type="button"
@@ -39,14 +51,20 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, childre
             className={`${slotClass} ${selected ? 'border-2 border-[color:var(--eq-slot-selected-border)]' : ''}`}
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
-            <SlotTooltip eligibleItems={eligibleItems} />
-            {children}
+            <SlotTooltip eligibleItems={tooltip} />
+            {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : children}
         </button>
     );
 }
 
 function GhostIcon({ src, alt = '', mirrored = false }: { src: string; alt?: string; mirrored?: boolean }) {
     return <img className={`relative z-10 ${ghostClass} ${mirrored ? '-scale-x-100' : ''}`} src={src} alt={alt} />;
+}
+
+function ItemIcon({ src, alt }: { src: string; alt: string }) {
+    const [failed, setFailed] = useState(false);
+    if (failed) return null;
+    return <img className="relative z-10 h-[62px] w-[62px] object-contain drop-shadow-sm" src={src} alt={alt} onError={() => setFailed(true)} />;
 }
 
 function DPad({ active }: { active: 'up' | 'right' | 'down' | 'left' }) {
@@ -72,7 +90,8 @@ function PouchPlaceholder() {
     );
 }
 
-function PouchSlot({ label, active, onOpen }: { label: string; active?: 'up' | 'right' | 'down' | 'left'; onOpen: (label: string) => void }) {
+function PouchSlot({ label, active, onOpen, item }: { label: string; active?: 'up' | 'right' | 'down' | 'left'; onOpen: (label: string) => void; item?: EquippedItem }) {
+    const tooltip = item?.occupied ? item.name : 'Tools and Spirit Ashes';
     return (
         <button
             type="button"
@@ -82,9 +101,9 @@ function PouchSlot({ label, active, onOpen }: { label: string; active?: 'up' | '
             className="group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] hover:border-[color:var(--eq-slot-hover-border)]"
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
-            <SlotTooltip eligibleItems="Tools and Spirit Ashes" />
+            <SlotTooltip eligibleItems={tooltip} />
             {active && <DPad active={active} />}
-            <PouchPlaceholder />
+            {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : <PouchPlaceholder />}
         </button>
     );
 }
@@ -122,14 +141,32 @@ function EmptyEquipmentModal({ onClose }: { onClose: () => void }) {
     );
 }
 
-export function EquipmentTab() {
+export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveLoadKey?: number } = {}) {
     const [selectedSlot, setSelectedSlot] = useState('Weapon slot 1');
     const [modalOpen, setModalOpen] = useState(false);
+    const [snapshot, setSnapshot] = useState<main.EquipmentSnapshot | null>(null);
     const openSlot = (label: string) => {
         setSelectedSlot(label);
         setModalOpen(true);
     };
     const selected = (label: string) => selectedSlot === label;
+
+    // Read-only load of the equipped items for the selected character. Guard
+    // against stale updates when the character changes or the tab unmounts.
+    useEffect(() => {
+        if (charIdx == null) return;
+        let active = true;
+        setSnapshot(null);
+        (async () => {
+            try {
+                const snap = await GetEquipmentSnapshot(charIdx);
+                if (active) setSnapshot(snap);
+            } catch {
+                if (active) setSnapshot(null);
+            }
+        })();
+        return () => { active = false; };
+    }, [charIdx, saveLoadKey]);
 
     const weaponSlots = ['Weapon slot 1', 'Weapon slot 2', 'Weapon slot 3'];
     const rangedSlots = ['Ranged slot 1', 'Ranged slot 2', 'Ranged slot 3'];
@@ -153,26 +190,27 @@ export function EquipmentTab() {
                     <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Equipment slots</h2>
                     <div className="grid gap-[10px]">
                         <div className="grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
-                            {weaponSlots.map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
+                            {weaponSlots.map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={snapshot?.rightHandArmaments[index]}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
                             <span aria-hidden="true" />
-                            {['Arrow slot 1', 'Arrow slot 2'].map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
+                            {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={snapshot?.arrows[index]}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
                         </div>
                         <div className="-mt-[7px] grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
-                            {rangedSlots.map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>)}
+                            {rangedSlots.map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={snapshot?.leftHandArmaments[index]}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>)}
                             <span aria-hidden="true" />
-                            {['Bolt slot 1', 'Bolt slot 2'].map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
+                            {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={snapshot?.bolts[index]}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
                         </div>
                         <div className="mt-[5px] grid grid-cols-[repeat(4,82px)] gap-[9px]">
-                            {armorSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {armorSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot} item={snapshot?.armor[index]}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         <div className="grid grid-cols-[repeat(4,82px)] gap-[9px]">
-                            {talismanSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {talismanSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot} item={snapshot?.talismans[index]}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         {[0, 1].map((row) => (
                             <div key={row} className="grid grid-cols-[repeat(5,82px)] gap-[9px]">
                                 {Array.from({ length: 5 }, (_, index) => {
-                                    const label = `Quick item ${row * 5 + index + 1}`;
-                                    return <EquipmentSlot key={label} label={label} eligibleItems="Tools and Spirit Ashes" selected={selected(label)} onOpen={openSlot}><GhostIcon src={toolsPlaceholder} /></EquipmentSlot>;
+                                    const slotIndex = row * 5 + index;
+                                    const label = `Quick item ${slotIndex + 1}`;
+                                    return <EquipmentSlot key={label} label={label} eligibleItems="Tools and Spirit Ashes" selected={selected(label)} onOpen={openSlot} item={snapshot?.quickItems[slotIndex]}><GhostIcon src={toolsPlaceholder} /></EquipmentSlot>;
                                 })}
                             </div>
                         ))}
@@ -182,12 +220,12 @@ export function EquipmentTab() {
                 <div className="border-l border-border pl-[26px]">
                     <h2 className="mb-3 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Quick pouch</h2>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
-                        <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} />
-                        <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} />
-                        <PouchSlot label="Quick pouch left" active="left" onOpen={openSlot} />
-                        <PouchSlot label="Quick pouch down" active="down" onOpen={openSlot} />
-                        <PouchSlot label="Quick pouch slot 5" onOpen={openSlot} />
-                        <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} />
+                        <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} item={snapshot?.pouch[0]} />
+                        <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} item={snapshot?.pouch[1]} />
+                        <PouchSlot label="Quick pouch left" active="left" onOpen={openSlot} item={snapshot?.pouch[2]} />
+                        <PouchSlot label="Quick pouch down" active="down" onOpen={openSlot} item={snapshot?.pouch[3]} />
+                        <PouchSlot label="Quick pouch slot 5" onOpen={openSlot} item={snapshot?.pouch[4]} />
+                        <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} item={snapshot?.pouch[5]} />
                     </div>
                     <div aria-hidden="true" className="mt-[6px] h-[14px]" />
                     <h3 className="mb-3 w-[173px] whitespace-pre-line text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">{'Wondrous\nPhysick flask'}</h3>

@@ -250,6 +250,10 @@ export function GetDiagnosticLogTail() {
   return window['go']['main']['App']['GetDiagnosticLogTail']();
 }
 
+export function GetEquipmentSnapshot(arg1) {
+  return window['go']['main']['App']['GetEquipmentSnapshot'](arg1);
+}
+
 export function GetFavoritesStatus() {
   return window['go']['main']['App']['GetFavoritesStatus']();
 }
