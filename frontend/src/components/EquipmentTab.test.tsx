@@ -72,4 +72,17 @@ describe('EquipmentTab', () => {
 
         expect(screen.getByText('Wondrous Physick flask')).toHaveClass('mb-3');
     });
+
+    it('drives visuals from theme tokens instead of hard-coded light colors', () => {
+        const { container } = render(<EquipmentTab />);
+
+        // Card surface and primary action follow the semantic theme palette.
+        const section = container.querySelector('section');
+        expect(section).toHaveClass('bg-card', 'text-card-foreground', 'border-border');
+        expect(screen.getByRole('button', { name: 'Save changes' })).toHaveClass('bg-primary', 'text-primary-foreground');
+        expect(screen.getByText('Wondrous Physick flask')).toHaveClass('text-muted-foreground');
+
+        // Equipment-specific visuals resolve to the per-theme --eq-* tokens.
+        expect(screen.getByRole('button', { name: 'Weapon slot 1' })).toHaveClass('border-[color:var(--eq-slot-border)]');
+    });
 });

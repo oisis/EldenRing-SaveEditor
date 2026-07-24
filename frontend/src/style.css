@@ -72,6 +72,25 @@
   --sf-console-text-dim: #cbd5e1;
   --sf-console-border: rgba(255, 255, 255, 0.15);
   --sf-toast-bg: rgba(15, 15, 20, 0.50);
+
+  /* Equipment tab (light) */
+  --eq-slot-bg: #f8fafc;
+  --eq-slot-gradient: radial-gradient(ellipse at 50% 45%, rgba(116,132,147,.13), transparent 62%), repeating-linear-gradient(34deg, rgba(94,109,126,.025) 0 1px, transparent 1px 5px), linear-gradient(145deg, #ffffff, #edf2f6 75%);
+  --eq-slot-shadow: inset 0 0 0 2px rgba(255,255,255,.65), inset 0 0 12px rgba(111,127,142,.09), 0 2px 4px #d4d9de;
+  --eq-slot-selected-shadow: inset 0 0 0 2px rgba(255,255,255,.65), inset 0 0 12px rgba(111,127,142,.09), 0 0 0 2px #d3f5de;
+  --eq-slot-border: #d2dce6;
+  --eq-slot-hover-border: #75c994;
+  --eq-slot-selected-border: #37b66c;
+  --eq-slot-inset-border: rgba(142,155,169,.15);
+  --eq-ghost-opacity: .22;
+  --eq-pouch-fill: #667586;
+  --eq-pouch-line: rgba(102,117,134,.25);
+  --eq-pouch-shadow: inset 0 5px 0 rgba(255,255,255,.18), inset 0 -5px 0 rgba(56,68,81,.2);
+  --eq-dpad-color: #596776;
+  --eq-dpad-shadow: #c1c8d0;
+  --eq-tooltip-bg: #303a47;
+  --eq-tooltip-text: #ffffff;
+  --eq-physick-text: #15803d;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -115,6 +134,25 @@
   --sf-console-text-dim: #1e293b;
   --sf-console-border: rgba(0, 0, 0, 0.2);
   --sf-toast-bg: rgba(235, 235, 240, 0.50);
+
+  /* Equipment tab (dark) */
+  --eq-slot-bg: #202432;
+  --eq-slot-gradient: radial-gradient(ellipse at 50% 45%, rgba(120,140,170,.10), transparent 62%), repeating-linear-gradient(34deg, rgba(200,215,235,.02) 0 1px, transparent 1px 5px), linear-gradient(145deg, #272c3b, #1b1f2b 75%);
+  --eq-slot-shadow: inset 0 0 0 2px rgba(255,255,255,.04), inset 0 0 12px rgba(0,0,0,.35), 0 2px 4px rgba(0,0,0,.4);
+  --eq-slot-selected-shadow: inset 0 0 0 2px rgba(255,255,255,.04), inset 0 0 12px rgba(0,0,0,.35), 0 0 0 2px rgba(74,222,128,.35);
+  --eq-slot-border: #333a48;
+  --eq-slot-hover-border: #3f8f5f;
+  --eq-slot-selected-border: #4ade80;
+  --eq-slot-inset-border: rgba(180,195,215,.08);
+  --eq-ghost-opacity: .35;
+  --eq-pouch-fill: #5a6b80;
+  --eq-pouch-line: rgba(120,140,165,.30);
+  --eq-pouch-shadow: inset 0 5px 0 rgba(255,255,255,.06), inset 0 -5px 0 rgba(0,0,0,.35);
+  --eq-dpad-color: #8a97a8;
+  --eq-dpad-shadow: rgba(0,0,0,.5);
+  --eq-tooltip-bg: #e2e8f0;
+  --eq-tooltip-text: #1a1f2b;
+  --eq-physick-text: #4ade80;
 }
 
 /* ═══════════════════════════════════════════════════
@@ -158,6 +196,25 @@
   --sf-console-text-dim: #3d3529;
   --sf-console-border: rgba(212, 168, 67, 0.25);
   --sf-toast-bg: rgba(225, 218, 200, 0.50);
+
+  /* Equipment tab (Elden Ring / golden) */
+  --eq-slot-bg: #221a13;
+  --eq-slot-gradient: radial-gradient(ellipse at 50% 45%, rgba(212,168,67,.10), transparent 62%), repeating-linear-gradient(34deg, rgba(212,168,67,.03) 0 1px, transparent 1px 5px), linear-gradient(145deg, #2a2016, #191209 75%);
+  --eq-slot-shadow: inset 0 0 0 2px rgba(212,168,67,.06), inset 0 0 12px rgba(0,0,0,.4), 0 2px 4px rgba(0,0,0,.5);
+  --eq-slot-selected-shadow: inset 0 0 0 2px rgba(212,168,67,.06), inset 0 0 12px rgba(0,0,0,.4), 0 0 0 2px rgba(212,168,67,.35);
+  --eq-slot-border: #3a2e1f;
+  --eq-slot-hover-border: #d4a843;
+  --eq-slot-selected-border: #e0b84f;
+  --eq-slot-inset-border: rgba(212,168,67,.10);
+  --eq-ghost-opacity: .32;
+  --eq-pouch-fill: #6b5a3d;
+  --eq-pouch-line: rgba(180,150,90,.30);
+  --eq-pouch-shadow: inset 0 5px 0 rgba(212,168,67,.10), inset 0 -5px 0 rgba(0,0,0,.4);
+  --eq-dpad-color: #b89a5a;
+  --eq-dpad-shadow: rgba(0,0,0,.55);
+  --eq-tooltip-bg: #e9dfc8;
+  --eq-tooltip-text: #2b2114;
+  --eq-physick-text: #d4a843;
 }
 
 /* ═══════════════════════════════════════════════════

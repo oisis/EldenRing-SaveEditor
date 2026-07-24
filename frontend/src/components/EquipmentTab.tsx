@@ -1,13 +1,13 @@
 import { useState, type CSSProperties, type ReactNode } from 'react';
 
 const slotSurface: CSSProperties = {
-    backgroundColor: '#f8fafc',
-    backgroundImage: 'radial-gradient(ellipse at 50% 45%, rgba(116,132,147,.13), transparent 62%), repeating-linear-gradient(34deg, rgba(94,109,126,.025) 0 1px, transparent 1px 5px), linear-gradient(145deg, #ffffff, #edf2f6 75%)',
-    boxShadow: 'inset 0 0 0 2px rgba(255,255,255,.65), inset 0 0 12px rgba(111,127,142,.09), 0 2px 4px #d4d9de',
+    backgroundColor: 'var(--eq-slot-bg)',
+    backgroundImage: 'var(--eq-slot-gradient)',
+    boxShadow: 'var(--eq-slot-shadow)',
 };
 
-const slotClass = 'group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[#d2dce6] p-[5px] transition-colors hover:border-[#75c994]';
-const ghostClass = 'h-[62px] w-[62px] object-contain opacity-[.22] grayscale contrast-75';
+const slotClass = 'group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] transition-colors hover:border-[color:var(--eq-slot-hover-border)]';
+const ghostClass = 'h-[62px] w-[62px] object-contain opacity-[var(--eq-ghost-opacity)] grayscale contrast-75';
 const toolsPlaceholder = '/equipment/tools-slot-placeholder.webp';
 
 type SlotProps = {
@@ -22,7 +22,7 @@ function SlotTooltip({ eligibleItems }: { eligibleItems: string }) {
     return (
         <span
             role="tooltip"
-            className="pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-30 w-max max-w-[170px] -translate-x-1/2 rounded-md bg-[#303a47] px-2 py-1 text-center text-[9px] font-bold leading-tight text-white opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
+            className="pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-30 w-max max-w-[170px] -translate-x-1/2 rounded-md bg-[color:var(--eq-tooltip-bg)] px-2 py-1 text-center text-[9px] font-bold leading-tight text-[color:var(--eq-tooltip-text)] opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
         >
             {eligibleItems}
         </span>
@@ -35,10 +35,10 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, childre
             type="button"
             aria-label={label}
             onClick={() => onOpen(label)}
-            style={slotSurface}
-            className={`${slotClass} ${selected ? 'border-2 border-[#37b66c] shadow-[inset_0_0_0_2px_rgba(255,255,255,.65),inset_0_0_12px_rgba(111,127,142,.09),0_0_0_2px_#d3f5de]' : ''}`}
+            style={selected ? { ...slotSurface, boxShadow: 'var(--eq-slot-selected-shadow)' } : slotSurface}
+            className={`${slotClass} ${selected ? 'border-2 border-[color:var(--eq-slot-selected-border)]' : ''}`}
         >
-            <span className="pointer-events-none absolute inset-[5px] border border-[#8e9ba9]/15" />
+            <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems={eligibleItems} />
             {children}
         </button>
@@ -51,10 +51,10 @@ function GhostIcon({ src, alt = '', mirrored = false }: { src: string; alt?: str
 
 function DPad({ active }: { active: 'up' | 'right' | 'down' | 'left' }) {
     const pieceClass = (direction: 'up' | 'right' | 'down' | 'left', position: string) =>
-        `absolute h-[6px] w-[6px] rounded-[1px] border border-[#596776] ${position} ${active === direction ? 'bg-[#596776]' : 'bg-transparent'}`;
+        `absolute h-[6px] w-[6px] rounded-[1px] border border-[color:var(--eq-dpad-color)] ${position} ${active === direction ? 'bg-[color:var(--eq-dpad-color)]' : 'bg-transparent'}`;
 
     return (
-        <span className="pointer-events-none absolute left-1 top-1 z-20 h-5 w-5 drop-shadow-[0_1px_1px_#c1c8d0]" aria-hidden="true">
+        <span className="pointer-events-none absolute left-1 top-1 z-20 h-5 w-5 drop-shadow-[0_1px_1px_var(--eq-dpad-shadow)]" aria-hidden="true">
             <i className={pieceClass('up', 'left-[7px] top-[1px]')} />
             <i className={pieceClass('right', 'right-0 top-[7px]')} />
             <i className={pieceClass('down', 'bottom-[1px] left-[7px]')} />
@@ -66,8 +66,8 @@ function DPad({ active }: { active: 'up' | 'right' | 'down' | 'left' }) {
 function PouchPlaceholder() {
     return (
         <>
-            <span className="pointer-events-none absolute left-1/2 top-[27px] h-[35px] w-[38px] -translate-x-1/2 rounded-[9px_9px_13px_13px] bg-[#667586] opacity-20 shadow-[inset_0_5px_0_rgba(255,255,255,.18),inset_0_-5px_0_rgba(56,68,81,.2)]" />
-            <span className="pointer-events-none absolute left-1/2 top-[19px] z-10 h-[13px] w-[24px] -translate-x-1/2 rounded-t-[13px] border-[4px] border-b-0 border-[#667586]/25" />
+            <span style={{ boxShadow: 'var(--eq-pouch-shadow)' }} className="pointer-events-none absolute left-1/2 top-[27px] h-[35px] w-[38px] -translate-x-1/2 rounded-[9px_9px_13px_13px] bg-[color:var(--eq-pouch-fill)] opacity-20" />
+            <span className="pointer-events-none absolute left-1/2 top-[19px] z-10 h-[13px] w-[24px] -translate-x-1/2 rounded-t-[13px] border-[4px] border-b-0 border-[color:var(--eq-pouch-line)]" />
         </>
     );
 }
@@ -79,9 +79,9 @@ function PouchSlot({ label, active, onOpen }: { label: string; active?: 'up' | '
             aria-label={label}
             onClick={() => onOpen(label)}
             style={slotSurface}
-            className="group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[#d2dce6] p-[5px] hover:border-[#75c994]"
+            className="group relative flex h-[82px] w-[82px] items-center justify-center overflow-visible rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] hover:border-[color:var(--eq-slot-hover-border)]"
         >
-            <span className="pointer-events-none absolute inset-[5px] border border-[#8e9ba9]/15" />
+            <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems="Tools and Spirit Ashes" />
             {active && <DPad active={active} />}
             <PouchPlaceholder />
@@ -96,12 +96,12 @@ function PhysickSlot({ label, onOpen }: { label: string; onOpen: (label: string)
             aria-label={label}
             onClick={() => onOpen(label)}
             style={slotSurface}
-            className="group relative flex h-[82px] w-[82px] flex-col rounded-lg border border-[#d2dce6] p-[5px] text-[#15803d] hover:border-[#75c994]"
+            className="group relative flex h-[82px] w-[82px] flex-col rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] text-[color:var(--eq-physick-text)] hover:border-[color:var(--eq-slot-hover-border)]"
         >
             <SlotTooltip eligibleItems="Crystal Tears" />
             <span className="line-clamp-2 min-h-[21px] text-center text-[8px] font-extrabold leading-[1.15]">Physick tear</span>
             <span className="flex h-[51px] items-center justify-center">
-                <img className="h-[51px] w-[51px] object-contain opacity-25" src="/equipment/physick-tear-placeholder.png" alt="" />
+                <img className="h-[51px] w-[51px] object-contain opacity-[var(--eq-ghost-opacity)]" src="/equipment/physick-tear-placeholder.png" alt="" />
             </span>
         </button>
     );
@@ -114,7 +114,7 @@ function EmptyEquipmentModal({ onClose }: { onClose: () => void }) {
                 <button type="button" onClick={onClose} className="rounded border border-border px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted/40">
                     Cancel
                 </button>
-                <button type="button" onClick={onClose} className="rounded bg-green-700/80 px-4 py-2 text-[10px] font-black uppercase tracking-widest text-white hover:bg-green-700">
+                <button type="button" onClick={onClose} className="rounded bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary-foreground hover:opacity-90">
                     Ok
                 </button>
             </div>
@@ -147,10 +147,10 @@ export function EquipmentTab() {
     ] as const;
 
     return (
-        <section className="w-full shrink-0 overflow-auto rounded-xl border border-[#d6e0ea] bg-white shadow-sm custom-scrollbar">
+        <section className="w-full shrink-0 overflow-auto rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-scrollbar">
             <div className="mx-auto grid w-fit grid-cols-[499px_255px] px-5 py-5">
                 <div>
-                    <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-[#5a6574]">Equipment slots</h2>
+                    <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Equipment slots</h2>
                     <div className="grid gap-[10px]">
                         <div className="grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
                             {weaponSlots.map((label) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
@@ -179,8 +179,8 @@ export function EquipmentTab() {
                     </div>
                 </div>
 
-                <div className="border-l border-[#d6e0ea] pl-[26px]">
-                    <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-[#5a6574]">Quick pouch</h2>
+                <div className="border-l border-border pl-[26px]">
+                    <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Quick pouch</h2>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} />
                         <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} />
@@ -190,16 +190,16 @@ export function EquipmentTab() {
                         <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} />
                     </div>
                     <div aria-hidden="true" className="mt-[6px] h-[14px]" />
-                    <h3 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.1em] text-[#5a6574]">Wondrous Physick flask</h3>
+                    <h3 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">Wondrous Physick flask</h3>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
                         <PhysickSlot label="Physick tear 1" onOpen={openSlot} />
                         <PhysickSlot label="Physick tear 2" onOpen={openSlot} />
                     </div>
                 </div>
             </div>
-            <div className="mx-5 flex items-center justify-between border-t border-[#d6e0ea] px-0 pb-4 pt-3">
-                <span className="text-[11px] font-extrabold tracking-[.04em] text-[#687484]">Equip Load <strong className="text-[#313944]">N / N</strong> | Medium</span>
-                <button type="button" className="rounded-md bg-green-700 px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-white hover:bg-green-800">Save changes</button>
+            <div className="mx-5 flex items-center justify-between border-t border-border px-0 pb-4 pt-3">
+                <span className="text-[11px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load <strong className="text-foreground">N / N</strong> | Medium</span>
+                <button type="button" className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90">Save changes</button>
             </div>
             {modalOpen && <EmptyEquipmentModal onClose={() => setModalOpen(false)} />}
         </section>
