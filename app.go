@@ -574,6 +574,33 @@ func (a *App) getItemListLocked(category string) []db.ItemEntry {
 	return db.GetItemsByCategory(category, platform)
 }
 
+// GetPouchEligibleItems returns the DB-known items that may be placed in a
+// Quick pouch slot (categories "tools" and "ashes"), filtered by the loaded
+// save's platform and sorted by name. Intended for the future unified
+// item-picker modal; the eligibility policy lives entirely in the db package.
+func (a *App) GetPouchEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetPouchEligibleItems(platform)
+}
+
+// GetPhysickEligibleItems returns the DB-known Crystal Tears that may be placed
+// in a Flask of Wondrous Physick slot, filtered by the loaded save's platform
+// and sorted by name. The eligibility policy lives entirely in the db package.
+func (a *App) GetPhysickEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetPhysickEligibleItems(platform)
+}
+
 // GetItemDetail returns full item data (description, stats) for a single base item ID.
 func (a *App) GetItemDetail(baseId uint32) *db.ItemEntry {
 	return db.GetItemEntryByID(baseId)

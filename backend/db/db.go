@@ -951,6 +951,47 @@ func GetAllItems(platform string) []ItemEntry {
 	return all
 }
 
+// pouchEligibleCategories is the single source of truth for which DB item
+// categories may be assigned to a Quick pouch / quick-item slot: exactly the
+// "tools" (flasks, consumables, reusable/multiplayer tools, Spectral Steed
+// Whistle) and "ashes" (Spirit Ashes) categories. Everything else — weapons,
+// shields, armour, talismans, arrows/bolts, spells, Ashes of War, crafting and
+// bolstering materials, key items, info items — is intentionally excluded.
+var pouchEligibleCategories = []string{"tools", "ashes"}
+
+// GetPouchEligibleItems returns every DB-known item eligible for a Quick pouch
+// slot, in deterministic name order. It reuses GetItemsByCategory so category
+// membership (and its per-category filtering, e.g. base-only flasks/ashes)
+// stays defined in exactly one place. Backend is the sole owner of the
+// eligibility policy — callers must not re-derive the category allowlist.
+func GetPouchEligibleItems(platform string) []ItemEntry {
+	var items []ItemEntry
+	for _, cat := range pouchEligibleCategories {
+		items = append(items, GetItemsByCategory(cat, platform)...)
+	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
+	return items
+}
+
+// GetPhysickEligibleItems returns every DB-known Crystal Tear eligible for a
+// Flask of Wondrous Physick slot, in deterministic name order. Membership is
+// the canonical data.SubcatKeyCrystalTears set (EquipParamGoods.goodsType == 10,
+// base + DLC), so the tear ID list is never duplicated here.
+func GetPhysickEligibleItems(platform string) []ItemEntry {
+	var items []ItemEntry
+	for _, it := range GetItemsByCategory("key_items", platform) {
+		if it.SubCategory == data.SubcatKeyCrystalTears {
+			items = append(items, it)
+		}
+	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
+	return items
+}
+
 // GetAllGraces returns all Sites of Grace as a flat list.
 var getAllGraces = sync.OnceValue(func() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))
