@@ -128,12 +128,74 @@ func (layout nativeGaItemLayout) firstFreeIndex() (int, bool) {
 	return 0, false
 }
 
+type nativeGaItemBatchAllocator struct {
+	slot        *SaveSlot
+	layout      nativeGaItemLayout
+	records     []GaItemFull
+	freeIndices []int
+	nextFree    int
+}
+
+func newNativeGaItemBatchAllocator(slot *SaveSlot) (*nativeGaItemBatchAllocator, error) {
+	layout, err := analyzeNativeGaItemLayout(slot)
+	if err != nil {
+		return nil, err
+	}
+
+	allocator := &nativeGaItemBatchAllocator{
+		slot:    slot,
+		layout:  layout,
+		records: make([]GaItemFull, len(slot.GaItems)),
+	}
+	for _, record := range slot.GaItems {
+		if record.IsEmpty() {
+			continue
+		}
+		allocator.records[int(record.Handle&0xFFFF)] = record
+	}
+	for index, used := range layout.used {
+		if !used {
+			allocator.freeIndices = append(allocator.freeIndices, index)
+		}
+	}
+	return allocator, nil
+}
+
+func (allocator *nativeGaItemBatchAllocator) allocate(prefix, itemID uint32) (uint32, error) {
+	if !isPhysicalGaItemPrefix(prefix) {
+		return 0, fmt.Errorf("batch GaItem allocator: handle type 0x%X is not physical", prefix)
+	}
+	if !physicalGaItemTypeMatchesItemID(prefix, itemID) {
+		return 0, fmt.Errorf("batch GaItem allocator: handle type 0x%X conflicts with item ID 0x%08X", prefix, itemID)
+	}
+	if allocator.nextFree >= len(allocator.freeIndices) {
+		return 0, fmt.Errorf("failed to generate physical GaItem handle: no free index")
+	}
+
+	index := allocator.freeIndices[allocator.nextFree]
+	allocator.nextFree++
+	allocator.layout.used[index] = true
+
+	handle := prefix | uint32(allocator.layout.partID)<<16 | uint32(index)
+	allocator.records[index] = newGaItemEntry(handle, itemID)
+	allocator.slot.GaMap[handle] = itemID
+	return handle, nil
+}
+
+func (allocator *nativeGaItemBatchAllocator) commit() error {
+	allocator.slot.GaItems = projectNativeGaItemRecords(allocator.records)
+	refreshGaItemTracking(allocator.slot)
+	if _, err := analyzeNativeGaItemLayout(allocator.slot); err != nil {
+		return fmt.Errorf("batch GaItem allocator: %w", err)
+	}
+	return nil
+}
+
 // reprojectNativeGaItems restores the game's two-pass record order without
 // changing any surviving handle or its physical low-16 index.
 func reprojectNativeGaItems(slot *SaveSlot) error {
 	records := make([]GaItemFull, len(slot.GaItems))
 	used := make([]bool, len(slot.GaItems))
-	aow := make([]bool, len(slot.GaItems))
 
 	for _, record := range slot.GaItems {
 		if record.IsEmpty() {
@@ -148,33 +210,35 @@ func reprojectNativeGaItems(slot *SaveSlot) error {
 		}
 		records[index] = record
 		used[index] = true
-		aow[index] = record.Handle&GaHandleTypeMask == ItemTypeAow
 	}
 
-	projected := make([]GaItemFull, len(slot.GaItems))
-	position := 0
-	for index := range records {
-		if used[index] && aow[index] {
-			projected[position] = records[index]
-			position++
-		}
-	}
-	for index := range records {
-		if aow[index] {
-			continue
-		}
-		if used[index] {
-			projected[position] = records[index]
-		}
-		position++
-	}
-
-	slot.GaItems = projected
+	slot.GaItems = projectNativeGaItemRecords(records)
 	refreshGaItemTracking(slot)
 	if _, err := analyzeNativeGaItemLayout(slot); err != nil {
 		return fmt.Errorf("native GaItem reprojection: %w", err)
 	}
 	return nil
+}
+
+func projectNativeGaItemRecords(records []GaItemFull) []GaItemFull {
+	projected := make([]GaItemFull, len(records))
+	position := 0
+	for _, record := range records {
+		if !record.IsEmpty() && record.Handle&GaHandleTypeMask == ItemTypeAow {
+			projected[position] = record
+			position++
+		}
+	}
+	for _, record := range records {
+		if !record.IsEmpty() && record.Handle&GaHandleTypeMask == ItemTypeAow {
+			continue
+		}
+		if !record.IsEmpty() {
+			projected[position] = record
+		}
+		position++
+	}
+	return projected
 }
 
 // NativeGaItemCapacity validates the persisted two-pass layout and reports the

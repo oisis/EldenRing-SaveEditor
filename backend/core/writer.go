@@ -311,16 +311,20 @@ func addItemsToSlotBatch(slot *SaveSlot, items []ItemToAdd, sessionStorageEmptyA
 	// stacks) must never create a second one. Do not assume every item
 	// family serializes identically beyond what these tests confirm.
 	seenNewGaItemDataForID := make(map[uint32]bool)
+	var gaAllocator *nativeGaItemBatchAllocator
 
 	allocNewGaItem := func(id, handlePrefix uint32) (uint32, error) {
-		h, err := generateUniqueHandle(slot, handlePrefix)
+		if gaAllocator == nil {
+			var err error
+			gaAllocator, err = newNativeGaItemBatchAllocator(slot)
+			if err != nil {
+				return 0, err
+			}
+		}
+		h, err := gaAllocator.allocate(handlePrefix, id)
 		if err != nil {
 			return 0, err
 		}
-		if err := allocateGaItem(slot, h, id); err != nil {
-			return 0, err
-		}
-		slot.GaMap[h] = id
 		// Arrows/bolts are weapon-prefixed and must get an active GaItemData
 		// entry too (T211). Armor gets the same ordinary-segment treatment as
 		// weapons (T020: Chain Coif/Chain Armor both get an active entry) —
@@ -495,6 +499,9 @@ func addItemsToSlotBatch(slot *SaveSlot, items []ItemToAdd, sessionStorageEmptyA
 	}
 
 	if gaModified {
+		if err := gaAllocator.commit(); err != nil {
+			return err
+		}
 		savedGaMap := make(map[uint32]uint32, len(slot.GaMap))
 		for k, v := range slot.GaMap {
 			savedGaMap[k] = v
@@ -601,23 +608,7 @@ func allocateGaItem(slot *SaveSlot, handle, itemID uint32) error {
 		return fmt.Errorf("allocateGaItem: physical index %d is already occupied", index)
 	}
 
-	// Unk2/Unk3 default to 0 for weapon/armor-shaped records (confirmed native:
-	// T020 armor Chain Coif/Chain Armor, T211/T063 Arrow — both -1 in the app's
-	// old output). AoW records serialize as 8 bytes (GaRecordItem) and never
-	// write these fields at all, so -1 here is inert but kept for continuity
-	// with the pre-fix in-memory default.
-	entry := GaItemFull{
-		Handle:          handle,
-		ItemID:          itemID,
-		Unk2:            -1,
-		Unk3:            -1,
-		AoWGaItemHandle: NoCustomAoWHandle,
-		Unk5:            0,
-	}
-	if !isAoW {
-		entry.Unk2 = 0
-		entry.Unk3 = 0
-	}
+	entry := newGaItemEntry(handle, itemID)
 
 	if isAoW {
 		insertAt := layout.position(index, true)
@@ -636,6 +627,29 @@ func allocateGaItem(slot *SaveSlot, handle, itemID uint32) error {
 	}
 	refreshGaItemTracking(slot)
 	return nil
+}
+
+// newGaItemEntry returns the confirmed native defaults shared by the
+// single-item and batch allocators.
+func newGaItemEntry(handle, itemID uint32) GaItemFull {
+	// Unk2/Unk3 default to 0 for weapon/armor-shaped records (confirmed native:
+	// T020 armor Chain Coif/Chain Armor, T211/T063 Arrow — both -1 in the app's
+	// old output). AoW records serialize as 8 bytes (GaRecordItem) and never
+	// write these fields at all, so -1 here is inert but kept for continuity
+	// with the pre-fix in-memory default.
+	entry := GaItemFull{
+		Handle:          handle,
+		ItemID:          itemID,
+		Unk2:            -1,
+		Unk3:            -1,
+		AoWGaItemHandle: NoCustomAoWHandle,
+		Unk5:            0,
+	}
+	if handle&GaHandleTypeMask != ItemTypeAow {
+		entry.Unk2 = 0
+		entry.Unk3 = 0
+	}
+	return entry
 }
 
 // FlushGaItems serializes the entire in-memory GaItems array back to slot.Data.
