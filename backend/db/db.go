@@ -1056,6 +1056,39 @@ func GetBoltSlotEligibleItems(platform string) []ItemEntry {
 	return ammoSlotEligibleItems(platform, data.SubcatArrowsBolts, data.SubcatArrowsGreatbolts)
 }
 
+// equipmentSlotEligibleItems returns every DB-known item for a single armor
+// slot category, name-sorted. Each armor slot maps to exactly one category, so
+// this just delegates to GetItemsByCategory — the category membership (and its
+// name sort) stays defined in exactly one place. Shared by the four
+// Head/Chest/Arms/Legs slot filters so the delegation isn't repeated per slot.
+func equipmentSlotEligibleItems(category, platform string) []ItemEntry {
+	return GetItemsByCategory(category, platform)
+}
+
+// GetHeadSlotEligibleItems returns every DB-known item that may occupy the Head
+// armor slot (helms): the "head" category only.
+func GetHeadSlotEligibleItems(platform string) []ItemEntry {
+	return equipmentSlotEligibleItems("head", platform)
+}
+
+// GetChestSlotEligibleItems returns every DB-known item that may occupy the
+// Chest armor slot (body armor): the "chest" category only.
+func GetChestSlotEligibleItems(platform string) []ItemEntry {
+	return equipmentSlotEligibleItems("chest", platform)
+}
+
+// GetArmsSlotEligibleItems returns every DB-known item that may occupy the Arms
+// armor slot (gauntlets): the "arms" category only.
+func GetArmsSlotEligibleItems(platform string) []ItemEntry {
+	return equipmentSlotEligibleItems("arms", platform)
+}
+
+// GetLegsSlotEligibleItems returns every DB-known item that may occupy the Legs
+// armor slot (greaves): the "legs" category only.
+func GetLegsSlotEligibleItems(platform string) []ItemEntry {
+	return equipmentSlotEligibleItems("legs", platform)
+}
+
 // GetAllGraces returns all Sites of Grace as a flat list.
 var getAllGraces = sync.OnceValue(func() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))

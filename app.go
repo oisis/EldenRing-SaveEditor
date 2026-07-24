@@ -657,6 +657,58 @@ func (a *App) GetBoltSlotEligibleItems() []db.ItemEntry {
 	return db.GetBoltSlotEligibleItems(platform)
 }
 
+// GetHeadSlotEligibleItems returns the DB-known items that may occupy the Head
+// armor slot (helms), filtered by the loaded save's platform and sorted by
+// name. The eligibility policy lives entirely in the db package.
+func (a *App) GetHeadSlotEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetHeadSlotEligibleItems(platform)
+}
+
+// GetChestSlotEligibleItems returns the DB-known items that may occupy the Chest
+// armor slot (body armor), filtered by the loaded save's platform and sorted by
+// name. The eligibility policy lives entirely in the db package.
+func (a *App) GetChestSlotEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetChestSlotEligibleItems(platform)
+}
+
+// GetArmsSlotEligibleItems returns the DB-known items that may occupy the Arms
+// armor slot (gauntlets), filtered by the loaded save's platform and sorted by
+// name. The eligibility policy lives entirely in the db package.
+func (a *App) GetArmsSlotEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetArmsSlotEligibleItems(platform)
+}
+
+// GetLegsSlotEligibleItems returns the DB-known items that may occupy the Legs
+// armor slot (greaves), filtered by the loaded save's platform and sorted by
+// name. The eligibility policy lives entirely in the db package.
+func (a *App) GetLegsSlotEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetLegsSlotEligibleItems(platform)
+}
+
 // GetItemDetail returns full item data (description, stats) for a single base item ID.
 func (a *App) GetItemDetail(baseId uint32) *db.ItemEntry {
 	return db.GetItemEntryByID(baseId)
