@@ -1,7 +1,7 @@
 import {useState, useEffect, useCallback, useRef} from 'react';
 import {EventsOn} from '../wailsjs/runtime/runtime';
 import toast from './lib/toast';
-import {SelectAndOpenSave, GetSlotStates, CleanResidualSlot, SetSlotActivity, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetInfuseTypes, GetSlotCapacity, AuditLoadedSaveIssues, GetSaveInventoryIntegrityReport, RepairDuplicateInventoryIndices, CloseSave, RunDiagnosticsAllLoaded, GetAppVersion, SetDiagnosticDebugMode, RecordDiagnosticClientNavigation, RecordDiagnosticIntegrityModalShown, RecordDiagnosticIntegrityModalRepairOutcome, RecordDiagnosticPostLoadDiagnosticsModalShown} from '../wailsjs/go/main/App';
+import {SelectAndOpenSave, GetSlotStates, CleanResidualSlot, SetSlotActivity, WriteSave, CloneSlot, DeleteSlot, GetCharacter, RevertSlot, GetUndoDepth, GetInfuseTypes, GetSlotCapacity, AuditLoadedSaveIssues, GetSaveInventoryIntegrityReport, RepairDuplicateInventoryIndices, CloseSave, RunDiagnosticsAllLoaded, GetAppVersion, GetLoadedSaveFileName, SetDiagnosticDebugMode, RecordDiagnosticClientNavigation, RecordDiagnosticIntegrityModalShown, RecordDiagnosticIntegrityModalRepairOutcome, RecordDiagnosticPostLoadDiagnosticsModalShown} from '../wailsjs/go/main/App';
 import {main} from '../wailsjs/go/models';
 import {CharacterTab} from './components/CharacterTab';
 import {InventoryTab} from './components/InventoryTab';
@@ -57,6 +57,7 @@ const DEFAULT_PVP_OPTIONS: PvPOptions = {
 function App() {
     const [appVersion, setAppVersion] = useState('dev');
     const [platform, setPlatform] = useState<string | null>(null);
+    const [loadedSaveFileName, setLoadedSaveFileName] = useState('');
     const [activeSlots, setActiveSlots] = useState<boolean[]>([]);
     const [postLoadDiagReport, setPostLoadDiagReport] = useState<main.DiagnosticsReport | null>(null);
     const [inventoryIssuesModal, setInventoryIssuesModal] = useState<{ reports: RepairIssueReport[] } | null>(null);
@@ -136,6 +137,14 @@ function App() {
             .then(version => setAppVersion(version || 'dev'))
             .catch(() => setAppVersion('dev'));
     }, []);
+
+    useEffect(() => {
+        if (!platform) {
+            setLoadedSaveFileName('');
+            return;
+        }
+        GetLoadedSaveFileName().then(setLoadedSaveFileName).catch(() => setLoadedSaveFileName(''));
+    }, [platform, saveLoadKey]);
 
     const refreshUndoDepth = useCallback(() => {
         if (!platform) { setUndoDepth(0); return; }
@@ -590,6 +599,11 @@ function App() {
                 </div>
                 
                 <div className="p-4 border-t border-border bg-muted/5 space-y-3">
+                    {loadedSaveFileName && (
+                        <p data-testid="loaded-save-file-name" title={loadedSaveFileName} className="max-h-6 overflow-hidden break-all text-center text-[10px] font-bold leading-3 text-blue-600 dark:text-blue-400">
+                            {loadedSaveFileName}
+                        </p>
+                    )}
                     <button
                         type="button"
                         data-testid="open-templates-shell"

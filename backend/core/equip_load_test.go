@@ -1,6 +1,9 @@
 package core
 
-import "testing"
+import (
+	"math"
+	"testing"
+)
 
 func TestBaseEquipLoad(t *testing.T) {
 	for _, tc := range []struct {
@@ -40,6 +43,29 @@ func TestClassifyEquipLoad(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			if got := ClassifyEquipLoad(tc.current, tc.maximum); got != tc.want {
 				t.Errorf("ClassifyEquipLoad(%g, %g) = %q, want %q", tc.current, tc.maximum, got, tc.want)
+			}
+		})
+	}
+}
+
+func TestMaxEquipLoad(t *testing.T) {
+	for _, tc := range []struct {
+		name           string
+		endurance      uint32
+		enduranceBonus int
+		equipLoadRate  float64
+		want           float64
+	}{
+		{"base only", 20, 0, 0, 64.1},
+		{"endurance bonus uses curve", 20, 2, 0, 67.2},
+		{"endurance bonus caps at 99", 99, 5, 0, 160},
+		{"great jars arsenal", 20, 0, 0.19, 76.279},
+		{"arsenal plus erdtree favor additively", 20, 0, 0.27, 81.407},
+		{"head and talisman rates", 20, 0, 0.235, 79.1635},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := MaxEquipLoad(tc.endurance, tc.enduranceBonus, tc.equipLoadRate); math.Abs(got-tc.want) > 0.000001 {
+				t.Errorf("MaxEquipLoad(%d, %d, %.3f) = %g, want %g", tc.endurance, tc.enduranceBonus, tc.equipLoadRate, got, tc.want)
 			}
 		})
 	}

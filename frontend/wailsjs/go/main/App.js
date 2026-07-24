@@ -302,6 +302,10 @@ export function GetLegsSlotEligibleItems() {
   return window['go']['main']['App']['GetLegsSlotEligibleItems']();
 }
 
+export function GetLoadedSaveFileName() {
+  return window['go']['main']['App']['GetLoadedSaveFileName']();
+}
+
 export function GetMapProgress(arg1) {
   return window['go']['main']['App']['GetMapProgress'](arg1);
 }

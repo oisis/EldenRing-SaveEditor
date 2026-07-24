@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EquipmentTab } from './EquipmentTab';
 import { GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
@@ -189,11 +189,25 @@ describe('EquipmentTab equipped-item projection', () => {
         expect(await screen.findAllByRole('tooltip', { name: 'Weapons, shields, staves, seals and torches' })).toHaveLength(6);
     });
 
-    it('renders current and base maximum Equip Load returned from the save', async () => {
+    it('renders current and maximum Equip Load returned from the save', async () => {
         render(<EquipmentTab charIdx={0} />);
 
         expect(await screen.findByText('Medium')).toHaveClass('text-orange-500');
         expect(screen.getByText('1.8 / 64.1', { exact: false })).toBeInTheDocument();
+    });
+
+    it('reloads load and movement class when the equipped-save revision changes', async () => {
+        vi.mocked(GetEquipmentSnapshot)
+            .mockResolvedValueOnce(makeSnapshot({ currentEquipLoad: 20, maxEquipLoad: 64.1, equipLoadClass: 'Medium' }) as never)
+            .mockResolvedValueOnce(makeSnapshot({ currentEquipLoad: 35, maxEquipLoad: 76.3, equipLoadClass: 'Heavy' }) as never);
+
+        const { rerender } = render(<EquipmentTab charIdx={0} saveLoadKey={1} />);
+        expect(await screen.findByText('20.0 / 64.1', { exact: false })).toBeInTheDocument();
+
+        rerender(<EquipmentTab charIdx={0} saveLoadKey={2} />);
+        await waitFor(() => expect(GetEquipmentSnapshot).toHaveBeenCalledTimes(2));
+        expect(await screen.findByText('35.0 / 76.3', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('Heavy')).toHaveClass('text-red-600');
     });
 
     it('leaves Physick unchanged when a snapshot loads', async () => {

@@ -27,12 +27,24 @@ const (
 )
 
 // BaseEquipLoad returns the maximum Equip Load derived only from Endurance.
-// Equipment and talisman modifiers are deliberately excluded.
 func BaseEquipLoad(endurance uint32) float64 {
 	if endurance >= uint32(len(baseEquipLoadTenths)) {
 		endurance = uint32(len(baseEquipLoadTenths) - 1)
 	}
 	return float64(baseEquipLoadTenths[endurance]) / 10
+}
+
+// MaxEquipLoad returns the maximum Equip Load after permanent equipped-item
+// effects. Endurance bonuses alter the stat before its load curve is read;
+// direct bonuses are additive percentage effects on that curve value.
+// Temporary effects, Great Runes, and Physick are intentionally excluded by
+// the caller.
+func MaxEquipLoad(endurance uint32, enduranceBonus int, equipLoadRate float64) float64 {
+	effectiveEndurance := int64(endurance) + int64(enduranceBonus)
+	if effectiveEndurance < 0 {
+		effectiveEndurance = 0
+	}
+	return BaseEquipLoad(uint32(effectiveEndurance)) * (1 + equipLoadRate)
 }
 
 // ClassifyEquipLoad returns the movement category for the current load ratio.

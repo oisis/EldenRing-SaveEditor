@@ -280,6 +280,27 @@ func TestGetEquipmentSnapshot_TreatsUnarmedAsEmptyHandSlot(t *testing.T) {
 	}
 }
 
+func TestGetEquipmentSnapshot_TreatsBareArmorAsEmpty(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	bareArmor := [4]uint32{0x10002710, 0x10002774, 0x100027D8, 0x1000283C}
+	for i, itemID := range bareArmor {
+		equipped[12+i] = itemID
+	}
+
+	snap, err := newEquipmentApp(buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	for i, view := range snap.Armor {
+		if view.Occupied || view.Resolved || view.RawID != 0 || view.Name != "" || view.IconPath != "" {
+			t.Errorf("bare armor slot %d = %+v, want empty view", i, view)
+		}
+	}
+	if !snap.EquipLoadKnown || snap.CurrentEquipLoad != 0 {
+		t.Errorf("bare armor Equip Load = %.1f / known=%v, want 0.0 / true", snap.CurrentEquipLoad, snap.EquipLoadKnown)
+	}
+}
+
 func TestGetEquipmentSnapshot_UsesEnduranceForBaseEquipLoad(t *testing.T) {
 	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
 	slot.Player.Endurance = 20
@@ -290,6 +311,47 @@ func TestGetEquipmentSnapshot_UsesEnduranceForBaseEquipLoad(t *testing.T) {
 	}
 	if snap.MaxEquipLoad != 64.1 {
 		t.Errorf("MaxEquipLoad = %.1f, want 64.1", snap.MaxEquipLoad)
+	}
+}
+
+func TestGetEquipmentSnapshot_AppliesPermanentEquipLoadModifiers(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	equipped[12] = 0x104F0A60 // Fire Knight Helm: +4.5% max Equip Load.
+	equipped[17] = 0x20000408 // Great-Jar's Arsenal: +19%.
+	equipped[18] = 0x20000412 // Erdtree's Favor +2: +8%.
+	equipped[19] = 0x2000041A // Radagon's Scarseal: +3 Endurance.
+
+	slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	slot.Player.Endurance = 20
+
+	snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	// END 20 + 3 = 68.8. Direct bonuses stack additively: 19% + 8% + 4.5%.
+	const want = 68.8 * 1.315
+	if snap.MaxEquipLoad != want {
+		t.Errorf("MaxEquipLoad = %.4f, want %.4f", snap.MaxEquipLoad, want)
+	}
+	if got, wantClass := snap.EquipLoadClass, string(core.EquipLoadLight); got != wantClass {
+		t.Errorf("EquipLoadClass = %q, want %q", got, wantClass)
+	}
+}
+
+func TestGetEquipmentSnapshot_IgnoresModifiersInLockedTalismanSlots(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	equipped[18] = 0x20000408 // Great-Jar's Arsenal, but this slot is locked.
+
+	slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	slot.Player.Endurance = 20
+	slot.Player.TalismanSlots = 0 // One usable slot: index 17 only.
+
+	snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if snap.MaxEquipLoad != 64.1 {
+		t.Errorf("MaxEquipLoad = %.1f, want base 64.1 without a locked-slot modifier", snap.MaxEquipLoad)
 	}
 }
 

@@ -158,6 +158,8 @@ export function GetItemListChunk(arg1:string):Promise<Array<db.ItemEntry>>;
 
 export function GetLegsSlotEligibleItems():Promise<Array<db.ItemEntry>>;
 
+export function GetLoadedSaveFileName():Promise<string>;
+
 export function GetMapProgress(arg1:number):Promise<Array<db.MapEntry>>;
 
 export function GetNetworkParams():Promise<core.NetworkParamValues>;

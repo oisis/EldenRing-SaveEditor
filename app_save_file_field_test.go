@@ -33,6 +33,26 @@ func TestSafeSaveFileName(t *testing.T) {
 	}
 }
 
+func TestGetLoadedSaveFileNameReturnsOnlySafeBasename(t *testing.T) {
+	app := NewApp()
+	app.save = &core.SaveFile{}
+	app.lastSavePath = "/Users/alice/private/ER0000-out.sl2"
+
+	if got := app.GetLoadedSaveFileName(); got != "ER0000-out.sl2" {
+		t.Errorf("GetLoadedSaveFileName() = %q, want safe basename", got)
+	}
+
+	app.lastSavePath = "../ER0000.sl2"
+	if got := app.GetLoadedSaveFileName(); got != "" {
+		t.Errorf("GetLoadedSaveFileName() = %q for unsafe path, want empty", got)
+	}
+
+	app.save = nil
+	if got := app.GetLoadedSaveFileName(); got != "" {
+		t.Errorf("GetLoadedSaveFileName() = %q without save, want empty", got)
+	}
+}
+
 func TestCommitLoadedSaveRecordsBasenameOnly(t *testing.T) {
 	app := newDebugOperationApp(t)
 	app.commitLoadedSave(&core.SaveFile{Platform: "PC"}, "/Users/alice/private/ER0000-kro55.sl2", loadOriginFileDialog)

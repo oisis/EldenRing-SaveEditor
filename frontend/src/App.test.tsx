@@ -29,7 +29,7 @@ vi.mock('../wailsjs/go/main/App', () => {
         GetCharacter: r(), RevertSlot: r(), GetUndoDepth: r(), GetInfuseTypes: r(),
         GetSlotCapacity: r(), AuditLoadedSaveIssues: r(), GetSaveInventoryIntegrityReport: r(),
         RepairDuplicateInventoryIndices: r(), CloseSave: r(), RunDiagnosticsAllLoaded: r(),
-        GetAppVersion: r(), ScanRepairIssuesLoaded: r(),
+        GetAppVersion: r(), GetLoadedSaveFileName: vi.fn().mockResolvedValue(''), ScanRepairIssuesLoaded: r(),
         SetDiagnosticDebugMode: r(),
         RecordDiagnosticClientNavigation: r(),
         RecordDiagnosticIntegrityModalShown: r(),
@@ -87,7 +87,7 @@ vi.mock('./components/ToastBar', () => ({ ToastBar: () => null }));
 
 import App from './App';
 import { SafetyModeProvider } from './state/safetyMode';
-import { SelectAndOpenSave, GetSaveInventoryIntegrityReport, GetSlotStates, SetDiagnosticDebugMode, RecordDiagnosticClientNavigation, RecordDiagnosticIntegrityModalShown, RecordDiagnosticIntegrityModalRepairOutcome, RecordDiagnosticPostLoadDiagnosticsModalShown, RepairDuplicateInventoryIndices, RunDiagnosticsAllLoaded } from '../wailsjs/go/main/App';
+import { SelectAndOpenSave, GetSaveInventoryIntegrityReport, GetSlotStates, GetLoadedSaveFileName, SetDiagnosticDebugMode, RecordDiagnosticClientNavigation, RecordDiagnosticIntegrityModalShown, RecordDiagnosticIntegrityModalRepairOutcome, RecordDiagnosticPostLoadDiagnosticsModalShown, RepairDuplicateInventoryIndices, RunDiagnosticsAllLoaded } from '../wailsjs/go/main/App';
 import toast from './lib/toast';
 
 function renderApp(profile: SafetyProfile) {
@@ -192,6 +192,19 @@ describe('App open-save button wording', () => {
         await new Promise(r => setTimeout(r, 0));
         expect(await screen.findByRole('button', { name: /^Open Save$/i })).toBeInTheDocument();
         expect(screen.queryByRole('button', { name: /Change Save/i })).not.toBeInTheDocument();
+    });
+
+    it('shows the loaded save basename above Templates in the sidebar', async () => {
+        vi.mocked(SelectAndOpenSave).mockResolvedValue('PC' as never);
+        vi.mocked(GetSaveInventoryIntegrityReport).mockResolvedValue({ clean: true, slots: [] } as never);
+        vi.mocked(GetLoadedSaveFileName).mockResolvedValue('ER0000-out.sl2' as never);
+
+        renderApp('safe');
+        fireEvent.click(screen.getByRole('button', { name: /Open Save File/i }));
+
+        const name = await screen.findByTestId('loaded-save-file-name');
+        expect(name).toHaveTextContent('ER0000-out.sl2');
+        expect(name).toHaveClass('max-h-6', 'break-all', 'text-blue-600');
     });
 });
 
