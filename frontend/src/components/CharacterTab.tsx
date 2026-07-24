@@ -155,6 +155,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                 isDirty.current = false;
                 toast.success('Character data updated in memory');
                 onNameChange?.();
+                onMutate();
                 GetCharacter(charIndex).then(updated => { if (updated) setChar(updated); }).catch(() => {});
             })
             .catch(err => toast.error('Error: ' + err));
@@ -171,6 +172,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                 isDirty.current = false;
                 toast.success('Soul Memory corrected');
                 onNameChange?.();
+                onMutate();
                 GetCharacter(charIndex).then(res => { if (res) setChar(res); }).catch(() => {});
             })
             .catch(err => toast.error('Fix failed: ' + err));

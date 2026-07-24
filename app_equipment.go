@@ -29,6 +29,7 @@ type EquipmentSnapshot struct {
 	EquipLoadKnown      bool                  `json:"equipLoadKnown"`
 	EquipLoadClass      string                `json:"equipLoadClass"`
 	ActiveTalismanSlots int                   `json:"activeTalismanSlots"`
+	ActiveSpellSlots    int                   `json:"activeSpellSlots"`
 	RightHandArmaments  [3]EquipmentSlotView  `json:"rightHandArmaments"`
 	LeftHandArmaments   [3]EquipmentSlotView  `json:"leftHandArmaments"`
 	Arrows              [2]EquipmentSlotView  `json:"arrows"`
@@ -50,6 +51,10 @@ const (
 	classGoods                          // quick items / pouch: 0xB0 goods handle
 
 	unarmedItemID uint32 = 0x0001ADB0
+
+	baseSpellSlotCount    = 2
+	maxSpellSlotCount     = 12
+	moonOfNokstellaItemID = 0x20000474
 )
 
 // bareArmorItemIDs are the four technical ProtectorParam rows Elden Ring uses
@@ -197,6 +202,24 @@ func activeTalismanSlotCount(additional uint8) int {
 	return int(additional) + 1
 }
 
+// activeSpellSlotCount combines the character's permanent Memory Stones with
+// Moon of Nokstella's equipped-only two-slot bonus. Memory Stones are read via
+// the same effective inventory source as the Character tab, and only unlocked
+// talisman fields can activate the Moon.
+func activeSpellSlotCount(slot *core.SaveSlot, raw core.RawEquippedState, activeTalismanSlots int) int {
+	slots := baseSpellSlotCount + int(normalizeMemoryStones(memoryStonesEffective(slot)))
+	for i := 0; i < activeTalismanSlots; i++ {
+		if normalizeEquipItemID(raw.Equipped[17+i], classTalisman) == moonOfNokstellaItemID {
+			slots += 2
+			break
+		}
+	}
+	if slots > maxSpellSlotCount {
+		return maxSpellSlotCount
+	}
+	return slots
+}
+
 // equipSlotView builds a view for an equipped-armaments slot, returning an
 // empty (unoccupied) view for sentinel values.
 func equipSlotView(raw uint32, class equipClass) EquipmentSlotView {
@@ -247,6 +270,7 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 		return snap, err
 	}
 	snap.ActiveTalismanSlots = activeTalismanSlotCount(slot.Player.TalismanSlots)
+	snap.ActiveSpellSlots = activeSpellSlotCount(&slot, raw, snap.ActiveTalismanSlots)
 	snap.MaxEquipLoad = maxEquipLoad(slot.Player.Endurance, raw, snap.ActiveTalismanSlots)
 	snap.CurrentEquipLoad, snap.EquipLoadKnown = currentEquipLoad(raw, snap.ActiveTalismanSlots)
 	if snap.EquipLoadKnown {

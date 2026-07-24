@@ -27,6 +27,7 @@ function makeSnapshot(over: Record<string, unknown> = {}) {
         equipLoadClass: 'Medium',
         maxEquipLoad: 64.1,
         activeTalismanSlots: 4,
+        activeSpellSlots: 10,
         ...over,
     };
 }
@@ -75,7 +76,7 @@ describe('EquipmentTab', () => {
         expect(screen.getAllByRole('tooltip', { name: 'Talismans' })).toHaveLength(4);
         expect(screen.getAllByRole('tooltip', { name: 'Tools and Spirit Ashes' })).toHaveLength(16);
         expect(screen.getAllByRole('tooltip', { name: 'Crystal Tears' })).toHaveLength(2);
-        expect(screen.getAllByRole('tooltip', { name: 'Sorceries and Incantations' })).toHaveLength(12);
+        expect(screen.getAllByRole('tooltip', { name: 'Sorceries and Incantations' })).toHaveLength(10);
     });
 
     it('keeps rows 3–6 on the fixed-width mockup grid', () => {
@@ -118,11 +119,11 @@ describe('EquipmentTab', () => {
         expect(screen.getByText('Spell slots')).toHaveClass('w-[173px]');
     });
 
-    it('lays out spell slots top-to-bottom in two six-slot columns with mixed spell placeholders', () => {
+    it('lays out spell slots top-to-bottom in two five-slot columns with mixed spell placeholders', () => {
         render(<EquipmentTab />);
 
-        const grid = screen.getByRole('button', { name: 'Spell slot 1' }).parentElement;
-        expect(grid).toHaveClass('grid-flow-col', 'grid-cols-[repeat(2,82px)]', 'grid-rows-[repeat(6,82px)]');
+        const grid = screen.getByTestId('spell-primary-grid');
+        expect(grid).toHaveClass('grid-flow-col', 'grid-cols-[repeat(2,82px)]', 'grid-rows-[repeat(5,82px)]');
         const placeholderSources = [
             '/items/sorceries/comet_azur.png',
             '/items/incantations/dragonfire.png',
@@ -137,11 +138,36 @@ describe('EquipmentTab', () => {
             '/items/sorceries/founding_rain_of_stars.png',
             '/items/incantations/frenzied_burst.png',
         ];
-        for (let index = 1; index <= 12; index++) {
+        for (let index = 1; index <= 10; index++) {
             const slot = screen.getByRole('button', { name: `Spell slot ${index}` });
             expect(slot).toBeInTheDocument();
             expect(slot.querySelector('img')).toHaveAttribute('src', placeholderSources[index - 1]);
         }
+        expect(screen.queryByRole('button', { name: 'Spell slot 11' })).not.toBeInTheDocument();
+        expect(screen.getByTestId('spell-slot-area')).toHaveClass('justify-center');
+    });
+
+    it('adds the bottom spell row immediately when Moon of Nokstella increases the snapshot to twelve slots', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({ activeSpellSlots: 12 }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        await screen.findByRole('button', { name: 'Spell slot 11' });
+        expect(screen.getByRole('button', { name: 'Spell slot 12' })).toBeInTheDocument();
+        expect(screen.getByTestId('spell-slot-area')).toHaveClass('justify-start');
+        expect(screen.getByRole('button', { name: 'Spell slot 11' }).parentElement).toHaveClass('grid-cols-[repeat(2,82px)]');
+    });
+
+    it('refreshes the visible spell slots after an equipment revision', async () => {
+        vi.mocked(GetEquipmentSnapshot)
+            .mockResolvedValueOnce(makeSnapshot({ activeSpellSlots: 10 }) as never)
+            .mockResolvedValueOnce(makeSnapshot({ activeSpellSlots: 12 }) as never);
+
+        const { rerender } = render(<EquipmentTab charIdx={0} equipmentRevision={1} />);
+        await screen.findByRole('button', { name: 'Spell slot 10' });
+        expect(screen.queryByRole('button', { name: 'Spell slot 11' })).not.toBeInTheDocument();
+
+        rerender(<EquipmentTab charIdx={0} equipmentRevision={2} />);
+        expect(await screen.findByRole('button', { name: 'Spell slot 11' })).toBeInTheDocument();
     });
 
     it('drives visuals from theme tokens instead of hard-coded light colors', () => {

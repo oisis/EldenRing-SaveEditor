@@ -76,6 +76,7 @@ function App() {
     const safeMode = safetyProfile === 'safe';
     const [inventoryVersion, setInventoryVersion] = useState(0);
     const [saveLoadKey, setSaveLoadKey] = useState(0);
+    const [equipmentRevision, setEquipmentRevision] = useState(0);
     const [theme, setTheme] = useState<Theme>(() => {
         return (localStorage.getItem('setting:theme') as Theme) || 'dark';
     });
@@ -754,7 +755,7 @@ function App() {
                                 })()}
                                 <div className={['inventory', 'advanced'].includes(activeTab) ? 'flex-1 flex flex-col min-h-0 overflow-hidden' : 'flex-1 overflow-y-auto custom-scrollbar'}>
                                 <div className={activeTab !== 'character' ? 'hidden' : undefined}>
-                                    <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={refreshUndoDepth} refreshKey={inventoryVersion} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} onAddSettingsChange={(s) => setCharAddSettings(prev => ({...prev, [selectedChar]: s}))} infuseTypes={infuseTypes} />
+                                    <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={() => { refreshUndoDepth(); setEquipmentRevision(value => value + 1); }} refreshKey={inventoryVersion} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} onAddSettingsChange={(s) => setCharAddSettings(prev => ({...prev, [selectedChar]: s}))} infuseTypes={infuseTypes} />
                                 </div>
                                 {activeTab === 'inventory' && (
                                     <div className="flex-1 flex flex-col min-h-0">
@@ -825,7 +826,7 @@ function App() {
                                                 onToggleFavorites={() => setShowOnlyFavorites(v => !v)}
                                             />
                                         ) : invView === 'equipment' ? (
-                                            <EquipmentTab charIdx={selectedChar} saveLoadKey={saveLoadKey} />
+                                            <EquipmentTab charIdx={selectedChar} saveLoadKey={saveLoadKey} equipmentRevision={equipmentRevision} />
                                         ) : (
                                             <SortOrderTab
                                                 charIndex={selectedChar}

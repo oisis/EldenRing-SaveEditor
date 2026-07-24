@@ -1780,6 +1780,7 @@ export namespace main {
 	    equipLoadKnown: boolean;
 	    equipLoadClass: string;
 	    activeTalismanSlots: number;
+	    activeSpellSlots: number;
 	    rightHandArmaments: EquipmentSlotView[];
 	    leftHandArmaments: EquipmentSlotView[];
 	    arrows: EquipmentSlotView[];
@@ -1800,6 +1801,7 @@ export namespace main {
 	        this.equipLoadKnown = source["equipLoadKnown"];
 	        this.equipLoadClass = source["equipLoadClass"];
 	        this.activeTalismanSlots = source["activeTalismanSlots"];
+	        this.activeSpellSlots = source["activeSpellSlots"];
 	        this.rightHandArmaments = this.convertValues(source["rightHandArmaments"], EquipmentSlotView);
 	        this.leftHandArmaments = this.convertValues(source["leftHandArmaments"], EquipmentSlotView);
 	        this.arrows = this.convertValues(source["arrows"], EquipmentSlotView);

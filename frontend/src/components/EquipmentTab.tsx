@@ -141,7 +141,7 @@ function EmptyEquipmentModal({ onClose }: { onClose: () => void }) {
     );
 }
 
-export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveLoadKey?: number } = {}) {
+export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision }: { charIdx?: number; saveLoadKey?: number; equipmentRevision?: number } = {}) {
     const [selectedSlot, setSelectedSlot] = useState('Weapon slot 1');
     const [modalOpen, setModalOpen] = useState(false);
     const [snapshot, setSnapshot] = useState<main.EquipmentSnapshot | null>(null);
@@ -166,7 +166,7 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
             }
         })();
         return () => { active = false; };
-    }, [charIdx, saveLoadKey]);
+    }, [charIdx, saveLoadKey, equipmentRevision]);
 
     const weaponSlots = ['Weapon slot 1', 'Weapon slot 2', 'Weapon slot 3'];
     const rangedSlots = ['Ranged slot 1', 'Ranged slot 2', 'Ranged slot 3'];
@@ -203,6 +203,9 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
     // arrives, retain the mockup's four-slot layout; once loaded, locked slots
     // disappear from the right and cannot be opened.
     const activeTalismanSlots = snapshot?.activeTalismanSlots ?? talismanSlots.length;
+    const activeSpellSlots = snapshot?.activeSpellSlots ?? 10;
+    const primarySpellSlots = spellSlots.slice(0, Math.min(activeSpellSlots, 10));
+    const moonSpellSlots = activeSpellSlots > 10 ? spellSlots.slice(10, activeSpellSlots) : [];
     const currentEquipLoad = snapshot?.equipLoadKnown ? snapshot.currentEquipLoad.toFixed(1) : 'N';
     const maxEquipLoad = snapshot ? snapshot.maxEquipLoad.toFixed(1) : 'N';
     const equipLoadClass = snapshot?.equipLoadKnown ? snapshot.equipLoadClass : 'Unknown';
@@ -265,10 +268,17 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
                     </div>
                 </div>
 
-                <div className="border-l border-border pl-[26px]">
+                <div className="flex h-full flex-col border-l border-border pl-[26px]">
                     <h2 className="mb-3 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Spell slots</h2>
-                    <div className="grid grid-flow-col grid-cols-[repeat(2,82px)] grid-rows-[repeat(6,82px)] gap-[9px]">
-                        {spellSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                    <div data-testid="spell-slot-area" className={`flex flex-1 flex-col ${moonSpellSlots.length ? 'justify-start' : 'justify-center'}`}>
+                        <div data-testid="spell-primary-grid" className="grid grid-flow-col grid-cols-[repeat(2,82px)] grid-rows-[repeat(5,82px)] gap-[9px]">
+                            {primarySpellSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                        </div>
+                        {moonSpellSlots.length > 0 && (
+                            <div className="mt-[9px] grid grid-cols-[repeat(2,82px)] gap-[9px]">
+                                {moonSpellSlots.map(([label, src]) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} onOpen={openSlot}><GhostIcon src={src} /></EquipmentSlot>)}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

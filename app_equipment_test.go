@@ -355,6 +355,40 @@ func TestGetEquipmentSnapshot_IgnoresModifiersInLockedTalismanSlots(t *testing.T
 	}
 }
 
+func TestGetEquipmentSnapshot_UsesMemoryStonesAndMoonOfNokstellaForSpellSlots(t *testing.T) {
+	for _, tc := range []struct {
+		name                string
+		memoryStones        uint32
+		moonChrAsmIndex     int
+		additionalTalismans uint8
+		want                int
+	}{
+		{"base slots", 0, -1, 3, 2},
+		{"all memory stones", 8, -1, 3, 10},
+		{"memory stones clamp", 99, -1, 3, 10},
+		{"moon of nokstella", 8, 17, 3, 12},
+		{"moon in locked talisman field", 8, 20, 2, 10},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			var equipped [core.ChrAsmFieldCount]uint32
+			if tc.moonChrAsmIndex >= 0 {
+				equipped[tc.moonChrAsmIndex] = moonOfNokstellaItemID
+			}
+			slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+			slot.Player.TalismanSlots = tc.additionalTalismans
+			slot.Inventory.CommonItems = []core.InventoryItem{{GaItemHandle: memoryStonesHandle, Quantity: tc.memoryStones}}
+
+			snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+			if err != nil {
+				t.Fatalf("GetEquipmentSnapshot: %v", err)
+			}
+			if snap.ActiveSpellSlots != tc.want {
+				t.Errorf("ActiveSpellSlots = %d, want %d", snap.ActiveSpellSlots, tc.want)
+			}
+		})
+	}
+}
+
 func TestGetEquipmentSnapshot_SumsCurrentEquipLoad(t *testing.T) {
 	var equipped [core.ChrAsmFieldCount]uint32
 	equipped[1] = 0x000F4240  // Dagger, 1.5 weight
