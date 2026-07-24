@@ -102,7 +102,13 @@ export function GetAoWAvailability(arg1:number):Promise<Array<vm.AoWAvailability
 
 export function GetAppVersion():Promise<string>;
 
+export function GetArmsSlotEligibleItems():Promise<Array<db.ItemEntry>>;
+
+export function GetArrowSlotEligibleItems():Promise<Array<db.ItemEntry>>;
+
 export function GetBellBearings(arg1:number):Promise<Array<db.BellBearingEntry>>;
+
+export function GetBoltSlotEligibleItems():Promise<Array<db.ItemEntry>>;
 
 export function GetBosses(arg1:number):Promise<Array<db.BossEntry>>;
 
@@ -115,6 +121,8 @@ export function GetCharacter(arg1:number):Promise<vm.CharacterViewModel>;
 export function GetCharacterAppearancePreset(arg1:number):Promise<main.PresetInfo>;
 
 export function GetCharacterNames():Promise<Array<string>>;
+
+export function GetChestSlotEligibleItems():Promise<Array<db.ItemEntry>>;
 
 export function GetColosseums(arg1:number):Promise<Array<db.ColosseumEntry>>;
 
@@ -130,6 +138,10 @@ export function GetGestures(arg1:number):Promise<Array<db.GestureEntry>>;
 
 export function GetGraces(arg1:number):Promise<Array<db.GraceEntry>>;
 
+export function GetHandArmamentEligibleItems():Promise<Array<db.ItemEntry>>;
+
+export function GetHeadSlotEligibleItems():Promise<Array<db.ItemEntry>>;
+
 export function GetInfuseTypes():Promise<Array<db.InfuseType>>;
 
 export function GetInventoryEditSession(arg1:string):Promise<editor.InventoryWorkspaceSnapshot>;
@@ -142,15 +154,23 @@ export function GetItemList(arg1:string):Promise<Array<db.ItemEntry>>;
 
 export function GetItemListChunk(arg1:string):Promise<Array<db.ItemEntry>>;
 
+export function GetLegsSlotEligibleItems():Promise<Array<db.ItemEntry>>;
+
 export function GetMapProgress(arg1:number):Promise<Array<db.MapEntry>>;
 
 export function GetNetworkParams():Promise<core.NetworkParamValues>;
 
 export function GetNetworkPreset(arg1:string):Promise<core.NetworkParamValues>;
 
+export function GetPhysickEligibleItems():Promise<Array<db.ItemEntry>>;
+
+export function GetPouchEligibleItems():Promise<Array<db.ItemEntry>>;
+
 export function GetQuestNPCs():Promise<Array<string>>;
 
 export function GetQuestProgress(arg1:number,arg2:string):Promise<db.QuestNPC>;
+
+export function GetQuickItemEligibleItems():Promise<Array<db.ItemEntry>>;
 
 export function GetSaveInventoryIntegrityReport():Promise<main.SaveInventoryIntegrityReport>;
 
@@ -165,6 +185,8 @@ export function GetSteamIDString():Promise<string>;
 export function GetStorageOrder(arg1:number,arg2:string):Promise<Array<main.InventoryOrderItem>>;
 
 export function GetSummoningPools(arg1:number):Promise<Array<db.SummoningPoolEntry>>;
+
+export function GetTalismanSlotEligibleItems():Promise<Array<db.ItemEntry>>;
 
 export function GetUndoDepth(arg1:number):Promise<number>;
 

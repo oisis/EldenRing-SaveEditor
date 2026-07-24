@@ -190,8 +190,20 @@ export function GetAppVersion() {
   return window['go']['main']['App']['GetAppVersion']();
 }
 
+export function GetArmsSlotEligibleItems() {
+  return window['go']['main']['App']['GetArmsSlotEligibleItems']();
+}
+
+export function GetArrowSlotEligibleItems() {
+  return window['go']['main']['App']['GetArrowSlotEligibleItems']();
+}
+
 export function GetBellBearings(arg1) {
   return window['go']['main']['App']['GetBellBearings'](arg1);
+}
+
+export function GetBoltSlotEligibleItems() {
+  return window['go']['main']['App']['GetBoltSlotEligibleItems']();
 }
 
 export function GetBosses(arg1) {
@@ -216,6 +228,10 @@ export function GetCharacterAppearancePreset(arg1) {
 
 export function GetCharacterNames() {
   return window['go']['main']['App']['GetCharacterNames']();
+}
+
+export function GetChestSlotEligibleItems() {
+  return window['go']['main']['App']['GetChestSlotEligibleItems']();
 }
 
 export function GetColosseums(arg1) {
@@ -246,6 +262,14 @@ export function GetGraces(arg1) {
   return window['go']['main']['App']['GetGraces'](arg1);
 }
 
+export function GetHandArmamentEligibleItems() {
+  return window['go']['main']['App']['GetHandArmamentEligibleItems']();
+}
+
+export function GetHeadSlotEligibleItems() {
+  return window['go']['main']['App']['GetHeadSlotEligibleItems']();
+}
+
 export function GetInfuseTypes() {
   return window['go']['main']['App']['GetInfuseTypes']();
 }
@@ -270,6 +294,10 @@ export function GetItemListChunk(arg1) {
   return window['go']['main']['App']['GetItemListChunk'](arg1);
 }
 
+export function GetLegsSlotEligibleItems() {
+  return window['go']['main']['App']['GetLegsSlotEligibleItems']();
+}
+
 export function GetMapProgress(arg1) {
   return window['go']['main']['App']['GetMapProgress'](arg1);
 }
@@ -282,12 +310,24 @@ export function GetNetworkPreset(arg1) {
   return window['go']['main']['App']['GetNetworkPreset'](arg1);
 }
 
+export function GetPhysickEligibleItems() {
+  return window['go']['main']['App']['GetPhysickEligibleItems']();
+}
+
+export function GetPouchEligibleItems() {
+  return window['go']['main']['App']['GetPouchEligibleItems']();
+}
+
 export function GetQuestNPCs() {
   return window['go']['main']['App']['GetQuestNPCs']();
 }
 
 export function GetQuestProgress(arg1, arg2) {
   return window['go']['main']['App']['GetQuestProgress'](arg1, arg2);
+}
+
+export function GetQuickItemEligibleItems() {
+  return window['go']['main']['App']['GetQuickItemEligibleItems']();
 }
 
 export function GetSaveInventoryIntegrityReport() {
@@ -316,6 +356,10 @@ export function GetStorageOrder(arg1, arg2) {
 
 export function GetSummoningPools(arg1) {
   return window['go']['main']['App']['GetSummoningPools'](arg1);
+}
+
+export function GetTalismanSlotEligibleItems() {
+  return window['go']['main']['App']['GetTalismanSlotEligibleItems']();
 }
 
 export function GetUndoDepth(arg1) {
