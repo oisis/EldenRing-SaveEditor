@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/binary"
+	"fmt"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
@@ -57,6 +58,49 @@ func buildEquipSlot(equipped [core.ChrAsmFieldCount]uint32, quick [10]core.RawEq
 		Version:              1,
 		EquipItemsIDOffset:   testEquipItemsIDOffset,
 		EquippedSpellsOffset: testEquippedSpellsOffset,
+		Player:               core.PlayerGameData{TalismanSlots: 3},
+	}
+}
+
+func TestGetEquipmentSnapshot_UsesUnlockedTalismanSlotCount(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	// Real talismans in every visible-position source slot. This proves that
+	// locked slots do not leak into the snapshot or the current load.
+	equipped[17] = 0x200003E8 // Crimson Amber Medallion, 0.3
+	equipped[18] = 0x200003E8
+	equipped[19] = 0x200003E8
+	equipped[20] = 0x200003E8
+
+	for _, tc := range []struct {
+		additional uint8
+		want       int
+	}{
+		{additional: 0, want: 1},
+		{additional: 1, want: 2},
+		{additional: 2, want: 3},
+		{additional: 3, want: 4},
+		{additional: 99, want: 4},
+	} {
+		t.Run(fmt.Sprintf("additional=%d", tc.additional), func(t *testing.T) {
+			slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+			slot.Player.TalismanSlots = tc.additional
+
+			snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+			if err != nil {
+				t.Fatalf("GetEquipmentSnapshot: %v", err)
+			}
+			if snap.ActiveTalismanSlots != tc.want {
+				t.Errorf("ActiveTalismanSlots = %d, want %d", snap.ActiveTalismanSlots, tc.want)
+			}
+			for i := 0; i < len(snap.Talismans); i++ {
+				if got := snap.Talismans[i].Occupied; got != (i < tc.want) {
+					t.Errorf("Talismans[%d].Occupied = %v, want %v", i, got, i < tc.want)
+				}
+			}
+			if wantLoad := float64(tc.want) * 0.3; snap.CurrentEquipLoad < wantLoad-0.001 || snap.CurrentEquipLoad > wantLoad+0.001 {
+				t.Errorf("CurrentEquipLoad = %.3f, want %.1f", snap.CurrentEquipLoad, wantLoad)
+			}
+		})
 	}
 }
 
@@ -233,5 +277,53 @@ func TestGetEquipmentSnapshot_TreatsUnarmedAsEmptyHandSlot(t *testing.T) {
 	}
 	if got := snap.RightHandArmaments[0]; got.Occupied || got.Resolved || got.RawID != 0 || got.Name != "" || got.IconPath != "" {
 		t.Errorf("Unarmed hand slot = %+v, want empty view", got)
+	}
+}
+
+func TestGetEquipmentSnapshot_UsesEnduranceForBaseEquipLoad(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	slot.Player.Endurance = 20
+
+	snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if snap.MaxEquipLoad != 64.1 {
+		t.Errorf("MaxEquipLoad = %.1f, want 64.1", snap.MaxEquipLoad)
+	}
+}
+
+func TestGetEquipmentSnapshot_SumsCurrentEquipLoad(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	equipped[1] = 0x000F4240  // Dagger, 1.5 weight
+	equipped[2] = 0x02082C11  // Frenzied Flame Seal, weightless
+	equipped[17] = 0x200003E8 // Crimson Amber Medallion, 0.3 weight
+
+	snap, err := newEquipmentApp(buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if !snap.EquipLoadKnown {
+		t.Fatal("EquipLoadKnown = false, want true")
+	}
+	if snap.CurrentEquipLoad < 1.79 || snap.CurrentEquipLoad > 1.81 {
+		t.Errorf("CurrentEquipLoad = %.3f, want 1.8", snap.CurrentEquipLoad)
+	}
+	if snap.EquipLoadClass != string(core.EquipLoadLight) {
+		t.Errorf("EquipLoadClass = %q, want %q", snap.EquipLoadClass, core.EquipLoadLight)
+	}
+}
+
+func TestGetEquipmentSnapshot_HidesPartialEquipLoadForUnknownItem(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	equipped[1] = 0x000F4240 // known Dagger
+	equipped[3] = 0x007FFFFF // unknown armament
+
+	snap, err := newEquipmentApp(buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if snap.EquipLoadKnown {
+		t.Error("EquipLoadKnown = true for an unknown equipped item")
 	}
 }

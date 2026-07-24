@@ -22,6 +22,11 @@ function makeSnapshot(over: Record<string, unknown> = {}) {
         talismans: fill(4),
         quickItems: fill(10),
         pouch: fill(6),
+        currentEquipLoad: 1.8,
+        equipLoadKnown: true,
+        equipLoadClass: 'Medium',
+        maxEquipLoad: 64.1,
+        activeTalismanSlots: 4,
         ...over,
     };
 }
@@ -158,10 +163,37 @@ describe('EquipmentTab equipped-item projection', () => {
         expect(await screen.findByRole('tooltip', { name: 'Unknown item (0x2000FFFF)' })).toBeInTheDocument();
     });
 
+    it.each([
+        [1, ['Axe Talisman']],
+        [2, ['Axe Talisman', 'Claw Talisman']],
+        [3, ['Axe Talisman', 'Claw Talisman', 'Companion Jar']],
+    ])('hides locked talisman slots from the right when only %i are unlocked', async (activeTalismanSlots, visibleLabels) => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({ activeTalismanSlots }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        await screen.findByRole('button', { name: 'Axe Talisman' });
+        for (const label of visibleLabels) {
+            expect(screen.getByRole('button', { name: label })).toBeInTheDocument();
+        }
+        for (const label of ['Axe Talisman', 'Claw Talisman', 'Companion Jar', 'Gold Scarab']) {
+            if (!visibleLabels.includes(label)) {
+                expect(screen.queryByRole('button', { name: label })).not.toBeInTheDocument();
+            }
+        }
+    });
+
     it('keeps the eligibility tooltip on an empty slot', async () => {
         render(<EquipmentTab charIdx={0} />);
         // All-empty snapshot: weapon slots keep their eligibility text.
         expect(await screen.findAllByRole('tooltip', { name: 'Weapons, shields, staves, seals and torches' })).toHaveLength(6);
+    });
+
+    it('renders current and base maximum Equip Load returned from the save', async () => {
+        render(<EquipmentTab charIdx={0} />);
+
+        expect(await screen.findByText('Medium')).toHaveClass('text-orange-500');
+        expect(screen.getByText('1.8 / 64.1', { exact: false })).toBeInTheDocument();
     });
 
     it('leaves Physick unchanged when a snapshot loads', async () => {

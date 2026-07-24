@@ -5,6 +5,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
 	"github.com/oisis/EldenRing-SaveForge/backend/db"
+	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
 )
 
 // EquipmentSlotView is the frontend-facing projection of a single equipped
@@ -23,14 +24,19 @@ type EquipmentSlotView struct {
 // items, grouped per UI slot family. Physick is intentionally excluded: its
 // tear encoding is not yet confirmed and it stays presentation-only.
 type EquipmentSnapshot struct {
-	RightHandArmaments [3]EquipmentSlotView  `json:"rightHandArmaments"`
-	LeftHandArmaments  [3]EquipmentSlotView  `json:"leftHandArmaments"`
-	Arrows             [2]EquipmentSlotView  `json:"arrows"`
-	Bolts              [2]EquipmentSlotView  `json:"bolts"`
-	Armor              [4]EquipmentSlotView  `json:"armor"`
-	Talismans          [4]EquipmentSlotView  `json:"talismans"`
-	QuickItems         [10]EquipmentSlotView `json:"quickItems"`
-	Pouch              [6]EquipmentSlotView  `json:"pouch"`
+	MaxEquipLoad        float64               `json:"maxEquipLoad"`
+	CurrentEquipLoad    float64               `json:"currentEquipLoad"`
+	EquipLoadKnown      bool                  `json:"equipLoadKnown"`
+	EquipLoadClass      string                `json:"equipLoadClass"`
+	ActiveTalismanSlots int                   `json:"activeTalismanSlots"`
+	RightHandArmaments  [3]EquipmentSlotView  `json:"rightHandArmaments"`
+	LeftHandArmaments   [3]EquipmentSlotView  `json:"leftHandArmaments"`
+	Arrows              [2]EquipmentSlotView  `json:"arrows"`
+	Bolts               [2]EquipmentSlotView  `json:"bolts"`
+	Armor               [4]EquipmentSlotView  `json:"armor"`
+	Talismans           [4]EquipmentSlotView  `json:"talismans"`
+	QuickItems          [10]EquipmentSlotView `json:"quickItems"`
+	Pouch               [6]EquipmentSlotView  `json:"pouch"`
 }
 
 // equipClass selects how a raw stored value is normalized to a DB item ID.
@@ -61,18 +67,7 @@ func isEmptyEquipSlot(v uint32, class equipClass) bool {
 func resolveEquipView(raw uint32, class equipClass) EquipmentSlotView {
 	view := EquipmentSlotView{Occupied: true, RawID: raw}
 
-	var normID uint32
-	switch class {
-	case classHandArmament, classArmor:
-		normID = raw & 0x7FFFFFFF
-	case classAmmo:
-		normID = raw
-	case classTalisman:
-		normID = (raw & 0x0FFFFFFF) | 0x20000000
-	case classGoods:
-		normID = db.HandleToItemID(raw)
-	}
-
+	normID := normalizeEquipItemID(raw, class)
 	item, baseID := db.GetItemDataFuzzy(normID)
 	if item.Name == "" {
 		view.Name = fmt.Sprintf("Unknown item (0x%08X)", raw)
@@ -86,6 +81,77 @@ func resolveEquipView(raw uint32, class equipClass) EquipmentSlotView {
 	view.IconPath = item.IconPath
 	view.Resolved = true
 	return view
+}
+
+func normalizeEquipItemID(raw uint32, class equipClass) uint32 {
+	switch class {
+	case classHandArmament, classArmor:
+		return raw & 0x7FFFFFFF
+	case classAmmo:
+		return raw
+	case classTalisman:
+		return (raw & 0x0FFFFFFF) | 0x20000000
+	case classGoods:
+		return db.HandleToItemID(raw)
+	}
+	return 0
+}
+
+// equippedItemWeight returns the weight of a load-bearing equipped item. An
+// empty slot has zero weight; a resolved item without an ItemWeights entry is
+// weightless. An unresolved item makes the total unavailable rather than
+// returning a misleading partial value.
+func equippedItemWeight(raw uint32, class equipClass) (float64, bool) {
+	if isEmptyEquipSlot(raw, class) {
+		return 0, true
+	}
+	item, baseID := db.GetItemDataFuzzy(normalizeEquipItemID(raw, class))
+	if item.Name == "" {
+		return 0, false
+	}
+	return data.ItemWeights[baseID], true
+}
+
+// currentEquipLoad sums all load-bearing equipment: six hand slots, four armor
+// pieces, and the character's active talismans. Ammunition, quick items, pouch
+// items, spells, and Physick tears do not contribute to the game's Equip Load.
+func currentEquipLoad(raw core.RawEquippedState, activeTalismanSlots int) (float64, bool) {
+	total := 0.0
+	add := func(index int, class equipClass) bool {
+		weight, ok := equippedItemWeight(raw.Equipped[index], class)
+		if !ok {
+			return false
+		}
+		total += weight
+		return true
+	}
+	for _, index := range []int{0, 1, 2, 3, 4, 5} {
+		if !add(index, classHandArmament) {
+			return 0, false
+		}
+	}
+	for _, index := range []int{12, 13, 14, 15} {
+		if !add(index, classArmor) {
+			return 0, false
+		}
+	}
+	for i := 0; i < activeTalismanSlots; i++ {
+		if !add(17+i, classTalisman) {
+			return 0, false
+		}
+	}
+	return total, true
+}
+
+// activeTalismanSlotCount converts the save's additional-slot field (0–3) to
+// the total number of usable talisman slots (1–4). The parser already clamps
+// this field, but the local clamp keeps the read-only UI projection safe for
+// synthetic or future save data as well.
+func activeTalismanSlotCount(additional uint8) int {
+	if additional > 3 {
+		additional = 3
+	}
+	return int(additional) + 1
 }
 
 // equipSlotView builds a view for an equipped-armaments slot, returning an
@@ -137,6 +203,12 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	if err != nil {
 		return snap, err
 	}
+	snap.ActiveTalismanSlots = activeTalismanSlotCount(slot.Player.TalismanSlots)
+	snap.MaxEquipLoad = core.BaseEquipLoad(slot.Player.Endurance)
+	snap.CurrentEquipLoad, snap.EquipLoadKnown = currentEquipLoad(raw, snap.ActiveTalismanSlots)
+	if snap.EquipLoadKnown {
+		snap.EquipLoadClass = string(core.ClassifyEquipLoad(snap.CurrentEquipLoad, snap.MaxEquipLoad))
+	}
 
 	// Hand armaments: right hand = slots 1/3/5, left hand = 0/2/4.
 	rightIdx := [3]int{1, 3, 5}
@@ -155,10 +227,11 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	for i := 0; i < 4; i++ {
 		snap.Armor[i] = equipSlotView(raw.Equipped[armorIdx[i]], classArmor)
 	}
-	// Talismans: slots 17/18/19/20 (Talisman5 / index 21 excluded from UI).
-	talismanIdx := [4]int{17, 18, 19, 20}
-	for i := 0; i < 4; i++ {
-		snap.Talismans[i] = equipSlotView(raw.Equipped[talismanIdx[i]], classTalisman)
+	// Talismans: active slots are always contiguous from the left. Slots beyond
+	// the character's unlock count stay empty and are not rendered by the UI.
+	// Talisman5 / index 21 remains outside this UI.
+	for i := 0; i < snap.ActiveTalismanSlots; i++ {
+		snap.Talismans[i] = equipSlotView(raw.Equipped[17+i], classTalisman)
 	}
 	// Quick items (10) and pouch (6).
 	for i := 0; i < 10; i++ {

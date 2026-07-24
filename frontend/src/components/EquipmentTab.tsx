@@ -182,6 +182,19 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
         ['Companion Jar', '/items/talismans/companion_jar.png'],
         ['Gold Scarab', '/items/talismans/gold_scarab.png'],
     ] as const;
+    // A save can unlock one to four talisman slots. Until the read-only snapshot
+    // arrives, retain the mockup's four-slot layout; once loaded, locked slots
+    // disappear from the right and cannot be opened.
+    const activeTalismanSlots = snapshot?.activeTalismanSlots ?? talismanSlots.length;
+    const currentEquipLoad = snapshot?.equipLoadKnown ? snapshot.currentEquipLoad.toFixed(1) : 'N';
+    const maxEquipLoad = snapshot ? snapshot.maxEquipLoad.toFixed(1) : 'N';
+    const equipLoadClass = snapshot?.equipLoadKnown ? snapshot.equipLoadClass : 'Unknown';
+    const equipLoadClassStyle = {
+        Light: 'text-emerald-600',
+        Medium: 'text-orange-500',
+        Heavy: 'text-red-600',
+        Overloaded: 'text-red-600 font-black',
+    }[equipLoadClass] ?? 'text-muted-foreground';
 
     return (
         <section className="w-full shrink-0 overflow-auto rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-scrollbar">
@@ -203,7 +216,7 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
                             {armorSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot} item={snapshot?.armor[index]}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         <div className="grid grid-cols-[repeat(4,82px)] gap-[9px]">
-                            {talismanSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot} item={snapshot?.talismans[index]}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {talismanSlots.slice(0, activeTalismanSlots).map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot} item={snapshot?.talismans[index]}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         {[0, 1].map((row) => (
                             <div key={row} className="grid grid-cols-[repeat(5,82px)] gap-[9px]">
@@ -236,7 +249,7 @@ export function EquipmentTab({ charIdx, saveLoadKey }: { charIdx?: number; saveL
                 </div>
             </div>
             <div className="mx-5 flex items-center justify-between border-t border-border px-0 pb-4 pt-3">
-                <span className="text-[11px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load <strong className="text-foreground">N / N</strong> | Medium</span>
+                <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
                 <button type="button" className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90">Save changes</button>
             </div>
             {modalOpen && <EmptyEquipmentModal onClose={() => setModalOpen(false)} />}

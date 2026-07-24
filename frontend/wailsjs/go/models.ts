@@ -1775,6 +1775,11 @@ export namespace main {
 	    }
 	}
 	export class EquipmentSnapshot {
+	    maxEquipLoad: number;
+	    currentEquipLoad: number;
+	    equipLoadKnown: boolean;
+	    equipLoadClass: string;
+	    activeTalismanSlots: number;
 	    rightHandArmaments: EquipmentSlotView[];
 	    leftHandArmaments: EquipmentSlotView[];
 	    arrows: EquipmentSlotView[];
@@ -1790,6 +1795,11 @@ export namespace main {
 
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.maxEquipLoad = source["maxEquipLoad"];
+	        this.currentEquipLoad = source["currentEquipLoad"];
+	        this.equipLoadKnown = source["equipLoadKnown"];
+	        this.equipLoadClass = source["equipLoadClass"];
+	        this.activeTalismanSlots = source["activeTalismanSlots"];
 	        this.rightHandArmaments = this.convertValues(source["rightHandArmaments"], EquipmentSlotView);
 	        this.leftHandArmaments = this.convertValues(source["leftHandArmaments"], EquipmentSlotView);
 	        this.arrows = this.convertValues(source["arrows"], EquipmentSlotView);
