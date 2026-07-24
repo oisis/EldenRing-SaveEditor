@@ -10,6 +10,7 @@ import {
     GetEquipmentSnapshot,
     GetHandArmamentEligibleItems,
     GetHeadSlotEligibleItems,
+    GetInfuseTypes,
     GetItemList,
     GetLegsSlotEligibleItems,
     GetPhysickEligibleItems,
@@ -25,6 +26,7 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetArrowSlotEligibleItems: vi.fn(),
     GetBoltSlotEligibleItems: vi.fn(),
     GetHeadSlotEligibleItems: vi.fn(),
+    GetInfuseTypes: vi.fn(),
     GetChestSlotEligibleItems: vi.fn(),
     GetArmsSlotEligibleItems: vi.fn(),
     GetLegsSlotEligibleItems: vi.fn(),
@@ -68,6 +70,7 @@ beforeEach(() => {
         GetArrowSlotEligibleItems,
         GetBoltSlotEligibleItems,
         GetHeadSlotEligibleItems,
+        GetInfuseTypes,
         GetChestSlotEligibleItems,
         GetArmsSlotEligibleItems,
         GetLegsSlotEligibleItems,
@@ -83,6 +86,8 @@ beforeEach(() => {
     });
     vi.mocked(GetCharacter).mockReset();
     vi.mocked(GetCharacter).mockResolvedValue({ inventory: [] } as never);
+    vi.mocked(GetInfuseTypes).mockReset();
+    vi.mocked(GetInfuseTypes).mockResolvedValue([] as never);
 });
 
 describe('EquipmentTab', () => {
@@ -219,6 +224,33 @@ describe('EquipmentTab', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
         expect(await screen.findByText('Safe item')).toBeInTheDocument();
         expect(screen.queryByText('Cut item')).not.toBeInTheDocument();
+    });
+
+    it('shows weapon level in icons and level, infusion and AoW columns in list view', async () => {
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: 1000, name: 'Test weapon', category: 'melee_armaments', iconPath: 'items/weapons/test.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1305, baseId: 1000, name: 'Test weapon', category: 'Weapon', iconPath: 'items/weapons/test.png', quantity: 1, maxInventory: 1, currentUpgrade: 5, aowId: 0x80002C88 }],
+        } as never);
+        vi.mocked(GetInfuseTypes).mockResolvedValue([{ name: 'Quality', offset: 300 }] as never);
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'ashes_of_war'
+            ? [{ id: 0x80002C88, name: 'Unsheathe', category: 'ashes_of_war', iconPath: '' }]
+            : []) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Weapon slot 1' }));
+        expect(await screen.findByText('+5')).toBeInTheDocument();
+
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+        expect(screen.getByText('Level')).toBeInTheDocument();
+        expect(screen.getByText('Infuse')).toBeInTheDocument();
+        expect(screen.getByText('Ashes of War')).toHaveClass('text-right');
+        expect(screen.getByText('Ashes of War').parentElement).toHaveClass('grid-cols-[minmax(0,1fr)_max-content_max-content_max-content]');
+        expect(screen.getByText('Quality')).toBeInTheDocument();
+        expect(screen.getByText('Unsheathe')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Select Test weapon' })).toHaveTextContent('Test weapon');
+        expect(screen.queryByText('Weapon · 1')).not.toBeInTheDocument();
     });
 
     it('shows the eligible item types in a tooltip for each slot family', () => {

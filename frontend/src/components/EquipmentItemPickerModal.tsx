@@ -8,6 +8,7 @@ import {
     GetChestSlotEligibleItems,
     GetHandArmamentEligibleItems,
     GetHeadSlotEligibleItems,
+    GetInfuseTypes,
     GetItemList,
     GetLegsSlotEligibleItems,
     GetPhysickEligibleItems,
@@ -23,6 +24,10 @@ type PickerView = 'icons' | 'list';
 type PickerSort = 'alphabetical' | 'weight' | 'category' | 'acquisition';
 
 const RISKY_ITEM_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
+const WEAPON_CATEGORIES = new Set(['melee_armaments', 'ranged_and_catalysts', 'shields']);
+
+const isWeaponCategory = (category: string) => WEAPON_CATEGORIES.has(category);
+const isWeaponSlot = (label: string) => label.startsWith('Weapon slot') || label.startsWith('Ranged slot');
 
 type PickerItem = {
     entryKey: string;
@@ -34,6 +39,10 @@ type PickerItem = {
     stackable: boolean;
     weight?: number;
     acquisitionOrder?: number;
+    isWeapon: boolean;
+    upgradeLevel?: number;
+    infusionName?: string;
+    aowName?: string;
 };
 
 export type EquipmentItemPickerModalProps = {
@@ -63,6 +72,7 @@ function eligibleItemsForSlot(label: string): Promise<db.ItemEntry[]> {
 }
 
 function toPickerItem(item: db.ItemEntry): PickerItem {
+    const weapon = isWeaponCategory(item.category);
     return {
         entryKey: `database-${item.id}`,
         id: item.id,
@@ -71,10 +81,22 @@ function toPickerItem(item: db.ItemEntry): PickerItem {
         iconPath: item.iconPath,
         stackable: item.maxInventory > 1,
         weight: item.weight,
+        isWeapon: weapon,
+        upgradeLevel: weapon ? 0 : undefined,
+        infusionName: weapon ? 'Standard' : undefined,
+        aowName: weapon ? '—' : undefined,
     };
 }
 
-function toOwnedPickerItem(item: vm.ItemViewModel, eligibleItem: db.ItemEntry | undefined, acquisitionOrder: number): PickerItem {
+function toOwnedPickerItem(
+    item: vm.ItemViewModel,
+    eligibleItem: db.ItemEntry | undefined,
+    acquisitionOrder: number,
+    infuseTypes: db.InfuseType[],
+    ashesOfWar: Map<number, string>,
+): PickerItem {
+    const weapon = isWeaponCategory(eligibleItem?.category ?? item.category);
+    const infusionOffset = item.id - item.baseId - item.currentUpgrade;
     return {
         entryKey: `inventory-${acquisitionOrder}-${item.handle}`,
         id: item.baseId || item.id,
@@ -85,6 +107,10 @@ function toOwnedPickerItem(item: vm.ItemViewModel, eligibleItem: db.ItemEntry | 
         stackable: item.maxInventory > 1,
         weight: eligibleItem?.weight,
         acquisitionOrder,
+        isWeapon: weapon,
+        upgradeLevel: weapon ? item.currentUpgrade : undefined,
+        infusionName: weapon ? (infuseTypes.find(type => type.offset === infusionOffset)?.name ?? 'Standard') : undefined,
+        aowName: weapon ? (item.aowId ? (ashesOfWar.get(item.aowId) ?? 'Unknown Ash of War') : '—') : undefined,
     };
 }
 
@@ -108,16 +134,30 @@ function sortItems(items: PickerItem[], sort: PickerSort): PickerItem[] {
     });
 }
 
-function ItemCard({ item, source, view, selected, onSelect }: {
+function ItemCard({ item, source, view, weaponList, selected, onSelect }: {
     item: PickerItem;
     source: PickerSource;
     view: PickerView;
+    weaponList: boolean;
     selected: boolean;
     onSelect: (item: PickerItem) => void;
 }) {
     const selectionClass = selected ? 'border-primary ring-1 ring-primary/50' : 'border-border hover:border-primary/60';
 
     if (view === 'list') {
+        if (item.isWeapon) {
+            return (
+                <div className={`col-span-4 grid min-h-16 items-center gap-x-3 rounded-lg border p-2 transition-colors ${selectionClass}`} style={weaponList ? { gridTemplateColumns: 'subgrid' } : undefined}>
+                    <button type="button" aria-label={`Select ${item.name}`} className="flex min-w-0 items-center gap-3 text-left" onClick={() => onSelect(item)}>
+                        <img className="h-12 w-12 shrink-0 object-contain" src={iconSrc(item.iconPath)} alt="" />
+                        <span className="block truncate text-sm font-bold text-foreground">{item.name}</span>
+                    </button>
+                    <span className="shrink-0 text-right text-xs font-bold text-muted-foreground">+{item.upgradeLevel ?? 0}</span>
+                    <span className="shrink-0 text-right text-xs text-muted-foreground">{item.infusionName ?? '—'}</span>
+                    <span className="max-w-48 shrink-0 truncate text-right text-xs text-muted-foreground">{item.aowName ?? '—'}</span>
+                </div>
+            );
+        }
         return (
             <div className={`flex min-h-16 items-center gap-3 rounded-lg border p-2 transition-colors ${selectionClass}`}>
                 <button type="button" aria-label={`Select ${item.name}`} className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => onSelect(item)}>
@@ -137,7 +177,8 @@ function ItemCard({ item, source, view, selected, onSelect }: {
             <button type="button" aria-label={`Select ${item.name}`} className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1" onClick={() => onSelect(item)}>
                 <img className={`${source === 'database' ? 'h-20 w-20' : 'h-16 w-16'} object-contain`} src={iconSrc(item.iconPath)} alt={item.name} />
                 <span className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground">{item.name}</span>
-                {item.quantity == null && <span className="text-[9px] text-muted-foreground">{item.category}</span>}
+                {item.isWeapon && <span className="text-[10px] font-bold text-muted-foreground">+{item.upgradeLevel ?? 0}</span>}
+                {!item.isWeapon && item.quantity == null && <span className="text-[9px] text-muted-foreground">{item.category}</span>}
             </button>
         </div>
     );
@@ -153,6 +194,8 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
     const [loading, setLoading] = useState(true);
     const [selected, setSelected] = useState<PickerItem | null>(null);
     const [safetyProfile, setSafetyProfile] = useState<SafetyProfile>(() => loadSafetyProfile());
+    const [infuseTypes, setInfuseTypes] = useState<db.InfuseType[]>([]);
+    const [ashesOfWar, setAshesOfWar] = useState<db.ItemEntry[]>([]);
 
     useEffect(() => {
         let active = true;
@@ -161,18 +204,25 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
         setSearch('');
         setSource('inventory');
 
+        const weaponSlot = isWeaponSlot(slotLabel);
         Promise.all([
             eligibleItemsForSlot(slotLabel),
             charIdx == null ? Promise.resolve<vm.CharacterViewModel | null>(null) : GetCharacter(charIdx),
-        ]).then(([items, character]) => {
+            weaponSlot ? GetInfuseTypes() : Promise.resolve<db.InfuseType[]>([]),
+            weaponSlot ? GetItemList('ashes_of_war') : Promise.resolve<db.ItemEntry[]>([]),
+        ]).then(([items, character, infusions, ashes]) => {
             if (!active) return;
             setEligible(items);
             setOwned(character?.inventory ?? []);
+            setInfuseTypes(infusions);
+            setAshesOfWar(ashes);
             setLoading(false);
         }).catch(() => {
             if (!active) return;
             setEligible([]);
             setOwned([]);
+            setInfuseTypes([]);
+            setAshesOfWar([]);
             setLoading(false);
         });
 
@@ -200,10 +250,11 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
 
     const inventoryItems = useMemo(() => {
         const eligibleByID = new Map(visibleEligible.map(item => [item.id, item]));
+        const aowNames = new Map(ashesOfWar.map(item => [item.id, item.name]));
         return owned
             .filter(item => eligibleByID.has(item.baseId || item.id))
-            .map((item, index) => toOwnedPickerItem(item, eligibleByID.get(item.baseId || item.id), index));
-    }, [owned, visibleEligible]);
+            .map((item, index) => toOwnedPickerItem(item, eligibleByID.get(item.baseId || item.id), index, infuseTypes, aowNames));
+    }, [ashesOfWar, infuseTypes, owned, visibleEligible]);
 
     const items = useMemo(
         () => sortItems(
@@ -213,6 +264,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
         ),
         [inventoryItems, search, sort, source, visibleEligible],
     );
+    const weaponList = view === 'list' && isWeaponSlot(slotLabel);
 
     return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onMouseDown={onClose}>
@@ -243,8 +295,9 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
 
                 <main className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar">
                     {loading ? <p className="py-12 text-center text-sm text-muted-foreground">Loading items…</p> : items.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">No matching items.</p> : (
-                        <div className={view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
-                            {items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} selected={selected?.id === item.id} onSelect={setSelected} />)}
+                        <div className={weaponList ? 'grid grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] gap-x-3 gap-y-2' : view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
+                            {weaponList && <><span className="px-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Weapon</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Level</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Infuse</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Ashes of War</span></>}
+                            {items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} selected={selected?.id === item.id} onSelect={setSelected} />)}
                         </div>
                     )}
                 </main>
