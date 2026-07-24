@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from 'react';
-import { GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
+import { GetCharacter, GetEquipmentSnapshot } from '../../wailsjs/go/main/App';
 import type { main } from '../../wailsjs/go/models';
 import { EquipmentItemPickerModal } from './EquipmentItemPickerModal';
 
@@ -25,6 +25,7 @@ type SlotProps = {
     onOpen: (label: string) => void;
     selected?: boolean;
     item?: EquippedItem;
+    quantity?: number;
     children: ReactNode;
 };
 
@@ -39,7 +40,11 @@ function SlotTooltip({ eligibleItems }: { eligibleItems: string }) {
     );
 }
 
-function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, item, children }: SlotProps) {
+function SlotRemoveIcon() {
+    return <span data-testid="slot-remove-icon" aria-hidden="true" className="pointer-events-none absolute bottom-0.5 left-1 z-20 text-lg font-black leading-none text-red-600 drop-shadow-sm">×</span>;
+}
+
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, item, quantity, children }: SlotProps) {
     // Occupied + resolved: real icon and item name. Occupied + unknown:
     // placeholder with the raw-ID name. Empty: placeholder + eligibility text.
     const tooltip = item?.occupied ? item.name : eligibleItems;
@@ -53,6 +58,8 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, item, c
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems={tooltip} />
+            <SlotRemoveIcon />
+            {quantity != null && <span className="pointer-events-none absolute left-1.5 top-1 z-20 text-xs font-black text-foreground">{quantity}</span>}
             {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : children}
         </button>
     );
@@ -103,6 +110,7 @@ function PouchSlot({ label, active, onOpen, item }: { label: string; active?: 'u
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems={tooltip} />
+            <SlotRemoveIcon />
             {active && <DPad active={active} />}
             {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : <PouchPlaceholder />}
         </button>
@@ -119,6 +127,7 @@ function PhysickSlot({ label, onOpen }: { label: string; onOpen: (label: string)
             className="group relative flex h-[82px] w-[82px] flex-col rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] text-[color:var(--eq-physick-text)] hover:border-[color:var(--eq-slot-hover-border)]"
         >
             <SlotTooltip eligibleItems="Crystal Tears" />
+            <SlotRemoveIcon />
             <span className="line-clamp-2 min-h-[21px] text-center text-[8px] font-extrabold leading-[1.15]">Physick tear</span>
             <span className="flex h-[51px] items-center justify-center">
                 <img className="h-[51px] w-[51px] object-contain opacity-[var(--eq-ghost-opacity)]" src="/equipment/physick-tear-placeholder.png" alt="" />
@@ -131,6 +140,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision }: { char
     const [selectedSlot, setSelectedSlot] = useState('Weapon slot 1');
     const [modalOpen, setModalOpen] = useState(false);
     const [snapshot, setSnapshot] = useState<main.EquipmentSnapshot | null>(null);
+    const [ammoQuantities, setAmmoQuantities] = useState<Record<number, number>>({});
     const openSlot = (label: string) => {
         setSelectedSlot(label);
         setModalOpen(true);
@@ -143,12 +153,25 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision }: { char
         if (charIdx == null) return;
         let active = true;
         setSnapshot(null);
+        setAmmoQuantities({});
         (async () => {
             try {
-                const snap = await GetEquipmentSnapshot(charIdx);
-                if (active) setSnapshot(snap);
+                const [snap, character] = await Promise.all([GetEquipmentSnapshot(charIdx), GetCharacter(charIdx)]);
+                if (!active) return;
+                const quantities: Record<number, number> = {};
+                for (const item of character.inventory ?? []) {
+                    if (item.subCategory !== 'arrows_and_bolts') continue;
+                    const quantity = item.quantity ?? 0;
+                    quantities[item.id] = (quantities[item.id] ?? 0) + quantity;
+                    if (item.baseId && item.baseId !== item.id) quantities[item.baseId] = (quantities[item.baseId] ?? 0) + quantity;
+                }
+                setSnapshot(snap);
+                setAmmoQuantities(quantities);
             } catch {
-                if (active) setSnapshot(null);
+                if (active) {
+                    setSnapshot(null);
+                    setAmmoQuantities({});
+                }
             }
         })();
         return () => { active = false; };
@@ -211,12 +234,12 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision }: { char
                         <div className="grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
                             {weaponSlots.map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={snapshot?.rightHandArmaments[index]}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
                             <span aria-hidden="true" />
-                            {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={snapshot?.arrows[index]}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
+                            {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={snapshot?.arrows[index]} quantity={snapshot?.arrows[index]?.occupied ? ammoQuantities[snapshot.arrows[index].rawId] : undefined}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
                         </div>
                         <div className="-mt-[7px] grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
                             {rangedSlots.map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={snapshot?.leftHandArmaments[index]}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>)}
                             <span aria-hidden="true" />
-                            {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={snapshot?.bolts[index]}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
+                            {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={snapshot?.bolts[index]} quantity={snapshot?.bolts[index]?.occupied ? ammoQuantities[snapshot.bolts[index].rawId] : undefined}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
                         </div>
                         <div className="mt-[5px] grid grid-cols-[repeat(4,82px)] gap-[9px]">
                             {armorSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot} item={snapshot?.armor[index]}><GhostIcon src={src} /></EquipmentSlot>)}

@@ -25,8 +25,18 @@ type PickerSort = 'alphabetical' | 'weight' | 'category' | 'acquisition';
 
 const RISKY_ITEM_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
 const WEAPON_CATEGORIES = new Set(['melee_armaments', 'ranged_and_catalysts', 'shields']);
+const ARMOR_CATEGORIES = new Set(['head', 'chest', 'arms', 'legs']);
+const TALISMAN_CATEGORIES = new Set(['talismans']);
+const AMMO_CATEGORIES = new Set(['arrows_and_bolts']);
+const QUICK_EQUIP_CATEGORIES = new Set(['tools', 'ashes']);
+const SPELL_CATEGORIES = new Set(['sorceries', 'incantations']);
 
 const isWeaponCategory = (category: string) => WEAPON_CATEGORIES.has(category);
+const isArmorCategory = (category: string) => ARMOR_CATEGORIES.has(category);
+const isTalismanCategory = (category: string) => TALISMAN_CATEGORIES.has(category);
+const isAmmoCategory = (category: string) => AMMO_CATEGORIES.has(category);
+const isQuickEquipCategory = (category: string) => QUICK_EQUIP_CATEGORIES.has(category);
+const isSpellCategory = (category: string) => SPELL_CATEGORIES.has(category);
 const isWeaponSlot = (label: string) => label.startsWith('Weapon slot') || label.startsWith('Ranged slot');
 
 type PickerItem = {
@@ -40,6 +50,11 @@ type PickerItem = {
     weight?: number;
     acquisitionOrder?: number;
     isWeapon: boolean;
+    isArmor: boolean;
+    isTalisman: boolean;
+    isAmmo: boolean;
+    isQuickEquipItem: boolean;
+    isSpell: boolean;
     upgradeLevel?: number;
     infusionName?: string;
     aowName?: string;
@@ -73,6 +88,11 @@ function eligibleItemsForSlot(label: string): Promise<db.ItemEntry[]> {
 
 function toPickerItem(item: db.ItemEntry): PickerItem {
     const weapon = isWeaponCategory(item.category);
+    const armor = isArmorCategory(item.category);
+    const talisman = isTalismanCategory(item.category);
+    const ammo = isAmmoCategory(item.category);
+    const quickEquipItem = isQuickEquipCategory(item.category);
+    const spell = isSpellCategory(item.category);
     return {
         entryKey: `database-${item.id}`,
         id: item.id,
@@ -82,6 +102,11 @@ function toPickerItem(item: db.ItemEntry): PickerItem {
         stackable: item.maxInventory > 1,
         weight: item.weight,
         isWeapon: weapon,
+        isArmor: armor,
+        isTalisman: talisman,
+        isAmmo: ammo,
+        isQuickEquipItem: quickEquipItem,
+        isSpell: spell,
         upgradeLevel: weapon ? 0 : undefined,
         infusionName: weapon ? 'Standard' : undefined,
         aowName: weapon ? '—' : undefined,
@@ -96,6 +121,11 @@ function toOwnedPickerItem(
     ashesOfWar: Map<number, string>,
 ): PickerItem {
     const weapon = isWeaponCategory(eligibleItem?.category ?? item.category);
+    const armor = isArmorCategory(eligibleItem?.category ?? item.category);
+    const talisman = isTalismanCategory(eligibleItem?.category ?? item.category);
+    const ammo = isAmmoCategory(eligibleItem?.category ?? item.category);
+    const quickEquipItem = isQuickEquipCategory(eligibleItem?.category ?? item.category);
+    const spell = isSpellCategory(eligibleItem?.category ?? item.category);
     const infusionOffset = item.id - item.baseId - item.currentUpgrade;
     return {
         entryKey: `inventory-${acquisitionOrder}-${item.handle}`,
@@ -108,6 +138,11 @@ function toOwnedPickerItem(
         weight: eligibleItem?.weight,
         acquisitionOrder,
         isWeapon: weapon,
+        isArmor: armor,
+        isTalisman: talisman,
+        isAmmo: ammo,
+        isQuickEquipItem: quickEquipItem,
+        isSpell: spell,
         upgradeLevel: weapon ? item.currentUpgrade : undefined,
         infusionName: weapon ? (infuseTypes.find(type => type.offset === infusionOffset)?.name ?? 'Standard') : undefined,
         aowName: weapon ? (item.aowId ? (ashesOfWar.get(item.aowId) ?? 'Unknown Ash of War') : '—') : undefined,
@@ -134,15 +169,17 @@ function sortItems(items: PickerItem[], sort: PickerSort): PickerItem[] {
     });
 }
 
-function ItemCard({ item, source, view, weaponList, selected, onSelect }: {
+function ItemCard({ item, source, view, weaponList, physickPicker, selected, onSelect }: {
     item: PickerItem;
     source: PickerSource;
     view: PickerView;
     weaponList: boolean;
+    physickPicker: boolean;
     selected: boolean;
     onSelect: (item: PickerItem) => void;
 }) {
     const selectionClass = selected ? 'border-primary ring-1 ring-primary/50' : 'border-border hover:border-primary/60';
+    const prominentListName = item.isArmor || item.isTalisman || item.isAmmo || item.isQuickEquipItem || item.isSpell || physickPicker;
 
     if (view === 'list') {
         if (item.isWeapon) {
@@ -163,8 +200,8 @@ function ItemCard({ item, source, view, weaponList, selected, onSelect }: {
                 <button type="button" aria-label={`Select ${item.name}`} className="flex min-w-0 flex-1 items-center gap-3 text-left" onClick={() => onSelect(item)}>
                     <img className="h-12 w-12 shrink-0 object-contain" src={iconSrc(item.iconPath)} alt="" />
                     <span className="min-w-0">
-                        <span className="block truncate text-xs font-bold text-foreground">{item.name}</span>
-                        <span className="block truncate text-[10px] text-muted-foreground">{item.category}{item.quantity != null ? ` · ${item.quantity}` : ''}</span>
+                        <span className={`block truncate font-bold text-foreground ${prominentListName ? 'text-sm' : 'text-xs'}`}>{item.name}</span>
+                        {!prominentListName && <span className="block truncate text-[10px] text-muted-foreground">{item.category}{item.quantity != null ? ` · ${item.quantity}` : ''}</span>}
                     </span>
                 </button>
             </div>
@@ -265,6 +302,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
         [inventoryItems, search, sort, source, visibleEligible],
     );
     const weaponList = view === 'list' && isWeaponSlot(slotLabel);
+    const physickPicker = slotLabel.startsWith('Physick tear');
 
     return createPortal(
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onMouseDown={onClose}>
@@ -297,7 +335,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
                     {loading ? <p className="py-12 text-center text-sm text-muted-foreground">Loading items…</p> : items.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">No matching items.</p> : (
                         <div className={weaponList ? 'grid grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] gap-x-3 gap-y-2' : view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
                             {weaponList && <><span className="px-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Weapon</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Level</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Infuse</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Ashes of War</span></>}
-                            {items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} selected={selected?.id === item.id} onSelect={setSelected} />)}
+                            {items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={selected?.id === item.id} onSelect={setSelected} />)}
                         </div>
                     )}
                 </main>

@@ -267,6 +267,20 @@ func TestGetEquipmentSnapshot_ResolvesKnownIDs(t *testing.T) {
 	}
 }
 
+func TestResolveEquipView_WeaponUpgradeExcludesInfusionOffset(t *testing.T) {
+	// Dismounter +4 with an affinity at offset +600. The stored value must
+	// display its actual upgrade level, not the combined database offset +604.
+	const dismounterInfusedPlusFour = 0x80000000 | (0x007A6020 + 604)
+
+	view := resolveEquipView(dismounterInfusedPlusFour, classHandArmament)
+	if !view.Resolved {
+		t.Fatalf("Dismounter did not resolve: %+v", view)
+	}
+	if view.Name != "Dismounter +4" {
+		t.Errorf("Name = %q, want %q", view.Name, "Dismounter +4")
+	}
+}
+
 func TestGetEquipmentSnapshot_ResolvesBothWondrousPhysickPouchVariants(t *testing.T) {
 	const (
 		filledPhysickHandle = 0xB00000FA

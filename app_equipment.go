@@ -99,8 +99,13 @@ func resolveEquipView(raw uint32, class equipClass) EquipmentSlotView {
 		return view
 	}
 	name := item.Name
-	if upgrade := displayID - baseID; upgrade > 0 {
-		name = fmt.Sprintf("%s +%d", name, upgrade)
+	// An infused weapon's ID encodes both its affinity (hundreds) and upgrade
+	// level (remainder). Display only the latter: e.g. an offset of 604 is a
+	// +4 weapon with the affinity at offset 600, not a +604 weapon.
+	if class == classHandArmament && isWeaponLikeCategory(item.Category) {
+		if upgrade, _ := decodeWeaponUpgradeInfusion(displayID, baseID); upgrade > 0 {
+			name = fmt.Sprintf("%s +%d", name, upgrade)
+		}
 	}
 	view.Name = name
 	view.IconPath = item.IconPath

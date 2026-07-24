@@ -102,6 +102,13 @@ describe('EquipmentTab', () => {
         expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
     });
 
+    it('shows a visible remove icon in the lower-left corner of every equipment field', () => {
+        render(<EquipmentTab />);
+
+        expect(screen.getAllByTestId('slot-remove-icon')).toHaveLength(46);
+        expect(screen.getAllByTestId('slot-remove-icon')[0]).toHaveClass('bottom-0.5', 'left-1', 'text-lg', 'text-red-600');
+    });
+
     it('opens the item picker from every equipment field and closes it with both actions', () => {
         render(<EquipmentTab />);
 
@@ -253,6 +260,114 @@ describe('EquipmentTab', () => {
         expect(screen.queryByText('Weapon · 1')).not.toBeInTheDocument();
     });
 
+    it('shows armor names larger without the category and quantity line in list view', async () => {
+        vi.mocked(GetChestSlotEligibleItems).mockResolvedValue([
+            { id: 1, name: 'Test armor', category: 'chest', iconPath: 'items/chest/test.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test armor', category: 'Armor', iconPath: 'items/chest/test.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Knight Armor' }));
+        await screen.findByText('Test armor');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+
+        expect(screen.getByText('Test armor')).toHaveClass('text-sm');
+        expect(screen.queryByText('Armor · 1')).not.toBeInTheDocument();
+    });
+
+    it('shows talisman names larger without the category and quantity line in list view', async () => {
+        vi.mocked(GetTalismanSlotEligibleItems).mockResolvedValue([
+            { id: 1, name: 'Test talisman', category: 'talismans', iconPath: 'items/talismans/test.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test talisman', category: 'Talisman', iconPath: 'items/talismans/test.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Axe Talisman' }));
+        await screen.findByText('Test talisman');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+
+        expect(screen.getByText('Test talisman')).toHaveClass('text-sm');
+        expect(screen.queryByText('Talisman · 1')).not.toBeInTheDocument();
+    });
+
+    it('shows ammunition names larger without the category and quantity line in list view', async () => {
+        vi.mocked(GetArrowSlotEligibleItems).mockResolvedValue([
+            { id: 1, name: 'Test arrow', category: 'arrows_and_bolts', iconPath: 'items/ammo/test.png', maxInventory: 99 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test arrow', category: 'Ammunition', iconPath: 'items/ammo/test.png', quantity: 10, maxInventory: 99 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Arrow slot 1' }));
+        await screen.findByText('Test arrow');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+
+        expect(screen.getByText('Test arrow')).toHaveClass('text-sm');
+        expect(screen.queryByText('Ammunition · 10')).not.toBeInTheDocument();
+    });
+
+    it('shows quick-pouch and quick-item names larger without category and quantity lines in list view', async () => {
+        const eligibleItem = { id: 1, name: 'Test tool', category: 'tools', iconPath: 'items/tools/test.png', maxInventory: 99 };
+        vi.mocked(GetPouchEligibleItems).mockResolvedValue([eligibleItem] as never);
+        vi.mocked(GetQuickItemEligibleItems).mockResolvedValue([eligibleItem] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test tool', category: 'Tool', iconPath: 'items/tools/test.png', quantity: 10, maxInventory: 99 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Quick pouch up' }));
+        await screen.findByText('Test tool');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+        expect(screen.getByText('Test tool')).toHaveClass('text-sm');
+        expect(screen.queryByText('Tool · 10')).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+        fireEvent.click(screen.getByRole('button', { name: 'Quick item 1' }));
+        await screen.findByText('Test tool');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+        expect(screen.getByText('Test tool')).toHaveClass('text-sm');
+        expect(screen.queryByText('Tool · 10')).not.toBeInTheDocument();
+    });
+
+    it('shows spell names larger without category and quantity lines in list view', async () => {
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries'
+            ? [{ id: 1, name: 'Test sorcery', category: 'sorceries', iconPath: 'items/sorceries/test.png', maxInventory: 1 }]
+            : []) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test sorcery', category: 'Sorcery', iconPath: 'items/sorceries/test.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Spell slot 1' }));
+        await screen.findByText('Test sorcery');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+
+        expect(screen.getByText('Test sorcery')).toHaveClass('text-sm');
+        expect(screen.queryByText('Sorcery · 1')).not.toBeInTheDocument();
+    });
+
+    it('shows Physick tear names larger without the key-item category and quantity line in list view', async () => {
+        vi.mocked(GetPhysickEligibleItems).mockResolvedValue([
+            { id: 1, name: 'Test crystal tear', category: 'key_items', iconPath: 'items/key_items/test.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test crystal tear', category: 'Key Item', iconPath: 'items/key_items/test.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
+        await screen.findByText('Test crystal tear');
+        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
+
+        expect(screen.getByText('Test crystal tear')).toHaveClass('text-sm');
+        expect(screen.queryByText('Key Item · 1')).not.toBeInTheDocument();
+    });
+
     it('shows the eligible item types in a tooltip for each slot family', () => {
         render(<EquipmentTab />);
 
@@ -397,6 +512,28 @@ describe('EquipmentTab equipped-item projection', () => {
         const icon = await screen.findByAltText('Spirit Jellyfish Ashes');
         expect(icon).toHaveAttribute('src', '/items/ashes/spirit_jellyfish.png');
         expect(screen.getByRole('tooltip', { name: 'Spirit Jellyfish Ashes' })).toBeInTheDocument();
+    });
+
+    it('shows inventory quantities in the upper-right corner of equipped arrow and bolt slots', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            arrows: [view({ occupied: true, rawId: 101, name: 'Test arrow', iconPath: 'items/arrows_and_bolts/arrow.png', resolved: true }), view({ occupied: true, rawId: 102, name: 'Test greatarrow', iconPath: 'items/arrows_and_bolts/greatarrow.png', resolved: true })],
+            bolts: [view({ occupied: true, rawId: 201, name: 'Test bolt', iconPath: 'items/arrows_and_bolts/bolt.png', resolved: true }), view({ occupied: true, rawId: 202, name: 'Test greatbolt', iconPath: 'items/arrows_and_bolts/greatbolt.png', resolved: true })],
+        }) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { id: 101, baseId: 101, subCategory: 'arrows_and_bolts', quantity: 30 },
+                { id: 102, baseId: 102, subCategory: 'arrows_and_bolts', quantity: 20 },
+                { id: 201, baseId: 201, subCategory: 'arrows_and_bolts', quantity: 40 },
+                { id: 202, baseId: 202, subCategory: 'arrows_and_bolts', quantity: 10 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        await waitFor(() => expect(screen.getByRole('button', { name: 'Arrow slot 1' })).toHaveTextContent('30'));
+        expect(screen.getByRole('button', { name: 'Arrow slot 2' })).toHaveTextContent('20');
+        expect(screen.getByRole('button', { name: 'Bolt slot 1' })).toHaveTextContent('40');
+        expect(screen.getByRole('button', { name: 'Bolt slot 2' })).toHaveTextContent('10');
+        expect(screen.getByText('30')).toHaveClass('left-1.5', 'top-1', 'text-xs');
     });
 
     it('shows the raw-ID label for a populated but unresolved slot', async () => {
