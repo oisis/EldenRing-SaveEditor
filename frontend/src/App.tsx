@@ -14,6 +14,7 @@ import {DatabaseTab} from './components/DatabaseTab';
 import {AppearanceTab} from './components/AppearanceTab';
 import {PvPTab} from './components/PvPTab';
 import {SortOrderTab} from './components/SortOrderTab';
+import {EquipmentTab} from './components/EquipmentTab';
 
 import {ToastBar} from './components/ToastBar';
 import {useSafetyMode} from './state/safetyMode';
@@ -105,7 +106,7 @@ function App() {
     const [showEmptySlots, setShowEmptySlots] = useState(false);
     const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
     const [infuseTypes, setInfuseTypes] = useState<db.InfuseType[]>([]);
-    const [invView, setInvView] = useState<'inventory' | 'database' | 'sort_order'>('inventory');
+    const [invView, setInvView] = useState<'inventory' | 'database' | 'equipment' | 'sort_order'>('inventory');
     const [detailItem, setDetailItem] = useState<db.ItemEntry | null>(null);
     const [saving, setSaving] = useState(false);
     const [capacity, setCapacity] = useState<main.SlotCapacity | null>(null);
@@ -748,11 +749,12 @@ function App() {
                                         {/* Mode bar: left = tabs, right = capacity stats */}
                                         <div className="flex items-center justify-between mb-3 shrink-0 gap-4">
                                             <div className="flex gap-1.5 p-1 bg-muted/30 rounded-lg border border-border/50 shrink-0">
-                                                {([
+                                                    {([
                                                     { id: 'database', label: 'Item Database' },
                                                     { id: 'inventory', label: 'Inventory' },
+                                                    { id: 'equipment', label: 'Equipment' },
                                                     { id: 'sort_order', label: 'Sort Order' },
-                                                ] as { id: 'database' | 'inventory' | 'sort_order'; label: string }[]).map(({ id, label }) => (
+                                                ] as { id: 'database' | 'inventory' | 'equipment' | 'sort_order'; label: string }[]).map(({ id, label }) => (
                                                     <button
                                                         key={id}
                                                         onClick={() => {
@@ -771,7 +773,7 @@ function App() {
                                                 ))}
                                             </div>
 
-                                            {invView !== 'sort_order' && capacity && (
+                                            {(invView === 'inventory' || invView === 'database') && capacity && (
                                                 <div className="flex items-center py-1.5 rounded-lg border border-border/50 bg-muted/10 shrink-0 divide-x divide-border/50">
                                                     {[
                                                         { label: 'Inventory', used: capacity.inventoryUsed, max: capacity.inventoryMax },
@@ -808,6 +810,8 @@ function App() {
                                                 showOnlyFavorites={showOnlyFavorites}
                                                 onToggleFavorites={() => setShowOnlyFavorites(v => !v)}
                                             />
+                                        ) : invView === 'equipment' ? (
+                                            <EquipmentTab />
                                         ) : (
                                             <SortOrderTab
                                                 charIndex={selectedChar}

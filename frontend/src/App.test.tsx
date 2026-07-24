@@ -68,6 +68,7 @@ vi.mock('./components/DatabaseTab', () => ({
 vi.mock('./components/AppearanceTab', () => ({ AppearanceTab: () => null }));
 vi.mock('./components/PvPTab', () => ({ PvPTab: () => null }));
 vi.mock('./components/SortOrderTab', () => ({ SortOrderTab: () => null }));
+vi.mock('./components/EquipmentTab', () => ({ EquipmentTab: () => <div>equipment-tab</div> }));
 // The stub exposes the App-owned Repair callback so a test can drive
 // handleRepairIntegrity without the real modal.
 vi.mock('./components/integrity/InventoryIntegrityModal', () => ({
@@ -150,7 +151,9 @@ describe('App navigation wording', () => {
 
         fireEvent.click(screen.getByRole('button', { name: 'Game Items' }));
         expect(await screen.findByRole('button', { name: 'Inventory' })).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Equipment' })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Equipment' })).toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Equipment' }));
+        expect(screen.getByText('equipment-tab')).toBeInTheDocument();
     });
 
     it('labels the sort submenu view "Sort Order", not the legacy "Weapons & Sort Order"', async () => {
