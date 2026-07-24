@@ -19,11 +19,13 @@ var phase2b2Additions = []struct {
 	SubCategory  string
 	MaxInventory uint32
 	MaxStorage   uint32
+	DLC          bool
 }{
-	{0x02FB1790, "Fire Arrow", SubcatArrowsArrows, 99, 600},
-	{0x030AA7F0, "Golem's Magic Arrow", SubcatArrowsGreatarrows, 30, 600},
-	{0x03199C10, "Lightning Bolt", SubcatArrowsBolts, 99, 600},
-	{0x0328DE50, "Lightning Greatbolt", SubcatArrowsGreatbolts, 20, 600},
+	{0x02FB1790, "Fire Arrow", SubcatArrowsArrows, 99, 600, false},
+	{0x030AA7F0, "Golem's Magic Arrow", SubcatArrowsGreatarrows, 30, 600, false},
+	{0x0311D3E0, "Igon's Harpoon", SubcatArrowsGreatarrows, 30, 600, true},
+	{0x03199C10, "Lightning Bolt", SubcatArrowsBolts, 99, 600, false},
+	{0x0328DE50, "Lightning Greatbolt", SubcatArrowsGreatbolts, 20, 600, false},
 }
 
 func TestPhase2B2ArrowsBoltsPresent(t *testing.T) {
@@ -70,9 +72,9 @@ func TestPhase2B2ArrowsBoltsPresent(t *testing.T) {
 			t.Errorf("ArrowsAndBolts[0x%08X] (%s) missing 'stackable' flag",
 				w.ID, w.Name)
 		}
-		if hasDLC {
-			t.Errorf("ArrowsAndBolts[0x%08X] (%s) carries 'dlc' flag but is base-game",
-				w.ID, w.Name)
+		if hasDLC != w.DLC {
+			t.Errorf("ArrowsAndBolts[0x%08X] (%s) 'dlc' flag = %v, want %v",
+				w.ID, w.Name, hasDLC, w.DLC)
 		}
 	}
 }

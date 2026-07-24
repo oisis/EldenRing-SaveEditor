@@ -5,9 +5,9 @@ package data
 //
 // Sub-groups (in-game order):
 //   1. Arrows — short-bow / long-bow / light-bow ammunition
-//   2. Greatarrows — greatbow ammunition (incl. Radahn's Spear)
+//   2. Greatarrows — greatbow ammunition (incl. Radahn's Spear, Igon's Harpoon)
 //   3. Bolts — crossbow ammunition
-//   4. Greatbolts — ballista ammunition (incl. Igon's Harpoon)
+//   4. Greatbolts — ballista ammunition
 var ArrowsAndBolts = map[uint32]ItemData{
 	// ─── Arrows ─────────────────────────────────────────────────────────
 	0x02FAF080: {Name: "Arrow", Category: "arrows_and_bolts", SubCategory: SubcatArrowsArrows, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/arrow.png", Flags: []string{"stackable"}},
@@ -53,9 +53,9 @@ var ArrowsAndBolts = map[uint32]ItemData{
 	0x030ACF00: {Name: "Radahn's Spear", Category: "arrows_and_bolts", SubCategory: SubcatArrowsGreatarrows, MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/radahns_spear.png", Flags: []string{"stackable"}},
 	0x030AF610: {Name: "Bone Great Arrow (Fletched)", Category: "arrows_and_bolts", SubCategory: SubcatArrowsGreatarrows, MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/bone_great_arrow_fletched.png", Flags: []string{"stackable"}},
 	0x030B1D20: {Name: "Bone Great Arrow", Category: "arrows_and_bolts", SubCategory: SubcatArrowsGreatarrows, MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/bone_great_arrow.png", Flags: []string{"stackable"}},
+	0x0311D3E0: {Name: "Igon's Harpoon", Category: "arrows_and_bolts", SubCategory: SubcatArrowsGreatarrows, MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/igons_harpoon.png", Flags: []string{"dlc", "stackable"}},
 
 	// ─── Bolts ──────────────────────────────────────────────────────────
-	0x0311D3E0: {Name: "Igon's Harpoon", Category: "arrows_and_bolts", SubCategory: SubcatArrowsGreatbolts, MaxInventory: 30, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/igons_harpoon.png", Flags: []string{"dlc", "stackable"}},
 	0x03197500: {Name: "Bolt", Category: "arrows_and_bolts", SubCategory: SubcatArrowsBolts, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/bolt.png", Flags: []string{"stackable"}},
 	0x03199C10: {Name: "Lightning Bolt", Category: "arrows_and_bolts", SubCategory: SubcatArrowsBolts, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/lightning_bolt.png", Flags: []string{"stackable"}},
 	0x0319C320: {Name: "Perfumer's Bolt", Category: "arrows_and_bolts", SubCategory: SubcatArrowsBolts, MaxInventory: 99, MaxStorage: 600, MaxUpgrade: 0, IconPath: "items/arrows_and_bolts/perfumers_bolt.png", Flags: []string{"stackable"}},

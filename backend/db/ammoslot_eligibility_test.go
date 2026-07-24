@@ -52,6 +52,7 @@ func TestGetArrowSlotEligibleItems(t *testing.T) {
 	include := map[uint32]string{
 		0x02FAF080: "Arrow",
 		0x030A32C0: "Great Arrow",
+		0x0311D3E0: "Igon's Harpoon",
 	}
 	exclude := map[uint32]string{
 		0x03197500: "Bolt",
@@ -76,6 +77,7 @@ func TestGetBoltSlotEligibleItems(t *testing.T) {
 	exclude := map[uint32]string{
 		0x02FAF080: "Arrow",
 		0x030A32C0: "Great Arrow",
+		0x0311D3E0: "Igon's Harpoon",
 		0x003085E0: "Claymore",
 		0x400003E9: "Flask of Crimson Tears",
 	}
