@@ -629,6 +629,34 @@ func (a *App) GetPhysickEligibleItems() []db.ItemEntry {
 	return db.GetPhysickEligibleItems(platform)
 }
 
+// GetArrowSlotEligibleItems returns the DB-known items that may occupy an Arrow
+// ammunition slot (equipment row 1, slots 4–5: Arrows + Greatarrows), filtered by
+// the loaded save's platform and sorted by name. Both arrow slots share one
+// policy, which lives entirely in the db package.
+func (a *App) GetArrowSlotEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetArrowSlotEligibleItems(platform)
+}
+
+// GetBoltSlotEligibleItems returns the DB-known items that may occupy a Bolt
+// ammunition slot (equipment row 2, slots 4–5: Bolts + Greatbolts), filtered by
+// the loaded save's platform and sorted by name. Both bolt slots share one
+// policy, which lives entirely in the db package.
+func (a *App) GetBoltSlotEligibleItems() []db.ItemEntry {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	platform := "PS4"
+	if a.save != nil {
+		platform = string(a.save.Platform)
+	}
+	return db.GetBoltSlotEligibleItems(platform)
+}
+
 // GetItemDetail returns full item data (description, stats) for a single base item ID.
 func (a *App) GetItemDetail(baseId uint32) *db.ItemEntry {
 	return db.GetItemEntryByID(baseId)

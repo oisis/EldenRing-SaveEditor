@@ -1025,6 +1025,37 @@ func GetPhysickEligibleItems(platform string) []ItemEntry {
 	return items
 }
 
+// ammoSlotEligibleItems returns every "arrows_and_bolts" item whose SubCategory
+// is in allowed, name-sorted. Shared by the Arrow- and Bolt-slot filters so the
+// candidate source (GetItemsByCategory) and the subcategory-filter logic live in
+// exactly one place — the two public filters differ only by their allowed set.
+func ammoSlotEligibleItems(platform string, allowed ...string) []ItemEntry {
+	var items []ItemEntry
+	for _, it := range GetItemsByCategory("arrows_and_bolts", platform) {
+		if slices.Contains(allowed, it.SubCategory) {
+			items = append(items, it)
+		}
+	}
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].Name < items[j].Name
+	})
+	return items
+}
+
+// GetArrowSlotEligibleItems returns every DB-known item that may occupy an Arrow
+// ammunition slot (equipment row 1, slots 4–5): the Arrows and Greatarrows
+// subcategories only. Both arrow slots share this single policy.
+func GetArrowSlotEligibleItems(platform string) []ItemEntry {
+	return ammoSlotEligibleItems(platform, data.SubcatArrowsArrows, data.SubcatArrowsGreatarrows)
+}
+
+// GetBoltSlotEligibleItems returns every DB-known item that may occupy a Bolt
+// ammunition slot (equipment row 2, slots 4–5): the Bolts and Greatbolts
+// subcategories only. Both bolt slots share this single policy.
+func GetBoltSlotEligibleItems(platform string) []ItemEntry {
+	return ammoSlotEligibleItems(platform, data.SubcatArrowsBolts, data.SubcatArrowsGreatbolts)
+}
+
 // GetAllGraces returns all Sites of Grace as a flat list.
 var getAllGraces = sync.OnceValue(func() []GraceEntry {
 	graces := make([]GraceEntry, 0, len(data.Graces))
