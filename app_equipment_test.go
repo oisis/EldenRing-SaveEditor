@@ -267,6 +267,39 @@ func TestGetEquipmentSnapshot_ResolvesKnownIDs(t *testing.T) {
 	}
 }
 
+func TestGetEquipmentSnapshot_ResolvesBothWondrousPhysickPouchVariants(t *testing.T) {
+	const (
+		filledPhysickHandle = 0xB00000FA
+		emptyPhysickHandle  = 0xB00000FB
+		physickName         = "Flask of Wondrous Physick"
+		physickIcon         = "items/tools/flask_of_wondrous_physick.png"
+	)
+
+	for _, raw := range []uint32{filledPhysickHandle, emptyPhysickHandle} {
+		t.Run(fmt.Sprintf("0x%08X", raw), func(t *testing.T) {
+			var pouch [6]core.RawEquipItem
+			// UI top-right Quick Pouch slot is Pouch[1].
+			pouch[1] = core.RawEquipItem{ItemID: raw, EquipIndex: 0x1E2}
+
+			snap, err := newEquipmentApp(buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, pouch)).GetEquipmentSnapshot(0)
+			if err != nil {
+				t.Fatalf("GetEquipmentSnapshot: %v", err)
+			}
+
+			got := snap.Pouch[1]
+			if got.RawID != raw {
+				t.Errorf("RawID = 0x%08X, want original 0x%08X", got.RawID, raw)
+			}
+			if !got.Occupied || !got.Resolved {
+				t.Errorf("Pouch[1] resolved state = occupied:%v resolved:%v, want both true", got.Occupied, got.Resolved)
+			}
+			if got.Name != physickName || got.IconPath != physickIcon {
+				t.Errorf("Pouch[1] = name:%q icon:%q, want name:%q icon:%q", got.Name, got.IconPath, physickName, physickIcon)
+			}
+		})
+	}
+}
+
 func TestGetEquipmentSnapshot_TreatsUnarmedAsEmptyHandSlot(t *testing.T) {
 	var equipped [core.ChrAsmFieldCount]uint32
 	equipped[1] = unarmedItemID // RightHandArmaments[0]

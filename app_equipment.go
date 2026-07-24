@@ -89,13 +89,17 @@ func resolveEquipView(raw uint32, class equipClass) EquipmentSlotView {
 	view := EquipmentSlotView{Occupied: true, RawID: raw}
 
 	normID := normalizeEquipItemID(raw, class)
-	item, baseID := db.GetItemDataFuzzy(normID)
+	// The filled Physick flask has a distinct saved ID but shares the empty
+	// flask's display metadata. Keep RawID above for fidelity while resolving
+	// both variants to the one DB-backed presentation entry.
+	displayID := db.WondrousPhysickDisplayID(normID)
+	item, baseID := db.GetItemDataFuzzy(displayID)
 	if item.Name == "" {
 		view.Name = fmt.Sprintf("Unknown item (0x%08X)", raw)
 		return view
 	}
 	name := item.Name
-	if upgrade := normID - baseID; upgrade > 0 {
+	if upgrade := displayID - baseID; upgrade > 0 {
 		name = fmt.Sprintf("%s +%d", name, upgrade)
 	}
 	view.Name = name
