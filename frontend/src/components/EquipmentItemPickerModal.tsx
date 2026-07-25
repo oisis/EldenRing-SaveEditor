@@ -30,6 +30,11 @@ const TALISMAN_CATEGORIES = new Set(['talismans']);
 const AMMO_CATEGORIES = new Set(['arrows_and_bolts']);
 const QUICK_EQUIP_CATEGORIES = new Set(['tools', 'ashes']);
 const SPELL_CATEGORIES = new Set(['sorceries', 'incantations']);
+const PHYSICK_TEAR_CANONICAL_IDS = new Map<number, number>([
+    [0x40002AFA, 0x40002AFB], // Crimson Crystal Tear variant
+    [0x40002AFC, 0x40002AFD], // Cerulean Crystal Tear variant
+    [0x40002B08, 0x40002B09], // Ruptured Crystal Tear variant
+]);
 
 const isWeaponCategory = (category: string) => WEAPON_CATEGORIES.has(category);
 const isArmorCategory = (category: string) => ARMOR_CATEGORIES.has(category);
@@ -119,6 +124,7 @@ function toOwnedPickerItem(
     acquisitionOrder: number,
     infuseTypes: db.InfuseType[],
     ashesOfWar: Map<number, string>,
+    canonicalID?: number,
 ): PickerItem {
     const weapon = isWeaponCategory(eligibleItem?.category ?? item.category);
     const armor = isArmorCategory(eligibleItem?.category ?? item.category);
@@ -129,10 +135,10 @@ function toOwnedPickerItem(
     const infusionOffset = item.id - item.baseId - item.currentUpgrade;
     return {
         entryKey: `inventory-${acquisitionOrder}-${item.handle}`,
-        id: item.baseId || item.id,
-        name: item.name,
-        category: item.category,
-        iconPath: item.iconPath,
+        id: canonicalID ?? (item.baseId || item.id),
+        name: canonicalID != null ? (eligibleItem?.name ?? item.name) : item.name,
+        category: canonicalID != null ? (eligibleItem?.category ?? item.category) : item.category,
+        iconPath: canonicalID != null ? (eligibleItem?.iconPath ?? item.iconPath) : item.iconPath,
         quantity: item.quantity,
         stackable: item.maxInventory > 1,
         weight: eligibleItem?.weight,
@@ -289,8 +295,16 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, onClose }: Equipm
         const eligibleByID = new Map(visibleEligible.map(item => [item.id, item]));
         const aowNames = new Map(ashesOfWar.map(item => [item.id, item.name]));
         return owned
-            .filter(item => eligibleByID.has(item.baseId || item.id))
-            .map((item, index) => toOwnedPickerItem(item, eligibleByID.get(item.baseId || item.id), index, infuseTypes, aowNames));
+            .map(item => {
+                const ownedID = item.baseId || item.id;
+                const canonicalID = slotLabel.startsWith('Physick tear')
+                    ? (PHYSICK_TEAR_CANONICAL_IDS.get(ownedID) ?? ownedID)
+                    : ownedID;
+                return { item, canonicalID, canonicalized: canonicalID !== ownedID };
+            })
+            .filter(({ canonicalID }) => eligibleByID.has(canonicalID))
+            .map(({ item, canonicalID, canonicalized }, index) =>
+                toOwnedPickerItem(item, eligibleByID.get(canonicalID), index, infuseTypes, aowNames, canonicalized ? canonicalID : undefined));
     }, [ashesOfWar, infuseTypes, owned, visibleEligible]);
 
     const items = useMemo(

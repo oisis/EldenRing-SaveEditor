@@ -368,6 +368,26 @@ describe('EquipmentTab', () => {
         expect(screen.queryByText('Key Item · 1')).not.toBeInTheDocument();
     });
 
+    it('shows an owned technical Crimson Crystal Tear variant as the canonical Physick tear', async () => {
+        vi.mocked(GetPhysickEligibleItems).mockResolvedValue([
+            { id: 0x40002AFB, name: 'Crimson Crystal Tear', category: 'key_items', iconPath: 'items/key_items/crimson_crystal_tear.png', maxInventory: 1 },
+            { id: 0x40002B02, name: 'Greenburst Crystal Tear', category: 'key_items', iconPath: 'items/key_items/greenburst_crystal_tear.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { handle: 0xB0002AFA, id: 0x40002AFA, baseId: 0x40002AFA, name: 'Crimson Crystal Tear (Variant)', category: 'Key Item', iconPath: 'items/key_items/crimson_crystal_tear.png', quantity: 1, maxInventory: 1 },
+                { handle: 0xB0002B02, id: 0x40002B02, baseId: 0x40002B02, name: 'Greenburst Crystal Tear', category: 'Key Item', iconPath: 'items/key_items/greenburst_crystal_tear.png', quantity: 1, maxInventory: 1 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
+
+        expect(await screen.findByText('Crimson Crystal Tear')).toBeInTheDocument();
+        expect(screen.getByText('Greenburst Crystal Tear')).toBeInTheDocument();
+        expect(screen.queryByText('Crimson Crystal Tear (Variant)')).not.toBeInTheDocument();
+    });
+
     it('shows the eligible item types in a tooltip for each slot family', () => {
         render(<EquipmentTab />);
 
