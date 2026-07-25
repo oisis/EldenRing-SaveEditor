@@ -644,10 +644,10 @@ describe('EquipmentTab equipped-item projection', () => {
         expect(screen.getByRole('tooltip', { name: 'Crimson Crystal Tear' })).toBeInTheDocument();
     });
 
-    it('shows an unresolved Physick tear as a visible unknown, not an empty placeholder', async () => {
+    it('shows a non-sentinel unresolved Physick tear (raw 0) as a visible unknown, not an empty placeholder', async () => {
         vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
             physick: [
-                view({ occupied: true, resolved: false, name: 'Unknown item (0xFFFFFFFF)', rawId: 0xffffffff }),
+                view({ occupied: true, resolved: false, name: 'Unknown item (0x00000000)', rawId: 0 }),
                 { occupied: false, rawId: 0, name: '', iconPath: '', resolved: false },
             ],
         }) as never);
@@ -655,11 +655,32 @@ describe('EquipmentTab equipped-item projection', () => {
         render(<EquipmentTab charIdx={0} />);
 
         // The raw-ID unknown label is visible and carries a tooltip; no ghost placeholder.
-        expect(await screen.findByRole('tooltip', { name: 'Unknown item (0xFFFFFFFF)' })).toBeInTheDocument();
+        expect(await screen.findByRole('tooltip', { name: 'Unknown item (0x00000000)' })).toBeInTheDocument();
         expect(screen.getByTestId('physick-unknown')).toBeInTheDocument();
         const tear1 = screen.getByRole('button', { name: 'Physick tear 1' });
         expect(tear1.querySelector('img')).toBeNull();
         // The still-empty second slot keeps its eligibility tooltip.
         expect(screen.getByRole('tooltip', { name: 'Crystal Tears' })).toBeInTheDocument();
+    });
+
+    it('renders the 0xFFFFFFFF sentinel slot as an empty placeholder, never as unknown', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            physick: [
+                // Backend empty-sentinel view for slot 1 (T545): unoccupied, raw preserved.
+                { occupied: false, rawId: 0xffffffff, name: '', iconPath: '', resolved: false },
+                view({ occupied: true, resolved: true, name: 'Greenspill Crystal Tear', iconPath: 'items/key_items/greenspill_crystal_tear.png', rawId: 0x40002af9 }),
+            ],
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        // Slot 2 resolves normally.
+        const greenspill = await screen.findByAltText('Greenspill Crystal Tear');
+        expect(greenspill).toHaveAttribute('src', '/items/key_items/greenspill_crystal_tear.png');
+        // Slot 1 (sentinel): placeholder + eligibility tooltip, no unknown marker.
+        expect(screen.queryByTestId('physick-unknown')).not.toBeInTheDocument();
+        expect(screen.getByRole('tooltip', { name: 'Crystal Tears' })).toBeInTheDocument();
+        const tear1 = screen.getByRole('button', { name: 'Physick tear 1' });
+        expect(tear1.querySelector('img')).toHaveAttribute('src', '/equipment/physick-tear-placeholder.png');
     });
 });

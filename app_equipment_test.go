@@ -497,7 +497,6 @@ func TestGetEquipmentSnapshot_ResolvesPhysickTears(t *testing.T) {
 		{"crimson-variant-canonical", crimsonVariantRaw, true, "Crimson Crystal Tear"},
 		{"greenspill-standalone", greenspillRaw, true, "Greenspill Crystal Tear"},
 		{"zero-unresolved", 0x00000000, false, "Unknown item (0x00000000)"},
-		{"ffffffff-unresolved", 0xFFFFFFFF, false, "Unknown item (0xFFFFFFFF)"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -527,4 +526,68 @@ func TestGetEquipmentSnapshot_ResolvesPhysickTears(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestGetEquipmentSnapshot_PhysickSentinelIsEmpty proves the T545 contract: the
+// 0xFFFFFFFF native sentinel yields an empty slot on either field with the raw
+// value preserved, while a lone Greenspill tear in slot 2 stays resolved —
+// confirming slot 1 / slot 2 independence and the physicsOff+0 / +4 mapping.
+func TestGetEquipmentSnapshot_PhysickSentinelIsEmpty(t *testing.T) {
+	const (
+		sentinel      = 0xFFFFFFFF
+		greenspillRaw = 0x40002AF9 // resolves to Greenspill Crystal Tear
+	)
+	assertEmptySentinel := func(t *testing.T, got EquipmentSlotView) {
+		t.Helper()
+		if got.Occupied {
+			t.Errorf("Occupied = true, want false for sentinel")
+		}
+		if got.Resolved {
+			t.Errorf("Resolved = true, want false for sentinel")
+		}
+		if got.RawID != sentinel {
+			t.Errorf("RawID = 0x%08X, want 0x%08X", got.RawID, uint32(sentinel))
+		}
+	}
+
+	t.Run("sentinel-slot1-empty", func(t *testing.T) {
+		slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+		writePhysickTears(slot, sentinel, sentinel)
+		snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+		if err != nil {
+			t.Fatalf("GetEquipmentSnapshot: %v", err)
+		}
+		assertEmptySentinel(t, snap.Physick[0])
+	})
+
+	t.Run("sentinel-slot2-empty", func(t *testing.T) {
+		slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+		writePhysickTears(slot, sentinel, sentinel)
+		snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+		if err != nil {
+			t.Fatalf("GetEquipmentSnapshot: %v", err)
+		}
+		assertEmptySentinel(t, snap.Physick[1])
+	})
+
+	// Game does not left-pack: an empty slot 1 with a lone tear in slot 2.
+	t.Run("empty-slot1-greenspill-slot2", func(t *testing.T) {
+		slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+		writePhysickTears(slot, sentinel, greenspillRaw)
+		snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+		if err != nil {
+			t.Fatalf("GetEquipmentSnapshot: %v", err)
+		}
+		assertEmptySentinel(t, snap.Physick[0])
+		got := snap.Physick[1]
+		if !got.Occupied || !got.Resolved {
+			t.Errorf("slot 2 = occupied:%v resolved:%v, want both true", got.Occupied, got.Resolved)
+		}
+		if got.Name != "Greenspill Crystal Tear" {
+			t.Errorf("slot 2 Name = %q, want %q", got.Name, "Greenspill Crystal Tear")
+		}
+		if got.RawID != greenspillRaw {
+			t.Errorf("slot 2 RawID = 0x%08X, want 0x%08X", got.RawID, uint32(greenspillRaw))
+		}
+	})
 }

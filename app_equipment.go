@@ -257,6 +257,19 @@ func goodsView(pair core.RawEquipItem) EquipmentSlotView {
 	return resolveEquipView(pair.ItemID, classGoods)
 }
 
+// physickSlotView projects one Wondrous Physick tear field (T545). 0xFFFFFFFF is
+// the confirmed native sentinel for an empty tear field on both slots: it yields
+// an empty slot (Occupied=false, Resolved=false) with the raw sentinel preserved
+// per EquipmentSlotView's contract, and is never resolved against the item DB.
+// Every other value — including 0, which is NOT a confirmed sentinel — falls
+// through the normal unresolved path and stays visible as "Unknown item (0x…)".
+func physickSlotView(raw uint32) EquipmentSlotView {
+	if raw == core.GaHandleInvalid {
+		return EquipmentSlotView{RawID: raw}
+	}
+	return resolveEquipView(raw, classPhysickTear)
+}
+
 // GetEquipmentSnapshot returns the read-only equipped-item projection for the
 // given character slot. It never mutates any save state and never calls a
 // writer / repack / repair / save path.
@@ -325,13 +338,12 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	for i := 0; i < 6; i++ {
 		snap.Pouch[i] = goodsView(raw.Pouch[i])
 	}
-	// Wondrous Physick: two active tears. Raw IDs preserved; display metadata
-	// follows explicit technical aliases via classPhysickTear. The native
-	// empty-mixture encoding is unconfirmed, so 0 / 0xFFFFFFFF are NOT treated as
-	// a confirmed-empty slot — they fall through the normal unresolved path and
-	// surface as a visible "Unknown item (0x…)" with the raw ID.
+	// Wondrous Physick: two active tears (T545). physicsOff+0 is screen slot 1,
+	// physicsOff+4 is slot 2; the game does not left-pack, so a single tear lives
+	// only in slot 2. Raw IDs preserved; display metadata follows explicit
+	// technical aliases via classPhysickTear.
 	for i := 0; i < 2; i++ {
-		snap.Physick[i] = resolveEquipView(raw.Physick[i], classPhysickTear)
+		snap.Physick[i] = physickSlotView(raw.Physick[i])
 	}
 
 	return snap, nil
