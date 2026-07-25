@@ -115,6 +115,97 @@ func newEquipmentApp(slot core.SaveSlot) *App {
 	return app
 }
 
+func putSpellRecord(slot *core.SaveSlot, index int, id uint32) {
+	off := slot.EquippedSpellsOffset + index*core.EquippedSpellSlotSize
+	binary.LittleEndian.PutUint32(slot.Data[off:], id)
+	follower := uint32(0)
+	if id != core.EquippedSpellEmptySentinel {
+		follower = core.EquippedSpellOccupiedFollower
+	}
+	binary.LittleEndian.PutUint32(slot.Data[off+4:], follower)
+}
+
+func TestGetEquipmentSnapshot_ProjectsSpellsAndActiveIndex(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	for i := 0; i < core.EquippedSpellSlotCount; i++ {
+		putSpellRecord(&slot, i, core.EquippedSpellEmptySentinel)
+	}
+	putSpellRecord(&slot, 0, 0x00000FA0)
+	putSpellRecord(&slot, 1, 0x00001770)
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+core.EquippedSpellActiveIndexOffset:], 1)
+
+	snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if got := snap.Spells[0]; !got.Occupied || !got.Resolved || got.RawID != 0x00000FA0 || got.Name != "Glintstone Pebble" {
+		t.Errorf("Spells[0] = %+v, want resolved Glintstone Pebble", got)
+	}
+	if got := snap.Spells[1]; !got.Occupied || !got.Resolved || got.RawID != 0x00001770 || got.Name != "Catch Flame" {
+		t.Errorf("Spells[1] = %+v, want resolved Catch Flame", got)
+	}
+	if snap.Spells[2].Occupied || snap.Spells[2].RawID != core.EquippedSpellEmptySentinel {
+		t.Errorf("Spells[2] = %+v, want empty sentinel view", snap.Spells[2])
+	}
+	if snap.ActiveSpellIndex != 1 {
+		t.Errorf("ActiveSpellIndex = %d, want 1", snap.ActiveSpellIndex)
+	}
+}
+
+func TestSaveEquippedSpells_CompactsAndPreservesActiveIndex(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	for i := 0; i < core.EquippedSpellSlotCount; i++ {
+		putSpellRecord(&slot, i, core.EquippedSpellEmptySentinel)
+	}
+	putSpellRecord(&slot, 0, 0x00000FA0)
+	putSpellRecord(&slot, 1, 0x00001770)
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+core.EquippedSpellActiveIndexOffset:], 1)
+	app := newEquipmentApp(slot)
+
+	if err := app.SaveEquippedSpells(0, []uint32{0x40000FA0, 0x40001158}); err != nil {
+		t.Fatalf("SaveEquippedSpells: %v", err)
+	}
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if got, want := raw.Spells[0], uint32(0x00000FA0); got != want {
+		t.Errorf("Spells[0] = 0x%08X, want 0x%08X", got, want)
+	}
+	if got, want := raw.Spells[1], uint32(0x00001158); got != want {
+		t.Errorf("Spells[1] = 0x%08X, want 0x%08X", got, want)
+	}
+	if raw.Spells[2] != core.EquippedSpellEmptySentinel {
+		t.Errorf("Spells[2] = 0x%08X, want empty sentinel", raw.Spells[2])
+	}
+	if raw.ActiveSpellIndex != 1 {
+		t.Errorf("ActiveSpellIndex = %d, want unchanged 1", raw.ActiveSpellIndex)
+	}
+}
+
+func TestSaveEquippedSpells_NormalizesOutOfRangeActiveIndexToZero(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	for i := 0; i < core.EquippedSpellSlotCount; i++ {
+		putSpellRecord(&slot, i, core.EquippedSpellEmptySentinel)
+	}
+	putSpellRecord(&slot, 0, 0x00000FA0)
+	putSpellRecord(&slot, 1, 0x00001770)
+	putSpellRecord(&slot, 2, 0x00001158)
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+core.EquippedSpellActiveIndexOffset:], 2)
+	app := newEquipmentApp(slot)
+
+	if err := app.SaveEquippedSpells(0, []uint32{0x40000FA0, 0x40001770}); err != nil {
+		t.Fatalf("SaveEquippedSpells: %v", err)
+	}
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if raw.ActiveSpellIndex != 0 {
+		t.Errorf("ActiveSpellIndex = %d, want native fallback 0", raw.ActiveSpellIndex)
+	}
+}
+
 func TestGetEquipmentSnapshot_ValidationErrors(t *testing.T) {
 	app := NewApp()
 	// No save loaded.

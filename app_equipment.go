@@ -39,6 +39,8 @@ type EquipmentSnapshot struct {
 	QuickItems          [10]EquipmentSlotView `json:"quickItems"`
 	Pouch               [6]EquipmentSlotView  `json:"pouch"`
 	Physick             [2]EquipmentSlotView  `json:"physick"`
+	Spells              [14]EquipmentSlotView `json:"spells"`
+	ActiveSpellIndex    int                   `json:"activeSpellIndex"`
 }
 
 // equipClass selects how a raw stored value is normalized to a DB item ID.
@@ -51,6 +53,7 @@ const (
 	classTalisman                       // talismans: bare lower bits, canonical 0x20 prefix
 	classGoods                          // quick items / pouch: 0xB0 goods handle
 	classPhysickTear                    // physick tears: bare GoodsParam item ID, resolved as-is
+	classSpell                          // spells: bare MagicParam ID, canonical 0x40 item ID
 
 	unarmedItemID uint32 = 0x0001ADB0
 
@@ -132,6 +135,8 @@ func normalizeEquipItemID(raw uint32, class equipClass) uint32 {
 		// preserved by the caller. No id±1 rule: 0x40002AF9 (Greenspill) is a
 		// standalone tear and resolves to itself.
 		return db.PhysickTearDisplayID(raw)
+	case classSpell:
+		return raw | 0x40000000
 	}
 	return 0
 }
@@ -270,6 +275,13 @@ func physickSlotView(raw uint32) EquipmentSlotView {
 	return resolveEquipView(raw, classPhysickTear)
 }
 
+func spellSlotView(raw uint32) EquipmentSlotView {
+	if raw == core.EquippedSpellEmptySentinel {
+		return EquipmentSlotView{RawID: raw}
+	}
+	return resolveEquipView(raw, classSpell)
+}
+
 // GetEquipmentSnapshot returns the read-only equipped-item projection for the
 // given character slot. It never mutates any save state and never calls a
 // writer / repack / repair / save path.
@@ -345,6 +357,72 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	for i := 0; i < 2; i++ {
 		snap.Physick[i] = physickSlotView(raw.Physick[i])
 	}
+	for i := 0; i < core.EquippedSpellSlotCount; i++ {
+		snap.Spells[i] = spellSlotView(raw.Spells[i])
+	}
+	if raw.ActiveSpellIndex < core.EquippedSpellSlotCount {
+		snap.ActiveSpellIndex = int(raw.ActiveSpellIndex)
+	} else {
+		// A malformed save must not select an arbitrary UI slot. The raw reader
+		// preserves the value, while the presentation falls back safely.
+		snap.ActiveSpellIndex = -1
+	}
 
 	return snap, nil
+}
+
+// SaveEquippedSpells replaces the compact equipped spell list in memory. It
+// does not write a save file; the normal application-level Write Save action is
+// still the only disk write. The native active-index rule is deliberately
+// narrow: retain a still-valid index; when compaction removes its last record,
+// reset it to zero. This is established by T119/T121/T123.
+func (a *App) SaveEquippedSpells(charIdx int, itemIDs []uint32) error {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= len(a.save.Slots) || !a.save.ActiveSlots[charIdx] {
+		return fmt.Errorf("invalid active character slot %d", charIdx)
+	}
+
+	a.slotMu[charIdx].Lock()
+	defer a.slotMu[charIdx].Unlock()
+
+	slot := &a.save.Slots[charIdx]
+	raw, err := slot.ReadEquippedState()
+	if err != nil {
+		return fmt.Errorf("SaveEquippedSpells: read equipped state: %w", err)
+	}
+	limit := activeSpellSlotCount(slot, raw, activeTalismanSlotCount(slot.Player.TalismanSlots))
+	if len(itemIDs) == 0 || len(itemIDs) > limit {
+		return fmt.Errorf("SaveEquippedSpells: spell count %d out of range [1,%d]", len(itemIDs), limit)
+	}
+
+	rawIDs := make([]uint32, len(itemIDs))
+	for i, itemID := range itemIDs {
+		if itemID&0xF0000000 != 0x40000000 {
+			return fmt.Errorf("SaveEquippedSpells[%d]: item ID 0x%08X is not a spell", i, itemID)
+		}
+		item := db.GetItemData(itemID)
+		if item.Category != "sorceries" && item.Category != "incantations" {
+			return fmt.Errorf("SaveEquippedSpells[%d]: item ID 0x%08X is not a known spell", i, itemID)
+		}
+		rawIDs[i] = db.ItemIDToMagicParamID(itemID)
+	}
+
+	a.pushUndoLocked(charIdx)
+	if raw.ActiveSpellIndex >= uint32(len(rawIDs)) {
+		// Native removal leaves a selected middle position unchanged (T119), but
+		// resets a now-out-of-range selected final position to Pebble/index zero
+		// (T121). Do not synthesize any other index transformation here.
+		if err := slot.WriteCompactSpellsWithActiveIndex(rawIDs, 0); err != nil {
+			return fmt.Errorf("SaveEquippedSpells: %w", err)
+		}
+		return nil
+	}
+	if err := slot.WriteCompactSpells(rawIDs); err != nil {
+		return fmt.Errorf("SaveEquippedSpells: %w", err)
+	}
+	return nil
 }

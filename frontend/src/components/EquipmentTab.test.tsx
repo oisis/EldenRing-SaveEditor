@@ -16,6 +16,7 @@ import {
     GetPhysickEligibleItems,
     GetPouchEligibleItems,
     GetQuickItemEligibleItems,
+    SaveEquippedSpells,
     GetTalismanSlotEligibleItems,
 } from '../../wailsjs/go/main/App';
 
@@ -32,6 +33,7 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetLegsSlotEligibleItems: vi.fn(),
     GetTalismanSlotEligibleItems: vi.fn(),
     GetQuickItemEligibleItems: vi.fn(),
+    SaveEquippedSpells: vi.fn(),
     GetPouchEligibleItems: vi.fn(),
     GetPhysickEligibleItems: vi.fn(),
     GetItemList: vi.fn(),
@@ -41,6 +43,25 @@ const emptyView = { occupied: false, rawId: 0, name: '', iconPath: '', resolved:
 const view = (over: Partial<typeof emptyView>) => ({ ...emptyView, ...over });
 const fill = (n: number, over?: Partial<typeof emptyView>) =>
     Array.from({ length: n }, (_, i) => (i === 0 && over ? view(over) : { ...emptyView }));
+
+const spellPickerItems = [
+    { id: 0x40000FA0, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1 },
+    { id: 0x40001770, name: 'Catch Flame', category: 'incantations', iconPath: 'items/incantations/catch_flame.png', maxInventory: 1 },
+    { id: 0x40001158, name: 'Carian Slicer', category: 'sorceries', iconPath: 'items/sorceries/carian_slicer.png', maxInventory: 1 },
+];
+
+function mockSpellPickerInventory() {
+    vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(spellPickerItems.filter(item => item.category === category)) as never);
+    vi.mocked(GetCharacter).mockResolvedValue({
+        inventory: spellPickerItems.map((item, index) => ({
+            ...item,
+            baseId: item.id,
+            handle: index,
+            currentUpgrade: 0,
+            quantity: 1,
+        })),
+    } as never);
+}
 
 function makeSnapshot(over: Record<string, unknown> = {}) {
     return {
@@ -53,6 +74,8 @@ function makeSnapshot(over: Record<string, unknown> = {}) {
         quickItems: fill(10),
         pouch: fill(6),
         physick: fill(2),
+        spells: fill(14),
+        activeSpellIndex: 0,
         currentEquipLoad: 1.8,
         equipLoadKnown: true,
         equipLoadClass: 'Medium',
@@ -87,11 +110,125 @@ beforeEach(() => {
     });
     vi.mocked(GetCharacter).mockReset();
     vi.mocked(GetCharacter).mockResolvedValue({ inventory: [] } as never);
+    vi.mocked(SaveEquippedSpells).mockReset();
+    vi.mocked(SaveEquippedSpells).mockResolvedValue(undefined as never);
     vi.mocked(GetInfuseTypes).mockReset();
     vi.mocked(GetInfuseTypes).mockResolvedValue([] as never);
 });
 
 describe('EquipmentTab', () => {
+    it('renders real sorceries and incantations from the equipment snapshot', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true }),
+                ...fill(12),
+            ],
+            activeSpellIndex: 1,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        expect(await screen.findByAltText('Glintstone Pebble')).toBeInTheDocument();
+        expect(screen.getByAltText('Catch Flame')).toBeInTheDocument();
+    });
+
+    it('marks the active spell slot with a visible frame', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true }),
+                ...fill(12),
+            ],
+            activeSpellIndex: 1,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        expect(await screen.findByRole('button', { name: 'Spell slot 2' })).toHaveAttribute('data-active-spell', 'true');
+        expect(screen.getByRole('button', { name: 'Spell slot 1' })).not.toHaveAttribute('data-active-spell');
+    });
+
+    it('marks the current spell green in the picker and clicking it again clears its slot', async () => {
+        mockSpellPickerInventory();
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1158, name: 'Carian Slicer', iconPath: 'items/sorceries/carian_slicer.png', resolved: true }),
+                ...fill(11),
+            ],
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Spell slot 1' }));
+
+        const pebble = await screen.findByRole('button', { name: 'Select Glintstone Pebble' });
+        expect(pebble.parentElement).toHaveAttribute('data-picker-selected', 'true');
+        expect(pebble.parentElement).toHaveClass('border-emerald-500');
+        fireEvent.click(pebble);
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, [0x40001770, 0x40001158]));
+    });
+
+    it('shows but disables a spell already equipped in another slot', async () => {
+        mockSpellPickerInventory();
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1158, name: 'Carian Slicer', iconPath: 'items/sorceries/carian_slicer.png', resolved: true }),
+                ...fill(11),
+            ],
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Spell slot 4' }));
+
+        const pebble = await screen.findByRole('button', { name: 'Select Glintstone Pebble' });
+        expect(pebble).toBeDisabled();
+        expect(pebble.parentElement).toHaveClass('grayscale', 'opacity-40');
+        expect(screen.getByRole('button', { name: 'Select Catch Flame' })).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Select Carian Slicer' })).toBeDisabled();
+    });
+
+    it('removes a non-active spell with the red cross, compacts the draft, and saves it', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1158, name: 'Carian Slicer', iconPath: 'items/sorceries/carian_slicer.png', resolved: true }),
+                ...fill(11),
+            ],
+            activeSpellIndex: 2,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        await screen.findByAltText('Carian Slicer');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Spell slot 2' }));
+        expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, [0x40000FA0, 0x40001158]));
+    });
+
+    it('also permits staging removal of the currently active sorcery', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true }),
+                view({ occupied: true, rawId: 0x1158, name: 'Carian Slicer', iconPath: 'items/sorceries/carian_slicer.png', resolved: true }),
+                ...fill(11),
+            ],
+            activeSpellIndex: 2,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        await screen.findByAltText('Carian Slicer');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Spell slot 3' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, [0x40000FA0, 0x40001770]));
+    });
+
     it('renders the approved equipment layout', () => {
         render(<EquipmentTab />);
 

@@ -14,6 +14,11 @@ const EquippedSpellSlotCount = 14
 // by follower/unk u32 LE.
 const EquippedSpellSlotSize = 8
 
+// EquippedSpellActiveIndexOffset is the u32 immediately after the fourteen
+// spell records. It is a zero-based index into the currently equipped compact
+// spell list.
+const EquippedSpellActiveIndexOffset = EquippedSpellSlotCount * EquippedSpellSlotSize
+
 // EquippedSpellEmptySentinel marks an empty spell slot. Both spell_id ==
 // 0xFFFFFFFF AND follower == 0x00000000 are required by the game; mixing
 // these is a corrupt state.
@@ -107,12 +112,75 @@ type SpellWrite struct {
 	SpellID   uint32
 }
 
-// WriteSpells is the batch equivalent of PatchEquippedSpell with one
-// extra responsibility: it recomputes hash entry [10] (the EquippedSpells
-// hash) so the in-save hash block stays consistent with the new spell
-// loadout. Mirrors the WriteEquipment pattern (hash[7] / hash[8] inline
-// recompute) and is deliberately the ONLY production-code path that
-// touches hash[10].
+// WriteCompactSpells replaces the complete equipped spell list with spellIDs.
+// The supplied raw MagicParam IDs are written contiguously from slot 0 and the
+// remaining records are reset to the native empty pair (0xFFFFFFFF, 0).
+//
+// This is deliberately separate from WriteSpells, whose partial-patch
+// semantics preserve unselected records. Use WriteCompactSpells only when the
+// caller owns the entire requested loadout. A non-empty list is required: the
+// native active-index semantics for an empty loadout have not been established.
+//
+// The method preserves the hash block and does not read or write active_index.
+// The caller deliberately owns the gameplay semantics of a selected spell
+// whose compact-list position changes; this low-level writer only persists the
+// requested compact list. All validation occurs before mutation.
+func (s *SaveSlot) WriteCompactSpells(spellIDs []uint32) error {
+	return s.writeCompactSpells(spellIDs, nil)
+}
+
+// WriteCompactSpellsWithActiveIndex replaces a compact spell loadout and writes
+// its active HUD index atomically. activeIndex must point at one of spellIDs.
+// It is intended for the high-level application path after it has applied the
+// native normalization contract; callers that merely patch spell records must
+// keep using WriteCompactSpells.
+func (s *SaveSlot) WriteCompactSpellsWithActiveIndex(spellIDs []uint32, activeIndex uint32) error {
+	return s.writeCompactSpells(spellIDs, &activeIndex)
+}
+
+func (s *SaveSlot) writeCompactSpells(spellIDs []uint32, activeIndex *uint32) error {
+	if s == nil {
+		return fmt.Errorf("WriteCompactSpells: nil slot")
+	}
+	if len(spellIDs) == 0 || len(spellIDs) > EquippedSpellSlotCount {
+		return fmt.Errorf("WriteCompactSpells: spell count %d out of range [1,%d]", len(spellIDs), EquippedSpellSlotCount)
+	}
+	if s.EquippedSpellsOffset <= 0 {
+		return fmt.Errorf("WriteCompactSpells: EquippedSpellsOffset not initialised (got %d); call calculateDynamicOffsets first", s.EquippedSpellsOffset)
+	}
+	sectionEnd := s.EquippedSpellsOffset + EquippedSpellSlotCount*EquippedSpellSlotSize
+	if activeIndex != nil {
+		if *activeIndex >= uint32(len(spellIDs)) {
+			return fmt.Errorf("WriteCompactSpells: active index %d out of range for %d spells", *activeIndex, len(spellIDs))
+		}
+		sectionEnd += 4
+	}
+	if sectionEnd > len(s.Data) {
+		return fmt.Errorf("WriteCompactSpells: EquippedSpells section out of bounds (offset 0x%X, Data length %d)", s.EquippedSpellsOffset, len(s.Data))
+	}
+	for i, spellID := range spellIDs {
+		if spellID == 0 || spellID == EquippedSpellEmptySentinel {
+			return fmt.Errorf("WriteCompactSpells[%d]: spell ID 0x%08X is not valid in a compact loadout", i, spellID)
+		}
+	}
+	for i := 0; i < EquippedSpellSlotCount; i++ {
+		off := s.EquippedSpellsOffset + i*EquippedSpellSlotSize
+		spellID := EquippedSpellEmptySentinel
+		follower := uint32(0)
+		if i < len(spellIDs) {
+			spellID = spellIDs[i]
+			follower = EquippedSpellOccupiedFollower
+		}
+		binary.LittleEndian.PutUint32(s.Data[off:], spellID)
+		binary.LittleEndian.PutUint32(s.Data[off+4:], follower)
+	}
+	if activeIndex != nil {
+		binary.LittleEndian.PutUint32(s.Data[s.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], *activeIndex)
+	}
+	return nil
+}
+
+// WriteSpells is the batch equivalent of PatchEquippedSpell.
 //
 // Atomicity: every write is structurally validated (slot index range +
 // duplicate detection) BEFORE any byte is mutated. Any validation
@@ -120,11 +188,14 @@ type SpellWrite struct {
 // WriteEquipment's no-partial-write invariant. Per-write semantic
 // validation (offset bounds, nil slot, etc.) is delegated to
 // PatchEquippedSpell, which itself never mutates on failure.
+// It does not compact the list; full-loadout callers must use
+// WriteCompactSpells.
 //
-// Hash discipline: only hash[10] is touched. hash[7] (weapons),
-// hash[8] (armor/talismans) and every other hash entry are left
-// untouched — this writer never invalidates work done by WriteEquipment
-// or by any future per-section writer.
+// Hash discipline: this writer never touches the slot hash block. Native cold
+// saves keep hash[10] zero. A game-written save immediately after changing the
+// spell list may hold another transient value, which Elden Ring normalizes on
+// the next cold save and which does not equal ComputeSlotHash. Preserving the
+// loaded value avoids synthesizing an unproven intermediate representation.
 //
 // Concurrency: callers that share a SaveSlot across goroutines must
 // hold the slot-level lock for the entire WriteSpells call.
@@ -137,9 +208,6 @@ func (s *SaveSlot) WriteSpells(writes []SpellWrite) error {
 	}
 	if s.EquippedSpellsOffset+EquippedSpellSlotCount*EquippedSpellSlotSize > len(s.Data) {
 		return fmt.Errorf("WriteSpells: EquippedSpells section out of bounds (offset 0x%X, Data length %d)", s.EquippedSpellsOffset, len(s.Data))
-	}
-	if HashOffset+HashSize > len(s.Data) {
-		return fmt.Errorf("WriteSpells: hash block out of bounds")
 	}
 	if len(writes) == 0 {
 		return nil
@@ -161,13 +229,6 @@ func (s *SaveSlot) WriteSpells(writes []SpellWrite) error {
 			return fmt.Errorf("WriteSpells: %w", err)
 		}
 	}
-
-	// Recompute hash[10] from the current EquippedSpells region. We
-	// re-read via readSpellIDs (the same helper ComputeSlotHash uses)
-	// so the in-save hash stays bit-equivalent to a full
-	// ComputeSlotHash for entry [10] without touching any other entry.
-	spellIDs := readSpellIDs(s.Data, s.EquippedSpellsOffset)
-	binary.LittleEndian.PutUint32(s.Data[HashOffset+10*4:], equipmentHash(spellIDs))
 
 	return nil
 }

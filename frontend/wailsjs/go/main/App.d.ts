@@ -288,6 +288,8 @@ export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<vo
 
 export function SaveDeployTarget(arg1:deploy.Target):Promise<void>;
 
+export function SaveEquippedSpells(arg1:number,arg2:Array<number>):Promise<void>;
+
 export function SaveImportedBuildTemplateJSONToLibrary(arg1:string):Promise<templates.LibraryTemplateEntry>;
 
 export function SaveInventoryWorkspaceChanges(arg1:string):Promise<editor.InventoryWorkspaceSnapshot>;

@@ -562,6 +562,10 @@ export function SaveDeployTarget(arg1) {
   return window['go']['main']['App']['SaveDeployTarget'](arg1);
 }
 
+export function SaveEquippedSpells(arg1, arg2) {
+  return window['go']['main']['App']['SaveEquippedSpells'](arg1, arg2);
+}
+
 export function SaveImportedBuildTemplateJSONToLibrary(arg1) {
   return window['go']['main']['App']['SaveImportedBuildTemplateJSONToLibrary'](arg1);
 }

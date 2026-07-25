@@ -37,6 +37,11 @@ type RawEquippedState struct {
 	// cold start on item-save-lab task-543. Anchored dynamically off
 	// armamentsOff — never a hardcoded file offset.
 	Physick [2]uint32
+	// Spells holds the fourteen raw MagicParam IDs in the equipped spell list.
+	// ActiveSpellIndex is the zero-based HUD selection immediately after those
+	// records. Both values are read only; no normalization is applied here.
+	Spells           [EquippedSpellSlotCount]uint32
+	ActiveSpellIndex uint32
 }
 
 // EquipItemData section layout (see tmp/equipment/equipped-state-research.md §3.2):
@@ -61,6 +66,15 @@ func (s *SaveSlot) ReadEquippedState() (RawEquippedState, error) {
 	if s.EquippedSpellsOffset <= 0 {
 		return st, fmt.Errorf("ReadEquippedState: offsets not parsed")
 	}
+	spellEnd := s.EquippedSpellsOffset + EquippedSpellActiveIndexOffset + 4
+	if spellEnd > len(s.Data) {
+		return st, fmt.Errorf("ReadEquippedState: equipped-spells block out of bounds")
+	}
+	for i := 0; i < EquippedSpellSlotCount; i++ {
+		off := s.EquippedSpellsOffset + i*EquippedSpellSlotSize
+		st.Spells[i] = binary.LittleEndian.Uint32(s.Data[off:])
+	}
+	st.ActiveSpellIndex = binary.LittleEndian.Uint32(s.Data[s.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:])
 
 	// The 22 equipped slot values live in the equipped-armaments block, which
 	// starts after the variable-length acquired-projectiles section:

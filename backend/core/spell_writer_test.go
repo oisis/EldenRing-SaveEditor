@@ -267,16 +267,185 @@ func TestPatchEquippedSpell_IdempotentWriteNoOp(t *testing.T) {
 	}
 }
 
-// ─── WriteSpells (batch + hash[10] recompute) ───────────────────────────
+// ─── WriteCompactSpells (full native-style loadout) ─────────────────────
 
-// makeCalibratedSpellTestSlot builds a SaveSlot whose dynamic offset
-// chain has been calculated against the real MagicPattern anchor — the
-// only configuration in which slot.EquippedSpellsOffset equals the
-// spellsOff that ComputeSlotHash recomputes for hash entry [10].
-//
-// Tests that assert hash[10] consistency MUST use this helper rather
-// than the simpler makeSpellTestSlot, which pins an arbitrary offset
-// purely for per-write unit tests.
+func TestWriteCompactSpells_RemovesMiddleSpellAndClearsTail(t *testing.T) {
+	slot := makeSpellTestSlot()
+	old := []uint32{0x00000FA0, 0x00001770, 0x00001158, 0x00001915}
+	if err := slot.WriteSpells([]SpellWrite{
+		{SlotIndex: 0, SpellID: old[0]},
+		{SlotIndex: 1, SpellID: old[1]},
+		{SlotIndex: 2, SpellID: old[2]},
+		{SlotIndex: 3, SpellID: old[3]},
+	}); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], 0)
+	binary.LittleEndian.PutUint32(slot.Data[HashOffset+10*4:], 0xC0DEC0DE)
+	before := append([]byte(nil), slot.Data...)
+
+	want := []uint32{old[0], old[1], old[3]}
+	if err := slot.WriteCompactSpells(want); err != nil {
+		t.Fatalf("WriteCompactSpells: %v", err)
+	}
+	for i := 0; i < EquippedSpellSlotCount; i++ {
+		gotID, gotFollower := readSpellSlot(t, slot, i)
+		if i < len(want) {
+			if gotID != want[i] || gotFollower != EquippedSpellOccupiedFollower {
+				t.Errorf("slot %d = (0x%08X, 0x%08X), want (0x%08X, 0xFFFFFFFF)", i, gotID, gotFollower, want[i])
+			}
+		} else if gotID != EquippedSpellEmptySentinel || gotFollower != 0 {
+			t.Errorf("tail slot %d = (0x%08X, 0x%08X), want empty pair", i, gotID, gotFollower)
+		}
+	}
+	if got := binary.LittleEndian.Uint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:]); got != 0 {
+		t.Errorf("active_index = %d, want unchanged 0", got)
+	}
+	if got := readHashEntry(t, slot, 10); got != 0xC0DEC0DE {
+		t.Errorf("hash[10] = 0x%08X, want unchanged 0xC0DEC0DE", got)
+	}
+	start := slot.EquippedSpellsOffset
+	end := start + EquippedSpellSlotCount*EquippedSpellSlotSize
+	for i := range slot.Data {
+		if i >= start && i < end {
+			continue
+		}
+		if slot.Data[i] != before[i] {
+			t.Fatalf("byte 0x%X changed outside compact spell records", i)
+		}
+	}
+}
+
+func TestWriteCompactSpells_PreservesSelectedSuccessorIndex(t *testing.T) {
+	slot := makeSpellTestSlot()
+	if err := slot.WriteSpells([]SpellWrite{
+		{SlotIndex: 0, SpellID: 0x00000FA0},
+		{SlotIndex: 1, SpellID: 0x00001770},
+		{SlotIndex: 2, SpellID: 0x00001158},
+		{SlotIndex: 3, SpellID: 0x00001915},
+	}); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], 2)
+
+	if err := slot.WriteCompactSpells([]uint32{0x00000FA0, 0x00001770, 0x00001915}); err != nil {
+		t.Fatalf("WriteCompactSpells: %v", err)
+	}
+	active := binary.LittleEndian.Uint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:])
+	if active != 2 {
+		t.Fatalf("active_index = %d, want preserved 2", active)
+	}
+	if got, _ := readSpellSlot(t, slot, int(active)); got != 0x00001915 {
+		t.Errorf("selected spell = 0x%08X, want shifted Heal 0x00001915", got)
+	}
+}
+
+func TestWriteCompactSpells_DoesNotModifyActiveIndex(t *testing.T) {
+	slot := makeSpellTestSlot()
+	if err := slot.WriteSpells([]SpellWrite{
+		{SlotIndex: 0, SpellID: 0x00000FA0},
+		{SlotIndex: 1, SpellID: 0x00001770},
+		{SlotIndex: 2, SpellID: 0x00001158},
+		{SlotIndex: 3, SpellID: 0x00001915},
+	}); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], 3)
+
+	if err := slot.WriteCompactSpells([]uint32{0x00000FA0, 0x00001770, 0x00001158}); err != nil {
+		t.Fatalf("WriteCompactSpells: %v", err)
+	}
+	active := binary.LittleEndian.Uint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:])
+	if active != 3 {
+		t.Fatalf("active_index = %d, want byte-exact preservation of 3", active)
+	}
+}
+
+func TestWriteCompactSpellsWithActiveIndex_WritesVerifiedFallback(t *testing.T) {
+	slot := makeSpellTestSlot()
+	if err := slot.WriteSpells([]SpellWrite{
+		{SlotIndex: 0, SpellID: 0x00000FA0},
+		{SlotIndex: 1, SpellID: 0x00001770},
+		{SlotIndex: 2, SpellID: 0x00001158},
+		{SlotIndex: 3, SpellID: 0x00001915},
+	}); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], 3)
+
+	if err := slot.WriteCompactSpellsWithActiveIndex([]uint32{0x00000FA0, 0x00001770, 0x00001158}, 0); err != nil {
+		t.Fatalf("WriteCompactSpellsWithActiveIndex: %v", err)
+	}
+	if active := binary.LittleEndian.Uint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:]); active != 0 {
+		t.Errorf("active_index = %d, want 0", active)
+	}
+	if got, _ := readSpellSlot(t, slot, 0); got != 0x00000FA0 {
+		t.Errorf("selected fallback spell = 0x%08X, want Pebble", got)
+	}
+}
+
+func TestWriteCompactSpellsWithActiveIndex_InvalidIndexIsAtomic(t *testing.T) {
+	slot := makeSpellTestSlot()
+	before := append([]byte(nil), slot.Data...)
+	if err := slot.WriteCompactSpellsWithActiveIndex([]uint32{0x00000FA0}, 1); err == nil {
+		t.Fatal("expected active-index validation error")
+	}
+	if !bytes.Equal(before, slot.Data) {
+		t.Fatal("invalid active index mutated slot.Data")
+	}
+}
+
+func TestWriteCompactSpells_InvalidInputIsAtomic(t *testing.T) {
+	cases := []struct {
+		name     string
+		spellIDs []uint32
+		active   uint32
+	}{
+		{name: "empty", spellIDs: nil},
+		{name: "too many", spellIDs: make([]uint32, EquippedSpellSlotCount+1)},
+		{name: "zero spell id", spellIDs: []uint32{0}},
+		{name: "empty sentinel in input", spellIDs: []uint32{EquippedSpellEmptySentinel}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			slot := makeSpellTestSlot()
+			binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], tc.active)
+			before := append([]byte(nil), slot.Data...)
+			if err := slot.WriteCompactSpells(tc.spellIDs); err == nil {
+				t.Fatal("expected validation error")
+			}
+			if !bytes.Equal(before, slot.Data) {
+				t.Fatal("invalid compact loadout mutated slot.Data")
+			}
+		})
+	}
+}
+
+func TestWriteCompactSpells_UsesEquippedSpellsOffset(t *testing.T) {
+	slotA := makeSpellTestSlot()
+	slotB := makeSpellTestSlot()
+	slotB.EquippedSpellsOffset = slotA.EquippedSpellsOffset + 0x4000
+	ids := []uint32{0x00001770, 0x00001915}
+	if err := slotA.WriteCompactSpells(ids); err != nil {
+		t.Fatalf("slotA: %v", err)
+	}
+	if err := slotB.WriteCompactSpells(ids); err != nil {
+		t.Fatalf("slotB: %v", err)
+	}
+	for _, slot := range []*SaveSlot{slotA, slotB} {
+		for i, want := range ids {
+			if got, _ := readSpellSlot(t, slot, i); got != want {
+				t.Errorf("slot offset 0x%X record %d = 0x%08X, want 0x%08X", slot.EquippedSpellsOffset, i, got, want)
+			}
+		}
+	}
+}
+
+// ─── WriteSpells (batch, native hash block preserved) ───────────────────
+
+// makeCalibratedSpellTestSlot builds a SaveSlot whose dynamic offset chain has
+// been calculated against the real MagicPattern anchor. It remains useful for
+// callers that need a dynamically-derived spells offset.
 func makeCalibratedSpellTestSlot(t *testing.T) *SaveSlot {
 	t.Helper()
 	data := make([]byte, SlotSize)
@@ -299,16 +468,18 @@ func makeCalibratedSpellTestSlot(t *testing.T) *SaveSlot {
 	return slot
 }
 
-// readHashEntry reads the u32 hash entry at index (0..15) from the
-// slot's hash block. Provides a stable assertion helper for the
-// "hash[10] is touched, sibling entries are not" tests below.
+// readHashEntry reads a u32 hash entry from the slot hash block.
 func readHashEntry(t *testing.T, slot *SaveSlot, idx int) uint32 {
 	t.Helper()
 	return binary.LittleEndian.Uint32(slot.Data[HashOffset+idx*4:])
 }
 
-func TestWriteSpells_OccupiedSpell_UpdatesHash10ToMatchComputeSlotHash(t *testing.T) {
-	slot := makeCalibratedSpellTestSlot(t)
+func TestWriteSpells_OccupiedSpell_PreservesHashBlock(t *testing.T) {
+	slot := makeSpellTestSlot()
+	for i := range slot.Data[HashOffset : HashOffset+HashSize] {
+		slot.Data[HashOffset+i] = byte(i + 1)
+	}
+	beforeHash := append([]byte(nil), slot.Data[HashOffset:HashOffset+HashSize]...)
 
 	if err := slot.WriteSpells([]SpellWrite{{SlotIndex: 3, SpellID: 0x00001770}}); err != nil {
 		t.Fatalf("WriteSpells: %v", err)
@@ -320,67 +491,51 @@ func TestWriteSpells_OccupiedSpell_UpdatesHash10ToMatchComputeSlotHash(t *testin
 		t.Errorf("slot 3 = (0x%08X, 0x%08X), want (0x00001770, 0xFFFFFFFF)", gotID, gotFollower)
 	}
 
-	// hash[10] in slot.Data is bit-equivalent to ComputeSlotHash[10].
-	got := readHashEntry(t, slot, 10)
-	full := ComputeSlotHash(slot)
-	want := binary.LittleEndian.Uint32(full[10*4 : 10*4+4])
-	if got != want {
-		t.Errorf("hash[10] = 0x%08X, want 0x%08X (drifted from ComputeSlotHash)", got, want)
+	if !bytes.Equal(beforeHash, slot.Data[HashOffset:HashOffset+HashSize]) {
+		t.Error("WriteSpells mutated native hash block")
 	}
 }
 
-func TestWriteSpells_ClearOccupiedSlot_RecomputesHash10(t *testing.T) {
-	slot := makeCalibratedSpellTestSlot(t)
+func TestWriteSpells_ClearOccupiedSlot_PreservesHashBlock(t *testing.T) {
+	slot := makeSpellTestSlot()
+	binary.LittleEndian.PutUint32(slot.Data[HashOffset+10*4:], 0xCAFEBABE)
+	beforeHash := append([]byte(nil), slot.Data[HashOffset:HashOffset+HashSize]...)
 
-	// Seed an occupied slot via WriteSpells so hash[10] reflects that
-	// state.
 	if err := slot.WriteSpells([]SpellWrite{{SlotIndex: 0, SpellID: 0x00001770}}); err != nil {
 		t.Fatalf("seed: %v", err)
 	}
-	seededHash := readHashEntry(t, slot, 10)
-
-	// Now clear it.
 	if err := slot.WriteSpells([]SpellWrite{{SlotIndex: 0, SpellID: EquippedSpellEmptySentinel}}); err != nil {
 		t.Fatalf("clear: %v", err)
 	}
-	clearedHash := readHashEntry(t, slot, 10)
-
-	if seededHash == clearedHash {
-		t.Error("hash[10] unchanged after clear: expected a different value than the seeded one")
+	gotID, gotFollower := readSpellSlot(t, slot, 0)
+	if gotID != EquippedSpellEmptySentinel || gotFollower != 0 {
+		t.Errorf("clear = (0x%08X, 0x%08X), want empty sentinel", gotID, gotFollower)
 	}
-
-	// And the cleared hash must match ComputeSlotHash on the
-	// current state.
-	full := ComputeSlotHash(slot)
-	want := binary.LittleEndian.Uint32(full[10*4 : 10*4+4])
-	if clearedHash != want {
-		t.Errorf("hash[10] = 0x%08X, want 0x%08X (clear path drifted)", clearedHash, want)
+	if !bytes.Equal(beforeHash, slot.Data[HashOffset:HashOffset+HashSize]) {
+		t.Error("clear mutated native hash block")
 	}
 }
 
-func TestWriteSpells_DoesNotTouchOtherHashEntries(t *testing.T) {
+func TestWriteSpells_DoesNotTouchHashBlock(t *testing.T) {
 	slot := makeSpellTestSlot()
-
-	// Plant distinctive sentinels in adjacent hash entries so any
-	// stray mutation is loud.
-	for _, idx := range []int{0, 5, 7, 8, 9, 11, 12, 15} {
-		binary.LittleEndian.PutUint32(slot.Data[HashOffset+idx*4:], 0xDEADBEEF)
+	for i := range slot.Data[HashOffset : HashOffset+HashSize] {
+		slot.Data[HashOffset+i] = byte(0xA5 ^ i)
 	}
+	beforeHash := append([]byte(nil), slot.Data[HashOffset:HashOffset+HashSize]...)
 
 	if err := slot.WriteSpells([]SpellWrite{{SlotIndex: 7, SpellID: 0x00002328}}); err != nil {
 		t.Fatalf("WriteSpells: %v", err)
 	}
 
-	for _, idx := range []int{0, 5, 7, 8, 9, 11, 12, 15} {
-		got := readHashEntry(t, slot, idx)
-		if got != 0xDEADBEEF {
-			t.Errorf("hash[%d] = 0x%08X, want 0xDEADBEEF (WriteSpells must only touch hash[10])", idx, got)
-		}
+	if !bytes.Equal(beforeHash, slot.Data[HashOffset:HashOffset+HashSize]) {
+		t.Error("WriteSpells mutated hash block")
 	}
 }
 
 func TestWriteSpells_BatchMultipleWrites(t *testing.T) {
-	slot := makeCalibratedSpellTestSlot(t)
+	slot := makeSpellTestSlot()
+	binary.LittleEndian.PutUint32(slot.Data[HashOffset+10*4:], 0xCAFEBABE)
+	beforeHash := append([]byte(nil), slot.Data[HashOffset:HashOffset+HashSize]...)
 	writes := []SpellWrite{
 		{SlotIndex: 0, SpellID: 0x00001770},
 		{SlotIndex: 5, SpellID: 0x000011A1},
@@ -404,12 +559,8 @@ func TestWriteSpells_BatchMultipleWrites(t *testing.T) {
 		}
 	}
 
-	// hash[10] consistent with full recompute.
-	got := readHashEntry(t, slot, 10)
-	full := ComputeSlotHash(slot)
-	want := binary.LittleEndian.Uint32(full[10*4 : 10*4+4])
-	if got != want {
-		t.Errorf("hash[10] = 0x%08X, want 0x%08X", got, want)
+	if !bytes.Equal(beforeHash, slot.Data[HashOffset:HashOffset+HashSize]) {
+		t.Error("batch write mutated native hash block")
 	}
 }
 
@@ -445,7 +596,7 @@ func TestWriteSpells_InvalidSlotIndex_NoMutation_NoHashChange(t *testing.T) {
 			before := append([]byte(nil), slot.Data...)
 
 			err := slot.WriteSpells([]SpellWrite{
-				{SlotIndex: 0, SpellID: 0x00001770}, // valid
+				{SlotIndex: 0, SpellID: 0x00001770},      // valid
 				{SlotIndex: badIdx, SpellID: 0x00001234}, // poison pill
 			})
 			if err == nil {
@@ -510,10 +661,12 @@ func TestWriteSpells_UninitialisedOffset_NoMutation(t *testing.T) {
 func TestWriteSpells_UsesEquippedSpellsOffset(t *testing.T) {
 	// Two slots with different EquippedSpellsOffset values. WriteSpells
 	// must write to the slot's own offset, not some shared/calculated
-	// value — proves the recompute path also reads from the same offset.
+	// value.
 	slotA := makeSpellTestSlot()
 	slotB := makeSpellTestSlot()
 	slotB.EquippedSpellsOffset = slotA.EquippedSpellsOffset + 0x4000
+	binary.LittleEndian.PutUint32(slotA.Data[HashOffset+10*4:], 0xA1A1A1A1)
+	binary.LittleEndian.PutUint32(slotB.Data[HashOffset+10*4:], 0xB2B2B2B2)
 
 	const id uint32 = 0x00001770
 	if err := slotA.WriteSpells([]SpellWrite{{SlotIndex: 2, SpellID: id}}); err != nil {
@@ -532,17 +685,10 @@ func TestWriteSpells_UsesEquippedSpellsOffset(t *testing.T) {
 		t.Errorf("slotB: spell at own offset = 0x%08X, want 0x%08X", gotB, id)
 	}
 
-	// And the hash[10] for each slot reflects its OWN spells region.
-	// Asserting against equipmentHash(readSpellIDs(slot.Data, slot.EquippedSpellsOffset))
-	// — NOT ComputeSlotHash — because the latter recomputes spellsOff from
-	// the MagicOffset chain and would diverge from the writer's
-	// field-driven offset (which is the whole point of this test).
-	for _, s := range []*SaveSlot{slotA, slotB} {
-		got := binary.LittleEndian.Uint32(s.Data[HashOffset+10*4:])
-		want := equipmentHash(readSpellIDs(s.Data, s.EquippedSpellsOffset))
-		if got != want {
-			t.Errorf("hash[10] drift on slot offset 0x%X: got 0x%08X, want 0x%08X",
-				s.EquippedSpellsOffset, got, want)
-		}
+	if got := readHashEntry(t, slotA, 10); got != 0xA1A1A1A1 {
+		t.Errorf("slotA hash[10] = 0x%08X, want unchanged 0xA1A1A1A1", got)
+	}
+	if got := readHashEntry(t, slotB, 10); got != 0xB2B2B2B2 {
+		t.Errorf("slotB hash[10] = 0x%08X, want unchanged 0xB2B2B2B2", got)
 	}
 }

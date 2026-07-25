@@ -611,8 +611,8 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 	// resolver's structural / DB-membership warnings land in the report
 	// in the same pre-mutation phase as equipment. The actual
 	// slot.WriteSpells call happens later, after vm.MapViewModelToSlot
-	// and after slot.WriteEquipment, so the spell bytes and hash[10]
-	// recompute sit on top of the freshest VM-flushed state.
+	// and after slot.WriteEquipment, so spell bytes sit on top of the
+	// freshest VM-flushed state.
 	var spellWrites []core.SpellWrite
 	var spellSlotsApplied int
 	if hasSpells {
@@ -799,8 +799,8 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 
 	// Phase 7d.3 — apply spell writes AFTER vm.MapViewModelToSlot
 	// (which already ran above) and AFTER slot.WriteEquipment, so the
-	// spell bytes and hash[10] recompute land on top of fully
-	// VM-flushed + equipment-written state. Any earlier placement
+	// spell bytes land on top of fully VM-flushed + equipment-written
+	// state. Any earlier placement
 	// would be overwritten by MapViewModelToSlot. WriteSpells batches
 	// PatchEquippedSpell with pre-validation; a non-nil error means no
 	// byte was mutated.
@@ -1453,15 +1453,15 @@ func resolveV2LayoutMode(opts *templates.LayoutApplyOptions) (v2LayoutModeOutcom
 // executeV2LayoutReorder. Counters are zero when the section was not
 // run (mode=ignore / mode=unsupported / no entries matched).
 type v2LayoutApplyResult struct {
-	inventoryMatched  int
-	storageMatched    int
-	inventoryMissing  int
-	storageMissing    int
-	inventoryExtras   int
-	storageExtras     int
-	inventoryRun      bool
-	storageRun        bool
-	warnings          []templates.ImportPreviewIssue
+	inventoryMatched int
+	storageMatched   int
+	inventoryMissing int
+	storageMissing   int
+	inventoryExtras  int
+	storageExtras    int
+	inventoryRun     bool
+	storageRun       bool
+	warnings         []templates.ImportPreviewIssue
 }
 
 // reorderContainerInPlace mutates EditableItem.Position values for one

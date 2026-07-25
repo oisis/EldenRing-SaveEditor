@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### feat(equipment): view and edit equipped sorceries and incantations
+
+Equipment now displays equipped sorceries and incantations with their actual
+icons and names. The red remove control works for both spell families; saving
+keeps the list compact and follows the verified native fallback to the first
+spell when compaction would leave the active index outside the list.
+
 ## [1.5.9] - 2026-07-24
 
 ### refactor(gaitem): remove obsolete allocation optimizer

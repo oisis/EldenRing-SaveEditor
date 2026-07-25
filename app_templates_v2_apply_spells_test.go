@@ -81,8 +81,10 @@ func spellsTemplateJSON(t *testing.T, sel *templates.SectionSelection, sec *temp
 
 // ─── happy path ────────────────────────────────────────────────────────
 
-func TestApplyV2_Spells_OccupiedSlot_WritesRawIDAndUpdatesHash10(t *testing.T) {
+func TestApplyV2_Spells_OccupiedSlot_WritesRawIDAndPreservesHash10(t *testing.T) {
 	app := spellsApplyFixture(t)
+	const nativeHash10 = 0xC0DEC0DE
+	binary.LittleEndian.PutUint32(app.save.Slots[0].Data[core.HashOffset+10*4:], nativeHash10)
 	jsonText := spellsTemplateJSON(t,
 		&templates.SectionSelection{Fields: map[string]bool{"spell1": true}},
 		&templates.SpellsSection{
@@ -119,13 +121,12 @@ func TestApplyV2_Spells_OccupiedSlot_WritesRawIDAndUpdatesHash10(t *testing.T) {
 		t.Errorf("slot 0 follower = 0x%08X, want 0x%08X", gotFollower, core.EquippedSpellOccupiedFollower)
 	}
 
-	// hash[10] in slot.Data matches ComputeSlotHash[10] — proves the
-	// apply path called WriteSpells (which recomputes hash[10]).
+	// WriteSpells preserves the loaded hash block. Native cold saves use zero,
+	// but a game-written intermediate value is also observed, so the app must
+	// not synthesize ComputeSlotHash here.
 	gotHash := readHash10(t, app)
-	full := core.ComputeSlotHash(&app.save.Slots[0])
-	wantHash := binary.LittleEndian.Uint32(full[10*4 : 10*4+4])
-	if gotHash != wantHash {
-		t.Errorf("hash[10] = 0x%08X, want 0x%08X (apply did not recompute)", gotHash, wantHash)
+	if gotHash != nativeHash10 {
+		t.Errorf("hash[10] = 0x%08X, want unchanged 0x%08X", gotHash, nativeHash10)
 	}
 }
 

@@ -1790,6 +1790,8 @@ export namespace main {
 	    quickItems: EquipmentSlotView[];
 	    pouch: EquipmentSlotView[];
 	    physick: EquipmentSlotView[];
+	    spells: EquipmentSlotView[];
+	    activeSpellIndex: number;
 
 	    static createFrom(source: any = {}) {
 	        return new EquipmentSnapshot(source);
@@ -1812,6 +1814,8 @@ export namespace main {
 	        this.quickItems = this.convertValues(source["quickItems"], EquipmentSlotView);
 	        this.pouch = this.convertValues(source["pouch"], EquipmentSlotView);
 	        this.physick = this.convertValues(source["physick"], EquipmentSlotView);
+	        this.spells = this.convertValues(source["spells"], EquipmentSlotView);
+	        this.activeSpellIndex = source["activeSpellIndex"];
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

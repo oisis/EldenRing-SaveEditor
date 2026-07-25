@@ -39,6 +39,14 @@ func makeReaderTestSlot() *SaveSlot {
 		binary.LittleEndian.PutUint32(data[equipOff+i*4:], decoyHeaderValue(i))
 	}
 
+	for i := 0; i < EquippedSpellSlotCount; i++ {
+		off := spellsOff + i*EquippedSpellSlotSize
+		binary.LittleEndian.PutUint32(data[off:], EquippedSpellEmptySentinel)
+	}
+	binary.LittleEndian.PutUint32(data[spellsOff:], 0x00000FA0)
+	binary.LittleEndian.PutUint32(data[spellsOff+EquippedSpellSlotSize:], 0x00001770)
+	binary.LittleEndian.PutUint32(data[spellsOff+EquippedSpellActiveIndexOffset:], 1)
+
 	// EquipItemData: quick pairs, active slot, pouch pairs.
 	base := spellsOff + DynEquipedSpells
 	for i := 0; i < equipItemDataQuickCount; i++ {
@@ -112,6 +120,25 @@ func TestReadEquippedState_PhysickBlock(t *testing.T) {
 		if got := st.Physick[i]; got != physickTearValue(i) {
 			t.Errorf("Physick[%d] = 0x%08X, want 0x%08X", i, got, physickTearValue(i))
 		}
+	}
+}
+
+func TestReadEquippedState_SpellsAndActiveIndex(t *testing.T) {
+	slot := makeReaderTestSlot()
+	st, err := slot.ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if st.Spells[0] != 0x00000FA0 || st.Spells[1] != 0x00001770 {
+		t.Fatalf("Spells[0:2] = [%08X %08X], want [00000FA0 00001770]", st.Spells[0], st.Spells[1])
+	}
+	for i := 2; i < EquippedSpellSlotCount; i++ {
+		if st.Spells[i] != EquippedSpellEmptySentinel {
+			t.Errorf("Spells[%d] = 0x%08X, want empty sentinel", i, st.Spells[i])
+		}
+	}
+	if st.ActiveSpellIndex != 1 {
+		t.Errorf("ActiveSpellIndex = %d, want 1", st.ActiveSpellIndex)
 	}
 }
 
