@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/binary"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
@@ -468,5 +469,62 @@ func TestGetEquipmentSnapshot_HidesPartialEquipLoadForUnknownItem(t *testing.T) 
 	}
 	if snap.EquipLoadKnown {
 		t.Error("EquipLoadKnown = true for an unknown equipped item")
+	}
+}
+
+// writePhysickTears writes the two active tear IDs into the EquipPhysicsData
+// block of a slot built by buildEquipSlot, at the exact offset ReadEquippedState
+// reads from (armamentsOff + DynEquipedArmaments).
+func writePhysickTears(slot core.SaveSlot, tear0, tear1 uint32) {
+	projHeaderOff := testEquippedSpellsOffset + core.DynEquipedSpells + core.DynEquipedItems + core.DynEquipedGestures
+	armamentsOff := projHeaderOff + 4 + testProjCount*8
+	physicsOff := armamentsOff + core.DynEquipedArmaments
+	binary.LittleEndian.PutUint32(slot.Data[physicsOff:], tear0)
+	binary.LittleEndian.PutUint32(slot.Data[physicsOff+4:], tear1)
+}
+
+func TestGetEquipmentSnapshot_ResolvesPhysickTears(t *testing.T) {
+	const (
+		crimsonVariantRaw = 0x40002AFA // technical variant, display -> canonical Crimson Crystal Tear
+		greenspillRaw     = 0x40002AF9 // standalone tear, must stay Greenspill (not a neighbour ID)
+	)
+	cases := []struct {
+		name         string
+		raw          uint32
+		wantResolved bool
+		wantName     string
+	}{
+		{"crimson-variant-canonical", crimsonVariantRaw, true, "Crimson Crystal Tear"},
+		{"greenspill-standalone", greenspillRaw, true, "Greenspill Crystal Tear"},
+		{"zero-unresolved", 0x00000000, false, "Unknown item (0x00000000)"},
+		{"ffffffff-unresolved", 0xFFFFFFFF, false, "Unknown item (0xFFFFFFFF)"},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+			writePhysickTears(slot, tc.raw, 0x40002AFE) // second tear: Speckled Hardtear, always resolvable
+
+			snap, err := newEquipmentApp(slot).GetEquipmentSnapshot(0)
+			if err != nil {
+				t.Fatalf("GetEquipmentSnapshot: %v", err)
+			}
+			got := snap.Physick[0]
+			if got.RawID != tc.raw {
+				t.Errorf("RawID = 0x%08X, want native 0x%08X", got.RawID, tc.raw)
+			}
+			if got.Resolved != tc.wantResolved {
+				t.Errorf("Resolved = %v, want %v", got.Resolved, tc.wantResolved)
+			}
+			if got.Name != tc.wantName {
+				t.Errorf("Name = %q, want %q", got.Name, tc.wantName)
+			}
+			// Unresolved tears must stay visible (occupied), never a silent empty slot.
+			if !got.Occupied {
+				t.Errorf("Physick[0].Occupied = false; unresolved tears must remain visible")
+			}
+			if tc.name == "crimson-variant-canonical" && strings.Contains(got.Name, "(Variant)") {
+				t.Errorf("display name %q must not carry the technical (Variant) suffix", got.Name)
+			}
+		})
 	}
 }

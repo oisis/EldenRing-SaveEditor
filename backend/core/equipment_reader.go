@@ -29,6 +29,14 @@ type RawEquippedState struct {
 	QuickItems  [10]RawEquipItem
 	Pouch       [6]RawEquipItem
 	ActiveQuick int32
+	// Physick holds the two active Wondrous Physick tear IDs, read from the
+	// EquipPhysicsData block that immediately follows the 0x9C armaments block
+	// (DynEquipePhysics = 0x0C: tear0 u32, tear1 u32, trailing u32). These are
+	// bare GoodsParam item IDs (e.g. 0x40002AF9 Greenspill, 0x40002AFA Crimson
+	// variant), directly DB-resolvable. Confirmed byte-exact across a native
+	// cold start on item-save-lab task-543. Anchored dynamically off
+	// armamentsOff — never a hardcoded file offset.
+	Physick [2]uint32
 }
 
 // EquipItemData section layout (see tmp/equipment/equipped-state-research.md §3.2):
@@ -74,6 +82,15 @@ func (s *SaveSlot) ReadEquippedState() (RawEquippedState, error) {
 	for i := 0; i < ChrAsmFieldCount; i++ {
 		st.Equipped[i] = binary.LittleEndian.Uint32(s.Data[armamentsOff+i*4:])
 	}
+
+	// EquipPhysicsData block (DynEquipePhysics = 0x0C) starts right after the
+	// 0x9C armaments block; its first two u32 are the active Physick tears.
+	physicsOff := armamentsOff + DynEquipedArmaments
+	if physicsOff < armamentsOff || physicsOff+DynEquipePhysics > len(s.Data) {
+		return st, fmt.Errorf("ReadEquippedState: physick block out of bounds")
+	}
+	st.Physick[0] = binary.LittleEndian.Uint32(s.Data[physicsOff:])
+	st.Physick[1] = binary.LittleEndian.Uint32(s.Data[physicsOff+4:])
 
 	base := s.EquippedSpellsOffset + DynEquipedSpells // start of EquipItemData
 	if base < 0 || base+DynEquipedItems > len(s.Data) {

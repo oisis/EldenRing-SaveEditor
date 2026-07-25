@@ -1789,6 +1789,7 @@ export namespace main {
 	    talismans: EquipmentSlotView[];
 	    quickItems: EquipmentSlotView[];
 	    pouch: EquipmentSlotView[];
+	    physick: EquipmentSlotView[];
 
 	    static createFrom(source: any = {}) {
 	        return new EquipmentSnapshot(source);
@@ -1810,6 +1811,7 @@ export namespace main {
 	        this.talismans = this.convertValues(source["talismans"], EquipmentSlotView);
 	        this.quickItems = this.convertValues(source["quickItems"], EquipmentSlotView);
 	        this.pouch = this.convertValues(source["pouch"], EquipmentSlotView);
+	        this.physick = this.convertValues(source["physick"], EquipmentSlotView);
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

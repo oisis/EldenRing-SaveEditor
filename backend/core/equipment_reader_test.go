@@ -3,6 +3,7 @@ package core
 import (
 	"bytes"
 	"encoding/binary"
+	"strings"
 	"testing"
 )
 
@@ -18,6 +19,9 @@ func armamentsSlotValue(idx int) uint32 { return 0xEA000000 | uint32(idx) }
 // decoyHeaderValue is written into the legacy EquipItemsID header. The reader
 // must NOT return these — they mimic the encoded ga-handles found on real saves.
 func decoyHeaderValue(idx int) uint32 { return 0x80010000 | uint32(idx) }
+
+// physickTearValue is the distinct value written for physick tear slot idx.
+func physickTearValue(idx int) uint32 { return 0x40002AF9 + uint32(idx) }
 
 // makeReaderTestSlot builds a synthetic slot with parsed EquipItemsIDOffset and
 // EquippedSpellsOffset. The 22 equipped values are written into the
@@ -57,6 +61,11 @@ func makeReaderTestSlot() *SaveSlot {
 		binary.LittleEndian.PutUint32(data[armamentsOff+i*4:], armamentsSlotValue(i))
 	}
 
+	// EquipPhysicsData block (two active tears) right after the 0x9C armaments block.
+	physicsOff := armamentsOff + DynEquipedArmaments
+	binary.LittleEndian.PutUint32(data[physicsOff:], physickTearValue(0))
+	binary.LittleEndian.PutUint32(data[physicsOff+4:], physickTearValue(1))
+
 	return &SaveSlot{
 		Data:                 data,
 		EquipItemsIDOffset:   equipOff,
@@ -86,6 +95,42 @@ func TestReadEquippedState_ArmamentsBlockMapping(t *testing.T) {
 		if st.Equipped[idx] != armamentsSlotValue(idx) {
 			t.Errorf("equipped slot idx %d misread", idx)
 		}
+	}
+}
+
+// TestReadEquippedState_PhysickBlock proves the two active tears are read from
+// the EquipPhysicsData block anchored at armamentsOff + DynEquipedArmaments,
+// matching the item-save-lab task-543 native contract (delta 0x0 from the block
+// start, tears at +0 and +4).
+func TestReadEquippedState_PhysickBlock(t *testing.T) {
+	slot := makeReaderTestSlot()
+	st, err := slot.ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	for i := 0; i < 2; i++ {
+		if got := st.Physick[i]; got != physickTearValue(i) {
+			t.Errorf("Physick[%d] = 0x%08X, want 0x%08X", i, got, physickTearValue(i))
+		}
+	}
+}
+
+// TestReadEquippedState_PhysickBlockOutOfBounds proves a dedicated bounds guard:
+// when the armaments block fits in Data but the full DynEquipePhysics block does
+// not, the reader returns the physick error rather than reading past the buffer.
+func TestReadEquippedState_PhysickBlockOutOfBounds(t *testing.T) {
+	slot := makeReaderTestSlot()
+	projHeaderOff := slot.EquippedSpellsOffset + DynEquipedSpells + DynEquipedItems + DynEquipedGestures
+	projCount := int(binary.LittleEndian.Uint32(slot.Data[projHeaderOff:]))
+	armamentsOff := projHeaderOff + 4 + projCount*8
+	physicsOff := armamentsOff + DynEquipedArmaments
+	// Keep the full armaments block in range (len >= physicsOff) but cut the
+	// physics block one byte short of DynEquipePhysics.
+	slot.Data = slot.Data[:physicsOff+DynEquipePhysics-1]
+
+	_, err := slot.ReadEquippedState()
+	if err == nil || !strings.Contains(err.Error(), "physick block out of bounds") {
+		t.Fatalf("want physick out-of-bounds error, got %v", err)
 	}
 }
 

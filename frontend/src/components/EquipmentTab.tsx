@@ -117,7 +117,13 @@ function PouchSlot({ label, active, onOpen, item }: { label: string; active?: 'u
     );
 }
 
-function PhysickSlot({ label, onOpen }: { label: string; onOpen: (label: string) => void }) {
+function PhysickSlot({ label, onOpen, item }: { label: string; onOpen: (label: string) => void; item?: EquippedItem }) {
+    // Occupied + resolved: real icon and tear name. Occupied + unknown: the raw-ID
+    // name, never the empty placeholder (the native empty-mixture encoding is
+    // unconfirmed). Empty: placeholder + eligibility text.
+    const occupied = item?.occupied ?? false;
+    const resolved = item?.resolved ?? false;
+    const tooltip = occupied ? item!.name : 'Crystal Tears';
     return (
         <button
             type="button"
@@ -126,11 +132,17 @@ function PhysickSlot({ label, onOpen }: { label: string; onOpen: (label: string)
             style={slotSurface}
             className="group relative flex h-[82px] w-[82px] flex-col rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] text-[color:var(--eq-physick-text)] hover:border-[color:var(--eq-slot-hover-border)]"
         >
-            <SlotTooltip eligibleItems="Crystal Tears" />
+            <SlotTooltip eligibleItems={tooltip} />
             <SlotRemoveIcon />
-            <span className="line-clamp-2 min-h-[21px] text-center text-[8px] font-extrabold leading-[1.15]">Physick tear</span>
+            <span className="line-clamp-2 min-h-[21px] text-center text-[8px] font-extrabold leading-[1.15]">{occupied ? item!.name : 'Physick tear'}</span>
             <span className="flex h-[51px] items-center justify-center">
-                <img className="h-[51px] w-[51px] object-contain opacity-[var(--eq-ghost-opacity)]" src="/equipment/physick-tear-placeholder.png" alt="" />
+                {resolved ? (
+                    <ItemIcon src={iconSrc(item!.iconPath)} alt={item!.name} />
+                ) : occupied ? (
+                    <span data-testid="physick-unknown" className="flex h-[51px] w-[51px] items-center justify-center text-2xl font-black text-[color:var(--eq-physick-text)]">?</span>
+                ) : (
+                    <img className="h-[51px] w-[51px] object-contain opacity-[var(--eq-ghost-opacity)]" src="/equipment/physick-tear-placeholder.png" alt="" />
+                )}
             </span>
         </button>
     );
@@ -272,8 +284,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision }: { char
                     <div aria-hidden="true" className="mt-[6px] h-[14px]" />
                     <h3 className="mb-3 w-[173px] whitespace-pre-line text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">{'Wondrous\nPhysick flask'}</h3>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
-                        <PhysickSlot label="Physick tear 1" onOpen={openSlot} />
-                        <PhysickSlot label="Physick tear 2" onOpen={openSlot} />
+                        <PhysickSlot label="Physick tear 1" onOpen={openSlot} item={snapshot?.physick[0]} />
+                        <PhysickSlot label="Physick tear 2" onOpen={openSlot} item={snapshot?.physick[1]} />
                     </div>
                 </div>
 

@@ -15,6 +15,29 @@ const (
 	flaskMaxLevel uint32 = 12
 )
 
+// physickTearDisplayAliases maps a technical Physick tear variant ID (a real
+// "(Variant)" GoodsParam row, base-1, kept out of the DB picker; see the
+// no_database rows in data/key_items.go) to the canonical tear row that carries
+// the display name and icon. Entries are explicit and locally confirmed — never
+// an id±1 heuristic. Standalone tears (e.g. 0x40002AF9 Greenspill) are
+// deliberately absent so they resolve to themselves, never a neighbour ID.
+var physickTearDisplayAliases = map[uint32]uint32{
+	0x40002AFA: 0x40002AFB, // Crimson Crystal Tear (Variant) -> Crimson Crystal Tear
+	0x40002AFC: 0x40002AFD, // Cerulean Crystal Tear (Variant) -> Cerulean Crystal Tear
+	0x40002B08: 0x40002B09, // Ruptured Crystal Tear (Variant) -> Ruptured Crystal Tear
+}
+
+// PhysickTearDisplayID returns the DB item ID used for a Physick tear's display
+// metadata. The caller preserves the raw saved ID; only the metadata lookup
+// follows an explicit technical alias. Unknown or standalone IDs resolve to
+// themselves, so a truly unresolvable value still fails soft downstream.
+func PhysickTearDisplayID(id uint32) uint32 {
+	if canonical, ok := physickTearDisplayAliases[id]; ok {
+		return canonical
+	}
+	return id
+}
+
 // IsWondrousPhysick reports whether id is either raw save-state variant of the
 // single logical Flask of Wondrous Physick item.
 func IsWondrousPhysick(id uint32) bool {

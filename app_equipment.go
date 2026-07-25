@@ -21,8 +21,8 @@ type EquipmentSlotView struct {
 }
 
 // EquipmentSnapshot is the read-only projection of one character's equipped
-// items, grouped per UI slot family. Physick is intentionally excluded: its
-// tear encoding is not yet confirmed and it stays presentation-only.
+// items, grouped per UI slot family. Physick holds the two active Wondrous
+// Physick tears (raw IDs preserved, resolved via the local item DB).
 type EquipmentSnapshot struct {
 	MaxEquipLoad        float64               `json:"maxEquipLoad"`
 	CurrentEquipLoad    float64               `json:"currentEquipLoad"`
@@ -38,6 +38,7 @@ type EquipmentSnapshot struct {
 	Talismans           [4]EquipmentSlotView  `json:"talismans"`
 	QuickItems          [10]EquipmentSlotView `json:"quickItems"`
 	Pouch               [6]EquipmentSlotView  `json:"pouch"`
+	Physick             [2]EquipmentSlotView  `json:"physick"`
 }
 
 // equipClass selects how a raw stored value is normalized to a DB item ID.
@@ -49,6 +50,7 @@ const (
 	classAmmo                           // arrows/bolts: bare item ID
 	classTalisman                       // talismans: bare lower bits, canonical 0x20 prefix
 	classGoods                          // quick items / pouch: 0xB0 goods handle
+	classPhysickTear                    // physick tears: bare GoodsParam item ID, resolved as-is
 
 	unarmedItemID uint32 = 0x0001ADB0
 
@@ -123,6 +125,13 @@ func normalizeEquipItemID(raw uint32, class equipClass) uint32 {
 		return (raw & 0x0FFFFFFF) | 0x20000000
 	case classGoods:
 		return db.HandleToItemID(raw)
+	case classPhysickTear:
+		// Tears are stored as bare item IDs (prefix 0x40). Display metadata
+		// follows an explicit technical alias (e.g. 0x40002AFA variant ->
+		// canonical Crimson Crystal Tear) via PhysickTearDisplayID; the raw ID is
+		// preserved by the caller. No id±1 rule: 0x40002AF9 (Greenspill) is a
+		// standalone tear and resolves to itself.
+		return db.PhysickTearDisplayID(raw)
 	}
 	return 0
 }
@@ -315,6 +324,14 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	}
 	for i := 0; i < 6; i++ {
 		snap.Pouch[i] = goodsView(raw.Pouch[i])
+	}
+	// Wondrous Physick: two active tears. Raw IDs preserved; display metadata
+	// follows explicit technical aliases via classPhysickTear. The native
+	// empty-mixture encoding is unconfirmed, so 0 / 0xFFFFFFFF are NOT treated as
+	// a confirmed-empty slot — they fall through the normal unresolved path and
+	// surface as a visible "Unknown item (0x…)" with the raw ID.
+	for i := 0; i < 2; i++ {
+		snap.Physick[i] = resolveEquipView(raw.Physick[i], classPhysickTear)
 	}
 
 	return snap, nil

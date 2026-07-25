@@ -52,6 +52,7 @@ function makeSnapshot(over: Record<string, unknown> = {}) {
         talismans: fill(4),
         quickItems: fill(10),
         pouch: fill(6),
+        physick: fill(2),
         currentEquipLoad: 1.8,
         equipLoadKnown: true,
         equipLoadClass: 'Medium',
@@ -613,7 +614,7 @@ describe('EquipmentTab equipped-item projection', () => {
         expect(screen.getByText('Heavy')).toHaveClass('text-red-600');
     });
 
-    it('leaves Physick unchanged when a snapshot loads', async () => {
+    it('keeps the eligibility tooltip on empty Physick slots', async () => {
         vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
             rightHandArmaments: fill(3, { occupied: true, resolved: true, name: 'Claymore', iconPath: 'items/weapons/claymore.png' }),
         }) as never);
@@ -622,5 +623,43 @@ describe('EquipmentTab equipped-item projection', () => {
         await screen.findByAltText('Claymore');
 
         expect(screen.getAllByRole('tooltip', { name: 'Crystal Tears' })).toHaveLength(2);
+    });
+
+    it('renders both Physick tears from the snapshot with canonical names and icons', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            physick: [
+                view({ occupied: true, resolved: true, name: 'Crimson Crystal Tear', iconPath: 'items/key_items/crimson_crystal_tear.png', rawId: 0x40002afa }),
+                view({ occupied: true, resolved: true, name: 'Greenspill Crystal Tear', iconPath: 'items/key_items/greenspill_crystal_tear.png', rawId: 0x40002af9 }),
+            ],
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        const crimson = await screen.findByAltText('Crimson Crystal Tear');
+        expect(crimson).toHaveAttribute('src', '/items/key_items/crimson_crystal_tear.png');
+        const greenspill = screen.getByAltText('Greenspill Crystal Tear');
+        expect(greenspill).toHaveAttribute('src', '/items/key_items/greenspill_crystal_tear.png');
+        // Canonical display: the technical variant suffix must not leak through.
+        expect(screen.queryByText('Crimson Crystal Tear (Variant)')).not.toBeInTheDocument();
+        expect(screen.getByRole('tooltip', { name: 'Crimson Crystal Tear' })).toBeInTheDocument();
+    });
+
+    it('shows an unresolved Physick tear as a visible unknown, not an empty placeholder', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            physick: [
+                view({ occupied: true, resolved: false, name: 'Unknown item (0xFFFFFFFF)', rawId: 0xffffffff }),
+                { occupied: false, rawId: 0, name: '', iconPath: '', resolved: false },
+            ],
+        }) as never);
+
+        render(<EquipmentTab charIdx={0} />);
+
+        // The raw-ID unknown label is visible and carries a tooltip; no ghost placeholder.
+        expect(await screen.findByRole('tooltip', { name: 'Unknown item (0xFFFFFFFF)' })).toBeInTheDocument();
+        expect(screen.getByTestId('physick-unknown')).toBeInTheDocument();
+        const tear1 = screen.getByRole('button', { name: 'Physick tear 1' });
+        expect(tear1.querySelector('img')).toBeNull();
+        // The still-empty second slot keeps its eligibility tooltip.
+        expect(screen.getByRole('tooltip', { name: 'Crystal Tears' })).toBeInTheDocument();
     });
 });
