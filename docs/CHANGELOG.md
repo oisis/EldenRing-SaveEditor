@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.0] - 2026-07-26
+
+### feat(equipment): add an experimental Equipment editor
+
+Added a dedicated Equipment tab for inspecting the active loadout, unlocked
+talisman capacity, Equip Load and movement class. The tab resolves armaments,
+ammunition, armor, talismans, Quick Items, Pouch items, Wondrous Physick tears,
+sorceries and incantations to their game names and icons while preserving
+unknown native values honestly. The new surface is explicitly marked
+Experimental.
+
+### feat(equipment): unify loadout pickers and supported editing
+
+Equipment fields now share a category-aware picker with Inventory and Item
+Database sources, eligibility filters, equipped-item highlighting, duplicate
+prevention and double-click selection. Weapon entries include their useful
+combat details. Supported armament, ammunition, armor and spell changes can be
+staged and saved from the same Equipment workflow, including red remove
+controls for sorceries and incantations. Talisman editing remains part of the
+explicitly experimental path while its native persistence is still being
+validated.
+
+### fix(equipment): preserve native loadout representations
+
+Equipment writes now keep the native EquipData, ChrAsm, ChrAsm2 and dynamic
+representations synchronized for armaments, ammunition and armor. Spell writes
+keep the memorized list compact and normalize an invalid active index using the
+verified native fallback. Physick display IDs and empty slots follow the native
+save contracts established from cold-start fixtures.
+
+### perf(gaitem): allocate added items as one native batch
+
+GaItem additions now reserve and apply native free positions as a batch,
+reducing repeated layout work while preserving the game's physical allocation
+semantics.
+
 ### docs(license): add third-party MIT notices for er-save-manager and ER-Save-Editor
 
 Added `docs/THIRD-PARTY-NOTICES.md` with the verbatim MIT license text and
