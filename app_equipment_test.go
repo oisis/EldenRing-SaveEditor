@@ -207,7 +207,7 @@ func TestSaveEquippedSpells_NormalizesOutOfRangeActiveIndexToZero(t *testing.T) 
 	}
 }
 
-func TestSaveEquipment_WritesOwnedHandleToBothNativeRepresentations(t *testing.T) {
+func TestSaveEquipment_WritesOwnedHandleToFourNativeRepresentations(t *testing.T) {
 	var equipped [core.ChrAsmFieldCount]uint32
 	equipped[1] = 0x0001ADB0 // native empty right-hand item (Unarmed)
 	slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
@@ -221,8 +221,6 @@ func TestSaveEquipment_WritesOwnedHandleToBothNativeRepresentations(t *testing.T
 		clubHandle:    clubItemID,
 	}
 	slot.Inventory.CommonItems = []core.InventoryItem{{GaItemHandle: clubHandle, Quantity: 1}}
-	// Header values are a separate native representation from equipped[] above.
-	binary.LittleEndian.PutUint32(slot.Data[slot.EquipItemsIDOffset+1*4:], 0x80007980)
 
 	app := newEquipmentApp(slot)
 	if err := app.SaveEquipment(0, []EquipmentChange{{Slot: core.EquipSlotRightHandArmament1, Handle: clubHandle}}); err != nil {
@@ -235,8 +233,18 @@ func TestSaveEquipment_WritesOwnedHandleToBothNativeRepresentations(t *testing.T
 	if got := raw.Equipped[1]; got != clubItemID {
 		t.Errorf("dynamic right hand = 0x%08X, want 0x%08X", got, uint32(clubItemID))
 	}
-	if got, want := binary.LittleEndian.Uint32(app.save.Slots[0].Data[slot.EquipItemsIDOffset+1*4:]), uint32(0x80001080); got != want {
-		t.Errorf("header right hand = 0x%08X, want 0x%08X", got, want)
+	fieldOff := 1 + 1*4
+	equipIndexBase := slot.MagicOffset + core.DynSpEffect
+	itemIDBase := equipIndexBase + core.DynEquipedItemIndex + core.DynActiveEquipedItems
+	handleBase := itemIDBase + core.DynEquipedItemsID
+	if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[equipIndexBase+fieldOff:]); got != 0x180 {
+		t.Errorf("EquipData right hand index = 0x%08X, want 0x00000180", got)
+	}
+	if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[itemIDBase+fieldOff:]); got != clubItemID&0x0FFFFFFF {
+		t.Errorf("ChrAsm right hand ID = 0x%08X, want 0x%08X", got, uint32(clubItemID&0x0FFFFFFF))
+	}
+	if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[handleBase+fieldOff:]); got != clubHandle {
+		t.Errorf("ChrAsm2 right hand handle = 0x%08X, want 0x%08X", got, uint32(clubHandle))
 	}
 	snap, err := app.GetEquipmentSnapshot(0)
 	if err != nil {

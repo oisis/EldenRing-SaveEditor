@@ -16,11 +16,20 @@ const (
 	equipmentWriterArmorHandle  = 0x90800020
 	equipmentWriterArrowHandle  = 0x80800030
 	equipmentWriterBoltHandle   = 0x80800031
+	equipmentWriterWeaponID     = 0x00100020
+	equipmentWriterArmorID      = 0x10100040
+	equipmentWriterArrowID      = 0x02FAF080
+	equipmentWriterBoltID       = 0x03197500
 	equipmentWriterTalisman     = 0xA00003E8
 	equipmentWriterTalisman2    = 0xA00003F2
 	equipmentWriterTalisman3    = 0xA00003FC
 	equipmentWriterTalisman4    = 0xA0000406
 	equipmentWriterTalismanRow  = 20
+	equipmentWriterUnarmedRow   = 5
+	equipmentWriterBareHeadRow  = 6
+	equipmentWriterBareChestRow = 7
+	equipmentWriterBareArmsRow  = 8
+	equipmentWriterBareLegsRow  = 9
 )
 
 func makeEquipmentTestSlot() *SaveSlot {
@@ -37,11 +46,11 @@ func makeEquipmentTestSlot() *SaveSlot {
 		Player:               PlayerGameData{TalismanSlots: 3},
 		GaMap: map[uint32]uint32{
 			0x80800079:                  unarmedEquipmentItemID,
-			equipmentWriterWeaponHandle: 0x00100020,
+			equipmentWriterWeaponHandle: equipmentWriterWeaponID,
 			0x80800011:                  0x00100021,
-			equipmentWriterArmorHandle:  0x10100040,
-			equipmentWriterArrowHandle:  0x40100050,
-			equipmentWriterBoltHandle:   0x40100051,
+			equipmentWriterArmorHandle:  equipmentWriterArmorID,
+			equipmentWriterArrowHandle:  equipmentWriterArrowID,
+			equipmentWriterBoltHandle:   equipmentWriterBoltID,
 			0x9080007F:                  0x10002710,
 			0x90800080:                  0x10002774,
 			0x90800081:                  0x100027D8,
@@ -54,34 +63,52 @@ func makeEquipmentTestSlot() *SaveSlot {
 	slot.Inventory.CommonItems[2] = InventoryItem{GaItemHandle: equipmentWriterArmorHandle, Quantity: 1}
 	slot.Inventory.CommonItems[3] = InventoryItem{GaItemHandle: equipmentWriterArrowHandle, Quantity: 1}
 	slot.Inventory.CommonItems[4] = InventoryItem{GaItemHandle: equipmentWriterBoltHandle, Quantity: 1}
+	slot.Inventory.CommonItems[equipmentWriterUnarmedRow] = InventoryItem{GaItemHandle: 0x80800079, Quantity: 1}
+	slot.Inventory.CommonItems[equipmentWriterBareHeadRow] = InventoryItem{GaItemHandle: 0x9080007F, Quantity: 1}
+	slot.Inventory.CommonItems[equipmentWriterBareChestRow] = InventoryItem{GaItemHandle: 0x90800080, Quantity: 1}
+	slot.Inventory.CommonItems[equipmentWriterBareArmsRow] = InventoryItem{GaItemHandle: 0x90800081, Quantity: 1}
+	slot.Inventory.CommonItems[equipmentWriterBareLegsRow] = InventoryItem{GaItemHandle: 0x90800082, Quantity: 1}
 	slot.Inventory.CommonItems[equipmentWriterTalismanRow] = InventoryItem{GaItemHandle: equipmentWriterTalisman, Quantity: 1}
 
-	// Native empty layout established by T547: unarmed/bare armor are real
-	// item IDs, while ammo uses the invalid sentinel in the dynamic block.
+	// Native empty layout established by T547: all four representations point
+	// at Unarmed / the per-slot bare armor rows, while ammunition is all-empty.
 	for i := 0; i < ChrAsmFieldCount; i++ {
 		binary.LittleEndian.PutUint32(data[armaments+i*4:], GaHandleInvalid)
 	}
 	for _, index := range []int{0, 1, 2, 3, 4, 5} {
+		equipIndexOff, itemIDOff, handleOff, err := slot.equipmentRepresentationOffsets(index)
+		if err != nil {
+			panic(err)
+		}
+		binary.LittleEndian.PutUint32(data[equipIndexOff:], inventoryEquipIndexBase+equipmentWriterUnarmedRow)
+		binary.LittleEndian.PutUint32(data[itemIDOff:], unarmedEquipmentItemID&0x0FFFFFFF)
+		binary.LittleEndian.PutUint32(data[handleOff:], 0x80800079)
 		binary.LittleEndian.PutUint32(data[armaments+index*4:], unarmedEquipmentItemID)
 	}
+	bareRows := map[int]int{
+		12: equipmentWriterBareHeadRow,
+		13: equipmentWriterBareChestRow,
+		14: equipmentWriterBareArmsRow,
+		15: equipmentWriterBareLegsRow,
+	}
+	bareHandles := map[int]uint32{
+		12: 0x9080007F,
+		13: 0x90800080,
+		14: 0x90800081,
+		15: 0x90800082,
+	}
 	for index, itemID := range bareArmorItemIDBySlot {
+		equipIndexOff, itemIDOff, handleOff, err := slot.equipmentRepresentationOffsets(index)
+		if err != nil {
+			panic(err)
+		}
+		binary.LittleEndian.PutUint32(data[equipIndexOff:], inventoryEquipIndexBase+uint32(bareRows[index]))
+		binary.LittleEndian.PutUint32(data[itemIDOff:], itemID&0x0FFFFFFF)
+		binary.LittleEndian.PutUint32(data[handleOff:], bareHandles[index])
 		binary.LittleEndian.PutUint32(data[armaments+index*4:], itemID)
 	}
-
-	// The low byte belongs to the slot representation; preserve it for handle
-	// backed values. Arrow and bolt empty sentinels are intentionally different.
-	static := [ChrAsmFieldCount]uint32{
-		0x800079FF, 0x80007980, 0x80007980, 0x80007980, 0x80007980, 0x80007980,
-		0x00000080, 0x00000000, 0x00000080, 0x00000000,
-		0, 0,
-		0x80007F00, 0x80008090, 0x80008190, 0x80008290,
-		0, 0, 0, 0, 0, 0,
-	}
-	for i, value := range static {
-		binary.LittleEndian.PutUint32(data[testEquipHeaderOff+i*4:], value)
-	}
 	for index := firstTalismanChrAsmIndex; index < firstTalismanChrAsmIndex+talismanSlotCount; index++ {
-		equipIndexOff, itemIDOff, handleOff, err := slot.talismanRepresentationOffsets(index)
+		equipIndexOff, itemIDOff, handleOff, err := slot.equipmentRepresentationOffsets(index)
 		if err != nil {
 			panic(err)
 		}
@@ -92,10 +119,6 @@ func makeEquipmentTestSlot() *SaveSlot {
 	return slot
 }
 
-func staticEquip(slot *SaveSlot, index int) uint32 {
-	return binary.LittleEndian.Uint32(slot.Data[slot.EquipItemsIDOffset+index*4:])
-}
-
 func dynamicEquip(slot *SaveSlot, index int) uint32 {
 	off, err := slot.equippedArmamentsOffset()
 	if err != nil {
@@ -104,8 +127,8 @@ func dynamicEquip(slot *SaveSlot, index int) uint32 {
 	return binary.LittleEndian.Uint32(slot.Data[off+index*4:])
 }
 
-func talismanNativeValues(slot *SaveSlot, index int) (equipIndex, itemID, handle, dynamic uint32) {
-	equipIndexOff, itemIDOff, handleOff, err := slot.talismanRepresentationOffsets(index)
+func nativeEquipmentValues(slot *SaveSlot, index int) (equipIndex, itemID, handle, dynamic uint32) {
+	equipIndexOff, itemIDOff, handleOff, err := slot.equipmentRepresentationOffsets(index)
 	if err != nil {
 		panic(err)
 	}
@@ -115,7 +138,11 @@ func talismanNativeValues(slot *SaveSlot, index int) (equipIndex, itemID, handle
 		dynamicEquip(slot, index)
 }
 
-func TestWriteEquipment_WritesBothNativeRepresentations(t *testing.T) {
+func talismanNativeValues(slot *SaveSlot, index int) (equipIndex, itemID, handle, dynamic uint32) {
+	return nativeEquipmentValues(slot, index)
+}
+
+func TestWriteEquipment_WritesFourNativeRepresentations(t *testing.T) {
 	slot := makeEquipmentTestSlot()
 	if err := slot.WriteEquipment([]EquipmentWrite{
 		{Slot: EquipSlotRightHandArmament1, Handle: equipmentWriterWeaponHandle},
@@ -126,18 +153,20 @@ func TestWriteEquipment_WritesBothNativeRepresentations(t *testing.T) {
 	}
 
 	cases := []struct {
-		index, header, dynamic uint32
+		index                               int
+		equipIndex, itemID, handle, dynamic uint32
 	}{
-		{1, 0x80001080, 0x00100020},
-		{6, 0x80003080, 0x40100050},
-		{12, 0x80002000, 0x10100040},
+		{1, inventoryEquipIndexBase + 0, equipmentWriterWeaponID & 0x0FFFFFFF, equipmentWriterWeaponHandle, equipmentWriterWeaponID},
+		{6, inventoryEquipIndexBase + 3, equipmentWriterArrowID & 0x0FFFFFFF, equipmentWriterArrowHandle, equipmentWriterArrowID},
+		{12, inventoryEquipIndexBase + 2, equipmentWriterArmorID & 0x0FFFFFFF, equipmentWriterArmorHandle, equipmentWriterArmorID},
 	}
 	for _, tc := range cases {
-		if got := staticEquip(slot, int(tc.index)); got != tc.header {
-			t.Errorf("slot %d header = %08X, want %08X", tc.index, got, tc.header)
-		}
-		if got := dynamicEquip(slot, int(tc.index)); got != tc.dynamic {
-			t.Errorf("slot %d dynamic = %08X, want %08X", tc.index, got, tc.dynamic)
+		equipIndex, itemID, handle, dynamic := nativeEquipmentValues(slot, tc.index)
+		if equipIndex != tc.equipIndex || itemID != tc.itemID || handle != tc.handle || dynamic != tc.dynamic {
+			t.Errorf("slot %d = %08X/%08X/%08X/%08X, want %08X/%08X/%08X/%08X",
+				tc.index,
+				equipIndex, itemID, handle, dynamic,
+				tc.equipIndex, tc.itemID, tc.handle, tc.dynamic)
 		}
 	}
 }
@@ -153,19 +182,21 @@ func TestWriteEquipment_ClearUsesNativeSentinels(t *testing.T) {
 		t.Fatal(err)
 	}
 	cases := []struct {
-		index, header, dynamic uint32
+		index                               int
+		equipIndex, itemID, handle, dynamic uint32
 	}{
-		{0, 0x800079FF, unarmedEquipmentItemID},
-		{6, 0x00000080, GaHandleInvalid},
-		{7, 0x00000000, GaHandleInvalid},
-		{12, 0x80007F00, 0x10002710},
+		{0, inventoryEquipIndexBase + equipmentWriterUnarmedRow, unarmedEquipmentItemID & 0x0FFFFFFF, 0x80800079, unarmedEquipmentItemID},
+		{6, GaHandleInvalid, GaHandleInvalid, 0, GaHandleInvalid},
+		{7, GaHandleInvalid, GaHandleInvalid, 0, GaHandleInvalid},
+		{12, inventoryEquipIndexBase + equipmentWriterBareHeadRow, 0x00002710, 0x9080007F, 0x10002710},
 	}
 	for _, tc := range cases {
-		if got := staticEquip(slot, int(tc.index)); got != tc.header {
-			t.Errorf("slot %d header = %08X, want %08X", tc.index, got, tc.header)
-		}
-		if got := dynamicEquip(slot, int(tc.index)); got != tc.dynamic {
-			t.Errorf("slot %d dynamic = %08X, want %08X", tc.index, got, tc.dynamic)
+		equipIndex, itemID, handle, dynamic := nativeEquipmentValues(slot, tc.index)
+		if equipIndex != tc.equipIndex || itemID != tc.itemID || handle != tc.handle || dynamic != tc.dynamic {
+			t.Errorf("slot %d = %08X/%08X/%08X/%08X, want %08X/%08X/%08X/%08X",
+				tc.index,
+				equipIndex, itemID, handle, dynamic,
+				tc.equipIndex, tc.itemID, tc.handle, tc.dynamic)
 		}
 	}
 }
@@ -355,31 +386,61 @@ func TestWriteEquipment_T547NativeClearContract(t *testing.T) {
 	if err := before.Slots[0].WriteEquipment(writes); err != nil {
 		t.Fatal(err)
 	}
-	beforeArm, err := before.Slots[0].equippedArmamentsOffset()
-	if err != nil {
-		t.Fatal(err)
-	}
-	afterArm, err := after.Slots[0].equippedArmamentsOffset()
-	if err != nil {
-		t.Fatal(err)
-	}
 	for _, index := range []int{0, 1, 6, 7, 12, 13, 14, 15} {
-		gotHeader := staticEquip(&before.Slots[0], index)
-		wantHeader := staticEquip(&after.Slots[0], index)
-		gotDynamic := binary.LittleEndian.Uint32(before.Slots[0].Data[beforeArm+index*4:])
-		wantDynamic := binary.LittleEndian.Uint32(after.Slots[0].Data[afterArm+index*4:])
-		if gotDynamic != wantDynamic {
-			t.Errorf("slot %d dynamic = %08X, native = %08X", index, gotDynamic, wantDynamic)
+		gotEquipIndex, gotItemID, gotHandle, gotDynamic := nativeEquipmentValues(&before.Slots[0], index)
+		wantEquipIndex, wantItemID, wantHandle, wantDynamic := nativeEquipmentValues(&after.Slots[0], index)
+		if gotEquipIndex != wantEquipIndex || gotItemID != wantItemID || gotDynamic != wantDynamic {
+			t.Errorf("slot %d fixed/dynamic values do not match native clear: got %08X/%08X/%08X; want %08X/%08X/%08X",
+				index,
+				gotEquipIndex, gotItemID, gotDynamic,
+				wantEquipIndex, wantItemID, wantDynamic)
 		}
-		if index == 6 || index == 7 {
-			if gotHeader != wantHeader {
-				t.Errorf("slot %d empty header = %08X, native = %08X", index, gotHeader, wantHeader)
+		if gotHandle == 0 || wantHandle == 0 {
+			if gotHandle != wantHandle {
+				t.Errorf("slot %d empty handle = %08X, native = %08X", index, gotHandle, wantHandle)
 			}
 			continue
 		}
-		if !headerReferencesItemID(&before.Slots[0], gotHeader, gotDynamic) {
-			t.Errorf("slot %d header %08X does not reference dynamic item %08X", index, gotHeader, gotDynamic)
+		if !nativeHandleMatches(&before.Slots[0], gotEquipIndex, gotHandle, gotDynamic) {
+			t.Errorf("slot %d writer handle %08X is not the inventory row referenced by EquipData %08X for item %08X",
+				index, gotHandle, gotEquipIndex, gotDynamic)
 		}
+		if !nativeHandleMatches(&after.Slots[0], wantEquipIndex, wantHandle, wantDynamic) {
+			t.Errorf("slot %d native handle %08X is not the inventory row referenced by EquipData %08X for item %08X",
+				index, wantHandle, wantEquipIndex, wantDynamic)
+		}
+	}
+}
+
+func TestWriteEquipment_T064NativeAmmoContract(t *testing.T) {
+	save := loadTaskArtifact(t, "task-064-", "05-pickup-a-b.sl2")
+	slot := &save.Slots[0]
+	before := append([]byte(nil), slot.Data...)
+	_, _, arrowHandle, _ := nativeEquipmentValues(slot, 6)
+	_, _, boltHandle, _ := nativeEquipmentValues(slot, 7)
+
+	if err := slot.WriteEquipment([]EquipmentWrite{
+		{Slot: EquipSlotArrows1, Handle: 0},
+		{Slot: EquipSlotBolts1, Handle: 0},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	for _, index := range []int{6, 7} {
+		equipIndex, itemID, handle, dynamic := nativeEquipmentValues(slot, index)
+		if equipIndex != GaHandleInvalid || itemID != GaHandleInvalid || handle != 0 || dynamic != GaHandleInvalid {
+			t.Errorf("cleared ammo slot %d = %08X/%08X/%08X/%08X, want FFFFFFFF/FFFFFFFF/00000000/FFFFFFFF",
+				index, equipIndex, itemID, handle, dynamic)
+		}
+	}
+
+	if err := slot.WriteEquipment([]EquipmentWrite{
+		{Slot: EquipSlotArrows1, Handle: arrowHandle},
+		{Slot: EquipSlotBolts1, Handle: boltHandle},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(slot.Data, before) {
+		t.Error("clear then restore did not reproduce the byte-exact native T064 ammunition state")
 	}
 }
 
@@ -437,15 +498,19 @@ func assertTalismanNativeMatches(t *testing.T, got, want *SaveSlot, indices ...i
 }
 
 func loadT548Artifact(t *testing.T, name string) *SaveFile {
+	return loadTaskArtifact(t, "task-548", name)
+}
+
+func loadTaskArtifact(t *testing.T, taskPrefix, name string) *SaveFile {
 	t.Helper()
 	root := filepath.Join("..", "..", "tmp", "item-save-lab", "artifacts", "tasks")
-	dirs, err := filepath.Glob(filepath.Join(root, "task-548*"))
+	dirs, err := filepath.Glob(filepath.Join(root, taskPrefix+"*"))
 	if err != nil || len(dirs) != 1 {
-		t.Skip("T548 artifacts unavailable")
+		t.Skipf("%s artifacts unavailable", taskPrefix)
 	}
 	path := filepath.Join(dirs[0], name)
 	if _, err := os.Stat(path); err != nil {
-		t.Skip("T548 artifact unavailable")
+		t.Skipf("%s artifact unavailable", taskPrefix)
 	}
 	save, err := LoadSave(path)
 	if err != nil {
@@ -454,12 +519,16 @@ func loadT548Artifact(t *testing.T, name string) *SaveFile {
 	return save
 }
 
-func headerReferencesItemID(slot *SaveSlot, header, itemID uint32) bool {
-	key := header >> 8
-	for handle, mappedItemID := range slot.GaMap {
-		if handle&0x00FFFFFF == key && mappedItemID == itemID {
-			return true
-		}
+func nativeHandleMatches(slot *SaveSlot, equipIndex, handle, itemID uint32) bool {
+	if equipIndex < inventoryEquipIndexBase {
+		return false
 	}
-	return false
+	row := int(equipIndex - inventoryEquipIndexBase)
+	if row < 0 || row >= len(slot.Inventory.CommonItems) {
+		return false
+	}
+	item := slot.Inventory.CommonItems[row]
+	return item.GaItemHandle == handle &&
+		item.Quantity&0x7FFFFFFF != 0 &&
+		slot.GaMap[handle] == itemID
 }
