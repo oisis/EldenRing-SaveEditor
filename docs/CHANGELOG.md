@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### feat(equipment): enable Quick Item and Pouch editing
+
+Quick Item and Pouch slots can now be equipped, replaced and cleared from the
+shared Equipment picker. Saves keep both native slot representations in sync,
+preserve the active Quick Item selection and show the owned stack quantity on
+each populated slot.
+
+### feat(equipment): choose stack quantities from Item Database
+
+Selecting a stackable Equipment item from Item Database now opens a quantity
+dialog before adding it to Inventory and equipping it. The selected quantity is
+also shown immediately on stackable Equipment slots.
+
 ## [1.6.0] - 2026-07-26
 
 ### feat(equipment): add an experimental Equipment editor

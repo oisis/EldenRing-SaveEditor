@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
-import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells } from '../../wailsjs/go/main/App';
+import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells, SaveQuickPouchItems } from '../../wailsjs/go/main/App';
 import type { main, vm } from '../../wailsjs/go/models';
 import { EquipmentItemPickerModal, type EquipmentPickerSelection } from './EquipmentItemPickerModal';
 
@@ -26,7 +26,7 @@ const equipmentSlotByLabel: Record<string, number> = {
     'Gold Scarab': 17,
 };
 
-const emptyEquipmentItem = (): EquippedItem => ({ occupied: false, rawId: 0, handle: 0, name: '', iconPath: '', resolved: false });
+const emptyEquipmentItem = (): EquippedItem => ({ occupied: false, rawId: 0, handle: 0, quantity: 0, name: '', iconPath: '', resolved: false });
 
 // Item icon paths in the DB are stored without a leading slash; the public
 // assets are served from the root, so normalize to an absolute path.
@@ -129,7 +129,7 @@ function PouchPlaceholder() {
     );
 }
 
-function PouchSlot({ label, active, onOpen, item }: { label: string; active?: 'up' | 'right' | 'down' | 'left'; onOpen: (label: string) => void; item?: EquippedItem }) {
+function PouchSlot({ label, active, onOpen, item, onRemove }: { label: string; active?: 'up' | 'right' | 'down' | 'left'; onOpen: (label: string) => void; item?: EquippedItem; onRemove?: () => void }) {
     const tooltip = item?.occupied ? item.name : 'Tools and Spirit Ashes';
     return (
         <button
@@ -141,7 +141,8 @@ function PouchSlot({ label, active, onOpen, item }: { label: string; active?: 'u
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems={tooltip} />
-            <SlotRemoveIcon label={label} />
+            <SlotRemoveIcon label={label} onRemove={onRemove} />
+            {item?.occupied && <span className="pointer-events-none absolute right-1.5 top-1 z-20 text-xs font-black text-foreground">{item.quantity}</span>}
             {active && <DPad active={active} />}
             {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : <PouchPlaceholder />}
         </button>
@@ -186,6 +187,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const [ammoQuantities, setAmmoQuantities] = useState<Record<number, number>>({});
     const [draftEquipment, setDraftEquipment] = useState<Record<number, EquippedItem>>({});
     const [equipmentDirty, setEquipmentDirty] = useState(false);
+    const [draftQuickPouch, setDraftQuickPouch] = useState<Record<number, EquippedItem>>({});
+    const [quickPouchDirty, setQuickPouchDirty] = useState(false);
     const [draftSpells, setDraftSpells] = useState<EquippedItem[] | null>(null);
     const [spellsDirty, setSpellsDirty] = useState(false);
     const [saveError, setSaveError] = useState('');
@@ -205,6 +208,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         setAmmoQuantities({});
         setDraftEquipment({});
         setEquipmentDirty(false);
+        setDraftQuickPouch({});
+        setQuickPouchDirty(false);
         setDraftSpells(null);
         setSpellsDirty(false);
         setSaveError('');
@@ -237,7 +242,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         return match ? Number(match[1]) - 1 : -1;
     };
 
-    const ensureDatabaseItemInInventory = async (itemID: number, excludedHandles: number[] = [], requireHandle = false) => {
+    const ensureDatabaseItemInInventory = async (itemID: number, quantity: number, excludedHandles: number[] = [], requireHandle = false) => {
         if (charIdx == null) throw new Error('Select a character before adding an item.');
         const findOwnedItem = (inventory: vm.ItemViewModel[]) => inventory?.find(item => {
             const canonicalID = item.baseId || item.id;
@@ -245,14 +250,10 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             return !requireHandle || (item.handle !== 0 && !excludedHandles.includes(item.handle));
         });
 
-        let character = await GetCharacter(charIdx);
-        let ownedItem = findOwnedItem(character.inventory);
-        if (!ownedItem) {
-            const result = await AddItemsToCharacter(charIdx, [itemID], 0, 0, 0, 0, 1, 0);
-            if (result.capHit) throw new Error(result.capHit);
-            character = await GetCharacter(charIdx);
-            ownedItem = findOwnedItem(character.inventory);
-        }
+        const result = await AddItemsToCharacter(charIdx, [itemID], 0, 0, 0, 0, quantity, 0);
+        if (result.capHit) throw new Error(result.capHit);
+        const character = await GetCharacter(charIdx);
+        const ownedItem = findOwnedItem(character.inventory);
         if (!ownedItem) throw new Error('The item could not be added to Inventory.');
         return ownedItem;
     };
@@ -260,10 +261,10 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const setSpellSelection = async (selection: EquipmentPickerSelection) => {
         const index = spellIndexForLabel(selectedSlot);
         if (index < 0) return;
-        if (selection.source === 'database') await ensureDatabaseItemInInventory(selection.id);
+        if (selection.source === 'database') await ensureDatabaseItemInInventory(selection.id, selection.quantity ?? 1);
         setDraftSpells(current => {
             const next = [...(current ?? Array.from(snapshot?.spells ?? []))];
-            next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, handle: 0, name: selection.name, iconPath: selection.iconPath, resolved: true };
+            next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, handle: 0, quantity: 1, name: selection.name, iconPath: selection.iconPath, resolved: true };
             return next;
         });
         setSpellsDirty(true);
@@ -287,6 +288,28 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         setEquipmentDirty(true);
         setSaveError('');
     };
+    const quickPouchSlotForLabel = (label: string) => {
+        const quick = /^Quick item (\d+)$/.exec(label);
+        if (quick) return Number(quick[1]) - 1;
+        const pouch: Record<string, number> = {
+            'Quick pouch up': 10,
+            'Quick pouch right': 11,
+            'Quick pouch left': 12,
+            'Quick pouch down': 13,
+            'Quick pouch slot 5': 14,
+            'Quick pouch slot 6': 15,
+        };
+        return pouch[label] ?? -1;
+    };
+    const quickPouchSnapshotForSlot = (slot: number): EquippedItem | undefined =>
+        slot < 10 ? snapshot?.quickItems[slot] : snapshot?.pouch[slot - 10];
+    const quickPouchView = (slot: number): EquippedItem | undefined =>
+        Object.prototype.hasOwnProperty.call(draftQuickPouch, slot) ? draftQuickPouch[slot] : quickPouchSnapshotForSlot(slot);
+    const removeQuickPouch = (slot: number) => {
+        setDraftQuickPouch(current => ({ ...current, [slot]: emptyEquipmentItem() }));
+        setQuickPouchDirty(true);
+        setSaveError('');
+    };
     const saveChanges = async () => {
         if (charIdx == null) return;
         try {
@@ -302,6 +325,14 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 const spellIDs = draftSpells.filter(item => item.occupied).map(item => item.rawId | 0x40000000);
                 await SaveEquippedSpells(charIdx, spellIDs);
                 setSpellsDirty(false);
+            }
+            if (quickPouchDirty) {
+                const changes = Object.entries(draftQuickPouch).map(([slot, item]) => ({
+                    slot: Number(slot),
+                    handle: item.occupied ? item.handle : 0,
+                }));
+                await SaveQuickPouchItems(charIdx, changes);
+                setQuickPouchDirty(false);
             }
             setSaveError('');
             setSaveRevision(value => value + 1);
@@ -407,13 +438,36 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             .filter((item): item is EquippedItem => Boolean(item?.occupied))
             .map(item => item.rawId)
         : [];
-    const disabledPickerItemIDs = selectedSpellIndex >= 0 ? disabledSpellIDs : disabledTalismanIDs;
+    const selectedQuickPouchSlot = quickPouchSlotForLabel(selectedSlot);
+    const selectedQuickPouch = selectedQuickPouchSlot >= 0 ? quickPouchView(selectedQuickPouchSlot) : undefined;
+    const selectedQuickPouchSelection = selectedQuickPouch?.occupied ? {
+        id: 0x40000000 | (selectedQuickPouch.rawId & 0x0FFFFFFF),
+        handle: selectedQuickPouch.handle,
+        name: selectedQuickPouch.name,
+        iconPath: selectedQuickPouch.iconPath,
+        quantity: selectedQuickPouch.quantity,
+        source: 'inventory' as const,
+    } : undefined;
+    const quickPouchFamilyStart = selectedQuickPouchSlot < 10 ? 0 : 10;
+    const quickPouchFamilyEnd = selectedQuickPouchSlot < 10 ? 10 : 16;
+    const disabledQuickPouchItems = selectedQuickPouchSlot >= 0
+        ? Array.from({ length: quickPouchFamilyEnd - quickPouchFamilyStart }, (_, index) => quickPouchFamilyStart + index)
+            .filter(slot => slot !== selectedQuickPouchSlot)
+            .map(slot => quickPouchView(slot))
+            .filter((item): item is EquippedItem => Boolean(item?.occupied))
+        : [];
+    const disabledQuickPouchHandles = disabledQuickPouchItems.map(item => item.handle).filter(Boolean);
+    const disabledQuickPouchIDs = disabledQuickPouchItems.map(item => 0x40000000 | (item.rawId & 0x0FFFFFFF));
+    const disabledPickerItemIDs = selectedSpellIndex >= 0 ? disabledSpellIDs : selectedQuickPouchSlot >= 0 ? disabledQuickPouchIDs : disabledTalismanIDs;
+    const disabledPickerItemHandles = selectedQuickPouchSlot >= 0 ? disabledQuickPouchHandles : disabledEquipmentHandles;
     const setEquipmentSelection = async (selection: EquipmentPickerSelection) => {
         if (selectedEquipmentSlot == null) return;
         let handle = selection.handle;
+        let quantity = selection.quantity ?? 1;
         if (selection.source === 'database') {
-            const ownedItem = await ensureDatabaseItemInInventory(selection.id, disabledEquipmentHandles, true);
+            const ownedItem = await ensureDatabaseItemInInventory(selection.id, quantity, disabledEquipmentHandles, true);
             handle = ownedItem.handle;
+            quantity = ownedItem.quantity;
         }
         if (handle == null || handle === 0) throw new Error('The selected item has no writable Inventory handle.');
         setDraftEquipment(current => ({
@@ -422,12 +476,39 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 occupied: true,
                 rawId: selection.id,
                 handle,
+                quantity,
                 name: selection.name,
                 iconPath: selection.iconPath,
                 resolved: true,
             },
         }));
         setEquipmentDirty(true);
+        setSaveError('');
+    };
+    const setQuickPouchSelection = async (selection: EquipmentPickerSelection) => {
+        if (selectedQuickPouchSlot < 0) return;
+        let handle = selection.handle;
+        let quantity = selection.quantity ?? 1;
+        if (selection.source === 'database') {
+            const ownedItem = await ensureDatabaseItemInInventory(selection.id, quantity, disabledQuickPouchHandles, true);
+            handle = ownedItem.handle;
+            quantity = ownedItem.quantity;
+        }
+        if (handle == null || handle === 0) throw new Error('The selected item has no writable Inventory handle.');
+        const writableHandle = handle;
+        setDraftQuickPouch(current => ({
+            ...current,
+            [selectedQuickPouchSlot]: {
+                occupied: true,
+                rawId: writableHandle,
+                handle: writableHandle,
+                quantity,
+                name: selection.name,
+                iconPath: selection.iconPath,
+                resolved: true,
+            },
+        }));
+        setQuickPouchDirty(true);
         setSaveError('');
     };
 
@@ -447,7 +528,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                             {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => {
                                 const slot = index === 0 ? 6 : 8;
                                 const item = equipmentView(slot, snapshot?.arrows[index]);
-                                return <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? ammoQuantities[item.rawId] : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>;
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? (item.quantity || ammoQuantities[item.rawId]) : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>;
                             })}
                         </div>
                         <div className="-mt-[7px] grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
@@ -460,7 +541,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                             {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => {
                                 const slot = index === 0 ? 7 : 9;
                                 const item = equipmentView(slot, snapshot?.bolts[index]);
-                                return <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? ammoQuantities[item.rawId] : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>;
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? (item.quantity || ammoQuantities[item.rawId]) : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>;
                             })}
                         </div>
                         <div className="mt-[5px] grid grid-cols-[repeat(4,82px)] gap-[9px]">
@@ -482,7 +563,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                                 {Array.from({ length: 5 }, (_, index) => {
                                     const slotIndex = row * 5 + index;
                                     const label = `Quick item ${slotIndex + 1}`;
-                                    return <EquipmentSlot key={label} label={label} eligibleItems="Tools and Spirit Ashes" selected={selected(label)} onOpen={openSlot} item={snapshot?.quickItems[slotIndex]}><GhostIcon src={toolsPlaceholder} /></EquipmentSlot>;
+                                    const item = quickPouchView(slotIndex);
+                                    return <EquipmentSlot key={label} label={label} eligibleItems="Tools and Spirit Ashes" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? item.quantity : undefined} onRemove={item?.occupied ? () => removeQuickPouch(slotIndex) : undefined}><GhostIcon src={toolsPlaceholder} /></EquipmentSlot>;
                                 })}
                             </div>
                         ))}
@@ -492,12 +574,12 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 <div className="border-l border-border pl-[26px]">
                     <h2 className="mb-3 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Quick pouch</h2>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
-                        <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} item={snapshot?.pouch[0]} />
-                        <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} item={snapshot?.pouch[1]} />
-                        <PouchSlot label="Quick pouch left" active="left" onOpen={openSlot} item={snapshot?.pouch[2]} />
-                        <PouchSlot label="Quick pouch down" active="down" onOpen={openSlot} item={snapshot?.pouch[3]} />
-                        <PouchSlot label="Quick pouch slot 5" onOpen={openSlot} item={snapshot?.pouch[4]} />
-                        <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} item={snapshot?.pouch[5]} />
+                        <PouchSlot label="Quick pouch up" active="up" onOpen={openSlot} item={quickPouchView(10)} onRemove={quickPouchView(10)?.occupied ? () => removeQuickPouch(10) : undefined} />
+                        <PouchSlot label="Quick pouch right" active="right" onOpen={openSlot} item={quickPouchView(11)} onRemove={quickPouchView(11)?.occupied ? () => removeQuickPouch(11) : undefined} />
+                        <PouchSlot label="Quick pouch left" active="left" onOpen={openSlot} item={quickPouchView(12)} onRemove={quickPouchView(12)?.occupied ? () => removeQuickPouch(12) : undefined} />
+                        <PouchSlot label="Quick pouch down" active="down" onOpen={openSlot} item={quickPouchView(13)} onRemove={quickPouchView(13)?.occupied ? () => removeQuickPouch(13) : undefined} />
+                        <PouchSlot label="Quick pouch slot 5" onOpen={openSlot} item={quickPouchView(14)} onRemove={quickPouchView(14)?.occupied ? () => removeQuickPouch(14) : undefined} />
+                        <PouchSlot label="Quick pouch slot 6" onOpen={openSlot} item={quickPouchView(15)} onRemove={quickPouchView(15)?.occupied ? () => removeQuickPouch(15) : undefined} />
                     </div>
                     <div aria-hidden="true" className="mt-[6px] h-[14px]" />
                     <h3 className="mb-3 w-[173px] whitespace-pre-line text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">{'Wondrous\nPhysick flask'}</h3>
@@ -528,16 +610,16 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
                 <strong className="text-base text-red-600">Expermiental</strong>
                 <span role="status" className="text-xs text-red-600">{saveError}</span>
-                <button type="button" disabled={(!spellsDirty && !equipmentDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
+                <button type="button" disabled={(!spellsDirty && !equipmentDirty && !quickPouchDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
             </div>
             {modalOpen && <EquipmentItemPickerModal
                 slotLabel={selectedSlot}
                 charIdx={charIdx}
-                initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedEquipmentSelection}
+                initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedQuickPouchSlot >= 0 ? selectedQuickPouchSelection : selectedEquipmentSelection}
                 disabledItemIDs={disabledPickerItemIDs}
-                disabledItemHandles={disabledEquipmentHandles}
-                onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
-                onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
+                disabledItemHandles={disabledPickerItemHandles}
+                onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedQuickPouchSlot >= 0 ? setQuickPouchSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
+                onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedQuickPouchSlot >= 0 ? () => removeQuickPouch(selectedQuickPouchSlot) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
                 onClose={() => setModalOpen(false)}
             />}
         </section>

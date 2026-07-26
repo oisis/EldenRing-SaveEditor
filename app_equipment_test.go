@@ -299,6 +299,101 @@ func TestSaveEquipment_WritesOwnedTalismanAndProjectsItsHandle(t *testing.T) {
 	}
 }
 
+func TestSaveQuickPouchItems_WritesOwnedGoodsAndProjectsQuantity(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	const (
+		daggerHandle    = uint32(0xB00006A4)
+		daggerID        = uint32(0x400006A4)
+		telescopeHandle = uint32(0xB00007F8)
+		telescopeID     = uint32(0x400007F8)
+	)
+	slot.GaMap = map[uint32]uint32{
+		daggerHandle:    daggerID,
+		telescopeHandle: telescopeID,
+	}
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: daggerHandle, Quantity: 17},
+		{GaItemHandle: telescopeHandle, Quantity: 1},
+	}
+	app := newEquipmentApp(slot)
+
+	if err := app.SaveQuickPouchItems(0, []QuickPouchChange{
+		{Slot: core.QuickPouchSlotQuick1, Handle: daggerHandle},
+		{Slot: core.QuickPouchSlotPouch1, Handle: telescopeHandle},
+	}); err != nil {
+		t.Fatalf("SaveQuickPouchItems: %v", err)
+	}
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if got := raw.QuickItems[0]; got.ItemID != daggerHandle || got.EquipIndex != 0x180 {
+		t.Errorf("QuickItems[0] = %+v, want dagger handle and Inventory row 0", got)
+	}
+	if got := raw.Pouch[0]; got.ItemID != telescopeHandle || got.EquipIndex != 0x181 {
+		t.Errorf("Pouch[0] = %+v, want telescope handle and Inventory row 1", got)
+	}
+
+	snap, err := app.GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if got := snap.QuickItems[0]; !got.Occupied || !got.Resolved || got.Handle != daggerHandle || got.Quantity != 17 {
+		t.Errorf("QuickItems[0] = %+v, want resolved Throwing Dagger quantity 17", got)
+	}
+	if got := snap.Pouch[0]; !got.Occupied || !got.Resolved || got.Handle != telescopeHandle || got.Quantity != 1 {
+		t.Errorf("Pouch[0] = %+v, want resolved Telescope quantity 1", got)
+	}
+}
+
+func TestSaveQuickPouchItems_ClearIsProjectedAsEmpty(t *testing.T) {
+	quick := [10]core.RawEquipItem{{ItemID: 0xB00006A4, EquipIndex: 0x180}}
+	pouch := [6]core.RawEquipItem{{ItemID: 0xB00007F8, EquipIndex: 0x181}}
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, quick, pouch)
+	slot.GaMap = map[uint32]uint32{
+		0xB00006A4: 0x400006A4,
+		0xB00007F8: 0x400007F8,
+	}
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: 0xB00006A4, Quantity: 10},
+		{GaItemHandle: 0xB00007F8, Quantity: 1},
+	}
+	app := newEquipmentApp(slot)
+
+	if err := app.SaveQuickPouchItems(0, []QuickPouchChange{
+		{Slot: core.QuickPouchSlotQuick1, Handle: 0},
+		{Slot: core.QuickPouchSlotPouch1, Handle: 0},
+	}); err != nil {
+		t.Fatalf("SaveQuickPouchItems: %v", err)
+	}
+	snap, err := app.GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if snap.QuickItems[0].Occupied || snap.Pouch[0].Occupied {
+		t.Errorf("cleared views remain occupied: quick=%+v pouch=%+v", snap.QuickItems[0], snap.Pouch[0])
+	}
+}
+
+func TestSaveQuickPouchItems_RejectsNonEligibleGoodsBeforeMutation(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	const tearHandle = uint32(0xB0002AFB)
+	slot.Inventory.CommonItems = []core.InventoryItem{{GaItemHandle: tearHandle, Quantity: 1}}
+	app := newEquipmentApp(slot)
+
+	err := app.SaveQuickPouchItems(0, []QuickPouchChange{{Slot: core.QuickPouchSlotQuick1, Handle: tearHandle}})
+	if err == nil || !strings.Contains(err.Error(), "not eligible") {
+		t.Fatalf("SaveQuickPouchItems error = %v, want eligibility rejection", err)
+	}
+	raw, readErr := app.save.Slots[0].ReadEquippedState()
+	if readErr != nil {
+		t.Fatal(readErr)
+	}
+	if raw.QuickItems[0].ItemID != 0 {
+		t.Errorf("QuickItems[0] mutated to 0x%08X after rejected write", raw.QuickItems[0].ItemID)
+	}
+}
+
 func TestGetEquipmentSnapshot_ValidationErrors(t *testing.T) {
 	app := NewApp()
 	// No save loaded.

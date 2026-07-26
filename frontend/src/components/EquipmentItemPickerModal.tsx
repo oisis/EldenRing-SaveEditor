@@ -49,6 +49,7 @@ type PickerItem = {
     category: string;
     iconPath: string;
     quantity?: number;
+    maxInventory: number;
     stackable: boolean;
     weight?: number;
     acquisitionOrder?: number;
@@ -78,6 +79,7 @@ export type EquipmentPickerSelection = {
 	handle?: number;
     name: string;
     iconPath: string;
+    quantity?: number;
     source: PickerSource;
 };
 
@@ -113,6 +115,7 @@ function toPickerItem(item: db.ItemEntry): PickerItem {
         name: item.name,
         category: item.category,
         iconPath: item.iconPath,
+        maxInventory: Math.max(1, item.maxInventory || 1),
         stackable: item.maxInventory > 1,
         weight: item.weight,
         isWeapon: weapon,
@@ -148,6 +151,7 @@ function toOwnedPickerItem(
         category: canonicalID != null ? (eligibleItem?.category ?? item.category) : item.category,
         iconPath: canonicalID != null ? (eligibleItem?.iconPath ?? item.iconPath) : item.iconPath,
         quantity: item.quantity,
+        maxInventory: Math.max(1, item.maxInventory || 1),
         stackable: item.maxInventory > 1,
         weight: eligibleItem?.weight,
         acquisitionOrder,
@@ -250,6 +254,8 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
     const [ashesOfWar, setAshesOfWar] = useState<db.ItemEntry[]>([]);
     const [submitting, setSubmitting] = useState(false);
     const [submissionError, setSubmissionError] = useState('');
+    const [quantityItem, setQuantityItem] = useState<PickerItem | null>(null);
+    const [quantity, setQuantity] = useState(1);
 
     useEffect(() => {
         let active = true;
@@ -261,6 +267,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
             name: initialSelection.name,
             category: '',
             iconPath: initialSelection.iconPath,
+            maxInventory: 1,
             stackable: false,
             isWeapon: false,
             isArmor: false,
@@ -272,6 +279,8 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
 		setSource('inventory');
         setSubmitting(false);
         setSubmissionError('');
+        setQuantityItem(null);
+        setQuantity(1);
 
         const weaponSlot = isWeaponSlot(slotLabel);
         Promise.all([
@@ -300,11 +309,16 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') onClose();
+            if (event.key !== 'Escape') return;
+            if (quantityItem) {
+                setQuantityItem(null);
+                return;
+            }
+            onClose();
         };
         window.addEventListener('keydown', onKeyDown);
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [onClose]);
+    }, [onClose, quantityItem]);
 
     useEffect(() => {
         const onSafetyProfileChanged = (event: Event) => setSafetyProfile((event as CustomEvent<SafetyProfile>).detail);
@@ -358,12 +372,19 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
         }
         setSelected(item);
     };
-    const commitSelection = async (item: PickerItem) => {
+    const submitSelection = async (item: PickerItem, selectedQuantity?: number) => {
         if (submitting) return;
         setSubmitting(true);
         setSubmissionError('');
         try {
-            await onConfirm?.({ id: item.id, handle: item.handle, name: item.name, iconPath: item.iconPath, source });
+            await onConfirm?.({
+                id: item.id,
+                handle: item.handle,
+                name: item.name,
+                iconPath: item.iconPath,
+                quantity: selectedQuantity ?? item.quantity,
+                source,
+            });
             onClose();
         } catch (error) {
             setSubmissionError(error instanceof Error ? error.message : 'Unable to select this item.');
@@ -371,8 +392,22 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
             setSubmitting(false);
         }
     };
+    const commitSelection = (item: PickerItem) => {
+        if (source === 'database' && item.stackable) {
+            setQuantityItem(item);
+            setQuantity(1);
+            return;
+        }
+        void submitSelection(item, source === 'database' ? 1 : item.quantity);
+    };
     const confirmSelection = () => {
-        if (selected) void commitSelection(selected);
+        if (selected) commitSelection(selected);
+    };
+    const confirmQuantity = () => {
+        if (!quantityItem) return;
+        const normalized = Math.max(1, Math.min(quantityItem.maxInventory, Math.trunc(quantity || 1)));
+        setQuantity(normalized);
+        void submitSelection(quantityItem, normalized);
     };
 
     return createPortal(
@@ -406,7 +441,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                     {loading ? <p className="py-12 text-center text-sm text-muted-foreground">Loading items…</p> : items.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">No matching items.</p> : (
                         <div className={weaponList ? 'grid grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] gap-x-3 gap-y-2' : view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
                             {weaponList && <><span className="px-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Weapon</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Level</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Infuse</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Ashes of War</span></>}
-							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={source === 'database' ? selected?.id === item.id : selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} onActivate={(selectedItem) => { void commitSelection(selectedItem); }} />)}
+							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={source === 'database' ? selected?.id === item.id : selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} onActivate={commitSelection} />)}
                         </div>
                     )}
                 </main>
@@ -420,6 +455,33 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                     </div>
                 </div>
             </div>
+            {quantityItem && (
+                <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/65 p-4" onMouseDown={() => setQuantityItem(null)}>
+                    <div role="dialog" aria-modal="true" aria-label="Select item quantity" className="w-full max-w-sm rounded-xl border border-border bg-card p-5 text-card-foreground shadow-2xl" onMouseDown={(event) => event.stopPropagation()}>
+                        <h3 className="text-base font-black">Add stackable item</h3>
+                        <p className="mt-1 text-sm text-muted-foreground">Choose how many {quantityItem.name} items to add to Inventory.</p>
+                        <label className="mt-4 block text-xs font-bold text-muted-foreground" htmlFor="equipment-item-quantity">Quantity</label>
+                        <input
+                            id="equipment-item-quantity"
+                            aria-label="Item quantity"
+                            type="number"
+                            min={1}
+                            max={quantityItem.maxInventory}
+                            value={quantity}
+                            autoFocus
+                            onChange={(event) => setQuantity(Number(event.target.value))}
+                            onKeyDown={(event) => { if (event.key === 'Enter') confirmQuantity(); }}
+                            className="mt-1 h-10 w-full rounded-md border border-border bg-background px-3 text-foreground outline-none focus:border-primary"
+                        />
+                        <p className="mt-1 text-[11px] text-muted-foreground">Allowed range: 1–{quantityItem.maxInventory}</p>
+                        {submissionError && <p role="alert" className="mt-2 text-xs font-bold text-red-600">{submissionError}</p>}
+                        <div className="mt-5 flex justify-end gap-2">
+                            <button type="button" disabled={submitting} onClick={() => setQuantityItem(null)} className="rounded border border-border px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted/40 disabled:opacity-50">Cancel</button>
+                            <button type="button" disabled={submitting} onClick={confirmQuantity} className="rounded bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary-foreground hover:opacity-90 disabled:opacity-50">Add and equip</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>,
         document.body,
     );

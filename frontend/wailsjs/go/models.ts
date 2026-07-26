@@ -1772,6 +1772,7 @@ export namespace main {
 	    occupied: boolean;
 	    rawId: number;
 	    handle: number;
+	    quantity: number;
 	    name: string;
 	    iconPath: string;
 	    resolved: boolean;
@@ -1785,6 +1786,7 @@ export namespace main {
 	        this.occupied = source["occupied"];
 	        this.rawId = source["rawId"];
 	        this.handle = source["handle"];
+	        this.quantity = source["quantity"];
 	        this.name = source["name"];
 	        this.iconPath = source["iconPath"];
 	        this.resolved = source["resolved"];
@@ -2286,6 +2288,20 @@ export namespace main {
 	        this.revealMap = source["revealMap"];
 	        this.summoningPools = source["summoningPools"];
 	        this.sitesOfGrace = source["sitesOfGrace"];
+	    }
+	}
+	export class QuickPouchChange {
+	    slot: number;
+	    handle: number;
+
+	    static createFrom(source: any = {}) {
+	        return new QuickPouchChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slot = source["slot"];
+	        this.handle = source["handle"];
 	    }
 	}
 	export class RepairActionResult {

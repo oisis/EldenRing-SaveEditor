@@ -17,6 +17,7 @@ type EquipmentSlotView struct {
 	Occupied bool   `json:"occupied"`
 	RawID    uint32 `json:"rawId"`
 	Handle   uint32 `json:"handle"`
+	Quantity uint32 `json:"quantity"`
 	Name     string `json:"name"`
 	IconPath string `json:"iconPath"`
 	Resolved bool   `json:"resolved"`
@@ -51,6 +52,13 @@ type EquipmentSnapshot struct {
 type EquipmentChange struct {
 	Slot   core.EquipmentSlotKind `json:"slot"`
 	Handle uint32                 `json:"handle"`
+}
+
+// QuickPouchChange is one writable Quick Item / Pouch request. Handle is the
+// exact owned goods handle; zero clears the slot.
+type QuickPouchChange struct {
+	Slot   core.QuickPouchSlotKind `json:"slot"`
+	Handle uint32                  `json:"handle"`
 }
 
 // equipClass selects how a raw stored value is normalized to a DB item ID.
@@ -299,11 +307,19 @@ func equippedView(slot *core.SaveSlot, index int, raw uint32, class equipClass) 
 // goodsView builds a view for a quick-item / pouch pair. Empty slots use the
 // {item_id: 0, equip_index: 0xFFFFFFFF} sentinel; item_id of 0 / 0xFFFFFFFF is
 // treated as empty regardless of equip_index.
-func goodsView(pair core.RawEquipItem) EquipmentSlotView {
+func goodsView(slot *core.SaveSlot, pair core.RawEquipItem) EquipmentSlotView {
 	if pair.ItemID == 0 || pair.ItemID == core.GaHandleInvalid {
 		return EquipmentSlotView{}
 	}
-	return resolveEquipView(pair.ItemID, classGoods)
+	view := resolveEquipView(pair.ItemID, classGoods)
+	view.Handle = pair.ItemID
+	for _, item := range slot.Inventory.CommonItems {
+		if item.GaItemHandle == pair.ItemID {
+			view.Quantity = item.Quantity & 0x7FFFFFFF
+			break
+		}
+	}
+	return view
 }
 
 // physickSlotView projects one Wondrous Physick tear field (T545). 0xFFFFFFFF is
@@ -389,10 +405,10 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	}
 	// Quick items (10) and pouch (6).
 	for i := 0; i < 10; i++ {
-		snap.QuickItems[i] = goodsView(raw.QuickItems[i])
+		snap.QuickItems[i] = goodsView(&slot, raw.QuickItems[i])
 	}
 	for i := 0; i < 6; i++ {
-		snap.Pouch[i] = goodsView(raw.Pouch[i])
+		snap.Pouch[i] = goodsView(&slot, raw.Pouch[i])
 	}
 	// Wondrous Physick: two active tears (T545). physicsOff+0 is screen slot 1,
 	// physicsOff+4 is slot 2; the game does not left-pack, so a single tear lives
@@ -497,6 +513,44 @@ func (a *App) SaveEquipment(charIdx int, changes []EquipmentChange) error {
 	before := a.buildSlotSnapshotLocked(charIdx)
 	if err := slot.WriteEquipment(writes); err != nil {
 		return fmt.Errorf("SaveEquipment: %w", err)
+	}
+	a.pushUndoSnapshotLocked(charIdx, before)
+	return nil
+}
+
+// SaveQuickPouchItems applies one atomic Quick Item / Pouch batch in memory.
+// The normal Save/Save As action remains responsible for writing the .sl2 file.
+func (a *App) SaveQuickPouchItems(charIdx int, changes []QuickPouchChange) error {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= len(a.save.Slots) || !a.save.ActiveSlots[charIdx] {
+		return fmt.Errorf("invalid active character slot %d", charIdx)
+	}
+	if len(changes) == 0 {
+		return nil
+	}
+
+	a.slotMu[charIdx].Lock()
+	defer a.slotMu[charIdx].Unlock()
+	slot := &a.save.Slots[charIdx]
+	writes := make([]core.QuickPouchWrite, len(changes))
+	for i, change := range changes {
+		if change.Handle != 0 {
+			itemID := db.HandleToItemID(change.Handle)
+			item := db.GetItemData(itemID)
+			if item.Category != "tools" && item.Category != "ashes" {
+				return fmt.Errorf("SaveQuickPouchItems[%d]: item 0x%08X is not eligible for Quick Items or Pouch", i, itemID)
+			}
+		}
+		writes[i] = core.QuickPouchWrite{Slot: change.Slot, Handle: change.Handle}
+	}
+
+	before := a.buildSlotSnapshotLocked(charIdx)
+	if err := slot.WriteQuickPouch(writes); err != nil {
+		return fmt.Errorf("SaveQuickPouchItems: %w", err)
 	}
 	a.pushUndoSnapshotLocked(charIdx, before)
 	return nil

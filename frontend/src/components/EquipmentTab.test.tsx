@@ -19,6 +19,7 @@ import {
     GetQuickItemEligibleItems,
     SaveEquipment,
     SaveEquippedSpells,
+    SaveQuickPouchItems,
 } from '../../wailsjs/go/main/App';
 
 vi.mock('../../wailsjs/go/main/App', () => ({
@@ -36,12 +37,13 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetQuickItemEligibleItems: vi.fn(),
     SaveEquipment: vi.fn(),
     SaveEquippedSpells: vi.fn(),
+    SaveQuickPouchItems: vi.fn(),
     GetPouchEligibleItems: vi.fn(),
     GetPhysickEligibleItems: vi.fn(),
     GetItemList: vi.fn(),
 }));
 
-const emptyView = { occupied: false, rawId: 0, handle: 0, name: '', iconPath: '', resolved: false };
+const emptyView = { occupied: false, rawId: 0, handle: 0, quantity: 0, name: '', iconPath: '', resolved: false };
 const view = (over: Partial<typeof emptyView>) => ({ ...emptyView, ...over });
 const fill = (n: number, over?: Partial<typeof emptyView>) =>
     Array.from({ length: n }, (_, i) => (i === 0 && over ? view(over) : { ...emptyView }));
@@ -123,6 +125,8 @@ beforeEach(() => {
     vi.mocked(SaveEquippedSpells).mockResolvedValue(undefined as never);
     vi.mocked(SaveEquipment).mockReset();
     vi.mocked(SaveEquipment).mockResolvedValue(undefined as never);
+    vi.mocked(SaveQuickPouchItems).mockReset();
+    vi.mocked(SaveQuickPouchItems).mockResolvedValue(undefined as never);
     vi.mocked(GetInfuseTypes).mockReset();
     vi.mocked(GetInfuseTypes).mockResolvedValue([] as never);
 });
@@ -370,6 +374,80 @@ describe('EquipmentTab', () => {
         expect(AddItemsToCharacter).toHaveBeenCalledWith(0, [spellID], 0, 0, 0, 0, 1, 0);
         fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
         await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, [spellID]));
+    });
+
+    it('adds a chosen stack quantity from Item Database and equips it as a Quick Item', async () => {
+        const itemID = 0x400006A4;
+        const handle = 0xB00006A4;
+        let added = false;
+        vi.mocked(GetQuickItemEligibleItems).mockResolvedValue([
+            { id: itemID, name: 'Throwing Dagger', category: 'tools', iconPath: 'items/tools/throwing_dagger.png', maxInventory: 99 },
+        ] as never);
+        vi.mocked(GetCharacter).mockImplementation(() => Promise.resolve({
+            inventory: added ? [
+                { id: itemID, baseId: itemID, handle, name: 'Throwing Dagger', category: 'tools', iconPath: 'items/tools/throwing_dagger.png', quantity: 25, maxInventory: 99 },
+            ] : [],
+        }) as never);
+        vi.mocked(AddItemsToCharacter).mockImplementation(async () => {
+            added = true;
+            return { added: 25, requested: 25, trimmed: [], skippedExisting: [], capHit: '' } as never;
+        });
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Quick item 1' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
+        fireEvent.doubleClick(await screen.findByRole('button', { name: 'Select Throwing Dagger' }));
+
+        expect(screen.getByRole('dialog', { name: 'Select item quantity' })).toBeInTheDocument();
+        fireEvent.change(screen.getByRole('spinbutton', { name: 'Item quantity' }), { target: { value: '25' } });
+        fireEvent.click(screen.getByRole('button', { name: 'Add and equip' }));
+
+        await waitFor(() => expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument());
+        expect(AddItemsToCharacter).toHaveBeenCalledWith(0, [itemID], 0, 0, 0, 0, 25, 0);
+        expect(screen.getByRole('button', { name: 'Quick item 1' })).toHaveTextContent('25');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SaveQuickPouchItems).toHaveBeenCalledWith(0, [{ slot: 0, handle }]));
+    });
+
+    it('writes Quick Item and Pouch removals through their shared atomic endpoint', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            quickItems: fill(10, { occupied: true, resolved: true, rawId: 0xB00006A4, handle: 0xB00006A4, quantity: 12, name: 'Throwing Dagger', iconPath: 'items/tools/throwing_dagger.png' }),
+            pouch: fill(6, { occupied: true, resolved: true, rawId: 0xB00007F8, handle: 0xB00007F8, quantity: 1, name: 'Telescope', iconPath: 'items/tools/telescope.png' }),
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        await screen.findByAltText('Throwing Dagger');
+        expect(screen.getByRole('button', { name: 'Quick item 1' })).toHaveTextContent('12');
+        expect(screen.getByRole('button', { name: 'Quick pouch up' })).toHaveTextContent('1');
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Quick item 1' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Quick pouch up' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveQuickPouchItems).toHaveBeenCalledWith(0, [
+            { slot: 0, handle: 0 },
+            { slot: 10, handle: 0 },
+        ]));
+    });
+
+    it('keeps already equipped Quick Items visible but disabled in other Quick Item slots', async () => {
+        const daggerID = 0x400006A4;
+        const daggerHandle = 0xB00006A4;
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            quickItems: fill(10, { occupied: true, resolved: true, rawId: daggerHandle, handle: daggerHandle, quantity: 12, name: 'Throwing Dagger', iconPath: 'items/tools/throwing_dagger.png' }),
+        }) as never);
+        vi.mocked(GetQuickItemEligibleItems).mockResolvedValue([
+            { id: daggerID, name: 'Throwing Dagger', category: 'tools', iconPath: 'items/tools/throwing_dagger.png', maxInventory: 99 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ id: daggerID, baseId: daggerID, handle: daggerHandle, name: 'Throwing Dagger', category: 'tools', iconPath: 'items/tools/throwing_dagger.png', quantity: 12, maxInventory: 99 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Quick item 2' }));
+        const dagger = await screen.findByRole('button', { name: 'Select Throwing Dagger' });
+        expect(dagger).toBeDisabled();
+        expect(dagger.parentElement).toHaveClass('grayscale', 'opacity-40');
     });
 
     it('maps armor controls to their writer enum values', async () => {
