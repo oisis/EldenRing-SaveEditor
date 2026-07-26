@@ -28,6 +28,15 @@ const equipmentSlotByLabel: Record<string, number> = {
 
 const emptyEquipmentItem = (): EquippedItem => ({ occupied: false, rawId: 0, handle: 0, quantity: 0, name: '', iconPath: '', resolved: false });
 
+// Wails may reject a Promise with an Error, a plain string (the Go error text),
+// or something else. Prefer the concrete backend message; fall back only when no
+// usable text is available.
+const saveErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) return error.message;
+    if (typeof error === 'string' && error.trim() !== '') return error;
+    return 'Unable to save equipment changes.';
+};
+
 // Item icon paths in the DB are stored without a leading slash; the public
 // assets are served from the root, so normalize to an absolute path.
 const iconSrc = (path: string) => (path.startsWith('/') ? path : `/${path}`);
@@ -338,7 +347,9 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             setSaveRevision(value => value + 1);
             onMutate?.();
         } catch (error) {
-            setSaveError(error instanceof Error ? error.message : 'Unable to save equipment changes.');
+            // Wails rejects a Go error as a plain string, not an Error instance;
+            // surface it so the real backend message reaches the user.
+            setSaveError(saveErrorMessage(error));
         }
     };
 

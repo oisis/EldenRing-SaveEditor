@@ -346,6 +346,105 @@ func TestSaveQuickPouchItems_WritesOwnedGoodsAndProjectsQuantity(t *testing.T) {
 	}
 }
 
+// TestSaveQuickPouchItems_AcceptsWondrousPhysickVariants proves the flask is
+// eligible for Quick Items / Pouch. Its filled variant (0x400000FA) has no
+// category row of its own; eligibility must resolve via the canonical empty
+// variant (0x400000FB). The raw handle is preserved everywhere, the dynamic
+// GoodsParam representation carries the matching raw item ID, and a second batch
+// entry is untouched — proving the fix keeps the batch atomic and complete.
+func TestSaveQuickPouchItems_AcceptsWondrousPhysickVariants(t *testing.T) {
+	const (
+		daggerHandle = uint32(0xB00006A4)
+		daggerID     = uint32(0x400006A4)
+		physickName  = "Flask of Wondrous Physick"
+	)
+	// Dynamic Quick Items representation lives in the equipped-armaments block.
+	projHeaderOff := testEquippedSpellsOffset + core.DynEquipedSpells + core.DynEquipedItems + core.DynEquipedGestures
+	armamentsOff := projHeaderOff + 4 + testProjCount*8
+	quick1DynamicOff := armamentsOff + core.ChrAsmEquipmentSize
+
+	for _, tc := range []struct {
+		name        string
+		flaskHandle uint32
+		wantDynamic uint32
+	}{
+		{"filled-0xB00000FA", 0xB00000FA, 0x400000FA},
+		{"empty-0xB00000FB", 0xB00000FB, 0x400000FB},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+			slot.Inventory.CommonItems = []core.InventoryItem{
+				{GaItemHandle: tc.flaskHandle, Quantity: 1},
+				{GaItemHandle: daggerHandle, Quantity: 17},
+			}
+			app := newEquipmentApp(slot)
+
+			if err := app.SaveQuickPouchItems(0, []QuickPouchChange{
+				{Slot: core.QuickPouchSlotQuick1, Handle: tc.flaskHandle},
+				{Slot: core.QuickPouchSlotPouch1, Handle: daggerHandle},
+			}); err != nil {
+				t.Fatalf("SaveQuickPouchItems: %v", err)
+			}
+
+			raw, err := app.save.Slots[0].ReadEquippedState()
+			if err != nil {
+				t.Fatalf("ReadEquippedState: %v", err)
+			}
+			// Handle representation preserves the raw flask handle unchanged.
+			if got := raw.QuickItems[0]; got.ItemID != tc.flaskHandle || got.EquipIndex != 0x180 {
+				t.Errorf("QuickItems[0] = %+v, want flask handle 0x%08X at Inventory row 0", got, tc.flaskHandle)
+			}
+			// Dynamic GoodsParam representation carries the matching raw item ID
+			// (0x400000FA / 0x400000FB), never the display alias.
+			if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[quick1DynamicOff:]); got != tc.wantDynamic {
+				t.Errorf("dynamic Quick1 = 0x%08X, want raw 0x%08X", got, tc.wantDynamic)
+			}
+			// The second batch entry is preserved intact.
+			if got := raw.Pouch[0]; got.ItemID != daggerHandle || got.EquipIndex != 0x181 {
+				t.Errorf("Pouch[0] = %+v, want dagger handle 0x%08X at Inventory row 1", got, daggerHandle)
+			}
+
+			snap, err := app.GetEquipmentSnapshot(0)
+			if err != nil {
+				t.Fatalf("GetEquipmentSnapshot: %v", err)
+			}
+			if got := snap.QuickItems[0]; !got.Occupied || !got.Resolved || got.Handle != tc.flaskHandle || got.Name != physickName || got.Quantity != 1 {
+				t.Errorf("QuickItems[0] = %+v, want resolved %q handle 0x%08X quantity 1", got, physickName, tc.flaskHandle)
+			}
+			if got := snap.Pouch[0]; !got.Occupied || got.Handle != daggerHandle || got.Quantity != 17 {
+				t.Errorf("Pouch[0] = %+v, want dagger handle 0x%08X quantity 17", got, daggerHandle)
+			}
+		})
+	}
+
+	// A batch mixing the now-eligible flask with an ineligible item still fails
+	// atomically: accepting the flask must not weaken validation of siblings.
+	t.Run("atomic-rejection-with-flask", func(t *testing.T) {
+		const tearHandle = uint32(0xB0002AFB) // Crimson Crystal Tear: not tools/ashes
+		slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+		slot.Inventory.CommonItems = []core.InventoryItem{
+			{GaItemHandle: 0xB00000FA, Quantity: 1},
+			{GaItemHandle: tearHandle, Quantity: 1},
+		}
+		app := newEquipmentApp(slot)
+
+		err := app.SaveQuickPouchItems(0, []QuickPouchChange{
+			{Slot: core.QuickPouchSlotQuick1, Handle: 0xB00000FA},
+			{Slot: core.QuickPouchSlotPouch1, Handle: tearHandle},
+		})
+		if err == nil || !strings.Contains(err.Error(), "not eligible") {
+			t.Fatalf("SaveQuickPouchItems error = %v, want eligibility rejection", err)
+		}
+		raw, readErr := app.save.Slots[0].ReadEquippedState()
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		if raw.QuickItems[0].ItemID != 0 || raw.Pouch[0].ItemID != 0 {
+			t.Errorf("slots mutated after rejected batch: quick=0x%08X pouch=0x%08X", raw.QuickItems[0].ItemID, raw.Pouch[0].ItemID)
+		}
+	})
+}
+
 func TestSaveQuickPouchItems_ClearIsProjectedAsEmpty(t *testing.T) {
 	quick := [10]core.RawEquipItem{{ItemID: 0xB00006A4, EquipIndex: 0x180}}
 	pouch := [6]core.RawEquipItem{{ItemID: 0xB00007F8, EquipIndex: 0x181}}

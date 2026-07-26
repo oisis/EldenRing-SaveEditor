@@ -430,6 +430,23 @@ describe('EquipmentTab', () => {
         ]));
     });
 
+    it('surfaces a plain-string backend rejection from the Quick Item / Pouch save', async () => {
+        // Wails rejects a Go error as a bare string, not an Error instance. The
+        // status line must show that concrete message, not a generic fallback.
+        const backendError = 'SaveQuickPouchItems[0]: item 0x400000FA is not eligible for Quick Items or Pouch';
+        vi.mocked(SaveQuickPouchItems).mockRejectedValue(backendError as never);
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            quickItems: fill(10, { occupied: true, resolved: true, rawId: 0xB00006A4, handle: 0xB00006A4, quantity: 12, name: 'Throwing Dagger', iconPath: 'items/tools/throwing_dagger.png' }),
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        await screen.findByAltText('Throwing Dagger');
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Quick item 1' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        expect(await screen.findByText(backendError)).toBeInTheDocument();
+    });
+
     it('keeps already equipped Quick Items visible but disabled in other Quick Item slots', async () => {
         const daggerID = 0x400006A4;
         const daggerHandle = 0xB00006A4;

@@ -540,7 +540,11 @@ func (a *App) SaveQuickPouchItems(charIdx int, changes []QuickPouchChange) error
 	for i, change := range changes {
 		if change.Handle != 0 {
 			itemID := db.HandleToItemID(change.Handle)
-			item := db.GetItemData(itemID)
+			// The filled Physick flask (0x400000FA) has no category of its own;
+			// its "tools" metadata lives under the canonical empty variant
+			// (0x400000FB). Resolve eligibility via the display ID while leaving
+			// the raw handle untouched for the writer.
+			item := db.GetItemData(db.WondrousPhysickDisplayID(itemID))
 			if item.Category != "tools" && item.Category != "ashes" {
 				return fmt.Errorf("SaveQuickPouchItems[%d]: item 0x%08X is not eligible for Quick Items or Pouch", i, itemID)
 			}
