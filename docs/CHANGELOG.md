@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### docs(license): add third-party MIT notices for er-save-manager and ER-Save-Editor
+
+Added `docs/THIRD-PARTY-NOTICES.md` with the verbatim MIT license text and
+copyright notices for [er-save-manager](https://github.com/Hapfel1/er-save-manager)
+(Hapfel) and [ER-Save-Editor](https://github.com/ClayAmore/ER-Save-Editor)
+(ClayAmore), whose parser structures and offset definitions this project
+derives from. README now credits both authors and links the notices.
+
 ### feat(equipment): view and edit equipped sorceries and incantations
 
 Equipment now displays equipped sorceries and incantations with their actual

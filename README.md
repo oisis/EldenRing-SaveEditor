@@ -135,6 +135,19 @@ make test
 - [Roadmap](docs/ROADMAP.md) - planned features and progress
 - [Changelog](docs/CHANGELOG.md) - release history
 
+## Acknowledgments
+
+This project builds on the reverse-engineering work of others:
+
+- [er-save-manager](https://github.com/Hapfel1/er-save-manager) by Hapfel — save-file parser structures and game-data tables.
+- [ER-Save-Editor](https://github.com/ClayAmore/ER-Save-Editor) by ClayAmore — save-slot structure and offset references.
+
+Thank you to both authors.
+
 ## License
 
 This project is not affiliated with FromSoftware or Bandai Namco.
+
+Portions of this project are derived from third-party MIT-licensed code. See
+[THIRD-PARTY-NOTICES.md](docs/THIRD-PARTY-NOTICES.md) for the required license
+notices and attributions.
