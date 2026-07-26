@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
-import { GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells } from '../../wailsjs/go/main/App';
-import type { main } from '../../wailsjs/go/models';
+import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells } from '../../wailsjs/go/main/App';
+import type { main, vm } from '../../wailsjs/go/models';
 import { EquipmentItemPickerModal, type EquipmentPickerSelection } from './EquipmentItemPickerModal';
 
 type EquippedItem = main.EquipmentSlotView;
@@ -236,9 +236,31 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         const match = /^Spell slot (\d+)$/.exec(label);
         return match ? Number(match[1]) - 1 : -1;
     };
-    const setSpellSelection = (selection: EquipmentPickerSelection) => {
+
+    const ensureDatabaseItemInInventory = async (itemID: number, excludedHandles: number[] = [], requireHandle = false) => {
+        if (charIdx == null) throw new Error('Select a character before adding an item.');
+        const findOwnedItem = (inventory: vm.ItemViewModel[]) => inventory?.find(item => {
+            const canonicalID = item.baseId || item.id;
+            if (canonicalID !== itemID || (item.quantity ?? 0) <= 0) return false;
+            return !requireHandle || (item.handle !== 0 && !excludedHandles.includes(item.handle));
+        });
+
+        let character = await GetCharacter(charIdx);
+        let ownedItem = findOwnedItem(character.inventory);
+        if (!ownedItem) {
+            const result = await AddItemsToCharacter(charIdx, [itemID], 0, 0, 0, 0, 1, 0);
+            if (result.capHit) throw new Error(result.capHit);
+            character = await GetCharacter(charIdx);
+            ownedItem = findOwnedItem(character.inventory);
+        }
+        if (!ownedItem) throw new Error('The item could not be added to Inventory.');
+        return ownedItem;
+    };
+
+    const setSpellSelection = async (selection: EquipmentPickerSelection) => {
         const index = spellIndexForLabel(selectedSlot);
         if (index < 0) return;
+        if (selection.source === 'database') await ensureDatabaseItemInInventory(selection.id);
         setDraftSpells(current => {
             const next = [...(current ?? Array.from(snapshot?.spells ?? []))];
             next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, handle: 0, name: selection.name, iconPath: selection.iconPath, resolved: true };
@@ -260,23 +282,6 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const selectedEquipmentSlot = equipmentSlotByLabel[selectedSlot];
     const equipmentView = (slot: number, fallback: EquippedItem | undefined): EquippedItem | undefined =>
         Object.prototype.hasOwnProperty.call(draftEquipment, slot) ? draftEquipment[slot] : fallback;
-    const setEquipmentSelection = (selection: EquipmentPickerSelection) => {
-        const handle = selection.handle;
-        if (selectedEquipmentSlot == null || handle == null || handle === 0) return;
-        setDraftEquipment(current => ({
-            ...current,
-            [selectedEquipmentSlot]: {
-                occupied: true,
-                rawId: selection.id,
-                handle,
-                name: selection.name,
-                iconPath: selection.iconPath,
-                resolved: true,
-            },
-        }));
-        setEquipmentDirty(true);
-        setSaveError('');
-    };
     const removeEquipment = (slot: number) => {
         setDraftEquipment(current => ({ ...current, [slot]: emptyEquipmentItem() }));
         setEquipmentDirty(true);
@@ -364,6 +369,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         id: selectedSpell.rawId | 0x40000000,
         name: selectedSpell.name,
         iconPath: selectedSpell.iconPath,
+        source: 'inventory' as const,
     } : undefined;
     const disabledSpellIDs = spellViews
         .filter((item, index) => index !== selectedSpellIndex && item.occupied)
@@ -387,12 +393,43 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         handle: selectedEquipment.handle,
         name: selectedEquipment.name,
         iconPath: selectedEquipment.iconPath,
+        source: 'inventory' as const,
     } : undefined;
     const disabledEquipmentHandles = Array.from({ length: 18 }, (_, slot) => slot)
         .filter(slot => slot !== selectedEquipmentSlot)
         .map(slot => equipmentView(slot, snapshotEquipmentForSlot(slot)))
         .filter((item): item is EquippedItem => Boolean(item?.occupied && item.handle))
         .map(item => item.handle);
+    const disabledTalismanIDs = selectedEquipmentSlot != null && selectedEquipmentSlot >= 14 && selectedEquipmentSlot <= 17
+        ? Array.from({ length: activeTalismanSlots }, (_, index) => index + 14)
+            .filter(slot => slot !== selectedEquipmentSlot)
+            .map(slot => equipmentView(slot, snapshotEquipmentForSlot(slot)))
+            .filter((item): item is EquippedItem => Boolean(item?.occupied))
+            .map(item => item.rawId)
+        : [];
+    const disabledPickerItemIDs = selectedSpellIndex >= 0 ? disabledSpellIDs : disabledTalismanIDs;
+    const setEquipmentSelection = async (selection: EquipmentPickerSelection) => {
+        if (selectedEquipmentSlot == null) return;
+        let handle = selection.handle;
+        if (selection.source === 'database') {
+            const ownedItem = await ensureDatabaseItemInInventory(selection.id, disabledEquipmentHandles, true);
+            handle = ownedItem.handle;
+        }
+        if (handle == null || handle === 0) throw new Error('The selected item has no writable Inventory handle.');
+        setDraftEquipment(current => ({
+            ...current,
+            [selectedEquipmentSlot]: {
+                occupied: true,
+                rawId: selection.id,
+                handle,
+                name: selection.name,
+                iconPath: selection.iconPath,
+                resolved: true,
+            },
+        }));
+        setEquipmentDirty(true);
+        setSaveError('');
+    };
 
     return (
         <section className="w-full shrink-0 overflow-auto rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-scrollbar">
@@ -496,9 +533,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 slotLabel={selectedSlot}
                 charIdx={charIdx}
                 initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedEquipmentSelection}
-                disabledItemIDs={disabledSpellIDs}
+                disabledItemIDs={disabledPickerItemIDs}
                 disabledItemHandles={disabledEquipmentHandles}
-                inventoryOnly={selectedEquipmentSlot != null}
                 onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
                 onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
                 onClose={() => setModalOpen(false)}

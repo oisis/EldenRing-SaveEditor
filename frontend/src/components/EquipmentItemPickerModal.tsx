@@ -18,7 +18,7 @@ import {
 import type { db, vm } from '../../wailsjs/go/models';
 import { loadSafetyProfile, revealsRiskyItems, SAFETY_PROFILE_EVENT, type SafetyProfile } from '../state/safetyProfile';
 
-type PickerSource = 'inventory' | 'database';
+export type PickerSource = 'inventory' | 'database';
 type PickerView = 'icons' | 'list';
 type PickerSort = 'alphabetical' | 'weight' | 'category' | 'acquisition';
 
@@ -68,8 +68,7 @@ export type EquipmentItemPickerModalProps = {
     initialSelection?: EquipmentPickerSelection;
 	disabledItemIDs?: number[];
 	disabledItemHandles?: number[];
-	inventoryOnly?: boolean;
-    onConfirm?: (item: EquipmentPickerSelection) => void;
+    onConfirm?: (item: EquipmentPickerSelection) => void | Promise<void>;
     onClear?: () => void;
     onClose: () => void;
 };
@@ -79,6 +78,7 @@ export type EquipmentPickerSelection = {
 	handle?: number;
     name: string;
     iconPath: string;
+    source: PickerSource;
 };
 
 const iconSrc = (path: string) => (path.startsWith('/') ? path : `/${path}`);
@@ -182,7 +182,7 @@ function sortItems(items: PickerItem[], sort: PickerSort): PickerItem[] {
     });
 }
 
-function ItemCard({ item, source, view, weaponList, physickPicker, selected, disabled, onSelect }: {
+function ItemCard({ item, source, view, weaponList, physickPicker, selected, disabled, onSelect, onActivate }: {
     item: PickerItem;
     source: PickerSource;
     view: PickerView;
@@ -191,6 +191,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     selected: boolean;
     disabled: boolean;
     onSelect: (item: PickerItem) => void;
+    onActivate: (item: PickerItem) => void;
 }) {
     const selectionClass = selected ? 'border-emerald-500 ring-2 ring-emerald-500/60' : disabled ? 'border-border opacity-40 grayscale' : 'border-border hover:border-primary/60';
     const prominentListName = item.isArmor || item.isAmmo || item.isQuickEquipItem || item.isSpell || physickPicker;
@@ -199,7 +200,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
         if (item.isWeapon) {
             return (
                 <div data-picker-selected={selected || undefined} className={`col-span-4 grid min-h-16 items-center gap-x-3 rounded-lg border p-2 transition-colors ${selectionClass}`} style={weaponList ? { gridTemplateColumns: 'subgrid' } : undefined}>
-                    <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-w-0 items-center gap-3 text-left disabled:cursor-not-allowed" onClick={() => onSelect(item)}>
+                    <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-w-0 items-center gap-3 text-left disabled:cursor-not-allowed" onClick={() => onSelect(item)} onDoubleClick={() => onActivate(item)}>
                         <img className="h-12 w-12 shrink-0 object-contain" src={iconSrc(item.iconPath)} alt="" />
                         <span className="block truncate text-sm font-bold text-foreground">{item.name}</span>
                     </button>
@@ -211,7 +212,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
         }
         return (
             <div data-picker-selected={selected || undefined} className={`flex min-h-16 items-center gap-3 rounded-lg border p-2 transition-colors ${selectionClass}`}>
-                <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed" onClick={() => onSelect(item)}>
+                <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-w-0 flex-1 items-center gap-3 text-left disabled:cursor-not-allowed" onClick={() => onSelect(item)} onDoubleClick={() => onActivate(item)}>
                     <img className="h-12 w-12 shrink-0 object-contain" src={iconSrc(item.iconPath)} alt="" />
                     <span className="min-w-0">
                         <span className={`block truncate font-bold text-foreground ${prominentListName ? 'text-sm' : 'text-xs'}`}>{item.name}</span>
@@ -225,7 +226,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     return (
         <div data-picker-selected={selected || undefined} className={`relative flex min-h-32 flex-col rounded-lg border p-2 transition-colors ${selectionClass}`}>
             {item.quantity != null && item.stackable && <span className="absolute right-2 top-2 text-xs font-black text-foreground">×{item.quantity}</span>}
-            <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 disabled:cursor-not-allowed" onClick={() => onSelect(item)}>
+            <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 disabled:cursor-not-allowed" onClick={() => onSelect(item)} onDoubleClick={() => onActivate(item)}>
                 <img className={`${source === 'database' ? 'h-20 w-20' : 'h-16 w-16'} object-contain`} src={iconSrc(item.iconPath)} alt={item.name} />
                 <span className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground">{item.name}</span>
                 {item.isWeapon && <span className="text-[10px] font-bold text-muted-foreground">+{item.upgradeLevel ?? 0}</span>}
@@ -235,7 +236,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     );
 }
 
-export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], disabledItemHandles = [], inventoryOnly = false, onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
+export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], disabledItemHandles = [], onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
     const [source, setSource] = useState<PickerSource>('inventory');
     const [view, setView] = useState<PickerView>('icons');
     const [sort, setSort] = useState<PickerSort>('alphabetical');
@@ -247,6 +248,8 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
     const [safetyProfile, setSafetyProfile] = useState<SafetyProfile>(() => loadSafetyProfile());
     const [infuseTypes, setInfuseTypes] = useState<db.InfuseType[]>([]);
     const [ashesOfWar, setAshesOfWar] = useState<db.ItemEntry[]>([]);
+    const [submitting, setSubmitting] = useState(false);
+    const [submissionError, setSubmissionError] = useState('');
 
     useEffect(() => {
         let active = true;
@@ -267,6 +270,8 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
         } : null);
         setSearch('');
 		setSource('inventory');
+        setSubmitting(false);
+        setSubmissionError('');
 
         const weaponSlot = isWeaponSlot(slotLabel);
         Promise.all([
@@ -343,16 +348,31 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
 		disabledItemIDs.includes(item.id) ||
 		(item.handle != null && disabledItemHandles.includes(item.handle));
 	const selectItem = (item: PickerItem) => {
-		if ((spellPicker && initialSelection?.id === item.id) || (inventoryOnly && initialSelection?.handle != null && initialSelection.handle === item.handle)) {
+		const isCurrent = source === 'database'
+			? initialSelection?.id === item.id
+			: (spellPicker && initialSelection?.id === item.id) || (initialSelection?.handle != null && initialSelection.handle === item.handle);
+		if (isCurrent) {
 			onClear?.();
             onClose();
             return;
         }
         setSelected(item);
     };
+    const commitSelection = async (item: PickerItem) => {
+        if (submitting) return;
+        setSubmitting(true);
+        setSubmissionError('');
+        try {
+            await onConfirm?.({ id: item.id, handle: item.handle, name: item.name, iconPath: item.iconPath, source });
+            onClose();
+        } catch (error) {
+            setSubmissionError(error instanceof Error ? error.message : 'Unable to select this item.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
     const confirmSelection = () => {
-		if (selected) onConfirm?.({ id: selected.id, handle: selected.handle, name: selected.name, iconPath: selected.iconPath });
-        onClose();
+        if (selected) void commitSelection(selected);
     };
 
     return createPortal(
@@ -376,27 +396,27 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                         <option value="category">Category</option>
                         <option value="acquisition">Acquisition order</option>
                     </select>
-					{!spellPicker && !inventoryOnly && <div className="ml-auto flex h-[32px] rounded-md border border-border p-0.5" aria-label="Item source">
+					<div className="ml-auto flex h-[32px] rounded-md border border-border p-0.5" aria-label="Item source">
                         <button type="button" aria-pressed={source === 'inventory'} onClick={() => setSource('inventory')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'inventory' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Inventory</button>
                         <button type="button" aria-pressed={source === 'database'} onClick={() => setSource('database')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'database' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Item Database</button>
-                    </div>}
+                    </div>
                 </div>
 
                 <main className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar">
                     {loading ? <p className="py-12 text-center text-sm text-muted-foreground">Loading items…</p> : items.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">No matching items.</p> : (
                         <div className={weaponList ? 'grid grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] gap-x-3 gap-y-2' : view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
                             {weaponList && <><span className="px-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Weapon</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Level</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Infuse</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Ashes of War</span></>}
-							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} />)}
+							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={source === 'database' ? selected?.id === item.id : selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} onActivate={(selectedItem) => { void commitSelection(selectedItem); }} />)}
                         </div>
                     )}
                 </main>
 
                 <div className="relative flex items-center justify-between gap-4 border-t border-border p-4">
-                    <span className="min-w-0 truncate text-sm text-muted-foreground">{selected ? `Selected: ${selected.name}` : 'Select an item to preview it.'}</span>
+                    <span className="min-w-0 truncate text-sm text-muted-foreground">{submissionError || (selected ? `Selected: ${selected.name}` : 'Select an item to preview it.')}</span>
                     {source === 'database' && <span className="absolute left-1/2 -translate-x-1/2 text-center text-xs font-bold text-primary">Items from Item Database will be added to Inventory before equipping.</span>}
                     <div className="flex shrink-0 gap-2">
-                        <button type="button" onClick={onClose} className="rounded border border-border px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted/40">Cancel</button>
-                        <button type="button" onClick={confirmSelection} className="rounded bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary-foreground hover:opacity-90">Ok</button>
+                        <button type="button" disabled={submitting} onClick={onClose} className="rounded border border-border px-4 py-2 text-[10px] font-black uppercase tracking-widest text-muted-foreground hover:bg-muted/40 disabled:opacity-50">Cancel</button>
+                        <button type="button" disabled={submitting || !selected} onClick={confirmSelection} className="rounded bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-widest text-primary-foreground hover:opacity-90 disabled:opacity-50">Ok</button>
                     </div>
                 </div>
             </div>

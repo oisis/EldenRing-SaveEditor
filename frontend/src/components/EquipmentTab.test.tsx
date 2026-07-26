@@ -2,6 +2,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { EquipmentTab } from './EquipmentTab';
 import {
+    AddItemsToCharacter,
     GetArmsSlotEligibleItems,
     GetArrowSlotEligibleItems,
     GetBoltSlotEligibleItems,
@@ -21,6 +22,7 @@ import {
 } from '../../wailsjs/go/main/App';
 
 vi.mock('../../wailsjs/go/main/App', () => ({
+    AddItemsToCharacter: vi.fn(),
     GetEquipmentSnapshot: vi.fn(),
     GetCharacter: vi.fn(),
     GetHandArmamentEligibleItems: vi.fn(),
@@ -87,6 +89,14 @@ function makeSnapshot(over: Record<string, unknown> = {}) {
 }
 
 beforeEach(() => {
+    vi.mocked(AddItemsToCharacter).mockReset();
+    vi.mocked(AddItemsToCharacter).mockResolvedValue({
+        added: 1,
+        requested: 1,
+        trimmed: [],
+        skippedExisting: [],
+        capHit: '',
+    } as never);
     vi.mocked(GetEquipmentSnapshot).mockReset();
     vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot() as never);
     const eligibilityEndpoints = [
@@ -274,7 +284,14 @@ describe('EquipmentTab', () => {
         expect(cerulean).toBeDisabled();
         expect(cerulean.parentElement).toHaveClass('grayscale', 'opacity-40');
 
-        fireEvent.click(crimson);
+        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
+        const databaseCrimson = await screen.findByRole('button', { name: 'Select Crimson Amber Medallion' });
+        const databaseCerulean = screen.getByRole('button', { name: 'Select Cerulean Amber Medallion' });
+        expect(databaseCrimson.parentElement).toHaveAttribute('data-picker-selected', 'true');
+        expect(databaseCrimson.parentElement).toHaveClass('border-emerald-500');
+        expect(databaseCerulean).toBeDisabled();
+
+        fireEvent.click(databaseCrimson);
         fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
         await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 14, handle: 0 }]));
     });
@@ -296,6 +313,63 @@ describe('EquipmentTab', () => {
         fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
 
         await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 14, handle: 0xA00003E8 }]));
+    });
+
+    it('adds a database equipment item to Inventory and equips it on double-click', async () => {
+        const itemID = 0x00100020;
+        const handle = 0x80800010;
+        let added = false;
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: itemID, name: 'Club', category: 'melee_armaments', iconPath: 'items/weapons/club.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockImplementation(() => Promise.resolve({
+            inventory: added ? [
+                { id: itemID, baseId: itemID, handle, name: 'Club', category: 'melee_armaments', iconPath: 'items/weapons/club.png', quantity: 1, maxInventory: 1 },
+            ] : [],
+        }) as never);
+        vi.mocked(AddItemsToCharacter).mockImplementation(async () => {
+            added = true;
+            return { added: 1, requested: 1, trimmed: [], skippedExisting: [], capHit: '' } as never;
+        });
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Weapon slot 1' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
+        const club = await screen.findByRole('button', { name: 'Select Club' });
+        fireEvent.doubleClick(club);
+
+        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        expect(AddItemsToCharacter).toHaveBeenCalledWith(0, [itemID], 0, 0, 0, 0, 1, 0);
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 1, handle }]));
+    });
+
+    it('adds a database spell to Inventory and stages it on double-click', async () => {
+        const spellID = 0x40000FA0;
+        let added = false;
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries' ? [
+            { id: spellID, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1 },
+        ] : []) as never);
+        vi.mocked(GetCharacter).mockImplementation(() => Promise.resolve({
+            inventory: added ? [
+                { id: spellID, baseId: spellID, handle: 1, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', quantity: 1, maxInventory: 1 },
+            ] : [],
+        }) as never);
+        vi.mocked(AddItemsToCharacter).mockImplementation(async () => {
+            added = true;
+            return { added: 1, requested: 1, trimmed: [], skippedExisting: [], capHit: '' } as never;
+        });
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Spell slot 1' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
+        const pebble = await screen.findByRole('button', { name: 'Select Glintstone Pebble' });
+        fireEvent.doubleClick(pebble);
+
+        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        expect(AddItemsToCharacter).toHaveBeenCalledWith(0, [spellID], 0, 0, 0, 0, 1, 0);
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, [spellID]));
     });
 
     it('maps armor controls to their writer enum values', async () => {
@@ -371,11 +445,11 @@ describe('EquipmentTab', () => {
         expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
 
         fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
-        fireEvent.click(screen.getByRole('button', { name: 'Ok' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
         expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
     });
 
-    it('filters owned items by slot eligibility and keeps writable equipment pickers inventory-only', async () => {
+    it('filters owned items by slot eligibility and exposes both picker sources', async () => {
         vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
             { id: 0x1234, name: 'Database Claymore', category: 'melee_armaments', iconPath: 'items/weapons/claymore.png' },
         ] as never);
@@ -392,7 +466,8 @@ describe('EquipmentTab', () => {
         expect(await screen.findByText('Owned Claymore')).toBeInTheDocument();
         expect(screen.queryByText('Ineligible Tool')).not.toBeInTheDocument();
 
-        expect(screen.queryByRole('button', { name: 'Item Database' })).not.toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Inventory' })).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.getByRole('button', { name: 'Item Database' })).toHaveAttribute('aria-pressed', 'false');
         expect(screen.getByTestId('equipment-picker-toolbar')).toHaveClass('justify-start');
         expect(screen.getByPlaceholderText('Search items...')).toHaveClass('h-[32px]', 'w-[448px]');
         expect(screen.getByPlaceholderText('Search items...')).toHaveClass('max-w-full');
