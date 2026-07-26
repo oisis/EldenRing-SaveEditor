@@ -425,6 +425,7 @@ describe('EquipmentTab', () => {
         expect(screen.getByText('Wondrous Physick flask')).toBeInTheDocument();
         expect(screen.getByText('Spell slots')).toBeInTheDocument();
         expect(screen.getByText('Equip Load', { exact: false })).toBeInTheDocument();
+        expect(screen.getByText('Expermiental')).toHaveClass('text-red-600');
         expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
     });
 
