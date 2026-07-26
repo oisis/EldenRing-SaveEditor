@@ -16,8 +16,8 @@ import {
     GetPhysickEligibleItems,
     GetPouchEligibleItems,
     GetQuickItemEligibleItems,
+    SaveEquipment,
     SaveEquippedSpells,
-    GetTalismanSlotEligibleItems,
 } from '../../wailsjs/go/main/App';
 
 vi.mock('../../wailsjs/go/main/App', () => ({
@@ -31,15 +31,15 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetChestSlotEligibleItems: vi.fn(),
     GetArmsSlotEligibleItems: vi.fn(),
     GetLegsSlotEligibleItems: vi.fn(),
-    GetTalismanSlotEligibleItems: vi.fn(),
     GetQuickItemEligibleItems: vi.fn(),
+    SaveEquipment: vi.fn(),
     SaveEquippedSpells: vi.fn(),
     GetPouchEligibleItems: vi.fn(),
     GetPhysickEligibleItems: vi.fn(),
     GetItemList: vi.fn(),
 }));
 
-const emptyView = { occupied: false, rawId: 0, name: '', iconPath: '', resolved: false };
+const emptyView = { occupied: false, rawId: 0, handle: 0, name: '', iconPath: '', resolved: false };
 const view = (over: Partial<typeof emptyView>) => ({ ...emptyView, ...over });
 const fill = (n: number, over?: Partial<typeof emptyView>) =>
     Array.from({ length: n }, (_, i) => (i === 0 && over ? view(over) : { ...emptyView }));
@@ -98,7 +98,6 @@ beforeEach(() => {
         GetChestSlotEligibleItems,
         GetArmsSlotEligibleItems,
         GetLegsSlotEligibleItems,
-        GetTalismanSlotEligibleItems,
         GetQuickItemEligibleItems,
         GetPouchEligibleItems,
         GetPhysickEligibleItems,
@@ -112,6 +111,8 @@ beforeEach(() => {
     vi.mocked(GetCharacter).mockResolvedValue({ inventory: [] } as never);
     vi.mocked(SaveEquippedSpells).mockReset();
     vi.mocked(SaveEquippedSpells).mockResolvedValue(undefined as never);
+    vi.mocked(SaveEquipment).mockReset();
+    vi.mocked(SaveEquipment).mockResolvedValue(undefined as never);
     vi.mocked(GetInfuseTypes).mockReset();
     vi.mocked(GetInfuseTypes).mockResolvedValue([] as never);
 });
@@ -229,6 +230,79 @@ describe('EquipmentTab', () => {
         await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, [0x40000FA0, 0x40001770]));
     });
 
+    it('stages a red-cross removal for equipped weapons and saves its owned-slot clear', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            rightHandArmaments: fill(3, { occupied: true, resolved: true, rawId: 0x00100020, handle: 0x80800010, name: 'Club', iconPath: 'items/weapons/club.png' }),
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        await screen.findByAltText('Club');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Weapon slot 1' }));
+        expect(screen.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 1, handle: 0 }]));
+        expect(SaveEquippedSpells).not.toHaveBeenCalled();
+    });
+
+    it('renders talismans as read-only slots without a picker or remove control', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            talismans: [view({ occupied: true, resolved: true, rawId: 0x200017CA, name: "Host's Trick-Mirror", iconPath: 'items/talismans/host.png' }), ...fill(3)],
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        await screen.findByAltText("Host's Trick-Mirror");
+        expect(screen.queryByRole('button', { name: 'Remove Axe Talisman' })).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Axe Talisman' }));
+        expect(screen.queryByText('Inventory')).not.toBeInTheDocument();
+        expect(SaveEquipment).not.toHaveBeenCalled();
+    });
+
+    it('maps armor controls to their writer enum values', async () => {
+        const equippedArmor = ['Knight Helm', 'Knight Armor', 'Knight Gauntlets', 'Knight Greaves']
+            .map((name, index) => view({ occupied: true, resolved: true, rawId: 0x10100000 + index, name, iconPath: `items/armor/${index}.png` }));
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            armor: equippedArmor,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        await screen.findByAltText('Knight Helm');
+
+        for (const label of ['Knight Helm', 'Knight Armor', 'Knight Gauntlets', 'Knight Greaves']) {
+            fireEvent.click(screen.getByRole('button', { name: `Remove ${label}` }));
+        }
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [
+            { slot: 10, handle: 0 },
+            { slot: 11, handle: 0 },
+            { slot: 12, handle: 0 },
+            { slot: 13, handle: 0 },
+        ]));
+    });
+
+    it('marks the equipped inventory instance green and removes it on a second click', async () => {
+        vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
+            { id: 0x100020, name: 'Club', category: 'melee_armaments', iconPath: 'items/weapons/club.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 0x80800010, id: 0x100020, baseId: 0x100020, name: 'Club', category: 'melee_armaments', iconPath: 'items/weapons/club.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            rightHandArmaments: fill(3, { occupied: true, resolved: true, rawId: 0x100020, handle: 0x80800010, name: 'Club', iconPath: 'items/weapons/club.png' }),
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Weapon slot 1' }));
+        const club = await screen.findByRole('button', { name: 'Select Club' });
+        expect(club.parentElement).toHaveAttribute('data-picker-selected', 'true');
+        expect(club.parentElement).toHaveClass('border-emerald-500');
+        fireEvent.click(club);
+
+        expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 1, handle: 0 }]));
+    });
+
     it('renders the approved equipment layout', () => {
         render(<EquipmentTab />);
 
@@ -240,10 +314,10 @@ describe('EquipmentTab', () => {
         expect(screen.getByRole('button', { name: 'Save changes' })).toBeInTheDocument();
     });
 
-    it('shows a visible remove icon in the lower-left corner of every equipment field', () => {
+    it('shows a visible remove icon in the lower-left corner of every editable equipment field', () => {
         render(<EquipmentTab />);
 
-        expect(screen.getAllByTestId('slot-remove-icon')).toHaveLength(46);
+        expect(screen.getAllByTestId('slot-remove-icon')).toHaveLength(42);
         expect(screen.getAllByTestId('slot-remove-icon')[0]).toHaveClass('bottom-0.5', 'left-1', 'text-lg', 'text-red-600');
     });
 
@@ -261,7 +335,7 @@ describe('EquipmentTab', () => {
         expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
     });
 
-    it('filters owned items by slot eligibility and exposes the database picker controls', async () => {
+    it('filters owned items by slot eligibility and keeps writable equipment pickers inventory-only', async () => {
         vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
             { id: 0x1234, name: 'Database Claymore', category: 'melee_armaments', iconPath: 'items/weapons/claymore.png' },
         ] as never);
@@ -278,23 +352,17 @@ describe('EquipmentTab', () => {
         expect(await screen.findByText('Owned Claymore')).toBeInTheDocument();
         expect(screen.queryByText('Ineligible Tool')).not.toBeInTheDocument();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
-        expect(await screen.findByText('Database Claymore')).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: 'Add & Equip' })).not.toBeInTheDocument();
-        expect(screen.getByText('Items from Item Database will be added to Inventory before equipping.')).toBeInTheDocument();
-        expect(screen.getByAltText('Database Claymore')).toHaveClass('h-20', 'w-20');
+        expect(screen.queryByRole('button', { name: 'Item Database' })).not.toBeInTheDocument();
         expect(screen.getByTestId('equipment-picker-toolbar')).toHaveClass('justify-start');
         expect(screen.getByPlaceholderText('Search items...')).toHaveClass('h-[32px]', 'w-[448px]');
         expect(screen.getByPlaceholderText('Search items...')).toHaveClass('max-w-full');
-        expect(screen.getByLabelText('Item source')).toHaveClass('ml-auto');
         expect(screen.getByLabelText('Sort items')).toHaveValue('alphabetical');
         expect(screen.getByLabelText('Sort items')).toHaveClass('h-[32px]');
         expect(screen.getByLabelText('View mode')).toHaveClass('h-[32px]');
-        expect(screen.getByLabelText('Item source')).toHaveClass('h-[32px]');
 
         fireEvent.click(screen.getByRole('button', { name: 'List view' }));
         expect(screen.getByRole('button', { name: 'List view' })).toHaveAttribute('aria-pressed', 'true');
-        expect(screen.getByRole('button', { name: 'Select Database Claymore' }).querySelector('img')).toHaveClass('h-12', 'w-12');
+        expect(screen.getByRole('button', { name: 'Select Owned Claymore' }).querySelector('img')).toHaveClass('h-12', 'w-12');
     });
 
     it('closes the item picker with Escape', () => {
@@ -349,7 +417,7 @@ describe('EquipmentTab', () => {
         cards.forEach(card => expect(card).toHaveClass('flex-col'));
     });
 
-    it('hides risky eligible items in Safe Mode from both picker sources', async () => {
+    it('hides risky eligible items in Safe Mode from the writable inventory picker', async () => {
         vi.mocked(GetHandArmamentEligibleItems).mockResolvedValue([
             { id: 1, name: 'Safe item', category: 'melee_armaments', iconPath: 'items/weapons/safe.png' },
             { id: 2, name: 'Cut item', category: 'melee_armaments', iconPath: 'items/weapons/cut.png', flags: ['cut_content', 'ban_risk'] },
@@ -366,9 +434,6 @@ describe('EquipmentTab', () => {
         expect(await screen.findByText('Safe item')).toBeInTheDocument();
         expect(screen.queryByText('Cut item')).not.toBeInTheDocument();
 
-        fireEvent.click(screen.getByRole('button', { name: 'Item Database' }));
-        expect(await screen.findByText('Safe item')).toBeInTheDocument();
-        expect(screen.queryByText('Cut item')).not.toBeInTheDocument();
     });
 
     it('shows weapon level in icons and level, infusion and AoW columns in list view', async () => {
@@ -413,23 +478,6 @@ describe('EquipmentTab', () => {
 
         expect(screen.getByText('Test armor')).toHaveClass('text-sm');
         expect(screen.queryByText('Armor · 1')).not.toBeInTheDocument();
-    });
-
-    it('shows talisman names larger without the category and quantity line in list view', async () => {
-        vi.mocked(GetTalismanSlotEligibleItems).mockResolvedValue([
-            { id: 1, name: 'Test talisman', category: 'talismans', iconPath: 'items/talismans/test.png', maxInventory: 1 },
-        ] as never);
-        vi.mocked(GetCharacter).mockResolvedValue({
-            inventory: [{ handle: 1, id: 1, baseId: 1, name: 'Test talisman', category: 'Talisman', iconPath: 'items/talismans/test.png', quantity: 1, maxInventory: 1 }],
-        } as never);
-        render(<EquipmentTab charIdx={0} />);
-
-        fireEvent.click(screen.getByRole('button', { name: 'Axe Talisman' }));
-        await screen.findByText('Test talisman');
-        fireEvent.click(screen.getByRole('button', { name: 'List view' }));
-
-        expect(screen.getByText('Test talisman')).toHaveClass('text-sm');
-        expect(screen.queryByText('Talisman · 1')).not.toBeInTheDocument();
     });
 
     it('shows ammunition names larger without the category and quantity line in list view', async () => {
@@ -536,7 +584,7 @@ describe('EquipmentTab', () => {
         expect(screen.getByRole('tooltip', { name: 'Chest armor' })).toBeInTheDocument();
         expect(screen.getByRole('tooltip', { name: 'Gauntlets' })).toBeInTheDocument();
         expect(screen.getByRole('tooltip', { name: 'Leg armor' })).toBeInTheDocument();
-        expect(screen.getAllByRole('tooltip', { name: 'Talismans' })).toHaveLength(4);
+        expect(screen.getAllByRole('tooltip', { name: 'Talismans (read-only)' })).toHaveLength(4);
         expect(screen.getAllByRole('tooltip', { name: 'Tools and Spirit Ashes' })).toHaveLength(16);
         expect(screen.getAllByRole('tooltip', { name: 'Crystal Tears' })).toHaveLength(2);
         expect(screen.getAllByRole('tooltip', { name: 'Sorceries and Incantations' })).toHaveLength(10);

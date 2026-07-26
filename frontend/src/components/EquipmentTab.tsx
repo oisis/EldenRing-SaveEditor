@@ -1,9 +1,28 @@
 import { useEffect, useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
-import { GetCharacter, GetEquipmentSnapshot, SaveEquippedSpells } from '../../wailsjs/go/main/App';
+import { GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells } from '../../wailsjs/go/main/App';
 import type { main } from '../../wailsjs/go/models';
 import { EquipmentItemPickerModal, type EquipmentPickerSelection } from './EquipmentItemPickerModal';
 
 type EquippedItem = main.EquipmentSlotView;
+
+const equipmentSlotByLabel: Record<string, number> = {
+    'Ranged slot 1': 0,
+    'Weapon slot 1': 1,
+    'Ranged slot 2': 2,
+    'Weapon slot 2': 3,
+    'Ranged slot 3': 4,
+    'Weapon slot 3': 5,
+    'Arrow slot 1': 6,
+    'Bolt slot 1': 7,
+    'Arrow slot 2': 8,
+    'Bolt slot 2': 9,
+    'Knight Helm': 10,
+    'Knight Armor': 11,
+    'Knight Gauntlets': 12,
+    'Knight Greaves': 13,
+};
+
+const emptyEquipmentItem = (): EquippedItem => ({ occupied: false, rawId: 0, handle: 0, name: '', iconPath: '', resolved: false });
 
 // Item icon paths in the DB are stored without a leading slash; the public
 // assets are served from the root, so normalize to an absolute path.
@@ -25,6 +44,8 @@ type SlotProps = {
     onOpen: (label: string) => void;
     selected?: boolean;
     active?: boolean;
+    readOnly?: boolean;
+    showRemove?: boolean;
     item?: EquippedItem;
     quantity?: number;
     onRemove?: () => void;
@@ -42,13 +63,14 @@ function SlotTooltip({ eligibleItems }: { eligibleItems: string }) {
     );
 }
 
-function SlotRemoveIcon({ label, onRemove }: { label: string; onRemove?: () => void }) {
+function SlotRemoveIcon({ label, onRemove, showRemove = true }: { label: string; onRemove?: () => void; showRemove?: boolean }) {
+    if (!showRemove) return null;
     if (!onRemove) return <span data-testid="slot-remove-icon" aria-hidden="true" className="pointer-events-none absolute bottom-0.5 left-1 z-20 text-lg font-black leading-none text-red-600 drop-shadow-sm">×</span>;
     const remove = (event: SyntheticEvent) => { event.stopPropagation(); onRemove(); };
     return <span data-testid="slot-remove-icon" role="button" tabIndex={0} aria-label={`Remove ${label}`} onClick={remove} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') remove(event); }} className="absolute bottom-0.5 left-1 z-20 cursor-pointer text-lg font-black leading-none text-red-600 drop-shadow-sm hover:text-red-500">×</span>;
 }
 
-function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, item, quantity, onRemove, children }: SlotProps) {
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, onRemove, children }: SlotProps) {
     // Occupied + resolved: real icon and item name. Occupied + unknown:
     // placeholder with the raw-ID name. Empty: placeholder + eligibility text.
     const tooltip = item?.occupied ? item.name : eligibleItems;
@@ -57,13 +79,13 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active 
             type="button"
             aria-label={label}
             data-active-spell={active || undefined}
-            onClick={() => onOpen(label)}
+            onClick={() => { if (!readOnly) onOpen(label); }}
             style={selected || active ? { ...slotSurface, boxShadow: 'var(--eq-slot-selected-shadow)' } : slotSurface}
             className={`${slotClass} ${selected ? 'border-2 border-[color:var(--eq-slot-selected-border)]' : ''} ${active ? 'border-2 border-amber-400 ring-2 ring-amber-400/60' : ''}`}
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems={tooltip} />
-            <SlotRemoveIcon label={label} onRemove={onRemove} />
+            <SlotRemoveIcon label={label} onRemove={onRemove} showRemove={showRemove} />
             {quantity != null && <span className="pointer-events-none absolute left-1.5 top-1 z-20 text-xs font-black text-foreground">{quantity}</span>}
             {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : children}
         </button>
@@ -158,10 +180,12 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const [modalOpen, setModalOpen] = useState(false);
     const [snapshot, setSnapshot] = useState<main.EquipmentSnapshot | null>(null);
     const [ammoQuantities, setAmmoQuantities] = useState<Record<number, number>>({});
+    const [draftEquipment, setDraftEquipment] = useState<Record<number, EquippedItem>>({});
+    const [equipmentDirty, setEquipmentDirty] = useState(false);
     const [draftSpells, setDraftSpells] = useState<EquippedItem[] | null>(null);
     const [spellsDirty, setSpellsDirty] = useState(false);
-    const [spellSaveError, setSpellSaveError] = useState('');
-    const [spellSaveRevision, setSpellSaveRevision] = useState(0);
+    const [saveError, setSaveError] = useState('');
+    const [saveRevision, setSaveRevision] = useState(0);
     const openSlot = (label: string) => {
         setSelectedSlot(label);
         setModalOpen(true);
@@ -175,9 +199,11 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         let active = true;
         setSnapshot(null);
         setAmmoQuantities({});
+        setDraftEquipment({});
+        setEquipmentDirty(false);
         setDraftSpells(null);
         setSpellsDirty(false);
-        setSpellSaveError('');
+        setSaveError('');
         (async () => {
             try {
                 const [snap, character] = await Promise.all([GetEquipmentSnapshot(charIdx), GetCharacter(charIdx)]);
@@ -200,7 +226,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             }
         })();
         return () => { active = false; };
-    }, [charIdx, saveLoadKey, equipmentRevision, spellSaveRevision]);
+    }, [charIdx, saveLoadKey, equipmentRevision, saveRevision]);
 
     const spellIndexForLabel = (label: string) => {
         const match = /^Spell slot (\d+)$/.exec(label);
@@ -211,33 +237,68 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         if (index < 0) return;
         setDraftSpells(current => {
             const next = [...(current ?? Array.from(snapshot?.spells ?? []))];
-            next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, name: selection.name, iconPath: selection.iconPath, resolved: true };
+            next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, handle: 0, name: selection.name, iconPath: selection.iconPath, resolved: true };
             return next;
         });
         setSpellsDirty(true);
-        setSpellSaveError('');
+        setSaveError('');
     };
     const removeSpell = (index: number) => {
         setDraftSpells(current => {
             const next = [...(current ?? Array.from(snapshot?.spells ?? []))];
             const compact = next.filter((item, itemIndex) => itemIndex !== index && item?.occupied);
-            while (compact.length < next.length) compact.push({ occupied: false, rawId: 0, name: '', iconPath: '', resolved: false });
+            while (compact.length < next.length) compact.push(emptyEquipmentItem());
             return compact;
         });
         setSpellsDirty(true);
-        setSpellSaveError('');
+        setSaveError('');
     };
-    const saveSpells = async () => {
-        if (charIdx == null || !draftSpells) return;
-        const spellIDs = draftSpells.filter(item => item.occupied).map(item => item.rawId | 0x40000000);
+    const selectedEquipmentSlot = equipmentSlotByLabel[selectedSlot];
+    const equipmentView = (slot: number, fallback: EquippedItem | undefined): EquippedItem | undefined =>
+        Object.prototype.hasOwnProperty.call(draftEquipment, slot) ? draftEquipment[slot] : fallback;
+    const setEquipmentSelection = (selection: EquipmentPickerSelection) => {
+        const handle = selection.handle;
+        if (selectedEquipmentSlot == null || handle == null || handle === 0) return;
+        setDraftEquipment(current => ({
+            ...current,
+            [selectedEquipmentSlot]: {
+                occupied: true,
+                rawId: selection.id,
+                handle,
+                name: selection.name,
+                iconPath: selection.iconPath,
+                resolved: true,
+            },
+        }));
+        setEquipmentDirty(true);
+        setSaveError('');
+    };
+    const removeEquipment = (slot: number) => {
+        setDraftEquipment(current => ({ ...current, [slot]: emptyEquipmentItem() }));
+        setEquipmentDirty(true);
+        setSaveError('');
+    };
+    const saveChanges = async () => {
+        if (charIdx == null) return;
         try {
-            await SaveEquippedSpells(charIdx, spellIDs);
-            setSpellsDirty(false);
-            setSpellSaveError('');
-            setSpellSaveRevision(value => value + 1);
+            if (equipmentDirty) {
+                const changes = Object.entries(draftEquipment).map(([slot, item]) => ({
+                    slot: Number(slot),
+                    handle: item.occupied ? item.handle : 0,
+                }));
+                await SaveEquipment(charIdx, changes);
+                setEquipmentDirty(false);
+            }
+            if (spellsDirty && draftSpells) {
+                const spellIDs = draftSpells.filter(item => item.occupied).map(item => item.rawId | 0x40000000);
+                await SaveEquippedSpells(charIdx, spellIDs);
+                setSpellsDirty(false);
+            }
+            setSaveError('');
+            setSaveRevision(value => value + 1);
             onMutate?.();
         } catch (error) {
-            setSpellSaveError(error instanceof Error ? error.message : 'Unable to save spell changes.');
+            setSaveError(error instanceof Error ? error.message : 'Unable to save equipment changes.');
         }
     };
 
@@ -303,6 +364,25 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const disabledSpellIDs = spellViews
         .filter((item, index) => index !== selectedSpellIndex && item.occupied)
         .map(item => item.rawId | 0x40000000);
+    const snapshotEquipmentForSlot = (slot: number): EquippedItem | undefined => {
+        if (slot >= 0 && slot <= 5) {
+            const handIndex = Math.floor(slot / 2);
+            return slot % 2 === 0 ? snapshot?.leftHandArmaments[handIndex] : snapshot?.rightHandArmaments[handIndex];
+        }
+        if (slot === 6) return snapshot?.arrows[0];
+        if (slot === 8) return snapshot?.arrows[1];
+        if (slot === 7) return snapshot?.bolts[0];
+        if (slot === 9) return snapshot?.bolts[1];
+        if (slot >= 10 && slot <= 13) return snapshot?.armor[slot - 10];
+        return undefined;
+    };
+    const selectedEquipment = selectedEquipmentSlot == null ? undefined : equipmentView(selectedEquipmentSlot, snapshotEquipmentForSlot(selectedEquipmentSlot));
+    const selectedEquipmentSelection = selectedEquipment?.occupied ? {
+        id: selectedEquipment.rawId,
+        handle: selectedEquipment.handle,
+        name: selectedEquipment.name,
+        iconPath: selectedEquipment.iconPath,
+    } : undefined;
 
     return (
         <section className="w-full shrink-0 overflow-auto rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-scrollbar">
@@ -311,20 +391,43 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                     <h2 className="mb-3 text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Equipment slots</h2>
                     <div className="grid gap-[10px]">
                         <div className="grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
-                            {weaponSlots.map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={snapshot?.rightHandArmaments[index]}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>)}
+                            {weaponSlots.map((label, index) => {
+                                const slot = 1 + index * 2;
+                                const item = equipmentView(slot, snapshot?.rightHandArmaments[index]);
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={item} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>;
+                            })}
                             <span aria-hidden="true" />
-                            {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={snapshot?.arrows[index]} quantity={snapshot?.arrows[index]?.occupied ? ammoQuantities[snapshot.arrows[index].rawId] : undefined}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>)}
+                            {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => {
+                                const slot = index === 0 ? 6 : 8;
+                                const item = equipmentView(slot, snapshot?.arrows[index]);
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Arrows and greatarrows" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? ammoQuantities[item.rawId] : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/items/arrows_and_bolts/arrow.png" mirrored /></EquipmentSlot>;
+                            })}
                         </div>
                         <div className="-mt-[7px] grid grid-cols-[repeat(3,82px)_18px_repeat(2,82px)] gap-[9px]">
-                            {rangedSlots.map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={snapshot?.leftHandArmaments[index]}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>)}
+                            {rangedSlots.map((label, index) => {
+                                const slot = index * 2;
+                                const item = equipmentView(slot, snapshot?.leftHandArmaments[index]);
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={item} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>;
+                            })}
                             <span aria-hidden="true" />
-                            {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={snapshot?.bolts[index]} quantity={snapshot?.bolts[index]?.occupied ? ammoQuantities[snapshot.bolts[index].rawId] : undefined}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>)}
+                            {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => {
+                                const slot = index === 0 ? 7 : 9;
+                                const item = equipmentView(slot, snapshot?.bolts[index]);
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Bolts and greatbolts" selected={selected(label)} onOpen={openSlot} item={item} quantity={item?.occupied ? ammoQuantities[item.rawId] : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/items/arrows_and_bolts/bolt.png" /></EquipmentSlot>;
+                            })}
                         </div>
                         <div className="mt-[5px] grid grid-cols-[repeat(4,82px)] gap-[9px]">
-                            {armorSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot} item={snapshot?.armor[index]}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {armorSlots.map(([label, src], index) => {
+                                const slot = 10 + index;
+                                const item = equipmentView(slot, snapshot?.armor[index]);
+                                return <EquipmentSlot key={label} label={label} eligibleItems={['Helms', 'Chest armor', 'Gauntlets', 'Leg armor'][index]} selected={selected(label)} onOpen={openSlot} item={item} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src={src} /></EquipmentSlot>;
+                            })}
                         </div>
                         <div className="grid grid-cols-[repeat(4,82px)] gap-[9px]">
-                            {talismanSlots.slice(0, activeTalismanSlots).map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot} item={snapshot?.talismans[index]}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {talismanSlots.slice(0, activeTalismanSlots).map(([label, src], index) => {
+                                const item = snapshot?.talismans[index];
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Talismans (read-only)" onOpen={openSlot} readOnly showRemove={false} item={item}><GhostIcon src={src} /></EquipmentSlot>;
+                            })}
                         </div>
                         {[0, 1].map((row) => (
                             <div key={row} className="grid grid-cols-[repeat(5,82px)] gap-[9px]">
@@ -375,10 +478,19 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             </div>
             <div className="mx-5 flex items-center justify-between border-t border-border px-0 pb-4 pt-3">
                 <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
-                <span role="status" className="text-xs text-red-600">{spellSaveError}</span>
-                <button type="button" disabled={!spellsDirty || charIdx == null} onClick={saveSpells} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
+                <span role="status" className="text-xs text-red-600">{saveError}</span>
+                <button type="button" disabled={(!spellsDirty && !equipmentDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
             </div>
-            {modalOpen && <EquipmentItemPickerModal slotLabel={selectedSlot} charIdx={charIdx} initialSelection={selectedSpellSelection} disabledItemIDs={disabledSpellIDs} onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : undefined} onClear={selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined} onClose={() => setModalOpen(false)} />}
+            {modalOpen && <EquipmentItemPickerModal
+                slotLabel={selectedSlot}
+                charIdx={charIdx}
+                initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedEquipmentSelection}
+                disabledItemIDs={disabledSpellIDs}
+                inventoryOnly={selectedEquipmentSlot != null}
+                onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
+                onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
+                onClose={() => setModalOpen(false)}
+            />}
         </section>
     );
 }

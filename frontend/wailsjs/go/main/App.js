@@ -366,10 +366,6 @@ export function GetSummoningPools(arg1) {
   return window['go']['main']['App']['GetSummoningPools'](arg1);
 }
 
-export function GetTalismanSlotEligibleItems() {
-  return window['go']['main']['App']['GetTalismanSlotEligibleItems']();
-}
-
 export function GetUndoDepth(arg1) {
   return window['go']['main']['App']['GetUndoDepth'](arg1);
 }
@@ -560,6 +556,10 @@ export function SaveCharacter(arg1, arg2) {
 
 export function SaveDeployTarget(arg1) {
   return window['go']['main']['App']['SaveDeployTarget'](arg1);
+}
+
+export function SaveEquipment(arg1, arg2) {
+  return window['go']['main']['App']['SaveEquipment'](arg1, arg2);
 }
 
 export function SaveEquippedSpells(arg1, arg2) {

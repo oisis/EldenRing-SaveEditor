@@ -190,8 +190,6 @@ export function GetStorageOrder(arg1:number,arg2:string):Promise<Array<main.Inve
 
 export function GetSummoningPools(arg1:number):Promise<Array<db.SummoningPoolEntry>>;
 
-export function GetTalismanSlotEligibleItems():Promise<Array<db.ItemEntry>>;
-
 export function GetUndoDepth(arg1:number):Promise<number>;
 
 export function GetUnlockedRegions(arg1:number):Promise<Array<db.RegionEntry>>;
@@ -287,6 +285,8 @@ export function SaveBuildTemplateV2FromCharacterToLibrary(arg1:number,arg2:strin
 export function SaveCharacter(arg1:number,arg2:vm.CharacterViewModel):Promise<void>;
 
 export function SaveDeployTarget(arg1:deploy.Target):Promise<void>;
+
+export function SaveEquipment(arg1:number,arg2:Array<main.EquipmentChange>):Promise<void>;
 
 export function SaveEquippedSpells(arg1:number,arg2:Array<number>):Promise<void>;
 

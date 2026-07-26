@@ -14,7 +14,6 @@ import {
     GetPhysickEligibleItems,
     GetPouchEligibleItems,
     GetQuickItemEligibleItems,
-    GetTalismanSlotEligibleItems,
 } from '../../wailsjs/go/main/App';
 import type { db, vm } from '../../wailsjs/go/models';
 import { loadSafetyProfile, revealsRiskyItems, SAFETY_PROFILE_EVENT, type SafetyProfile } from '../state/safetyProfile';
@@ -26,7 +25,6 @@ type PickerSort = 'alphabetical' | 'weight' | 'category' | 'acquisition';
 const RISKY_ITEM_FLAGS = ['cut_content', 'ban_risk', 'pre_order', 'dlc_duplicate'];
 const WEAPON_CATEGORIES = new Set(['melee_armaments', 'ranged_and_catalysts', 'shields']);
 const ARMOR_CATEGORIES = new Set(['head', 'chest', 'arms', 'legs']);
-const TALISMAN_CATEGORIES = new Set(['talismans']);
 const AMMO_CATEGORIES = new Set(['arrows_and_bolts']);
 const QUICK_EQUIP_CATEGORIES = new Set(['tools', 'ashes']);
 const SPELL_CATEGORIES = new Set(['sorceries', 'incantations']);
@@ -38,15 +36,15 @@ const PHYSICK_TEAR_CANONICAL_IDS = new Map<number, number>([
 
 const isWeaponCategory = (category: string) => WEAPON_CATEGORIES.has(category);
 const isArmorCategory = (category: string) => ARMOR_CATEGORIES.has(category);
-const isTalismanCategory = (category: string) => TALISMAN_CATEGORIES.has(category);
 const isAmmoCategory = (category: string) => AMMO_CATEGORIES.has(category);
 const isQuickEquipCategory = (category: string) => QUICK_EQUIP_CATEGORIES.has(category);
 const isSpellCategory = (category: string) => SPELL_CATEGORIES.has(category);
 const isWeaponSlot = (label: string) => label.startsWith('Weapon slot') || label.startsWith('Ranged slot');
 
 type PickerItem = {
-    entryKey: string;
-    id: number;
+	entryKey: string;
+	id: number;
+	handle?: number;
     name: string;
     category: string;
     iconPath: string;
@@ -56,7 +54,6 @@ type PickerItem = {
     acquisitionOrder?: number;
     isWeapon: boolean;
     isArmor: boolean;
-    isTalisman: boolean;
     isAmmo: boolean;
     isQuickEquipItem: boolean;
     isSpell: boolean;
@@ -69,14 +66,16 @@ export type EquipmentItemPickerModalProps = {
     slotLabel: string;
     charIdx?: number;
     initialSelection?: EquipmentPickerSelection;
-    disabledItemIDs?: number[];
+	disabledItemIDs?: number[];
+	inventoryOnly?: boolean;
     onConfirm?: (item: EquipmentPickerSelection) => void;
     onClear?: () => void;
     onClose: () => void;
 };
 
 export type EquipmentPickerSelection = {
-    id: number;
+	id: number;
+	handle?: number;
     name: string;
     iconPath: string;
 };
@@ -91,7 +90,6 @@ function eligibleItemsForSlot(label: string): Promise<db.ItemEntry[]> {
     if (label === 'Knight Armor') return GetChestSlotEligibleItems();
     if (label === 'Knight Gauntlets') return GetArmsSlotEligibleItems();
     if (label === 'Knight Greaves') return GetLegsSlotEligibleItems();
-    if (['Axe Talisman', 'Claw Talisman', 'Companion Jar', 'Gold Scarab'].includes(label)) return GetTalismanSlotEligibleItems();
     if (label.startsWith('Quick item')) return GetQuickItemEligibleItems();
     if (label.startsWith('Quick pouch')) return GetPouchEligibleItems();
     if (label.startsWith('Physick tear')) return GetPhysickEligibleItems();
@@ -104,7 +102,6 @@ function eligibleItemsForSlot(label: string): Promise<db.ItemEntry[]> {
 function toPickerItem(item: db.ItemEntry): PickerItem {
     const weapon = isWeaponCategory(item.category);
     const armor = isArmorCategory(item.category);
-    const talisman = isTalismanCategory(item.category);
     const ammo = isAmmoCategory(item.category);
     const quickEquipItem = isQuickEquipCategory(item.category);
     const spell = isSpellCategory(item.category);
@@ -118,7 +115,6 @@ function toPickerItem(item: db.ItemEntry): PickerItem {
         weight: item.weight,
         isWeapon: weapon,
         isArmor: armor,
-        isTalisman: talisman,
         isAmmo: ammo,
         isQuickEquipItem: quickEquipItem,
         isSpell: spell,
@@ -138,14 +134,14 @@ function toOwnedPickerItem(
 ): PickerItem {
     const weapon = isWeaponCategory(eligibleItem?.category ?? item.category);
     const armor = isArmorCategory(eligibleItem?.category ?? item.category);
-    const talisman = isTalismanCategory(eligibleItem?.category ?? item.category);
     const ammo = isAmmoCategory(eligibleItem?.category ?? item.category);
     const quickEquipItem = isQuickEquipCategory(eligibleItem?.category ?? item.category);
     const spell = isSpellCategory(eligibleItem?.category ?? item.category);
     const infusionOffset = item.id - item.baseId - item.currentUpgrade;
-    return {
-        entryKey: `inventory-${acquisitionOrder}-${item.handle}`,
-        id: canonicalID ?? (item.baseId || item.id),
+	return {
+		entryKey: `inventory-${acquisitionOrder}-${item.handle}`,
+		id: canonicalID ?? (item.baseId || item.id),
+		handle: item.handle,
         name: canonicalID != null ? (eligibleItem?.name ?? item.name) : item.name,
         category: canonicalID != null ? (eligibleItem?.category ?? item.category) : item.category,
         iconPath: canonicalID != null ? (eligibleItem?.iconPath ?? item.iconPath) : item.iconPath,
@@ -155,7 +151,6 @@ function toOwnedPickerItem(
         acquisitionOrder,
         isWeapon: weapon,
         isArmor: armor,
-        isTalisman: talisman,
         isAmmo: ammo,
         isQuickEquipItem: quickEquipItem,
         isSpell: spell,
@@ -196,7 +191,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     onSelect: (item: PickerItem) => void;
 }) {
     const selectionClass = selected ? 'border-emerald-500 ring-2 ring-emerald-500/60' : disabled ? 'border-border opacity-40 grayscale' : 'border-border hover:border-primary/60';
-    const prominentListName = item.isArmor || item.isTalisman || item.isAmmo || item.isQuickEquipItem || item.isSpell || physickPicker;
+    const prominentListName = item.isArmor || item.isAmmo || item.isQuickEquipItem || item.isSpell || physickPicker;
 
     if (view === 'list') {
         if (item.isWeapon) {
@@ -238,7 +233,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     );
 }
 
-export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
+export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], inventoryOnly = false, onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
     const [source, setSource] = useState<PickerSource>('inventory');
     const [view, setView] = useState<PickerView>('icons');
     const [sort, setSort] = useState<PickerSort>('alphabetical');
@@ -254,22 +249,22 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
     useEffect(() => {
         let active = true;
         setLoading(true);
-        setSelected(initialSelection ? {
-            entryKey: `current-${initialSelection.id}`,
-            id: initialSelection.id,
+		setSelected(initialSelection ? {
+			entryKey: `current-${initialSelection.id}`,
+			id: initialSelection.id,
+			handle: initialSelection.handle,
             name: initialSelection.name,
             category: '',
             iconPath: initialSelection.iconPath,
             stackable: false,
             isWeapon: false,
             isArmor: false,
-            isTalisman: false,
             isAmmo: false,
             isQuickEquipItem: false,
             isSpell: slotLabel.startsWith('Spell slot'),
         } : null);
         setSearch('');
-        setSource('inventory');
+		setSource('inventory');
 
         const weaponSlot = isWeaponSlot(slotLabel);
         Promise.all([
@@ -294,7 +289,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
         });
 
         return () => { active = false; };
-    }, [slotLabel, charIdx, initialSelection?.id]);
+	}, [slotLabel, charIdx, initialSelection?.id, initialSelection?.handle]);
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -342,17 +337,17 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
     const weaponList = view === 'list' && isWeaponSlot(slotLabel);
     const physickPicker = slotLabel.startsWith('Physick tear');
     const spellPicker = slotLabel.startsWith('Spell slot');
-    const isDisabled = (item: PickerItem) => spellPicker && disabledItemIDs.includes(item.id);
-    const selectItem = (item: PickerItem) => {
-        if (spellPicker && initialSelection?.id === item.id) {
-            onClear?.();
+	const isDisabled = (item: PickerItem) => spellPicker && disabledItemIDs.includes(item.id);
+	const selectItem = (item: PickerItem) => {
+		if ((spellPicker && initialSelection?.id === item.id) || (inventoryOnly && initialSelection?.handle != null && initialSelection.handle === item.handle)) {
+			onClear?.();
             onClose();
             return;
         }
         setSelected(item);
     };
     const confirmSelection = () => {
-        if (selected) onConfirm?.({ id: selected.id, name: selected.name, iconPath: selected.iconPath });
+		if (selected) onConfirm?.({ id: selected.id, handle: selected.handle, name: selected.name, iconPath: selected.iconPath });
         onClose();
     };
 
@@ -377,7 +372,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                         <option value="category">Category</option>
                         <option value="acquisition">Acquisition order</option>
                     </select>
-                    {!spellPicker && <div className="ml-auto flex h-[32px] rounded-md border border-border p-0.5" aria-label="Item source">
+					{!spellPicker && !inventoryOnly && <div className="ml-auto flex h-[32px] rounded-md border border-border p-0.5" aria-label="Item source">
                         <button type="button" aria-pressed={source === 'inventory'} onClick={() => setSource('inventory')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'inventory' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Inventory</button>
                         <button type="button" aria-pressed={source === 'database'} onClick={() => setSource('database')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'database' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Item Database</button>
                     </div>}
@@ -387,7 +382,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                     {loading ? <p className="py-12 text-center text-sm text-muted-foreground">Loading items…</p> : items.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">No matching items.</p> : (
                         <div className={weaponList ? 'grid grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] gap-x-3 gap-y-2' : view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
                             {weaponList && <><span className="px-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Weapon</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Level</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Infuse</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Ashes of War</span></>}
-                            {items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} />)}
+							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} />)}
                         </div>
                     )}
                 </main>

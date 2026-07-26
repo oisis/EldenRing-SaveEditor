@@ -1754,9 +1754,24 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class EquipmentChange {
+	    slot: number;
+	    handle: number;
+
+	    static createFrom(source: any = {}) {
+	        return new EquipmentChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slot = source["slot"];
+	        this.handle = source["handle"];
+	    }
+	}
 	export class EquipmentSlotView {
 	    occupied: boolean;
 	    rawId: number;
+	    handle: number;
 	    name: string;
 	    iconPath: string;
 	    resolved: boolean;
@@ -1769,6 +1784,7 @@ export namespace main {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.occupied = source["occupied"];
 	        this.rawId = source["rawId"];
+	        this.handle = source["handle"];
 	        this.name = source["name"];
 	        this.iconPath = source["iconPath"];
 	        this.resolved = source["resolved"];

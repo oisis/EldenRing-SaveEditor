@@ -709,20 +709,6 @@ func (a *App) GetLegsSlotEligibleItems() []db.ItemEntry {
 	return db.GetLegsSlotEligibleItems(platform)
 }
 
-// GetTalismanSlotEligibleItems returns the DB-known items that may occupy any of
-// the four Talisman slots (equipment row 4, slots 1–4), filtered by the loaded
-// save's platform and sorted by name. All four slots share one policy — the
-// eligibility logic lives entirely in the db package.
-func (a *App) GetTalismanSlotEligibleItems() []db.ItemEntry {
-	a.saveMu.RLock()
-	defer a.saveMu.RUnlock()
-	platform := "PS4"
-	if a.save != nil {
-		platform = string(a.save.Platform)
-	}
-	return db.GetTalismanSlotEligibleItems(platform)
-}
-
 // GetItemDetail returns full item data (description, stats) for a single base item ID.
 func (a *App) GetItemDetail(baseId uint32) *db.ItemEntry {
 	return db.GetItemEntryByID(baseId)

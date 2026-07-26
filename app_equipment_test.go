@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"strings"
@@ -203,6 +204,60 @@ func TestSaveEquippedSpells_NormalizesOutOfRangeActiveIndexToZero(t *testing.T) 
 	}
 	if raw.ActiveSpellIndex != 0 {
 		t.Errorf("ActiveSpellIndex = %d, want native fallback 0", raw.ActiveSpellIndex)
+	}
+}
+
+func TestSaveEquipment_WritesOwnedHandleToBothNativeRepresentations(t *testing.T) {
+	var equipped [core.ChrAsmFieldCount]uint32
+	equipped[1] = 0x0001ADB0 // native empty right-hand item (Unarmed)
+	slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	const (
+		unarmedHandle = 0x80800079
+		clubHandle    = 0x80800010
+		clubItemID    = 0x00100020
+	)
+	slot.GaMap = map[uint32]uint32{
+		unarmedHandle: 0x0001ADB0,
+		clubHandle:    clubItemID,
+	}
+	slot.Inventory.CommonItems = []core.InventoryItem{{GaItemHandle: clubHandle, Quantity: 1}}
+	// Header values are a separate native representation from equipped[] above.
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquipItemsIDOffset+1*4:], 0x80007980)
+
+	app := newEquipmentApp(slot)
+	if err := app.SaveEquipment(0, []EquipmentChange{{Slot: core.EquipSlotRightHandArmament1, Handle: clubHandle}}); err != nil {
+		t.Fatalf("SaveEquipment: %v", err)
+	}
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if got := raw.Equipped[1]; got != clubItemID {
+		t.Errorf("dynamic right hand = 0x%08X, want 0x%08X", got, uint32(clubItemID))
+	}
+	if got, want := binary.LittleEndian.Uint32(app.save.Slots[0].Data[slot.EquipItemsIDOffset+1*4:]), uint32(0x80001080); got != want {
+		t.Errorf("header right hand = 0x%08X, want 0x%08X", got, want)
+	}
+	snap, err := app.GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if got := snap.RightHandArmaments[0].Handle; got != clubHandle {
+		t.Errorf("snapshot Handle = 0x%08X, want owned handle 0x%08X", got, uint32(clubHandle))
+	}
+}
+
+func TestSaveEquipment_RejectsLegacyTalismanSlotValues(t *testing.T) {
+	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	app := newEquipmentApp(slot)
+	before := append([]byte(nil), app.save.Slots[0].Data...)
+
+	err := app.SaveEquipment(0, []EquipmentChange{{Slot: core.EquipmentSlotKind(14), Handle: 0}})
+	if err == nil || !strings.Contains(err.Error(), "talismans are read-only") {
+		t.Fatalf("SaveEquipment error = %v", err)
+	}
+	if !bytes.Equal(before, app.save.Slots[0].Data) {
+		t.Error("read-only talisman rejection mutated slot data")
 	}
 }
 

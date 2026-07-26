@@ -420,6 +420,7 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 
 	slot := &a.save.Slots[charIdx]
 	snapshot := core.SnapshotSlot(slot)
+	profileSummarySnapshot := a.save.ProfileSummaries[charIdx]
 
 	// Phase 7a — workspace snapshot for atomic rollback in the
 	// mixed-apply case. Only taken when the apply will touch the
@@ -440,6 +441,7 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 	// partial inventory / items write never leaves slot.Data modified.
 	rollbackBoth := func() {
 		core.RestoreSlot(slot, snapshot)
+		a.save.ProfileSummaries[charIdx] = profileSummarySnapshot
 		if needsSession {
 			sess.Workspace = workspaceBackup
 		}
@@ -590,8 +592,7 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 	var equipmentWrites []core.EquipmentWrite
 	var equipmentSlotsApplied int
 	if hasEquipment {
-		activeTalismanSlots := computeActiveTalismanSlots(slot, tpl)
-		writes, equipWarn, equipErr := resolveEquipmentWrites(slot, tpl.Selection.Equipment, tpl.Sections.Equipment, activeTalismanSlots)
+		writes, equipWarn, equipErr := resolveEquipmentWrites(slot, tpl.Selection.Equipment, tpl.Sections.Equipment)
 		if equipErr != nil {
 			rollbackBoth()
 			return ApplyTemplateV2Result{
@@ -776,9 +777,8 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 	// Phase 7b.1 — equipment apply. Runs AFTER profile/stats have
 	// flushed to slot.Data so any failure here is rolled back by the
 	// existing core.SnapshotSlot taken at the top of the slot lock.
-	// WriteEquipment writes the 14 supported ChrAsmEquipment slots
-	// directly to slot.Data and recomputes the touched hash 7 / 8
-	// entries inline; the rollback snapshot covers both.
+	// WriteEquipment writes the supported non-talisman ChrAsmEquipment slots
+	// directly to slot.Data; the rollback snapshot covers the whole batch.
 	if len(equipmentWrites) > 0 {
 		if err := slot.WriteEquipment(equipmentWrites); err != nil {
 			rollbackBoth()
@@ -1156,35 +1156,6 @@ func cancelledApplyV2Result(charIdx int) ApplyTemplateV2Result {
 		Preview:   cancelledPreviewReport(),
 		Applied:   false,
 	}
-}
-
-// computeActiveTalismanSlots returns the effective talisman pouch
-// capacity (1..4) the equipment resolver should gate talisman slots
-// against. When the template selects profile.talismanSlots and ships a
-// value in sections.profile, that value wins because profile apply
-// later lifts the persisted pouch count before equipment apply runs;
-// otherwise the slot's current persisted Player.TalismanSlots is used.
-// Both branches clamp to [0, 3] (MaxProfileTalismanSlots) and add 1 to
-// derive the active slot count (the base talisman slot is always
-// available even with zero Pouch upgrades).
-func computeActiveTalismanSlots(slot *core.SaveSlot, tpl *templates.BuildTemplate) uint8 {
-	var base uint8
-	if slot != nil {
-		base = slot.Player.TalismanSlots
-	}
-	if base > templates.MaxProfileTalismanSlots {
-		base = templates.MaxProfileTalismanSlots
-	}
-	if tpl != nil && tpl.Selection != nil &&
-		tpl.Selection.Profile.Selected("talismanSlots") &&
-		tpl.Sections.Profile != nil && tpl.Sections.Profile.TalismanSlots != nil {
-		v := *tpl.Sections.Profile.TalismanSlots
-		if v > templates.MaxProfileTalismanSlots {
-			v = templates.MaxProfileTalismanSlots
-		}
-		base = v
-	}
-	return 1 + base
 }
 
 // ─── Phase 8D.1 — v2 items addMissing apply helpers ─────────────────────

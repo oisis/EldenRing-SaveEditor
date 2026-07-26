@@ -12,8 +12,8 @@ import (
 
 // equipmentSlotChrAsmIndex maps a canonical slot key to the corresponding
 // index inside the 22-entry core.ChrAsmEquipment array. Keys mirror
-// templates.EquipmentSlotOrder. Phase 7c extends the map with the 5
-// talisman indices (17–21).
+// templates.EquipmentSlotOrder. Talisman entries are retained here for
+// read/export only; they are not writable.
 var equipmentSlotChrAsmIndex = map[string]int{
 	"weaponLeftHand1":  0,
 	"weaponRightHand1": 1,
@@ -69,16 +69,6 @@ func equipmentSlotKindForKey(slotKey string) (core.EquipmentSlotKind, bool) {
 		return core.EquipSlotArms, true
 	case "armorLegs":
 		return core.EquipSlotLegs, true
-	case "talisman1":
-		return core.EquipSlotTalisman1, true
-	case "talisman2":
-		return core.EquipSlotTalisman2, true
-	case "talisman3":
-		return core.EquipSlotTalisman3, true
-	case "talisman4":
-		return core.EquipSlotTalisman4, true
-	case "talisman5":
-		return core.EquipSlotTalisman5, true
 	}
 	return 0, false
 }
@@ -220,31 +210,20 @@ func decodeEquipmentSlotToRef(raw uint32, slotKey string, byEquipped map[uint32]
 	return &templates.EquipmentItemRef{BaseItemID: candidateID}
 }
 
-// MaxActiveTalismanSlots is the vanilla cap on simultaneously equipped
-// talismans (1 base slot + 3 Talisman Pouch upgrades). Slot 5 (index 21)
-// exists in the binary but is unreachable through in-game gameplay; the
-// resolver therefore warns + skips any non-empty talisman5 ref.
-const MaxActiveTalismanSlots = 4
-
 // resolveEquipmentWrites walks the selected slots in
 // templates.EquipmentSection and produces a []core.EquipmentWrite batch
 // ready for SaveSlot.WriteEquipment.
 //
-// activeTalismanSlots is the effective talisman pouch capacity (1..4)
-// the resolver gates talisman slots against. Callers should compute it
-// as `1 + effective profile.talismanSlots` where the effective value is
-// the template's profile.talismanSlots when present and selected, else
-// the slot's current persisted Player.TalismanSlots. See
-// computeActiveTalismanSlots in app_templates_v2_apply.go.
+// Talismans are kept in the template schema for export/import fidelity, but
+// selected talisman fields are skipped with a warning until their native write
+// contract is established.
 //
-// Phase 7b.1 / 7c strict-existing-only policy:
+// Phase 7b.1 strict-existing-only policy:
 //   - sel must be non-nil and HasAny == true at the call site.
 //   - sec may be nil only when no slot is selected (defensive — the
 //     caller checks hasEquipment before invoking us).
 //   - For each selected + populated slot:
-//   - BaseItemID == 0 → emit EquipmentWrite{Handle: 0} (explicit
-//     clear). No inventory lookup, no pouch gating; clearing an
-//     out-of-bounds talisman slot (incl. talisman5) is always allowed.
+//   - BaseItemID == 0 → emit EquipmentWrite{Handle: 0} (explicit clear).
 //   - BaseItemID > 0 → search slot.Inventory.CommonItems for a
 //     matching item. Storage is NOT searched. Match keys: BaseItemID
 //     (required), Upgrade (optional disambiguator), InfusionName
@@ -252,11 +231,6 @@ const MaxActiveTalismanSlots = 4
 //     first hit + emits equipment_item_ambiguous warning. No match
 //     emits equipment_item_not_in_inventory warning and the slot is
 //     skipped.
-//   - Talisman slots (talisman1..5) are additionally gated against
-//     activeTalismanSlots. A non-empty ref for slot N where
-//     N > activeTalismanSlots emits talisman_slot_pouch_insufficient
-//     warning and is skipped. Talisman5 always trips the gate when
-//     populated (vanilla cap = 4 active slots).
 //
 // Returned warnings carry the canonical slot key in Container (reusing
 // the existing optional string field on ImportPreviewIssue so the UI
@@ -265,7 +239,7 @@ const MaxActiveTalismanSlots = 4
 // The Go error return is reserved for infrastructure problems (nil
 // slot, nil section pointer where the caller expected one); per-slot
 // resolution issues never surface as a Go error.
-func resolveEquipmentWrites(slot *core.SaveSlot, sel *templates.SectionSelection, sec *templates.EquipmentSection, activeTalismanSlots uint8) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
+func resolveEquipmentWrites(slot *core.SaveSlot, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
 	if slot == nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: nil slot")
 	}
@@ -278,26 +252,7 @@ func resolveEquipmentWrites(slot *core.SaveSlot, sel *templates.SectionSelection
 	if err != nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: BuildSnapshot: %w", err)
 	}
-	return resolveEquipmentWritesFromItems(snap.InventoryItems, sel, sec, activeTalismanSlots)
-}
-
-// talismanSlotOrdinal returns 1..5 for talisman1..talisman5 and 0 for
-// any non-talisman slot key. Used by the resolver to gate non-empty
-// talisman refs against the active pouch capacity.
-func talismanSlotOrdinal(slotKey string) int {
-	switch slotKey {
-	case "talisman1":
-		return 1
-	case "talisman2":
-		return 2
-	case "talisman3":
-		return 3
-	case "talisman4":
-		return 4
-	case "talisman5":
-		return 5
-	}
-	return 0
+	return resolveEquipmentWritesFromItems(snap.InventoryItems, sel, sec)
 }
 
 // resolveEquipmentWritesFromItems is the pure-logic core of the
@@ -305,7 +260,7 @@ func talismanSlotOrdinal(slotKey string) int {
 // items. Factored out so tests can exercise the matching / warning
 // logic without standing up a full SaveSlot that BuildSnapshot can
 // parse.
-func resolveEquipmentWritesFromItems(items []editor.EditableItem, sel *templates.SectionSelection, sec *templates.EquipmentSection, activeTalismanSlots uint8) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
+func resolveEquipmentWritesFromItems(items []editor.EditableItem, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
 	if sec == nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: nil equipment section")
 	}
@@ -321,6 +276,15 @@ func resolveEquipmentWritesFromItems(items []editor.EditableItem, sel *templates
 		if ref == nil {
 			continue
 		}
+		if equipmentSlotIsTalisman(slotKey) {
+			warnings = append(warnings, templates.ImportPreviewIssue{
+				Severity:  "warning",
+				Code:      templates.IssueCodeEquipmentSlotInvalid,
+				Message:   fmt.Sprintf("equipment.%s: talisman writes are disabled until the native write contract is established; slot skipped", slotKey),
+				Container: slotKey,
+			})
+			continue
+		}
 		kind, ok := equipmentSlotKindForKey(slotKey)
 		if !ok {
 			// Unreachable — equipmentSlotKindForKey covers every key in
@@ -334,22 +298,6 @@ func resolveEquipmentWritesFromItems(items []editor.EditableItem, sel *templates
 		if ref.BaseItemID == 0 {
 			writes = append(writes, core.EquipmentWrite{Slot: kind, Handle: 0})
 			continue
-		}
-
-		// Talisman pouch gating runs only for non-empty talisman refs.
-		// Vanilla cap = 4 active slots; talisman5 is always out of range
-		// because there is no Pouch upgrade that lifts the cap to 5.
-		if ord := talismanSlotOrdinal(slotKey); ord > 0 {
-			if ord > MaxActiveTalismanSlots || ord > int(activeTalismanSlots) {
-				warnings = append(warnings, templates.ImportPreviewIssue{
-					Severity:   "warning",
-					Code:       templates.IssueCodeTalismanSlotPouchInsufficient,
-					Message:    fmt.Sprintf("equipment.%s: talisman slot %d not available (active pouch capacity = %d); slot skipped", slotKey, ord, activeTalismanSlots),
-					Container:  slotKey,
-					BaseItemID: ref.BaseItemID,
-				})
-				continue
-			}
 		}
 
 		handle, ambiguous, found := lookupEquipmentHandle(items, ref)

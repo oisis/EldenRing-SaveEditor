@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/binary"
 	"fmt"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
@@ -15,6 +16,7 @@ import (
 type EquipmentSlotView struct {
 	Occupied bool   `json:"occupied"`
 	RawID    uint32 `json:"rawId"`
+	Handle   uint32 `json:"handle"`
 	Name     string `json:"name"`
 	IconPath string `json:"iconPath"`
 	Resolved bool   `json:"resolved"`
@@ -41,6 +43,14 @@ type EquipmentSnapshot struct {
 	Physick             [2]EquipmentSlotView  `json:"physick"`
 	Spells              [14]EquipmentSlotView `json:"spells"`
 	ActiveSpellIndex    int                   `json:"activeSpellIndex"`
+}
+
+// EquipmentChange is one writable Equipment slot request from the frontend.
+// Handle is the owned inventory handle selected in the picker; zero clears the
+// slot. Quick Items, Pouch, Physick and spells have separate contracts.
+type EquipmentChange struct {
+	Slot   core.EquipmentSlotKind `json:"slot"`
+	Handle uint32                 `json:"handle"`
 }
 
 // equipClass selects how a raw stored value is normalized to a DB item ID.
@@ -252,6 +262,28 @@ func equipSlotView(raw uint32, class equipClass) EquipmentSlotView {
 	return resolveEquipView(raw, class)
 }
 
+func equippedSlotHandle(slot *core.SaveSlot, index int, class equipClass, occupied bool) uint32 {
+	if !occupied || slot == nil || slot.EquipItemsIDOffset <= 0 || index < 0 || slot.EquipItemsIDOffset+(index+1)*4 > len(slot.Data) {
+		return 0
+	}
+	header := binary.LittleEndian.Uint32(slot.Data[slot.EquipItemsIDOffset+index*4:])
+	key := header >> 8
+	switch class {
+	case classHandArmament, classAmmo:
+		return core.ItemTypeWeapon | key
+	case classArmor:
+		return core.ItemTypeArmor | key
+	default:
+		return 0
+	}
+}
+
+func equippedView(slot *core.SaveSlot, index int, raw uint32, class equipClass) EquipmentSlotView {
+	view := equipSlotView(raw, class)
+	view.Handle = equippedSlotHandle(slot, index, class, view.Occupied)
+	return view
+}
+
 // goodsView builds a view for a quick-item / pouch pair. Empty slots use the
 // {item_id: 0, equip_index: 0xFFFFFFFF} sentinel; item_id of 0 / 0xFFFFFFFF is
 // treated as empty regardless of equip_index.
@@ -324,24 +356,24 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	rightIdx := [3]int{1, 3, 5}
 	leftIdx := [3]int{0, 2, 4}
 	for i := 0; i < 3; i++ {
-		snap.RightHandArmaments[i] = equipSlotView(raw.Equipped[rightIdx[i]], classHandArmament)
-		snap.LeftHandArmaments[i] = equipSlotView(raw.Equipped[leftIdx[i]], classHandArmament)
+		snap.RightHandArmaments[i] = equippedView(&slot, rightIdx[i], raw.Equipped[rightIdx[i]], classHandArmament)
+		snap.LeftHandArmaments[i] = equippedView(&slot, leftIdx[i], raw.Equipped[leftIdx[i]], classHandArmament)
 	}
 	// Arrows: slots 6/8. Bolts: slots 7/9.
-	snap.Arrows[0] = equipSlotView(raw.Equipped[6], classAmmo)
-	snap.Arrows[1] = equipSlotView(raw.Equipped[8], classAmmo)
-	snap.Bolts[0] = equipSlotView(raw.Equipped[7], classAmmo)
-	snap.Bolts[1] = equipSlotView(raw.Equipped[9], classAmmo)
+	snap.Arrows[0] = equippedView(&slot, 6, raw.Equipped[6], classAmmo)
+	snap.Arrows[1] = equippedView(&slot, 8, raw.Equipped[8], classAmmo)
+	snap.Bolts[0] = equippedView(&slot, 7, raw.Equipped[7], classAmmo)
+	snap.Bolts[1] = equippedView(&slot, 9, raw.Equipped[9], classAmmo)
 	// Armor: slots 12/13/14/15.
 	armorIdx := [4]int{12, 13, 14, 15}
 	for i := 0; i < 4; i++ {
-		snap.Armor[i] = equipSlotView(raw.Equipped[armorIdx[i]], classArmor)
+		snap.Armor[i] = equippedView(&slot, armorIdx[i], raw.Equipped[armorIdx[i]], classArmor)
 	}
 	// Talismans: active slots are always contiguous from the left. Slots beyond
 	// the character's unlock count stay empty and are not rendered by the UI.
 	// Talisman5 / index 21 remains outside this UI.
 	for i := 0; i < snap.ActiveTalismanSlots; i++ {
-		snap.Talismans[i] = equipSlotView(raw.Equipped[17+i], classTalisman)
+		snap.Talismans[i] = equippedView(&slot, 17+i, raw.Equipped[17+i], classTalisman)
 	}
 	// Quick items (10) and pouch (6).
 	for i := 0; i < 10; i++ {
@@ -424,5 +456,41 @@ func (a *App) SaveEquippedSpells(charIdx int, itemIDs []uint32) error {
 	if err := slot.WriteCompactSpells(rawIDs); err != nil {
 		return fmt.Errorf("SaveEquippedSpells: %w", err)
 	}
+	return nil
+}
+
+// SaveEquipment applies one atomic Equipment batch in memory. The normal
+// Save/Save As action remains responsible for writing the .sl2 file.
+func (a *App) SaveEquipment(charIdx int, changes []EquipmentChange) error {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= len(a.save.Slots) || !a.save.ActiveSlots[charIdx] {
+		return fmt.Errorf("invalid active character slot %d", charIdx)
+	}
+	if len(changes) == 0 {
+		return nil
+	}
+
+	a.slotMu[charIdx].Lock()
+	defer a.slotMu[charIdx].Unlock()
+	slot := &a.save.Slots[charIdx]
+	writes := make([]core.EquipmentWrite, len(changes))
+	for i, change := range changes {
+		// Historical writer values 14–18 are talisman slots. Keep this API
+		// boundary closed even when called outside the UI.
+		if change.Slot >= core.EquipmentSlotKind(14) && change.Slot <= core.EquipmentSlotKind(18) {
+			return fmt.Errorf("SaveEquipment[%d]: talismans are read-only until their native write contract is established", i)
+		}
+		writes[i] = core.EquipmentWrite{Slot: change.Slot, Handle: change.Handle}
+	}
+
+	before := a.buildSlotSnapshotLocked(charIdx)
+	if err := slot.WriteEquipment(writes); err != nil {
+		return fmt.Errorf("SaveEquipment: %w", err)
+	}
+	a.pushUndoSnapshotLocked(charIdx, before)
 	return nil
 }
