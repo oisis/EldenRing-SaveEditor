@@ -338,9 +338,11 @@ func (s *SaveSlot) parseFromData() error {
 	}
 
 	// NOTE: Per-slot SteamID is at a dynamic offset within the sequential parsing chain
-	// (after BaseVersion, before PS5Activity), NOT at the fixed SlotSize-8 address.
-	// SlotSize-8 falls inside the PlayerGameDataHash region. The authoritative SteamID
-	// is read from UserData10 by the save_manager and propagated to slots from there.
+	// (inside TrailingFixedBlock, after BaseVersion, before PS5Activity), NOT at the fixed
+	// SlotSize-8 address (which falls inside the PlayerGameDataHash region). This per-slot
+	// copy is a real, game-checked representation of the account id: the game rejects a save
+	// whose slot SteamID disagrees with the global UserData10 SteamID (issue #10). On write,
+	// SaveFile.syncActiveSlotSteamIDs keeps every active slot's copy in sync with UserData10.
 
 	// 8. Build section map for RebuildSlot. Failure here is non-fatal — we surface
 	// it as a warning so editing of fixed-offset fields still works.
@@ -840,10 +842,11 @@ func (s *SaveSlot) Write(platform string) []byte {
 	s.SyncPlayerToData()
 
 	// NOTE: Per-slot SteamID is NOT written here. The offset is at a dynamic position within
-	// the sequential data chain (after BaseVersion, before PS5Activity), NOT at SlotSize-8.
-	// SlotSize-8 falls inside the PlayerGameDataHash region (last 0x80 bytes). Writing there
-	// corrupts hash data. The primary SteamID is stored in UserData10 and flushed by
-	// flushMetadata() — that is the authoritative source the game uses.
+	// TrailingFixedBlock (after BaseVersion, before PS5Activity), NOT at SlotSize-8 (which
+	// falls inside the PlayerGameDataHash region and would corrupt hash data). The per-slot
+	// SteamID is written by SaveFile.syncActiveSlotSteamIDs at save time, which locates the
+	// dynamic offset via the parser chain and keeps it in sync with the global UserData10
+	// SteamID. Both representations are game-checked and must agree (issue #10).
 
 	// NOTE: CSPlayerGameDataHash (last 0x80 bytes) is intentionally NOT recomputed here.
 	// All reference editors (ER-Save-Editor, er-save-manager, Final.py) treat this region

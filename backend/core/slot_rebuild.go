@@ -99,6 +99,116 @@ func validateSectionMap(sections []SectionRange) error {
 	return nil
 }
 
+// postRegionSections holds every typed section that follows unlocked_regions,
+// parsed from a slot's on-disk bytes in dependency order. It is the single
+// definition of the post-regions parser chain, shared by RebuildSlot,
+// RebuildSlotFull and the per-slot SteamID locator so the chain is never
+// duplicated.
+type postRegionSections struct {
+	Head    WorldHead
+	Menu    MenuSaveLoad
+	Trophy  TrophyEquipData
+	Gaitem  GaitemGameData
+	Tut     TutorialData
+	Scalars PreEventFlagsScalars
+	EF      EventFlagsBlock
+	WGB     WorldGeomBlock
+	PC      PlayerCoordinates
+	SP      SpawnPointBlock
+	NM      NetMan
+	Trail   TrailingFixedBlock
+	Hash    PlayerGameDataHash
+
+	// TrailingStart is the absolute offset in slot.Data where TrailingFixedBlock
+	// begins (== the byte after NetMan). TailStart is the absolute offset after
+	// PlayerGameDataHash.
+	TrailingStart int
+	TailStart     int
+}
+
+// readPostRegionSections parses every section after unlocked_regions from
+// slot.Data, starting at the original regions-end boundary recorded in the
+// SectionMap (using live len(UnlockedRegions) would give the wrong byte
+// position if the slice was mutated between Read() and rebuild).
+func readPostRegionSections(slot *SaveSlot) (*postRegionSections, error) {
+	origRegsEnd := -1
+	for _, sec := range slot.SectionMap {
+		if sec.Name == SectionUnlockedRegs {
+			origRegsEnd = sec.End
+			break
+		}
+	}
+	if origRegsEnd < 0 {
+		return nil, fmt.Errorf("SectionMap missing unlocked_regions entry")
+	}
+
+	r := NewReader(slot.Data)
+	if _, err := r.Seek(int64(origRegsEnd), 0); err != nil {
+		return nil, fmt.Errorf("seek to regs end: %w", err)
+	}
+
+	p := &postRegionSections{}
+	if err := p.Head.Read(r); err != nil {
+		return nil, fmt.Errorf("head: %w", err)
+	}
+	if err := p.Menu.Read(r); err != nil {
+		return nil, fmt.Errorf("menu: %w", err)
+	}
+	if err := p.Trophy.Read(r); err != nil {
+		return nil, fmt.Errorf("trophy: %w", err)
+	}
+	if err := p.Gaitem.Read(r); err != nil {
+		return nil, fmt.Errorf("gaitem: %w", err)
+	}
+	if err := p.Tut.Read(r); err != nil {
+		return nil, fmt.Errorf("tut: %w", err)
+	}
+	if err := p.Scalars.Read(r); err != nil {
+		return nil, fmt.Errorf("scalars: %w", err)
+	}
+	if err := p.EF.Read(r); err != nil {
+		return nil, fmt.Errorf("ef: %w", err)
+	}
+	if err := p.WGB.Read(r); err != nil {
+		return nil, fmt.Errorf("wgb: %w", err)
+	}
+	if err := p.PC.Read(r); err != nil {
+		return nil, fmt.Errorf("pc: %w", err)
+	}
+	if err := p.SP.Read(r, slot.Version); err != nil {
+		return nil, fmt.Errorf("sp: %w", err)
+	}
+	if err := p.NM.Read(r); err != nil {
+		return nil, fmt.Errorf("nm: %w", err)
+	}
+	p.TrailingStart = r.Pos()
+	if err := p.Trail.Read(r); err != nil {
+		return nil, fmt.Errorf("trail: %w", err)
+	}
+	if err := p.Hash.Read(r); err != nil {
+		return nil, fmt.Errorf("hash: %w", err)
+	}
+	p.TailStart = r.Pos()
+	return p, nil
+}
+
+// write serializes every post-regions section back in parse order.
+func (p *postRegionSections) write(sw *SectionWriter) {
+	p.Head.Write(sw)
+	p.Menu.Write(sw)
+	p.Trophy.Write(sw)
+	p.Gaitem.Write(sw)
+	p.Tut.Write(sw)
+	p.Scalars.Write(sw)
+	p.EF.Write(sw)
+	p.WGB.Write(sw)
+	p.PC.Write(sw)
+	p.SP.Write(sw)
+	p.NM.Write(sw)
+	p.Trail.Write(sw)
+	p.Hash.Write(sw)
+}
+
 // RebuildSlot serializes a SaveSlot into a fresh 0x280000-byte buffer.
 //
 // Sequential rebuild strategy (Option B / R-1 final):
@@ -137,84 +247,18 @@ func RebuildSlot(slot *SaveSlot) ([]byte, error) {
 		return out, nil
 	}
 
-	// Original regions end is captured in the SectionMap recorded at Read time.
-	// We need it because slot.UnlockedRegions may have been mutated since then,
-	// so the live `len(UnlockedRegions)` may not reflect the on-disk byte boundary.
-	origRegsEnd := -1
-	for _, sec := range slot.SectionMap {
-		if sec.Name == SectionUnlockedRegs {
-			origRegsEnd = sec.End
-			break
-		}
-	}
-	if origRegsEnd < 0 {
-		return nil, fmt.Errorf("RebuildSlot: SectionMap missing unlocked_regions entry")
-	}
-
-	// Parse every post-region section from the original on-disk bytes.
-	r := NewReader(slot.Data)
-	if _, err := r.Seek(int64(origRegsEnd), 0); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: seek to regs end: %w", err)
-	}
-	var (
-		head    WorldHead
-		menu    MenuSaveLoad
-		trophy  TrophyEquipData
-		gaitem  GaitemGameData
-		tut     TutorialData
-		scalars PreEventFlagsScalars
-		ef      EventFlagsBlock
-		wgb     WorldGeomBlock
-		pc      PlayerCoordinates
-		sp      SpawnPointBlock
-		nm      NetMan
-		trail   TrailingFixedBlock
-		hash    PlayerGameDataHash
-	)
-	if err := head.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := menu.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := trophy.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := gaitem.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := tut.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := scalars.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := ef.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := wgb.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := pc.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := sp.Read(r, slot.Version); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := nm.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := trail.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlot: %w", err)
-	}
-	if err := hash.Read(r); err != nil {
+	// Parse every post-region section from the original on-disk bytes. The
+	// regions-end boundary comes from the SectionMap recorded at Read time,
+	// because slot.UnlockedRegions may have been mutated since then, so the live
+	// `len(UnlockedRegions)` may not reflect the on-disk byte boundary.
+	p, err := readPostRegionSections(slot)
+	if err != nil {
 		return nil, fmt.Errorf("RebuildSlot: %w", err)
 	}
 
 	// Capture the original tail rest verbatim so identity round-trip preserves
 	// any non-zero garbage that may exist past the hash.
-	tailStart := r.Pos()
-	tailRest := slot.Data[tailStart:]
+	tailRest := slot.Data[p.TailStart:]
 
 	// Build output buffer sequentially.
 	sw := NewSectionWriter(SlotSize)
@@ -223,19 +267,7 @@ func RebuildSlot(slot *SaveSlot) ([]byte, error) {
 	for _, id := range slot.UnlockedRegions {
 		sw.WriteU32(id)
 	}
-	head.Write(sw)
-	menu.Write(sw)
-	trophy.Write(sw)
-	gaitem.Write(sw)
-	tut.Write(sw)
-	scalars.Write(sw)
-	ef.Write(sw)
-	wgb.Write(sw)
-	pc.Write(sw)
-	sp.Write(sw)
-	nm.Write(sw)
-	trail.Write(sw)
-	hash.Write(sw)
+	p.write(sw)
 
 	// Append original tail rest, then zero-pad to SlotSize.
 	written := sw.Len()
@@ -376,76 +408,11 @@ func RebuildSlotFull(slot *SaveSlot) ([]byte, error) {
 	// SectionMap captures the original regions-end boundary; using the live
 	// len(UnlockedRegions) would give the wrong byte position if the slice
 	// was mutated between Read() and rebuild.
-	origRegsEnd := -1
-	for _, sec := range slot.SectionMap {
-		if sec.Name == SectionUnlockedRegs {
-			origRegsEnd = sec.End
-			break
-		}
+	p, err := readPostRegionSections(slot)
+	if err != nil {
+		return nil, fmt.Errorf("RebuildSlotFull: %w", err)
 	}
-	if origRegsEnd < 0 {
-		return nil, fmt.Errorf("RebuildSlotFull: SectionMap missing unlocked_regions entry")
-	}
-
-	r := NewReader(slot.Data)
-	if _, err := r.Seek(int64(origRegsEnd), 0); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: seek to regs end: %w", err)
-	}
-	var (
-		head    WorldHead
-		menu    MenuSaveLoad
-		trophy  TrophyEquipData
-		gaitem  GaitemGameData
-		tut     TutorialData
-		scalars PreEventFlagsScalars
-		ef      EventFlagsBlock
-		wgb     WorldGeomBlock
-		pc      PlayerCoordinates
-		sp      SpawnPointBlock
-		nm      NetMan
-		trail   TrailingFixedBlock
-		hash    PlayerGameDataHash
-	)
-	if err := head.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: head: %w", err)
-	}
-	if err := menu.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: menu: %w", err)
-	}
-	if err := trophy.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: trophy: %w", err)
-	}
-	if err := gaitem.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: gaitem: %w", err)
-	}
-	if err := tut.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: tut: %w", err)
-	}
-	if err := scalars.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: scalars: %w", err)
-	}
-	if err := ef.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: ef: %w", err)
-	}
-	if err := wgb.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: wgb: %w", err)
-	}
-	if err := pc.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: pc: %w", err)
-	}
-	if err := sp.Read(r, slot.Version); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: sp: %w", err)
-	}
-	if err := nm.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: nm: %w", err)
-	}
-	if err := trail.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: trail: %w", err)
-	}
-	if err := hash.Read(r); err != nil {
-		return nil, fmt.Errorf("RebuildSlotFull: hash: %w", err)
-	}
-	tailRest := slot.Data[r.Pos():]
+	tailRest := slot.Data[p.TailStart:]
 
 	// 4. Build output buffer sequentially.
 	sw := NewSectionWriter(SlotSize)
@@ -456,19 +423,7 @@ func RebuildSlotFull(slot *SaveSlot) ([]byte, error) {
 	for _, id := range slot.UnlockedRegions {
 		sw.WriteU32(id)
 	}
-	head.Write(sw)
-	menu.Write(sw)
-	trophy.Write(sw)
-	gaitem.Write(sw)
-	tut.Write(sw)
-	scalars.Write(sw)
-	ef.Write(sw)
-	wgb.Write(sw)
-	pc.Write(sw)
-	sp.Write(sw)
-	nm.Write(sw)
-	trail.Write(sw)
-	hash.Write(sw)
+	p.write(sw)
 
 	written := sw.Len()
 	if written > SlotSize {

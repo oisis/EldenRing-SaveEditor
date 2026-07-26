@@ -294,6 +294,98 @@ func (s *SaveFile) flushMetadata() {
 	}
 }
 
+// slotSteamIDFieldOffset resolves the absolute byte offset of a slot's own
+// SteamID by walking the dynamic post-regions parser chain. The SteamID is a
+// u64 inside TrailingFixedBlock, positioned after Weather+Time+BaseVersion.
+//
+// The offset is genuinely per-slot: it differs between slots of the same save
+// and between saves (verified on real fixtures: 0x219A1D, 0x21A392, 0x2166D2,
+// … in one file). It is therefore never a fixed file offset, never SlotSize-8
+// (that address lands inside PlayerGameDataHash), and never found by scanning
+// for the raw id bytes — only through the parser chain that also drives
+// RebuildSlot.
+func slotSteamIDFieldOffset(slot *SaveSlot) (int, error) {
+	if slot.Version == 0 || slot.UnlockedRegionsOffset == 0 {
+		return 0, fmt.Errorf("slot is empty or unparseable")
+	}
+	p, err := readPostRegionSections(slot)
+	if err != nil {
+		return 0, fmt.Errorf("locate slot SteamID: %w", err)
+	}
+	off := p.TrailingStart + WorldAreaWeatherSize + WorldAreaTimeSize + BaseVersionSize
+	// Fail closed: the field must sit fully before PlayerGameDataHash (last
+	// HashSize bytes). HashOffset == SlotSize - HashSize.
+	if off < 0 || off+8 > HashOffset {
+		return 0, fmt.Errorf("slot SteamID offset 0x%X would overlap PlayerGameDataHash", off)
+	}
+	return off, nil
+}
+
+// syncActiveSlotSteamIDs propagates s.SteamID into every active slot's own
+// SteamID field. PC target only: PS4 saves carry no Steam identity, so an
+// untouched PS4 save and a PC→PS4 conversion both skip this — a PC-only value
+// is never written into a PS4 slot.
+//
+// Fail-closed and atomic in memory: it resolves and range-checks every active
+// slot's offset first, and only writes once all offsets are known-good. A
+// parser failure on any active slot aborts before a single byte changes, so the
+// in-memory save is never left partially synced.
+func (s *SaveFile) syncActiveSlotSteamIDs() error {
+	if s.Platform != PlatformPC {
+		return nil
+	}
+	type target struct {
+		slot int
+		off  int
+	}
+	targets := make([]target, 0, 10)
+	for i := 0; i < 10; i++ {
+		if !s.ActiveSlots[i] {
+			continue
+		}
+		off, err := slotSteamIDFieldOffset(&s.Slots[i])
+		if err != nil {
+			return fmt.Errorf("slot %d: %w", i, err)
+		}
+		targets = append(targets, target{i, off})
+	}
+	for _, t := range targets {
+		binary.LittleEndian.PutUint64(s.Slots[t.slot].Data[t.off:t.off+8], s.SteamID)
+		s.Slots[t.slot].SteamID = s.SteamID
+	}
+	return nil
+}
+
+// ValidateSteamIDConsistency reports whether the global UserData10 SteamID
+// agrees with every active slot's own SteamID. It is read-only and does not
+// mutate the save.
+//
+// PC saves only: on PS4 there is no Steam identity (global and slot ids are 0),
+// so this returns nil immediately to avoid false positives. On PC it detects
+// the issue-#10 failure mode — a save where only the global id was changed and
+// the per-slot copies were left stale (a partially synced save the game rejects
+// as corrupt) — as well as an unreadable slot SteamID offset.
+func (s *SaveFile) ValidateSteamIDConsistency() error {
+	if s.Platform != PlatformPC {
+		return nil
+	}
+	for i := 0; i < 10; i++ {
+		if !s.ActiveSlots[i] {
+			continue
+		}
+		off, err := slotSteamIDFieldOffset(&s.Slots[i])
+		if err != nil {
+			return fmt.Errorf("slot %d: unreadable SteamID offset: %w", i, err)
+		}
+		slotID := binary.LittleEndian.Uint64(s.Slots[i].Data[off : off+8])
+		if slotID != s.SteamID {
+			return fmt.Errorf("slot %d SteamID (%d) does not match global SteamID (%d): save is partially synced",
+				i, slotID, s.SteamID)
+		}
+	}
+	return nil
+}
+
 func (s *SaveFile) SaveFile(path string) error {
 	// Write-ahead validation: check all active slots before writing anything.
 	for i := 0; i < 10; i++ {
@@ -303,6 +395,21 @@ func (s *SaveFile) SaveFile(path string) error {
 		if err := ValidateSlotIntegrity(&s.Slots[i]); err != nil {
 			return fmt.Errorf("slot %d integrity check failed: %w", i, err)
 		}
+	}
+
+	// Propagate the SteamID into every active slot (PC only). Fail-closed: a
+	// parser failure aborts the whole write before any file bytes are produced,
+	// and syncActiveSlotSteamIDs itself never leaves the in-memory save partially
+	// synced. Global UserData10 and per-slot copies must agree or the game
+	// rejects the save as corrupt (issue #10).
+	//
+	// This runs BEFORE flushMetadata: syncActiveSlotSteamIDs reads s.SteamID (not
+	// UserData10 bytes), so it can preflight and mutate slots first. If it fails,
+	// UserData10 must still be pristine — flushMetadata has not yet re-serialized
+	// the new SteamID/metadata into it, so a failed SaveFile leaves no partial
+	// in-memory mutation.
+	if err := s.syncActiveSlotSteamIDs(); err != nil {
+		return fmt.Errorf("slot SteamID sync failed: %w", err)
 	}
 
 	s.flushMetadata()
