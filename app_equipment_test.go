@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"encoding/binary"
 	"fmt"
 	"strings"
@@ -58,6 +57,7 @@ func buildEquipSlot(equipped [core.ChrAsmFieldCount]uint32, quick [10]core.RawEq
 	return core.SaveSlot{
 		Data:                 data,
 		Version:              1,
+		MagicOffset:          testEquipItemsIDOffset - (core.DynSpEffect + core.DynEquipedItemIndex + core.DynActiveEquipedItems + core.DynEquipedItemsID),
 		EquipItemsIDOffset:   testEquipItemsIDOffset,
 		EquippedSpellsOffset: testEquippedSpellsOffset,
 		Player:               core.PlayerGameData{TalismanSlots: 3},
@@ -247,17 +247,47 @@ func TestSaveEquipment_WritesOwnedHandleToBothNativeRepresentations(t *testing.T
 	}
 }
 
-func TestSaveEquipment_RejectsLegacyTalismanSlotValues(t *testing.T) {
+func TestSaveEquipment_WritesOwnedTalismanAndProjectsItsHandle(t *testing.T) {
 	slot := buildEquipSlot([core.ChrAsmFieldCount]uint32{}, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	const (
+		talismanHandle = core.ItemTypeAccessory | 0x000003E8
+		inventoryRow   = 4
+	)
+	slot.Inventory.CommonItems = make([]core.InventoryItem, inventoryRow+1)
+	slot.Inventory.CommonItems[inventoryRow] = core.InventoryItem{GaItemHandle: talismanHandle, Quantity: 1}
 	app := newEquipmentApp(slot)
-	before := append([]byte(nil), app.save.Slots[0].Data...)
 
-	err := app.SaveEquipment(0, []EquipmentChange{{Slot: core.EquipmentSlotKind(14), Handle: 0}})
-	if err == nil || !strings.Contains(err.Error(), "talismans are read-only") {
-		t.Fatalf("SaveEquipment error = %v", err)
+	if err := app.SaveEquipment(0, []EquipmentChange{{Slot: core.EquipSlotTalisman1, Handle: talismanHandle}}); err != nil {
+		t.Fatalf("SaveEquipment: %v", err)
 	}
-	if !bytes.Equal(before, app.save.Slots[0].Data) {
-		t.Error("read-only talisman rejection mutated slot data")
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if got := raw.Equipped[17]; got != 0x200003E8 {
+		t.Errorf("dynamic talisman = 0x%08X, want 0x200003E8", got)
+	}
+
+	fieldOff := 1 + 17*4
+	equipIndexBase := slot.MagicOffset + core.DynSpEffect
+	itemIDBase := equipIndexBase + core.DynEquipedItemIndex + core.DynActiveEquipedItems
+	handleBase := itemIDBase + core.DynEquipedItemsID
+	if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[equipIndexBase+fieldOff:]); got != 0x180+inventoryRow {
+		t.Errorf("EquipData talisman index = 0x%08X, want 0x%08X", got, uint32(0x180+inventoryRow))
+	}
+	if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[itemIDBase+fieldOff:]); got != 0x000003E8 {
+		t.Errorf("ChrAsm talisman ID = 0x%08X, want 0x000003E8", got)
+	}
+	if got := binary.LittleEndian.Uint32(app.save.Slots[0].Data[handleBase+fieldOff:]); got != talismanHandle {
+		t.Errorf("ChrAsm2 talisman handle = 0x%08X, want 0x%08X", got, uint32(talismanHandle))
+	}
+
+	snap, err := app.GetEquipmentSnapshot(0)
+	if err != nil {
+		t.Fatalf("GetEquipmentSnapshot: %v", err)
+	}
+	if got := snap.Talismans[0]; !got.Occupied || !got.Resolved || got.Handle != talismanHandle || got.RawID != 0x200003E8 {
+		t.Errorf("Talismans[0] = %+v, want equipped Crimson Amber Medallion with owned handle", got)
 	}
 }
 

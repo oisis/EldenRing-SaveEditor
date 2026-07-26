@@ -67,6 +67,7 @@ export type EquipmentItemPickerModalProps = {
     charIdx?: number;
     initialSelection?: EquipmentPickerSelection;
 	disabledItemIDs?: number[];
+	disabledItemHandles?: number[];
 	inventoryOnly?: boolean;
     onConfirm?: (item: EquipmentPickerSelection) => void;
     onClear?: () => void;
@@ -90,6 +91,7 @@ function eligibleItemsForSlot(label: string): Promise<db.ItemEntry[]> {
     if (label === 'Knight Armor') return GetChestSlotEligibleItems();
     if (label === 'Knight Gauntlets') return GetArmsSlotEligibleItems();
     if (label === 'Knight Greaves') return GetLegsSlotEligibleItems();
+    if (label === 'Axe Talisman' || label === 'Claw Talisman' || label === 'Companion Jar' || label === 'Gold Scarab') return GetItemList('talismans');
     if (label.startsWith('Quick item')) return GetQuickItemEligibleItems();
     if (label.startsWith('Quick pouch')) return GetPouchEligibleItems();
     if (label.startsWith('Physick tear')) return GetPhysickEligibleItems();
@@ -233,7 +235,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     );
 }
 
-export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], inventoryOnly = false, onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
+export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], disabledItemHandles = [], inventoryOnly = false, onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
     const [source, setSource] = useState<PickerSource>('inventory');
     const [view, setView] = useState<PickerView>('icons');
     const [sort, setSort] = useState<PickerSort>('alphabetical');
@@ -335,9 +337,11 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
         [inventoryItems, search, sort, source, visibleEligible],
     );
     const weaponList = view === 'list' && isWeaponSlot(slotLabel);
-    const physickPicker = slotLabel.startsWith('Physick tear');
-    const spellPicker = slotLabel.startsWith('Spell slot');
-	const isDisabled = (item: PickerItem) => spellPicker && disabledItemIDs.includes(item.id);
+	const physickPicker = slotLabel.startsWith('Physick tear');
+	const spellPicker = slotLabel.startsWith('Spell slot');
+	const isDisabled = (item: PickerItem) =>
+		disabledItemIDs.includes(item.id) ||
+		(item.handle != null && disabledItemHandles.includes(item.handle));
 	const selectItem = (item: PickerItem) => {
 		if ((spellPicker && initialSelection?.id === item.id) || (inventoryOnly && initialSelection?.handle != null && initialSelection.handle === item.handle)) {
 			onClear?.();

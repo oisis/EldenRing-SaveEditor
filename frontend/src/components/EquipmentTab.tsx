@@ -20,6 +20,10 @@ const equipmentSlotByLabel: Record<string, number> = {
     'Knight Armor': 11,
     'Knight Gauntlets': 12,
     'Knight Greaves': 13,
+    'Axe Talisman': 14,
+    'Claw Talisman': 15,
+    'Companion Jar': 16,
+    'Gold Scarab': 17,
 };
 
 const emptyEquipmentItem = (): EquippedItem => ({ occupied: false, rawId: 0, handle: 0, name: '', iconPath: '', resolved: false });
@@ -374,6 +378,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         if (slot === 7) return snapshot?.bolts[0];
         if (slot === 9) return snapshot?.bolts[1];
         if (slot >= 10 && slot <= 13) return snapshot?.armor[slot - 10];
+        if (slot >= 14 && slot <= 17) return snapshot?.talismans[slot - 14];
         return undefined;
     };
     const selectedEquipment = selectedEquipmentSlot == null ? undefined : equipmentView(selectedEquipmentSlot, snapshotEquipmentForSlot(selectedEquipmentSlot));
@@ -383,6 +388,11 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         name: selectedEquipment.name,
         iconPath: selectedEquipment.iconPath,
     } : undefined;
+    const disabledEquipmentHandles = Array.from({ length: 18 }, (_, slot) => slot)
+        .filter(slot => slot !== selectedEquipmentSlot)
+        .map(slot => equipmentView(slot, snapshotEquipmentForSlot(slot)))
+        .filter((item): item is EquippedItem => Boolean(item?.occupied && item.handle))
+        .map(item => item.handle);
 
     return (
         <section className="w-full shrink-0 overflow-auto rounded-xl border border-border bg-card text-card-foreground shadow-sm custom-scrollbar">
@@ -425,8 +435,9 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                         </div>
                         <div className="grid grid-cols-[repeat(4,82px)] gap-[9px]">
                             {talismanSlots.slice(0, activeTalismanSlots).map(([label, src], index) => {
-                                const item = snapshot?.talismans[index];
-                                return <EquipmentSlot key={label} label={label} eligibleItems="Talismans (read-only)" onOpen={openSlot} readOnly showRemove={false} item={item}><GhostIcon src={src} /></EquipmentSlot>;
+                                const slot = 14 + index;
+                                const item = equipmentView(slot, snapshot?.talismans[index]);
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Talismans" selected={selected(label)} onOpen={openSlot} item={item} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src={src} /></EquipmentSlot>;
                             })}
                         </div>
                         {[0, 1].map((row) => (
@@ -486,6 +497,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 charIdx={charIdx}
                 initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedEquipmentSelection}
                 disabledItemIDs={disabledSpellIDs}
+                disabledItemHandles={disabledEquipmentHandles}
                 inventoryOnly={selectedEquipmentSlot != null}
                 onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
                 onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}

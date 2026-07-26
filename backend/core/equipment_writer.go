@@ -7,10 +7,9 @@ import (
 
 // EquipmentSlotKind identifies a writable equipment slot within ChrAsmEquipment.
 //
-// Phase 7b.0 — backend-only foundation for weapon/ammo slots (0–9, hash 7) and
-// armor slots (12–15, hash 8).
-// Talismans are deliberately read-only until their native write contract has
-// been established by dedicated Deck tests.
+// Phase 7b.0 — backend-only foundation for weapon/ammo slots (0–9, hash 7),
+// armor slots (12–15, hash 8), and the four player-visible talisman slots
+// (17–20).
 // The unknown slots 10/11/16 and EquippedGreatRune remain out of scope.
 type EquipmentSlotKind int
 
@@ -29,15 +28,20 @@ const (
 	EquipSlotChest
 	EquipSlotArms
 	EquipSlotLegs
+	EquipSlotTalisman1
+	EquipSlotTalisman2
+	EquipSlotTalisman3
+	EquipSlotTalisman4
 )
 
 // equipmentSlotKindClass classifies what handle type a slot accepts.
 type equipmentSlotKindClass int
 
 const (
-	slotClassWeapon equipmentSlotKindClass = iota // accepts handle prefix 0x80 (ItemTypeWeapon)
-	slotClassAmmo                                 // accepts handle prefix 0xB0 (ItemTypeItem / goods)
-	slotClassArmor                                // accepts handle prefix 0x90 (ItemTypeArmor)
+	slotClassWeapon   equipmentSlotKindClass = iota // accepts handle prefix 0x80 (ItemTypeWeapon)
+	slotClassAmmo                                   // accepts handle prefix 0xB0 (ItemTypeItem / goods)
+	slotClassArmor                                  // accepts handle prefix 0x90 (ItemTypeArmor)
+	slotClassTalisman                               // accepts handle prefix 0xA0 (ItemTypeAccessory)
 )
 
 // equipmentSlotInfo maps a slot kind to its index in ChrAsmEquipment and its class.
@@ -61,6 +65,10 @@ var equipmentSlotTable = map[EquipmentSlotKind]equipmentSlotInfo{
 	EquipSlotChest:              {13, slotClassArmor},
 	EquipSlotArms:               {14, slotClassArmor},
 	EquipSlotLegs:               {15, slotClassArmor},
+	EquipSlotTalisman1:          {17, slotClassTalisman},
+	EquipSlotTalisman2:          {18, slotClassTalisman},
+	EquipSlotTalisman3:          {19, slotClassTalisman},
+	EquipSlotTalisman4:          {20, slotClassTalisman},
 }
 
 // EquipmentWrite is one entry in a WriteEquipment batch. Handle == 0 clears
@@ -68,6 +76,22 @@ var equipmentSlotTable = map[EquipmentSlotKind]equipmentSlotInfo{
 type EquipmentWrite struct {
 	Slot   EquipmentSlotKind
 	Handle uint32
+}
+
+type talismanNativeWrite struct {
+	equipIndexOff int
+	itemIDOff     int
+	handleOff     int
+	equipIndex    uint32
+	itemID        uint32
+	handle        uint32
+}
+
+type resolvedEquipmentWrite struct {
+	index    int
+	header   uint32
+	dynamic  uint32
+	talisman *talismanNativeWrite
 }
 
 // WriteEquipment applies a batch of equipment slot writes atomically.
@@ -99,38 +123,193 @@ func (s *SaveSlot) WriteEquipment(writes []EquipmentWrite) error {
 	if err != nil {
 		return fmt.Errorf("WriteEquipment: %w", err)
 	}
-	// Validate every write first; record both native representations before
-	// mutating either one.
-	type resolved struct {
-		index   int
-		header  uint32
-		dynamic uint32
-	}
-	resolvedWrites := make([]resolved, 0, len(writes))
+	// Validate every write first and resolve every native representation before
+	// mutating any of them.
+	resolvedWrites := make([]resolvedEquipmentWrite, 0, len(writes))
 	seenIndex := make(map[int]int, len(writes)) // index → position in writes for duplicate-detection diagnostics
 
 	for i, w := range writes {
 		info, ok := equipmentSlotTable[w.Slot]
 		if !ok {
-			return fmt.Errorf("WriteEquipment[%d]: unsupported slot kind %d (slots 10/11/16, spells, quick items, great rune, and unknown slots are out of scope)", i, int(w.Slot))
+			return fmt.Errorf("WriteEquipment[%d]: unsupported slot kind %d (slots 10/11/16/21, spells, quick items, great rune, and unknown slots are out of scope)", i, int(w.Slot))
 		}
 		if prev, dup := seenIndex[info.index]; dup {
 			return fmt.Errorf("WriteEquipment[%d]: slot index %d already written at writes[%d]", i, info.index, prev)
 		}
 		seenIndex[info.index] = i
 
+		if info.class == slotClassTalisman {
+			native, dynamic, err := s.resolveTalismanValues(info.index, w.Handle)
+			if err != nil {
+				return fmt.Errorf("WriteEquipment[%d]: %w", i, err)
+			}
+			resolvedWrites = append(resolvedWrites, resolvedEquipmentWrite{
+				index:    info.index,
+				dynamic:  dynamic,
+				talisman: &native,
+			})
+			continue
+		}
+
 		currentHeader := binary.LittleEndian.Uint32(s.Data[s.EquipItemsIDOffset+info.index*4:])
 		header, dynamic, err := s.resolveEquipmentValues(info.index, info.class, w.Handle, currentHeader)
 		if err != nil {
 			return fmt.Errorf("WriteEquipment[%d]: %w", i, err)
 		}
-		resolvedWrites = append(resolvedWrites, resolved{index: info.index, header: header, dynamic: dynamic})
+		resolvedWrites = append(resolvedWrites, resolvedEquipmentWrite{index: info.index, header: header, dynamic: dynamic})
 	}
 
-	// All writes valid — perform the paired updates.
+	if err := validateTalismanDuplicates(s, armamentsOff, resolvedWrites); err != nil {
+		return fmt.Errorf("WriteEquipment: %w", err)
+	}
+
+	// All writes valid — perform the native updates.
 	for _, r := range resolvedWrites {
+		if r.talisman != nil {
+			binary.LittleEndian.PutUint32(s.Data[r.talisman.equipIndexOff:], r.talisman.equipIndex)
+			binary.LittleEndian.PutUint32(s.Data[r.talisman.itemIDOff:], r.talisman.itemID)
+			binary.LittleEndian.PutUint32(s.Data[r.talisman.handleOff:], r.talisman.handle)
+			binary.LittleEndian.PutUint32(s.Data[armamentsOff+r.index*4:], r.dynamic)
+			continue
+		}
 		binary.LittleEndian.PutUint32(s.Data[s.EquipItemsIDOffset+r.index*4:], r.header)
 		binary.LittleEndian.PutUint32(s.Data[armamentsOff+r.index*4:], r.dynamic)
+	}
+	return nil
+}
+
+const (
+	firstTalismanChrAsmIndex = 17
+	talismanSlotCount        = 4
+	inventoryEquipIndexBase  = 0x180
+	equipmentStructLead      = 1
+)
+
+// talismanRepresentationOffsets returns the three fixed player-data fields
+// which accompany the dynamic equipped-armaments value:
+//
+//	EquipData: physical inventory row + 0x180
+//	ChrAsm:    bare accessory item ID
+//	ChrAsm2:   0xA0 GaItem handle
+//
+// Each serialized structure has one leading byte before its 22 u32 equipment
+// fields. T548 established the +1 layout and the four-field values for one and
+// four native talismans.
+func (s *SaveSlot) talismanRepresentationOffsets(index int) (equipIndexOff, itemIDOff, handleOff int, err error) {
+	if index < firstTalismanChrAsmIndex || index >= firstTalismanChrAsmIndex+talismanSlotCount {
+		return 0, 0, 0, fmt.Errorf("internal: talisman index %d out of range", index)
+	}
+	if s.MagicOffset < MinMagicOffset {
+		return 0, 0, 0, fmt.Errorf("MagicOffset not parsed")
+	}
+
+	equipIndexBase := s.MagicOffset + DynSpEffect
+	itemIDBase := equipIndexBase + DynEquipedItemIndex + DynActiveEquipedItems
+	handleBase := itemIDBase + DynEquipedItemsID
+	if handleBase != s.EquipItemsIDOffset {
+		return 0, 0, 0, fmt.Errorf("talisman offset chain mismatch: ChrAsm2=0x%X EquipItemsIDOffset=0x%X", handleBase, s.EquipItemsIDOffset)
+	}
+	fieldOff := equipmentStructLead + index*4
+	equipIndexOff = equipIndexBase + fieldOff
+	itemIDOff = itemIDBase + fieldOff
+	handleOff = handleBase + fieldOff
+	for name, off := range map[string]int{
+		"EquipData": equipIndexOff,
+		"ChrAsm":    itemIDOff,
+		"ChrAsm2":   handleOff,
+	} {
+		if off < 0 || off+4 > len(s.Data) {
+			return 0, 0, 0, fmt.Errorf("%s talisman field out of bounds", name)
+		}
+	}
+	return equipIndexOff, itemIDOff, handleOff, nil
+}
+
+func (s *SaveSlot) resolveTalismanValues(index int, handle uint32) (native talismanNativeWrite, dynamic uint32, err error) {
+	native.equipIndexOff, native.itemIDOff, native.handleOff, err = s.talismanRepresentationOffsets(index)
+	if err != nil {
+		return native, 0, err
+	}
+	if handle == 0 {
+		native.equipIndex = GaHandleInvalid
+		native.itemID = GaHandleInvalid
+		native.handle = 0
+		return native, GaHandleInvalid, nil
+	}
+	if handle == GaHandleInvalid {
+		return native, 0, fmt.Errorf("handle 0xFFFFFFFF is invalid; use Handle=0 to clear a slot")
+	}
+	if handle&GaHandleTypeMask != ItemTypeAccessory {
+		return native, 0, fmt.Errorf("handle 0x%08X is not a talisman handle", handle)
+	}
+
+	ordinal := index - firstTalismanChrAsmIndex
+	unlocked := 1 + int(s.Player.TalismanSlots)
+	if unlocked > talismanSlotCount {
+		unlocked = talismanSlotCount
+	}
+	if ordinal >= unlocked {
+		return native, 0, fmt.Errorf("talisman slot %d is locked (character has %d active slot(s))", ordinal+1, unlocked)
+	}
+
+	inventoryRow := -1
+	for row, item := range s.Inventory.CommonItems {
+		if item.GaItemHandle == handle && item.Quantity&0x7FFFFFFF != 0 {
+			inventoryRow = row
+			break
+		}
+	}
+	if inventoryRow < 0 {
+		return native, 0, fmt.Errorf("talisman handle 0x%08X is not present in inventory", handle)
+	}
+
+	bareItemID := handle & 0x0FFFFFFF
+	if bareItemID == 0 {
+		return native, 0, fmt.Errorf("talisman handle 0x%08X has an empty item ID", handle)
+	}
+	native.equipIndex = inventoryEquipIndexBase + uint32(inventoryRow)
+	native.itemID = bareItemID
+	native.handle = handle
+	return native, 0x20000000 | bareItemID, nil
+}
+
+func validateTalismanDuplicates(s *SaveSlot, armamentsOff int, writes []resolvedEquipmentWrite) error {
+	hasTalismanWrite := false
+	for _, write := range writes {
+		if write.talisman != nil {
+			hasTalismanWrite = true
+			break
+		}
+	}
+	if !hasTalismanWrite {
+		return nil
+	}
+
+	var final [talismanSlotCount]uint32
+	for i := range final {
+		final[i] = binary.LittleEndian.Uint32(s.Data[armamentsOff+(firstTalismanChrAsmIndex+i)*4:])
+	}
+	for _, write := range writes {
+		if write.talisman != nil {
+			final[write.index-firstTalismanChrAsmIndex] = write.dynamic
+		}
+	}
+
+	seen := make(map[uint32]int, talismanSlotCount)
+	unlocked := 1 + int(s.Player.TalismanSlots)
+	if unlocked > talismanSlotCount {
+		unlocked = talismanSlotCount
+	}
+	for i := 0; i < unlocked; i++ {
+		raw := final[i]
+		if raw == 0 || raw == GaHandleInvalid {
+			continue
+		}
+		itemID := 0x20000000 | (raw & 0x0FFFFFFF)
+		if previous, exists := seen[itemID]; exists {
+			return fmt.Errorf("talisman 0x%08X cannot occupy slots %d and %d", itemID, previous+1, i+1)
+		}
+		seen[itemID] = i
 	}
 	return nil
 }

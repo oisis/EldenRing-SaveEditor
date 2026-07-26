@@ -245,17 +245,57 @@ describe('EquipmentTab', () => {
         expect(SaveEquippedSpells).not.toHaveBeenCalled();
     });
 
-    it('renders talismans as read-only slots without a picker or remove control', async () => {
+    it('edits talisman slots and keeps already-equipped talismans visible but disabled', async () => {
         vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
-            talismans: [view({ occupied: true, resolved: true, rawId: 0x200017CA, name: "Host's Trick-Mirror", iconPath: 'items/talismans/host.png' }), ...fill(3)],
+            talismans: [
+                view({ occupied: true, resolved: true, rawId: 0x200003E8, handle: 0xA00003E8, name: 'Crimson Amber Medallion', iconPath: 'items/talismans/crimson.png' }),
+                view({ occupied: true, resolved: true, rawId: 0x200003F2, handle: 0xA00003F2, name: 'Cerulean Amber Medallion', iconPath: 'items/talismans/cerulean.png' }),
+                ...fill(2),
+            ],
         }) as never);
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'talismans' ? [
+            { id: 0x200003E8, name: 'Crimson Amber Medallion', category: 'talismans', iconPath: 'items/talismans/crimson.png', maxInventory: 1 },
+            { id: 0x200003F2, name: 'Cerulean Amber Medallion', category: 'talismans', iconPath: 'items/talismans/cerulean.png', maxInventory: 1 },
+        ] : []) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { id: 0x200003E8, baseId: 0x200003E8, handle: 0xA00003E8, name: 'Crimson Amber Medallion', category: 'talismans', iconPath: 'items/talismans/crimson.png', quantity: 1, maxInventory: 1 },
+                { id: 0x200003F2, baseId: 0x200003F2, handle: 0xA00003F2, name: 'Cerulean Amber Medallion', category: 'talismans', iconPath: 'items/talismans/cerulean.png', quantity: 1, maxInventory: 1 },
+            ],
+        } as never);
         render(<EquipmentTab charIdx={0} />);
 
-        await screen.findByAltText("Host's Trick-Mirror");
-        expect(screen.queryByRole('button', { name: 'Remove Axe Talisman' })).not.toBeInTheDocument();
+        await screen.findByAltText('Crimson Amber Medallion');
         fireEvent.click(screen.getByRole('button', { name: 'Axe Talisman' }));
-        expect(screen.queryByText('Inventory')).not.toBeInTheDocument();
-        expect(SaveEquipment).not.toHaveBeenCalled();
+
+        const crimson = await screen.findByRole('button', { name: 'Select Crimson Amber Medallion' });
+        const cerulean = screen.getByRole('button', { name: 'Select Cerulean Amber Medallion' });
+        expect(crimson.parentElement).toHaveAttribute('data-picker-selected', 'true');
+        expect(cerulean).toBeDisabled();
+        expect(cerulean.parentElement).toHaveClass('grayscale', 'opacity-40');
+
+        fireEvent.click(crimson);
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 14, handle: 0 }]));
+    });
+
+    it('equips an owned talisman through the picker', async () => {
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'talismans' ? [
+            { id: 0x200003E8, name: 'Crimson Amber Medallion', category: 'talismans', iconPath: 'items/talismans/crimson.png', maxInventory: 1 },
+        ] : []) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [
+                { id: 0x200003E8, baseId: 0x200003E8, handle: 0xA00003E8, name: 'Crimson Amber Medallion', category: 'talismans', iconPath: 'items/talismans/crimson.png', quantity: 1, maxInventory: 1 },
+            ],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(await screen.findByRole('button', { name: 'Axe Talisman' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Select Crimson Amber Medallion' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ok' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveEquipment).toHaveBeenCalledWith(0, [{ slot: 14, handle: 0xA00003E8 }]));
     });
 
     it('maps armor controls to their writer enum values', async () => {
@@ -317,7 +357,7 @@ describe('EquipmentTab', () => {
     it('shows a visible remove icon in the lower-left corner of every editable equipment field', () => {
         render(<EquipmentTab />);
 
-        expect(screen.getAllByTestId('slot-remove-icon')).toHaveLength(42);
+        expect(screen.getAllByTestId('slot-remove-icon')).toHaveLength(46);
         expect(screen.getAllByTestId('slot-remove-icon')[0]).toHaveClass('bottom-0.5', 'left-1', 'text-lg', 'text-red-600');
     });
 
@@ -584,7 +624,7 @@ describe('EquipmentTab', () => {
         expect(screen.getByRole('tooltip', { name: 'Chest armor' })).toBeInTheDocument();
         expect(screen.getByRole('tooltip', { name: 'Gauntlets' })).toBeInTheDocument();
         expect(screen.getByRole('tooltip', { name: 'Leg armor' })).toBeInTheDocument();
-        expect(screen.getAllByRole('tooltip', { name: 'Talismans (read-only)' })).toHaveLength(4);
+        expect(screen.getAllByRole('tooltip', { name: 'Talismans' })).toHaveLength(4);
         expect(screen.getAllByRole('tooltip', { name: 'Tools and Spirit Ashes' })).toHaveLength(16);
         expect(screen.getAllByRole('tooltip', { name: 'Crystal Tears' })).toHaveLength(2);
         expect(screen.getAllByRole('tooltip', { name: 'Sorceries and Incantations' })).toHaveLength(10);

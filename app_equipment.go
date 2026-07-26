@@ -262,8 +262,20 @@ func equipSlotView(raw uint32, class equipClass) EquipmentSlotView {
 	return resolveEquipView(raw, class)
 }
 
-func equippedSlotHandle(slot *core.SaveSlot, index int, class equipClass, occupied bool) uint32 {
-	if !occupied || slot == nil || slot.EquipItemsIDOffset <= 0 || index < 0 || slot.EquipItemsIDOffset+(index+1)*4 > len(slot.Data) {
+func equippedSlotHandle(slot *core.SaveSlot, index int, raw uint32, class equipClass, occupied bool) uint32 {
+	if !occupied || slot == nil || index < 0 {
+		return 0
+	}
+	if class == classTalisman {
+		handle := core.ItemTypeAccessory | (normalizeEquipItemID(raw, classTalisman) & 0x0FFFFFFF)
+		for _, item := range slot.Inventory.CommonItems {
+			if item.GaItemHandle == handle && item.Quantity&0x7FFFFFFF != 0 {
+				return handle
+			}
+		}
+		return 0
+	}
+	if slot.EquipItemsIDOffset <= 0 || slot.EquipItemsIDOffset+(index+1)*4 > len(slot.Data) {
 		return 0
 	}
 	header := binary.LittleEndian.Uint32(slot.Data[slot.EquipItemsIDOffset+index*4:])
@@ -280,7 +292,7 @@ func equippedSlotHandle(slot *core.SaveSlot, index int, class equipClass, occupi
 
 func equippedView(slot *core.SaveSlot, index int, raw uint32, class equipClass) EquipmentSlotView {
 	view := equipSlotView(raw, class)
-	view.Handle = equippedSlotHandle(slot, index, class, view.Occupied)
+	view.Handle = equippedSlotHandle(slot, index, raw, class, view.Occupied)
 	return view
 }
 
@@ -479,11 +491,6 @@ func (a *App) SaveEquipment(charIdx int, changes []EquipmentChange) error {
 	slot := &a.save.Slots[charIdx]
 	writes := make([]core.EquipmentWrite, len(changes))
 	for i, change := range changes {
-		// Historical writer values 14–18 are talisman slots. Keep this API
-		// boundary closed even when called outside the UI.
-		if change.Slot >= core.EquipmentSlotKind(14) && change.Slot <= core.EquipmentSlotKind(18) {
-			return fmt.Errorf("SaveEquipment[%d]: talismans are read-only until their native write contract is established", i)
-		}
 		writes[i] = core.EquipmentWrite{Slot: change.Slot, Handle: change.Handle}
 	}
 
