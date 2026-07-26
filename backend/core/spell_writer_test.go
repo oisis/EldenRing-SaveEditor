@@ -441,6 +441,51 @@ func TestWriteCompactSpells_UsesEquippedSpellsOffset(t *testing.T) {
 	}
 }
 
+// ─── ClearCompactSpells (native empty-loadout contract) ─────────────────
+
+func TestClearCompactSpells_WritesNativeEmptyContract(t *testing.T) {
+	slot := makeSpellTestSlot()
+	// Seed a non-empty loadout and a non-sentinel active index / hash so the
+	// empty write has something to overwrite.
+	if err := slot.WriteSpells([]SpellWrite{
+		{SlotIndex: 0, SpellID: 0x00000FA0},
+		{SlotIndex: 1, SpellID: 0x00001770},
+	}); err != nil {
+		t.Fatalf("seed: %v", err)
+	}
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], 0)
+	binary.LittleEndian.PutUint32(slot.Data[HashOffset+10*4:], 0xC0DEC0DE)
+
+	if err := slot.ClearCompactSpells(); err != nil {
+		t.Fatalf("ClearCompactSpells: %v", err)
+	}
+	for i := 0; i < EquippedSpellSlotCount; i++ {
+		gotID, gotFollower := readSpellSlot(t, slot, i)
+		if gotID != EquippedSpellEmptySentinel || gotFollower != 0 {
+			t.Errorf("record %d = (0x%08X, 0x%08X), want (0xFFFFFFFF, 0)", i, gotID, gotFollower)
+		}
+	}
+	if got := binary.LittleEndian.Uint32(slot.Data[slot.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:]); got != EquippedSpellEmptySentinel {
+		t.Errorf("active_index = 0x%08X, want empty sentinel 0xFFFFFFFF (never 0)", got)
+	}
+	if got := readHashEntry(t, slot, 10); got != 0xC0DEC0DE {
+		t.Errorf("hash[10] = 0x%08X, want untouched 0xC0DEC0DE", got)
+	}
+}
+
+func TestClearCompactSpells_StructuralErrorIsAtomic(t *testing.T) {
+	slot := makeSpellTestSlot()
+	// Force the section end past the buffer so the bounds check fails.
+	slot.EquippedSpellsOffset = len(slot.Data) - 8
+	before := append([]byte(nil), slot.Data...)
+	if err := slot.ClearCompactSpells(); err == nil {
+		t.Fatal("expected out-of-bounds error")
+	}
+	if !bytes.Equal(before, slot.Data) {
+		t.Fatal("structural error mutated slot.Data")
+	}
+}
+
 // ─── WriteSpells (batch, native hash block preserved) ───────────────────
 
 // makeCalibratedSpellTestSlot builds a SaveSlot whose dynamic offset chain has

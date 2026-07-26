@@ -37,7 +37,11 @@ type ItemEntry struct {
 	Weapon                *data.WeaponStats `json:"weapon,omitempty"`
 	Armor                 *data.ArmorStats  `json:"armor,omitempty"`
 	Spell                 *data.SpellStats  `json:"spell,omitempty"`
-	AoWCompatBitmask      uint64            `json:"aowCompatBitmask,omitempty"`
+	// MemorySlots is a spell's Memory Slot cost (1-3) from the generated
+	// SpellMemorySlots SSOT. Zero for non-spells and for any spell ID absent
+	// from that map (unknown cost — callers must fail closed, never assume 1).
+	MemorySlots      uint32 `json:"memorySlots,omitempty"`
+	AoWCompatBitmask uint64 `json:"aowCompatBitmask,omitempty"`
 	// Text is the generated Phase 3B.1 text payload (display + canonical
 	// name, caption, description, location, per-field provenance).
 	// Read-only for the frontend; nil when the item ID has no ItemTexts
@@ -357,6 +361,13 @@ func enrichItemEntry(e *ItemEntry) {
 			e.Armor = desc.Armor
 			e.Spell = desc.Spell
 		}
+	}
+	// Memory Slot cost is authoritative in the generated SpellMemorySlots map
+	// (regulation.bin), which — unlike Descriptions[id].Spell.Slots — also covers
+	// every DLC spell. Populate it for sorceries and incantations so the picker
+	// and Equipment tab can sum real memory usage instead of counting records.
+	if cost, ok := data.SpellMemorySlots[e.ID]; ok {
+		e.MemorySlots = uint32(cost)
 	}
 	// Prefer the Phase 3B.1 ItemTexts entry for Description / Location
 	// when populated. Empty strings leave the legacy fallback intact.
@@ -686,6 +697,16 @@ func ItemIDToHandlePrefix(id uint32) uint32 {
 // pipeline never feeds a non-spell ID through this conversion.
 func ItemIDToMagicParamID(itemID uint32) uint32 {
 	return itemID & 0x0FFFFFFF
+}
+
+// SpellMemorySlotCost returns the Memory Slot cost (1-3) for a full spell item
+// ID and whether it is known. It is the single source of truth for spell memory
+// cost; an unknown ID returns ok=false and callers must fail closed rather than
+// assume a cost of 1 (that would undercount DLC spells and re-introduce the
+// over-capacity write bug).
+func SpellMemorySlotCost(itemID uint32) (uint32, bool) {
+	cost, ok := data.SpellMemorySlots[itemID]
+	return uint32(cost), ok
 }
 
 // GetItemsByCategory returns a sorted list of items for a given category.

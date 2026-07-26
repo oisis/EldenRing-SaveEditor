@@ -728,6 +728,7 @@ export namespace db {
 	    weapon?: data.WeaponStats;
 	    armor?: data.ArmorStats;
 	    spell?: data.SpellStats;
+	    memorySlots?: number;
 	    aowCompatBitmask?: number;
 	    text?: data.ItemTextData;
 	    stats?: data.ItemStatsData;
@@ -759,6 +760,7 @@ export namespace db {
 	        this.weapon = this.convertValues(source["weapon"], data.WeaponStats);
 	        this.armor = this.convertValues(source["armor"], data.ArmorStats);
 	        this.spell = this.convertValues(source["spell"], data.SpellStats);
+	        this.memorySlots = source["memorySlots"];
 	        this.aowCompatBitmask = source["aowCompatBitmask"];
 	        this.text = this.convertValues(source["text"], data.ItemTextData);
 	        this.stats = this.convertValues(source["stats"], data.ItemStatsData);
@@ -1776,6 +1778,7 @@ export namespace main {
 	    name: string;
 	    iconPath: string;
 	    resolved: boolean;
+	    memorySlots?: number;
 
 	    static createFrom(source: any = {}) {
 	        return new EquipmentSlotView(source);
@@ -1790,6 +1793,7 @@ export namespace main {
 	        this.name = source["name"];
 	        this.iconPath = source["iconPath"];
 	        this.resolved = source["resolved"];
+	        this.memorySlots = source["memorySlots"];
 	    }
 	}
 	export class EquipmentSnapshot {

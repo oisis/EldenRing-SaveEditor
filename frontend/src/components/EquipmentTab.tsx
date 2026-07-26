@@ -61,6 +61,7 @@ type SlotProps = {
     showRemove?: boolean;
     item?: EquippedItem;
     quantity?: number;
+    costBadge?: number;
     onRemove?: () => void;
     children: ReactNode;
 };
@@ -83,7 +84,7 @@ function SlotRemoveIcon({ label, onRemove, showRemove = true }: { label: string;
     return <span data-testid="slot-remove-icon" role="button" tabIndex={0} aria-label={`Remove ${label}`} onClick={remove} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') remove(event); }} className="absolute bottom-0.5 left-1 z-20 cursor-pointer text-lg font-black leading-none text-red-600 drop-shadow-sm hover:text-red-500">×</span>;
 }
 
-function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, onRemove, children }: SlotProps) {
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, costBadge, onRemove, children }: SlotProps) {
     // Occupied + resolved: real icon and item name. Occupied + unknown:
     // placeholder with the raw-ID name. Empty: placeholder + eligibility text.
     const tooltip = item?.occupied ? item.name : eligibleItems;
@@ -100,6 +101,7 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active 
             <SlotTooltip eligibleItems={tooltip} />
             <SlotRemoveIcon label={label} onRemove={onRemove} showRemove={showRemove} />
             {quantity != null && <span className="pointer-events-none absolute left-1.5 top-1 z-20 text-xs font-black text-foreground">{quantity}</span>}
+            {costBadge != null && costBadge > 1 && <span data-testid="spell-cost-badge" className="pointer-events-none absolute bottom-0.5 right-1 z-20 rounded bg-black/70 px-1 text-[8px] font-black leading-tight text-white">{costBadge} slots</span>}
             {item?.resolved ? <ItemIcon src={iconSrc(item.iconPath)} alt={item.name} /> : children}
         </button>
     );
@@ -273,7 +275,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         if (selection.source === 'database') await ensureDatabaseItemInInventory(selection.id, selection.quantity ?? 1);
         setDraftSpells(current => {
             const next = [...(current ?? Array.from(snapshot?.spells ?? []))];
-            next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, handle: 0, quantity: 1, name: selection.name, iconPath: selection.iconPath, resolved: true };
+            next[index] = { occupied: true, rawId: selection.id & 0x0FFFFFFF, handle: 0, quantity: 1, name: selection.name, iconPath: selection.iconPath, resolved: true, memorySlots: selection.memorySlots };
             return next;
         });
         setSpellsDirty(true);
@@ -401,6 +403,10 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         Overloaded: 'text-red-600 font-black',
     }[equipLoadClass] ?? 'text-muted-foreground';
     const spellViews = draftSpells ?? Array.from(snapshot?.spells ?? []);
+    const spellCost = (item?: EquippedItem) => (item?.occupied ? (item.memorySlots ?? 0) : 0);
+    // Real memory usage is the SUM of per-spell costs (1-3 each), not the number
+    // of equipped records — a multi-slot spell still occupies a single record.
+    const usedSpellSlots = spellViews.reduce((sum, item) => sum + spellCost(item), 0);
     const equippedSpellCount = spellViews.filter(item => item.occupied).length;
     const activeSpellIndex = snapshot && equippedSpellCount > 0
         ? (snapshot.activeSpellIndex >= equippedSpellCount ? 0 : snapshot.activeSpellIndex)
@@ -411,8 +417,12 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         id: selectedSpell.rawId | 0x40000000,
         name: selectedSpell.name,
         iconPath: selectedSpell.iconPath,
+        memorySlots: selectedSpell.memorySlots,
         source: 'inventory' as const,
     } : undefined;
+    // Cost already spent by spells in OTHER slots, so the picker can validate a
+    // swap by subtracting the edited slot's own cost before adding the candidate.
+    const spellUsedExcludingSelected = usedSpellSlots - (selectedSpellIndex >= 0 ? spellCost(spellViews[selectedSpellIndex]) : 0);
     const disabledSpellIDs = spellViews
         .filter((item, index) => index !== selectedSpellIndex && item.occupied)
         .map(item => item.rawId | 0x40000000);
@@ -601,16 +611,17 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 </div>
 
                 <div className="flex h-full flex-col border-l border-border pl-[26px]">
-                    <h2 className="mb-3 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Spell slots</h2>
+                    <h2 className="mb-1 w-[173px] text-center text-[10px] font-black uppercase tracking-[0.15em] text-muted-foreground">Spell slots</h2>
+                    <p data-testid="memory-slots-usage" className={`mb-2 w-[173px] text-center text-[10px] font-bold ${usedSpellSlots > activeSpellSlots ? 'text-red-600' : 'text-muted-foreground'}`}>Memory slots: {usedSpellSlots} / {activeSpellSlots}</p>
                     <div data-testid="spell-slot-area" className={`flex flex-1 flex-col ${moonSpellSlots.length ? 'justify-start' : 'justify-center'}`}>
                         <div data-testid="spell-primary-grid" className="grid grid-flow-col grid-cols-[repeat(2,82px)] grid-rows-[repeat(5,82px)] gap-[9px]">
-                            {primarySpellSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {primarySpellSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} costBadge={spellCost(spellViews[index])} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         {moonSpellSlots.length > 0 && (
                             <div className="mt-[9px] grid grid-cols-[repeat(2,82px)] gap-[9px]">
                                 {moonSpellSlots.map(([label, src], offset) => {
                                     const index = offset + 10;
-                                    return <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>;
+                                    return <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} costBadge={spellCost(spellViews[index])} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>;
                                 })}
                             </div>
                         )}
@@ -629,6 +640,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedQuickPouchSlot >= 0 ? selectedQuickPouchSelection : selectedEquipmentSelection}
                 disabledItemIDs={disabledPickerItemIDs}
                 disabledItemHandles={disabledPickerItemHandles}
+                spellCapacity={selectedSlot.startsWith('Spell slot') ? activeSpellSlots : undefined}
+                spellUsedExcludingSelected={spellUsedExcludingSelected}
                 onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedQuickPouchSlot >= 0 ? setQuickPouchSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
                 onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedQuickPouchSlot >= 0 ? () => removeQuickPouch(selectedQuickPouchSlot) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
                 onClose={() => setModalOpen(false)}

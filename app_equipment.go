@@ -21,6 +21,10 @@ type EquipmentSlotView struct {
 	Name     string `json:"name"`
 	IconPath string `json:"iconPath"`
 	Resolved bool   `json:"resolved"`
+	// MemorySlots is the equipped spell's Memory Slot cost (1-3). It is only
+	// meaningful for spell slots and stays 0 for every other slot family and for
+	// a spell whose cost is unknown; the UI sums it to show real memory usage.
+	MemorySlots int `json:"memorySlots,omitempty"`
 }
 
 // EquipmentSnapshot is the read-only projection of one character's equipped
@@ -339,7 +343,11 @@ func spellSlotView(raw uint32) EquipmentSlotView {
 	if raw == core.EquippedSpellEmptySentinel {
 		return EquipmentSlotView{RawID: raw}
 	}
-	return resolveEquipView(raw, classSpell)
+	view := resolveEquipView(raw, classSpell)
+	if cost, ok := db.SpellMemorySlotCost(normalizeEquipItemID(raw, classSpell)); ok {
+		view.MemorySlots = int(cost)
+	}
+	return view
 }
 
 // GetEquipmentSnapshot returns the read-only equipped-item projection for the
@@ -454,12 +462,31 @@ func (a *App) SaveEquippedSpells(charIdx int, itemIDs []uint32) error {
 	if err != nil {
 		return fmt.Errorf("SaveEquippedSpells: read equipped state: %w", err)
 	}
-	limit := activeSpellSlotCount(slot, raw, activeTalismanSlotCount(slot.Player.TalismanSlots))
-	if len(itemIDs) == 0 || len(itemIDs) > limit {
-		return fmt.Errorf("SaveEquippedSpells: spell count %d out of range [1,%d]", len(itemIDs), limit)
+
+	// An empty loadout is a legitimate native state (all 14 records cleared,
+	// active_index = 0xFFFFFFFF). It has its own atomic writer and skips the
+	// per-spell / capacity checks entirely.
+	if len(itemIDs) == 0 {
+		a.pushUndoLocked(charIdx)
+		if err := slot.ClearCompactSpells(); err != nil {
+			return fmt.Errorf("SaveEquippedSpells: %w", err)
+		}
+		return nil
 	}
 
+	// The physical section holds at most 14 spell records regardless of memory
+	// capacity; reject before doing any per-spell work.
+	if len(itemIDs) > core.EquippedSpellSlotCount {
+		return fmt.Errorf("SaveEquippedSpells: spell count %d exceeds the %d available records", len(itemIDs), core.EquippedSpellSlotCount)
+	}
+
+	// Memory capacity is measured in slots, not records: a single spell can cost
+	// 1-3 slots, so the sum of per-spell costs — never len(itemIDs) — is what must
+	// fit within the character's active capacity.
+	capacity := activeSpellSlotCount(slot, raw, activeTalismanSlotCount(slot.Player.TalismanSlots))
 	rawIDs := make([]uint32, len(itemIDs))
+	seen := make(map[uint32]int, len(itemIDs))
+	totalCost := 0
 	for i, itemID := range itemIDs {
 		if itemID&0xF0000000 != 0x40000000 {
 			return fmt.Errorf("SaveEquippedSpells[%d]: item ID 0x%08X is not a spell", i, itemID)
@@ -468,7 +495,19 @@ func (a *App) SaveEquippedSpells(charIdx int, itemIDs []uint32) error {
 		if item.Category != "sorceries" && item.Category != "incantations" {
 			return fmt.Errorf("SaveEquippedSpells[%d]: item ID 0x%08X is not a known spell", i, itemID)
 		}
+		if prev, dup := seen[itemID]; dup {
+			return fmt.Errorf("SaveEquippedSpells[%d]: spell %q (0x%08X) is already equipped at position %d", i, item.Name, itemID, prev)
+		}
+		seen[itemID] = i
+		cost, ok := db.SpellMemorySlotCost(itemID)
+		if !ok {
+			return fmt.Errorf("SaveEquippedSpells[%d]: no Memory Slot cost for spell %q (0x%08X); refusing to guess and write an over-capacity loadout", i, item.Name, itemID)
+		}
+		totalCost += int(cost)
 		rawIDs[i] = db.ItemIDToMagicParamID(itemID)
+	}
+	if totalCost > capacity {
+		return fmt.Errorf("SaveEquippedSpells: loadout costs %d Memory Slots but only %d are available", totalCost, capacity)
 	}
 
 	a.pushUndoLocked(charIdx)

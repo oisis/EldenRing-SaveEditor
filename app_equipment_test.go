@@ -1,12 +1,14 @@
 package main
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"strings"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
+	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
 )
 
 // Equipment section offsets used by the synthetic fixture. Values mirror the
@@ -204,6 +206,163 @@ func TestSaveEquippedSpells_NormalizesOutOfRangeActiveIndexToZero(t *testing.T) 
 	}
 	if raw.ActiveSpellIndex != 0 {
 		t.Errorf("ActiveSpellIndex = %d, want native fallback 0", raw.ActiveSpellIndex)
+	}
+}
+
+// spellCapacitySlot builds a slot with a given number of Memory Stones and an
+// optional equipped Moon of Nokstella, so tests can pin the active spell
+// capacity (base 2 + stones, +2 with the Moon).
+func spellCapacitySlot(t *testing.T, memoryStones uint32, moon bool) core.SaveSlot {
+	t.Helper()
+	var equipped [core.ChrAsmFieldCount]uint32
+	if moon {
+		equipped[17] = moonOfNokstellaItemID
+	}
+	slot := buildEquipSlot(equipped, [10]core.RawEquipItem{}, [6]core.RawEquipItem{})
+	slot.Player.TalismanSlots = 3
+	slot.Inventory.CommonItems = []core.InventoryItem{{GaItemHandle: memoryStonesHandle, Quantity: memoryStones}}
+	for i := 0; i < core.EquippedSpellSlotCount; i++ {
+		putSpellRecord(&slot, i, core.EquippedSpellEmptySentinel)
+	}
+	return slot
+}
+
+func TestSaveEquippedSpells_EmptyLoadoutWritesNativeContract(t *testing.T) {
+	slot := spellCapacitySlot(t, 8, false)
+	putSpellRecord(&slot, 0, 0x00000FA0)
+	putSpellRecord(&slot, 1, 0x00001770)
+	binary.LittleEndian.PutUint32(slot.Data[slot.EquippedSpellsOffset+core.EquippedSpellActiveIndexOffset:], 1)
+	app := newEquipmentApp(slot)
+
+	if err := app.SaveEquippedSpells(0, []uint32{}); err != nil {
+		t.Fatalf("SaveEquippedSpells(empty): %v", err)
+	}
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	for i, id := range raw.Spells {
+		if id != core.EquippedSpellEmptySentinel {
+			t.Errorf("Spells[%d] = 0x%08X, want empty sentinel", i, id)
+		}
+	}
+	if raw.ActiveSpellIndex != core.EquippedSpellEmptySentinel {
+		t.Errorf("ActiveSpellIndex = 0x%08X, want empty sentinel 0xFFFFFFFF", raw.ActiveSpellIndex)
+	}
+}
+
+func TestSaveEquippedSpells_RejectsCostOverCapacityWithinRecordLimit(t *testing.T) {
+	// Capacity 2 (base, no stones); two records — within the 14-record limit —
+	// but Pebble(1) + Rennala's Full Moon(2) = 3 memory slots.
+	app := newEquipmentApp(spellCapacitySlot(t, 0, false))
+	err := app.SaveEquippedSpells(0, []uint32{0x40000FA0, 0x40001108})
+	if err == nil {
+		t.Fatal("expected over-capacity rejection")
+	}
+	if !strings.Contains(err.Error(), "Memory Slots") {
+		t.Errorf("error = %q, want memory-slot capacity message", err)
+	}
+}
+
+func TestSaveEquippedSpells_AcceptsCostExactlyAtCapacity(t *testing.T) {
+	// Capacity 3 (base 2 + 1 stone); Pebble(1) + Rennala's Full Moon(2) = 3.
+	app := newEquipmentApp(spellCapacitySlot(t, 1, false))
+	if err := app.SaveEquippedSpells(0, []uint32{0x40000FA0, 0x40001108}); err != nil {
+		t.Fatalf("SaveEquippedSpells at exact capacity: %v", err)
+	}
+	raw, err := app.save.Slots[0].ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if raw.Spells[0] != 0x00000FA0 || raw.Spells[1] != 0x00001108 {
+		t.Errorf("Spells[0:2] = 0x%08X, 0x%08X, want Pebble + Rennala", raw.Spells[0], raw.Spells[1])
+	}
+}
+
+func TestSaveEquippedSpells_RejectsUnknownCostFailClosed(t *testing.T) {
+	const pebbleID = uint32(0x40000FA0)
+	cost, ok := data.SpellMemorySlots[pebbleID]
+	if !ok {
+		t.Fatal("test precondition: Pebble cost missing")
+	}
+	delete(data.SpellMemorySlots, pebbleID)
+	defer func() { data.SpellMemorySlots[pebbleID] = cost }()
+
+	app := newEquipmentApp(spellCapacitySlot(t, 8, false))
+	before := append([]byte(nil), app.save.Slots[0].Data...)
+	err := app.SaveEquippedSpells(0, []uint32{pebbleID})
+	if err == nil || !strings.Contains(err.Error(), "no Memory Slot cost") {
+		t.Fatalf("expected fail-closed missing-cost error, got %v", err)
+	}
+	if !bytes.Equal(before, app.save.Slots[0].Data) {
+		t.Fatal("missing-cost rejection mutated slot data")
+	}
+}
+
+func TestSaveEquippedSpells_RejectsDuplicateSpell(t *testing.T) {
+	app := newEquipmentApp(spellCapacitySlot(t, 8, false))
+	err := app.SaveEquippedSpells(0, []uint32{0x40000FA0, 0x40000FA0})
+	if err == nil || !strings.Contains(err.Error(), "already equipped") {
+		t.Fatalf("expected duplicate rejection, got %v", err)
+	}
+}
+
+func TestSaveEquippedSpells_RejectsMoreThanPhysicalRecordLimit(t *testing.T) {
+	app := newEquipmentApp(spellCapacitySlot(t, 8, true))
+	itemIDs := make([]uint32, core.EquippedSpellSlotCount+1)
+	for i := range itemIDs {
+		itemIDs[i] = 0x40000FA0
+	}
+	err := app.SaveEquippedSpells(0, itemIDs)
+	if err == nil || !strings.Contains(err.Error(), "available records") {
+		t.Fatalf("expected physical-record limit error, got %v", err)
+	}
+}
+
+func TestSaveEquippedSpells_MoonRaisesCapacityNotCost(t *testing.T) {
+	// Loadout costs 11 Memory Slots: Comet Azur(3) + Rennala(2) + Ranni's Dark
+	// Moon(2) + 4×single-slot spells. It exceeds capacity 10 (8 stones) but fits
+	// capacity 12 once the Moon of Nokstella is equipped — the spell costs never
+	// change, only the capacity does.
+	loadout := []uint32{0x40001068, 0x40001108, 0x40001109, 0x40001770, 0x40001771, 0x4000177A, 0x40001784}
+
+	if err := newEquipmentApp(spellCapacitySlot(t, 8, false)).SaveEquippedSpells(0, loadout); err == nil {
+		t.Fatal("expected rejection without Moon (cost 11 > capacity 10)")
+	}
+	app := newEquipmentApp(spellCapacitySlot(t, 8, true))
+	if err := app.SaveEquippedSpells(0, loadout); err != nil {
+		t.Fatalf("SaveEquippedSpells with Moon (capacity 12): %v", err)
+	}
+}
+
+func TestSaveEquippedSpells_ReportedDLCLoadoutCostsTwelveSlots(t *testing.T) {
+	// This is the exact 10-record loadout from ER0000-kro55-mem-slots-app-2:
+	// eight one-slot spells, Black Blade (2), Blades of Stone (2), and
+	// Crucible Thorns (1) consume 12 Memory Slots in total. The old len-based
+	// check incorrectly accepted it at capacity 10, producing "Empty Slots -2"
+	// and hiding the final records in game.
+	loadout := []uint32{
+		0x40001B1C, // Ancient Dragons' Lightning Spear: 1
+		0x40001D60, // Aspects of the Crucible: Breath: 1
+		0x40001A90, // Bestial Sling: 1
+		0x4000191F, // Blessing of the Erdtree: 1
+		0x401E96DC, // Blades of Stone: 2
+		0x401E9E7A, // Aspects of the Crucible: Thorns: 1
+		0x40001D4C, // Aspects of the Crucible: Tail: 1
+		0x40001AB8, // Bestial Vitality: 1
+		0x40001D6A, // Black Blade: 2
+		0x40001AC2, // Bestial Constitution: 1
+	}
+
+	withoutMoon := newEquipmentApp(spellCapacitySlot(t, 8, false))
+	err := withoutMoon.SaveEquippedSpells(0, loadout)
+	if err == nil || !strings.Contains(err.Error(), "costs 12 Memory Slots but only 10 are available") {
+		t.Fatalf("expected exact reported over-capacity error, got %v", err)
+	}
+
+	withMoon := newEquipmentApp(spellCapacitySlot(t, 8, true))
+	if err := withMoon.SaveEquippedSpells(0, loadout); err != nil {
+		t.Fatalf("same 12-slot loadout should fit with Moon of Nokstella: %v", err)
 	}
 }
 

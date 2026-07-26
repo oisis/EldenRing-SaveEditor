@@ -58,6 +58,7 @@ type PickerItem = {
     isAmmo: boolean;
     isQuickEquipItem: boolean;
     isSpell: boolean;
+    memorySlots?: number;
     upgradeLevel?: number;
     infusionName?: string;
     aowName?: string;
@@ -69,6 +70,13 @@ export type EquipmentItemPickerModalProps = {
     initialSelection?: EquipmentPickerSelection;
 	disabledItemIDs?: number[];
 	disabledItemHandles?: number[];
+    // Spell picker only: the Memory Slot capacity (Y) and the cost already spent
+    // by spells in OTHER slots (draft total minus the edited slot's own cost).
+    // A candidate spell is blocked when spellUsedExcludingSelected + its cost
+    // exceeds spellCapacity, or when its cost is unknown. Undefined for every
+    // non-spell slot family, which disables the capacity check entirely.
+    spellCapacity?: number;
+    spellUsedExcludingSelected?: number;
     onConfirm?: (item: EquipmentPickerSelection) => void | Promise<void>;
     onClear?: () => void;
     onClose: () => void;
@@ -80,6 +88,7 @@ export type EquipmentPickerSelection = {
     name: string;
     iconPath: string;
     quantity?: number;
+    memorySlots?: number;
     source: PickerSource;
 };
 
@@ -123,6 +132,7 @@ function toPickerItem(item: db.ItemEntry): PickerItem {
         isAmmo: ammo,
         isQuickEquipItem: quickEquipItem,
         isSpell: spell,
+        memorySlots: spell ? item.memorySlots : undefined,
         upgradeLevel: weapon ? 0 : undefined,
         infusionName: weapon ? 'Standard' : undefined,
         aowName: weapon ? '—' : undefined,
@@ -160,6 +170,7 @@ function toOwnedPickerItem(
         isAmmo: ammo,
         isQuickEquipItem: quickEquipItem,
         isSpell: spell,
+        memorySlots: spell ? eligibleItem?.memorySlots : undefined,
         upgradeLevel: weapon ? item.currentUpgrade : undefined,
         infusionName: weapon ? (infuseTypes.find(type => type.offset === infusionOffset)?.name ?? 'Standard') : undefined,
         aowName: weapon ? (item.aowId ? (ashesOfWar.get(item.aowId) ?? 'Unknown Ash of War') : '—') : undefined,
@@ -186,7 +197,7 @@ function sortItems(items: PickerItem[], sort: PickerSort): PickerItem[] {
     });
 }
 
-function ItemCard({ item, source, view, weaponList, physickPicker, selected, disabled, onSelect, onActivate }: {
+function ItemCard({ item, source, view, weaponList, physickPicker, selected, disabled, blockReason, onSelect, onActivate }: {
     item: PickerItem;
     source: PickerSource;
     view: PickerView;
@@ -194,11 +205,15 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     physickPicker: boolean;
     selected: boolean;
     disabled: boolean;
+    blockReason?: string;
     onSelect: (item: PickerItem) => void;
     onActivate: (item: PickerItem) => void;
 }) {
     const selectionClass = selected ? 'border-emerald-500 ring-2 ring-emerald-500/60' : disabled ? 'border-border opacity-40 grayscale' : 'border-border hover:border-primary/60';
     const prominentListName = item.isArmor || item.isAmmo || item.isQuickEquipItem || item.isSpell || physickPicker;
+    // Multi-slot spells advertise their real Memory Slot cost; a blocked spell
+    // (over capacity or unknown cost) shows why so the disabled state is legible.
+    const costLabel = item.isSpell && item.memorySlots != null && item.memorySlots > 1 ? `${item.memorySlots} slots` : null;
 
     if (view === 'list') {
         if (item.isWeapon) {
@@ -221,6 +236,7 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
                     <span className="min-w-0">
                         <span className={`block truncate font-bold text-foreground ${prominentListName ? 'text-sm' : 'text-xs'}`}>{item.name}</span>
                         {!prominentListName && <span className="block truncate text-[10px] text-muted-foreground">{item.category}{item.quantity != null ? ` · ${item.quantity}` : ''}</span>}
+                        {(costLabel || blockReason) && <span className="block truncate text-[10px] font-bold text-muted-foreground">{blockReason ?? costLabel}</span>}
                     </span>
                 </button>
             </div>
@@ -230,17 +246,19 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     return (
         <div data-picker-selected={selected || undefined} className={`relative flex min-h-32 flex-col rounded-lg border p-2 transition-colors ${selectionClass}`}>
             {item.quantity != null && item.stackable && <span className="absolute right-2 top-2 text-xs font-black text-foreground">×{item.quantity}</span>}
+            {costLabel && <span className="absolute left-2 top-2 rounded bg-muted px-1 text-[9px] font-black text-muted-foreground">{costLabel}</span>}
             <button type="button" disabled={disabled} aria-label={`Select ${item.name}`} className="flex min-h-0 flex-1 flex-col items-center justify-center gap-1 disabled:cursor-not-allowed" onClick={() => onSelect(item)} onDoubleClick={() => onActivate(item)}>
                 <img className={`${source === 'database' ? 'h-20 w-20' : 'h-16 w-16'} object-contain`} src={iconSrc(item.iconPath)} alt={item.name} />
                 <span className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground">{item.name}</span>
                 {item.isWeapon && <span className="text-[10px] font-bold text-muted-foreground">+{item.upgradeLevel ?? 0}</span>}
-                {!item.isWeapon && item.quantity == null && <span className="text-[9px] text-muted-foreground">{item.category}</span>}
+                {!item.isWeapon && item.quantity == null && !blockReason && <span className="text-[9px] text-muted-foreground">{item.category}</span>}
+                {blockReason && <span className="text-center text-[9px] font-bold text-muted-foreground">{blockReason}</span>}
             </button>
         </div>
     );
 }
 
-export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], disabledItemHandles = [], onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
+export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection, disabledItemIDs = [], disabledItemHandles = [], spellCapacity, spellUsedExcludingSelected = 0, onConfirm, onClear, onClose }: EquipmentItemPickerModalProps) {
     const [source, setSource] = useState<PickerSource>('inventory');
     const [view, setView] = useState<PickerView>('icons');
     const [sort, setSort] = useState<PickerSort>('alphabetical');
@@ -274,6 +292,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
             isAmmo: false,
             isQuickEquipItem: false,
             isSpell: slotLabel.startsWith('Spell slot'),
+            memorySlots: initialSelection.memorySlots,
         } : null);
         setSearch('');
 		setSource('inventory');
@@ -305,7 +324,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
         });
 
         return () => { active = false; };
-	}, [slotLabel, charIdx, initialSelection?.id, initialSelection?.handle]);
+	}, [slotLabel, charIdx, initialSelection?.id, initialSelection?.handle, initialSelection?.memorySlots]);
 
     useEffect(() => {
         const onKeyDown = (event: KeyboardEvent) => {
@@ -358,9 +377,20 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
     const weaponList = view === 'list' && isWeaponSlot(slotLabel);
 	const physickPicker = slotLabel.startsWith('Physick tear');
 	const spellPicker = slotLabel.startsWith('Spell slot');
+	// Spell capacity block: a candidate is unselectable when its Memory Slot cost
+	// (added to what other slots already spend) would exceed capacity, or when its
+	// cost is unknown — never silently assumed to be 1.
+	const spellBlockReason = (item: PickerItem): string | undefined => {
+		if (!spellPicker || spellCapacity == null) return undefined;
+		if (item.memorySlots == null || item.memorySlots < 1) return 'No memory-cost data';
+		const free = spellCapacity - spellUsedExcludingSelected;
+		if (item.memorySlots > free) return `Needs ${item.memorySlots}, ${Math.max(0, free)} free`;
+		return undefined;
+	};
 	const isDisabled = (item: PickerItem) =>
 		disabledItemIDs.includes(item.id) ||
-		(item.handle != null && disabledItemHandles.includes(item.handle));
+		(item.handle != null && disabledItemHandles.includes(item.handle)) ||
+		spellBlockReason(item) != null;
 	const selectItem = (item: PickerItem) => {
 		const isCurrent = source === 'database'
 			? initialSelection?.id === item.id
@@ -383,6 +413,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                 name: item.name,
                 iconPath: item.iconPath,
                 quantity: selectedQuantity ?? item.quantity,
+                memorySlots: item.memorySlots,
                 source,
             });
             onClose();
@@ -441,7 +472,7 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                     {loading ? <p className="py-12 text-center text-sm text-muted-foreground">Loading items…</p> : items.length === 0 ? <p className="py-12 text-center text-sm text-muted-foreground">No matching items.</p> : (
                         <div className={weaponList ? 'grid grid-cols-[minmax(0,1fr)_max-content_max-content_max-content] gap-x-3 gap-y-2' : view === 'icons' ? 'grid grid-cols-[repeat(auto-fill,minmax(125px,1fr))] gap-2' : 'space-y-2'}>
                             {weaponList && <><span className="px-2 text-[10px] font-black uppercase tracking-wider text-muted-foreground">Weapon</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Level</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Infuse</span><span className="text-right text-[10px] font-black uppercase tracking-wider text-muted-foreground">Ashes of War</span></>}
-							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={source === 'database' ? selected?.id === item.id : selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} onSelect={selectItem} onActivate={commitSelection} />)}
+							{items.map(item => <ItemCard key={item.entryKey} item={item} source={source} view={view} weaponList={weaponList} physickPicker={physickPicker} selected={source === 'database' ? selected?.id === item.id : selected?.handle != null ? selected.handle === item.handle : selected?.id === item.id} disabled={isDisabled(item)} blockReason={spellBlockReason(item)} onSelect={selectItem} onActivate={commitSelection} />)}
                         </div>
                     )}
                 </main>

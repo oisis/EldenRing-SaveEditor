@@ -43,15 +43,15 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetItemList: vi.fn(),
 }));
 
-const emptyView = { occupied: false, rawId: 0, handle: 0, quantity: 0, name: '', iconPath: '', resolved: false };
+const emptyView = { occupied: false, rawId: 0, handle: 0, quantity: 0, name: '', iconPath: '', resolved: false, memorySlots: 0 };
 const view = (over: Partial<typeof emptyView>) => ({ ...emptyView, ...over });
 const fill = (n: number, over?: Partial<typeof emptyView>) =>
     Array.from({ length: n }, (_, i) => (i === 0 && over ? view(over) : { ...emptyView }));
 
 const spellPickerItems = [
-    { id: 0x40000FA0, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1 },
-    { id: 0x40001770, name: 'Catch Flame', category: 'incantations', iconPath: 'items/incantations/catch_flame.png', maxInventory: 1 },
-    { id: 0x40001158, name: 'Carian Slicer', category: 'sorceries', iconPath: 'items/sorceries/carian_slicer.png', maxInventory: 1 },
+    { id: 0x40000FA0, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1, memorySlots: 1 },
+    { id: 0x40001770, name: 'Catch Flame', category: 'incantations', iconPath: 'items/incantations/catch_flame.png', maxInventory: 1, memorySlots: 1 },
+    { id: 0x40001158, name: 'Carian Slicer', category: 'sorceries', iconPath: 'items/sorceries/carian_slicer.png', maxInventory: 1, memorySlots: 1 },
 ];
 
 function mockSpellPickerInventory() {
@@ -205,6 +205,104 @@ describe('EquipmentTab', () => {
         expect(screen.getByRole('button', { name: 'Select Carian Slicer' })).toBeDisabled();
     });
 
+    it('shows real memory-slot usage as the sum of costs, not the record count', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x1068, name: 'Comet Azur', iconPath: 'items/sorceries/comet_azur.png', resolved: true, memorySlots: 3 }),
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true, memorySlots: 1 }),
+                ...fill(12),
+            ],
+            activeSpellSlots: 10,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        expect(await screen.findByTestId('memory-slots-usage')).toHaveTextContent('Memory slots: 4 / 10');
+        // The 3-slot spell advertises its cost; the 1-slot spell does not.
+        const badges = screen.getAllByTestId('spell-cost-badge');
+        expect(badges).toHaveLength(1);
+        expect(badges[0]).toHaveTextContent('3 slots');
+    });
+
+    it('blocks a picker spell whose cost would exceed remaining capacity', async () => {
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries' ? [
+            { id: 0x40001068, name: 'Comet Azur', category: 'sorceries', iconPath: 'items/sorceries/comet_azur.png', maxInventory: 1, memorySlots: 3 },
+        ] : []) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({ inventory: [
+            { id: 0x40001068, baseId: 0x40001068, handle: 5, name: 'Comet Azur', category: 'sorceries', iconPath: 'items/sorceries/comet_azur.png', quantity: 1, maxInventory: 1, memorySlots: 3 },
+        ] } as never);
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true, memorySlots: 1 }),
+                ...fill(13),
+            ],
+            activeSpellSlots: 3, // 1 used by Pebble, only 2 free — a 3-slot spell must not fit.
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Spell slot 2' }));
+
+        const comet = await screen.findByRole('button', { name: 'Select Comet Azur' });
+        expect(comet).toBeDisabled();
+        expect(comet.parentElement).toHaveTextContent(/Needs 3, 2 free/);
+    });
+
+    it('accounts for the swapped-out spell cost when validating a replacement', async () => {
+        // Capacity 3, the only equipped spell is Comet Azur (3) in slot 1. Editing
+        // that slot frees its 3 slots, so another 3-slot spell fits exactly.
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries' ? [
+            { id: 0x40001068, name: 'Comet Azur', category: 'sorceries', iconPath: 'items/sorceries/comet_azur.png', maxInventory: 1, memorySlots: 3 },
+        ] : category === 'incantations' ? [
+            { id: 0x40001B8A, name: "Placidusax's Ruin", category: 'incantations', iconPath: 'items/incantations/placidusaxs_ruin.png', maxInventory: 1, memorySlots: 3 },
+        ] : []) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({ inventory: [
+            { id: 0x40001B8A, baseId: 0x40001B8A, handle: 7, name: "Placidusax's Ruin", category: 'incantations', iconPath: 'items/incantations/placidusaxs_ruin.png', quantity: 1, maxInventory: 1, memorySlots: 3 },
+        ] } as never);
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x1068, name: 'Comet Azur', iconPath: 'items/sorceries/comet_azur.png', resolved: true, memorySlots: 3 }),
+                ...fill(13),
+            ],
+            activeSpellSlots: 3,
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Spell slot 1' }));
+
+        expect(await screen.findByRole('button', { name: "Select Placidusax's Ruin" })).toBeEnabled();
+    });
+
+    it('lets the user clear every spell and Save changes with an empty loadout', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true, memorySlots: 1 }),
+                view({ occupied: true, rawId: 0x1770, name: 'Catch Flame', iconPath: 'items/incantations/catch_flame.png', resolved: true, memorySlots: 1 }),
+                ...fill(12),
+            ],
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+        await screen.findByAltText('Glintstone Pebble');
+
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Spell slot 1' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Remove Spell slot 1' }));
+        expect(screen.getByTestId('memory-slots-usage')).toHaveTextContent('Memory slots: 0 /');
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+
+        await waitFor(() => expect(SaveEquippedSpells).toHaveBeenCalledWith(0, []));
+    });
+
+    it('shows a spell of unknown cost as visibly disabled instead of assuming cost 1', async () => {
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries' ? [
+            { id: 0x401E96DC, name: 'Blades of Stone', category: 'sorceries', iconPath: 'items/sorceries/blades_of_stone.png', maxInventory: 1 },
+        ] : []) as never);
+        vi.mocked(GetCharacter).mockResolvedValue({ inventory: [
+            { id: 0x401E96DC, baseId: 0x401E96DC, handle: 9, name: 'Blades of Stone', category: 'sorceries', iconPath: 'items/sorceries/blades_of_stone.png', quantity: 1, maxInventory: 1 },
+        ] } as never);
+        render(<EquipmentTab charIdx={0} />);
+        fireEvent.click(await screen.findByRole('button', { name: 'Spell slot 1' }));
+
+        const blades = await screen.findByRole('button', { name: 'Select Blades of Stone' });
+        expect(blades).toBeDisabled();
+        expect(blades.parentElement).toHaveTextContent(/No memory-cost data/);
+    });
+
     it('removes a non-active spell with the red cross, compacts the draft, and saves it', async () => {
         vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
             spells: [
@@ -352,7 +450,7 @@ describe('EquipmentTab', () => {
         const spellID = 0x40000FA0;
         let added = false;
         vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries' ? [
-            { id: spellID, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1 },
+            { id: spellID, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1, memorySlots: 1 },
         ] : []) as never);
         vi.mocked(GetCharacter).mockImplementation(() => Promise.resolve({
             inventory: added ? [

@@ -138,6 +138,33 @@ func (s *SaveSlot) WriteCompactSpellsWithActiveIndex(spellIDs []uint32, activeIn
 	return s.writeCompactSpells(spellIDs, &activeIndex)
 }
 
+// ClearCompactSpells writes the native empty-loadout contract atomically: all
+// fourteen records become the empty pair (0xFFFFFFFF, 0) and active_index is set
+// to 0xFFFFFFFF. That active-index sentinel — never 0 — is what distinguishes an
+// empty list from a one-spell list selected at slot 0; this matches 285 native
+// cold saves. The slot hash block (hash[10]) is deliberately left untouched,
+// exactly like the other compact writers. All bounds are validated before any
+// byte is mutated, so a structural error leaves slot.Data unchanged.
+func (s *SaveSlot) ClearCompactSpells() error {
+	if s == nil {
+		return fmt.Errorf("ClearCompactSpells: nil slot")
+	}
+	if s.EquippedSpellsOffset <= 0 {
+		return fmt.Errorf("ClearCompactSpells: EquippedSpellsOffset not initialised (got %d); call calculateDynamicOffsets first", s.EquippedSpellsOffset)
+	}
+	sectionEnd := s.EquippedSpellsOffset + EquippedSpellActiveIndexOffset + 4
+	if sectionEnd > len(s.Data) {
+		return fmt.Errorf("ClearCompactSpells: EquippedSpells section out of bounds (offset 0x%X, Data length %d)", s.EquippedSpellsOffset, len(s.Data))
+	}
+	for i := 0; i < EquippedSpellSlotCount; i++ {
+		off := s.EquippedSpellsOffset + i*EquippedSpellSlotSize
+		binary.LittleEndian.PutUint32(s.Data[off:], EquippedSpellEmptySentinel)
+		binary.LittleEndian.PutUint32(s.Data[off+4:], 0)
+	}
+	binary.LittleEndian.PutUint32(s.Data[s.EquippedSpellsOffset+EquippedSpellActiveIndexOffset:], EquippedSpellEmptySentinel)
+	return nil
+}
+
 func (s *SaveSlot) writeCompactSpells(spellIDs []uint32, activeIndex *uint32) error {
 	if s == nil {
 		return fmt.Errorf("WriteCompactSpells: nil slot")
