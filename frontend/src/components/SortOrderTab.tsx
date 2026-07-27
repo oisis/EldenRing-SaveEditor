@@ -651,14 +651,14 @@ export function SortOrderTab({ charIndex, inventoryVersion, onMutate }: Props) {
                             disabled={saving || loading || invSelectedUIDs.size + stoSelectedUIDs.size === 0}
                             onClick={onRemoveSelected}
                             title="Remove selected items from the workspace"
-                            className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded text-destructive hover:text-destructive/80 hover:bg-red-500/20 border border-destructive/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded text-destructive hover:text-destructive/80 hover:bg-red-500/20 border border-destructive/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Remove
                         </button>
                         <button
                             disabled={saving || loading}
                             onClick={() => { setAddContainer('inventory'); setAddOpen(true); }}
-                            className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded text-foreground hover:bg-primary/20 border border-primary/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded text-foreground hover:bg-primary/20 border border-primary/40 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Add Item…
                         </button>
@@ -674,7 +674,7 @@ export function SortOrderTab({ charIndex, inventoryVersion, onMutate }: Props) {
                                         ? 'Save all pending edits to the save file.'
                                         : 'No pending edits to save.'
                             }
-                            className={`px-3 py-1 text-xs font-black uppercase tracking-wider rounded transition-all ${
+                            className={`px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded transition-all ${
                                 dirty && !saving && errorCount === 0
                                     ? 'bg-primary text-primary-foreground hover:brightness-110 shadow-sm'
                                     : 'opacity-50 cursor-not-allowed bg-muted/20 text-muted-foreground border border-border/40'
@@ -685,7 +685,7 @@ export function SortOrderTab({ charIndex, inventoryVersion, onMutate }: Props) {
                         <button
                             disabled={!dirty || saving || loading}
                             onClick={() => setConfirmDiscardOpen(true)}
-                            className="px-3 py-1 text-xs font-black uppercase tracking-wider rounded text-foreground/70 hover:text-foreground hover:bg-muted/40 border border-border/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="px-3 py-1 text-[10px] font-black uppercase tracking-wider rounded text-foreground/70 hover:text-foreground hover:bg-muted/40 border border-border/60 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Discard
                         </button>
