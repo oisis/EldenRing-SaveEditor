@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.2] - 2026-07-27
+
+### feat(character): set levels for all owned weapons
+
+Character Add Settings can now stage a batch update for every carried weapon
+and apply the Standard and Special levels currently selected by their sliders.
+Storage and Spirit Ashes remain untouched.
+
+### fix(items): preserve both Crimson Crystal Tears
+
+The two distinct Crimson Crystal Tear items now keep independent identities,
+share the same in-game name and can both be added to Inventory. The tear
+collected with the Flask of Wondrous Physick is listed first.
+
+### feat(game-items): improve equipment and container workflows
+
+Inventory is now shown to the left of Storage in Sort Order. Equipped weapons
+can open the same infusion and Ash of War editor used by Sort Order, and item
+capacity cells use clear unavailable and fully-owned indicators.
+
+### feat(appearance): add a persistent 3D preset carousel
+
+Appearance Presets now use the same centered ring carousel before and after a
+save is loaded. The carousel supports slider and drag navigation, emphasizes
+the active card, stores local favorites with a favorites-only filter and opens
+previews above the complete application interface.
+
 ## [1.6.1] - 2026-07-27
 
 ### feat(equipment): enable Quick Item and Pouch editing
