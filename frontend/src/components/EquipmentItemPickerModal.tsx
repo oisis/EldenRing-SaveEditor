@@ -29,8 +29,7 @@ const AMMO_CATEGORIES = new Set(['arrows_and_bolts']);
 const QUICK_EQUIP_CATEGORIES = new Set(['tools', 'ashes']);
 const SPELL_CATEGORIES = new Set(['sorceries', 'incantations']);
 const PHYSICK_TEAR_CANONICAL_IDS = new Map<number, number>([
-    [0x40002AFA, 0x40002AFB], // Crimson Crystal Tear variant
-    [0x40002AFC, 0x40002AFD], // Cerulean Crystal Tear variant
+	[0x40002AFC, 0x40002AFD], // Cerulean Crystal Tear variant
     [0x40002B08, 0x40002B09], // Ruptured Crystal Tear variant
 ]);
 

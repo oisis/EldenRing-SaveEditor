@@ -14,10 +14,11 @@ import (
 // tests) are removed.
 //
 // Scope is deliberately limited to what PatchWeaponItemID itself implements:
-// locate-by-handle, the expected-current stale-data guard, and the in-place
-// 4-byte ItemID overwrite. Business rules that live in the App layer (upgrade
-// clamp, infusion-offset derivation, base-ID validation, somber/standard
-// rules) are NOT part of this primitive's contract and are not asserted here.
+// locate-by-handle, the expected-current stale-data guard, the in-place GaItem
+// ItemID overwrite, and synchronization of an equipped instance's native item
+// ID fields. Business rules that live in the App layer (upgrade clamp,
+// infusion-offset derivation, base-ID validation, somber/standard rules) are
+// NOT part of this primitive's contract and are not asserted here.
 
 const (
 	itemidWepHandle  = uint32(0x80800001)
@@ -69,6 +70,43 @@ func TestPatchWeaponItemID_Success_PatchesOnlyMatchingItemID(t *testing.T) {
 	}
 	if got := binary.LittleEndian.Uint32(slot.Data[itemidWriterOff:]); got != itemidNewID {
 		t.Errorf("slot.Data ItemID field: expected 0x%08X, got 0x%08X", itemidNewID, got)
+	}
+}
+
+func TestPatchWeaponItemID_SynchronizesEquippedWeaponRepresentations(t *testing.T) {
+	slot := makeEquipmentTestSlot()
+	slot.GaItems = make([]GaItemFull, 1)
+	addTestWeapon(slot, 0, equipmentWriterWeaponHandle, equipmentWriterWeaponID, NoCustomAoWHandle)
+	flushTestGaItems(slot)
+
+	if err := slot.WriteEquipment([]EquipmentWrite{{
+		Slot:   EquipSlotRightHandArmament1,
+		Handle: equipmentWriterWeaponHandle,
+	}}); err != nil {
+		t.Fatalf("WriteEquipment: %v", err)
+	}
+
+	const upgradedID = uint32(0x00100025)
+	if err := PatchWeaponItemID(slot, equipmentWriterWeaponHandle, equipmentWriterWeaponID, upgradedID); err != nil {
+		t.Fatalf("PatchWeaponItemID: %v", err)
+	}
+
+	equipIndex, itemID, handle, dynamic := nativeEquipmentValues(slot, 1)
+	if equipIndex != inventoryEquipIndexBase ||
+		itemID != upgradedID&0x0FFFFFFF ||
+		handle != equipmentWriterWeaponHandle ||
+		dynamic != upgradedID {
+		t.Fatalf("equipped values = %08X/%08X/%08X/%08X, want %08X/%08X/%08X/%08X",
+			equipIndex, itemID, handle, dynamic,
+			uint32(inventoryEquipIndexBase), upgradedID&0x0FFFFFFF, uint32(equipmentWriterWeaponHandle), upgradedID)
+	}
+
+	raw, err := slot.ReadEquippedState()
+	if err != nil {
+		t.Fatalf("ReadEquippedState: %v", err)
+	}
+	if raw.Equipped[1] != upgradedID {
+		t.Fatalf("Equipment snapshot raw ID = 0x%08X, want 0x%08X", raw.Equipped[1], upgradedID)
 	}
 }
 

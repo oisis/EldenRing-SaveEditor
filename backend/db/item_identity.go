@@ -15,14 +15,12 @@ const (
 	flaskMaxLevel uint32 = 12
 )
 
-// physickTearDisplayAliases maps a technical Physick tear variant ID (a real
-// "(Variant)" GoodsParam row, base-1, kept out of the DB picker; see the
-// no_database rows in data/key_items.go) to the canonical tear row that carries
-// the display name and icon. Entries are explicit and locally confirmed — never
-// an id±1 heuristic. Standalone tears (e.g. 0x40002AF9 Greenspill) are
-// deliberately absent so they resolve to themselves, never a neighbour ID.
+// physickTearDisplayAliases maps only Physick rows that are display aliases to
+// their canonical metadata. Entries are explicit — never an id±1 heuristic.
+// Crimson Crystal Tears 0x40002AFA and 0x40002AFB are deliberately absent: they
+// are separate in-game items with the same player-facing name and must remain
+// independently visible and ownable.
 var physickTearDisplayAliases = map[uint32]uint32{
-	0x40002AFA: 0x40002AFB, // Crimson Crystal Tear (Variant) -> Crimson Crystal Tear
 	0x40002AFC: 0x40002AFD, // Cerulean Crystal Tear (Variant) -> Cerulean Crystal Tear
 	0x40002B08: 0x40002B09, // Ruptured Crystal Tear (Variant) -> Ruptured Crystal Tear
 }

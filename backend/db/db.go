@@ -900,7 +900,10 @@ func GetItemsByCategory(category, platform string) []ItemEntry {
 	}
 
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+		if items[i].Name != items[j].Name {
+			return items[i].Name < items[j].Name
+		}
+		return items[i].ID < items[j].ID
 	})
 
 	itemCacheMu.Lock()
@@ -963,7 +966,10 @@ func GetAllItems(platform string) []ItemEntry {
 	}
 
 	sort.Slice(all, func(i, j int) bool {
-		return all[i].Name < all[j].Name
+		if all[i].Name != all[j].Name {
+			return all[i].Name < all[j].Name
+		}
+		return all[i].ID < all[j].ID
 	})
 
 	itemCacheMu.Lock()
@@ -991,7 +997,10 @@ func GetPouchEligibleItems(platform string) []ItemEntry {
 		items = append(items, GetItemsByCategory(cat, platform)...)
 	}
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+		if items[i].Name != items[j].Name {
+			return items[i].Name < items[j].Name
+		}
+		return items[i].ID < items[j].ID
 	})
 	return items
 }
@@ -1024,7 +1033,10 @@ func GetHandArmamentEligibleItems(platform string) []ItemEntry {
 		items = append(items, GetItemsByCategory(cat, platform)...)
 	}
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+		if items[i].Name != items[j].Name {
+			return items[i].Name < items[j].Name
+		}
+		return items[i].ID < items[j].ID
 	})
 	return items
 }
@@ -1041,7 +1053,10 @@ func GetPhysickEligibleItems(platform string) []ItemEntry {
 		}
 	}
 	sort.Slice(items, func(i, j int) bool {
-		return items[i].Name < items[j].Name
+		if items[i].Name != items[j].Name {
+			return items[i].Name < items[j].Name
+		}
+		return items[i].ID < items[j].ID
 	})
 	return items
 }

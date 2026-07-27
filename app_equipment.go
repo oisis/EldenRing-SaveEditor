@@ -158,11 +158,10 @@ func normalizeEquipItemID(raw uint32, class equipClass) uint32 {
 	case classGoods:
 		return db.HandleToItemID(raw)
 	case classPhysickTear:
-		// Tears are stored as bare item IDs (prefix 0x40). Display metadata
-		// follows an explicit technical alias (e.g. 0x40002AFA variant ->
-		// canonical Crimson Crystal Tear) via PhysickTearDisplayID; the raw ID is
-		// preserved by the caller. No id±1 rule: 0x40002AF9 (Greenspill) is a
-		// standalone tear and resolves to itself.
+		// Tears are stored as bare item IDs (prefix 0x40). Display aliases, where
+		// explicitly confirmed, are resolved by PhysickTearDisplayID; raw IDs stay
+		// distinct. In particular, Crimson 0x40002AFA and 0x40002AFB are separate
+		// tears with the same player-facing name.
 		return db.PhysickTearDisplayID(raw)
 	case classSpell:
 		return raw | 0x40000000
@@ -352,9 +351,9 @@ func physickSlotView(slot *core.SaveSlot, raw uint32) EquipmentSlotView {
 // GoodsParam ID equals rawID, so the picker can recognize the currently mixed
 // tear (clear-on-reselect) and block it in the other slot. It searches only the
 // two carried containers proper to tears (CommonItems, KeyItems) — never Storage
-// — and requires a positive quantity. No variant/alias canonicalization: Crimson
-// raw 0x40002AFA resolves to its exact owned handle 0xB0002AFA. Returns 0 when no
-// exact owned handle exists, leaving the view's Handle unset.
+// — and requires a positive quantity. Crimson 0x40002AFA and 0x40002AFB remain
+// separate exact handles. Returns 0 when no exact owned handle exists, leaving
+// the view's Handle unset.
 func physickTearHandle(slot *core.SaveSlot, rawID uint32) uint32 {
 	if slot == nil {
 		return 0
@@ -672,8 +671,8 @@ func hasWondrousPhysickFlask(slot *core.SaveSlot) bool {
 // It writes only the two active-mixture u32 in EquipPhysicsData. Each non-empty
 // tear must be a crystal tear the character actually owns (CommonItems/KeyItems,
 // positive quantity); the exact raw ID of the owned record — derived via the
-// repository SSOT db.HandleToItemID — is written through unchanged, so technical
-// variants such as Crimson 0x40002AFA are preserved without a reverse map. A
+// repository SSOT db.HandleToItemID — is written through unchanged, so distinct
+// Crimson tears such as 0x40002AFA are preserved without a reverse map. A
 // Flask of Wondrous Physick must be owned. Handle 0 clears a slot (0xFFFFFFFF);
 // the surviving tear is never left-packed.
 func (a *App) SavePhysickMixture(charIdx int, changes []PhysickChange) error {
@@ -713,8 +712,7 @@ func (a *App) SavePhysickMixture(charIdx int, changes []PhysickChange) error {
 			return fmt.Errorf("SavePhysickMixture[%d]: handle 0x%08X is not an owned tear with a positive quantity", i, change.Handle)
 		}
 		// Repository SSOT for handle → raw item ID. The exact owned ID is written
-		// through, so an owned technical variant (e.g. Crimson 0x40002AFA) is
-		// preserved rather than canonicalized to its picker display alias.
+		// through, so the two distinct Crimson tears are never collapsed.
 		rawID := db.HandleToItemID(change.Handle)
 		if db.GetItemData(rawID).SubCategory != data.SubcatKeyCrystalTears {
 			return fmt.Errorf("SavePhysickMixture[%d]: item 0x%08X is not a Wondrous Physick crystal tear", i, rawID)

@@ -1570,7 +1570,10 @@ func sortUint32Slice(s []uint32) {
 // PatchWeaponItemID changes the ItemID of a single weapon GaItem in-place.
 // Both IDs must be in the weapon range (prefix 0x00000000 → record size 21 B).
 // Since the record size doesn't change, no RebuildSlotFull is needed — we
-// overwrite exactly 4 bytes at the ItemID field and update derived state.
+// overwrite exactly 4 bytes at the ItemID field and update derived state. If
+// the same handle is currently equipped in an armament slot, its two
+// item-ID-bearing native equipment representations are updated as well; the
+// inventory-row and exact-handle representations remain unchanged.
 //
 // Caller guarantees:
 //   - handle identifies one weapon instance in slot.GaItems / slot.GaMap
@@ -1613,6 +1616,11 @@ func PatchWeaponItemID(slot *SaveSlot, handle, expectedCurrentItemID, newItemID 
 			handle, expectedCurrentItemID, slot.GaItems[found].ItemID)
 	}
 
+	equippedRefs, err := slot.equippedWeaponItemIDReferences(handle)
+	if err != nil {
+		return fmt.Errorf("PatchWeaponItemID: equipped references: %w", err)
+	}
+
 	// Overwrite ItemID field (bytes [curr+4, curr+8]) in slot.Data.
 	sa := NewSlotAccessor(slot.Data)
 	if err := sa.CheckBounds(curr+4, 4, "PatchWeaponItemID/itemID"); err != nil {
@@ -1624,11 +1632,52 @@ func PatchWeaponItemID(slot *SaveSlot, handle, expectedCurrentItemID, newItemID 
 	slot.GaItems[found].ItemID = newItemID
 	slot.GaMap[handle] = newItemID
 
+	for _, ref := range equippedRefs {
+		binary.LittleEndian.PutUint32(slot.Data[ref.itemIDOff:], newItemID&0x0FFFFFFF)
+		binary.LittleEndian.PutUint32(slot.Data[ref.dynamicOff:], newItemID)
+	}
+
 	// Ensure new weapon ID is present in GaitemGameData section.
 	// We intentionally leave the old entry in GaItemData — the game tolerates
 	// extra entries (same behaviour as when a weapon is removed from inventory
 	// but AddItemsToSlot already registered it in GaItemData).
 	return upsertWeaponGaItemData(slot, newItemID)
+}
+
+type equippedWeaponItemIDReference struct {
+	itemIDOff  int
+	dynamicOff int
+}
+
+// equippedWeaponItemIDReferences returns the native item-ID fields for every
+// hand-armament slot whose ChrAsm2 handle matches handle. Minimal synthetic
+// slots used by low-level GaItem tests do not carry parsed equipment offsets;
+// for those slots there are no equipment references to synchronize.
+func (s *SaveSlot) equippedWeaponItemIDReferences(handle uint32) ([]equippedWeaponItemIDReference, error) {
+	if s.EquipItemsIDOffset <= 0 || s.EquippedSpellsOffset <= 0 {
+		return nil, nil
+	}
+
+	armamentsOff, err := s.equippedArmamentsOffset()
+	if err != nil {
+		return nil, err
+	}
+
+	refs := make([]equippedWeaponItemIDReference, 0, 1)
+	for index := 0; index < 6; index++ {
+		_, itemIDOff, handleOff, err := s.equipmentRepresentationOffsets(index)
+		if err != nil {
+			return nil, err
+		}
+		if binary.LittleEndian.Uint32(s.Data[handleOff:]) != handle {
+			continue
+		}
+		refs = append(refs, equippedWeaponItemIDReference{
+			itemIDOff:  itemIDOff,
+			dynamicOff: armamentsOff + index*4,
+		})
+	}
+	return refs, nil
 }
 
 // PatchWeaponAoWHandle patches the AoWGaItemHandle field of a weapon GaItem in-place.

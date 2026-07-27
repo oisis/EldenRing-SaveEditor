@@ -282,33 +282,27 @@ describe('CharacterTab — Set owned weapon levels', () => {
         fireEvent.click(await screen.findByText('Add Settings'));
     }
 
-    it('confirmation modal blocks the binding until the user confirms', async () => {
+    it('uses a checkbox with a live level tooltip and keeps Apply Changes disabled until selected', async () => {
         renderWithSettings();
         await openAddSettings();
 
-        fireEvent.click(await screen.findByText('Set all weapons levels'));
-        // Modal is up but nothing has been called yet.
+        const apply = screen.getByRole('button', {name: 'Apply Changes'});
+        expect(apply).toBeDisabled();
         expect(mocks.SetOwnedWeaponLevels).not.toHaveBeenCalled();
+        expect(screen.getByTitle('Standard +25 · Special +10 · Inventory only')).toBeInTheDocument();
 
-        // Text must explicitly exclude Storage and Spirit Ashes (button hint
-        // + modal both reinforce it), and warn that levels may be lowered.
-        expect(screen.getAllByText(/Spirit Ashes/).length).toBeGreaterThan(0);
-        expect(screen.getAllByText(/Storage/).length).toBeGreaterThan(0);
-        expect(screen.getByText(/will be lowered/)).toBeTruthy();
-
-        // Cancel leaves the binding untouched.
-        fireEvent.click(screen.getByText('Cancel'));
-        expect(mocks.SetOwnedWeaponLevels).not.toHaveBeenCalled();
+        fireEvent.click(screen.getByRole('checkbox', {name: 'Set all weapons levels'}));
+        expect(apply).toBeEnabled();
     });
 
-    it('confirming calls the binding with the current slider values and refreshes on success', async () => {
+    it('applies selected weapon levels through Apply Changes and refreshes on success', async () => {
         mocks.SetOwnedWeaponLevels.mockResolvedValue(7);
         const onMutate = vi.fn();
         renderWithSettings(onMutate);
         await openAddSettings();
 
-        fireEvent.click(await screen.findByText('Set all weapons levels'));
-        fireEvent.click(screen.getByText('Set levels'));
+        fireEvent.click(screen.getByRole('checkbox', {name: 'Set all weapons levels'}));
+        fireEvent.click(screen.getByRole('button', {name: 'Apply Changes'}));
 
         await waitFor(() =>
             expect(mocks.SetOwnedWeaponLevels).toHaveBeenCalledWith(2, 25, 10),

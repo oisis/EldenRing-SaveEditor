@@ -21,6 +21,8 @@ func TestGetPhysickEligibleItems(t *testing.T) {
 		id   uint32
 		name string
 	}{
+		{0x40002AFA, "Crimson Crystal Tear (Flask pickup)"},
+		{0x40002AFB, "Crimson Crystal Tear (second tear)"},
 		{0x40002AF8, "Crimsonspill Crystal Tear (base)"},
 		{0x401EAFBE, "Deflecting Hardtear (DLC)"},
 		{0x401EAF82, "Crimsonburst Dried Tear (DLC)"},
@@ -58,7 +60,12 @@ func TestGetPhysickEligibleItems(t *testing.T) {
 		}
 	}
 
-	if !sort.SliceIsSorted(items, func(i, j int) bool { return items[i].Name < items[j].Name }) {
+	if !sort.SliceIsSorted(items, func(i, j int) bool {
+		if items[i].Name != items[j].Name {
+			return items[i].Name < items[j].Name
+		}
+		return items[i].ID < items[j].ID
+	}) {
 		t.Error("result is not sorted by name")
 	}
 }

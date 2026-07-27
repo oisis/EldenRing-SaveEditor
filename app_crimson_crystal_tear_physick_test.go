@@ -7,7 +7,10 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/db"
 )
 
-const crimsonCrystalTearID = uint32(0x40002AFB)
+const (
+	crimsonCrystalTearFlaskPickupID = uint32(0x40002AFA)
+	crimsonCrystalTearID            = uint32(0x40002AFB)
+)
 
 func hasItemHandle(items []core.InventoryItem, handle uint32) bool {
 	for _, item := range items {
@@ -38,6 +41,25 @@ func TestAddItemsToCharacter_AddsCrimsonCrystalTearWithoutPhysickBundle(t *testi
 			hasItemHandle(slot.Inventory.KeyItems, handle) {
 			t.Errorf("unexpected T090 bundle handle 0x%08X written", handle)
 		}
+	}
+}
+
+func TestAddItemsToCharacter_AddsBothDistinctCrimsonCrystalTears(t *testing.T) {
+	app := gaItemAddApp(t, false)
+	slot := &app.save.Slots[0]
+
+	result, err := app.AddItemsToCharacter(0, []uint32{crimsonCrystalTearFlaskPickupID, crimsonCrystalTearID}, 0, 0, 0, 0, 1, 0)
+	if err != nil {
+		t.Fatalf("AddItemsToCharacter: %v", err)
+	}
+	if result.Added != 2 {
+		t.Fatalf("Added = %d, want 2", result.Added)
+	}
+	if !hasItemHandle(slot.Inventory.KeyItems, 0xB0002AFA) {
+		t.Error("first Crimson Crystal Tear (Flask pickup) not written to KeyItems")
+	}
+	if !hasItemHandle(slot.Inventory.CommonItems, 0xB0002AFB) {
+		t.Error("second Crimson Crystal Tear not written to CommonItems")
 	}
 }
 

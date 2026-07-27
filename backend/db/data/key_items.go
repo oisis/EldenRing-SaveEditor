@@ -140,11 +140,11 @@ var KeyItems = map[uint32]ItemData{
 	0x40002313: {Name: "Beast Eye", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/beast_eye.png"},
 	0x40002AF8: {Name: "Crimsonspill Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/crimsonspill_crystal_tear.png"},
 	0x40002AF9: {Name: "Greenspill Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/greenspill_crystal_tear.png"},
-	// Technical left-side variants: real GoodsParam rows (base ID − 1) the game
-	// stores for the same tear. Identical params (maxNum=1, isDeposit=0), so they
-	// reuse the base entry's data. no_database keeps them out of the item picker
-	// while still resolving in the scanner instead of firing unknown_item_id.
-	0x40002AFA: {Name: "Crimson Crystal Tear (Variant)", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/crimson_crystal_tear.png", Flags: []string{"no_database"}},
+	// Two distinct Crimson Crystal Tear GoodsParam rows exist in-game. The first
+	// (0x40002AFA) is picked up with Flask of Wondrous Physick; the second is a
+	// separate tear. They intentionally share the player-facing name and are both
+	// exposed in Item Database as independently ownable items.
+	0x40002AFA: {Name: "Crimson Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/crimson_crystal_tear.png"},
 	0x40002AFB: {Name: "Crimson Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/crimson_crystal_tear.png"},
 	0x40002AFC: {Name: "Cerulean Crystal Tear (Variant)", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/cerulean_crystal_tear.png", Flags: []string{"no_database"}},
 	0x40002AFD: {Name: "Cerulean Crystal Tear", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/cerulean_crystal_tear.png"},

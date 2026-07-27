@@ -75,7 +75,7 @@ func TestItemTextsAllAppItemsCovered(t *testing.T) {
 		// Technical left-side variant GoodsParam rows: share their base item's
 		// FMG text, so the generator emits no separate ItemTexts entry. Added to
 		// the DB solely to stop false-positive unknown_item_id in the scanner.
-		0x40002AFA: true, // Crimson Crystal Tear (Variant)
+		0x40002AFA: true, // first Crimson Crystal Tear
 		0x40002AFC: true, // Cerulean Crystal Tear (Variant)
 		0x40002B08: true, // Ruptured Crystal Tear (Variant)
 		0x40001FAD: true, // Academy Glintstone Key (Variant)

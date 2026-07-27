@@ -866,14 +866,15 @@ describe('EquipmentTab', () => {
         expect(screen.queryByText('Key Item · 1')).not.toBeInTheDocument();
     });
 
-    it('shows an owned technical Crimson Crystal Tear variant as the canonical Physick tear', async () => {
+    it('shows the first owned Crimson Crystal Tear as its own Physick entry', async () => {
         vi.mocked(GetPhysickEligibleItems).mockResolvedValue([
+			{ id: 0x40002AFA, name: 'Crimson Crystal Tear', category: 'key_items', iconPath: 'items/key_items/crimson_crystal_tear.png', maxInventory: 1 },
             { id: 0x40002AFB, name: 'Crimson Crystal Tear', category: 'key_items', iconPath: 'items/key_items/crimson_crystal_tear.png', maxInventory: 1 },
             { id: 0x40002B02, name: 'Greenburst Crystal Tear', category: 'key_items', iconPath: 'items/key_items/greenburst_crystal_tear.png', maxInventory: 1 },
         ] as never);
         vi.mocked(GetCharacter).mockResolvedValue({
             inventory: [
-                { handle: 0xB0002AFA, id: 0x40002AFA, baseId: 0x40002AFA, name: 'Crimson Crystal Tear (Variant)', category: 'Key Item', iconPath: 'items/key_items/crimson_crystal_tear.png', quantity: 1, maxInventory: 1 },
+				{ handle: 0xB0002AFA, id: 0x40002AFA, baseId: 0x40002AFA, name: 'Crimson Crystal Tear', category: 'Key Item', iconPath: 'items/key_items/crimson_crystal_tear.png', quantity: 1, maxInventory: 1 },
                 { handle: 0xB0002B02, id: 0x40002B02, baseId: 0x40002B02, name: 'Greenburst Crystal Tear', category: 'Key Item', iconPath: 'items/key_items/greenburst_crystal_tear.png', quantity: 1, maxInventory: 1 },
             ],
         } as never);
@@ -883,7 +884,6 @@ describe('EquipmentTab', () => {
 
         expect(await screen.findByText('Crimson Crystal Tear')).toBeInTheDocument();
         expect(screen.getByText('Greenburst Crystal Tear')).toBeInTheDocument();
-        expect(screen.queryByText('Crimson Crystal Tear (Variant)')).not.toBeInTheDocument();
     });
 
     it('recognizes the current tear in an existing mixture: clears on reselect and blocks the other slot', async () => {
@@ -1228,9 +1228,7 @@ describe('EquipmentTab equipped-item projection', () => {
         expect(crimson).toHaveAttribute('src', '/items/key_items/crimson_crystal_tear.png');
         const greenspill = screen.getByAltText('Greenspill Crystal Tear');
         expect(greenspill).toHaveAttribute('src', '/items/key_items/greenspill_crystal_tear.png');
-        // Canonical display: the technical variant suffix must not leak through.
-        expect(screen.queryByText('Crimson Crystal Tear (Variant)')).not.toBeInTheDocument();
-        expect(screen.getByRole('tooltip', { name: 'Crimson Crystal Tear' })).toBeInTheDocument();
+		expect(screen.getByRole('tooltip', { name: 'Crimson Crystal Tear' })).toBeInTheDocument();
     });
 
     it('shows a non-sentinel unresolved Physick tear (raw 0) as a visible unknown, not an empty placeholder', async () => {

@@ -46,6 +46,9 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
     const [loading, setLoading] = useState(false);
     const [startingClasses, setStartingClasses] = useState<db.ClassStats[]>([]);
     const isDirty = useRef(false);
+    const [characterDirty, setCharacterDirty] = useState(false);
+    const [applyOwnedWeaponLevels, setApplyOwnedWeaponLevels] = useState(false);
+    const [applyingChanges, setApplyingChanges] = useState(false);
     const prevCharIndex = useRef(charIndex);
 
     // Appearance state
@@ -78,6 +81,8 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
         prevCharIndex.current = charIndex;
         if (charChanged) {
             isDirty.current = false;
+            setCharacterDirty(false);
+            setApplyOwnedWeaponLevels(false);
         } else if (isDirty.current) {
             return;
         }
@@ -108,6 +113,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                     updatedData.dexterity + updatedData.intelligence + updatedData.faith + updatedData.arcane;
         updatedData.level = Math.max(1, sum - 79);
         isDirty.current = true;
+        setCharacterDirty(true);
         setChar(vm.CharacterViewModel.createFrom(updatedData));
     };
 
@@ -125,6 +131,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
         const arcane       = Math.max(char.arcane,       nc.arcane);
         const level = Math.max(1, vigor + mind + endurance + strength + dexterity + intelligence + faith + arcane - 79);
         isDirty.current = true;
+        setCharacterDirty(true);
         setChar(vm.CharacterViewModel.createFrom({
             ...char,
             class: classId,
@@ -148,34 +155,32 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
         }
     };
 
-    const handleSave = () => {
-        if (!char) return;
-        SaveCharacter(charIndex, char)
-            .then(() => {
+    const handleSave = async () => {
+        if (!char || (!characterDirty && !applyOwnedWeaponLevels)) return;
+        setApplyingChanges(true);
+        try {
+            // Apply the optional weapon batch first: a batch failure leaves the
+            // separately staged character fields untouched and retryable.
+            if (applyOwnedWeaponLevels) {
+                const changed = await SetOwnedWeaponLevels(charIndex, addSettings.upgrade25, addSettings.upgrade10);
+                toast.success(changed === 0
+                    ? 'All owned weapons already match these levels'
+                    : `Set ${changed} owned weapon${changed === 1 ? '' : 's'} to +${addSettings.upgrade25} / +${addSettings.upgrade10}`);
+                setApplyOwnedWeaponLevels(false);
+            }
+            if (characterDirty) {
+                await SaveCharacter(charIndex, char);
                 isDirty.current = false;
+                setCharacterDirty(false);
                 toast.success('Character data updated in memory');
                 onNameChange?.();
-                onMutate();
                 GetCharacter(charIndex).then(updated => { if (updated) setChar(updated); }).catch(() => {});
-            })
-            .catch(err => toast.error('Error: ' + err));
-    };
-
-    // Batch "set all owned weapons to these levels" (Add Settings).
-    const [showWeaponLevelsConfirm, setShowWeaponLevelsConfirm] = useState(false);
-    const [settingWeaponLevels, setSettingWeaponLevels] = useState(false);
-
-    const handleSetOwnedWeaponLevels = async () => {
-        setShowWeaponLevelsConfirm(false);
-        setSettingWeaponLevels(true);
-        try {
-            const changed = await SetOwnedWeaponLevels(charIndex, addSettings.upgrade25, addSettings.upgrade10);
-            toast.success(`Set ${changed} owned weapon${changed === 1 ? '' : 's'} to +${addSettings.upgrade25} / +${addSettings.upgrade10}`);
+            }
             onMutate();
-        } catch (e) {
-            toast.error('Set weapon levels failed: ' + e);
+        } catch (err) {
+            toast.error('Apply changes failed: ' + err);
         } finally {
-            setSettingWeaponLevels(false);
+            setApplyingChanges(false);
         }
     };
 
@@ -188,6 +193,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
         SaveCharacter(charIndex, updated)
             .then(() => {
                 isDirty.current = false;
+                setCharacterDirty(false);
                 toast.success('Soul Memory corrected');
                 onNameChange?.();
                 onMutate();
@@ -295,7 +301,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                         <div className="space-y-1.5">
                             <label className="text-[11px] font-bold text-muted-foreground uppercase tracking-tight ml-1">Character Name</label>
                             <input type="text" value={char.name} maxLength={16}
-                                onChange={e => { isDirty.current = true; setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value})); }}
+                                onChange={e => { isDirty.current = true; setCharacterDirty(true); setChar(vm.CharacterViewModel.createFrom({...char, name: e.target.value})); }}
                                 className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
                         </div>
                         <div className="space-y-1.5">
@@ -326,6 +332,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                 onChange={e => {
                                     const v = Math.min(3, Math.max(0, parseInt(e.target.value) || 0));
                                     isDirty.current = true;
+                                    setCharacterDirty(true);
                                     setChar(vm.CharacterViewModel.createFrom({...char, talismanSlots: v}));
                                 }}
                                 className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
@@ -338,6 +345,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                 onChange={e => {
                                     const v = Math.min(8, Math.max(0, parseInt(e.target.value) || 0));
                                     isDirty.current = true;
+                                    setCharacterDirty(true);
                                     setChar(vm.CharacterViewModel.createFrom({...char, memoryStones: v}));
                                 }}
                                 className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
@@ -353,6 +361,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                 onChange={e => {
                                     const v = Math.min(7, Math.max(0, parseInt(e.target.value) || 0));
                                     isDirty.current = true;
+                                    setCharacterDirty(true);
                                     setChar(vm.CharacterViewModel.createFrom({...char, clearCount: v}));
                                 }}
                                 className="w-full bg-muted/20 border border-border rounded-md px-3 py-2 text-xs font-mono focus:ring-1 focus:ring-primary/30 outline-none transition-all" />
@@ -370,6 +379,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                         toast.error(`Online Safety Mode: clamped to legal max ${RUNES_LEGAL_MAX.toLocaleString()}`);
                                     }
                                     isDirty.current = true;
+                                    setCharacterDirty(true);
                                     setChar(vm.CharacterViewModel.createFrom({...char, souls: v}));
                                 }}
                                 title={safetyMode.enabled ? `Online Safety Mode caps Runes at ${RUNES_LEGAL_MAX.toLocaleString()}` : undefined}
@@ -484,19 +494,12 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                     style={{background: 'hsl(var(--border))'}} />
                                 <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{addSettings.upgradeAsh}</span>
                             </div>
-                            <div className="md:col-span-2 flex flex-col gap-1.5 pt-1 border-t border-border/30">
-                                <button
-                                    onClick={() => setShowWeaponLevelsConfirm(true)}
-                                    disabled={settingWeaponLevels}
-                                    className="self-start px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-primary border border-primary/40 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    {settingWeaponLevels ? 'Setting…' : 'Set all weapons levels'}
-                                </button>
-                                <span className="text-[10px] font-mono text-muted-foreground">
-                                    Standard +{addSettings.upgrade25} · Special +{addSettings.upgrade10} · Inventory only
-                                </span>
-                            </div>
                             <div className="flex items-center gap-8 md:col-span-2 pt-1 border-t border-border/30">
+                                <label title={`Standard +${addSettings.upgrade25} · Special +${addSettings.upgrade10} · Inventory only`} className="flex items-center gap-2 cursor-pointer">
+                                    <input type="checkbox" checked={applyOwnedWeaponLevels} onChange={e => setApplyOwnedWeaponLevels(e.target.checked)}
+                                        className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
+                                    <span className="text-[11px] font-normal uppercase tracking-widest text-foreground">Set all weapons levels</span>
+                                </label>
                                 <label title="When enabled, only the highest-tier variant of each talisman family is shown — lower upgrade levels are hidden." className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={addSettings.talismansHighestOnly} onChange={e => set({talismansHighestOnly: e.target.checked})}
                                         className="w-3.5 h-3.5 rounded border-border text-primary focus:ring-primary/20" />
@@ -634,9 +637,9 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
             {/* ═══ APPLY CHANGES ═══ */}
             <div className="flex justify-end items-center space-x-4 pt-4 pb-2 border-t border-border/30">
                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest italic opacity-50">Staged in memory</p>
-                <button onClick={handleSave}
-                    className="bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all font-black px-6 py-2 rounded-md text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20">
-                    Apply Changes
+                <button onClick={handleSave} disabled={!characterDirty && !applyOwnedWeaponLevels || applyingChanges}
+                    className="bg-primary text-primary-foreground hover:brightness-110 active:scale-95 transition-all font-black px-6 py-2 rounded-md text-[10px] uppercase tracking-widest shadow-lg shadow-primary/20 disabled:cursor-not-allowed disabled:opacity-50">
+                    {applyingChanges ? 'Applying…' : 'Apply Changes'}
                 </button>
             </div>
 
@@ -653,44 +656,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
-                </div>
-            )}
-
-            {/* Set owned weapon levels confirmation */}
-            {showWeaponLevelsConfirm && (
-                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="bg-card p-8 rounded-2xl border border-primary/40 flex flex-col space-y-5 max-w-md w-full mx-4 shadow-2xl shadow-primary/20 animate-in zoom-in-95 duration-200">
-                        <h2 className="text-sm font-black uppercase tracking-widest text-primary">Set owned weapon levels</h2>
-                        <div className="space-y-3 text-[11px] leading-relaxed text-muted-foreground">
-                            <p>
-                                This changes <strong className="text-foreground/90">every weapon you already own in this
-                                character's Inventory</strong> — both standard weapons (to <strong className="text-foreground/90">+{addSettings.upgrade25}</strong>)
-                                and special / somber weapons and shields (to <strong className="text-foreground/90">+{addSettings.upgrade10}</strong>).
-                            </p>
-                            <p>
-                                It does <strong className="text-foreground/90">not</strong> touch Storage and does
-                                <strong className="text-foreground/90"> not</strong> touch Spirit Ashes.
-                            </p>
-                            <p>
-                                This is an absolute set: weapons currently above the target level
-                                <strong className="text-foreground/90"> will be lowered</strong>. One Undo reverts the whole batch.
-                            </p>
-                        </div>
-                        <div className="flex justify-end space-x-3 pt-1">
-                            <button
-                                onClick={() => setShowWeaponLevelsConfirm(false)}
-                                className="px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-muted-foreground border border-border/50 hover:bg-muted/30 transition-all"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSetOwnedWeaponLevels}
-                                className="px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-primary-foreground bg-primary hover:brightness-110 transition-all"
-                            >
-                                Set levels
-                            </button>
-                        </div>
-                    </div>
                 </div>
             )}
         </div>

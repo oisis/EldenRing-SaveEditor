@@ -13,7 +13,7 @@ var expectedCrystalTears = []struct {
 }{
 	{0x40002AF8, "Crimsonspill Crystal Tear"},
 	{0x40002AF9, "Greenspill Crystal Tear"},
-	{0x40002AFA, "Crimson Crystal Tear (Variant)"},
+	{0x40002AFA, "Crimson Crystal Tear"},
 	{0x40002AFB, "Crimson Crystal Tear"},
 	{0x40002AFC, "Cerulean Crystal Tear (Variant)"},
 	{0x40002AFD, "Cerulean Crystal Tear"},

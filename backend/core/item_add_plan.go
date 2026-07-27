@@ -40,16 +40,15 @@ const (
 	addKindGaItem
 )
 
-// craftingKitItemID, crackedPotItemID and crimsonCrystalTearVariantID are the
+// craftingKitItemID, crackedPotItemID and crimsonCrystalTearFlaskPickupID are the
 // three single-ID confirmed-native-KeyItems families that aren't already
 // covered by a whole-family DB helper (data.IsCookbookItemID covers
-// cookbooks). crimsonCrystalTearVariantID is deliberately the raw save
-// variant 0x40002AFA T090 observed on disk, NOT the canonical picker ID
-// 0x40002AFB.
+// cookbooks). crimsonCrystalTearFlaskPickupID is the distinct Crimson tear
+// 0x40002AFA picked up with Flask of Wondrous Physick.
 const (
-	craftingKitItemID           = uint32(0x40002134) // T070 — Crafting Kit
-	crackedPotItemID            = uint32(0x4000251C) // T074 — Cracked Pot only (not Ritual/Hefty Pot, Perfume Bottle)
-	crimsonCrystalTearVariantID = uint32(0x40002AFA) // T090 — Physick package's raw save variant
+	craftingKitItemID               = uint32(0x40002134) // T070 — Crafting Kit
+	crackedPotItemID                = uint32(0x4000251C) // T074 — Cracked Pot only (not Ritual/Hefty Pot, Perfume Bottle)
+	crimsonCrystalTearFlaskPickupID = uint32(0x40002AFA) // T090 — Flask of Wondrous Physick pickup
 )
 
 // nativeKeyItemFamily reports whether id is one of the confirmed families
@@ -65,7 +64,7 @@ const (
 // addKindStack exactly as before.
 func nativeKeyItemFamily(id uint32) bool {
 	switch id {
-	case craftingKitItemID, crackedPotItemID, crimsonCrystalTearVariantID:
+	case craftingKitItemID, crackedPotItemID, crimsonCrystalTearFlaskPickupID:
 		return true
 	}
 	return data.IsCookbookItemID(id)

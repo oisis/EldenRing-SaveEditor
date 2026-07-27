@@ -10,7 +10,6 @@ var technicalVariantHandles = []struct {
 	handle uint32
 	name   string
 }{
-	{0xB0002AFA, "Crimson Crystal Tear (Variant)"},
 	{0xB0002AFC, "Cerulean Crystal Tear (Variant)"},
 	{0xB0002B08, "Ruptured Crystal Tear (Variant)"},
 	{0xB0001FAD, "Academy Glintstone Key (Variant)"},

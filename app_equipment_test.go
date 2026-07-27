@@ -1022,8 +1022,8 @@ func writePhysickTears(slot core.SaveSlot, tear0, tear1 uint32) {
 
 func TestGetEquipmentSnapshot_ResolvesPhysickTears(t *testing.T) {
 	const (
-		crimsonVariantRaw = 0x40002AFA // technical variant, display -> canonical Crimson Crystal Tear
-		greenspillRaw     = 0x40002AF9 // standalone tear, must stay Greenspill (not a neighbour ID)
+		crimsonFlaskRaw = 0x40002AFA // first Crimson Crystal Tear, picked up with Physick Flask
+		greenspillRaw   = 0x40002AF9 // standalone tear, must stay Greenspill (not a neighbour ID)
 	)
 	cases := []struct {
 		name         string
@@ -1031,7 +1031,7 @@ func TestGetEquipmentSnapshot_ResolvesPhysickTears(t *testing.T) {
 		wantResolved bool
 		wantName     string
 	}{
-		{"crimson-variant-canonical", crimsonVariantRaw, true, "Crimson Crystal Tear"},
+		{"crimson-flask-pickup", crimsonFlaskRaw, true, "Crimson Crystal Tear"},
 		{"greenspill-standalone", greenspillRaw, true, "Greenspill Crystal Tear"},
 		{"zero-unresolved", 0x00000000, false, "Unknown item (0x00000000)"},
 	}
@@ -1058,8 +1058,8 @@ func TestGetEquipmentSnapshot_ResolvesPhysickTears(t *testing.T) {
 			if !got.Occupied {
 				t.Errorf("Physick[0].Occupied = false; unresolved tears must remain visible")
 			}
-			if tc.name == "crimson-variant-canonical" && strings.Contains(got.Name, "(Variant)") {
-				t.Errorf("display name %q must not carry the technical (Variant) suffix", got.Name)
+			if tc.name == "crimson-flask-pickup" && got.Name != "Crimson Crystal Tear" {
+				t.Errorf("display name %q must be Crimson Crystal Tear", got.Name)
 			}
 		})
 	}

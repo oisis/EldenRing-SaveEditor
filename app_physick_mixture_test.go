@@ -9,16 +9,16 @@ import (
 )
 
 // Owned goods handles used across the Physick mixture tests. HandleToItemID maps
-// each to its bare GoodsParam tear ID (0xB0… -> 0x40…). Crimson is the technical
-// save variant 0x40002AFA (owned as 0xB0002AFA), NOT the picker canonical
-// 0x40002AFB — the writer must preserve exactly what the character owns.
+// each to its bare GoodsParam tear ID (0xB0… -> 0x40…). Crimson 0x40002AFA is
+// the first distinct Crimson Crystal Tear, picked up with the Physick Flask;
+// the writer must preserve exactly what the character owns.
 const (
-	flaskHandle          = uint32(0xB00000FB) // Flask of Wondrous Physick (empty)
-	greenspillHandle     = uint32(0xB0002AF9) // Greenspill Crystal Tear -> 0x40002AF9
-	greenspillID         = uint32(0x40002AF9)
-	crimsonVariantHandle = uint32(0xB0002AFA) // Crimson Crystal Tear (Variant) -> 0x40002AFA
-	crimsonVariantID     = uint32(0x40002AFA)
-	larvalHandle         = uint32(0xB0001FF9) // Larval Tear: goods, but NOT a crystal tear
+	flaskHandle        = uint32(0xB00000FB) // Flask of Wondrous Physick (empty)
+	greenspillHandle   = uint32(0xB0002AF9) // Greenspill Crystal Tear -> 0x40002AF9
+	greenspillID       = uint32(0x40002AF9)
+	crimsonFlaskHandle = uint32(0xB0002AFA) // first Crimson Crystal Tear -> 0x40002AFA
+	crimsonFlaskID     = uint32(0x40002AFA)
+	larvalHandle       = uint32(0xB0001FF9) // Larval Tear: goods, but NOT a crystal tear
 )
 
 // physickOffset returns the EquipPhysicsData base for a slot built by
@@ -58,12 +58,12 @@ func readPhysickFields(t *testing.T, app *App, physicsOff int) (slot0, slot1, tr
 func TestSavePhysickMixture_WritesTwoTearsAndPreservesTrailing(t *testing.T) {
 	app, physicsOff := newPhysickApp(t,
 		core.InventoryItem{GaItemHandle: greenspillHandle, Quantity: 1},
-		core.InventoryItem{GaItemHandle: crimsonVariantHandle, Quantity: 1},
+		core.InventoryItem{GaItemHandle: crimsonFlaskHandle, Quantity: 1},
 	)
 
 	if err := app.SavePhysickMixture(0, []PhysickChange{
 		{Slot: core.PhysickSlot1, Handle: greenspillHandle},
-		{Slot: core.PhysickSlot2, Handle: crimsonVariantHandle},
+		{Slot: core.PhysickSlot2, Handle: crimsonFlaskHandle},
 	}); err != nil {
 		t.Fatalf("SavePhysickMixture: %v", err)
 	}
@@ -73,8 +73,8 @@ func TestSavePhysickMixture_WritesTwoTearsAndPreservesTrailing(t *testing.T) {
 		t.Errorf("slot0 = 0x%08X, want 0x%08X", slot0, greenspillID)
 	}
 	// Crimson raw variant preserved exactly — not canonicalized to 0x40002AFB.
-	if slot1 != crimsonVariantID {
-		t.Errorf("slot1 = 0x%08X, want raw Crimson variant 0x%08X", slot1, crimsonVariantID)
+	if slot1 != crimsonFlaskID {
+		t.Errorf("slot1 = 0x%08X, want first Crimson tear 0x%08X", slot1, crimsonFlaskID)
 	}
 	if trailing != physickTrailingSentinel {
 		t.Errorf("trailing u32 = 0x%08X, want preserved 0x%08X", trailing, physickTrailingSentinel)
@@ -84,17 +84,17 @@ func TestSavePhysickMixture_WritesTwoTearsAndPreservesTrailing(t *testing.T) {
 func TestSavePhysickMixture_SwapAcrossSlots(t *testing.T) {
 	app, physicsOff := newPhysickApp(t,
 		core.InventoryItem{GaItemHandle: greenspillHandle, Quantity: 1},
-		core.InventoryItem{GaItemHandle: crimsonVariantHandle, Quantity: 1},
+		core.InventoryItem{GaItemHandle: crimsonFlaskHandle, Quantity: 1},
 	)
 	if err := app.SavePhysickMixture(0, []PhysickChange{
-		{Slot: core.PhysickSlot1, Handle: crimsonVariantHandle},
+		{Slot: core.PhysickSlot1, Handle: crimsonFlaskHandle},
 		{Slot: core.PhysickSlot2, Handle: greenspillHandle},
 	}); err != nil {
 		t.Fatalf("SavePhysickMixture: %v", err)
 	}
 	slot0, slot1, _ := readPhysickFields(t, app, physicsOff)
-	if slot0 != crimsonVariantID || slot1 != greenspillID {
-		t.Errorf("swapped mixture = 0x%08X/0x%08X, want 0x%08X/0x%08X", slot0, slot1, crimsonVariantID, greenspillID)
+	if slot0 != crimsonFlaskID || slot1 != greenspillID {
+		t.Errorf("swapped mixture = 0x%08X/0x%08X, want 0x%08X/0x%08X", slot0, slot1, crimsonFlaskID, greenspillID)
 	}
 }
 
@@ -167,7 +167,7 @@ func TestSavePhysickMixture_NoPartialMutationOnBatchError(t *testing.T) {
 	app, physicsOff := newPhysickApp(t, core.InventoryItem{GaItemHandle: greenspillHandle, Quantity: 1})
 	err := app.SavePhysickMixture(0, []PhysickChange{
 		{Slot: core.PhysickSlot1, Handle: greenspillHandle},
-		{Slot: core.PhysickSlot2, Handle: crimsonVariantHandle}, // not owned
+		{Slot: core.PhysickSlot2, Handle: crimsonFlaskHandle}, // not owned
 	})
 	if err == nil {
 		t.Fatal("expected batch rejection, got nil")
@@ -236,7 +236,7 @@ func TestGetEquipmentSnapshot_ResolvesOwnedPhysickHandleFromKeyItems(t *testing.
 }
 
 func TestGetEquipmentSnapshot_PhysickCrimsonVariantKeepsExactRawAndHandle(t *testing.T) {
-	app := seedPhysickTear(t, crimsonVariantID, "common", core.InventoryItem{GaItemHandle: crimsonVariantHandle, Quantity: 1})
+	app := seedPhysickTear(t, crimsonFlaskID, "common", core.InventoryItem{GaItemHandle: crimsonFlaskHandle, Quantity: 1})
 	snap, err := app.GetEquipmentSnapshot(0)
 	if err != nil {
 		t.Fatalf("GetEquipmentSnapshot: %v", err)
@@ -245,8 +245,8 @@ func TestGetEquipmentSnapshot_PhysickCrimsonVariantKeepsExactRawAndHandle(t *tes
 	// Raw ID and owned handle are the exact technical variant — never canonicalized
 	// to the picker's 0x40002AFB / 0xB0002AFB — while the display name resolves to
 	// the canonical Crimson Crystal Tear.
-	if got.RawID != crimsonVariantID || got.Handle != crimsonVariantHandle {
-		t.Errorf("Physick[0] raw/handle = 0x%08X/0x%08X, want 0x%08X/0x%08X", got.RawID, got.Handle, crimsonVariantID, crimsonVariantHandle)
+	if got.RawID != crimsonFlaskID || got.Handle != crimsonFlaskHandle {
+		t.Errorf("Physick[0] raw/handle = 0x%08X/0x%08X, want 0x%08X/0x%08X", got.RawID, got.Handle, crimsonFlaskID, crimsonFlaskHandle)
 	}
 	if !got.Resolved || !strings.Contains(got.Name, "Crimson") {
 		t.Errorf("Physick[0] name = %q resolved=%v, want resolved Crimson", got.Name, got.Resolved)
@@ -274,11 +274,11 @@ func TestGetEquipmentSnapshot_PhysickHandleZeroWhenNotOwned(t *testing.T) {
 func TestSavePhysickMixture_SnapshotReadBack(t *testing.T) {
 	app, _ := newPhysickApp(t,
 		core.InventoryItem{GaItemHandle: greenspillHandle, Quantity: 1},
-		core.InventoryItem{GaItemHandle: crimsonVariantHandle, Quantity: 1},
+		core.InventoryItem{GaItemHandle: crimsonFlaskHandle, Quantity: 1},
 	)
 	if err := app.SavePhysickMixture(0, []PhysickChange{
 		{Slot: core.PhysickSlot1, Handle: greenspillHandle},
-		{Slot: core.PhysickSlot2, Handle: crimsonVariantHandle},
+		{Slot: core.PhysickSlot2, Handle: crimsonFlaskHandle},
 	}); err != nil {
 		t.Fatalf("SavePhysickMixture: %v", err)
 	}
@@ -289,7 +289,7 @@ func TestSavePhysickMixture_SnapshotReadBack(t *testing.T) {
 	if got := snap.Physick[0]; !got.Occupied || !got.Resolved || got.RawID != greenspillID {
 		t.Errorf("Physick[0] = %+v, want resolved Greenspill 0x%08X", got, greenspillID)
 	}
-	if got := snap.Physick[1]; !got.Occupied || !got.Resolved || got.RawID != crimsonVariantID || !strings.Contains(got.Name, "Crimson") {
-		t.Errorf("Physick[1] = %+v, want resolved Crimson variant raw 0x%08X", got, crimsonVariantID)
+	if got := snap.Physick[1]; !got.Occupied || !got.Resolved || got.RawID != crimsonFlaskID || !strings.Contains(got.Name, "Crimson") {
+		t.Errorf("Physick[1] = %+v, want first Crimson tear raw 0x%08X", got, crimsonFlaskID)
 	}
 }

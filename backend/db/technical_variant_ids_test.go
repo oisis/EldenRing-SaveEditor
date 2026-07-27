@@ -2,12 +2,11 @@ package db
 
 import "testing"
 
-// The five technical variant GoodsParam rows observed in a real save
+// The remaining technical variant GoodsParam rows observed in a real save
 // (tmp/save/ER0000.sl2 slot 0 "[PL] Jagna"). Each is a legal in-game item ID
 // that shares its base item's params; they were previously absent from the DB
 // and therefore raised false-positive unknown_item_id in the repair scanner.
 var technicalVariantIDs = map[uint32]string{
-	0x40002AFA: "Crimson Crystal Tear (Variant)",
 	0x40002AFC: "Cerulean Crystal Tear (Variant)",
 	0x40002B08: "Ruptured Crystal Tear (Variant)",
 	0x40001FAD: "Academy Glintstone Key (Variant)",
