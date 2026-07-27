@@ -47,6 +47,12 @@ web_modules/
 # TypeScript cache
 *.tsbuildinfo
 
+# Go test and profiling output
+coverage.out
+*.test
+*.prof
+*.pprof
+
 # Optional npm cache directory
 .npm
 
@@ -140,6 +146,14 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+.vite/
+
+# Temporary editor and tool files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
 
 # MacOS
 .DS_Store
@@ -171,14 +185,23 @@ analiza/
 analiza.md
 org-src/
 save/
-build/bin/
+/build/bin/
 # Keep Wails platform config (manifests, plists, info.json)
 !build/darwin/
 !build/windows/
 !build/appicon.png
-EldenRing-SaveEditor
-EldenRing-SaveForge
-main
+
+# Local binaries produced by Go/Wails commands
+/Elden Ring SaveForge
+/Elden Ring SaveForge.exe
+/EldenRing-SaveEditor
+/EldenRing-SaveEditor.exe
+/EldenRing-SaveForge
+/EldenRing-SaveForge.exe
+/main
+/main.exe
+
+# Wails bindings under frontend/wailsjs/ are generated but tracked by design.
 
 # Ignore AI files
 .claude/
