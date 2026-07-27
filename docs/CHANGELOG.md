@@ -4,6 +4,30 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.3] - 2026-07-27
+
+### fix(game-items): correct inventory capacity and Ash of War ownership
+
+Inventory and Item Database capacity indicators now use the expanded game
+limits for Spirit Ashes, sorceries, incantations, armor, talismans and other
+stackable items. Ashes of War are represented as individual copies, distinguish
+equipped instances from standalone Inventory and Storage items, and expose
+their weapon assignment in the Inventory table.
+
+### fix(equipment): enforce weapon-specific Ash of War and infusion rules
+
+Weapon editing now derives Ash of War compatibility and infusion support from
+generated regulation data for the complete base-game and DLC weapon set,
+including bows, catalysts, shields and torches. The editor presents compatible
+Ashes of War as icons, resolves built-in skill names and can optionally show
+unavailable choices.
+
+### fix(equipment): correct weapon editor controls
+
+The Equipment weapon-edit control now remains above the weapon icon across its
+entire hit area, so clicking its center opens the editor instead of the item
+picker. Availability badges also use readable labels and clearer status colors.
+
 ## [1.6.2] - 2026-07-27
 
 ### feat(character): set levels for all owned weapons
