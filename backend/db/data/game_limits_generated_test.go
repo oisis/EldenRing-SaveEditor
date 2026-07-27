@@ -12,6 +12,8 @@ func TestGeneratedGameLimits_KnownRegulationCases(t *testing.T) {
 		{"Crimson flask +12 full", 0x40000401, 20, 20},
 		{"Cerulean flask +12 full", 0x40000433, 20, 20},
 		{"Festering Bloody Finger", 0x4000006F, 99, 99},
+		{"Furlcalling Finger Remedy", 0x40000096, 999, 999},
+		{"Furlcalling Finger Remedy appearance state", 0x400000B6, 999, 999},
 		{"Glintstone Pebble", 0x40000FA0, 99, 600},
 		{`Prattling Pate "Hello"`, 0x40000898, 1, 600},
 		{"Remembrance of the Starscourge", 0x40000B87, 99, 600},

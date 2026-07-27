@@ -928,8 +928,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" prefix="I" compact />
-                                                <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" prefix="S" compact />
+                                                <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" prefix="I" compact mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
+                                                <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" prefix="S" compact mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
                                             </div>
                                         </div>
                                     );
@@ -944,7 +944,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-20 backdrop-blur-md border-b border-border">
                             <tr>
                                 {!readOnly && (
-                                    <th className="px-2 py-4 w-8">
+                                    <th className="pl-3 pr-1 py-4 w-6">
                                         <div
                                             onClick={toggleAll}
                                             title="Select all"
@@ -955,8 +955,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         </div>
                                     </th>
                                 )}
-                                <th className="px-1 py-4 w-8"></th>
-                                <th className="px-2 py-4 w-14">Icon</th>
+                                <th className="px-1 py-4 w-6"></th>
+                                <th className="pl-1 pr-2 py-4 w-14">Icon</th>
                                 <th className="px-2 py-4 w-full cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('name')}>
                                     Name {sortCol === 'name' && (sortDir === 'asc' ? '↑' : '↓')}
                                 </th>
@@ -998,7 +998,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                 return (
                                     <tr key={item.id} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.03] transition-colors ${selectedDbItems.has(item.id) ? 'bg-primary/[0.02]' : ''}`}>
                                         {!readOnly && (
-                                            <td className="px-2 py-2">
+                                            <td className="pl-3 pr-1 py-2">
                                                 <div
                                                     onClick={() => toggleItem(item.id)}
                                                     className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedDbItems.has(item.id) ? 'bg-primary border-primary' : 'bg-muted/30 border-border group-hover:border-primary/50'}`}
@@ -1015,7 +1015,7 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                                 </svg>
                                             </button>
                                         </td>
-                                        <td className="px-2 py-0.5">
+                                        <td className="pl-1 pr-2 py-0.5">
                                             <div
                                                 className="w-12 h-12 bg-muted/20 rounded-lg border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-pointer"
                                                 onClick={() => onSelectItem ? onSelectItem(item) : setDetailItem(item)}
@@ -1077,10 +1077,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                             return (
                                                 <>
                                                     <td className="px-3 py-2 text-center">
-                                                        <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" />
+                                                        <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
                                                     </td>
                                                     <td className="px-3 py-2 text-center">
-                                                        <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" />
+                                                        <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
                                                     </td>
                                                 </>
                                             );

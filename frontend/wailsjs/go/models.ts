@@ -2174,6 +2174,7 @@ export namespace db {
 	    gameMaxStorage: number;
 	    gameMaxInventoryKnown: boolean;
 	    gameMaxStorageKnown: boolean;
+	    recordMode: string;
 	    maxUpgrade: number;
 	    iconPath: string;
 	    flags: string[];
@@ -2206,6 +2207,7 @@ export namespace db {
 	        this.gameMaxStorage = source["gameMaxStorage"];
 	        this.gameMaxInventoryKnown = source["gameMaxInventoryKnown"];
 	        this.gameMaxStorageKnown = source["gameMaxStorageKnown"];
+	        this.recordMode = source["recordMode"];
 	        this.maxUpgrade = source["maxUpgrade"];
 	        this.iconPath = source["iconPath"];
 	        this.flags = source["flags"];
@@ -3112,6 +3114,11 @@ export namespace vm {
 	    quantity: number;
 	    maxInventory: number;
 	    maxStorage: number;
+	    gameMaxInventory: number;
+	    gameMaxStorage: number;
+	    gameMaxInventoryKnown: boolean;
+	    gameMaxStorageKnown: boolean;
+	    recordMode: string;
 	    maxUpgrade: number;
 	    currentUpgrade: number;
 	    iconPath: string;
@@ -3121,6 +3128,10 @@ export namespace vm {
 	    canMountAoW: boolean;
 	    wepType: number;
 	    aowCompatBitmask: number;
+	    isEquippedAoW: boolean;
+	    equippedByWeaponHandle: number;
+	    equippedByWeaponName: string;
+	    aowHandleShared: boolean;
 
 	    static createFrom(source: any = {}) {
 	        return new ItemViewModel(source);
@@ -3139,6 +3150,11 @@ export namespace vm {
 	        this.quantity = source["quantity"];
 	        this.maxInventory = source["maxInventory"];
 	        this.maxStorage = source["maxStorage"];
+	        this.gameMaxInventory = source["gameMaxInventory"];
+	        this.gameMaxStorage = source["gameMaxStorage"];
+	        this.gameMaxInventoryKnown = source["gameMaxInventoryKnown"];
+	        this.gameMaxStorageKnown = source["gameMaxStorageKnown"];
+	        this.recordMode = source["recordMode"];
 	        this.maxUpgrade = source["maxUpgrade"];
 	        this.currentUpgrade = source["currentUpgrade"];
 	        this.iconPath = source["iconPath"];
@@ -3148,6 +3164,10 @@ export namespace vm {
 	        this.canMountAoW = source["canMountAoW"];
 	        this.wepType = source["wepType"];
 	        this.aowCompatBitmask = source["aowCompatBitmask"];
+	        this.isEquippedAoW = source["isEquippedAoW"];
+	        this.equippedByWeaponHandle = source["equippedByWeaponHandle"];
+	        this.equippedByWeaponName = source["equippedByWeaponName"];
+	        this.aowHandleShared = source["aowHandleShared"];
 	    }
 	}
 	export class CharacterViewModel {
@@ -3173,10 +3193,12 @@ export namespace vm {
 	    soulMemory: number;
 	    inventory: ItemViewModel[];
 	    storage: ItemViewModel[];
+	    attachedItems: ItemViewModel[];
 	    warnings: string[];
 	    statValidation?: StatValidationResult;
 	    eventFlagsAvailable: boolean;
 	    classBaseStats: Record<string, number>;
+	    useTechnicalItemCaps: boolean;
 
 	    static createFrom(source: any = {}) {
 	        return new CharacterViewModel(source);
@@ -3206,10 +3228,12 @@ export namespace vm {
 	        this.soulMemory = source["soulMemory"];
 	        this.inventory = this.convertValues(source["inventory"], ItemViewModel);
 	        this.storage = this.convertValues(source["storage"], ItemViewModel);
+	        this.attachedItems = this.convertValues(source["attachedItems"], ItemViewModel);
 	        this.warnings = source["warnings"];
 	        this.statValidation = this.convertValues(source["statValidation"], StatValidationResult);
 	        this.eventFlagsAvailable = source["eventFlagsAvailable"];
 	        this.classBaseStats = source["classBaseStats"];
+	        this.useTechnicalItemCaps = source["useTechnicalItemCaps"];
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

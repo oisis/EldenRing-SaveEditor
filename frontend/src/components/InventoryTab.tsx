@@ -2,12 +2,16 @@ import {useEffect, useState, useMemo, useRef, useDeferredValue} from 'react';
 import toast from '../lib/toast';
 import {useVirtualizer} from '@tanstack/react-virtual';
 import {GetCharacter, SaveCharacter, RemoveItemsFromCharacter, GetItemDetail} from '../../wailsjs/go/main/App';
-import {vm, db} from '../../wailsjs/go/models';
+import {vm, db, editor} from '../../wailsjs/go/models';
 import {CategorySelect} from './CategorySelect';
 import {RiskBadge} from './RiskBadge';
 import {useFavorites} from '../state/favorites';
 import {ItemDetailPanel} from './ItemDetailPanel';
 import {ItemCapacityBadge} from './ItemCapacityBadge';
+import {useInventoryWorkspace, type ContainerKind} from '../hooks/useInventoryWorkspace';
+import {WeaponEditModal} from './WeaponEditModal';
+import {adaptForWeaponModal} from './weaponPatch';
+import {loadSafetyProfile, usesTechnicalCaps, SAFETY_PROFILE_EVENT, type SafetyProfile} from '../state/safetyProfile';
 
 // Categories with sub-groupings — drives the Sub-Category column visibility.
 const CATEGORIES_WITH_SUBGROUPS = new Set([
@@ -48,7 +52,12 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
     const [charInventory, setCharInventory] = useState<vm.ItemViewModel[]>([]);
     const [charStorage, setCharStorage] = useState<vm.ItemViewModel[]>([]);
+    const [charAttachedItems, setCharAttachedItems] = useState<vm.ItemViewModel[]>([]);
     const [loading, setLoading] = useState(false);
+    const workspace = useInventoryWorkspace();
+    const [weaponEditor, setWeaponEditor] = useState<{uid: string; source: ContainerKind} | null>(null);
+    const [safetyProfile, setSafetyProfile] = useState<SafetyProfile>(() => loadSafetyProfile());
+    const useTechnicalCapsMode = usesTechnicalCaps(safetyProfile);
     
     // Sorting state
     const [sortCol, setSortCol] = useState<string>('name');
@@ -69,6 +78,18 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const [detailItem, setDetailItem] = useState<db.ItemEntry | null>(null);
     const [hoverTooltip, setHoverTooltip] = useState<{name: string, path: string, x: number, y: number} | null>(null);
 
+    useEffect(() => {
+        const handler = (event: Event) => setSafetyProfile((event as CustomEvent<SafetyProfile>).detail);
+        window.addEventListener(SAFETY_PROFILE_EVENT, handler);
+        return () => window.removeEventListener(SAFETY_PROFILE_EVENT, handler);
+    }, []);
+
+    useEffect(() => {
+        workspace.start(charIndex).catch(() => { /* surfaced through workspace.lastError */ });
+        setWeaponEditor(null);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [charIndex, inventoryVersion]);
+
     const toggleSelect = (key: string) => {
         setSelectedKeys(prev => {
             const next = new Set(prev);
@@ -78,15 +99,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     };
 
     const toggleSelectAll = () => {
-        if (selectedKeys.size === filteredOwnedItems.length && filteredOwnedItems.length > 0) {
+        const selectable = filteredOwnedItems.filter(item => !item.readOnly);
+        if (selectedKeys.size === selectable.length && selectable.length > 0) {
             setSelectedKeys(new Set());
         } else {
-            setSelectedKeys(new Set(filteredOwnedItems.map(i => rowKey(i))));
+            setSelectedKeys(new Set(selectable.map(i => rowKey(i))));
         }
     };
 
     const handleRemoveSelected = () => {
-        const items = filteredOwnedItems.filter(i => selectedKeys.has(rowKey(i)));
+        const items = filteredOwnedItems.filter(i => !i.readOnly && selectedKeys.has(rowKey(i)));
         const handles = items.flatMap(i => [i.invHandle, i.storageHandle].filter(h => h !== 0));
         setRemoveModal({ handles, names: items.map(i => i.name) });
     };
@@ -100,7 +122,11 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             setRemoveModal(null);
             // Reload inventory
             const char = await GetCharacter(charIndex);
-            if (char) { setCharInventory(char.inventory || []); setCharStorage(char.storage || []); }
+            if (char) {
+                setCharInventory(char.inventory || []);
+                setCharStorage(char.storage || []);
+                setCharAttachedItems(char.attachedItems || []);
+            }
             onMutate?.();
         } catch (err) {
             toast.error('Remove failed: ' + err);
@@ -121,11 +147,33 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     };
 
     const saveChanges = async () => {
-        if (isSaving) return;
+        if (isSaving || workspace.saving) return;
         setIsSaving(true);
         try {
+            // Persist the weapon workspace first. Quantity edits are then applied
+            // to a fresh VM so SaveCharacter cannot overwrite the AoW/infusion
+            // state with a snapshot captured before the workspace save.
+            if (workspace.dirty) {
+                const saved = await workspace.save();
+                if (!saved) {
+                    throw new Error(workspace.lastError || 'Weapon changes could not be saved');
+                }
+            }
+
+            const hasQuantityEdits = Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0;
+            if (!hasQuantityEdits) {
+                const updatedChar = await GetCharacter(charIndex);
+                setCharInventory(updatedChar?.inventory || []);
+                setCharStorage(updatedChar?.storage || []);
+                setCharAttachedItems(updatedChar?.attachedItems || []);
+                setWeaponEditor(null);
+                onMutate?.();
+                return;
+            }
+
             const char = await GetCharacter(charIndex);
             if (!char) return;
+            char.useTechnicalItemCaps = useTechnicalCapsMode;
 
             // Apply local edits to the character VM
             char.inventory = char.inventory.map(item => ({
@@ -143,12 +191,14 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             const updatedChar = await GetCharacter(charIndex);
             setCharInventory(updatedChar?.inventory || []);
             setCharStorage(updatedChar?.storage || []);
+            setCharAttachedItems(updatedChar?.attachedItems || []);
             setEditedInv({});
             setEditedStorage({});
+            setWeaponEditor(null);
             onMutate?.();
             
         } catch (err) {
-            console.error("Failed to save inventory changes:", err);
+            toast.error('Save failed: ' + err);
         } finally {
             setIsSaving(false);
         }
@@ -156,12 +206,16 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
 
     type MergedItem = {
         id: number; baseId: number; name: string; category: string; subCategory: string; subGroup: string;
-        nonStackable: boolean; inInventory: boolean; inStorage: boolean;
-        invHandle: number; storageHandle: number;
+        separateInstances: boolean; inInventory: boolean; inStorage: boolean;
+        invHandle: number; storageHandle: number; attachedHandle: number;
         invQty: number; storageQty: number;
         maxInv: number; maxStorage: number; maxUpgrade: number; currentUpgrade: number; iconPath: string;
         flags: string[];
         readOnly: boolean;
+        isEquippedAoW: boolean;
+        equippedByWeaponHandle: number;
+        equippedByWeaponName: string;
+        aowHandleShared: boolean;
         uid: string;
     };
 
@@ -172,55 +226,78 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     const rowKey = (item: MergedItem) => item.uid;
 
     // Build item list for display.
-    // Non-stackable (maxInventory <= 1 and maxStorage <= 1): separate row for each instance in inventory and storage.
+    // Instance-backed items: separate row for each physical record in inventory and storage.
     //   Each copy can have different upgrade/infuse/AoW, so merging by handle is wrong.
-    // Stackable (maxInventory > 1): merged by item ID — one row with both inv and storage qty.
+    // Quantity stacks: merged by item ID — one row with both inv and storage qty.
     const mergedOwnedItems = useMemo(() => {
-        const nonStackableList: MergedItem[] = [];
+        const separateInstanceList: MergedItem[] = [];
         const stackableMap = new Map<number, MergedItem>();
+        const recordMode = (item: vm.ItemViewModel) =>
+            item.recordMode || (item.category === 'Item' || item.subCategory === 'arrows_and_bolts'
+                ? 'quantity_stack'
+                : 'separate_instances');
+        const cap = (item: vm.ItemViewModel, kind: 'inv' | 'storage') => {
+            if (useTechnicalCapsMode) {
+                if (kind === 'inv' && item.gameMaxInventoryKnown) return item.gameMaxInventory;
+                if (kind === 'storage' && item.gameMaxStorageKnown) return item.gameMaxStorage;
+            }
+            return kind === 'inv' ? item.maxInventory : item.maxStorage;
+        };
 
         charInventory.forEach(item => {
-            if (item.maxInventory <= 1 && item.maxStorage <= 1) {
-                nonStackableList.push({
+            if (recordMode(item) === 'separate_instances') {
+                separateInstanceList.push({
                     id: item.id, baseId: item.baseId || item.id, name: item.name,
                     category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
-                    nonStackable: true, inInventory: true, inStorage: false,
-                    invHandle: item.handle, storageHandle: 0,
+                    separateInstances: true, inInventory: true, inStorage: false,
+                    invHandle: item.handle, storageHandle: 0, attachedHandle: 0,
                     invQty: 1, storageQty: 0,
-                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxInv: cap(item, 'inv'), maxStorage: cap(item, 'storage'),
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
                     readOnly: item.readOnly ?? false,
+                    isEquippedAoW: item.isEquippedAoW ?? false,
+                    equippedByWeaponHandle: item.equippedByWeaponHandle ?? 0,
+                    equippedByWeaponName: item.equippedByWeaponName ?? '',
+                    aowHandleShared: item.aowHandleShared ?? false,
                     uid: '',
                 });
             } else {
                 stackableMap.set(item.id, {
                     id: item.id, baseId: item.baseId || item.id, name: item.name,
                     category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
-                    nonStackable: false, inInventory: true, inStorage: false,
-                    invHandle: item.handle, storageHandle: 0,
+                    separateInstances: false, inInventory: true, inStorage: false,
+                    invHandle: item.handle, storageHandle: 0, attachedHandle: 0,
                     invQty: item.quantity, storageQty: 0,
-                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxInv: cap(item, 'inv'), maxStorage: cap(item, 'storage'),
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
                     readOnly: item.readOnly ?? false,
+                    isEquippedAoW: false,
+                    equippedByWeaponHandle: 0,
+                    equippedByWeaponName: '',
+                    aowHandleShared: false,
                     uid: '',
                 });
             }
         });
 
         charStorage.forEach(item => {
-            if (item.maxInventory <= 1 && item.maxStorage <= 1) {
-                nonStackableList.push({
+            if (recordMode(item) === 'separate_instances') {
+                separateInstanceList.push({
                     id: item.id, baseId: item.baseId || item.id, name: item.name,
                     category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
-                    nonStackable: true, inInventory: false, inStorage: true,
-                    invHandle: 0, storageHandle: item.handle,
+                    separateInstances: true, inInventory: false, inStorage: true,
+                    invHandle: 0, storageHandle: item.handle, attachedHandle: 0,
                     invQty: 0, storageQty: 1,
-                    maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                    maxInv: cap(item, 'inv'), maxStorage: cap(item, 'storage'),
                     maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                     flags: item.flags ?? [],
                     readOnly: item.readOnly ?? false,
+                    isEquippedAoW: item.isEquippedAoW ?? false,
+                    equippedByWeaponHandle: item.equippedByWeaponHandle ?? 0,
+                    equippedByWeaponName: item.equippedByWeaponName ?? '',
+                    aowHandleShared: item.aowHandleShared ?? false,
                     uid: '',
                 });
             } else {
@@ -233,31 +310,54 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     stackableMap.set(item.id, {
                         id: item.id, baseId: item.baseId || item.id, name: item.name,
                         category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
-                        nonStackable: false, inInventory: false, inStorage: true,
-                        invHandle: 0, storageHandle: item.handle,
+                        separateInstances: false, inInventory: false, inStorage: true,
+                        invHandle: 0, storageHandle: item.handle, attachedHandle: 0,
                         invQty: 0, storageQty: item.quantity,
-                        maxInv: item.maxInventory, maxStorage: item.maxStorage,
+                        maxInv: cap(item, 'inv'), maxStorage: cap(item, 'storage'),
                         maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
                         flags: item.flags ?? [],
                         readOnly: item.readOnly ?? false,
+                        isEquippedAoW: false,
+                        equippedByWeaponHandle: 0,
+                        equippedByWeaponName: '',
+                        aowHandleShared: false,
                         uid: '',
                     });
                 }
             }
         });
 
-        const all = [...nonStackableList, ...Array.from(stackableMap.values())];
+        charAttachedItems.forEach(item => {
+            separateInstanceList.push({
+                id: item.id, baseId: item.baseId || item.id, name: item.name,
+                category: item.category, subCategory: item.subCategory, subGroup: item.subGroup ?? '',
+                separateInstances: true, inInventory: false, inStorage: false,
+                invHandle: 0, storageHandle: 0, attachedHandle: item.handle,
+                invQty: 0, storageQty: 0,
+                maxInv: cap(item, 'inv'), maxStorage: cap(item, 'storage'),
+                maxUpgrade: item.maxUpgrade, currentUpgrade: item.currentUpgrade ?? 0, iconPath: item.iconPath,
+                flags: item.flags ?? [],
+                readOnly: true,
+                isEquippedAoW: item.isEquippedAoW ?? true,
+                equippedByWeaponHandle: item.equippedByWeaponHandle ?? 0,
+                equippedByWeaponName: item.equippedByWeaponName ?? '',
+                aowHandleShared: item.aowHandleShared ?? false,
+                uid: '',
+            });
+        });
+
+        const all = [...separateInstanceList, ...Array.from(stackableMap.values())];
         const seen = new Map<string, number>();
         for (const it of all) {
-            const base = it.nonStackable
-                ? `h-${it.inInventory ? 'i' : 's'}-${it.invHandle || it.storageHandle}`
+            const base = it.separateInstances
+                ? `h-${it.inInventory ? 'i' : it.inStorage ? 's' : 'a'}-${it.invHandle || it.storageHandle || it.attachedHandle}`
                 : `s-${it.id}`;
             const n = seen.get(base) ?? 0;
             seen.set(base, n + 1);
             it.uid = n === 0 ? base : `${base}#${n}`;
         }
         return all;
-    }, [charInventory, charStorage]);
+    }, [charInventory, charStorage, charAttachedItems, useTechnicalCapsMode]);
 
     const handleImageError = (iconPath: string) => {
         setBrokenIcons(prev => new Set(prev).add(iconPath));
@@ -277,6 +377,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
         GetCharacter(charIndex).then(res => {
             setCharInventory(res?.inventory || []);
             setCharStorage(res?.storage || []);
+            setCharAttachedItems(res?.attachedItems || []);
         }).finally(() => setLoading(false));
     }, [charIndex, inventoryVersion]);
 
@@ -303,11 +404,11 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             } else if (sortCol === 'invOwned') {
                 // Numeric ownership shown in the Inventory cell: non-stackable = 0/1
                 // presence, stackable = base quantity (edits don't re-sort mid-typing).
-                valA = a.nonStackable ? (a.inInventory ? 1 : 0) : a.invQty;
-                valB = b.nonStackable ? (b.inInventory ? 1 : 0) : b.invQty;
+                valA = a.separateInstances ? (a.inInventory ? 1 : 0) : a.invQty;
+                valB = b.separateInstances ? (b.inInventory ? 1 : 0) : b.invQty;
             } else if (sortCol === 'storageOwned') {
-                valA = a.nonStackable ? (a.inStorage ? 1 : 0) : a.storageQty;
-                valB = b.nonStackable ? (b.inStorage ? 1 : 0) : b.storageQty;
+                valA = a.separateInstances ? (a.inStorage ? 1 : 0) : a.storageQty;
+                valB = b.separateInstances ? (b.inStorage ? 1 : 0) : b.storageQty;
             } else {
                 const rawA = a[sortCol as keyof MergedItem];
                 const rawB = b[sortCol as keyof MergedItem];
@@ -353,6 +454,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
             item.name.toLowerCase().includes(q) ||
             item.id.toString(16).toLowerCase().includes(q);
     })), [mergedOwnedItems, deferredSearch, category, subCategory, sortCol, sortDir, showFlaggedItems, showOnlyFavorites, isFav]);
+    const selectableOwnedCount = useMemo(() => filteredOwnedItems.filter(item => !item.readOnly).length, [filteredOwnedItems]);
 
     // Owned count scoped to the selected category/subcategory — derived from
     // mergedOwnedItems (not filtered) so text search never affects it.
@@ -369,6 +471,39 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
     // Combined upgrade/max-upgrade column — hidden when the whole current table
     // has no upgradeable rows (avoids empty columns on consumables/armor).
     const showUpgradeColumn = useMemo(() => filteredOwnedItems.some(i => i.maxUpgrade > 0), [filteredOwnedItems]);
+    const showWeaponColumns = useMemo(() => filteredOwnedItems.some(i => i.category === 'Weapon'), [filteredOwnedItems]);
+
+    const workspaceItemsByRecord = useMemo(() => {
+        const result = new Map<string, editor.EditableItem>();
+        for (const item of workspace.inventoryItems) {
+            if (item.isWeapon) result.set(`inventory:${item.originalHandle}`, item);
+        }
+        for (const item of workspace.storageItems) {
+            if (item.isWeapon) result.set(`storage:${item.originalHandle}`, item);
+        }
+        return result;
+    }, [workspace.inventoryItems, workspace.storageItems]);
+
+    const getWorkspaceWeapon = (item: MergedItem): {item: editor.EditableItem; source: ContainerKind} | null => {
+        if (item.category !== 'Weapon') return null;
+        const source: ContainerKind = item.inInventory ? 'inventory' : 'storage';
+        const handle = item.inInventory ? item.invHandle : item.storageHandle;
+        const workspaceItem = workspaceItemsByRecord.get(`${source}:${handle}`);
+        return workspaceItem ? {item: workspaceItem, source} : null;
+    };
+
+    const activeWeaponEditor = useMemo(() => {
+        if (!weaponEditor) return null;
+        const pool = weaponEditor.source === 'inventory' ? workspace.inventoryItems : workspace.storageItems;
+        const item = pool.find(candidate => candidate.uid === weaponEditor.uid);
+        return item ? {item, source: weaponEditor.source} : null;
+    }, [weaponEditor, workspace.inventoryItems, workspace.storageItems]);
+
+    const tableColumnCount = 6 +
+        (columnVisibility.id ? 1 : 0) +
+        (columnVisibility.category && showSubGroupColumn ? 1 : 0) +
+        (showUpgradeColumn ? 1 : 0) +
+        (showWeaponColumns ? 2 : 0);
 
     const SortIndicator = ({ col }: { col: string }) => {
         if (sortCol !== col) return <span className="ml-1 opacity-20">↕</span>;
@@ -385,6 +520,20 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
 
     return (
         <div className="flex-1 flex flex-col min-h-0 space-y-3 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            {activeWeaponEditor && (
+                <WeaponEditModal
+                    charIndex={charIndex}
+                    item={adaptForWeaponModal(activeWeaponEditor.item)}
+                    source={activeWeaponEditor.source}
+                    onClose={() => setWeaponEditor(null)}
+                    workspace={{
+                        sessionID: workspace.sessionID,
+                        updateWeapon: (uid, patch) => workspace.updateWeapon(uid, patch),
+                    }}
+                    workspaceItem={activeWeaponEditor.item}
+                />
+            )}
+
             {/* Remove Confirm Modal */}
             {removeModal && (
                 <div className="fixed inset-0 z-[110] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-300">
@@ -488,13 +637,13 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     <span className="text-[10px] font-bold tabular-nums text-foreground">{ownedCount}</span>
                 </div>
 
-                {(Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0) && (
+                {(Object.keys(editedInv).length > 0 || Object.keys(editedStorage).length > 0 || workspace.dirty) && (
                     <button
                         onClick={saveChanges}
-                        disabled={isSaving}
+                        disabled={isSaving || workspace.saving}
                         className="px-6 py-2.5 bg-primary text-primary-foreground rounded-md text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
                     >
-                        {isSaving ? 'Saving...' : 'Save Changes'}
+                        {isSaving || workspace.saving ? 'Saving...' : 'Save Changes'}
                     </button>
                 )}
                 {selectedKeys.size > 0 && (
@@ -567,7 +716,14 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                     const key = rowKey(item);
                                     return (
                                         <div key={key}
-                                            className={`relative rounded-xl border bg-card p-1.5 flex flex-col items-center gap-1 transition-all hover:border-primary/40 hover:bg-primary/[0.03] group ${selectedKeys.has(key) ? 'border-red-500/50 bg-red-500/[0.03]' : 'border-border/50'}`}
+                                            className={`relative rounded-xl border bg-card p-1.5 flex flex-col items-center gap-1 transition-all hover:border-primary/40 hover:bg-primary/[0.03] group ${
+                                                item.isEquippedAoW
+                                                    ? 'border-border/50 bg-green-500/[0.08]'
+                                                    : selectedKeys.has(key)
+                                                        ? 'border-red-500/50 bg-red-500/[0.03]'
+                                                        : 'border-border/50'
+                                            }`}
+                                            title={item.isEquippedAoW ? `Equipped on ${item.equippedByWeaponName || 'weapon'}` : undefined}
                                         >
                                             <button onClick={e => { e.stopPropagation(); toggleFav(item.id); }} className="absolute top-2 right-2 p-0.5 transition-all hover:scale-125 z-10">
                                                 <svg className={`w-3.5 h-3.5 ${isFav(item.id) ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground/20 fill-none hover:text-amber-500/50'}`} stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
@@ -597,8 +753,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 )}
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <ItemCapacityBadge owned={item.nonStackable ? (item.inInventory ? 1 : 0) : item.invQty} max={item.maxInv} label="Inventory" prefix="I" compact />
-                                                <ItemCapacityBadge owned={item.nonStackable ? (item.inStorage ? 1 : 0) : item.storageQty} max={item.maxStorage} label="Storage" prefix="S" compact />
+                                                <ItemCapacityBadge owned={item.separateInstances ? (item.inInventory ? 1 : 0) : item.invQty} max={item.maxInv} label="Inventory" prefix="I" compact mode={item.separateInstances ? 'instance' : 'quantity'} />
+                                                <ItemCapacityBadge owned={item.separateInstances ? (item.inStorage ? 1 : 0) : item.storageQty} max={item.maxStorage} label="Storage" prefix="S" compact mode={item.separateInstances ? 'instance' : 'quantity'} />
                                             </div>
                                         </div>
                                     );
@@ -611,18 +767,19 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                     <table className="w-full text-left text-sm border-collapse">
                         <thead className="bg-muted/30 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] sticky top-0 z-10 backdrop-blur-md border-b border-border">
                             <tr>
-                                <th className="px-4 py-4 w-10">
+                                <th className="pl-3 pr-1 py-4 w-6">
                                     <div
                                         onClick={toggleSelectAll}
-                                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedKeys.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border hover:border-red-400/50'}`}
+                                        className={`w-4 h-4 rounded border flex items-center justify-center transition-all cursor-pointer ${selectedKeys.size === selectableOwnedCount && selectableOwnedCount > 0 ? 'bg-red-500 border-red-500' : 'bg-muted/30 border-border hover:border-red-400/50'}`}
                                     >
-                                        {selectedKeys.size === filteredOwnedItems.length && filteredOwnedItems.length > 0 &&
+                                        {selectedKeys.size === selectableOwnedCount && selectableOwnedCount > 0 &&
                                             <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 13l4 4L19 7"/></svg>}
                                     </div>
                                 </th>
-                                <th className="px-2 py-4 w-8"></th>
-                                <th className="px-6 py-4 w-16">Icon</th>
-                                <th className="px-6 py-4 w-full cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('name')}>
+                                <th className="px-1 py-4 w-6"></th>
+                                {showWeaponColumns && <th className="px-1 py-4 w-6"></th>}
+                                <th className="pl-1 pr-2 py-4 w-14">Icon</th>
+                                <th className="pl-2 pr-6 py-4 w-full cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('name')}>
                                     Name <SortIndicator col="name" />
                                 </th>
                                 {columnVisibility.id && (
@@ -652,6 +809,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                         >MaxUp<SortIndicator col="maxUpgrade" /></span>
                                     </th>
                                 )}
+                                {showWeaponColumns && (
+                                    <th className="px-3 py-4 text-left whitespace-nowrap">Ash of War</th>
+                                )}
                                 <th className="px-3 py-4 text-center whitespace-nowrap cursor-pointer hover:text-primary transition-colors" onClick={() => handleSort('invOwned')}>
                                     Inventory <SortIndicator col="invOwned" />
                                 </th>
@@ -663,7 +823,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                         <tbody className="divide-y divide-border/30">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={9} className="px-6 py-24 text-center">
+                                    <td colSpan={tableColumnCount} className="px-6 py-24 text-center">
                                         <div className="flex flex-col items-center justify-center space-y-4">
                                             <div className="w-6 h-6 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
                                             <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Accessing data...</p>
@@ -673,16 +833,31 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                             ) : filteredOwnedItems.length > 0 ? (
                                 <>
                                 {rowVirtualizer.getVirtualItems().length > 0 && rowVirtualizer.getVirtualItems()[0].start > 0 && (
-                                    <tr><td colSpan={9} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
+                                    <tr><td colSpan={tableColumnCount} style={{ height: rowVirtualizer.getVirtualItems()[0].start, padding: 0, border: 'none' }} /></tr>
                                 )}
                                 {rowVirtualizer.getVirtualItems().map((virtualRow) => {
                                     const item = filteredOwnedItems[virtualRow.index];
                                     const key = rowKey(item);
                                     return (
-                                    <tr key={key} data-index={virtualRow.index} ref={node => { if (node) rowVirtualizer.measureElement(node); }} className={`group hover:bg-primary/[0.02] transition-colors ${selectedKeys.has(key) ? 'bg-red-500/[0.03]' : ''}`}>
-                                        <td className="px-4 py-0.5">
+                                    <tr
+                                        key={key}
+                                        data-index={virtualRow.index}
+                                        ref={node => { if (node) rowVirtualizer.measureElement(node); }}
+                                        className={`group hover:bg-primary/[0.02] transition-colors ${
+                                            item.isEquippedAoW
+                                                ? 'bg-green-500/[0.06] hover:bg-green-500/[0.09]'
+                                                : selectedKeys.has(key) ? 'bg-red-500/[0.03]' : ''
+                                        }`}
+                                        title={item.isEquippedAoW ? `Equipped on ${item.equippedByWeaponName || 'weapon'}` : undefined}
+                                    >
+                                        <td className="pl-3 pr-1 py-0.5">
                                             {item.readOnly ? (
-                                                <div className="w-4 h-4 rounded border border-border/20 bg-muted/10 flex items-center justify-center" title="Managed by World tab">
+                                                <div
+                                                    className="w-4 h-4 rounded border border-border/20 bg-muted/10 flex items-center justify-center"
+                                                    title={item.isEquippedAoW
+                                                        ? `Attached to ${item.equippedByWeaponName || 'weapon'}. Edit it from the weapon.`
+                                                        : 'Managed by World tab'}
+                                                >
                                                     <svg className="w-2.5 h-2.5 text-muted-foreground/30" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd"/></svg>
                                                 </div>
                                             ) : (
@@ -695,14 +870,37 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-2 text-center">
+                                        <td className="px-1 text-center">
                                             <button onClick={e => { e.stopPropagation(); toggleFav(item.id); }} className="p-0.5 transition-all hover:scale-125">
                                                 <svg className={`w-4 h-4 ${isFav(item.id) ? 'text-amber-500 fill-amber-500' : 'text-muted-foreground/20 fill-none hover:text-amber-500/50'}`} stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                                 </svg>
                                             </button>
                                         </td>
-                                        <td className="px-6 py-0.5">
+                                        {showWeaponColumns && (
+                                            <td className="px-1 text-center">
+                                                {(() => {
+                                                    const weapon = getWorkspaceWeapon(item);
+                                                    return weapon ? (
+                                                        <button
+                                                            type="button"
+                                                            onClick={event => {
+                                                                event.stopPropagation();
+                                                                setWeaponEditor({uid: weapon.item.uid, source: weapon.source});
+                                                            }}
+                                                            title="Edit weapon"
+                                                            aria-label={`Edit ${item.name}`}
+                                                            className="w-5 h-5 inline-flex items-center justify-center rounded bg-red-700/85 hover:bg-red-600 text-white shadow ring-1 ring-red-900/40 transition-colors"
+                                                        >
+                                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M14.7 6.3l3 3M4 20l3.5-1 9.8-9.8a2.1 2.1 0 0 0 0-3l-.5-.5a2.1 2.1 0 0 0-3 0L4 16.5 4 20z" />
+                                                            </svg>
+                                                        </button>
+                                                    ) : null;
+                                                })()}
+                                            </td>
+                                        )}
+                                        <td className="pl-1 pr-2 py-0.5">
                                             <div
                                                 className="w-12 h-12 rounded bg-muted/30 border border-border/50 flex items-center justify-center overflow-hidden group-hover:border-primary/30 transition-all cursor-pointer"
                                                 onClick={() => handleItemClick(item)}
@@ -721,7 +919,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 )}
                                             </div>
                                         </td>
-                                        <td className="px-6 py-4 w-full">
+                                        <td className="pl-2 pr-6 py-4 w-full">
                                             <div className="flex flex-col gap-0.5">
                                                 <div className="flex items-center gap-1.5 flex-wrap">
                                                     <span className="text-[13px] font-semibold text-foreground group-hover:text-primary transition-colors cursor-pointer hover:underline decoration-primary/40 underline-offset-2" onClick={() => handleItemClick(item)}>{item.name}</span>
@@ -759,9 +957,27 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                 )}
                                             </td>
                                         )}
+                                        {showWeaponColumns && (
+                                            <td className="px-3 py-4 whitespace-nowrap">
+                                                {(() => {
+                                                    const weapon = getWorkspaceWeapon(item)?.item;
+                                                    if (!weapon) return <span className="text-muted-foreground/30">—</span>;
+                                                    if (weapon.pendingAoWItemID && weapon.pendingAoWName) {
+                                                        return <span className="text-[11px] font-semibold text-green-500" title="Pending save">{weapon.pendingAoWName}</span>;
+                                                    }
+                                                    if (weapon.pendingAoWClear) {
+                                                        return <span className="text-[11px] font-semibold text-muted-foreground" title="Built-in Ash of War (pending save)">{weapon.defaultAoWName || 'Built-in skill'}</span>;
+                                                    }
+                                                    if (weapon.hasCurrentAoW && weapon.currentAoWName) {
+                                                        return <span className="text-[11px] font-semibold text-green-500">{weapon.currentAoWName}</span>;
+                                                    }
+                                                    return <span className="text-[11px] font-semibold text-muted-foreground" title="Built-in Ash of War">{weapon.defaultAoWName || 'Built-in skill'}</span>;
+                                                })()}
+                                            </td>
+                                        )}
                                         <td className="px-3 py-4 text-center whitespace-nowrap">
                                             {item.maxInv <= 1 || item.readOnly ? (
-                                                <ItemCapacityBadge owned={item.inInventory ? (item.nonStackable ? 1 : item.invQty) : 0} max={item.maxInv} label="Inventory" />
+                                                <ItemCapacityBadge owned={item.inInventory ? (item.separateInstances ? 1 : item.invQty) : 0} max={item.maxInv} label="Inventory" mode={item.separateInstances ? 'instance' : 'quantity'} />
                                             ) : item.inInventory ? (
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
@@ -780,7 +996,7 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                         </td>
                                         <td className="px-3 py-4 text-center whitespace-nowrap">
                                             {item.maxStorage <= 1 || item.readOnly ? (
-                                                <ItemCapacityBadge owned={item.inStorage ? (item.nonStackable ? 1 : item.storageQty) : 0} max={item.maxStorage} label="Storage" />
+                                                <ItemCapacityBadge owned={item.inStorage ? (item.separateInstances ? 1 : item.storageQty) : 0} max={item.maxStorage} label="Storage" mode={item.separateInstances ? 'instance' : 'quantity'} />
                                             ) : item.inStorage ? (
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
@@ -804,12 +1020,12 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                     const paddingBottom = virtualItems.length > 0
                                         ? rowVirtualizer.getTotalSize() - virtualItems[virtualItems.length - 1].end
                                         : 0;
-                                    return paddingBottom > 0 ? <tr><td colSpan={9} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
+                                    return paddingBottom > 0 ? <tr><td colSpan={tableColumnCount} style={{ height: paddingBottom, padding: 0, border: 'none' }} /></tr> : null;
                                 })()}
                                 </>
                             ) : (
                                 <tr>
-                                    <td colSpan={9} className="px-6 py-24 text-center">
+                                    <td colSpan={tableColumnCount} className="px-6 py-24 text-center">
                                         <p className="text-xs text-muted-foreground font-medium italic">Nothing found in this section.</p>
                                     </td>
                                 </tr>

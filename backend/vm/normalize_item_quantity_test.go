@@ -24,3 +24,29 @@ func TestNormalizeItemQuantity(t *testing.T) {
 		}
 	}
 }
+
+func TestNormalizeItemQuantityForMode_UsesKnownTechnicalCaps(t *testing.T) {
+	item := ItemViewModel{
+		Quantity:              50,
+		MaxInventory:          1,
+		MaxStorage:            0,
+		GameMaxInventory:      99,
+		GameMaxStorage:        600,
+		GameMaxInventoryKnown: true,
+		GameMaxStorageKnown:   true,
+	}
+	if got := NormalizeItemQuantityForMode(item, false, true); got != 50 {
+		t.Errorf("Expanded inventory quantity = %d, want 50", got)
+	}
+	if got := NormalizeItemQuantityForMode(item, true, true); got != 50 {
+		t.Errorf("Expanded storage quantity = %d, want 50", got)
+	}
+	if got := NormalizeItemQuantityForMode(item, false, false); got != 1 {
+		t.Errorf("Safe inventory quantity = %d, want authored cap 1", got)
+	}
+
+	item.GameMaxInventoryKnown = false
+	if got := NormalizeItemQuantityForMode(item, false, true); got != 1 {
+		t.Errorf("unknown technical cap = %d, want authored fallback 1", got)
+	}
+}

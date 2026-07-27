@@ -520,7 +520,7 @@ func itemVMByHandle(items []vm.ItemViewModel) map[uint32]vm.ItemViewModel {
 // Stone stack (which has its own memory_stones* logging), and only rows whose
 // normalized planned quantity differs from the current physical Quantity. read
 // re-selects the same section+row from the post-operation slot.
-func planItemSection(records []core.InventoryItem, submitted map[uint32]vm.ItemViewModel, isStorage bool, prefix string, section func(*core.SaveSlot) []core.InventoryItem) []itemQuantityPlan {
+func planItemSection(records []core.InventoryItem, submitted map[uint32]vm.ItemViewModel, isStorage, useTechnicalCaps bool, prefix string, section func(*core.SaveSlot) []core.InventoryItem) []itemQuantityPlan {
 	var plans []itemQuantityPlan
 	for row := range records {
 		rec := records[row]
@@ -532,7 +532,7 @@ func planItemSection(records []core.InventoryItem, submitted map[uint32]vm.ItemV
 		if !ok {
 			continue
 		}
-		planned := vm.NormalizeItemQuantity(vmItem, isStorage)
+		planned := vm.NormalizeItemQuantityForMode(vmItem, isStorage, useTechnicalCaps)
 		if planned == rec.Quantity {
 			continue
 		}
@@ -562,11 +562,11 @@ func planItemQuantityChanges(slot *core.SaveSlot, submitted *vm.CharacterViewMod
 	storMap := itemVMByHandle(submitted.Storage)
 
 	var plans []itemQuantityPlan
-	plans = append(plans, planItemSection(slot.Inventory.CommonItems, invMap, false, "inventory_common",
+	plans = append(plans, planItemSection(slot.Inventory.CommonItems, invMap, false, submitted.UseTechnicalItemCaps, "inventory_common",
 		func(s *core.SaveSlot) []core.InventoryItem { return s.Inventory.CommonItems })...)
-	plans = append(plans, planItemSection(slot.Inventory.KeyItems, invMap, false, "inventory_key",
+	plans = append(plans, planItemSection(slot.Inventory.KeyItems, invMap, false, submitted.UseTechnicalItemCaps, "inventory_key",
 		func(s *core.SaveSlot) []core.InventoryItem { return s.Inventory.KeyItems })...)
-	plans = append(plans, planItemSection(slot.Storage.CommonItems, storMap, true, "storage_common",
+	plans = append(plans, planItemSection(slot.Storage.CommonItems, storMap, true, submitted.UseTechnicalItemCaps, "storage_common",
 		func(s *core.SaveSlot) []core.InventoryItem { return s.Storage.CommonItems })...)
 	return plans
 }

@@ -21,9 +21,10 @@ func fakeRecord(buf []byte, off int, handle, qty, idx uint32) {
 // empty — callers add entries as needed.
 //
 // Layout:
-//   [0 .. invStart)              padding
-//   [invStart .. invEnd)         CommonItemCount × 12 bytes
-//   [storageStart .. storageEnd) StorageCommonCount × 12 bytes
+//
+//	[0 .. invStart)              padding
+//	[invStart .. invEnd)         CommonItemCount × 12 bytes
+//	[storageStart .. storageEnd) StorageCommonCount × 12 bytes
 func fixtureSlot(t *testing.T) (*core.SaveSlot, int, int) {
 	t.Helper()
 	const magicOff = 0
@@ -66,6 +67,13 @@ func TestBuildSnapshot_NilSlotReturnsError(t *testing.T) {
 	_, err := BuildSnapshot(nil, "ses-x", 0)
 	if err == nil {
 		t.Fatal("expected error for nil slot")
+	}
+}
+
+func TestDefaultAoWForBaseID_ResolvesCrossbowKickAlias(t *testing.T) {
+	id, name := defaultAoWForBaseID(0x029020C0)
+	if id != 4990 || name != "Kick" {
+		t.Fatalf("crossbow default skill = %d %q, want 4990 %q", id, name, "Kick")
 	}
 }
 

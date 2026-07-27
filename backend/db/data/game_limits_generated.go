@@ -150,7 +150,7 @@ var GameLimitsByItemID = map[uint32]GameLimitData{
 	0x40000073: {MaxInventory: 1, MaxStorage: 1, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x40000082: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x40000087: {MaxInventory: 99, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},    // EquipParamGoods
-	0x40000096: {MaxInventory: 999, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},   // EquipParamGoods
+	0x40000096: {MaxInventory: 999, MaxStorage: 999, InventoryKnown: true, StorageKnown: true}, // EquipParamGoods + observed storage override
 	0x400000A6: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x400000AA: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x400000AB: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
@@ -161,7 +161,7 @@ var GameLimitsByItemID = map[uint32]GameLimitData{
 	0x400000B3: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x400000B4: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x400000B5: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
-	0x400000B6: {MaxInventory: 999, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},   // EquipParamGoods
+	0x400000B6: {MaxInventory: 999, MaxStorage: 999, InventoryKnown: true, StorageKnown: true}, // EquipParamGoods + observed storage override
 	0x400000B7: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x400000B8: {MaxInventory: 1, MaxStorage: 0, InventoryKnown: true, StorageKnown: true},     // EquipParamGoods
 	0x400000BE: {MaxInventory: 99, MaxStorage: 600, InventoryKnown: true, StorageKnown: true},  // EquipParamGoods

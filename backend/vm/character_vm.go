@@ -60,26 +60,35 @@ func NormalizeClearCount(count uint32) uint32 {
 }
 
 type ItemViewModel struct {
-	Handle           uint32   `json:"handle"`
-	ID               uint32   `json:"id"`
-	BaseID           uint32   `json:"baseId"`
-	FamilyID         uint32   `json:"familyId"` // ownership/counting family override (Crimson/Cerulean flask +0 base); 0 = none
-	Name             string   `json:"name"`
-	Category         string   `json:"category"`    // broad type from handle prefix: "Weapon"/"Armor"/"Talisman"/"Item"/"Ash of War"
-	SubCategory      string   `json:"subCategory"` // main game tab: "tools", "key_items", "melee_armaments", ...
-	SubGroup         string   `json:"subGroup"`    // sub-grouping within tab: "Sacred Flasks", "Daggers", ...
-	Quantity         uint32   `json:"quantity"`
-	MaxInventory     uint32   `json:"maxInventory"`
-	MaxStorage       uint32   `json:"maxStorage"`
-	MaxUpgrade       uint32   `json:"maxUpgrade"`
-	CurrentUpgrade   uint32   `json:"currentUpgrade"`
-	IconPath         string   `json:"iconPath"`
-	Flags            []string `json:"flags"`
-	ReadOnly         bool     `json:"readOnly"`
-	AoWID            uint32   `json:"aowId"`            // item ID of the AoW gem attached to this weapon (0 = none / not a weapon)
-	CanMountAoW      bool     `json:"canMountAoW"`      // true iff gemMountType==2 (standard infusable weapon)
-	WepType          uint16   `json:"wepType"`          // weapon category integer from EquipParamWeapon (0 for non-weapons)
-	AoWCompatBitmask uint64   `json:"aowCompatBitmask"` // 36-bit canMountWep bitmask (non-zero for AoWs only)
+	Handle                uint32   `json:"handle"`
+	ID                    uint32   `json:"id"`
+	BaseID                uint32   `json:"baseId"`
+	FamilyID              uint32   `json:"familyId"` // ownership/counting family override (Crimson/Cerulean flask +0 base); 0 = none
+	Name                  string   `json:"name"`
+	Category              string   `json:"category"`    // broad type from handle prefix: "Weapon"/"Armor"/"Talisman"/"Item"/"Ash of War"
+	SubCategory           string   `json:"subCategory"` // main game tab: "tools", "key_items", "melee_armaments", ...
+	SubGroup              string   `json:"subGroup"`    // sub-grouping within tab: "Sacred Flasks", "Daggers", ...
+	Quantity              uint32   `json:"quantity"`
+	MaxInventory          uint32   `json:"maxInventory"`
+	MaxStorage            uint32   `json:"maxStorage"`
+	GameMaxInventory      uint32   `json:"gameMaxInventory"`
+	GameMaxStorage        uint32   `json:"gameMaxStorage"`
+	GameMaxInventoryKnown bool     `json:"gameMaxInventoryKnown"`
+	GameMaxStorageKnown   bool     `json:"gameMaxStorageKnown"`
+	RecordMode            string   `json:"recordMode"`
+	MaxUpgrade            uint32   `json:"maxUpgrade"`
+	CurrentUpgrade        uint32   `json:"currentUpgrade"`
+	IconPath              string   `json:"iconPath"`
+	Flags                 []string `json:"flags"`
+	ReadOnly              bool     `json:"readOnly"`
+	AoWID                 uint32   `json:"aowId"`            // item ID of the AoW gem attached to this weapon (0 = none / not a weapon)
+	CanMountAoW           bool     `json:"canMountAoW"`      // true iff gemMountType==2 (standard infusable weapon)
+	WepType               uint16   `json:"wepType"`          // weapon category integer from EquipParamWeapon (0 for non-weapons)
+	AoWCompatBitmask      uint64   `json:"aowCompatBitmask"` // 36-bit canMountWep bitmask (non-zero for AoWs only)
+	IsEquippedAoW         bool     `json:"isEquippedAoW"`
+	EquippedByWeapon      uint32   `json:"equippedByWeaponHandle"`
+	EquippedByWeaponName  string   `json:"equippedByWeaponName"`
+	AoWHandleShared       bool     `json:"aowHandleShared"`
 }
 
 // AoWAvailabilityEntry aggregates per-itemID availability for a single Ash of War.
@@ -96,32 +105,34 @@ type AoWAvailabilityEntry struct {
 }
 
 type CharacterViewModel struct {
-	Name                string                `json:"name"`
-	Level               uint32                `json:"level"`
-	Souls               uint32                `json:"souls"`
-	Class               uint8                 `json:"class"`
-	ClassName           string                `json:"className"`
-	Vigor               uint32                `json:"vigor"`
-	Mind                uint32                `json:"mind"`
-	Endurance           uint32                `json:"endurance"`
-	Strength            uint32                `json:"strength"`
-	Dexterity           uint32                `json:"dexterity"`
-	Intelligence        uint32                `json:"intelligence"`
-	Faith               uint32                `json:"faith"`
-	Arcane              uint32                `json:"arcane"`
-	TalismanSlots       uint8                 `json:"talismanSlots"`
-	ClearCount          uint32                `json:"clearCount"`
-	ScadutreeBlessing   uint8                 `json:"scadutreeBlessing"`
-	ShadowRealmBlessing uint8                 `json:"shadowRealmBlessing"`
-	MemoryStones        uint32                `json:"memoryStones"`
-	Gender              uint8                 `json:"gender"`
-	SoulMemory          uint32                `json:"soulMemory"`
-	Inventory           []ItemViewModel       `json:"inventory"`
-	Storage             []ItemViewModel       `json:"storage"`
-	Warnings            []string              `json:"warnings"`
-	StatValidation      *StatValidationResult `json:"statValidation,omitempty"`
-	EventFlagsAvailable bool                  `json:"eventFlagsAvailable"`
-	ClassBaseStats      map[string]uint32     `json:"classBaseStats"`
+	Name                 string                `json:"name"`
+	Level                uint32                `json:"level"`
+	Souls                uint32                `json:"souls"`
+	Class                uint8                 `json:"class"`
+	ClassName            string                `json:"className"`
+	Vigor                uint32                `json:"vigor"`
+	Mind                 uint32                `json:"mind"`
+	Endurance            uint32                `json:"endurance"`
+	Strength             uint32                `json:"strength"`
+	Dexterity            uint32                `json:"dexterity"`
+	Intelligence         uint32                `json:"intelligence"`
+	Faith                uint32                `json:"faith"`
+	Arcane               uint32                `json:"arcane"`
+	TalismanSlots        uint8                 `json:"talismanSlots"`
+	ClearCount           uint32                `json:"clearCount"`
+	ScadutreeBlessing    uint8                 `json:"scadutreeBlessing"`
+	ShadowRealmBlessing  uint8                 `json:"shadowRealmBlessing"`
+	MemoryStones         uint32                `json:"memoryStones"`
+	Gender               uint8                 `json:"gender"`
+	SoulMemory           uint32                `json:"soulMemory"`
+	Inventory            []ItemViewModel       `json:"inventory"`
+	Storage              []ItemViewModel       `json:"storage"`
+	AttachedItems        []ItemViewModel       `json:"attachedItems"`
+	Warnings             []string              `json:"warnings"`
+	StatValidation       *StatValidationResult `json:"statValidation,omitempty"`
+	EventFlagsAvailable  bool                  `json:"eventFlagsAvailable"`
+	ClassBaseStats       map[string]uint32     `json:"classBaseStats"`
+	UseTechnicalItemCaps bool                  `json:"useTechnicalItemCaps"`
 }
 
 // NormalizeItemQuantity returns the physical quantity ApplyVMToParsedSlot
@@ -131,10 +142,27 @@ type CharacterViewModel struct {
 // shared by updateItemsAndSync and the Character diagnostic quantity planner so
 // a planned quantity can never drift from what the writer stores.
 func NormalizeItemQuantity(item ItemViewModel, isStorage bool) uint32 {
+	return NormalizeItemQuantityForMode(item, isStorage, false)
+}
+
+// NormalizeItemQuantityForMode applies either conservative authored caps or,
+// for Expanded Limits / Chaos callers, regulation-derived technical caps when
+// they are known. Unknown technical limits always fall back to the authored
+// cap. The established zero-limit write contract remains "do not clamp", so a
+// character-wide save never deletes a pre-existing anomalous row merely
+// because its container is unavailable in regulation data.
+func NormalizeItemQuantityForMode(item ItemViewModel, isStorage, useTechnicalCaps bool) uint32 {
 	qty := item.Quantity
 	limit := item.MaxInventory
 	if isStorage {
 		limit = item.MaxStorage
+	}
+	if useTechnicalCaps {
+		if isStorage && item.GameMaxStorageKnown {
+			limit = item.GameMaxStorage
+		} else if !isStorage && item.GameMaxInventoryKnown {
+			limit = item.GameMaxInventory
+		}
 	}
 	if limit > 0 && qty > limit {
 		qty = limit
@@ -164,6 +192,7 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 		Gender:              data.Gender,
 		Inventory:           []ItemViewModel{},
 		Storage:             []ItemViewModel{},
+		AttachedItems:       []ItemViewModel{},
 	}
 
 	vm.Name = core.UTF16ToString(data.CharacterName[:])
@@ -200,12 +229,67 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 			gaItemsByHandle[gi.Handle] = gi
 		}
 	}
+	aowCopiesByHandle := make(map[uint32]core.AoWCopyRaw)
+	aowCopies := core.ScanAoWAvailability(slot)
+	for _, copy := range aowCopies {
+		aowCopiesByHandle[copy.Handle] = copy
+	}
 
 	// Map Inventory
-	vm.Inventory = mapItems(slot.Inventory, slot.GaMap, gaItemsByHandle)
+	vm.Inventory = mapItems(slot.Inventory, slot.GaMap, gaItemsByHandle, aowCopiesByHandle)
 
 	// Map Storage
-	vm.Storage = mapItems(slot.Storage, slot.GaMap, gaItemsByHandle)
+	vm.Storage = mapItems(slot.Storage, slot.GaMap, gaItemsByHandle, aowCopiesByHandle)
+
+	// An attached Ash of War can exist only as a GaItem referenced by its weapon,
+	// without a standalone InventoryItem record. Keep those copies in a distinct
+	// attached-items collection: the weapon's Inventory/Storage location is not
+	// evidence that the AoW itself has a record in the same container.
+	seenAoWHandles := make(map[uint32]struct{})
+	weaponNames := make(map[uint32]string)
+	for _, item := range vm.Inventory {
+		if item.Category == "Ash of War" {
+			seenAoWHandles[item.Handle] = struct{}{}
+		}
+		if item.Category == "Weapon" {
+			weaponNames[item.Handle] = item.Name
+		}
+	}
+	for _, item := range vm.Storage {
+		if item.Category == "Ash of War" {
+			seenAoWHandles[item.Handle] = struct{}{}
+		}
+		if item.Category == "Weapon" {
+			weaponNames[item.Handle] = item.Name
+		}
+	}
+	for i := range vm.Inventory {
+		if vm.Inventory[i].IsEquippedAoW {
+			vm.Inventory[i].EquippedByWeaponName = weaponNames[vm.Inventory[i].EquippedByWeapon]
+		}
+	}
+	for i := range vm.Storage {
+		if vm.Storage[i].IsEquippedAoW {
+			vm.Storage[i].EquippedByWeaponName = weaponNames[vm.Storage[i].EquippedByWeapon]
+		}
+	}
+	for _, copy := range aowCopies {
+		if copy.UsedByWeaponHandle == 0 {
+			continue
+		}
+		if _, exists := seenAoWHandles[copy.Handle]; exists {
+			continue
+		}
+		weaponName, ownerExists := weaponNames[copy.UsedByWeaponHandle]
+		if !ownerExists {
+			continue
+		}
+		item, ok := equippedAoWView(copy, weaponName)
+		if !ok {
+			continue
+		}
+		vm.AttachedItems = append(vm.AttachedItems, item)
+	}
 
 	// Populate MemoryStones — addToInventory writes to CommonItems; stones obtained
 	// in-game may reside in KeyItems. Scan both to handle either case.
@@ -227,7 +311,40 @@ func MapParsedSlotToVM(slot *core.SaveSlot) (*CharacterViewModel, error) {
 	return vm, nil
 }
 
-func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32, gaItemsByHandle map[uint32]core.GaItemFull) []ItemViewModel {
+func equippedAoWView(copy core.AoWCopyRaw, weaponName string) (ItemViewModel, bool) {
+	itemData, baseID := db.GetItemDataFuzzy(copy.ItemID)
+	if itemData.Name == "" {
+		return ItemViewModel{}, false
+	}
+	return ItemViewModel{
+		Handle:                copy.Handle,
+		ID:                    copy.ItemID,
+		BaseID:                baseID,
+		Name:                  itemData.Name,
+		Category:              "Ash of War",
+		SubCategory:           db.GetItemSubCategory(copy.ItemID, itemData, "Ash of War"),
+		SubGroup:              itemData.SubCategory,
+		Quantity:              1,
+		MaxInventory:          itemData.MaxInventory,
+		MaxStorage:            itemData.MaxStorage,
+		GameMaxInventory:      itemData.GameMaxInventory,
+		GameMaxStorage:        itemData.GameMaxStorage,
+		GameMaxInventoryKnown: itemData.GameMaxInventoryKnown,
+		GameMaxStorageKnown:   itemData.GameMaxStorageKnown,
+		RecordMode:            db.ItemRecordMode(copy.ItemID, itemData.Category),
+		MaxUpgrade:            itemData.MaxUpgrade,
+		IconPath:              itemData.IconPath,
+		Flags:                 itemData.Flags,
+		ReadOnly:              true,
+		AoWCompatBitmask:      itemData.AoWCompatBitmask,
+		IsEquippedAoW:         true,
+		EquippedByWeapon:      copy.UsedByWeaponHandle,
+		EquippedByWeaponName:  weaponName,
+		AoWHandleShared:       copy.HasSharedHandleConflict,
+	}, true
+}
+
+func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32, gaItemsByHandle map[uint32]core.GaItemFull, aowCopiesByHandle map[uint32]core.AoWCopyRaw) []ItemViewModel {
 	items := []ItemViewModel{}
 	seenPhysick := false
 
@@ -320,28 +437,43 @@ func mapItems(data core.EquipInventoryData, gaMap map[uint32]uint32, gaItemsByHa
 					}
 				}
 			}
+			aowCopy, isAoWCopy := aowCopiesByHandle[item.GaItemHandle]
+			isEquippedAoW := isAoWCopy && aowCopy.UsedByWeaponHandle != 0
+			readOnly := gamedata.IsCookbookItemID(itemID) ||
+				gamedata.IsWhetbladeItemID(itemID) ||
+				gamedata.IsBellBearingItemID(itemID) ||
+				slices.Contains(itemData.Flags, "no_database") ||
+				isEquippedAoW
 
 			items = append(items, ItemViewModel{
-				Handle:           item.GaItemHandle,
-				ID:               displayID,
-				BaseID:           baseID,
-				FamilyID:         familyID,
-				Name:             name,
-				Category:         category,
-				SubCategory:      db.GetItemSubCategory(displayID, itemData, category),
-				SubGroup:         itemData.SubCategory,
-				Quantity:         displayQuantity,
-				MaxInventory:     itemData.MaxInventory,
-				MaxStorage:       itemData.MaxStorage,
-				MaxUpgrade:       itemData.MaxUpgrade,
-				CurrentUpgrade:   currentUpgrade,
-				IconPath:         itemData.IconPath,
-				Flags:            itemData.Flags,
-				ReadOnly:         gamedata.IsCookbookItemID(itemID) || gamedata.IsWhetbladeItemID(itemID) || gamedata.IsBellBearingItemID(itemID) || slices.Contains(itemData.Flags, "no_database"),
-				AoWID:            aowID,
-				CanMountAoW:      itemData.GemMountType == 2,
-				WepType:          itemData.WepType,
-				AoWCompatBitmask: itemData.AoWCompatBitmask,
+				Handle:                item.GaItemHandle,
+				ID:                    displayID,
+				BaseID:                baseID,
+				FamilyID:              familyID,
+				Name:                  name,
+				Category:              category,
+				SubCategory:           db.GetItemSubCategory(displayID, itemData, category),
+				SubGroup:              itemData.SubCategory,
+				Quantity:              displayQuantity,
+				MaxInventory:          itemData.MaxInventory,
+				MaxStorage:            itemData.MaxStorage,
+				GameMaxInventory:      itemData.GameMaxInventory,
+				GameMaxStorage:        itemData.GameMaxStorage,
+				GameMaxInventoryKnown: itemData.GameMaxInventoryKnown,
+				GameMaxStorageKnown:   itemData.GameMaxStorageKnown,
+				RecordMode:            db.ItemRecordMode(displayID, itemData.Category),
+				MaxUpgrade:            itemData.MaxUpgrade,
+				CurrentUpgrade:        currentUpgrade,
+				IconPath:              itemData.IconPath,
+				Flags:                 itemData.Flags,
+				ReadOnly:              readOnly,
+				AoWID:                 aowID,
+				CanMountAoW:           itemData.GemMountType == 2,
+				WepType:               itemData.WepType,
+				AoWCompatBitmask:      itemData.AoWCompatBitmask,
+				IsEquippedAoW:         isEquippedAoW,
+				EquippedByWeapon:      aowCopy.UsedByWeaponHandle,
+				AoWHandleShared:       aowCopy.HasSharedHandleConflict,
 			})
 		}
 	}
@@ -400,12 +532,12 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 	data.CharacterName = NormalizeCharacterName(vm.Name)
 
 	// Update Inventory (with write-back to slot.Data)
-	if err := updateItemsAndSync(vm.Inventory, &slot.Inventory, slot, false); err != nil {
+	if err := updateItemsAndSync(vm.Inventory, &slot.Inventory, slot, false, vm.UseTechnicalItemCaps); err != nil {
 		return fmt.Errorf("inventory sync failed: %w", err)
 	}
 
 	// Update Storage (with write-back to slot.Data)
-	if err := updateItemsAndSync(vm.Storage, &slot.Storage, slot, true); err != nil {
+	if err := updateItemsAndSync(vm.Storage, &slot.Storage, slot, true, vm.UseTechnicalItemCaps); err != nil {
 		return fmt.Errorf("storage sync failed: %w", err)
 	}
 
@@ -415,7 +547,7 @@ func ApplyVMToParsedSlot(vm *CharacterViewModel, slot *core.SaveSlot) error {
 // updateItemsAndSync writes quantity changes from VM items back to slot.Data.
 // It operates on a snapshot of slot.Data: if any write fails, the original is preserved (rollback).
 // Uses SlotAccessor for bounds-checked writes instead of raw binary.LittleEndian.
-func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, slot *core.SaveSlot, isStorage bool) error {
+func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, slot *core.SaveSlot, isStorage, useTechnicalCaps bool) error {
 	vmMap := make(map[uint32]ItemViewModel)
 	for _, item := range vmItems {
 		vmMap[item.Handle] = item
@@ -472,7 +604,7 @@ func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, 
 			continue
 		}
 		if vmItem, ok := vmMap[handle]; ok {
-			qty := NormalizeItemQuantity(vmItem, isStorage)
+			qty := NormalizeItemQuantityForMode(vmItem, isStorage, useTechnicalCaps)
 			data.CommonItems[i].Quantity = qty
 			off := commonStart + i*12 + 4
 			if err := ssa.WriteU32(off, qty); err != nil {
@@ -491,7 +623,7 @@ func updateItemsAndSync(vmItems []ItemViewModel, data *core.EquipInventoryData, 
 			if vmItem, ok := vmMap[handle]; ok {
 				// Key Items live only in Inventory, so they always clamp to the
 				// Inventory limit.
-				qty := NormalizeItemQuantity(vmItem, false)
+				qty := NormalizeItemQuantityForMode(vmItem, false, useTechnicalCaps)
 				data.KeyItems[i].Quantity = qty
 				off := keyStart + i*12 + 4
 				if err := ssa.WriteU32(off, qty); err != nil {

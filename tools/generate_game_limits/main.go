@@ -27,6 +27,15 @@ type limits struct {
 	source         string
 }
 
+// observedGoodsStorageOverrides covers regulation rows whose repository fields
+// do not match live-game behavior. Furlcalling Finger Remedy is stackable and
+// can be stored up to its carried cap; both technical IDs represent the same
+// display item in different appearance states.
+var observedGoodsStorageOverrides = map[uint32]uint32{
+	0x40000096: 999,
+	0x400000B6: 999,
+}
+
 func main() {
 	rows := make(map[uint32]limits)
 	mustRead(goodsCSV, func(header map[string]int, row []string) error {
@@ -58,6 +67,17 @@ func main() {
 		}
 		return nil
 	})
+
+	for id, maxStorage := range observedGoodsStorageOverrides {
+		entry, ok := rows[id]
+		if !ok {
+			fatalf("storage override item 0x%08X missing from %s", id, goodsCSV)
+		}
+		entry.maxStorage = maxStorage
+		entry.storageKnown = true
+		entry.source += " + observed storage override"
+		rows[id] = entry
+	}
 
 	// Ammunition uses EquipParamWeapon rather than EquipParamGoods. Regulation
 	// exposes the carried limit as maxArrowQuantity. The in-game repository cap

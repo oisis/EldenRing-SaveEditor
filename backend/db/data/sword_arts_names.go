@@ -133,4 +133,6 @@ var SwordArtsNames = map[int32]string{
 	1197: "Contagious Fury",
 	1198: "Ordovis's Vortex",
 	1199: "Spinning Weapon",
+	// SwordArtsParam 4990 is the crossbow alias whose textId points to 503.
+	4990: "Kick",
 }

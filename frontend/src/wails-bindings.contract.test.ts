@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import * as App from '../wailsjs/go/main/App';
-import { core, editor, application as main, templates } from '../wailsjs/go/models';
+import { core, db, editor, application as main, templates, vm } from '../wailsjs/go/models';
 
 // This is a contract test that locks the Wails-generated binding surface
 // the inventory workspace UI depends on. Any unintentional rename or
@@ -225,6 +225,30 @@ describe('Wails binding contract: editor.EditableItem', () => {
         expect('itemID' in sample).toBe(true);
         expect('baseItemID' in sample).toBe(true);
         expect('isWeapon' in sample).toBe(true);
+    });
+});
+
+describe('Wails binding contract: item storage semantics', () => {
+    it('exposes record mode and technical caps on database and owned-item DTOs', () => {
+        const databaseItem = db.ItemEntry.createFrom({});
+        expect('recordMode' in databaseItem).toBe(true);
+        expect('gameMaxInventoryKnown' in databaseItem).toBe(true);
+        expect('gameMaxStorageKnown' in databaseItem).toBe(true);
+
+        const ownedItem = vm.ItemViewModel.createFrom({});
+        expect('recordMode' in ownedItem).toBe(true);
+        expect('gameMaxInventory' in ownedItem).toBe(true);
+        expect('gameMaxStorage' in ownedItem).toBe(true);
+        expect('gameMaxInventoryKnown' in ownedItem).toBe(true);
+        expect('gameMaxStorageKnown' in ownedItem).toBe(true);
+        expect('isEquippedAoW' in ownedItem).toBe(true);
+        expect('equippedByWeaponHandle' in ownedItem).toBe(true);
+        expect('equippedByWeaponName' in ownedItem).toBe(true);
+        expect('aowHandleShared' in ownedItem).toBe(true);
+
+        const character = vm.CharacterViewModel.createFrom({});
+        expect('attachedItems' in character).toBe(true);
+        expect('useTechnicalItemCaps' in character).toBe(true);
     });
 });
 

@@ -28,6 +28,7 @@ type ItemEntry struct {
 	GameMaxStorage        uint32            `json:"gameMaxStorage"`
 	GameMaxInventoryKnown bool              `json:"gameMaxInventoryKnown"`
 	GameMaxStorageKnown   bool              `json:"gameMaxStorageKnown"`
+	RecordMode            string            `json:"recordMode"`
 	MaxUpgrade            uint32            `json:"maxUpgrade"`
 	IconPath              string            `json:"iconPath"`
 	Flags                 []string          `json:"flags"`
@@ -63,6 +64,22 @@ type ItemEntry struct {
 	// the World-tab unlock endpoints instead of AddItemsToCharacter.
 	// Values: "cookbook" | "whetblade" | "bell_bearing" | "" (standard).
 	UnlockCategory string `json:"unlockCategory,omitempty"`
+}
+
+const (
+	ItemRecordModeQuantityStack     = "quantity_stack"
+	ItemRecordModeSeparateInstances = "separate_instances"
+)
+
+// ItemRecordMode returns the physical storage semantics for an item. Goods and
+// ammunition keep their quantity in a stack record; weapons, armor, talismans
+// and Ashes of War use one physical record per copy. UI code must not infer
+// this distinction from authored or regulation quantity caps.
+func ItemRecordMode(id uint32, category string) string {
+	if ItemIDToHandlePrefix(id) == 0xB0000000 || category == "arrows_and_bolts" {
+		return ItemRecordModeQuantityStack
+	}
+	return ItemRecordModeSeparateInstances
 }
 
 // weightedCategory lists item categories that have physical weight from regulation.bin weapon/armor params.
@@ -484,6 +501,7 @@ func GetItemEntryByID(id uint32) *ItemEntry {
 		GameMaxStorage:        item.GameMaxStorage,
 		GameMaxInventoryKnown: item.GameMaxInventoryKnown,
 		GameMaxStorageKnown:   item.GameMaxStorageKnown,
+		RecordMode:            ItemRecordMode(id, item.Category),
 		MaxUpgrade:            item.MaxUpgrade,
 		IconPath:              item.IconPath,
 		Flags:                 item.Flags,
@@ -918,6 +936,7 @@ func applyGameLimitsToEntry(entry *ItemEntry) {
 	entry.GameMaxStorage = item.GameMaxStorage
 	entry.GameMaxInventoryKnown = item.GameMaxInventoryKnown
 	entry.GameMaxStorageKnown = item.GameMaxStorageKnown
+	entry.RecordMode = ItemRecordMode(entry.ID, entry.Category)
 }
 
 // GetItemSubCategory returns the granular category string for an item.
