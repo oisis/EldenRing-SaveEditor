@@ -105,9 +105,9 @@ function SlotEditIcon({ label, onEdit }: { label: string; onEdit?: () => void })
             onMouseDown={(event) => event.stopPropagation()}
             onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}
             onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') edit(event); }}
-            className="absolute top-0.5 left-0.5 z-10 w-4 h-4 flex items-center justify-center rounded bg-red-700/85 hover:bg-red-600 text-white shadow ring-1 ring-red-900/40 transition-colors cursor-pointer"
+            className="absolute top-0.5 left-0.5 z-30 w-4 h-4 flex items-center justify-center rounded bg-red-700/85 hover:bg-red-600 text-white shadow ring-1 ring-red-900/40 transition-colors cursor-pointer"
         >
-            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="pointer-events-none w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M14.7 6.3l3 3M4 20l3.5-1 9.8-9.8a2.1 2.1 0 0 0 0-3l-.5-.5a2.1 2.1 0 0 0-3 0L4 16.5 4 20z" />
             </svg>
         </span>

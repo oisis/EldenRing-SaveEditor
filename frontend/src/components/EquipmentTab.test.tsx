@@ -189,12 +189,15 @@ describe('EquipmentTab', () => {
 
         render(<EquipmentTab charIdx={0} />);
         const editButton = await screen.findByRole('button', { name: 'Edit Weapon slot 1' });
-        expect(editButton).toHaveClass('bg-red-700/85', 'hover:bg-red-600', 'text-white', 'w-4', 'h-4');
+        expect(editButton).toHaveClass('bg-red-700/85', 'hover:bg-red-600', 'text-white', 'w-4', 'h-4', 'z-30');
+        expect(screen.getByAltText('Claymore')).toHaveClass('z-10');
+        expect(editButton.querySelector('svg')).toHaveClass('pointer-events-none');
         fireEvent.click(editButton);
 
         await waitFor(() => expect(StartInventoryEditSession).toHaveBeenCalledWith(0));
         expect(await screen.findByText('Infusion')).toBeInTheDocument();
         expect(screen.getByText('Ash of War')).toBeInTheDocument();
+        expect(screen.queryByRole('dialog', { name: 'Select equipment item' })).not.toBeInTheDocument();
     });
 
     it('renders real sorceries and incantations from the equipment snapshot', async () => {

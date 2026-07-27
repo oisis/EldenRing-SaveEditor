@@ -359,8 +359,8 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
     const statusBadge = (status: AoWStatus) => {
         const map: Record<AoWStatus, { label: string; cls: string }> = {
             current: { label: 'Current', cls: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30' },
-            available: { label: 'Available', cls: 'bg-green-500/15 text-green-700 dark:text-green-300 border-green-500/30' },
-            in_use: { label: 'In use', cls: 'bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30' },
+            available: { label: 'Available', cls: 'bg-green-500/15 text-black border-green-500/30' },
+            in_use: { label: 'In use', cls: 'bg-red-200 text-black border-red-300' },
             missing: { label: 'Missing', cls: 'bg-muted/30 text-muted-foreground border-border/40' },
             conflict: { label: 'Conflict', cls: 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30' },
         };

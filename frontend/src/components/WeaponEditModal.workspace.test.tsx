@@ -228,6 +228,15 @@ describe('WeaponEditModal (workspace mode)', () => {
                 isMissing: false,
                 hasSharedHandleConflict: false,
             },
+            {
+                itemId: 0x80002710,
+                totalCopies: 1,
+                availableCopies: 0,
+                usedCopies: 1,
+                usedByWeaponHandles: [0x80800002],
+                isMissing: false,
+                hasSharedHandleConflict: false,
+            },
         ]);
         mocks.GetItemList.mockImplementation(async (cat: string) => {
             if (cat !== 'ashes_of_war') return [];
@@ -237,6 +246,12 @@ describe('WeaponEditModal (workspace mode)', () => {
                     name: 'Sword Dance',
                     iconPath: '',
                     aowCompatBitmask: 1, // bit 0 set ⇒ compatible with wepType=1 (Dagger)
+                },
+                {
+                    id: 0x80002710,
+                    name: "Lion's Claw",
+                    iconPath: '',
+                    aowCompatBitmask: 1,
                 },
             ];
         });
@@ -258,7 +273,10 @@ describe('WeaponEditModal (workspace mode)', () => {
         // "No compatible Ashes of War available." fallback.
         await waitFor(() => {
             expect(screen.getByText('Sword Dance')).toBeInTheDocument();
+            expect(screen.getByText("Lion's Claw")).toBeInTheDocument();
         });
+        expect(screen.getByText('Available')).toHaveClass('text-black');
+        expect(screen.getByText('In use')).toHaveClass('bg-red-200', 'text-black', 'border-red-300');
         expect(screen.queryByText(/No compatible Ashes of War available/i))
             .not.toBeInTheDocument();
     });
