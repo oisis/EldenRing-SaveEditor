@@ -412,9 +412,9 @@ describe('SortOrderTab (workspace mode)', () => {
         expect(save).not.toBeDisabled();
     });
 
-    it('renders Unsaved badge when dirty', async () => {
+    it('does not render a redundant Unsaved badge when dirty', async () => {
         await mount(makeSnapshot({ inventory: [makeItem('hnd:0x80800001', 'inventory', 0)], dirty: true }));
-        expect(screen.getByText('Unsaved')).toBeInTheDocument();
+        expect(screen.queryByText('Unsaved')).not.toBeInTheDocument();
     });
 
     it('clicking Save changes opens confirm, then calls SaveInventoryWorkspaceChanges', async () => {

@@ -629,14 +629,6 @@ export function SortOrderTab({ charIndex, inventoryVersion, onMutate }: Props) {
                         </select>
                     </label>
                     <div className="ml-auto flex items-center gap-2">
-                        {dirty && (
-                            <span
-                                title="You have unsaved inventory edits. Press Save changes to persist."
-                                className="text-xs font-black uppercase tracking-wider text-cyan-700 bg-cyan-500/15 border border-cyan-500/40 rounded px-2 py-0.5 whitespace-nowrap"
-                            >
-                                Unsaved
-                            </span>
-                        )}
                         {errorCount > 0 && (
                             <span className="text-xs font-black uppercase tracking-wider text-destructive bg-red-500/10 border border-destructive/40 rounded px-2 py-0.5 whitespace-nowrap">
                                 {errorCount} error{errorCount === 1 ? '' : 's'}
