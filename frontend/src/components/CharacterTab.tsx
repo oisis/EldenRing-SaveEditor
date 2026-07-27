@@ -490,10 +490,10 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                     disabled={settingWeaponLevels}
                                     className="self-start px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-primary border border-primary/40 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                 >
-                                    {settingWeaponLevels ? 'Setting…' : 'Set owned weapons to these levels'}
+                                    {settingWeaponLevels ? 'Setting…' : 'Set all weapons levels'}
                                 </button>
                                 <span className="text-[10px] font-mono text-muted-foreground">
-                                    Standard +{addSettings.upgrade25} · Special +{addSettings.upgrade10} · Inventory only, never Storage or Spirit Ashes
+                                    Standard +{addSettings.upgrade25} · Special +{addSettings.upgrade10} · Inventory only
                                 </span>
                             </div>
                             <div className="flex items-center gap-8 md:col-span-2 pt-1 border-t border-border/30">

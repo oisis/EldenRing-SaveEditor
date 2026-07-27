@@ -286,7 +286,7 @@ describe('CharacterTab — Set owned weapon levels', () => {
         renderWithSettings();
         await openAddSettings();
 
-        fireEvent.click(await screen.findByText('Set owned weapons to these levels'));
+        fireEvent.click(await screen.findByText('Set all weapons levels'));
         // Modal is up but nothing has been called yet.
         expect(mocks.SetOwnedWeaponLevels).not.toHaveBeenCalled();
 
@@ -307,7 +307,7 @@ describe('CharacterTab — Set owned weapon levels', () => {
         renderWithSettings(onMutate);
         await openAddSettings();
 
-        fireEvent.click(await screen.findByText('Set owned weapons to these levels'));
+        fireEvent.click(await screen.findByText('Set all weapons levels'));
         fireEvent.click(screen.getByText('Set levels'));
 
         await waitFor(() =>
