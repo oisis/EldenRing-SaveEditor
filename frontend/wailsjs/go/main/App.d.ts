@@ -328,6 +328,8 @@ export function SetMapRegionFlags(arg1:number,arg2:number,arg3:boolean):Promise<
 
 export function SetNetworkParams(arg1:core.NetworkParamValues):Promise<void>;
 
+export function SetOwnedWeaponLevels(arg1:number,arg2:number,arg3:number):Promise<number>;
+
 export function SetQuestStep(arg1:number,arg2:string,arg3:number):Promise<void>;
 
 export function SetRegionUnlocked(arg1:number,arg2:number,arg3:boolean):Promise<void>;

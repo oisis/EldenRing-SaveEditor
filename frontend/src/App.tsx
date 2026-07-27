@@ -755,7 +755,7 @@ function App() {
                                 })()}
                                 <div className={['inventory', 'advanced'].includes(activeTab) ? 'flex-1 flex flex-col min-h-0 overflow-hidden' : 'flex-1 overflow-y-auto custom-scrollbar'}>
                                 <div className={activeTab !== 'character' ? 'hidden' : undefined}>
-                                    <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={() => { refreshUndoDepth(); setEquipmentRevision(value => value + 1); }} refreshKey={inventoryVersion} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} onAddSettingsChange={(s) => setCharAddSettings(prev => ({...prev, [selectedChar]: s}))} infuseTypes={infuseTypes} />
+                                    <CharacterTab charIndex={selectedChar} onNameChange={refreshSlots} onMutate={() => { refreshUndoDepth(); setEquipmentRevision(value => value + 1); setInventoryVersion(v => v + 1); }} refreshKey={inventoryVersion} addSettings={charAddSettings[selectedChar] ?? DEFAULT_ADD_SETTINGS} onAddSettingsChange={(s) => setCharAddSettings(prev => ({...prev, [selectedChar]: s}))} infuseTypes={infuseTypes} />
                                 </div>
                                 {activeTab === 'inventory' && (
                                     <div className="flex-1 flex flex-col min-h-0">

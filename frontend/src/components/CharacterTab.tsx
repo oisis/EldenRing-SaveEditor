@@ -1,6 +1,6 @@
 import {useEffect, useRef, useState} from 'react';
 import toast from '../lib/toast';
-import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyMirrorFavoriteToCharacter, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset, GetStartingClasses, SetCharacterGender, ApplyPresetToCharacter, GetCharacterAppearancePreset} from '../../wailsjs/go/main/App';
+import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyMirrorFavoriteToCharacter, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset, GetStartingClasses, SetCharacterGender, ApplyPresetToCharacter, GetCharacterAppearancePreset, SetOwnedWeaponLevels} from '../../wailsjs/go/main/App';
 import {vm, main, db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 import {RiskInfoIcon} from './RiskInfoIcon';
@@ -159,6 +159,24 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                 GetCharacter(charIndex).then(updated => { if (updated) setChar(updated); }).catch(() => {});
             })
             .catch(err => toast.error('Error: ' + err));
+    };
+
+    // Batch "set all owned weapons to these levels" (Add Settings).
+    const [showWeaponLevelsConfirm, setShowWeaponLevelsConfirm] = useState(false);
+    const [settingWeaponLevels, setSettingWeaponLevels] = useState(false);
+
+    const handleSetOwnedWeaponLevels = async () => {
+        setShowWeaponLevelsConfirm(false);
+        setSettingWeaponLevels(true);
+        try {
+            const changed = await SetOwnedWeaponLevels(charIndex, addSettings.upgrade25, addSettings.upgrade10);
+            toast.success(`Set ${changed} owned weapon${changed === 1 ? '' : 's'} to +${addSettings.upgrade25} / +${addSettings.upgrade10}`);
+            onMutate();
+        } catch (e) {
+            toast.error('Set weapon levels failed: ' + e);
+        } finally {
+            setSettingWeaponLevels(false);
+        }
     };
 
     const handleFixSoulMemory = () => {
@@ -466,6 +484,18 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                     style={{background: 'hsl(var(--border))'}} />
                                 <span className="text-[10px] font-mono font-bold text-primary w-5 text-right">+{addSettings.upgradeAsh}</span>
                             </div>
+                            <div className="md:col-span-2 flex flex-col gap-1.5 pt-1 border-t border-border/30">
+                                <button
+                                    onClick={() => setShowWeaponLevelsConfirm(true)}
+                                    disabled={settingWeaponLevels}
+                                    className="self-start px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-primary border border-primary/40 hover:bg-primary/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    {settingWeaponLevels ? 'Setting…' : 'Set owned weapons to these levels'}
+                                </button>
+                                <span className="text-[10px] font-mono text-muted-foreground">
+                                    Standard +{addSettings.upgrade25} · Special +{addSettings.upgrade10} · Inventory only, never Storage or Spirit Ashes
+                                </span>
+                            </div>
                             <div className="flex items-center gap-8 md:col-span-2 pt-1 border-t border-border/30">
                                 <label title="When enabled, only the highest-tier variant of each talisman family is shown — lower upgrade levels are hidden." className="flex items-center gap-2 cursor-pointer">
                                     <input type="checkbox" checked={addSettings.talismansHighestOnly} onChange={e => set({talismansHighestOnly: e.target.checked})}
@@ -623,6 +653,44 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
+                </div>
+            )}
+
+            {/* Set owned weapon levels confirmation */}
+            {showWeaponLevelsConfirm && (
+                <div className="fixed inset-0 z-[120] flex items-center justify-center bg-background/80 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="bg-card p-8 rounded-2xl border border-primary/40 flex flex-col space-y-5 max-w-md w-full mx-4 shadow-2xl shadow-primary/20 animate-in zoom-in-95 duration-200">
+                        <h2 className="text-sm font-black uppercase tracking-widest text-primary">Set owned weapon levels</h2>
+                        <div className="space-y-3 text-[11px] leading-relaxed text-muted-foreground">
+                            <p>
+                                This changes <strong className="text-foreground/90">every weapon you already own in this
+                                character's Inventory</strong> — both standard weapons (to <strong className="text-foreground/90">+{addSettings.upgrade25}</strong>)
+                                and special / somber weapons and shields (to <strong className="text-foreground/90">+{addSettings.upgrade10}</strong>).
+                            </p>
+                            <p>
+                                It does <strong className="text-foreground/90">not</strong> touch Storage and does
+                                <strong className="text-foreground/90"> not</strong> touch Spirit Ashes.
+                            </p>
+                            <p>
+                                This is an absolute set: weapons currently above the target level
+                                <strong className="text-foreground/90"> will be lowered</strong>. One Undo reverts the whole batch.
+                            </p>
+                        </div>
+                        <div className="flex justify-end space-x-3 pt-1">
+                            <button
+                                onClick={() => setShowWeaponLevelsConfirm(false)}
+                                className="px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-muted-foreground border border-border/50 hover:bg-muted/30 transition-all"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSetOwnedWeaponLevels}
+                                className="px-4 py-2 rounded text-[11px] font-black uppercase tracking-widest text-primary-foreground bg-primary hover:brightness-110 transition-all"
+                            >
+                                Set levels
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

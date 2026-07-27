@@ -41,6 +41,7 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     SetCharacterGender: vi.fn(),
     ApplyPresetToCharacter: vi.fn(),
     GetCharacterAppearancePreset: vi.fn(() => Promise.resolve(null)),
+    SetOwnedWeaponLevels: vi.fn(() => Promise.resolve(0)),
 }));
 
 vi.mock('../lib/toast', () => {
@@ -256,5 +257,62 @@ describe('CharacterTab — matched appearance card', () => {
         expect(screen.getByText('Casca, Berserk’s Band of the Falcon Commander')).toBeTruthy();
         const thumb = screen.getByAltText('Casca, Berserk’s Band of the Falcon Commander');
         expect(thumb.getAttribute('src')).toBe('presets/casca.jpg');
+    });
+});
+
+describe('CharacterTab — Set owned weapon levels', () => {
+    const ADD_SETTINGS = {
+        upgrade25: 25, upgrade10: 10, infuseOffset: 0, upgradeAsh: 0,
+        talismansHighestOnly: false, includeAshenCapital: false,
+    } as never;
+
+    function renderWithSettings(onMutate = vi.fn()) {
+        return render(
+            <CharacterTab
+                charIndex={2}
+                onMutate={onMutate}
+                addSettings={ADD_SETTINGS}
+                onAddSettingsChange={vi.fn()}
+                infuseTypes={[]}
+            />,
+        );
+    }
+
+    async function openAddSettings() {
+        fireEvent.click(await screen.findByText('Add Settings'));
+    }
+
+    it('confirmation modal blocks the binding until the user confirms', async () => {
+        renderWithSettings();
+        await openAddSettings();
+
+        fireEvent.click(await screen.findByText('Set owned weapons to these levels'));
+        // Modal is up but nothing has been called yet.
+        expect(mocks.SetOwnedWeaponLevels).not.toHaveBeenCalled();
+
+        // Text must explicitly exclude Storage and Spirit Ashes (button hint
+        // + modal both reinforce it), and warn that levels may be lowered.
+        expect(screen.getAllByText(/Spirit Ashes/).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/Storage/).length).toBeGreaterThan(0);
+        expect(screen.getByText(/will be lowered/)).toBeTruthy();
+
+        // Cancel leaves the binding untouched.
+        fireEvent.click(screen.getByText('Cancel'));
+        expect(mocks.SetOwnedWeaponLevels).not.toHaveBeenCalled();
+    });
+
+    it('confirming calls the binding with the current slider values and refreshes on success', async () => {
+        mocks.SetOwnedWeaponLevels.mockResolvedValue(7);
+        const onMutate = vi.fn();
+        renderWithSettings(onMutate);
+        await openAddSettings();
+
+        fireEvent.click(await screen.findByText('Set owned weapons to these levels'));
+        fireEvent.click(screen.getByText('Set levels'));
+
+        await waitFor(() =>
+            expect(mocks.SetOwnedWeaponLevels).toHaveBeenCalledWith(2, 25, 10),
+        );
+        await waitFor(() => expect(onMutate).toHaveBeenCalled());
     });
 });

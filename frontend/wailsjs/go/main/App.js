@@ -642,6 +642,10 @@ export function SetNetworkParams(arg1) {
   return window['go']['main']['App']['SetNetworkParams'](arg1);
 }
 
+export function SetOwnedWeaponLevels(arg1, arg2, arg3) {
+  return window['go']['main']['App']['SetOwnedWeaponLevels'](arg1, arg2, arg3);
+}
+
 export function SetQuestStep(arg1, arg2, arg3) {
   return window['go']['main']['App']['SetQuestStep'](arg1, arg2, arg3);
 }

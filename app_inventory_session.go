@@ -72,6 +72,37 @@ func (a *App) acquireSession(sessionID string) (*editor.InventoryEditSession, er
 //     effect (re-runs on charIndex / inventoryVersion change) still gets
 //     the post-event snapshot it depends on.
 func (a *App) StartInventoryEditSession(charIdx int) (editor.InventoryWorkspaceSnapshot, error) {
+	// replaceExisting=true preserves the historical contract: any prior
+	// session for this character is evicted and replaced.
+	return a.startInventoryEditSession(charIdx, true)
+}
+
+// startInventoryEditSessionIfNone is the collision-safe variant used by
+// self-contained batch endpoints (e.g. SetOwnedWeaponLevels) that must
+// never clobber a session the user opened. It runs the identical Start
+// flow but the "does a session already exist?" test and the decision to
+// reject are performed atomically under lifecycleMu[charIdx] — the SAME
+// lock that guards eviction/publish in the replacing path — so no peer
+// StartInventoryEditSession can slip a fresh session in between our check
+// and our own publish. When a session already exists it returns an error
+// and evicts NOTHING; when none exists it builds and publishes exactly
+// like Start.
+//
+// This closes the TOCTOU that a separate map pre-check + later Start could
+// not: there, a session created after the pre-check but before Start would
+// be silently deleted by Start's replace semantics.
+func (a *App) startInventoryEditSessionIfNone(charIdx int) (editor.InventoryWorkspaceSnapshot, error) {
+	return a.startInventoryEditSession(charIdx, false)
+}
+
+// startInventoryEditSession is the shared core for both start variants.
+// With replaceExisting=true it evicts and drains any prior session for the
+// character before building the new one (the UI-facing Start contract).
+// With replaceExisting=false it instead REJECTS when a session already
+// exists, removing nothing — the collision-safe start. The existence check
+// and its consequence both happen under lifecycleMu[charIdx], so the
+// reject decision cannot race a concurrent Start/publish.
+func (a *App) startInventoryEditSession(charIdx int, replaceExisting bool) (editor.InventoryWorkspaceSnapshot, error) {
 	// saveMu.RLock pins the a.save pointer for the entire Start flow so a
 	// concurrent SelectAndOpenSave / DownloadRemoteSave cannot swap the
 	// underlying SaveFile while we are evicting the prior session and
@@ -91,14 +122,22 @@ func (a *App) StartInventoryEditSession(charIdx int) (editor.InventoryWorkspaceS
 
 	slot := &a.save.Slots[charIdx]
 
-	// Step 1 — evict any prior session for this character from the
-	// registry. We deliberately delete BEFORE building the new snapshot
-	// so peer endpoints holding only the prior session's ID see "not
-	// found" immediately and the frontend self-heal triggers a fresh
-	// Start (which then queues behind us on lifecycleMu).
+	// Step 1 — inspect the registry under editSessionsMu. In the
+	// collision-safe (non-replacing) mode a pre-existing session is a hard
+	// reject that evicts NOTHING. In the replacing mode we evict the prior
+	// session BEFORE building the new snapshot so peer endpoints holding
+	// only the prior session's ID see "not found" immediately and the
+	// frontend self-heal triggers a fresh Start (which then queues behind
+	// us on lifecycleMu). Because both the existence check and the reject
+	// happen while we hold lifecycleMu[charIdx], no concurrent Start can
+	// publish a session between our check and our own publish below.
 	var prior *editor.InventoryEditSession
 	a.editSessionsMu.Lock()
 	if oldID, ok := a.editSessionByChar[charIdx]; ok {
+		if !replaceExisting {
+			a.editSessionsMu.Unlock()
+			return editor.InventoryWorkspaceSnapshot{}, fmt.Errorf("close the inventory edit session for character slot %d before continuing", charIdx+1)
+		}
 		if p, ok2 := a.editSessions[oldID]; ok2 {
 			prior = p
 		}
@@ -110,7 +149,8 @@ func (a *App) StartInventoryEditSession(charIdx int) (editor.InventoryWorkspaceS
 	// Step 2 — drain the prior session BEFORE touching the slot.
 	// closeSession blocks until any in-flight Save (or other mutator)
 	// has released the per-session lock, so editor.StartSession below
-	// reads a quiesced slot.
+	// reads a quiesced slot. (No-op in the collision-safe path, which
+	// returned above if any session existed.)
 	if prior != nil {
 		closeSession(prior)
 	}

@@ -157,6 +157,61 @@ func UpdateWeapon(snap *InventoryWorkspaceSnapshot, uid string, patch WeaponPatc
 	return nil
 }
 
+// SetOwnedWeaponLevels is the batch "set every owned weapon to these
+// levels" primitive. It walks the INVENTORY container only (Storage is
+// never iterated, so it can never be touched), selects weapon-editable
+// items (IsWeapon — includes shields) whose MaxUpgrade is EXACTLY 25
+// (standard) or 10 (special/somber, incl. somber shields), clamps the
+// requested level to the item's MaxUpgrade, and applies an absolute SET
+// via UpdateWeapon. Because SetUpgrade only re-encodes the upgrade offset
+// of ItemID, the current infusion, Ash of War, handle, quantity and every
+// other field are preserved. Items with MaxUpgrade 0 / unknown / non-weapon
+// (Spirit Ashes, armor, talismans) are skipped; pass-through records never
+// reach InventoryItems and so are skipped by construction.
+//
+// The SET may raise OR lower a weapon's level. A weapon already sitting at
+// its target level is left untouched (no UpdateWeapon call, so no pending
+// patch and no snapshot Dirty flip) — the count reflects only weapons whose
+// level actually changed, so the caller can skip the Save/Undo entirely
+// when nothing moved. On the first per-item error the snapshot is left in
+// whatever partial state UpdateWeapon reached and the error is returned so
+// the caller rolls back the whole batch (Save is never reached).
+//
+// ponytail: UpdateWeapon re-runs Validate per changed item, so a full
+// inventory is O(n²); n is a few thousand at most, so this is fine. Batch a
+// single Validate at the end only if it ever shows up in a profile.
+func SetOwnedWeaponLevels(snap *InventoryWorkspaceSnapshot, upgrade25, upgrade10 int) (int, error) {
+	if snap == nil {
+		return 0, fmt.Errorf("SetOwnedWeaponLevels: nil snapshot")
+	}
+	changed := 0
+	for i := range snap.InventoryItems {
+		it := &snap.InventoryItems[i]
+		if !it.IsWeapon {
+			continue
+		}
+		var target int
+		switch it.MaxUpgrade {
+		case 25:
+			target = ClampUpgrade(upgrade25, it.MaxUpgrade)
+		case 10:
+			target = ClampUpgrade(upgrade10, it.MaxUpgrade)
+		default:
+			continue
+		}
+		// Already at target — skip so no no-op patch or spurious Undo is
+		// produced. This is what keeps `changed` an honest count.
+		if it.CurrentUpgrade == target {
+			continue
+		}
+		if err := UpdateWeapon(snap, it.UID, WeaponPatch{SetUpgrade: true, Upgrade: target}); err != nil {
+			return changed, fmt.Errorf("SetOwnedWeaponLevels: %s: %w", it.Name, err)
+		}
+		changed++
+	}
+	return changed, nil
+}
+
 // encodeWeaponItemID is the inverse of decodeWeaponUpgradeInfusion:
 // given a base ID, upgrade level, and infusion name, return the
 // effective item ID stored in the inventory record.
