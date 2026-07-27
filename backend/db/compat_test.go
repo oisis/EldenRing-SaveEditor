@@ -1,6 +1,10 @@
 package db
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/db/data"
+)
 
 // Test data references (from backend/db/data/aow_compat.go and weapon_gem_mount.go):
 //
@@ -192,6 +196,9 @@ func TestIsAshOfWarCompatibleWithWeapon_DLCWepTypesMapped(t *testing.T) {
 }
 
 func TestAoWCompatMasks_UnresolvedDLCAoWsFailClosed(t *testing.T) {
+	// A DLC AoW is "resolved" if it has a direct mask (bits 0..39) OR a heuristic
+	// wepType entry. Anything with neither must fail-closed. `expected` lists AoWs
+	// we knowingly cannot resolve — currently none.
 	expected := map[uint32]string{}
 
 	seen := make(map[uint32]string, len(expected))
@@ -205,6 +212,9 @@ func TestAoWCompatMasks_UnresolvedDLCAoWsFailClosed(t *testing.T) {
 		}
 		if !isDLC || item.AoWCompatBitmask != 0 {
 			continue
+		}
+		if _, resolved := data.AoWHeuristicWepTypes[item.ID]; resolved {
+			continue // resolved via the heuristic fallback, not fail-closed
 		}
 
 		seen[item.ID] = item.Name
@@ -276,6 +286,59 @@ func TestIsAshOfWarCompatibleWithWeapon_SourceVerifiedDLCAoWs(t *testing.T) {
 				t.Fatal("expected compatible=false on dagger")
 			}
 		})
+	}
+}
+
+// B2: Dueling / Thrusting Shields (wepType 90) previously mapped to bit 43, which no
+// AoW ever set, so every AoW edit was refused. Now they map to reserved_canMountWep
+// bit 2 (mask bit 38). Impaling Thrust (0x80002774, reserved=12 → bits 38,39) must
+// mount; Sword Dance (0x80003070, reserved=8 → bit 39 only) must not.
+func TestIsAshOfWarCompatibleWithWeapon_DuelingShield(t *testing.T) {
+	const duelingShield = uint32(0x03B9ACA0) // WepType 90, GemMountType 2
+
+	compatible, known := IsAshOfWarCompatibleWithWeapon(0x80002774, duelingShield)
+	if !known || !compatible {
+		t.Errorf("Impaling Thrust + Dueling Shield: got (compatible=%v, known=%v), want (true, true)", compatible, known)
+	}
+
+	compatible, known = IsAshOfWarCompatibleWithWeapon(0x80003070, duelingShield)
+	if !known {
+		t.Fatal("Sword Dance + Dueling Shield: expected known=true")
+	}
+	if compatible {
+		t.Error("Sword Dance + Dueling Shield: expected compatible=false (bit 38 not set)")
+	}
+}
+
+// B3: base AoWs whose reserved_canMountWep declares DLC-class compatibility used to
+// have that data dropped. Lifesteal Fist (0x80005014, reserved=1) must now be
+// compatible with Hand-to-Hand weapons (wepType 88, mask bit 36).
+func TestIsAoWCompatibleWithWepType_ReservedBitsAppliedToBaseAoWs(t *testing.T) {
+	compatible, known := IsAoWCompatibleWithWepType(0x80005014, 88)
+	if !known || !compatible {
+		t.Errorf("Lifesteal Fist + wepType 88: got (compatible=%v, known=%v), want (true, true)", compatible, known)
+	}
+}
+
+// B5: real torches are wepType 87. They previously mapped to the Bow bit (25); the fix
+// points them at the Torch column (bit 35). A Torch-only AoW must mount on a torch and a
+// Bow-only AoW must not.
+func TestIsAshOfWarCompatibleWithWeapon_TorchUsesTorchBitNotBow(t *testing.T) {
+	const torch = uint32(0x016E3600) // WepType 87, GemMountType 2
+
+	// No Skill (0x800078B4) sets bit 35 (Torch) but not bit 25 (Bow).
+	compatible, known := IsAshOfWarCompatibleWithWeapon(0x800078B4, torch)
+	if !known || !compatible {
+		t.Errorf("No Skill (Torch-compatible) + Torch: got (compatible=%v, known=%v), want (true, true)", compatible, known)
+	}
+
+	// Mighty Shot (0x80009D08) sets bit 25 (Bow) but not bit 35 (Torch): must NOT leak to torches.
+	compatible, known = IsAshOfWarCompatibleWithWeapon(0x80009D08, torch)
+	if !known {
+		t.Fatal("Bow-only AoW + Torch: expected known=true")
+	}
+	if compatible {
+		t.Error("Bow-only AoW + Torch: expected compatible=false (torch must not use the Bow bit)")
 	}
 }
 

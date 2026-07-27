@@ -6,6 +6,7 @@ import {
 } from '../../wailsjs/go/main/App';
 import { db, editor, application as main } from '../../wailsjs/go/models';
 import { aowApplyPatch, infusionPatch, upgradePatch } from './weaponPatch';
+import { WEP_TYPE_TO_BITS, AOW_HEURISTIC_WEPTYPES } from '../data/aowCompat.generated';
 
 // The modal routes upgrade / infusion / AoW edits through the in-memory
 // inventory workspace via updateWeapon(uid, patch). pending* state from the
@@ -28,26 +29,29 @@ interface Props {
     workspaceItem: editor.EditableItem;
 }
 
-// Mirrors backend data.CanMountBitsForWepType.
-// Maps weapon wepType → bit positions in AoWCompatBitmask.
-const WEP_TYPE_TO_BITS: Record<number, number[]> = {
-    1: [0], 3: [1], 5: [2], 7: [3], 9: [8], 11: [9], 13: [6], 14: [5], 15: [4], 16: [7], 17: [7],
-    19: [11], 21: [13], 23: [10], 24: [10], 25: [12], 28: [14], 29: [14], 31: [15], 32: [17],
-    33: [18], 35: [20], 37: [19], 39: [20], 41: [21], 43: [22], 50: [23], 51: [24], 52: [25],
-    53: [26], 54: [27], 55: [28], 57: [29], 61: [30], 65: [32], 66: [33], 67: [34], 69: [34], 68: [35],
-    87: [25], 88: [36], 89: [38], 90: [43], 91: [37], 92: [40], 93: [42], 94: [6, 41], 95: [21, 39],
-};
-
 type AoWCompatStatus = 'compatible' | 'incompatible' | 'unknown';
 
-function getAoWCompatStatus(aowCompatBitmask: number, wepType: number): AoWCompatStatus {
-    if (aowCompatBitmask === 0 || wepType === 0) return 'unknown';
+// Mirrors backend db.IsAoWCompatibleWithWepType. WEP_TYPE_TO_BITS and
+// AOW_HEURISTIC_WEPTYPES are generated (single source with the Go backend) —
+// see frontend/src/data/aowCompat.generated.ts. Two layers, both fail-closed:
+//   1. direct 40-bit mask (canMountWep + reserved_canMountWep),
+//   2. heuristic fallback for DLC arts with no direct bit.
+export function getAoWCompatStatus(aowId: number, aowCompatBitmask: number, wepType: number): AoWCompatStatus {
+    if (wepType === 0) return 'unknown';
     const bitPositions = WEP_TYPE_TO_BITS[wepType];
+    if (bitPositions && bitPositions.length > 0 && aowCompatBitmask !== 0) {
+        const mask = BigInt(aowCompatBitmask);
+        if (bitPositions.some(bitPos => ((mask >> BigInt(bitPos)) & BigInt(1)) === BigInt(1))) {
+            return 'compatible';
+        }
+    }
+    const heuristic = AOW_HEURISTIC_WEPTYPES[aowId];
+    if (heuristic) {
+        return heuristic.includes(wepType) ? 'compatible' : 'incompatible';
+    }
+    if (aowCompatBitmask === 0) return 'unknown';
     if (!bitPositions || bitPositions.length === 0) return 'unknown';
-    const mask = BigInt(aowCompatBitmask);
-    return bitPositions.some(bitPos => ((mask >> BigInt(bitPos)) & BigInt(1)) === BigInt(1))
-        ? 'compatible'
-        : 'incompatible';
+    return 'incompatible';
 }
 
 interface AshOfWarOption {
@@ -193,7 +197,7 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
         return ashesOfWar.filter(a => {
  if (q && !a.name.toLowerCase().includes(q)) return false;
  if (!showUnavailable) {
- const compat = getAoWCompatStatus(a.aowCompatBitmask, wepType);
+ const compat = getAoWCompatStatus(a.id, a.aowCompatBitmask, wepType);
  // Fail-closed default view: hide incompatible AND unknown.
  if (compat !== 'compatible') return false;
             }
@@ -216,7 +220,7 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
     const selectedAoWStatus: AoWStatus | null =
         selectedAoW !== null && selectedAoW !== 0 ? getStatus(selectedAoW) : null;
     const selectedAoWCompat: AoWCompatStatus | null =
-        selectedAoWEntry ? getAoWCompatStatus(selectedAoWEntry.aowCompatBitmask, wepType) : null;
+        selectedAoWEntry ? getAoWCompatStatus(selectedAoWEntry.id, selectedAoWEntry.aowCompatBitmask, wepType) : null;
 
     const aowChanged = selectedAoW !== null && selectedAoW !== currentAoWId;
     // Remove (selectedAoW===0) is always allowed when there is a current AoW.
@@ -635,7 +639,7 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
                                     ) : (
                                         filteredAoW.map(aow => {
                                             const status = getStatus(aow.id);
-                                            const compat = getAoWCompatStatus(aow.aowCompatBitmask, wepType);
+                                            const compat = getAoWCompatStatus(aow.id, aow.aowCompatBitmask, wepType);
                                             const isSelected = selectedAoW === aow.id;
  const selectable = compat === 'compatible';
                                             return (

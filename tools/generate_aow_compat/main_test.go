@@ -1,0 +1,168 @@
+package main
+
+import (
+	"path/filepath"
+	"strings"
+	"testing"
+)
+
+const (
+	gemFixture    = "testdata/EquipParamGem.csv"
+	weaponFixture = "testdata/EquipParamWeapon.csv"
+)
+
+func mustGenerate(t *testing.T) *result {
+	t.Helper()
+	res, err := generate(gemFixture, weaponFixture)
+	if err != nil {
+		t.Fatalf("generate: %v", err)
+	}
+	return res
+}
+
+func TestGenerate_MaskBits0to35(t *testing.T) {
+	res := mustGenerate(t)
+	// Row 10 sets canMountWep_Dagger (bit 0) + canMountWep_SwordNormal (bit 1).
+	if got := res.masks[0x8000000A]; got != 0x3 {
+		t.Errorf("row 10 mask = 0x%X, want 0x3", got)
+	}
+}
+
+func TestGenerate_ReservedBitsMapTo36_39(t *testing.T) {
+	res := mustGenerate(t)
+	// Row 100 has reserved_canMountWep=15 → all four DLC bits 36..39.
+	if got := res.masks[0x80000064]; got != 0xF000000000 {
+		t.Errorf("row 100 mask = 0x%X, want 0xF000000000 (bits 36-39)", got)
+	}
+	// Row 300 has reserved bit 2 → mask bit 38 (Dueling/Thrusting Shields).
+	if got := res.masks[0x8000012C]; got != 0x4000000000 {
+		t.Errorf("row 300 mask = 0x%X, want 0x4000000000 (bit 38)", got)
+	}
+}
+
+func TestGenerate_ZeroMaskOmittedAndHeuristicResolved(t *testing.T) {
+	res := mustGenerate(t)
+	// Row 200 has no canMountWep / reserved bits → mask omitted, heuristic resolves it.
+	if _, ok := res.masks[0x800000C8]; ok {
+		t.Error("row 200 has mask==0 and must be omitted from AoWCompatMasks")
+	}
+	got := res.heuristic[0x800000C8]
+	if len(got) != 1 || got[0] != 92 {
+		t.Errorf("row 200 heuristic = %v, want [92]", got)
+	}
+}
+
+func TestGenerate_WeaponMounts(t *testing.T) {
+	res := mustGenerate(t)
+	// Keys are the decimal Row ID rendered as hex (1000 → 0x3E8, 4000 → 0xFA0).
+	// gemMountType 0 weapons are excluded; 1 and 2 are kept.
+	if !strings.Contains(res.weaponGo, "0x000003E8: {WepType: 92, GemMountType: 2}") {
+		t.Error("weapon row 1000 (gm2) missing from generated WeaponGemMounts")
+	}
+	if strings.Contains(res.weaponGo, "0x00000FA0:") {
+		t.Error("weapon row 4000 (gm0) must be excluded from WeaponGemMounts")
+	}
+	if !strings.Contains(res.weaponGo, "0x00000BB8: {WepType: 3, GemMountType: 1}") {
+		t.Error("somber weapon row 3000 (gm1) missing from generated WeaponGemMounts")
+	}
+}
+
+func TestGenerate_Reserved2GuardFails(t *testing.T) {
+	_, err := generate("testdata/EquipParamGem_reserved2.csv", weaponFixture)
+	if err == nil {
+		t.Fatal("expected error for non-zero reserved2_canMountWep")
+	}
+	if !strings.Contains(err.Error(), "reserved2_canMountWep") {
+		t.Errorf("error = %q, want mention of reserved2_canMountWep", err)
+	}
+}
+
+func TestGenerate_MissingColumnFails(t *testing.T) {
+	_, err := generate("testdata/EquipParamGem_missingcol.csv", weaponFixture)
+	if err == nil {
+		t.Fatal("expected error for missing required column")
+	}
+	if !strings.Contains(err.Error(), "canMountWep_Torch") {
+		t.Errorf("error = %q, want mention of the missing column", err)
+	}
+}
+
+// TestGenerate_StrictValidationRejects covers the fail-closed parsing: every
+// malformed required field aborts generation instead of being silently dropped
+// or defaulted. Each case names the substrings the error must carry so the
+// message stays actionable (field name + offending value).
+func TestGenerate_StrictValidationRejects(t *testing.T) {
+	cases := []struct {
+		name    string
+		gem     string
+		weapon  string
+		wantSub []string
+	}{
+		{"invalid Row ID", "testdata/EquipParamGem_badrowid.csv", weaponFixture, []string{"Row ID", "abc"}},
+		{"duplicate Row ID", "testdata/EquipParamGem_duprowid.csv", weaponFixture, []string{"duplicate Row ID", "10"}},
+		{"canMountWep = 2", "testdata/EquipParamGem_canmount2.csv", weaponFixture, []string{"canMountWep_Dagger", "2", "exactly 0 or 1"}},
+		{"canMountWep = abc", "testdata/EquipParamGem_canmountabc.csv", weaponFixture, []string{"canMountWep_Dagger", "abc"}},
+		{"reserved out of range", "testdata/EquipParamGem_badreserved.csv", weaponFixture, []string{"reserved_canMountWep", "16", "0..15"}},
+		{"reserved2 non-integer text", "testdata/EquipParamGem_reserved2text.csv", weaponFixture, []string{"reserved2_canMountWep", "abc"}},
+		{"reserved2 non-zero", "testdata/EquipParamGem_reserved2.csv", weaponFixture, []string{"reserved2_canMountWep", "non-zero"}},
+		{"truncated CSV row", "testdata/EquipParamGem_short.csv", weaponFixture, []string{"truncated record"}},
+		{"wepType overflows uint16", gemFixture, "testdata/EquipParamWeapon_weptype_overflow.csv", []string{"wepType", "70000", "uint16"}},
+		{"gemMountType out of 0..2", gemFixture, "testdata/EquipParamWeapon_gemmount_bad.csv", []string{"gemMountType", "3"}},
+		{"weapon invalid Row ID", gemFixture, "testdata/EquipParamWeapon_badrowid.csv", []string{"Row ID", "abc"}},
+		// Duplicate must name file, current CSV row (3), the duplicate Row ID (1000)
+		// and the CSV row it first appeared on (2).
+		{"weapon duplicate Row ID", gemFixture, "testdata/EquipParamWeapon_duprowid.csv", []string{"EquipParamWeapon_duprowid.csv", "CSV row 3", "duplicate Row ID", "1000", "CSV row 2"}},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			_, err := generate(c.gem, c.weapon)
+			if err == nil {
+				t.Fatalf("expected error, got nil")
+			}
+			for _, sub := range c.wantSub {
+				if !strings.Contains(err.Error(), sub) {
+					t.Errorf("error = %q, want substring %q", err, sub)
+				}
+			}
+		})
+	}
+}
+
+// TestGenerate_NegativeOneAccepted verifies -1 is a valid value where allowed
+// (swordArtsParamId, mountWepTextId) and does not abort generation.
+func TestGenerate_NegativeOneAccepted(t *testing.T) {
+	if _, err := generate("testdata/EquipParamGem_neg1.csv", weaponFixture); err != nil {
+		t.Fatalf("generate with -1 swordArtsParamId/mountWepTextId: %v", err)
+	}
+}
+
+func TestGenerate_Deterministic(t *testing.T) {
+	a, err := generate(gemFixture, weaponFixture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	b, err := generate(gemFixture, weaponFixture)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if a.aowGo != b.aowGo || a.weaponGo != b.weaponGo || a.tsSource != b.tsSource {
+		t.Error("generator output is not deterministic across runs")
+	}
+}
+
+func TestGenerate_ProvenanceHeader(t *testing.T) {
+	res := mustGenerate(t)
+	if !strings.Contains(res.aowGo, "Code generated by tools/generate_aow_compat") {
+		t.Error("aow_compat.go missing DO NOT EDIT provenance line")
+	}
+	// The header must carry the input hashes so the source dump is identifiable.
+	if !strings.Contains(res.aowGo, res.gemHash) || !strings.Contains(res.aowGo, res.weaponHash) {
+		t.Error("aow_compat.go header missing input CSV sha256 hashes")
+	}
+	if !strings.Contains(res.aowGo, filepath.ToSlash(gemFixture)) {
+		t.Error("aow_compat.go header missing gem source path")
+	}
+	if !strings.Contains(res.tsSource, res.gemHash) {
+		t.Error("TS mirror missing gem source hash")
+	}
+}

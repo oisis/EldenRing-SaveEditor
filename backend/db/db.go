@@ -299,20 +299,43 @@ func CanWeaponMountAoW(baseItemID uint32) bool {
 
 // IsAoWCompatibleWithWepType returns (compatible, known).
 // known=false means data is insufficient — the caller must block the operation, not assume compatibility.
-// Reasons for known=false: AoW not in compat table (bitmask=0), or wepType not in WepTypeToCanMountBit.
+//
+// Two layers, both fail-closed:
+//
+//  1. Direct 40-bit mask from regulation.bin (canMountWep_* in bits 0..35,
+//     reserved_canMountWep in bits 36..39).
+//  2. Heuristic fallback (data.AoWHeuristicWepTypes) for DLC arts that carry no
+//     direct bit (Backhand Blades, Light Greatswords, native arts of Great
+//     Katanas / Beast Claws). Consulted only when the direct mask matches nothing.
+//     An art present in the heuristic map is compatible ONLY with the listed
+//     wepTypes — any other wepType is a definitive incompatible, never a leak.
 func IsAoWCompatibleWithWepType(aowItemID uint32, wepType uint16) (compatible bool, known bool) {
 	aow := GetItemData(aowItemID)
+	bitPositions, bitsKnown := data.CanMountBitsForWepType(wepType)
+
+	if aow.AoWCompatBitmask != 0 && bitsKnown {
+		for _, bitPos := range bitPositions {
+			if (aow.AoWCompatBitmask>>bitPos)&1 == 1 {
+				return true, true
+			}
+		}
+	}
+
+	if heuristicTypes, ok := data.AoWHeuristicWepTypes[aowItemID]; ok {
+		for _, wt := range heuristicTypes {
+			if wt == wepType {
+				return true, true
+			}
+		}
+		// Heuristic-resolved art on a non-listed wepType: definitively incompatible.
+		return false, true
+	}
+
 	if aow.AoWCompatBitmask == 0 {
 		return false, false // AoW compatibility data missing
 	}
-	bitPositions, ok := data.CanMountBitsForWepType(wepType)
-	if !ok {
+	if !bitsKnown {
 		return false, false // weapon type not in bit map
-	}
-	for _, bitPos := range bitPositions {
-		if (aow.AoWCompatBitmask>>bitPos)&1 == 1 {
-			return true, true
-		}
 	}
 	return false, true
 }
