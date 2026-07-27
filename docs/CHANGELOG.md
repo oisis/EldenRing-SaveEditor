@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.1] - 2026-07-27
+
 ### feat(equipment): enable Quick Item and Pouch editing
 
 Quick Item and Pouch slots can now be equipped, replaced and cleared from the
@@ -16,6 +18,23 @@ each populated slot.
 Selecting a stackable Equipment item from Item Database now opens a quantity
 dialog before adding it to Inventory and equipping it. The selected quantity is
 also shown immediately on stackable Equipment slots.
+
+### feat(equipment): support Wondrous Physick tear mixtures
+
+Equipment can now edit both Wondrous Physick tear slots using carried Crystal
+Tears only. The editor preserves the native mixture representation, supports
+clearing either slot without left-packing the other, and keeps technical tear
+variants intact.
+
+### fix(equipment): validate spell memory slots
+
+Equipped spells now show their required Memory Slots in Equipment and in the
+picker. Saving rejects unknown or over-capacity spell loadouts.
+
+### fix(save): synchronize active Steam identities
+
+Loading and saving active character slots now keeps their Steam identity
+records synchronized.
 
 ## [1.6.0] - 2026-07-26
 
