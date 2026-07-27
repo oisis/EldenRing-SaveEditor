@@ -3,7 +3,7 @@ import {
     PreviewBuildTemplateV2FromCharacter,
     SaveBuildTemplateV2FromCharacterToLibrary,
 } from '../../../wailsjs/go/main/App';
-import { main, templates } from '../../../wailsjs/go/models';
+import { application as main, templates } from '../../../wailsjs/go/models';
 import { ImportTemplatePreviewModal } from './ImportTemplatePreviewModal';
 
 // CreateTemplateV2Modal collects metadata + per-field profile/stats

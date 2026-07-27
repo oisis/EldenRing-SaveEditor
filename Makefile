@@ -46,7 +46,7 @@ test: test-go test-frontend
 
 test-go: frontend-build
 	@echo "🧪 Running Go tests..."
-	go test -count=1 -v . ./backend/... ./tests/...
+	go test -count=1 -v . ./internal/application ./backend/... ./tests/...
 	go test -count=1 ./scripts/clean-artifacts
 
 test-frontend:
@@ -54,9 +54,9 @@ test-frontend:
 	npm --prefix frontend test
 
 # Run linter (requires golangci-lint installed) without traversing tmp/.
-lint:
+lint: frontend-build
 	@echo "🔍 Running linter..."
-	golangci-lint run . ./backend/... ./tests/... ./scripts/clean-artifacts
+	golangci-lint run . ./internal/application ./backend/... ./tests/... ./scripts/clean-artifacts
 
 # Remove only known project-local generated files, build output and caches.
 # tmp/ and tracked Wails bindings are intentionally outside this list.

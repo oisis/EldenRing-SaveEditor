@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { editor, main } from '../../wailsjs/go/models';
+import { editor, application as main } from '../../wailsjs/go/models';
 
 // vi.hoisted runs before module imports so the shared mock fns are
 // available inside vi.mock's hoisted factory. Each test reassigns the

@@ -203,6 +203,10 @@ func TestWeaponStatsV1GeneratorReproducible(t *testing.T) {
 	if _, err := os.Stat(genScript); err != nil {
 		t.Skipf("generator script not found at %s: %v", genScript, err)
 	}
+	genInput := filepath.Join(repoRoot, "tmp", "item-audit", "app_items.csv")
+	if _, err := os.Stat(genInput); err != nil {
+		t.Skipf("generator input not found at %s: %v", genInput, err)
+	}
 	target := filepath.Join(repoRoot, "backend", "db", "data", "weapon_stats_generated.go")
 
 	hashBefore, err := sha256OfFile(target)

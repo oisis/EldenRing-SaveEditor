@@ -117,6 +117,8 @@ make test
 
 ```
 .
+├── internal/
+│   └── application/  # Wails application services, lifecycle, DTOs, and tests
 ├── backend/
 │   ├── core/        # Save file I/O, crypto, structures, diagnostics, repair primitives
 │   ├── db/          # Game database: items, graces, regions, flags, limits

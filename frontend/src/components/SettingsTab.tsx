@@ -9,7 +9,7 @@ import {
     BackupCurrentSave,
     DiagnosticRecoveryStatus, ExportDiagnosticLog,
 } from '../../wailsjs/go/main/App';
-import {deploy, main} from '../../wailsjs/go/models';
+import {deploy, application as main} from '../../wailsjs/go/models';
 import {saveSafetyProfile, type SafetyProfile} from '../state/safetyProfile';
 import {FavoritesManager} from './FavoritesManager';
 import {useFavorites} from '../state/favorites';

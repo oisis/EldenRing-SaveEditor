@@ -1,4 +1,4 @@
-import { editor, main } from '../../wailsjs/go/models';
+import { editor, application as main } from '../../wailsjs/go/models';
 
 // Helpers that build the WeaponPatch DTO for the four user actions the
 // WeaponEditModal exposes in workspace mode. Kept separate so the action

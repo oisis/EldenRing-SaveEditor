@@ -89,7 +89,7 @@ out
 dist
 
 # Generated at build time from Makefile VERSION.
-/app_version_generated.go
+/internal/application/app_version_generated.go
 
 # Gatsby files
 .cache/

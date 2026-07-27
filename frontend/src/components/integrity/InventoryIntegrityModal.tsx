@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { main } from '../../../wailsjs/go/models';
+import type { application as main } from '../../../wailsjs/go/models';
 
 // Presentational blocking modal for load-time inventory integrity gate.
 // All decisions stay in App.tsx; this component only renders the report

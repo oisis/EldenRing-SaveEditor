@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {createPortal} from 'react-dom';
 import {RepairAllLoadedSlots} from '../../wailsjs/go/main/App';
-import {main} from '../../wailsjs/go/models';
+import {application as main} from '../../wailsjs/go/models';
 
 // DiagnosticsModal now serves a single responsibility: display the post-load
 // all-slots DiagnosticsReport that App.tsx produces via RunDiagnosticsAllLoaded

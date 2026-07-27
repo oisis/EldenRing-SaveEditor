@@ -9,7 +9,7 @@ import {
     RemoveFavoritePreset,
     WriteSelectedToFavorites,
 } from '../../wailsjs/go/main/App';
-import {main} from '../../wailsjs/go/models';
+import {application as main} from '../../wailsjs/go/models';
 
 const APPEARANCE_FAVORITES_KEY = 'favorites:appearance-presets';
 const RING_RADIUS = 390;

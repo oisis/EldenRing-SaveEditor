@@ -8,7 +8,7 @@ import {
     RebuildBuildTemplateLibraryIndex,
     RenameBuildTemplateInLibrary,
 } from '../../../wailsjs/go/main/App';
-import { main, templates } from '../../../wailsjs/go/models';
+import { application as main, templates } from '../../../wailsjs/go/models';
 
 // TemplateLibraryModal lists locally-stored build templates and exposes
 // the actions a user needs to manage them: preview, apply to workspace,

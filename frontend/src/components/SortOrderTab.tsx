@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GetItemList, RepairInventoryWorkspaceItems } from '../../wailsjs/go/main/App';
-import { db, editor, main } from '../../wailsjs/go/models';
+import { db, editor, application as main } from '../../wailsjs/go/models';
 import toast from '../lib/toast';
 import { useInventoryWorkspace, ContainerKind } from '../hooks/useInventoryWorkspace';
 import { WeaponEditModal } from './WeaponEditModal';

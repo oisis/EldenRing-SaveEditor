@@ -10,7 +10,7 @@ import {
     PreviewBuildTemplateImportYAMLFromURL,
     SaveImportedBuildTemplateJSONToLibrary,
 } from '../../../wailsjs/go/main/App';
-import { main, templates } from '../../../wailsjs/go/models';
+import { application as main, templates } from '../../../wailsjs/go/models';
 import { TemplateLibraryModal } from './TemplateLibraryModal';
 import { ImportTemplatePreviewModal, isCancelledPreview } from './ImportTemplatePreviewModal';
 import { CreateTemplateV2Modal } from './CreateTemplateV2Modal';

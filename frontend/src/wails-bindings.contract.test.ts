@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import * as App from '../wailsjs/go/main/App';
-import { core, editor, main, templates } from '../wailsjs/go/models';
+import { core, editor, application as main, templates } from '../wailsjs/go/models';
 
 // This is a contract test that locks the Wails-generated binding surface
 // the inventory workspace UI depends on. Any unintentional rename or

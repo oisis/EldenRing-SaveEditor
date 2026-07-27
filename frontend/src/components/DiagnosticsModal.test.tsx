@@ -9,7 +9,7 @@ vi.mock('../../wailsjs/go/main/App', () => ({
 
 // Imported after the mock so DiagnosticsModal binds to the mocked endpoint.
 import { DiagnosticsModal } from './DiagnosticsModal';
-import { main } from '../../wailsjs/go/models';
+import { application as main } from '../../wailsjs/go/models';
 
 function reportWithIssue(): main.DiagnosticsReport {
     return new main.DiagnosticsReport({

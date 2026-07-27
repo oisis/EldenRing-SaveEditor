@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/oisis/EldenRing-SaveForge/internal/application"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/logger"
 	"github.com/wailsapp/wails/v2/pkg/options"
@@ -22,13 +23,13 @@ func main() {
 	// Open the durable per-session diagnostic journal before wails.Run so
 	// startup and Wails logging are captured. If it cannot be opened the
 	// app still runs: we fall back to Wails' default stdout logger and
-	// leave app.journal nil (journalLog then no-ops).
+	// leave the application journal unset (journalLog then no-ops).
 	appLogger := logger.NewDefaultLogger()
-	if journal, err := NewSessionDiagnosticJournal(); err != nil {
+	if journal, err := application.NewSessionDiagnosticJournal(); err != nil {
 		fmt.Fprintf(os.Stderr, "diagnostic journal unavailable: %v\n", err)
 	} else {
-		app.journal = journal
-		appLogger = newWailsJournalLogger(journal)
+		app.setDiagnosticJournal(journal)
+		appLogger = application.NewWailsJournalLogger(journal)
 	}
 
 	// Create application with options

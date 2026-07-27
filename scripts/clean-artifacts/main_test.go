@@ -2,10 +2,17 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 )
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("write failed")
+}
 
 func TestArtifactTarget(t *testing.T) {
 	root := t.TempDir()
@@ -77,5 +84,12 @@ func TestCleanArtifactsValidatesAllPathsBeforeRemovingAnything(t *testing.T) {
 	}
 	if _, err := os.Stat(buildArtifact); err != nil {
 		t.Fatalf("valid artifact was removed before validation completed: %v", err)
+	}
+}
+
+func TestCleanArtifactsDryRunPropagatesWriterError(t *testing.T) {
+	err := cleanArtifacts(t.TempDir(), []string{"build/bin"}, true, failingWriter{})
+	if err == nil {
+		t.Fatal("cleanArtifacts succeeded, want writer error")
 	}
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
 import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells, SavePhysickMixture, SaveQuickPouchItems } from '../../wailsjs/go/main/App';
-import { type editor, type main, type vm } from '../../wailsjs/go/models';
+import { type editor, type application as main, type vm } from '../../wailsjs/go/models';
 import { useInventoryWorkspace, type ContainerKind } from '../hooks/useInventoryWorkspace';
 import { EquipmentItemPickerModal, type EquipmentPickerSelection } from './EquipmentItemPickerModal';
 import { WeaponEditModal } from './WeaponEditModal';

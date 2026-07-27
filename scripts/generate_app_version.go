@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const outputPath = "app_version_generated.go"
+const outputPath = "internal/application/app_version_generated.go"
 
 func main() {
 	version, err := readMakefileVersion("Makefile")
@@ -16,7 +16,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	content := fmt.Sprintf(`package main
+	content := fmt.Sprintf(`package application
 
 func init() {
 	appVersion = %q

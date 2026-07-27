@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
-import { main } from '../../../wailsjs/go/models';
+import { application as main } from '../../../wailsjs/go/models';
 import { InventoryIntegrityModal } from './InventoryIntegrityModal';
 
 function makeReport(overrides: Partial<main.SaveInventoryIntegrityReport> = {}): main.SaveInventoryIntegrityReport {

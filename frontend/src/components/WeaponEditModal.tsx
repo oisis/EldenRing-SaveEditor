@@ -4,7 +4,7 @@ import {
     GetInfuseTypes,
     GetItemList,
 } from '../../wailsjs/go/main/App';
-import { db, editor, main } from '../../wailsjs/go/models';
+import { db, editor, application as main } from '../../wailsjs/go/models';
 import { aowApplyPatch, infusionPatch, upgradePatch } from './weaponPatch';
 
 // The modal routes upgrade / infusion / AoW edits through the in-memory

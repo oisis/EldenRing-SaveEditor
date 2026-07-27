@@ -7,7 +7,7 @@ import {
     ApplyBuiltinCharacterPresetStats,
     ApplyBuiltinCharacterPresetInventory,
 } from '../../wailsjs/go/main/App';
-import {main, vm} from '../../wailsjs/go/models';
+import {application as main, vm} from '../../wailsjs/go/models';
 import toast from '../lib/toast';
 
 // ─── Types ────────────────────────────────────────────────────────────────────

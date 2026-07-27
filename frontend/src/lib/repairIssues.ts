@@ -2,7 +2,7 @@ import {
     ApplyRepairsLoaded,
     ScanRepairIssuesLoaded,
 } from '../../wailsjs/go/main/App';
-import { core, main } from '../../wailsjs/go/models';
+import { core, application as main } from '../../wailsjs/go/models';
 
 export type IssueKey = core.IssueKey;
 export type ValidationCoverage = core.ValidationCoverage;

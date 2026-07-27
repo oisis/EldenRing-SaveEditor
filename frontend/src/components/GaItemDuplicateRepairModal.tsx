@@ -1,6 +1,6 @@
 import {useCallback, useEffect, useState} from 'react';
 import {AnalyzeGaItemDuplicate, ExecuteGaItemDuplicateRepair} from '../../wailsjs/go/main/App';
-import type {main} from '../../wailsjs/go/models';
+import type {application as main} from '../../wailsjs/go/models';
 
 type Analysis = main.GaItemDuplicateAnalysis;
 type ExecutionResult = main.GaItemDuplicateExecutionResult;

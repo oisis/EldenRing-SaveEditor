@@ -12,7 +12,7 @@ import (
 const expectedModule = "module github.com/oisis/EldenRing-SaveForge"
 
 var artifactPaths = []string{
-	"app_version_generated.go",
+	"internal/application/app_version_generated.go",
 	"build/bin",
 	"frontend/dist",
 	".cache",
@@ -81,7 +81,9 @@ func cleanArtifacts(root string, relativePaths []string, dryRun bool, output io.
 
 	for index, relativePath := range relativePaths {
 		if dryRun {
-			fmt.Fprintln(output, relativePath)
+			if _, err := fmt.Fprintln(output, relativePath); err != nil {
+				return fmt.Errorf("write dry-run output: %w", err)
+			}
 			continue
 		}
 		if err := os.RemoveAll(targets[index]); err != nil {

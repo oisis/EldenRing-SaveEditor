@@ -1,7 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import toast from '../lib/toast';
 import {GetCharacter, SaveCharacter, GetStartingClasses, SetCharacterGender, GetCharacterAppearancePreset, SetOwnedWeaponLevels} from '../../wailsjs/go/main/App';
-import {vm, main, db} from '../../wailsjs/go/models';
+import {vm, application as main, db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 import {AppearanceTab} from './AppearanceTab';
 import {RiskInfoIcon} from './RiskInfoIcon';

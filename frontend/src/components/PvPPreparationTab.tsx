@@ -1,7 +1,7 @@
 import {useState} from 'react';
 import toast from '../lib/toast';
 import {ApplyPvPPreparation} from '../../wailsjs/go/main/App';
-import {main} from '../../wailsjs/go/models';
+import {application as main} from '../../wailsjs/go/models';
 import type {PvPOptions} from '../App';
 import {NetworkSpeedPanel} from './NetworkSpeedPanel';
 
