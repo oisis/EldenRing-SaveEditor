@@ -65,6 +65,7 @@ function makeWorkspaceItem(overrides: Partial<editor.EditableItem> = {}): editor
         isWeapon: true,
         isArmor: false,
         isTalisman: false,
+        canChangeAffinity: true,
         ...overrides,
     });
 }
@@ -143,7 +144,47 @@ describe('WeaponEditModal (workspace mode)', () => {
         expect(screen.getByText('Claymore')).toBeInTheDocument();
     });
 
+    it('renders through a top-level portal with compact level and infusion editors', async () => {
+        const host = document.createElement('div');
+        document.body.appendChild(host);
+
+        let result!: ReturnType<typeof render>;
+        await act(async () => {
+            result = render(
+                <WeaponEditModal
+                    charIndex={0}
+                    item={makeOrderItem()}
+                    source="inventory"
+                    onClose={() => {}}
+                    workspace={{ sessionID: 'ses-layout', updateWeapon: vi.fn() }}
+                    workspaceItem={makeWorkspaceItem()}
+                />,
+                { container: host },
+            );
+        });
+
+        const dialog = screen.getByRole('dialog', { name: 'Edit Dagger' });
+        expect(dialog.parentElement).toBe(document.body.lastElementChild);
+        expect(dialog.parentElement).toHaveClass('z-[100]', 'bg-black/60');
+
+        const editors = screen.getByTestId('weapon-value-editors');
+        expect(editors).toHaveClass('grid-cols-2');
+        expect(screen.getByLabelText('Upgrade level')).toHaveClass('h-8');
+
+        result.unmount();
+        host.remove();
+    });
+
     it('shows default AoW name when no custom AoW is attached', async () => {
+        mocks.GetItemList.mockImplementation(async (cat: string) => {
+            if (cat !== 'ashes_of_war') return [];
+            return [{
+                id: 0x80002710,
+                name: 'Quickstep',
+                iconPath: '/items/ashes_of_war/quickstep.png',
+                aowCompatBitmask: 1,
+            }];
+        });
         const workspace = { sessionID: 'ses-default-aow', updateWeapon: vi.fn() };
         await renderModal({
             charIndex: 0,
@@ -161,6 +202,8 @@ describe('WeaponEditModal (workspace mode)', () => {
 
         expect(screen.getByText('Quickstep')).toBeInTheDocument();
         expect(screen.queryByText('Built-in skill')).not.toBeInTheDocument();
+        const icon = await screen.findByTestId('current-aow-icon');
+        expect(icon.querySelector('img')).toHaveAttribute('src', '/items/ashes_of_war/quickstep.png');
     });
 
     // Regression: workspace-mode WeaponEditModal must render compatible
@@ -216,9 +259,43 @@ describe('WeaponEditModal (workspace mode)', () => {
         await waitFor(() => {
             expect(screen.getByText('Sword Dance')).toBeInTheDocument();
         });
- expect(screen.queryByText(/No compatible Ashes of War available/i))
- .not.toBeInTheDocument();
- });
+        expect(screen.queryByText(/No compatible Ashes of War available/i))
+            .not.toBeInTheDocument();
+    });
+
+    it('renders Ashes of War as an icon grid instead of list rows', async () => {
+        mocks.GetAoWAvailability.mockResolvedValue([]);
+        mocks.GetItemList.mockImplementation(async (cat: string) => {
+            if (cat !== 'ashes_of_war') return [];
+            return [
+                {
+                    id: 0x80003070,
+                    name: 'Sword Dance',
+                    iconPath: '/items/ashes_of_war/sword_dance.png',
+                    aowCompatBitmask: 1,
+                },
+            ];
+        });
+
+        await renderModal({
+            charIndex: 0,
+            item: makeOrderItem(),
+            source: 'inventory',
+            onClose: () => {},
+            workspace: { sessionID: 'ses-aow-icons', updateWeapon: vi.fn() },
+            workspaceItem: makeWorkspaceItem({
+                wepType: 1,
+                canMountAoW: true,
+            }),
+        });
+
+        const grid = await screen.findByTestId('aow-icon-grid');
+        expect(grid).toHaveClass('grid-cols-[repeat(auto-fill,minmax(104px,1fr))]');
+
+        const card = screen.getByRole('button', { name: 'Select Sword Dance' });
+        expect(card).toHaveAttribute('data-aow-icon-card');
+        expect(card.querySelector('img')).toHaveClass('h-full', 'w-full', 'object-contain');
+    });
 
  it('allows applying compatible AoW when no free copy exists in the save', async () => {
  mocks.GetAoWAvailability.mockResolvedValue([]);
@@ -271,40 +348,138 @@ describe('WeaponEditModal (workspace mode)', () => {
  );
  });
 
- it('renders DLC AoWs that use synthetic compatibility bits', async () => {
- mocks.GetAoWAvailability.mockResolvedValue([]);
- mocks.GetItemList.mockImplementation(async (cat: string) => {
- if (cat !== 'ashes_of_war') return [];
- return [
- {
- id: 0x80064960,
- name: 'Wing Stance',
- iconPath: '',
- aowCompatBitmask: 2 ** 42, // synthetic DLC light greatsword bit
- },
- ];
- });
+    it('shows direct Light Greatsword AoWs for Milady and toggles incompatible entries', async () => {
+        mocks.GetAoWAvailability.mockResolvedValue([]);
+        mocks.GetItemList.mockImplementation(async (cat: string) => {
+            if (cat !== 'ashes_of_war') return [];
+            return [
+                {
+                    id: 0x80002774,
+                    name: 'Impaling Thrust',
+                    iconPath: '',
+                    aowCompatBitmask: 2 ** 41,
+                },
+                {
+                    id: 0x80003070,
+                    name: 'Sword Dance',
+                    iconPath: '',
+                    aowCompatBitmask: 2 ** 41,
+                },
+                {
+                    id: 0x80064960,
+                    name: 'Wing Stance',
+                    iconPath: '',
+                    aowCompatBitmask: 2 ** 41,
+                },
+                {
+                    id: 0x80002CEC,
+                    name: 'Square Off',
+                    iconPath: '',
+                    aowCompatBitmask: 2 ** 1,
+                },
+            ];
+        });
 
- const workspace = { sessionID: 'ses-aow-dlc', updateWeapon: vi.fn() };
- await renderModal({
- charIndex: 0,
- item: makeOrderItem({ name: 'Milady', itemId: 0x0405F7E0 }),
- source: 'inventory',
- onClose: () => {},
- workspace,
- workspaceItem: makeWorkspaceItem({
- name: 'Milady',
- itemID: 0x0405F7E0,
- baseItemID: 0x0405F7E0,
- wepType: 93,
- canMountAoW: true,
- }),
- });
+        await renderModal({
+            charIndex: 0,
+            item: makeOrderItem({ name: 'Milady', itemId: 0x0405F7E0 }),
+            source: 'inventory',
+            onClose: () => {},
+            workspace: { sessionID: 'ses-aow-dlc', updateWeapon: vi.fn() },
+            workspaceItem: makeWorkspaceItem({
+                name: 'Milady',
+                itemID: 0x0405F7E0,
+                baseItemID: 0x0405F7E0,
+                wepType: 93,
+                canMountAoW: true,
+            }),
+        });
 
- await waitFor(() => {
- expect(screen.getByText('Wing Stance')).toBeInTheDocument();
- });
- expect(screen.queryByText(/No compatible Ashes of War available/i))
- .not.toBeInTheDocument();
- });
+        await waitFor(() => {
+            expect(screen.getByText('Impaling Thrust')).toBeInTheDocument();
+            expect(screen.getByText('Sword Dance')).toBeInTheDocument();
+            expect(screen.getByText('Wing Stance')).toBeInTheDocument();
+        });
+        expect(screen.queryByText('Square Off')).not.toBeInTheDocument();
+
+        const showUnavailable = screen.getByRole('checkbox', { name: 'Show unavailable' });
+        expect(showUnavailable.closest('label')).toHaveClass('h-9');
+        expect(screen.getByPlaceholderText('Search Ashes of War...')).toHaveClass('h-9');
+        fireEvent.click(showUnavailable);
+
+        expect(await screen.findByText('Square Off')).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: 'Select Square Off' }))
+            .toHaveAttribute('data-aow-compat', 'incompatible');
+    });
+
+    it('shows only light-bow AoWs and hides affinity editing for Shortbow', async () => {
+        mocks.GetInfuseTypes.mockResolvedValue([
+            { name: 'Standard', offset: 0 },
+            { name: 'Heavy', offset: 100 },
+        ]);
+        mocks.GetItemList.mockImplementation(async (cat: string) => {
+            if (cat !== 'ashes_of_war') return [];
+            return [
+                { id: 0x80009CA4, name: 'Barrage', iconPath: '', aowCompatBitmask: 2 ** 24 },
+                { id: 0x80003070, name: 'Sword Dance', iconPath: '', aowCompatBitmask: 1 },
+            ];
+        });
+
+        await renderModal({
+            charIndex: 0,
+            item: makeOrderItem({
+                itemId: 0x02625A00,
+                name: 'Shortbow',
+                category: 'ranged_and_catalysts',
+            }),
+            source: 'inventory',
+            onClose: () => {},
+            workspace: { sessionID: 'ses-shortbow', updateWeapon: vi.fn() },
+            workspaceItem: makeWorkspaceItem({
+                itemID: 0x02625A00,
+                baseItemID: 0x02625A00,
+                name: 'Shortbow',
+                category: 'ranged_and_catalysts',
+                wepType: 50,
+                canMountAoW: true,
+                canChangeAffinity: false,
+            }),
+        });
+
+        await waitFor(() => expect(screen.getByText('Barrage')).toBeInTheDocument());
+        expect(screen.queryByText('Sword Dance')).not.toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Apply Infusion/i })).not.toBeInTheDocument();
+    });
+
+    it('keeps level editing but hides AoW and affinity controls for Steel-Wire Torch', async () => {
+        mocks.GetInfuseTypes.mockResolvedValue([
+            { name: 'Standard', offset: 0 },
+            { name: 'Heavy', offset: 100 },
+        ]);
+
+        await renderModal({
+            charIndex: 0,
+            item: makeOrderItem({
+                itemId: 0x016E8420,
+                name: 'Steel-Wire Torch',
+                category: 'shields',
+            }),
+            source: 'inventory',
+            onClose: () => {},
+            workspace: { sessionID: 'ses-torch', updateWeapon: vi.fn() },
+            workspaceItem: makeWorkspaceItem({
+                itemID: 0x016E8420,
+                baseItemID: 0x016E8420,
+                name: 'Steel-Wire Torch',
+                category: 'shields',
+                wepType: 87,
+                canMountAoW: false,
+                canChangeAffinity: false,
+            }),
+        });
+
+        expect(screen.getByRole('button', { name: /Apply Level/i })).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: /Apply Infusion/i })).not.toBeInTheDocument();
+        expect(screen.queryByText(/No compatible Ashes of War available/i)).not.toBeInTheDocument();
+    });
  });

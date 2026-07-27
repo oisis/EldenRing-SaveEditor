@@ -9,6 +9,8 @@ import (
 const (
 	wpDaggerBase      = uint32(0x000F4240) // melee_armaments, MaxUpgrade=25
 	wpClaymoreBase    = uint32(0x003085E0) // melee_armaments, MaxUpgrade=25
+	wpShortbowBase    = uint32(0x02625A00) // ranged_and_catalysts, MaxUpgrade=25, no affinity
+	wpSteelWireBase   = uint32(0x016E8420) // shields, MaxUpgrade=25, no AoW/affinity
 	aowLionsClaw      = uint32(0x80002710) // ashes_of_war
 	aowImpalingThrust = uint32(0x80002774) // ashes_of_war
 )
@@ -218,6 +220,102 @@ func TestUpdateWeapon_UnknownInfusionRejected(t *testing.T) {
 	if snap.InventoryItems[0].HasPendingWeaponPatch {
 		t.Error("item mutated on error")
 	}
+}
+
+func TestUpdateWeapon_NonAffinityWeaponRejectsInfusionWithoutMutation(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		baseID uint32
+	}{
+		{"Shortbow", wpShortbowBase},
+		{"Steel-Wire Torch", wpSteelWireBase},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			snap := weaponSnap()
+			item := &snap.InventoryItems[0]
+			item.ItemID = tc.baseID
+			item.BaseItemID = tc.baseID
+			item.Name = tc.name
+
+			err := UpdateWeapon(snap, item.UID, WeaponPatch{
+				SetInfusionName: true,
+				InfusionName:    "Heavy",
+			})
+			if err == nil {
+				t.Fatal("expected unsupported affinity error")
+			}
+			if !strings.Contains(err.Error(), "does not support affinity") {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if item.ItemID != tc.baseID || item.InfusionName != "" || item.HasPendingWeaponPatch {
+				t.Fatalf("item mutated on error: %+v", *item)
+			}
+			if snap.Dirty {
+				t.Fatal("snapshot mutated on error")
+			}
+		})
+	}
+}
+
+func TestUpdateWeapon_NonAffinityWeaponStillAllowsUpgrade(t *testing.T) {
+	snap := weaponSnap()
+	item := &snap.InventoryItems[0]
+	item.ItemID = wpSteelWireBase
+	item.BaseItemID = wpSteelWireBase
+	item.Name = "Steel-Wire Torch"
+
+	if err := UpdateWeapon(snap, item.UID, WeaponPatch{
+		SetUpgrade: true,
+		Upgrade:    12,
+	}); err != nil {
+		t.Fatalf("UpdateWeapon: %v", err)
+	}
+	if item.CurrentUpgrade != 12 || item.ItemID != wpSteelWireBase+12 {
+		t.Fatalf("upgrade not applied: %+v", *item)
+	}
+}
+
+func TestUpdateWeapon_StandardRepairsUnsupportedAffinity(t *testing.T) {
+	snap := weaponSnap()
+	item := &snap.InventoryItems[0]
+	item.ItemID = wpSteelWireBase + 105
+	item.BaseItemID = wpSteelWireBase
+	item.Name = "Steel-Wire Torch"
+	item.CurrentUpgrade = 5
+	item.InfusionName = "Heavy"
+
+	if err := UpdateWeapon(snap, item.UID, WeaponPatch{
+		SetInfusionName: true,
+		InfusionName:    "Standard",
+	}); err != nil {
+		t.Fatalf("UpdateWeapon: %v", err)
+	}
+	if item.InfusionName != "" {
+		t.Fatalf("InfusionName=%q, want empty Standard encoding", item.InfusionName)
+	}
+	if item.ItemID != wpSteelWireBase+5 {
+		t.Fatalf("ItemID=0x%08X, want 0x%08X", item.ItemID, wpSteelWireBase+5)
+	}
+}
+
+func TestValidate_UnsupportedAffinityIsBlocking(t *testing.T) {
+	snap := weaponSnap()
+	item := &snap.InventoryItems[0]
+	item.ItemID = wpSteelWireBase + 100
+	item.BaseItemID = wpSteelWireBase
+	item.Name = "Steel-Wire Torch"
+	item.InfusionName = "Heavy"
+
+	rep := Validate(*snap)
+	if rep.OK {
+		t.Fatal("expected validation failure")
+	}
+	for _, issue := range rep.Errors {
+		if issue.Code == CodeAffinityUnsupported {
+			return
+		}
+	}
+	t.Fatalf("missing %q error: %+v", CodeAffinityUnsupported, rep.Errors)
 }
 
 func TestUpdateWeapon_ArmorReturnsNonWeaponError(t *testing.T) {

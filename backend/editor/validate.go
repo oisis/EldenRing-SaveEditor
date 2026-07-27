@@ -45,6 +45,7 @@ const (
 	CodeUnknownItemID            = "unknown_item_id"
 	CodeQuantityZero             = "quantity_zero"
 	CodeUpgradeOutOfRange        = "upgrade_out_of_range"
+	CodeAffinityUnsupported      = "affinity_unsupported"
 	CodeCategoryUnsupported      = "category_unsupported"
 	CodePassThroughRecords       = "pass_through_records"
 	CodeSharedAoWConflict        = "shared_aow_conflict"
@@ -159,6 +160,21 @@ func Validate(snap InventoryWorkspaceSnapshot) WorkspaceValidationReport {
 						Handle: it.OriginalHandle,
 					})
 				}
+			}
+
+			// Affinity eligibility is independent from the +25 upgrade path and
+			// from AoW mounting. Validate against DB metadata instead of trusting
+			// the DTO boolean so direct workspace mutation cannot bypass the gate.
+			if it.IsWeapon && normalizeInfusionName(it.InfusionName) != "" &&
+				!db.CanWeaponChangeAffinity(it.BaseItemID) {
+				rep.Errors = append(rep.Errors, WorkspaceValidationIssue{
+					Severity: SeverityError,
+					Code:     CodeAffinityUnsupported,
+					Message: fmt.Sprintf("weapon %s (0x%08X) does not support affinity %q",
+						it.Name, it.BaseItemID, it.InfusionName),
+					UID:    it.UID,
+					Handle: it.OriginalHandle,
+				})
 			}
 
 			if !SupportedCategories[it.Category] {

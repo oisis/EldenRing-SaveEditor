@@ -2,274 +2,273 @@
 //
 // Sources:
 //   tmp/regulation-bin-dump/csv/EquipParamGem.csv (sha256 008d5b0be8c86e1d461de6164b3c49dbc4d9266c75fbc0037578a120f8f40283)
+//   tmp/regulation-bin-dump/params/EquipParamGem.param (sha256 dcdc8d9ade2ae3ef6f430d4b568782bca657ff7be34b75f4aba5623e7b82db00)
 //   tmp/regulation-bin-dump/csv/EquipParamWeapon.csv (sha256 21dd9565289357563e9d66d0fe3bb019b6a5d64ccaf8480738de028e9cd20ead)
 //
-// Direct data: mask bits 0..35 (canMountWep_*) and 36..39 (reserved_canMountWep).
-// Heuristic:   AoWHeuristicWepTypes (mountWepTextId + swordArtsParamId inference).
+// Direct data: mask bits 0..43 (base-game and DLC canMountWep fields).
+// Legacy fallback: AoWHeuristicWepTypes (mountWepTextId + swordArtsParamId inference).
 
 package data
 
-// AoWCompatMasks maps an Ash of War item ID to its 40-bit weapon-compatibility
+// AoWCompatMasks maps an Ash of War item ID to its 44-bit weapon-compatibility
 // mask, sourced directly from regulation.bin:
 //
 //	bits 0..35  = EquipParamGem.canMountWep_Dagger .. canMountWep_Torch
-//	bits 36..39 = EquipParamGem.reserved_canMountWep bits 0..3
+//	bits 36..43 = DLC canMountWep fields HandToHand .. BeastClaw
 //
 // AoW item ID = EquipParamGem.Row ID | 0x80000000. Masks equal to 0 are omitted;
 // such arts (if any) resolve through AoWHeuristicWepTypes instead.
 var AoWCompatMasks = map[uint32]uint64{
-	0x8000000A: 0x0FFFFEFFFF, // row 10
-	0x80000014: 0x0FFFFEFFFF, // row 20
-	0x8000001E: 0x0FFFFEFFFF, // row 30
-	0x80000028: 0x0FFFFEFFFF, // row 40
-	0x80000029: 0x0FFFFEFFFF, // row 41
-	0x80000050: 0x0FFFFEFFFF, // row 80
-	0x80000051: 0x0FFFFEFFFF, // row 81
-	0x80000052: 0x0FFFFEFFFF, // row 82
-	0x80000053: 0x0FFFFEFFFF, // row 83
-	0x80000054: 0x0FFFFEFFFF, // row 84
-	0x80000055: 0x0FFFFEFFFF, // row 85
-	0x80000056: 0x0FFFFEFFFF, // row 86
-	0x80000057: 0x0FFFFEFFFF, // row 87
-	0x80000058: 0x0FFFFEFFFF, // row 88
-	0x80000059: 0x0FFFFEFFFF, // row 89
-	0x8000005A: 0x0FFFFEFFFF, // row 90
-	0x80000064: 0x0FFFFEFFFF, // row 100
-	0x80000065: 0x0FFFFEFFFF, // row 101
-	0x80000066: 0x0FFFFEFFFF, // row 102
-	0x80000067: 0x0FFFFEFFFF, // row 103
-	0x80000068: 0x0FFFFEFFFF, // row 104
-	0x80000069: 0x0FFFFEFFFF, // row 105
-	0x8000006A: 0x0FFFFEFFFF, // row 106
-	0x8000006B: 0x0FFFFEFFFF, // row 107
-	0x8000006C: 0x0FFFFEFFFF, // row 108
-	0x8000006D: 0x0FFFFEFFFF, // row 109
-	0x8000006E: 0x0FFFFEFFFF, // row 110
-	0x8000006F: 0x0FFFFEFFFF, // row 111
-	0x80000070: 0x0FFFFEFFFF, // row 112
-	0x80000071: 0x0FFFFEFFFF, // row 113
-	0x80000072: 0x0FFFFEFFFF, // row 114
-	0x80000073: 0x0FFFFEFFFF, // row 115
-	0x80000074: 0x0FFFFEFFFF, // row 116
-	0x80000075: 0x0FFFFEFFFF, // row 117
-	0x80000076: 0x0FFFFEFFFF, // row 118
-	0x80000077: 0x0FFFFEFFFF, // row 119
-	0x80000078: 0x0FFFFEFFFF, // row 120
-	0x80000079: 0x0FFFFEFFFF, // row 121
-	0x8000007A: 0x0FFFFEFFFF, // row 122
-	0x8000007B: 0x0FFFFEFFFF, // row 123
-	0x8000007C: 0x0FFFFEFFFF, // row 124
-	0x8000007D: 0x0FFFFEFFFF, // row 125
-	0x8000007E: 0x0FFFFEFFFF, // row 126
-	0x8000007F: 0x0FFFFEFFFF, // row 127
-	0x80000080: 0x0FFFFEFFFF, // row 128
-	0x80000081: 0x0FFFFEFFFF, // row 129
-	0x80000082: 0x0FFFFEFFFF, // row 130
-	0x80000083: 0x0FFFFEFFFF, // row 131
-	0x80000084: 0x0FFFFEFFFF, // row 132
-	0x80000085: 0x0FFFFEFFFF, // row 133
-	0x80000086: 0x0FFFFEFFFF, // row 134
-	0x80000087: 0x0FFFFEFFFF, // row 135
-	0x80000088: 0x0FFFFEFFFF, // row 136
-	0x80000089: 0x0FFFFEFFFF, // row 137
-	0x8000008A: 0x0FFFFEFFFF, // row 138
-	0x8000008B: 0x0FFFFEFFFF, // row 139
-	0x8000008C: 0x0FFFFEFFFF, // row 140
-	0x8000008D: 0x0FFFFEFFFF, // row 141
-	0x8000008E: 0x0FFFFEFFFF, // row 142
-	0x8000008F: 0x0FFFFEFFFF, // row 143
-	0x80000090: 0x0FFFFEFFFF, // row 144
-	0x80000092: 0x0FFFFEFFFF, // row 146
-	0x80000093: 0x0FFFFEFFFF, // row 147
-	0x80000094: 0x0FFFFEFFFF, // row 148
-	0x80000095: 0x0FFFFEFFFF, // row 149
-	0x80000097: 0x0FFFFEFFFF, // row 151
-	0x80000098: 0x0FFFFEFFFF, // row 152
-	0x80000099: 0x0FFFFEFFFF, // row 153
-	0x8000009A: 0x0FFFFEFFFF, // row 154
-	0x8000009B: 0x0FFFFEFFFF, // row 155
-	0x8000009C: 0x0FFFFEFFFF, // row 156
-	0x8000009D: 0x0FFFFEFFFF, // row 157
-	0x8000009E: 0x0FFFFEFFFF, // row 158
-	0x8000009F: 0x0FFFFEFFFF, // row 159
-	0x800000A0: 0x0FFFFEFFFF, // row 160
-	0x800000A1: 0x0FFFFEFFFF, // row 161
-	0x800000A3: 0x0FFFFEFFFF, // row 163
-	0x800000A4: 0x0FFFFEFFFF, // row 164
-	0x800000A5: 0x0FFFFEFFFF, // row 165
-	0x800000A6: 0x0FFFFEFFFF, // row 166
-	0x800000A7: 0x0FFFFEFFFF, // row 167
-	0x800000A8: 0x0FFFFEFFFF, // row 168
-	0x800000A9: 0x0FFFFEFFFF, // row 169
-	0x800000AA: 0x0FFFFEFFFF, // row 170
-	0x800000AB: 0x0FFFFEFFFF, // row 171
-	0x800000AD: 0x0FFFFEFFFF, // row 173
-	0x800000AE: 0x0FFFFEFFFF, // row 174
-	0x800000AF: 0x0FFFFEFFFF, // row 175
-	0x800000B0: 0x0FFFFEFFFF, // row 176
-	0x800000B1: 0x0FFFFEFFFF, // row 177
-	0x800000B2: 0x0FFFFEFFFF, // row 178
-	0x800000B3: 0x0FFFFEFFFF, // row 179
-	0x800000B4: 0x0FFFFEFFFF, // row 180
-	0x800000B5: 0x0FFFFEFFFF, // row 181
-	0x800000B6: 0x0FFFFEFFFF, // row 182
-	0x800000B7: 0x0FFFFEFFFF, // row 183
-	0x800000B8: 0x0FFFFEFFFF, // row 184
-	0x800000B9: 0x0FFFFEFFFF, // row 185
-	0x800000BA: 0x0FFFFEFFFF, // row 186
-	0x800000BB: 0x0FFFFEFFFF, // row 187
-	0x800000BE: 0x0FFFFEFFFF, // row 190
-	0x800000BF: 0x0FFFFEFFFF, // row 191
-	0x800000C0: 0x0FFFFEFFFF, // row 192
-	0x800000C2: 0x0FFFFEFFFF, // row 194
-	0x800000C3: 0x0FFFFEFFFF, // row 195
-	0x800000C4: 0x0FFFFEFFFF, // row 196
-	0x800000C5: 0x0FFFFEFFFF, // row 197
-	0x800000C6: 0x0FFFFEFFFF, // row 198
-	0x800003E8: 0x0000807C7E, // row 1000
-	0x800003E9: 0x00000683C7, // row 1001
-	0x800003EA: 0x0000B07CFF, // row 1002
-	0x800003EB: 0x00000E8000, // row 1003
-	0x800003EC: 0x0000FEFFFF, // row 1004
-	0x800003ED: 0x00000803FF, // row 1005
-	0x800003EE: 0x00008EFEFE, // row 1006
-	0x800003EF: 0x00008EFFFE, // row 1007
-	0x800003F0: 0x00000EFFF7, // row 1008
-	0x800003F1: 0x00008E7C2C, // row 1009
-	0x800003F2: 0x00008EFFFF, // row 1010
-	0x800003F3: 0x0000FEFFFF, // row 1011
-	0x800003F4: 0x0000FEFFD7, // row 1012
-	0x800003F5: 0x0000FEFFFF, // row 1013
-	0x800003F6: 0x0000FEFFFF, // row 1014
-	0x800003F7: 0x0F00FEFFFF, // row 1015
-	0x800003F8: 0x0F00FEFFFF, // row 1016
-	0x800003F9: 0x0F00FEFFFF, // row 1017
-	0x80002710: 0x0000807CFE, // row 10000
-	0x80002774: 0xC0002683C7, // row 10100
-	0x800027D8: 0x40000683C6, // row 10200
-	0x8000283C: 0x80000E8CF7, // row 10300
-	0x80002904: 0x4000068280, // row 10500
-	0x80002968: 0x0000807E2C, // row 10600
-	0x800029CC: 0x0000807E2C, // row 10700
-	0x80002A30: 0xC0000683C7, // row 10800
-	0x80002A94: 0xC0000683C7, // row 10900
-	0x80002AF8: 0x0000007C34, // row 11000
-	0x80002B5C: 0x00000C8000, // row 11100
-	0x80002BC0: 0x80000C00F7, // row 11200
-	0x80002C24: 0x0000802800, // row 11300
-	0x80002C88: 0x0000000040, // row 11400
-	0x80002CEC: 0x0000000002, // row 11500
-	0x80002D50: 0x400006828C, // row 11600
-	0x80002E18: 0x00000E8080, // row 11800
-	0x80002E7C: 0x8000000153, // row 11900
-	0x80002EE0: 0xC0200CD5D3, // row 12000
-	0x80002FA8: 0x4000068280, // row 12200
-	0x8000300C: 0x00000EFCF6, // row 12300
-	0x80003070: 0x80000C8CF7, // row 12400
-	0x80004E20: 0xC0000683F7, // row 20000
-	0x80004E84: 0x40008EFFFF, // row 20100
-	0x80004EE8: 0x0000068080, // row 20200
-	0x80004F4C: 0xC0000683F7, // row 20300
-	0x80004FB0: 0x80000003F7, // row 20400
-	0x80005014: 0x1000300000, // row 20500
-	0x800050DC: 0x0000802A2C, // row 20700
-	0x80005140: 0x0000807C00, // row 20800
-	0x800051A4: 0x40008EFFFE, // row 20900
-	0x80005208: 0x8000000377, // row 21000
-	0x800052D0: 0x0000822808, // row 21200
-	0x80005334: 0x0000822808, // row 21300
-	0x80005398: 0x40003EFFF7, // row 21400
-	0x80005460: 0xC000FEFFFF, // row 21600
-	0x800054C4: 0x0000807FFF, // row 21700
-	0x80005528: 0x80000003F7, // row 21800
-	0x8000558C: 0x80000003F7, // row 21900
-	0x800055F0: 0x8000000FFF, // row 22000
-	0x80005654: 0x00000E8080, // row 22100
-	0x800056B8: 0x00000C8000, // row 22200
-	0x80005780: 0x80000001D3, // row 22400
-	0x800057E4: 0x00000C8080, // row 22500
-	0x80005848: 0x0000068000, // row 22600
-	0x800058AC: 0x40008EFFFF, // row 22700
-	0x80005910: 0x40008EFFFF, // row 22800
-	0x80007530: 0x4700000000, // row 30000
-	0x80007594: 0x4700000000, // row 30100
-	0x800075F8: 0x8300300111, // row 30200
-	0x80007724: 0x0300000000, // row 30500
-	0x80007788: 0x0300000000, // row 30600
-	0x800077EC: 0x0300000000, // row 30700
-	0x80007850: 0x4700000000, // row 30800
-	0x800078B4: 0x4F00000000, // row 30900
-	0x80007918: 0x0300000000, // row 31000
-	0x80009C40: 0x0004000000, // row 40000
-	0x80009CA4: 0x0001000000, // row 40100
-	0x80009D08: 0x0003000000, // row 40200
-	0x80009DD0: 0x0003000000, // row 40400
-	0x80009E34: 0x0003000000, // row 40500
-	0x80009E98: 0x0007000000, // row 40600
-	0x8000C3B4: 0xD000FEFFFF, // row 50100
-	0x8000C418: 0xF000FEFFFF, // row 50200
-	0x8000C47C: 0xF000FEFFFF, // row 50300
-	0x8000C4E0: 0xD000FEFFFF, // row 50400
-	0x8000C544: 0xD000FEFFFF, // row 50500
-	0x8000C5A8: 0xF000FEFFFF, // row 50600
-	0x8000C60C: 0xD000FEFFFF, // row 50700
-	0x8000C670: 0x0000822808, // row 50800
-	0x8000C6D4: 0xF000FEFFFF, // row 50900
-	0x8000EA60: 0x4000FEFFFF, // row 60000
-	0x8000EAC4: 0x4000FEFFFF, // row 60100
-	0x8000EB28: 0x80000001C3, // row 60200
-	0x8000EB8C: 0xD000FEFFFF, // row 60300
-	0x8000EBF0: 0x4000FEFFFF, // row 60400
-	0x8000EC54: 0x4000FEFFFF, // row 60500
-	0x8000ECB8: 0x00000683F6, // row 60600
-	0x8000ED1C: 0x4000BEFFFF, // row 60700
-	0x8000FDE8: 0x1000BEFCFE, // row 65000
-	0x8000FE4C: 0x1000BEFCFE, // row 65100
-	0x8000FEB0: 0xF000FEFFFF, // row 65200
-	0x8000FF14: 0x0000802A2C, // row 65300
-	0x8000FF78: 0x1000BEFCFE, // row 65400
-	0x80011170: 0xF000FEFFFF, // row 70000
-	0x800111D4: 0x4700000000, // row 70100
-	0x80011238: 0x4700000000, // row 70200
-	0x80013880: 0xF000FEFFFF, // row 80000
-	0x800138E4: 0xF000FEFFFF, // row 80100
-	0x80013948: 0xF000FEFFFF, // row 80200
-	0x80014C08: 0xD000FEFFFF, // row 85000
-	0x80030D40: 0x1000000000, // row 200000
-	0x80030DA4: 0x80000683FF, // row 200100
-	0x80061A80: 0x000000022C, // row 400000
-	0x80061E68: 0x1000000000, // row 401000
-	0x80062250: 0x8000000000, // row 402000
-	0x80062638: 0x8000000000, // row 403000
-	0x80062A20: 0x2000000000, // row 404000
-	0x80062E08: 0x2000000000, // row 405000
-	0x80064D48: 0xD000FEFFFF, // row 413000
-	0x80065130: 0x40000683CE, // row 414000
-	0x80065518: 0x0000807CFE, // row 415000
-	0x80065900: 0xD000FEFFFF, // row 416000
-	0x80065CE8: 0x40000683CF, // row 417000
-	0x800660D0: 0x80000003F7, // row 418000
-	0x800664B8: 0xD000FEFFFF, // row 419000
-	0x80067070: 0x000006837E, // row 422000
-	0x8007B4A8: 0xD000FEFFFF, // row 505000
-	0x80085CA0: 0x0004000000, // row 548000
-	0x800C3500: 0x4700000000, // row 800000
+	0x8000000A: 0x0FFFFEFFFF,  // row 10
+	0x80000014: 0x0FFFFEFFFF,  // row 20
+	0x8000001E: 0x0FFFFEFFFF,  // row 30
+	0x80000028: 0x0FFFFEFFFF,  // row 40
+	0x80000029: 0x0FFFFEFFFF,  // row 41
+	0x80000050: 0x0FFFFEFFFF,  // row 80
+	0x80000051: 0x0FFFFEFFFF,  // row 81
+	0x80000052: 0x0FFFFEFFFF,  // row 82
+	0x80000053: 0x0FFFFEFFFF,  // row 83
+	0x80000054: 0x0FFFFEFFFF,  // row 84
+	0x80000055: 0x0FFFFEFFFF,  // row 85
+	0x80000056: 0x0FFFFEFFFF,  // row 86
+	0x80000057: 0x0FFFFEFFFF,  // row 87
+	0x80000058: 0x0FFFFEFFFF,  // row 88
+	0x80000059: 0x0FFFFEFFFF,  // row 89
+	0x8000005A: 0x0FFFFEFFFF,  // row 90
+	0x80000064: 0x0FFFFEFFFF,  // row 100
+	0x80000065: 0x0FFFFEFFFF,  // row 101
+	0x80000066: 0x0FFFFEFFFF,  // row 102
+	0x80000067: 0x0FFFFEFFFF,  // row 103
+	0x80000068: 0x0FFFFEFFFF,  // row 104
+	0x80000069: 0x0FFFFEFFFF,  // row 105
+	0x8000006A: 0x0FFFFEFFFF,  // row 106
+	0x8000006B: 0x0FFFFEFFFF,  // row 107
+	0x8000006C: 0x0FFFFEFFFF,  // row 108
+	0x8000006D: 0x0FFFFEFFFF,  // row 109
+	0x8000006E: 0x0FFFFEFFFF,  // row 110
+	0x8000006F: 0x0FFFFEFFFF,  // row 111
+	0x80000070: 0x0FFFFEFFFF,  // row 112
+	0x80000071: 0x0FFFFEFFFF,  // row 113
+	0x80000072: 0x0FFFFEFFFF,  // row 114
+	0x80000073: 0x0FFFFEFFFF,  // row 115
+	0x80000074: 0x0FFFFEFFFF,  // row 116
+	0x80000075: 0x0FFFFEFFFF,  // row 117
+	0x80000076: 0x0FFFFEFFFF,  // row 118
+	0x80000077: 0x0FFFFEFFFF,  // row 119
+	0x80000078: 0x0FFFFEFFFF,  // row 120
+	0x80000079: 0x0FFFFEFFFF,  // row 121
+	0x8000007A: 0x0FFFFEFFFF,  // row 122
+	0x8000007B: 0x0FFFFEFFFF,  // row 123
+	0x8000007C: 0x0FFFFEFFFF,  // row 124
+	0x8000007D: 0x0FFFFEFFFF,  // row 125
+	0x8000007E: 0x0FFFFEFFFF,  // row 126
+	0x8000007F: 0x0FFFFEFFFF,  // row 127
+	0x80000080: 0x0FFFFEFFFF,  // row 128
+	0x80000081: 0x0FFFFEFFFF,  // row 129
+	0x80000082: 0x0FFFFEFFFF,  // row 130
+	0x80000083: 0x0FFFFEFFFF,  // row 131
+	0x80000084: 0x0FFFFEFFFF,  // row 132
+	0x80000085: 0x0FFFFEFFFF,  // row 133
+	0x80000086: 0x0FFFFEFFFF,  // row 134
+	0x80000087: 0x0FFFFEFFFF,  // row 135
+	0x80000088: 0x0FFFFEFFFF,  // row 136
+	0x80000089: 0x0FFFFEFFFF,  // row 137
+	0x8000008A: 0x0FFFFEFFFF,  // row 138
+	0x8000008B: 0x0FFFFEFFFF,  // row 139
+	0x8000008C: 0x0FFFFEFFFF,  // row 140
+	0x8000008D: 0x0FFFFEFFFF,  // row 141
+	0x8000008E: 0x0FFFFEFFFF,  // row 142
+	0x8000008F: 0x0FFFFEFFFF,  // row 143
+	0x80000090: 0x0FFFFEFFFF,  // row 144
+	0x80000092: 0x0FFFFEFFFF,  // row 146
+	0x80000093: 0x0FFFFEFFFF,  // row 147
+	0x80000094: 0x0FFFFEFFFF,  // row 148
+	0x80000095: 0x0FFFFEFFFF,  // row 149
+	0x80000097: 0x0FFFFEFFFF,  // row 151
+	0x80000098: 0x0FFFFEFFFF,  // row 152
+	0x80000099: 0x0FFFFEFFFF,  // row 153
+	0x8000009A: 0x0FFFFEFFFF,  // row 154
+	0x8000009B: 0x0FFFFEFFFF,  // row 155
+	0x8000009C: 0x0FFFFEFFFF,  // row 156
+	0x8000009D: 0x0FFFFEFFFF,  // row 157
+	0x8000009E: 0x0FFFFEFFFF,  // row 158
+	0x8000009F: 0x0FFFFEFFFF,  // row 159
+	0x800000A0: 0x0FFFFEFFFF,  // row 160
+	0x800000A1: 0x0FFFFEFFFF,  // row 161
+	0x800000A3: 0x0FFFFEFFFF,  // row 163
+	0x800000A4: 0x0FFFFEFFFF,  // row 164
+	0x800000A5: 0x0FFFFEFFFF,  // row 165
+	0x800000A6: 0x0FFFFEFFFF,  // row 166
+	0x800000A7: 0x0FFFFEFFFF,  // row 167
+	0x800000A8: 0x0FFFFEFFFF,  // row 168
+	0x800000A9: 0x0FFFFEFFFF,  // row 169
+	0x800000AA: 0x0FFFFEFFFF,  // row 170
+	0x800000AB: 0x0FFFFEFFFF,  // row 171
+	0x800000AD: 0x0FFFFEFFFF,  // row 173
+	0x800000AE: 0x0FFFFEFFFF,  // row 174
+	0x800000AF: 0x0FFFFEFFFF,  // row 175
+	0x800000B0: 0x0FFFFEFFFF,  // row 176
+	0x800000B1: 0x0FFFFEFFFF,  // row 177
+	0x800000B2: 0x0FFFFEFFFF,  // row 178
+	0x800000B3: 0x0FFFFEFFFF,  // row 179
+	0x800000B4: 0x0FFFFEFFFF,  // row 180
+	0x800000B5: 0x0FFFFEFFFF,  // row 181
+	0x800000B6: 0x0FFFFEFFFF,  // row 182
+	0x800000B7: 0x0FFFFEFFFF,  // row 183
+	0x800000B8: 0x0FFFFEFFFF,  // row 184
+	0x800000B9: 0x0FFFFEFFFF,  // row 185
+	0x800000BA: 0x0FFFFEFFFF,  // row 186
+	0x800000BB: 0x0FFFFEFFFF,  // row 187
+	0x800000BE: 0x0FFFFEFFFF,  // row 190
+	0x800000BF: 0x0FFFFEFFFF,  // row 191
+	0x800000C0: 0x0FFFFEFFFF,  // row 192
+	0x800000C2: 0x0FFFFEFFFF,  // row 194
+	0x800000C3: 0x0FFFFEFFFF,  // row 195
+	0x800000C4: 0x0FFFFEFFFF,  // row 196
+	0x800000C5: 0x0FFFFEFFFF,  // row 197
+	0x800000C6: 0x0FFFFEFFFF,  // row 198
+	0x800003E8: 0x0000807C7E,  // row 1000
+	0x800003E9: 0x00000683C7,  // row 1001
+	0x800003EA: 0x0000B07CFF,  // row 1002
+	0x800003EB: 0x00000E8000,  // row 1003
+	0x800003EC: 0x0000FEFFFF,  // row 1004
+	0x800003ED: 0x00000803FF,  // row 1005
+	0x800003EE: 0x00008EFEFE,  // row 1006
+	0x800003EF: 0x00008EFFFE,  // row 1007
+	0x800003F0: 0x00000EFFF7,  // row 1008
+	0x800003F1: 0x00008E7C2C,  // row 1009
+	0x800003F2: 0x00008EFFFF,  // row 1010
+	0x800003F3: 0x0000FEFFFF,  // row 1011
+	0x800003F4: 0x0000FEFFD7,  // row 1012
+	0x800003F5: 0x0000FEFFFF,  // row 1013
+	0x800003F6: 0x0000FEFFFF,  // row 1014
+	0x800003F7: 0x0F00FEFFFF,  // row 1015
+	0x800003F8: 0x0F00FEFFFF,  // row 1016
+	0x800003F9: 0x0F00FEFFFF,  // row 1017
+	0x80002710: 0x60000807CFE, // row 10000
+	0x80002774: 0x6C0002683C7, // row 10100
+	0x800027D8: 0x640000683C6, // row 10200
+	0x8000283C: 0x780000E8CF7, // row 10300
+	0x80002904: 0x4000068280,  // row 10500
+	0x80002968: 0x40000807E2C, // row 10600
+	0x800029CC: 0x40000807E2C, // row 10700
+	0x80002A30: 0x6C0000683C7, // row 10800
+	0x80002A94: 0x6C0000683C7, // row 10900
+	0x80002AF8: 0x40000007C34, // row 11000
+	0x80002B5C: 0x00000C8000,  // row 11100
+	0x80002BC0: 0x680000C00F7, // row 11200
+	0x80002C24: 0x0000802800,  // row 11300
+	0x80002C88: 0x0000000040,  // row 11400
+	0x80002CEC: 0x0000000002,  // row 11500
+	0x80002D50: 0x4400006828C, // row 11600
+	0x80002E18: 0x00000E8080,  // row 11800
+	0x80002E7C: 0x38000000153, // row 11900
+	0x80002EE0: 0x7C0200CD5D3, // row 12000
+	0x80002FA8: 0x4000068280,  // row 12200
+	0x8000300C: 0x600000EFCF6, // row 12300
+	0x80003070: 0x780000C8CF7, // row 12400
+	0x80004E20: 0x6C0000683F7, // row 20000
+	0x80004E84: 0x640008EFFFF, // row 20100
+	0x80004EE8: 0x0000068080,  // row 20200
+	0x80004F4C: 0x6C0000683F7, // row 20300
+	0x80004FB0: 0x680000003F7, // row 20400
+	0x80005014: 0x81000300000, // row 20500
+	0x800050DC: 0x40000802A2C, // row 20700
+	0x80005140: 0x0000807C00,  // row 20800
+	0x800051A4: 0x740008EFFFE, // row 20900
+	0x80005208: 0x68000000377, // row 21000
+	0x800052D0: 0x0000822808,  // row 21200
+	0x80005334: 0x0000822808,  // row 21300
+	0x80005398: 0xF40003EFFF7, // row 21400
+	0x80005460: 0xFC000FEFFFF, // row 21600
+	0x800054C4: 0x60000807FFF, // row 21700
+	0x80005528: 0x680000003F7, // row 21800
+	0x8000558C: 0x680000003F7, // row 21900
+	0x800055F0: 0x68000000FFF, // row 22000
+	0x80005654: 0x00000E8080,  // row 22100
+	0x800056B8: 0x00000C8000,  // row 22200
+	0x80005780: 0x380000001D3, // row 22400
+	0x800057E4: 0x00000C8080,  // row 22500
+	0x80005848: 0x0000068000,  // row 22600
+	0x800058AC: 0x640008EFFFF, // row 22700
+	0x80005910: 0x640008EFFFF, // row 22800
+	0x80007530: 0x4700000000,  // row 30000
+	0x80007594: 0x4700000000,  // row 30100
+	0x800075F8: 0x8300300111,  // row 30200
+	0x80007724: 0x0300000000,  // row 30500
+	0x80007788: 0x0300000000,  // row 30600
+	0x800077EC: 0x0300000000,  // row 30700
+	0x80007850: 0x4700000000,  // row 30800
+	0x800078B4: 0x4F00000000,  // row 30900
+	0x80007918: 0x0300000000,  // row 31000
+	0x80009C40: 0x0004000000,  // row 40000
+	0x80009CA4: 0x0001000000,  // row 40100
+	0x80009D08: 0x0003000000,  // row 40200
+	0x80009DD0: 0x0003000000,  // row 40400
+	0x80009E34: 0x0003000000,  // row 40500
+	0x80009E98: 0x0007000000,  // row 40600
+	0x8000C3B4: 0xFD000FEFFFF, // row 50100
+	0x8000C418: 0xFF000FEFFFF, // row 50200
+	0x8000C47C: 0xFF000FEFFFF, // row 50300
+	0x8000C4E0: 0xFD000FEFFFF, // row 50400
+	0x8000C544: 0xFD000FEFFFF, // row 50500
+	0x8000C5A8: 0xFF000FEFFFF, // row 50600
+	0x8000C60C: 0xFD000FEFFFF, // row 50700
+	0x8000C670: 0x0000822808,  // row 50800
+	0x8000C6D4: 0xFF000FEFFFF, // row 50900
+	0x8000EA60: 0xF4000FEFFFF, // row 60000
+	0x8000EAC4: 0xF4000FEFFFF, // row 60100
+	0x8000EB28: 0x280000001C3, // row 60200
+	0x8000EB8C: 0xFD000FEFFFF, // row 60300
+	0x8000EBF0: 0xF4000FEFFFF, // row 60400
+	0x8000EC54: 0xF4000FEFFFF, // row 60500
+	0x8000ECB8: 0x600000683F6, // row 60600
+	0x8000ED1C: 0xF4000BEFFFF, // row 60700
+	0x8000FDE8: 0xE1000BEFCFE, // row 65000
+	0x8000FE4C: 0xE1000BEFCFE, // row 65100
+	0x8000FEB0: 0xFF000FEFFFF, // row 65200
+	0x8000FF14: 0x40000802A2C, // row 65300
+	0x8000FF78: 0xE1000BEFCFE, // row 65400
+	0x80011170: 0xFF000FEFFFF, // row 70000
+	0x800111D4: 0x4700000000,  // row 70100
+	0x80011238: 0x4700000000,  // row 70200
+	0x80013880: 0xFF000FEFFFF, // row 80000
+	0x800138E4: 0xFF000FEFFFF, // row 80100
+	0x80013948: 0xFF000FEFFFF, // row 80200
+	0x80014C08: 0xFD000FEFFFF, // row 85000
+	0x80030D40: 0x1000000000,  // row 200000
+	0x80030DA4: 0x680000683FF, // row 200100
+	0x80061A80: 0x4000000022C, // row 400000
+	0x80061E68: 0x1000000000,  // row 401000
+	0x80062250: 0x8000000000,  // row 402000
+	0x80062638: 0x8000000000,  // row 403000
+	0x80062A20: 0x2000000000,  // row 404000
+	0x80062E08: 0x2000000000,  // row 405000
+	0x800631F0: 0x80000000000, // row 406000
+	0x800635D8: 0x80000000000, // row 407000
+	0x80063DA8: 0x10000000000, // row 409000
+	0x80064190: 0x10000000000, // row 410000
+	0x80064578: 0x40000000000, // row 411000
+	0x80064960: 0x20000000000, // row 412000
+	0x80064D48: 0xFD000FEFFFF, // row 413000
+	0x80065130: 0x640000683CE, // row 414000
+	0x80065518: 0x60000807CFE, // row 415000
+	0x80065900: 0xFD000FEFFFF, // row 416000
+	0x80065CE8: 0x640000683CF, // row 417000
+	0x800660D0: 0x680000003F7, // row 418000
+	0x800664B8: 0xFD000FEFFFF, // row 419000
+	0x80067070: 0x6000006837E, // row 422000
+	0x8007B4A8: 0xFD000FEFFFF, // row 505000
+	0x80085CA0: 0x0004000000,  // row 548000
+	0x800C3500: 0x4700000000,  // row 800000
 }
 
-// AoWHeuristicWepTypes lists compatible wepTypes for DLC arts that carry NO direct
-// canMountWep / reserved_canMountWep bit (Backhand Blades, Light Greatswords, and the
-// native arts of Great Katanas / Beast Claws). This is a HEURISTIC, not a regulation
+// AoWHeuristicWepTypes lists compatible wepTypes for legacy inputs whose arts carry
+// no direct canMountWep bit. This is a HEURISTIC, not a regulation
 // field: the wepType is inferred from mountWepTextId grouping + swordArtsParamId (the
 // art is a weapon's built-in skill). It is consulted only after the direct mask check
 // fails, and never grants a wepType outside this list (fail-closed).
-var AoWHeuristicWepTypes = map[uint32][]uint16{
-	0x800631F0: {95},
-	0x800635D8: {95},
-	0x80063DA8: {92},
-	0x80064190: {92},
-	0x80064578: {94},
-	0x80064960: {93},
-}
+var AoWHeuristicWepTypes = map[uint32][]uint16{}
 
 // WepTypeToCanMountBit maps EquipParamWeapon.wepType to the AoWCompatMasks bit the
 // game engine checks for that weapon class. This is an engine enum (not stored in
@@ -280,47 +279,46 @@ var WepTypeToCanMountBit = map[uint16]uint8{
 	3:  1,  // canMountWep_SwordNormal (bit 1)
 	5:  2,  // canMountWep_SwordLarge (bit 2)
 	7:  3,  // canMountWep_SwordGigantic (bit 3)
-	9:  8,  // canMountWep_SwordPierce (bit 8)
-	11: 9,  // canMountWep_RapierHeavy (bit 9)
+	9:  4,  // canMountWep_SaberNormal (bit 4)
+	11: 5,  // canMountWep_SaberLarge (bit 5)
 	13: 6,  // canMountWep_katana (bit 6)
-	14: 5,  // canMountWep_SaberLarge (bit 5)
-	15: 4,  // canMountWep_SaberNormal (bit 4)
-	16: 7,  // canMountWep_SwordDoubleEdge (bit 7)
-	17: 7,  // canMountWep_SwordDoubleEdge (bit 7)
+	14: 7,  // canMountWep_SwordDoubleEdge (bit 7)
+	15: 8,  // canMountWep_SwordPierce (bit 8)
+	16: 9,  // canMountWep_RapierHeavy (bit 9)
+	17: 10, // canMountWep_AxeNormal (bit 10)
 	19: 11, // canMountWep_AxeLarge (bit 11)
-	21: 13, // canMountWep_HammerLarge (bit 13)
-	23: 10, // canMountWep_AxeNormal (bit 10)
-	24: 10, // canMountWep_AxeNormal (bit 10)
-	25: 12, // canMountWep_HammerNormal (bit 12)
-	28: 14, // canMountWep_Flail (bit 14)
-	29: 14, // canMountWep_Flail (bit 14)
-	31: 15, // canMountWep_SpearNormal (bit 15)
+	21: 12, // canMountWep_HammerNormal (bit 12)
+	23: 13, // canMountWep_HammerLarge (bit 13)
+	24: 14, // canMountWep_Flail (bit 14)
+	25: 15, // canMountWep_SpearNormal (bit 15)
+	28: 16, // canMountWep_SpearLarge (bit 16)
+	29: 18, // canMountWep_SpearAxe (bit 18)
+	31: 19, // canMountWep_Sickle (bit 19)
 	32: 17, // canMountWep_SpearHeavy (bit 17)
 	33: 18, // canMountWep_SpearAxe (bit 18)
 	35: 20, // canMountWep_Knuckle (bit 20)
-	37: 19, // canMountWep_Sickle (bit 19)
-	39: 20, // canMountWep_Knuckle (bit 20)
-	41: 21, // canMountWep_Claw (bit 21)
-	43: 22, // canMountWep_Whip (bit 22)
-	50: 23, // canMountWep_AxhammerLarge (bit 23)
-	51: 24, // canMountWep_BowSmall (bit 24)
-	52: 25, // canMountWep_BowNormal (bit 25)
+	37: 21, // canMountWep_Claw (bit 21)
+	39: 22, // canMountWep_Whip (bit 22)
+	41: 23, // canMountWep_AxhammerLarge (bit 23)
+	50: 24, // canMountWep_BowSmall (bit 24)
+	51: 25, // canMountWep_BowNormal (bit 25)
 	53: 26, // canMountWep_BowLarge (bit 26)
-	54: 27, // canMountWep_ClossBow (bit 27)
-	55: 28, // canMountWep_Ballista (bit 28)
+	55: 27, // canMountWep_ClossBow (bit 27)
+	56: 28, // canMountWep_Ballista (bit 28)
 	57: 29, // canMountWep_Staff (bit 29)
 	61: 30, // canMountWep_Sorcery (bit 30)
 	65: 32, // canMountWep_ShieldSmall (bit 32)
-	66: 33, // canMountWep_ShieldNormal (bit 33)
-	67: 34, // canMountWep_ShieldLarge (bit 34)
+	67: 33, // canMountWep_ShieldNormal (bit 33)
 	69: 34, // canMountWep_ShieldLarge (bit 34)
 	87: 35, // canMountWep_Torch (bit 35)
-	88: 36, // reserved_canMountWep bit 0 (mask bit 36)
-	89: 37, // reserved_canMountWep bit 1 (mask bit 37)
-	90: 38, // reserved_canMountWep bit 2 (mask bit 38)
-	91: 39, // reserved_canMountWep bit 3 (mask bit 39)
-	94: 6,  // canMountWep_katana (bit 6)
-	95: 21, // canMountWep_Claw (bit 21)
+	88: 36, // canMountWep_HandToHand (mask bit 36)
+	89: 37, // canMountWep_PerfumeBottle (mask bit 37)
+	90: 38, // canMountWep_ThrustingShield (mask bit 38)
+	91: 39, // canMountWep_ThrowingWeapon (mask bit 39)
+	92: 40, // canMountWep_ReverseHandSword (mask bit 40)
+	93: 41, // canMountWep_LightGreatsword (mask bit 41)
+	94: 42, // canMountWep_GreatKatana (mask bit 42)
+	95: 43, // canMountWep_BeastClaw (mask bit 43)
 }
 
 // CanMountBitsForWepType returns the mask bit(s) to test for a wepType. Every wepType
@@ -333,8 +331,8 @@ func CanMountBitsForWepType(wepType uint16) ([]uint8, bool) {
 	return []uint8{bit}, true
 }
 
-// CanMountWepNames names each mask bit (0..39) for diagnostics. Bits 0..35 are the
-// EquipParamGem canMountWep_* columns; bits 36..39 are reserved_canMountWep bits 0..3.
+// CanMountWepNames names each mask bit (0..43) for diagnostics. Bits 0..35 are the
+// base-game EquipParamGem fields; bits 36..43 are the DLC canMountWep fields.
 var CanMountWepNames = []string{
 	"Dagger",
 	"SwordNormal",
@@ -372,8 +370,12 @@ var CanMountWepNames = []string{
 	"ShieldNormal",
 	"ShieldLarge",
 	"Torch",
-	"reserved0_HandToHandArts",
-	"reserved1_PerfumeBottle",
-	"reserved2_ThrustingShield",
-	"reserved3_ThrowingBlade",
+	"canMountWep_HandToHand",
+	"canMountWep_PerfumeBottle",
+	"canMountWep_ThrustingShield",
+	"canMountWep_ThrowingWeapon",
+	"canMountWep_ReverseHandSword",
+	"canMountWep_LightGreatsword",
+	"canMountWep_GreatKatana",
+	"canMountWep_BeastClaw",
 }

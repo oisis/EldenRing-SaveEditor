@@ -311,6 +311,15 @@ describe('Wails binding contract: editor.InventoryWorkspaceSnapshot', () => {
     });
 });
 
+describe('Wails binding contract: editor.EditableItem weapon metadata', () => {
+    it('exposes independent AoW and affinity capabilities', () => {
+        const sample = editor.EditableItem.createFrom({});
+        expect('wepType' in sample).toBe(true);
+        expect('canMountAoW' in sample).toBe(true);
+        expect('canChangeAffinity' in sample).toBe(true);
+    });
+});
+
 describe('Wails binding contract: editor.WorkspaceValidationReport', () => {
     it('exposes ok/errors/warnings the validation panel reads', () => {
         const sample = editor.WorkspaceValidationReport.createFrom({});

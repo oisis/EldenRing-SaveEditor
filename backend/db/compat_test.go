@@ -196,7 +196,7 @@ func TestIsAshOfWarCompatibleWithWeapon_DLCWepTypesMapped(t *testing.T) {
 }
 
 func TestAoWCompatMasks_UnresolvedDLCAoWsFailClosed(t *testing.T) {
-	// A DLC AoW is "resolved" if it has a direct mask (bits 0..39) OR a heuristic
+	// A DLC AoW is "resolved" if it has a direct mask (bits 0..43) OR a heuristic
 	// wepType entry. Anything with neither must fail-closed. `expected` lists AoWs
 	// we knowingly cannot resolve — currently none.
 	expected := map[uint32]string{}
@@ -234,6 +234,31 @@ func TestAoWCompatMasks_UnresolvedDLCAoWsFailClosed(t *testing.T) {
 		if _, ok := seen[id]; !ok {
 			t.Errorf("expected unresolved DLC AoW 0x%08X %q not found", id, name)
 		}
+	}
+}
+
+func TestIsAshOfWarCompatibleWithWeapon_MiladyUsesDirectLightGreatswordBit(t *testing.T) {
+	const milady = uint32(0x0405F7E0) // WepType 93, GemMountType 2
+
+	for _, aow := range []uint32{
+		0x80002774, // Impaling Thrust
+		0x80003070, // Sword Dance
+		0x8000558C, // Carian Greatsword
+		0x80064960, // Wing Stance
+	} {
+		compatible, known := IsAshOfWarCompatibleWithWeapon(aow, milady)
+		if !known || !compatible {
+			t.Errorf("AoW 0x%08X + Milady: got (compatible=%v, known=%v), want (true, true)",
+				aow, compatible, known)
+		}
+	}
+
+	compatible, known := IsAshOfWarCompatibleWithWeapon(0x80002CEC, milady) // Square Off
+	if !known {
+		t.Fatal("Square Off + Milady: expected known=true")
+	}
+	if compatible {
+		t.Fatal("Square Off + Milady: expected compatible=false")
 	}
 }
 
@@ -339,6 +364,49 @@ func TestIsAshOfWarCompatibleWithWeapon_TorchUsesTorchBitNotBow(t *testing.T) {
 	}
 	if compatible {
 		t.Error("Bow-only AoW + Torch: expected compatible=false (torch must not use the Bow bit)")
+	}
+}
+
+func TestIsAshOfWarCompatibleWithWeapon_BowClasses(t *testing.T) {
+	const (
+		shortbow   = uint32(0x02625A00)
+		composite  = uint32(0x02631D50)
+		longbow    = uint32(0x02719C40)
+		greatbow   = uint32(0x02817AC0)
+		barrage    = uint32(0x80009CA4)
+		mighty     = uint32(0x80009D08)
+		through    = uint32(0x80009C40)
+		swordDance = uint32(0x80003070)
+	)
+
+	cases := []struct {
+		name       string
+		weapon     uint32
+		aow        uint32
+		compatible bool
+	}{
+		{"Shortbow + Barrage", shortbow, barrage, true},
+		{"Shortbow + Mighty Shot", shortbow, mighty, true},
+		{"Shortbow + Through and Through", shortbow, through, false},
+		{"Shortbow + Sword Dance", shortbow, swordDance, false},
+		{"Composite Bow + Mighty Shot", composite, mighty, true},
+		{"Composite Bow + Sword Dance", composite, swordDance, false},
+		{"Longbow + Mighty Shot", longbow, mighty, true},
+		{"Longbow + Barrage", longbow, barrage, false},
+		{"Greatbow + Through and Through", greatbow, through, true},
+		{"Greatbow + Mighty Shot", greatbow, mighty, false},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			compatible, known := IsAshOfWarCompatibleWithWeapon(tc.aow, tc.weapon)
+			if !known {
+				t.Fatal("expected known=true")
+			}
+			if compatible != tc.compatible {
+				t.Fatalf("compatible=%v, want %v", compatible, tc.compatible)
+			}
+		})
 	}
 }
 

@@ -37,10 +37,10 @@ Reference chapters whose contents we do **not** repeat in 54:
 | Allocation writer (`core.PatchWeaponAoW`) | ✅ allocates a new AoW + rebuilds the slot (active AoW-set path of the workspace save). |
 | Allocator guard | ✅ guard `NextArmamentIndex >= maxEntries` in `allocateGaItem` (commit `6881cb9`). |
 | Availability scan (`core.ScanAoWAvailability`) | ✅ two-pass, detects shared-handle. |
-| Compatibility check (`db.IsAshOfWarCompatibleWithWeapon`) | ✅ 40-bit `canMountWep_*` + `reserved_canMountWep` mask, plus the `AoWHeuristicWepTypes` fallback. |
+| Compatibility check (`db.IsAshOfWarCompatibleWithWeapon`) | ✅ 44-bit `canMountWep_*` mask from `EquipParamGem.param`, plus a legacy `AoWHeuristicWepTypes` fallback. |
 | Workspace AoW (`editor.UpdateWeapon` + `EditableItem` pending fields) | ✅ pending pattern with "fail-closed on unknown compat" validation at save. |
 | Frontend modal (`WeaponEditModal.tsx`) | ✅ workspace-only path (the former non-workspace/legacy mode was removed). |
-| DLC wepTypes 87–91, 94, 95 | ✅ mapped. Torches (87) use the Torch bit; 88–91 use `reserved_canMountWep`; 94/95 reuse the base katana/claw bit. Backhand Blades (92) / Light Greatswords (93) resolve via the heuristic (in-game unconfirmed). |
+| DLC wepTypes 87–95 | ✅ mapped. Torches (87) use the Torch bit; 88–95 use the eight DLC bits 36–43 recovered from the raw PARAM. |
 
 ---
 
@@ -77,7 +77,7 @@ Every weapon has a skill visible in-game as an **Ash of War**. It comes from one
 Three `regulation.bin` parameters are the reference layer. SaveForge **never** modifies them:
 
 - `EquipParamWeapon.swordArtsParamId` — fallback skill.
-- `EquipParamGem.swordArtsParamId` + `canMountWep_*` + `reserved_canMountWep` — the gem's skill and 40-bit compatibility mask.
+- `EquipParamGem.swordArtsParamId` + `canMountWep_*` — the gem's skill and 44-bit compatibility mask.
 - `SwordArtsParam` — skill definitions (animations, costs, in-game name).
 
 The consequences of overlooking this distinction (and the bugs that historically followed):
@@ -187,13 +187,13 @@ func CanWeaponMountAoW(baseItemID uint32) bool {
 func IsAoWCompatibleWithWepType(aowItemID uint32, wepType uint16) (compatible, known bool) {
     aow := GetItemData(aowItemID)
     bitPositions, bitsKnown := data.CanMountBitsForWepType(wepType)
-    // Layer 1 — direct 40-bit mask.
+    // Layer 1 — direct 44-bit mask.
     if aow.AoWCompatBitmask != 0 && bitsKnown {
         for _, b := range bitPositions {
             if (aow.AoWCompatBitmask>>b)&1 == 1 { return true, true }
         }
     }
-    // Layer 2 — heuristic fallback for DLC arts with no direct bit.
+    // Layer 2 — legacy heuristic fallback for an input with no direct bit.
     if types, ok := data.AoWHeuristicWepTypes[aowItemID]; ok {
         for _, wt := range types {
             if wt == wepType { return true, true }
@@ -206,18 +206,22 @@ func IsAoWCompatibleWithWepType(aowItemID uint32, wepType uint16) (compatible, k
 }
 ```
 
-The compatibility mask is **40 bits**, sourced directly from `regulation.bin`:
+The compatibility mask is **44 bits**, sourced directly from `regulation.bin`:
 
 - **bits 0–35** — `EquipParamGem.canMountWep_Dagger … canMountWep_Torch` (full list in `data.CanMountWepNames`).
-- **bits 36–39** — `EquipParamGem.reserved_canMountWep` bits 0–3, i.e. the four DLC weapon classes that carry a dedicated compatibility bit:
+- **bits 36–43** — the eight DLC `canMountWep_*` flags:
   - bit 36 → `wepType 88` (Hand-to-Hand / Dryleaf Arts)
   - bit 37 → `wepType 89` (Perfume Bottles)
   - bit 38 → `wepType 90` (Dueling / Thrusting Shields)
   - bit 39 → `wepType 91` (Throwing / Smithscript Blades)
+  - bit 40 → `wepType 92` (Backhand Blades)
+  - bit 41 → `wepType 93` (Light Greatswords)
+  - bit 42 → `wepType 94` (Great Katanas)
+  - bit 43 → `wepType 95` (Beast Claws)
 
-`WepTypeToCanMountBit` maps `EquipParamWeapon.wepType` to its bit; `CanMountBitsForWepType` wraps it. `reserved2_canMountWep` is zero on every row (the generator aborts if that ever changes).
+`WepTypeToCanMountBit` maps `EquipParamWeapon.wepType` to its bit; `CanMountBitsForWepType` wraps it. The old CSV PARAMDEF exposes only bits 0–39, so the generator also reads the raw `EquipParamGem.param`, verifies that its low 40 bits match the CSV for every row, then imports bits 40–43. Any higher bit aborts generation.
 
-A few DLC arts carry **no** direct bit at all (Backhand Blades `wepType 92`, Light Greatswords `wepType 93`, and the native arts of Great Katanas `94` / Beast Claws `95`). These are resolved by **`AoWHeuristicWepTypes`** — a HEURISTIC (not a regulation field) derived from `mountWepTextId` + `swordArtsParamId`, consulted only when the direct mask matches nothing and never granting a wepType outside its list. `wepType 94/95` also reuse their base katana/claw bit for standard arts. The `92/93` inference is **not** confirmed in-game.
+Current regulation data gives direct bits to all DLC arts. **`AoWHeuristicWepTypes`** remains only as a fail-closed fallback for older/future inputs whose direct mask is genuinely zero.
 
 The signature `(compatible, known)`:
 
@@ -551,7 +555,7 @@ Contrast across the active layers:
 
 Both active layers fail-closed on unknown compatibility — the UI hides the entry and the workspace save refuses it. This is deliberate, because templates and auto-apply can introduce combinations the UI never confirmed. (A previous generation of direct-write endpoints fail-opened on `known == false`; they were removed, so no passthrough path remains.)
 
-The 40-bit mask covers every `EquipParamGem` row (bits 0–39 come straight from `canMountWep_*` + `reserved_canMountWep`); a golden check reconstructs it from the CSV with zero mismatches. Affinity gating for infusion variants (e.g., Heavy Longsword vs Standard Longsword) is **not** handled by the bitmask — `EquipParamWeapon.defaultWepAttr` / `configurableWepAttr00..23` are not imported. No evidence was found that affinity gating is enforced in SaveForge.
+The 44-bit mask covers every `EquipParamGem` row. Bits 0–39 are cross-checked against the CSV, while bits 40–43 come directly from the raw PARAM compatibility field. Affinity gating for infusion variants (e.g., Heavy Longsword vs Standard Longsword) is **not** handled by the bitmask — `EquipParamWeapon.defaultWepAttr` / `configurableWepAttr00..23` are not imported. No evidence was found that affinity gating is enforced in SaveForge.
 
 ---
 
@@ -628,7 +632,7 @@ Anti-patterns the document must NOT document as "safe":
 | `backend/editor/save_test.go::TestValidatePendingAoWChanges_*` | Fail-closed on unknown compat, reject non-AoW category, accept clear. |
 | `backend/db/compat_test.go::TestIsAshOfWarCompatibleWithWeapon_DLCWepTypesMapped` | Real DLC weapons (Dragon Towershield 69, Great Katana 94, Beast Claw 95) now resolve `known=true`, `compatible=true`. |
 | `backend/db/compat_test.go::TestIsAshOfWarCompatibleWithWeapon_DuelingShield` / `_TorchUsesTorchBitNotBow` / `_ReservedBitsAppliedToBaseAoWs` | B2/B3/B5 regression guards (reserved bit 2 → Dueling Shields; torch uses Torch bit; base reserved bits applied). |
-| `tools/generate_aow_compat/main_test.go::*` | Generator fixtures: bits 0–35, reserved → 36–39, `reserved2` guard, missing-column error, determinism, provenance. |
+| `tools/generate_aow_compat/main_test.go::*` | Generator fixtures: CSV bits 0–39, raw PARAM bits 40–43, CSV/PARAM cross-check, unknown-bit guard, missing-column error, determinism, provenance. |
 | `backend/db/compat_test.go::TestIsAshOfWarCompatibleWithWeapon_*` | Known-compatible / known-incompatible / non-mountable (`gemMountType != 2`) verdicts at the DB layer. |
 | `backend/core/writer_weapon_itemid_test.go::*` | `PatchWeaponItemID` byte-patch contract (locate-by-handle, stale-data guard, in-place 4-byte ItemID overwrite). |
 | `frontend/src/components/WeaponEditModal.workspace.test.tsx` | Workspace mode read/write with workspaceItem. |
@@ -640,10 +644,10 @@ Anti-patterns the document must NOT document as "safe":
 | # | Area | Status |
 |---|---|---|
 | L1 | Affinity gating per AoW (`defaultWepAttr`/`configurableWepAttr00..23`) | `needs verification` — no gating path found in the code. The UI does not differentiate infusion variants on the compat check. |
-| L2 | DLC wepType 92/93 (Backhand Blades / Light Greatswords) | No dedicated regulation bit. Resolved via `AoWHeuristicWepTypes` (`mountWepTextId` + `swordArtsParamId`). ✅ their native arts mount; `needs verification` in-game whether these classes also accept standard Ashes of War (fail-closed until confirmed). wepTypes 87–91/94/95 are now directly mapped. |
+| L2 | DLC wepType 92–95 | ✅ resolved from direct PARAM bits 40–43. Milady (`wepType 93`) uses bit 41, so standard compatible arts and Wing Stance are both represented without a hand-written allowlist. |
 | L3 | `gemMountType == 1` (somber) AoW editing semantics | The UI sets `CanMountAoW = false` → the AoW section is disabled. `needs verification` whether there is a placeholder/explanation that this is not an error. |
 | L4 | Frontend ↔ backend mapping | ✅ resolved. Single source (`tools/generate_aow_compat` → Go + `aowCompat.generated.ts`); the UI imports the generated module. No hand-maintained mirror. |
-| L5 | Compat mask completeness | ✅ every `EquipParamGem` row (bits 0–39) is regenerated deterministically; a golden check asserts 0 CSV mismatches and `reserved2_canMountWep == 0`. Re-run `tools/generate_aow_compat` after a regulation update. |
+| L5 | Compat mask completeness | ✅ every `EquipParamGem` row (bits 0–43) is regenerated deterministically; the generator cross-checks raw PARAM bits 0–39 against the CSV and rejects unsupported bits above 43. Re-run `tools/generate_aow_compat` after a regulation update. |
 | L6 | Orphan AoW GaItem garbage collection | Does not exist (intentionally). The game tolerates it, the strict path can re-attach. `needs verification` in long user-facing workflows (whether the save grows linearly with the number of AoW edits). |
 | L7 | Workspace `populateCurrentAoW` edge cases | The full Added × Removed × Pending matrix is not described here — covered by tests in `current_aow_test.go`. `needs verification` for new sources/sinks. |
 
@@ -667,7 +671,7 @@ Anti-patterns the document must NOT document as "safe":
 ## 24. Sources
 
 - Code: `backend/core/structures.go`, `backend/core/offset_defs.go`, `backend/core/writer.go`, `backend/core/aow_availability.go`, `backend/db/db.go`, `backend/db/data/aow_compat.go`, `backend/db/data/weapon_gem_mount.go`, `backend/editor/weapon.go`, `backend/editor/save.go`, `backend/editor/validate.go`, `backend/editor/workspace.go`, `app.go`, `frontend/src/components/WeaponEditModal.tsx`, `frontend/src/data/aowCompat.generated.ts`, `frontend/src/components/SortOrderTab.tsx`.
-- Generator: `tools/generate_aow_compat` (Go; emits `aow_compat.go`, `weapon_gem_mount.go`, and `aowCompat.generated.ts` from `EquipParamGem.csv` + `EquipParamWeapon.csv`; header carries source paths + sha256). Regenerate: `go run ./tools/generate_aow_compat -gem <EquipParamGem.csv> -weapon <EquipParamWeapon.csv>`.
+- Generator: `tools/generate_aow_compat` (Go; emits `aow_compat.go`, `weapon_gem_mount.go`, and `aowCompat.generated.ts` from `EquipParamGem.csv` + raw `EquipParamGem.param` + `EquipParamWeapon.csv`; header carries source paths + sha256). Regenerate: `go run ./tools/generate_aow_compat -gem <EquipParamGem.csv> -gem-param <EquipParamGem.param> -weapon <EquipParamWeapon.csv>`.
 - Tests: `backend/core/aow_strict_test.go`, `backend/core/aow_dual_destination_test.go`, `backend/core/gaitem_placement_test.go`, `backend/core/writer_weapon_itemid_test.go`, `backend/db/compat_test.go`, `backend/editor/current_aow_test.go`, `backend/editor/weapon_test.go`, `backend/editor/save_test.go`, `frontend/src/components/WeaponEditModal.workspace.test.tsx`.
 - Game data: `tmp/regulation-bin-dump/csv/EquipParamWeapon.csv` (columns `swordArtsParamId`, `wepType`, `gemMountType`), `EquipParamGem.csv` (`swordArtsParamId`, `canMountWep_*`), `SwordArtsParam.csv`.
 - History / forensic: commits `4e800b9` (`fix(aow): use vanilla no-custom sentinel`), `cb1a822` (`fix(ui): clarify custom Ash of War removal`), `6881cb9` (`fix(core): guard AoW allocation at armament capacity`), `f3d64c1` (`fix(inventory): restore AoW editing in workspace mode`), `0b62cfd` (`feat(inventory): save pending Ashes of War edits`), `8fcc97f` (`feat(inventory): expose current AoW in workspace`).

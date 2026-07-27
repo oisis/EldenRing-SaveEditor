@@ -137,7 +137,7 @@ export function ItemDetailPanel({item, onClose}: ItemDetailPanelProps) {
     const reinforcementLabel = v1Weapon
         ? v1Weapon.IsSomber
             ? 'Somber'
-            : v1Weapon.IsInfusable
+            : v1Weapon.MaxUpgrade === 25
                 ? 'Standard'
                 : '—'
         : undefined;

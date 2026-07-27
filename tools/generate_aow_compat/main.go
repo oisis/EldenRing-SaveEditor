@@ -5,33 +5,35 @@
 //
 //	backend/db/data/aow_compat.go       — AoWCompatMasks, WepTypeToCanMountBit,
 //	                                       AoWHeuristicWepTypes, CanMountWepNames
-//	backend/db/data/weapon_gem_mount.go — WeaponGemMounts (wepType + gemMountType)
+//	backend/db/data/weapon_gem_mount.go — WeaponGemMounts (wepType + AoW/affinity gates)
 //	frontend/src/data/aowCompat.generated.ts — the Go maps mirrored for the UI
 //
 // Compatibility model:
 //
 //	Layer 1 (direct, from regulation.bin):
 //	  mask bits 0..35  = EquipParamGem.canMountWep_Dagger .. canMountWep_Torch
-//	  mask bits 36..39 = EquipParamGem.reserved_canMountWep bits 0..3
-//	    bit 36 (reserved 0) → wepType 88 (Hand-to-Hand / Dryleaf Arts)
-//	    bit 37 (reserved 1) → wepType 89 (Perfume Bottles)
-//	    bit 38 (reserved 2) → wepType 90 (Dueling / Thrusting Shields)
-//	    bit 39 (reserved 3) → wepType 91 (Throwing / Smithscript Blades)
-//	  reserved2_canMountWep is expected to be zero on every row; a non-zero value
-//	  aborts generation rather than silently dropping data.
+//	  mask bits 36..43 = the eight DLC canMountWep fields packed after canMountWep_Torch
+//	    bit 36 → wepType 88 (Hand-to-Hand / Dryleaf Arts)
+//	    bit 37 → wepType 89 (Perfume Bottles)
+//	    bit 38 → wepType 90 (Dueling / Thrusting Shields)
+//	    bit 39 → wepType 91 (Throwing / Smithscript Blades)
+//	    bit 40 → wepType 92 (Backhand Blades)
+//	    bit 41 → wepType 93 (Light Greatswords)
+//	    bit 42 → wepType 94 (Great Katanas)
+//	    bit 43 → wepType 95 (Beast Claws)
+//	  The checked-in CSV dump used an older PARAMDEF and exposes only bits 36..39.
+//	  The raw EquipParamGem.param supplies the full 64-bit field. Its low 40 bits
+//	  are cross-checked against the CSV before bits 40..43 are accepted.
 //
-//	Layer 2 (heuristic, NOT a regulation field): a handful of DLC arts carry no
-//	canMountWep / reserved bit at all (Backhand Blades, Light Greatswords, and the
-//	native arts of Great Katanas / Beast Claws). For those the compatible wepType
-//	is inferred from mountWepTextId grouping + swordArtsParamId (an art that is a
-//	weapon's built-in skill is compatible with that weapon type). This is emitted
-//	as AoWHeuristicWepTypes, kept separate from the direct mask, and only consulted
-//	when the direct mask yields nothing.
+//	Layer 2 (legacy fallback): if a future/older input genuinely has a zero direct
+//	mask, compatibility may still be inferred from mountWepTextId grouping plus
+//	swordArtsParamId. Current regulation data resolves all DLC arts directly.
 //
 // Usage:
 //
 //	go run ./tools/generate_aow_compat \
 //	    -gem tmp/regulation-bin-dump/csv/EquipParamGem.csv \
+//	    -gem-param tmp/regulation-bin-dump/params/EquipParamGem.param \
 //	    -weapon tmp/regulation-bin-dump/csv/EquipParamWeapon.csv
 //
 // The tool never reads a hard-coded tmp/ path; both inputs are explicit flags.
@@ -39,11 +41,13 @@ package main
 
 import (
 	"crypto/sha256"
+	"encoding/binary"
 	"encoding/csv"
 	"flag"
 	"fmt"
 	"go/format"
 	"io"
+	"math"
 	"os"
 	"sort"
 	"strconv"
@@ -64,14 +68,18 @@ var canMountColumns = []string{
 	"ShieldSmall", "ShieldNormal", "ShieldLarge", "Torch",
 }
 
-// reservedBitNames labels mask bits 36..39, sourced from reserved_canMountWep
-// bits 0..3. These are synthetic names — reserved_canMountWep is a single packed
-// column in the paramdef, not four named columns.
+// reservedBitNames labels mask bits 36..43. The first four are exposed by the
+// legacy CSV dump as reserved_canMountWep bits 0..3; the final four exist only
+// in the raw PARAM because that dump used a pre-DLC PARAMDEF.
 var reservedBitNames = []string{
-	"reserved0_HandToHandArts",  // bit 36 → wepType 88
-	"reserved1_PerfumeBottle",   // bit 37 → wepType 89
-	"reserved2_ThrustingShield", // bit 38 → wepType 90
-	"reserved3_ThrowingBlade",   // bit 39 → wepType 91
+	"canMountWep_HandToHand",       // bit 36 → wepType 88
+	"canMountWep_PerfumeBottle",    // bit 37 → wepType 89
+	"canMountWep_ThrustingShield",  // bit 38 → wepType 90
+	"canMountWep_ThrowingWeapon",   // bit 39 → wepType 91
+	"canMountWep_ReverseHandSword", // bit 40 → wepType 92
+	"canMountWep_LightGreatsword",  // bit 41 → wepType 93
+	"canMountWep_GreatKatana",      // bit 42 → wepType 94
+	"canMountWep_BeastClaw",        // bit 43 → wepType 95
 }
 
 // wepTypeToBit maps EquipParamWeapon.wepType → the mask bit the game engine
@@ -88,54 +96,59 @@ var wepTypeToBit = map[uint16]uint8{
 	3:  1,  // Straight Sword
 	5:  2,  // Greatsword
 	7:  3,  // Colossal Sword
-	9:  8,  // Curved Sword
-	11: 9,  // Curved Greatsword
+	9:  4,  // Curved Sword
+	11: 5,  // Curved Greatsword
 	13: 6,  // Katana
-	14: 5,  // Curved Greatsword (alt)
-	15: 4,  // Curved Sword (alt)
-	16: 7,  // Twinblade
-	17: 7,  // Twinblade (alt)
+	14: 7,  // Twinblade
+	15: 8,  // Thrusting Sword
+	16: 9,  // Heavy Thrusting Sword
+	17: 10, // Axe
 	19: 11, // Greataxe
-	21: 13, // Great Hammer
-	23: 10, // Axe
-	24: 10, // Axe (alt)
-	25: 12, // Spear
-	28: 14, // Great Spear
-	29: 14, // Halberd
-	31: 15, // Reaper
-	32: 17, // Great Spear (heavy)
-	33: 18, // Halberd (alt)
+	21: 12, // Hammer
+	23: 13, // Great Hammer
+	24: 14, // Flail
+	25: 15, // Spear
+	28: 16, // Great Spear
+	32: 17, // Heavy Spear engine category
+	29: 18, // Halberd
+	33: 18, // Legacy halberd engine category (no mountable app weapon)
+	31: 19, // Reaper
 	35: 20, // Fist
-	37: 19, // Sickle / Claw
-	39: 20, // Whip
-	41: 21, // Hand-to-hand / Beast weapons
-	43: 22, // Whip (alt)
-	50: 23, // Light Bow
-	51: 24, // Bow
-	52: 25, // Bow (alt)
+	37: 21, // Claw
+	39: 22, // Whip
+	41: 23, // Colossal Weapon
+	50: 24, // Light Bow
+	51: 25, // Bow
 	53: 26, // Greatbow
-	54: 27, // Crossbow (alt)
-	55: 28, // Crossbow
+	55: 27, // Crossbow
+	56: 28, // Ballista
 	57: 29, // Glintstone Staff
 	61: 30, // Sacred Seal
 	65: 32, // Small Shield
-	66: 33, // Medium Shield
-	67: 34, // Greatshield
-	69: 34, // Greatshield / Towershield
+	67: 33, // Medium Shield
+	69: 34, // Greatshield
 	87: 35, // Torch (real torch wepType; the game checks canMountWep_Torch)
 	88: 36, // Hand-to-Hand Arts (reserved_canMountWep bit 0)
 	89: 37, // Perfume Bottles (reserved_canMountWep bit 1)
 	90: 38, // Dueling / Thrusting Shields (reserved_canMountWep bit 2)
 	91: 39, // Throwing / Smithscript Blades (reserved_canMountWep bit 3)
-	94: 6,  // Great Katana — reuses the base katana column (bit 6)
-	95: 21, // Beast Claw — reuses the base claw column (bit 21)
-	// wepType 92 (Backhand Blades) and 93 (Light Greatswords) have no dedicated
-	// regulation bit; they are resolved via AoWHeuristicWepTypes instead.
+	92: 40, // Backhand Blades
+	93: 41, // Light Greatswords
+	94: 42, // Great Katanas
+	95: 43, // Beast Claws
 	// wepType 68 is intentionally absent: no weapon row uses it (real torches are
 	// wepType 87), so mapping it would describe a non-existent weapon class.
 }
 
-const maskBits = 40 // 0..35 canMountWep, 36..39 reserved_canMountWep
+const maskBits = 44
+
+const (
+	paramRowCountOffset = 0x0A
+	paramRowTableOffset = 0x40
+	paramRowEntrySize   = 0x18
+	paramCompatOffset   = 0x38
+	paramCompatSize     = 8
+)
 
 type gem struct {
 	rid   uint32
@@ -146,37 +159,40 @@ type gem struct {
 }
 
 type weapon struct {
-	rid     uint32
-	wepType uint16
-	gm      uint8
-	sap     int
+	rid               uint32
+	wepType           uint16
+	gm                uint8
+	canChangeAffinity bool
+	sap               int
 }
 
 type result struct {
-	gems       []gem
-	weapons    []weapon
-	masks      map[uint32]uint64   // AoW item ID → mask (only non-zero masks)
-	heuristic  map[uint32][]uint16 // AoW item ID → wepTypes (mask==0 DLC arts)
-	gemHash    string
-	weaponHash string
-	aowGo      string
-	weaponGo   string
-	tsSource   string
+	gems         []gem
+	weapons      []weapon
+	masks        map[uint32]uint64   // AoW item ID → mask (only non-zero masks)
+	heuristic    map[uint32][]uint16 // AoW item ID → wepTypes (mask==0 DLC arts)
+	gemHash      string
+	gemParamHash string
+	weaponHash   string
+	aowGo        string
+	weaponGo     string
+	tsSource     string
 }
 
 func main() {
 	gemPath := flag.String("gem", "", "path to EquipParamGem.csv")
+	gemParamPath := flag.String("gem-param", "", "path to raw EquipParamGem.param")
 	weaponPath := flag.String("weapon", "", "path to EquipParamWeapon.csv")
 	aowOut := flag.String("aow-out", "backend/db/data/aow_compat.go", "output path for aow_compat.go")
 	weaponOut := flag.String("weapon-out", "backend/db/data/weapon_gem_mount.go", "output path for weapon_gem_mount.go")
 	tsOut := flag.String("ts-out", "frontend/src/data/aowCompat.generated.ts", "output path for the TypeScript mirror")
 	flag.Parse()
 
-	if *gemPath == "" || *weaponPath == "" {
-		fatalf("both -gem and -weapon are required")
+	if *gemPath == "" || *gemParamPath == "" || *weaponPath == "" {
+		fatalf("-gem, -gem-param, and -weapon are required")
 	}
 
-	res, err := generate(*gemPath, *weaponPath)
+	res, err := generate(*gemPath, *gemParamPath, *weaponPath)
 	if err != nil {
 		fatalf("%v", err)
 	}
@@ -186,14 +202,21 @@ func main() {
 	write(*tsOut, res.tsSource)
 
 	fmt.Printf("aow_compat: %d masks, %d heuristic entries\n", len(res.masks), len(res.heuristic))
-	fmt.Printf("weapon_gem_mount: %d weapons\n", countMountable(res.weapons))
+	fmt.Printf("weapon_gem_mount: %d weapon metadata rows\n", countWeaponMetadata(res.weapons))
 }
 
 // generate is the pure core: it reads both CSVs and returns every generated
 // artifact plus the intermediate model, so tests can assert on it directly.
-func generate(gemPath, weaponPath string) (*result, error) {
+func generate(gemPath, gemParamPath, weaponPath string) (*result, error) {
 	gems, gemHash, err := readGems(gemPath)
 	if err != nil {
+		return nil, err
+	}
+	rawMasks, gemParamHash, err := readGemParamMasks(gemParamPath)
+	if err != nil {
+		return nil, err
+	}
+	if err := applyRawGemMasks(gems, rawMasks, gemPath, gemParamPath); err != nil {
 		return nil, err
 	}
 	weapons, weaponHash, err := readWeapons(weaponPath)
@@ -210,15 +233,16 @@ func generate(gemPath, weaponPath string) (*result, error) {
 	heuristic := computeHeuristic(gems, weapons)
 
 	res := &result{
-		gems:       gems,
-		weapons:    weapons,
-		masks:      masks,
-		heuristic:  heuristic,
-		gemHash:    gemHash,
-		weaponHash: weaponHash,
+		gems:         gems,
+		weapons:      weapons,
+		masks:        masks,
+		heuristic:    heuristic,
+		gemHash:      gemHash,
+		gemParamHash: gemParamHash,
+		weaponHash:   weaponHash,
 	}
 
-	aowGo, err := renderAoWGo(res, gemPath, weaponPath)
+	aowGo, err := renderAoWGo(res, gemPath, gemParamPath, weaponPath)
 	if err != nil {
 		return nil, err
 	}
@@ -228,7 +252,7 @@ func generate(gemPath, weaponPath string) (*result, error) {
 	}
 	res.aowGo = aowGo
 	res.weaponGo = weaponGo
-	res.tsSource = renderTS(res, gemPath, weaponPath)
+	res.tsSource = renderTS(res, gemPath, gemParamPath, weaponPath)
 	return res, nil
 }
 
@@ -353,12 +377,93 @@ func readGems(path string) ([]gem, string, error) {
 	return gems, hash, nil
 }
 
+// readGemParamMasks reads the 64-bit weapon compatibility field directly from
+// EquipParamGem.param. The CSV export in tmp/ was produced with a pre-DLC
+// PARAMDEF: it exposes bits 0..39 but labels bits 40..43 as padding. Reading the
+// raw field is therefore required to recover the four final DLC categories.
+//
+// These offsets are the stable Elden Ring PARAM layout for this table. The
+// caller cross-checks every row ID and the low 40 mask bits against the CSV, so
+// a schema/layout mismatch fails before any generated artifact is written.
+func readGemParamMasks(path string) (map[uint32]uint64, string, error) {
+	data, err := os.ReadFile(path)
+	if err != nil {
+		return nil, "", fmt.Errorf("open %s: %w", path, err)
+	}
+	sum := sha256.Sum256(data)
+	hash := fmt.Sprintf("%x", sum)
+
+	if len(data) < paramRowTableOffset {
+		return nil, "", fmt.Errorf("%s: truncated PARAM header (%d bytes)", path, len(data))
+	}
+	rowCount := int(binary.LittleEndian.Uint16(data[paramRowCountOffset : paramRowCountOffset+2]))
+	tableEnd := paramRowTableOffset + rowCount*paramRowEntrySize
+	if rowCount == 0 || tableEnd > len(data) {
+		return nil, "", fmt.Errorf("%s: invalid PARAM row table (rows=%d, end=0x%X, size=0x%X)",
+			path, rowCount, tableEnd, len(data))
+	}
+
+	masks := make(map[uint32]uint64, rowCount)
+	for i := 0; i < rowCount; i++ {
+		entry := paramRowTableOffset + i*paramRowEntrySize
+		rawRowID := int64(binary.LittleEndian.Uint64(data[entry : entry+8]))
+		if rawRowID < 0 || rawRowID > math.MaxUint32 {
+			return nil, "", fmt.Errorf("%s: PARAM row %d has Row ID %d outside uint32", path, i+1, rawRowID)
+		}
+		rowID := uint32(rawRowID)
+		if _, duplicate := masks[rowID]; duplicate {
+			return nil, "", fmt.Errorf("%s: duplicate PARAM Row ID %d", path, rowID)
+		}
+
+		dataOffset64 := binary.LittleEndian.Uint64(data[entry+8 : entry+16])
+		if dataOffset64 > uint64(len(data)) {
+			return nil, "", fmt.Errorf("%s: PARAM Row ID %d data offset 0x%X exceeds file size 0x%X",
+				path, rowID, dataOffset64, len(data))
+		}
+		dataOffset := int(dataOffset64)
+		maskEnd := dataOffset + paramCompatOffset + paramCompatSize
+		if dataOffset < tableEnd || maskEnd > len(data) {
+			return nil, "", fmt.Errorf("%s: PARAM Row ID %d has invalid data range 0x%X..0x%X",
+				path, rowID, dataOffset, maskEnd)
+		}
+		mask := binary.LittleEndian.Uint64(data[dataOffset+paramCompatOffset : maskEnd])
+		if mask>>maskBits != 0 {
+			return nil, "", fmt.Errorf("%s: PARAM Row ID %d sets unsupported compatibility bits above %d (mask 0x%X)",
+				path, rowID, maskBits-1, mask)
+		}
+		masks[rowID] = mask
+	}
+	return masks, hash, nil
+}
+
+func applyRawGemMasks(gems []gem, rawMasks map[uint32]uint64, csvPath, paramPath string) error {
+	if len(rawMasks) != len(gems) {
+		return fmt.Errorf("%s and %s row count mismatch: CSV=%d PARAM=%d",
+			csvPath, paramPath, len(gems), len(rawMasks))
+	}
+	const csvMaskBits = 40
+	const csvMask = (uint64(1) << csvMaskBits) - 1
+	for i := range gems {
+		rawMask, ok := rawMasks[gems[i].rid]
+		if !ok {
+			return fmt.Errorf("%s: PARAM missing EquipParamGem Row ID %d from %s",
+				paramPath, gems[i].rid, csvPath)
+		}
+		if rawMask&csvMask != gems[i].mask {
+			return fmt.Errorf("EquipParamGem Row ID %d compatibility mismatch: %s=0x%X, %s low %d bits=0x%X",
+				gems[i].rid, csvPath, gems[i].mask, paramPath, csvMaskBits, rawMask&csvMask)
+		}
+		gems[i].mask = rawMask
+	}
+	return nil
+}
+
 func readWeapons(path string) ([]weapon, string, error) {
 	header, rows, hash, err := readCSV(path)
 	if err != nil {
 		return nil, "", err
 	}
-	if err := requireColumns(path, header, []string{"Row ID", "wepType", "gemMountType", "swordArtsParamId"}); err != nil {
+	if err := requireColumns(path, header, []string{"Row ID", "wepType", "gemMountType", "disableGemAttr", "swordArtsParamId"}); err != nil {
 		return nil, "", err
 	}
 	var weapons []weapon
@@ -392,31 +497,36 @@ func readWeapons(path string) ([]weapon, string, error) {
 		if gm != 0 && gm != 1 && gm != 2 {
 			return nil, "", rr.err("gemMountType", strconv.Itoa(gm), "not a contract value (expected 0, 1 or 2)")
 		}
+		disableGemAttr, err := rr.reqBit("disableGemAttr")
+		if err != nil {
+			return nil, "", err
+		}
 		sap, err := rr.reqInt("swordArtsParamId") // -1 allowed
 		if err != nil {
 			return nil, "", err
 		}
 		weapons = append(weapons, weapon{
-			rid:     rid,
-			wepType: uint16(wepType),
-			gm:      uint8(gm),
-			sap:     sap,
+			rid:               rid,
+			wepType:           uint16(wepType),
+			gm:                uint8(gm),
+			canChangeAffinity: gm == 2 && !disableGemAttr,
+			sap:               sap,
 		})
 	}
 	sort.Slice(weapons, func(i, j int) bool { return weapons[i].rid < weapons[j].rid })
 	return weapons, hash, nil
 }
 
-func renderAoWGo(res *result, gemPath, weaponPath string) (string, error) {
+func renderAoWGo(res *result, gemPath, gemParamPath, weaponPath string) (string, error) {
 	var b strings.Builder
-	b.WriteString(header(gemPath, weaponPath, res.gemHash, res.weaponHash))
+	b.WriteString(header(gemPath, gemParamPath, weaponPath, res.gemHash, res.gemParamHash, res.weaponHash))
 	b.WriteString("package data\n\n")
 
 	// Masks.
-	b.WriteString("// AoWCompatMasks maps an Ash of War item ID to its 40-bit weapon-compatibility\n")
+	b.WriteString("// AoWCompatMasks maps an Ash of War item ID to its 44-bit weapon-compatibility\n")
 	b.WriteString("// mask, sourced directly from regulation.bin:\n")
 	b.WriteString("//   bits 0..35  = EquipParamGem.canMountWep_Dagger .. canMountWep_Torch\n")
-	b.WriteString("//   bits 36..39 = EquipParamGem.reserved_canMountWep bits 0..3\n")
+	b.WriteString("//   bits 36..43 = DLC canMountWep fields HandToHand .. BeastClaw\n")
 	b.WriteString("// AoW item ID = EquipParamGem.Row ID | 0x80000000. Masks equal to 0 are omitted;\n")
 	b.WriteString("// such arts (if any) resolve through AoWHeuristicWepTypes instead.\n")
 	b.WriteString("var AoWCompatMasks = map[uint32]uint64{\n")
@@ -429,9 +539,8 @@ func renderAoWGo(res *result, gemPath, weaponPath string) (string, error) {
 	b.WriteString("}\n\n")
 
 	// Heuristic.
-	b.WriteString("// AoWHeuristicWepTypes lists compatible wepTypes for DLC arts that carry NO direct\n")
-	b.WriteString("// canMountWep / reserved_canMountWep bit (Backhand Blades, Light Greatswords, and the\n")
-	b.WriteString("// native arts of Great Katanas / Beast Claws). This is a HEURISTIC, not a regulation\n")
+	b.WriteString("// AoWHeuristicWepTypes lists compatible wepTypes for legacy inputs whose arts carry\n")
+	b.WriteString("// no direct canMountWep bit. This is a HEURISTIC, not a regulation\n")
 	b.WriteString("// field: the wepType is inferred from mountWepTextId grouping + swordArtsParamId (the\n")
 	b.WriteString("// art is a weapon's built-in skill). It is consulted only after the direct mask check\n")
 	b.WriteString("// fails, and never grants a wepType outside this list (fail-closed).\n")
@@ -462,8 +571,8 @@ func renderAoWGo(res *result, gemPath, weaponPath string) (string, error) {
 	b.WriteString("}\n\n")
 
 	// Column names.
-	b.WriteString("// CanMountWepNames names each mask bit (0..39) for diagnostics. Bits 0..35 are the\n")
-	b.WriteString("// EquipParamGem canMountWep_* columns; bits 36..39 are reserved_canMountWep bits 0..3.\n")
+	b.WriteString("// CanMountWepNames names each mask bit (0..43) for diagnostics. Bits 0..35 are the\n")
+	b.WriteString("// base-game EquipParamGem fields; bits 36..43 are the DLC canMountWep fields.\n")
 	b.WriteString("var CanMountWepNames = []string{\n")
 	for i := 0; i < maskBits; i++ {
 		fmt.Fprintf(&b, "\t%q,\n", bitName(uint8(i)))
@@ -477,35 +586,40 @@ func renderWeaponGo(res *result, weaponPath string) (string, error) {
 	var b strings.Builder
 	b.WriteString(headerSingle(weaponPath, res.weaponHash))
 	b.WriteString("package data\n\n")
-	b.WriteString("// WeaponGemMount holds AoW-mount metadata for a weapon base item ID.\n")
+	b.WriteString("// WeaponGemMount holds AoW and affinity metadata for a weapon item ID.\n")
 	b.WriteString("type WeaponGemMount struct {\n")
-	b.WriteString("\tWepType      uint16 // EquipParamWeapon.wepType (weapon category integer)\n")
-	b.WriteString("\tGemMountType uint8  // 0=none, 1=special/somber, 2=standard infusable\n")
+	b.WriteString("\tWepType          uint16 // EquipParamWeapon.wepType (weapon category integer)\n")
+	b.WriteString("\tGemMountType     uint8  // EquipParamWeapon.gemMountType: 2 permits custom AoW mounting\n")
+	b.WriteString("\tCanChangeAffinity bool   // gemMountType == 2 && disableGemAttr == 0\n")
 	b.WriteString("}\n\n")
-	b.WriteString("// WeaponGemMounts maps a weapon base item ID (Row ID, upgrade 0) to its mount data.\n")
-	b.WriteString("// Only weapons with gemMountType != 0 are included. Infused/upgraded item IDs resolve\n")
-	b.WriteString("// to their base via db.GetItemDataFuzzy before lookup.\n")
+	b.WriteString("// WeaponGemMounts maps every EquipParamWeapon Row ID to its AoW/affinity metadata.\n")
+	b.WriteString("// Rows with gemMountType == 0 are deliberately retained: they are required to\n")
+	b.WriteString("// distinguish a known non-editable weapon from missing metadata.\n")
 	b.WriteString("var WeaponGemMounts = map[uint32]WeaponGemMount{\n")
 	for _, w := range res.weapons {
-		if w.rid%100 != 0 || w.gm == 0 {
+		if w.rid%100 != 0 {
 			continue
 		}
-		fmt.Fprintf(&b, "\t0x%08X: {WepType: %d, GemMountType: %d},\n", w.rid, w.wepType, w.gm)
+		if w.canChangeAffinity {
+			fmt.Fprintf(&b, "\t0x%08X: {WepType: %d, GemMountType: %d, CanChangeAffinity: true},\n",
+				w.rid, w.wepType, w.gm)
+		} else {
+			fmt.Fprintf(&b, "\t0x%08X: {WepType: %d, GemMountType: %d},\n",
+				w.rid, w.wepType, w.gm)
+		}
 	}
 	b.WriteString("}\n")
 	return gofmt(b.String())
 }
 
-func renderTS(res *result, gemPath, weaponPath string) string {
+func renderTS(res *result, gemPath, gemParamPath, weaponPath string) string {
 	var b strings.Builder
 	b.WriteString("// Code generated by tools/generate_aow_compat; DO NOT EDIT.\n")
-	fmt.Fprintf(&b, "// Sources: %s (sha256 %s), %s (sha256 %s).\n",
-		gemPath, res.gemHash, weaponPath, res.weaponHash)
+	fmt.Fprintf(&b, "// Sources: %s (sha256 %s), %s (sha256 %s), %s (sha256 %s).\n",
+		gemPath, res.gemHash, gemParamPath, res.gemParamHash, weaponPath, res.weaponHash)
 	b.WriteString("//\n")
 	b.WriteString("// Single source of truth shared with backend/db/data/aow_compat.go. Bits 0..35 come\n")
-	b.WriteString("// from EquipParamGem.canMountWep_*, bits 36..39 from reserved_canMountWep. Backhand\n")
-	b.WriteString("// Blades / Light Greatswords and the native arts of Great Katanas / Beast Claws carry\n")
-	b.WriteString("// no direct bit and are resolved via AOW_HEURISTIC_WEPTYPES (heuristic, fail-closed).\n\n")
+	b.WriteString("// from the CSV canMountWep_* columns; bits 36..43 come from the raw PARAM field.\n\n")
 
 	b.WriteString("// Maps EquipParamWeapon.wepType to AoWCompatBitmask bit positions.\n")
 	b.WriteString("export const WEP_TYPE_TO_BITS: Record<number, number[]> = {\n")
@@ -525,17 +639,18 @@ func renderTS(res *result, gemPath, weaponPath string) string {
 
 // --- rendering helpers ---
 
-func header(gemPath, weaponPath, gemHash, weaponHash string) string {
+func header(gemPath, gemParamPath, weaponPath, gemHash, gemParamHash, weaponHash string) string {
 	return fmt.Sprintf(
 		"// Code generated by tools/generate_aow_compat; DO NOT EDIT.\n"+
 			"//\n"+
 			"// Sources:\n"+
 			"//   %s (sha256 %s)\n"+
 			"//   %s (sha256 %s)\n"+
+			"//   %s (sha256 %s)\n"+
 			"//\n"+
-			"// Direct data: mask bits 0..35 (canMountWep_*) and 36..39 (reserved_canMountWep).\n"+
-			"// Heuristic:   AoWHeuristicWepTypes (mountWepTextId + swordArtsParamId inference).\n\n",
-		gemPath, gemHash, weaponPath, weaponHash)
+			"// Direct data: mask bits 0..43 (base-game and DLC canMountWep fields).\n"+
+			"// Legacy fallback: AoWHeuristicWepTypes (mountWepTextId + swordArtsParamId inference).\n\n",
+		gemPath, gemHash, gemParamPath, gemParamHash, weaponPath, weaponHash)
 }
 
 func headerSingle(path, hash string) string {
@@ -562,7 +677,7 @@ func bitColumnComment(bit uint8) string {
 		return fmt.Sprintf("canMountWep_%s (bit %d)", canMountColumns[bit], bit)
 	}
 	i := int(bit) - len(canMountColumns)
-	return fmt.Sprintf("reserved_canMountWep bit %d (mask bit %d)", i, bit)
+	return fmt.Sprintf("%s (mask bit %d)", reservedBitNames[i], bit)
 }
 
 func canMountCols() []string {
@@ -762,10 +877,10 @@ func joinUint16(v []uint16) string {
 	return strings.Join(parts, ", ")
 }
 
-func countMountable(weapons []weapon) int {
+func countWeaponMetadata(weapons []weapon) int {
 	n := 0
 	for _, w := range weapons {
-		if w.rid%100 == 0 && w.gm != 0 {
+		if w.rid%100 == 0 {
 			n++
 		}
 	}

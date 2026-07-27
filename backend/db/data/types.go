@@ -26,9 +26,14 @@ type ItemData struct {
 	MaxUpgrade            uint32
 	IconPath              string
 	Flags                 []string
-	// Weapon AoW compatibility (populated from EquipParamWeapon via weapon_gem_mount.go):
-	//   0 = cannot mount AoW, 1 = special/unique AoW (somber), 2 = standard infusable
+	// Weapon editing metadata populated from EquipParamWeapon via
+	// weapon_gem_mount.go. AoW mounting and affinity changes are independent:
+	// bows and some staffs or torches have GemMountType=2 but explicitly block
+	// affinity changes through disableGemAttr.
 	GemMountType uint8
+	// CanChangeAffinity is true only when EquipParamWeapon permits both custom
+	// gem mounting (gemMountType=2) and affinity changes (disableGemAttr=0).
+	CanChangeAffinity bool
 	// Weapon type category integer from EquipParamWeapon.wepType (populated for weapons).
 	WepType uint16
 	// AoW → weapon compatibility bitmask from EquipParamGem.canMountWep_* (populated for AoWs).

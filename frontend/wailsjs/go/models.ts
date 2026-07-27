@@ -2510,6 +2510,7 @@ export namespace editor {
 	    isTalisman: boolean;
 	    wepType?: number;
 	    canMountAoW?: boolean;
+	    canChangeAffinity?: boolean;
 	    defaultAoWID?: number;
 	    defaultAoWName?: string;
 	    currentAoWHandle?: number;
@@ -2555,6 +2556,7 @@ export namespace editor {
 	        this.isTalisman = source["isTalisman"];
 	        this.wepType = source["wepType"];
 	        this.canMountAoW = source["canMountAoW"];
+	        this.canChangeAffinity = source["canChangeAffinity"];
 	        this.defaultAoWID = source["defaultAoWID"];
 	        this.defaultAoWName = source["defaultAoWName"];
 	        this.currentAoWHandle = source["currentAoWHandle"];

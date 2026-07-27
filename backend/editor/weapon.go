@@ -51,6 +51,8 @@ type WeaponPatch struct {
 //   - item is not weapon-editable (must satisfy IsWeapon)
 //   - SetUpgrade with value outside [0, MaxUpgrade]
 //   - SetInfusionName with an infusion name not in db.InfuseTypes
+//   - SetInfusionName with a non-standard affinity on a weapon whose
+//     EquipParamWeapon metadata forbids affinity changes
 //   - SetAoWItemID with a non-zero ID that is not a known
 //     ashes_of_war DB entry
 //
@@ -91,7 +93,11 @@ func UpdateWeapon(snap *InventoryWorkspaceSnapshot, uid string, patch WeaponPatc
 		if !isKnownInfusion(patch.InfusionName) {
 			return fmt.Errorf("UpdateWeapon: unknown infusion %q", patch.InfusionName)
 		}
-		newInf = patch.InfusionName
+		newInf = normalizeInfusionName(patch.InfusionName)
+		if newInf != "" && !db.CanWeaponChangeAffinity(it.BaseItemID) {
+			return fmt.Errorf("UpdateWeapon: weapon %s (0x%08X) does not support affinity changes",
+				it.Name, it.BaseItemID)
+		}
 	}
 
 	var pendingAoWID uint32
@@ -238,6 +244,13 @@ func encodeWeaponItemID(baseID uint32, level int, infusionName string) (uint32, 
 		}
 	}
 	return baseID + uint32(infOffset) + uint32(level), nil
+}
+
+func normalizeInfusionName(name string) string {
+	if name == "Standard" {
+		return ""
+	}
+	return name
 }
 
 // isKnownInfusion accepts "", "Standard", or any name listed in

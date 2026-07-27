@@ -1,2 +1,2 @@
-Row ID;wepType;gemMountType;swordArtsParamId
-1000;3;3;500
+Row ID;wepType;gemMountType;disableGemAttr;swordArtsParamId
+1000;3;3;0;500

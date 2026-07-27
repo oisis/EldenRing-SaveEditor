@@ -250,12 +250,13 @@ func init() {
 			globalItemIndex[id] = entry
 		}
 	}
-	// Merge weapon AoW mount data (gemMountType, wepType) from generated lookup maps.
-	// WeaponGemMounts keys include base variants (upgrade 0) and infusion variants (+100, +200, ...).
-	// We only update entries already in the index (i.e. base weapons in our DB).
+	// Merge weapon AoW/affinity metadata from EquipParamWeapon. WeaponGemMounts
+	// deliberately includes gemMountType=0 rows so a known prohibition is not
+	// confused with missing data.
 	for id, mount := range data.WeaponGemMounts {
 		if entry, ok := globalItemIndex[id]; ok {
 			entry.GemMountType = mount.GemMountType
+			entry.CanChangeAffinity = mount.CanChangeAffinity
 			entry.WepType = mount.WepType
 			globalItemIndex[id] = entry
 		}
@@ -289,7 +290,7 @@ func GetItemData(id uint32) data.ItemData {
 	return data.ItemData{}
 }
 
-// CanWeaponMountAoW returns true if the weapon (by base item ID) supports standard AoW mounting
+// CanWeaponMountAoW returns true if the weapon (by base item ID) supports custom AoW mounting
 // (gemMountType == 2). Returns false for unique/somber weapons (gemMountType == 1) and
 // weapons that cannot mount AoW at all (gemMountType == 0 or not found in data).
 func CanWeaponMountAoW(baseItemID uint32) bool {
@@ -297,16 +298,23 @@ func CanWeaponMountAoW(baseItemID uint32) bool {
 	return item.GemMountType == 2
 }
 
+// CanWeaponChangeAffinity returns the regulation-derived affinity gate for a
+// weapon item ID. Fuzzy resolution accepts upgraded/infused IDs; missing data
+// returns false so callers fail closed.
+func CanWeaponChangeAffinity(itemID uint32) bool {
+	item, _ := GetItemDataFuzzy(itemID)
+	return item.Name != "" && item.CanChangeAffinity
+}
+
 // IsAoWCompatibleWithWepType returns (compatible, known).
 // known=false means data is insufficient — the caller must block the operation, not assume compatibility.
 //
 // Two layers, both fail-closed:
 //
-//  1. Direct 40-bit mask from regulation.bin (canMountWep_* in bits 0..35,
-//     reserved_canMountWep in bits 36..39).
-//  2. Heuristic fallback (data.AoWHeuristicWepTypes) for DLC arts that carry no
-//     direct bit (Backhand Blades, Light Greatswords, native arts of Great
-//     Katanas / Beast Claws). Consulted only when the direct mask matches nothing.
+//  1. Direct 44-bit mask from regulation.bin (base-game canMountWep_* in bits
+//     0..35 and DLC canMountWep_* in bits 36..43).
+//  2. Legacy heuristic fallback (data.AoWHeuristicWepTypes) for an input whose
+//     art genuinely carries no direct bit. Consulted only when the direct mask matches nothing.
 //     An art present in the heuristic map is compatible ONLY with the listed
 //     wepTypes — any other wepType is a definitive incompatible, never a leak.
 func IsAoWCompatibleWithWepType(aowItemID uint32, wepType uint16) (compatible bool, known bool) {

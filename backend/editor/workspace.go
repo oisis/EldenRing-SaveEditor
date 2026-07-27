@@ -110,42 +110,43 @@ type InventoryWorkspaceSnapshot struct {
 // user's pending edit. Use Pending* fields to express an unsaved AoW
 // swap; the two coexist until Save resolves the pending request.
 type EditableItem struct {
-	UID              string        `json:"uid"`
-	Source           ItemSource    `json:"source"`
-	Container        ContainerKind `json:"container"`
-	Position         int           `json:"position"`
-	OriginalHandle   uint32        `json:"originalHandle"`
-	ItemID           uint32        `json:"itemID"`
-	BaseItemID       uint32        `json:"baseItemID"`
-	Name             string        `json:"name"`
-	Category         string        `json:"category"`
+	UID            string        `json:"uid"`
+	Source         ItemSource    `json:"source"`
+	Container      ContainerKind `json:"container"`
+	Position       int           `json:"position"`
+	OriginalHandle uint32        `json:"originalHandle"`
+	ItemID         uint32        `json:"itemID"`
+	BaseItemID     uint32        `json:"baseItemID"`
+	Name           string        `json:"name"`
+	Category       string        `json:"category"`
 	// SubCategory is the canonical in-game weapon-class grouping (e.g.
 	// "Daggers", "Small Shields", "Bows"), sourced 1:1 from the DB
 	// ItemData.SubCategory. Empty for categories without sub-grouping. The
 	// Sort Order "Default" sort uses it to reproduce the in-game section
 	// hierarchy; it is never inferred from item names in the frontend.
-	SubCategory      string        `json:"subCategory,omitempty"`
-	Quantity         uint32        `json:"quantity"`
-	AcquisitionIndex uint32        `json:"acquisitionIndex"`
-	Weight           float64       `json:"weight,omitempty"`
-	SortID           uint32        `json:"sortId,omitempty"`
-	SortGroupID      uint8         `json:"sortGroupId,omitempty"`
-	CurrentUpgrade   int           `json:"currentUpgrade"`
-	MaxUpgrade       int           `json:"maxUpgrade"`
-	InfusionName     string        `json:"infusionName,omitempty"`
-	IconPath         string        `json:"iconPath,omitempty"`
-	HasGaItem        bool          `json:"hasGaItem"`
-	IsWeapon         bool          `json:"isWeapon"`
-	IsArmor          bool          `json:"isArmor"`
-	IsTalisman       bool          `json:"isTalisman"`
-	// AoW mounting compatibility metadata, populated for weapon-editable
-	// items. WepType / CanMountAoW mirror the DB lookups done by
+	SubCategory      string  `json:"subCategory,omitempty"`
+	Quantity         uint32  `json:"quantity"`
+	AcquisitionIndex uint32  `json:"acquisitionIndex"`
+	Weight           float64 `json:"weight,omitempty"`
+	SortID           uint32  `json:"sortId,omitempty"`
+	SortGroupID      uint8   `json:"sortGroupId,omitempty"`
+	CurrentUpgrade   int     `json:"currentUpgrade"`
+	MaxUpgrade       int     `json:"maxUpgrade"`
+	InfusionName     string  `json:"infusionName,omitempty"`
+	IconPath         string  `json:"iconPath,omitempty"`
+	HasGaItem        bool    `json:"hasGaItem"`
+	IsWeapon         bool    `json:"isWeapon"`
+	IsArmor          bool    `json:"isArmor"`
+	IsTalisman       bool    `json:"isTalisman"`
+	// Weapon editing metadata, populated for weapon-editable items.
+	// WepType / CanMountAoW / CanChangeAffinity mirror the DB lookups done by
 	// vm.MapParsedSlotToVM so the WeaponEditModal can resolve AoW
-	// compatibility directly from the workspace item without falling
+	// compatibility and affinity eligibility directly without falling
 	// back to GetCharacter (which can desync for newly-added items, or
 	// when the handle has been re-allocated by a prior Save).
 	WepType               uint16 `json:"wepType,omitempty"`
 	CanMountAoW           bool   `json:"canMountAoW,omitempty"`
+	CanChangeAffinity     bool   `json:"canChangeAffinity,omitempty"`
 	DefaultAoWID          int32  `json:"defaultAoWID,omitempty"`
 	DefaultAoWName        string `json:"defaultAoWName,omitempty"`
 	CurrentAoWHandle      uint32 `json:"currentAoWHandle,omitempty"`
@@ -449,14 +450,15 @@ func classifyRecord(slot *core.SaveSlot, container ContainerKind, slotIdx int, h
 	}
 	editable.OriginalSlotIndex = slotIdx
 	if isWeapon {
-		// Weapon AoW-mounting metadata: WepType is the EquipParamWeapon
-		// category integer (0 = unknown), CanMountAoW reflects the
-		// gemMountType==2 gate. Both come from the DB entry resolved by
-		// GetItemDataFuzzy above and are exposed to the workspace so the
-		// edit modal does not have to round-trip through GetCharacter
-		// (which can desync for handles re-allocated by Save).
+		// Weapon editing metadata comes from the exact EquipParamWeapon row:
+		// WepType selects the AoW compatibility bit, GemMountType gates custom
+		// AoW mounting, and disableGemAttr independently gates affinity. The
+		// values resolved by GetItemDataFuzzy above are exposed directly to
+		// the workspace so the edit modal does not have to round-trip through
+		// GetCharacter (which can desync for handles re-allocated by Save).
 		editable.WepType = itemData.WepType
 		editable.CanMountAoW = itemData.GemMountType == 2
+		editable.CanChangeAffinity = itemData.CanChangeAffinity
 		populateCurrentAoW(slot, editable, weaponAoWRefs, aowSharedCount)
 	}
 	return classified{editable: editable}

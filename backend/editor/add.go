@@ -123,6 +123,7 @@ func AddItem(snap *InventoryWorkspaceSnapshot, spec AddItemSpec, targetContainer
 		// workspace is saved and re-loaded from the slot.
 		baseItem.WepType = itemData.WepType
 		baseItem.CanMountAoW = itemData.GemMountType == 2
+		baseItem.CanChangeAffinity = itemData.CanChangeAffinity
 	}
 
 	dst := sliceFor(snap, targetContainer)

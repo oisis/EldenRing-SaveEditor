@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
     GetAoWAvailability,
     GetInfuseTypes,
@@ -34,8 +35,8 @@ type AoWCompatStatus = 'compatible' | 'incompatible' | 'unknown';
 // Mirrors backend db.IsAoWCompatibleWithWepType. WEP_TYPE_TO_BITS and
 // AOW_HEURISTIC_WEPTYPES are generated (single source with the Go backend) —
 // see frontend/src/data/aowCompat.generated.ts. Two layers, both fail-closed:
-//   1. direct 40-bit mask (canMountWep + reserved_canMountWep),
-//   2. heuristic fallback for DLC arts with no direct bit.
+//   1. direct 44-bit mask (base-game and DLC canMountWep fields),
+//   2. legacy heuristic fallback for an input with no direct bit.
 export function getAoWCompatStatus(aowId: number, aowCompatBitmask: number, wepType: number): AoWCompatStatus {
     if (wepType === 0) return 'unknown';
     const bitPositions = WEP_TYPE_TO_BITS[wepType];
@@ -206,13 +207,17 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [ashesOfWar, aowSearch, showUnavailable, wepType, currentAoWId, aowAvailability]);
 
-    const currentAoWName = useMemo(() => {
-        if (currentAoWId === 0) return null;
-        return ashesOfWar.find(a => a.id === currentAoWId)?.name ?? null;
-    }, [ashesOfWar, currentAoWId]);
+    const currentAoWOption = useMemo(() => {
+        if (currentAoWId !== 0) {
+            return ashesOfWar.find(a => a.id === currentAoWId) ?? null;
+        }
+        const defaultName = workspaceItem.defaultAoWName?.trim();
+        if (!defaultName) return null;
+        return ashesOfWar.find(a => a.name === defaultName) ?? null;
+    }, [ashesOfWar, currentAoWId, workspaceItem.defaultAoWName]);
     const currentAoWDisplay = currentAoWId === 0
         ? workspaceItem.defaultAoWName || (workspaceItem.defaultAoWID ? `Skill #${workspaceItem.defaultAoWID}` : 'Built-in skill')
-        : currentAoWName ?? `Unknown (0x${currentAoWId.toString(16).toUpperCase()})`;
+        : currentAoWOption?.name ?? `Unknown (0x${currentAoWId.toString(16).toUpperCase()})`;
 
     const selectedAoWEntry = selectedAoW !== null && selectedAoW !== 0
         ? ashesOfWar.find(a => a.id === selectedAoW) ?? null
@@ -243,7 +248,10 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
     const levelInRange = selectedLevel >= 0 && selectedLevel <= maxUpgrade;
     const canApplyLevel = canEditLevel && levelChanged && levelInRange && !applying;
 
-    const canEditInfusion = maxUpgrade === 25;
+    // Affinity support is independent from the +25 upgrade path. Bows and some
+    // staffs or torches upgrade normally but explicitly block affinity changes
+    // in EquipParamWeapon.disableGemAttr.
+    const canEditInfusion = workspaceItem.canChangeAffinity ?? false;
     const infusionChanged = selectedInfuseOffset !== currentInfuseOffset;
     const canApplyInfusion =
         canEditInfusion && infusionChanged && infuseTypes.length > 0 && !applying;
@@ -350,15 +358,15 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
 
     const statusBadge = (status: AoWStatus) => {
         const map: Record<AoWStatus, { label: string; cls: string }> = {
-            current: { label: 'Current', cls: 'bg-blue-500/15 text-blue-300 border-blue-500/30' },
-            available: { label: 'Available', cls: 'bg-green-500/15 text-green-300 border-green-500/30' },
-            in_use: { label: 'In use', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
+            current: { label: 'Current', cls: 'bg-blue-500/15 text-blue-700 dark:text-blue-300 border-blue-500/30' },
+            available: { label: 'Available', cls: 'bg-green-500/15 text-green-700 dark:text-green-300 border-green-500/30' },
+            in_use: { label: 'In use', cls: 'bg-slate-500/15 text-slate-700 dark:text-slate-300 border-slate-500/30' },
             missing: { label: 'Missing', cls: 'bg-muted/30 text-muted-foreground border-border/40' },
-            conflict: { label: 'Conflict', cls: 'bg-red-500/15 text-red-400 border-red-500/30' },
+            conflict: { label: 'Conflict', cls: 'bg-red-500/15 text-red-700 dark:text-red-400 border-red-500/30' },
         };
         const m = map[status];
         return (
-            <span className={`text-[9px] font-black uppercase tracking-wider border px-1.5 py-0.5 rounded ${m.cls}`}>
+            <span className={`whitespace-nowrap text-[8px] font-black uppercase tracking-wide border px-1 py-0.5 rounded ${m.cls}`}>
                 {m.label}
             </span>
         );
@@ -367,23 +375,26 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
     const compatBadge = (compat: AoWCompatStatus) => {
         if (compat === 'compatible') return null;
         const map: Record<Exclude<AoWCompatStatus, 'compatible'>, { label: string; cls: string }> = {
-            incompatible: { label: 'Incompatible', cls: 'bg-red-500/10 text-red-400/90 border-red-500/30' },
+            incompatible: { label: 'Incompatible', cls: 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30' },
             unknown: { label: 'Unknown', cls: 'bg-muted/30 text-muted-foreground border-border/40' },
         };
         const m = map[compat];
         return (
-            <span className={`text-[9px] font-black uppercase tracking-wider border px-1.5 py-0.5 rounded ${m.cls}`}>
+            <span className={`whitespace-nowrap text-[8px] font-black uppercase tracking-wide border px-1 py-0.5 rounded ${m.cls}`}>
                 {m.label}
             </span>
         );
     };
 
-    return (
+    return createPortal(
         <div
-            className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
             onClick={onClose}
         >
             <div
+                role="dialog"
+                aria-modal="true"
+                aria-label={`Edit ${item.name}`}
                 className="w-full max-w-3xl bg-card border border-border/60 rounded-xl shadow-2xl max-h-[92vh] flex flex-col"
                 onClick={(e) => e.stopPropagation()}
             >
@@ -437,121 +448,97 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
 
                 {/* Body */}
                 <div className="p-5 space-y-4 overflow-y-auto">
-                    {/* Level edit section */}
-                    <section className="rounded-lg border border-border/50 bg-muted/10 p-4 space-y-3">
-                        <div className="flex items-center justify-between gap-2">
-                            <span className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-                                Upgrade Level
-                            </span>
-                            {canEditLevel ? (
-                                <span className={`text-[9px] font-mono ${levelOutOfRange ? 'text-red-500 font-black' : 'text-muted-foreground/70'}`}>
-                                    +{currentLevel} / +{maxUpgrade}
+                    {/* Compact weapon value editors */}
+                    <section
+                        data-testid="weapon-value-editors"
+                        className="grid grid-cols-2 gap-3 rounded-lg border border-border/50 bg-muted/10 p-3"
+                    >
+                        <div className="min-w-0 space-y-1.5">
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                    Upgrade Level
                                 </span>
-                            ) : null}
-                        </div>
-
-                        {levelOutOfRange && (
-                            <p className="text-[10px] text-red-500 leading-relaxed">
-                                ⚠ Stored level +{currentLevel} exceeds this weapon&rsquo;s max +{maxUpgrade} (invalid data).
-                                Pick a valid level and press <span className="font-black">Apply Level</span> to repair it.
-                            </p>
-                        )}
-
-                        {!canEditLevel ? (
-                            <p className="text-[10px] text-muted-foreground/70 italic">
-                                This weapon cannot be upgraded.
-                            </p>
-                        ) : (
-                            <div className="flex items-center gap-2">
-                                <select
-                                    value={selectedLevel}
-                                    onChange={(e) => setSelectedLevel(Number(e.target.value))}
-                                    disabled={applying}
-                                    className="flex-1 bg-background/60 border border-border/50 rounded-md px-2 py-1.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {levelOptions.map(lvl => (
-                                        <option key={lvl} value={lvl}>
-                                            +{lvl}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={onApplyLevel}
-                                    disabled={!canApplyLevel}
-                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded transition-all ${
-                                        canApplyLevel
-                                            ? 'bg-green-700/80 text-white hover:bg-green-700 shadow-sm'
-                                            : 'opacity-40 cursor-not-allowed bg-muted/30 text-muted-foreground'
-                                    }`}
-                                    title={
-                                        !canEditLevel
-                                            ? 'Weapon cannot be upgraded'
-                                            : !levelChanged
-                                              ? 'No level change'
-                                              : applying
-                                                ? 'Applying…'
-                                                : 'Apply new upgrade level'
-                                    }
-                                >
-                                    {applying ? 'Applying…' : 'Apply Level'}
-                                </button>
+                                {canEditLevel && (
+                                    <span className={`text-[9px] font-mono ${levelOutOfRange ? 'font-black text-red-500' : 'text-muted-foreground/70'}`}>
+                                        +{currentLevel} / +{maxUpgrade}
+                                    </span>
+                                )}
                             </div>
-                        )}
-                    </section>
-
-                    {/* Infusion edit section */}
-                    <section className="rounded-lg border border-border/50 bg-muted/10 p-3 space-y-2">
-                        <div className="flex items-center justify-between gap-2">
-                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
-                                Infusion
-                            </span>
-                            {canEditInfusion && (
-                                <span className="text-[9px] font-mono text-muted-foreground/70">
-                                    {currentInfusionName || 'Standard'}
-                                </span>
+                            {!canEditLevel ? (
+                                <p className="text-[9px] italic text-muted-foreground/70">Cannot be upgraded.</p>
+                            ) : (
+                                <div className="flex items-center gap-1.5">
+                                    <select
+                                        aria-label="Upgrade level"
+                                        value={selectedLevel}
+                                        onChange={(e) => setSelectedLevel(Number(e.target.value))}
+                                        disabled={applying}
+                                        className="h-8 min-w-0 flex-1 rounded-md border border-border/50 bg-background/60 px-2 text-[10px] font-mono focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {levelOptions.map(lvl => <option key={lvl} value={lvl}>+{lvl}</option>)}
+                                    </select>
+                                    <button
+                                        onClick={onApplyLevel}
+                                        disabled={!canApplyLevel}
+                                        aria-label="Apply Level"
+                                        className={`h-8 shrink-0 rounded px-2 text-[9px] font-black uppercase tracking-wide transition-all ${
+                                            canApplyLevel
+                                                ? 'bg-green-700/80 text-white shadow-sm hover:bg-green-700'
+                                                : 'cursor-not-allowed bg-muted/30 text-muted-foreground opacity-40'
+                                        }`}
+                                        title={!levelChanged ? 'No level change' : applying ? 'Applying…' : 'Apply new upgrade level'}
+                                    >
+                                        {applying ? 'Applying…' : 'Apply'}
+                                    </button>
+                                </div>
+                            )}
+                            {levelOutOfRange && (
+                                <p className="text-[9px] leading-snug text-red-500">
+                                    Stored +{currentLevel} exceeds the +{maxUpgrade} limit. Select a valid level to repair it.
+                                </p>
                             )}
                         </div>
 
-                        {!canEditInfusion ? (
-                            <p className="text-[10px] text-muted-foreground/70 italic">
-                                This weapon does not support infusion changes.
-                            </p>
-                        ) : (
-                            <div className="flex items-center gap-2">
-                                <select
-                                    value={selectedInfuseOffset}
-                                    onChange={(e) => setSelectedInfuseOffset(Number(e.target.value))}
-                                    disabled={applying || infuseTypes.length === 0}
-                                    className="flex-1 bg-background/60 border border-border/50 rounded-md px-2 py-1.5 text-[11px] font-mono focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                                >
-                                    {infuseTypes.map(t => (
-                                        <option key={t.offset} value={t.offset}>
-                                            {t.name}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={onApplyInfusion}
-                                    disabled={!canApplyInfusion}
-                                    className={`px-3 py-1.5 text-[10px] font-black uppercase tracking-wider rounded transition-all ${
-                                        canApplyInfusion
-                                            ? 'bg-green-700/80 text-white hover:bg-green-700 shadow-sm'
-                                            : 'opacity-40 cursor-not-allowed bg-muted/30 text-muted-foreground'
-                                    }`}
-                                    title={
-                                        !canEditInfusion
-                                            ? 'Weapon does not support infusion'
-                                            : !infusionChanged
-                                              ? 'No infusion change'
-                                              : applying
-                                                ? 'Applying…'
-                                                : 'Apply new infusion'
-                                    }
-                                >
-                                    {applying ? 'Applying…' : 'Apply Infusion'}
-                                </button>
+                        <div className="min-w-0 space-y-1.5">
+                            <div className="flex items-center justify-between gap-2">
+                                <span className="text-[10px] font-black uppercase tracking-[0.18em] text-muted-foreground">
+                                    Infusion
+                                </span>
+                                {canEditInfusion && (
+                                    <span className="truncate text-[9px] font-mono text-muted-foreground/70">
+                                        {currentInfusionName || 'Standard'}
+                                    </span>
+                                )}
                             </div>
-                        )}
+                            {!canEditInfusion ? (
+                                <p className="text-[9px] italic text-muted-foreground/70">Affinity changes unavailable.</p>
+                            ) : (
+                                <div className="flex items-center gap-1.5">
+                                    <select
+                                        aria-label="Infusion"
+                                        value={selectedInfuseOffset}
+                                        onChange={(e) => setSelectedInfuseOffset(Number(e.target.value))}
+                                        disabled={applying || infuseTypes.length === 0}
+                                        className="h-8 min-w-0 flex-1 rounded-md border border-border/50 bg-background/60 px-2 text-[10px] font-mono focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/30 disabled:cursor-not-allowed disabled:opacity-50"
+                                    >
+                                        {infuseTypes.map(t => <option key={t.offset} value={t.offset}>{t.name}</option>)}
+                                    </select>
+                                    <button
+                                        onClick={onApplyInfusion}
+                                        disabled={!canApplyInfusion}
+                                        aria-label="Apply Infusion"
+                                        className={`h-8 shrink-0 rounded px-2 text-[9px] font-black uppercase tracking-wide transition-all ${
+                                            canApplyInfusion
+                                                ? 'bg-green-700/80 text-white shadow-sm hover:bg-green-700'
+                                                : 'cursor-not-allowed bg-muted/30 text-muted-foreground opacity-40'
+                                        }`}
+                                        title={!infusionChanged ? 'No infusion change' : applying ? 'Applying…' : 'Apply new infusion'}
+                                    >
+                                        {applying ? 'Applying…' : 'Apply'}
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </section>
 
                     {/* Ash of War edit section */}
@@ -577,6 +564,22 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
                         ) : (
                             <>
                                 <div className="flex items-center gap-3 rounded-lg border border-border/40 bg-background/45 px-3 py-2.5">
+                                    <div
+                                        data-testid="current-aow-icon"
+                                        className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/40 bg-muted/20"
+                                    >
+                                        {currentAoWOption?.iconPath ? (
+                                            <img
+                                                src={currentAoWOption.iconPath}
+                                                alt=""
+                                                className="h-full w-full object-contain p-0.5 drop-shadow-sm"
+                                            />
+                                        ) : (
+                                            <span className="text-base font-black text-muted-foreground/40">
+                                                {currentAoWDisplay.charAt(0) || '?'}
+                                            </span>
+                                        )}
+                                    </div>
                                     <div className="min-w-0 flex-1">
                                         <div className="text-[8px] font-black uppercase tracking-[0.18em] text-muted-foreground/70">
                                             Current Ash of War
@@ -603,7 +606,7 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
                                     </button>
                                 </div>
 
-                                <div className="flex items-center gap-2">
+                                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                                     <div className="relative flex-1">
                                         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -614,26 +617,28 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
                                             value={aowSearch}
                                             onChange={(e) => setAowSearch(e.target.value)}
                                             disabled={applying}
-                                            className="w-full bg-background/60 border border-border/50 rounded-md pl-9 pr-3 py-2 text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary disabled:opacity-50"
+                                            className="h-9 w-full bg-background/60 border border-border/50 rounded-md pl-9 pr-3 text-[12px] focus:outline-none focus:ring-1 focus:ring-primary/30 focus:border-primary disabled:opacity-50"
                                         />
                                     </div>
+                                    <label className="flex h-9 shrink-0 items-center gap-2 rounded-md border border-border/40 bg-background/40 px-3 text-[11px] text-muted-foreground/80 cursor-pointer select-none">
+                                        <input
+                                            type="checkbox"
+                                            checked={showUnavailable}
+                                            onChange={(e) => setShowUnavailable(e.target.checked)}
+                                            className="accent-primary"
+                                        />
+                                        Show unavailable
+                                    </label>
                                 </div>
 
-                                <label className="flex items-center gap-2 text-[11px] text-muted-foreground/80 cursor-pointer select-none">
-                                    <input
-                                        type="checkbox"
-                                        checked={showUnavailable}
-                                        onChange={(e) => setShowUnavailable(e.target.checked)}
-                                        className="accent-primary"
-                                    />
-                                    Show unavailable / incompatible
-                                </label>
-
-                                <div className="max-h-72 overflow-y-auto rounded border border-border/40 bg-background/30 divide-y divide-border/30">
+                                <div
+                                    data-testid="aow-icon-grid"
+                                    className="grid max-h-72 grid-cols-[repeat(auto-fill,minmax(104px,1fr))] gap-2 overflow-y-auto rounded border border-border/40 bg-background/30 p-2"
+                                >
                                     {ashesOfWar.length === 0 ? (
-                                        <p className="text-[10px] text-muted-foreground/60 italic p-3 text-center">Loading…</p>
+                                        <p className="col-span-full text-[10px] text-muted-foreground/60 italic p-3 text-center">Loading…</p>
                                     ) : filteredAoW.length === 0 ? (
-                                        <p className="text-[10px] text-muted-foreground/60 italic p-3 text-center">
+                                        <p className="col-span-full text-[10px] text-muted-foreground/60 italic p-3 text-center">
                                             {aowSearch ? 'No matching Ashes of War.' : 'No compatible Ashes of War available.'}
                                         </p>
                                     ) : (
@@ -647,26 +652,32 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
                                                     key={aow.id}
                                                     type="button"
                                                     disabled={applying}
+                                                    data-aow-icon-card
+                                                    data-aow-status={status}
+                                                    data-aow-compat={compat}
+                                                    aria-label={`Select ${aow.name}`}
+                                                    aria-pressed={isSelected}
+                                                    title={aow.name}
                                                     onClick={() => setSelectedAoW(isSelected ? null : aow.id)}
-                                                    className={`w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors ${
+                                                    className={`relative flex min-h-[128px] flex-col items-center justify-start gap-1 rounded-lg border p-2 text-center transition-all disabled:cursor-not-allowed ${
                                                         isSelected
-                                                            ? 'bg-primary/15'
+                                                            ? 'border-primary bg-primary/15 ring-1 ring-primary/50'
                                                             : selectable
-                                                              ? 'hover:bg-muted/30'
-                                                              : 'opacity-60 hover:bg-muted/20'
+                                                              ? 'border-border/50 bg-card/50 hover:border-primary/60 hover:bg-primary/[0.06]'
+                                                              : 'border-border/30 bg-muted/10 opacity-60 grayscale-[0.65] hover:bg-muted/20'
                                                     }`}
                                                 >
-                                                    <div className="w-10 h-10 rounded bg-muted/30 border border-border/40 shrink-0 flex items-center justify-center overflow-hidden">
+                                                    <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border/40 bg-muted/20">
                                                         {aow.iconPath ? (
-                                                            <img src={aow.iconPath} alt="" className="w-full h-full object-contain" />
+                                                            <img src={aow.iconPath} alt="" className="h-full w-full object-contain p-0.5 drop-shadow-sm" />
                                                         ) : (
-                                                            <span className="text-[12px] text-muted-foreground/40">{aow.name.charAt(0)}</span>
+                                                            <span className="text-lg font-black text-muted-foreground/40">{aow.name.charAt(0)}</span>
                                                         )}
                                                     </div>
-                                                    <span className="flex-1 min-w-0 text-[13px] font-bold text-foreground/85 truncate">
+                                                    <span className="line-clamp-2 min-h-7 w-full text-[10px] font-bold leading-tight text-foreground/85">
                                                         {aow.name}
                                                     </span>
-                                                    <div className="shrink-0 flex items-center gap-1">
+                                                    <div className="mt-auto flex max-w-full flex-wrap items-center justify-center gap-0.5">
                                                         {compatBadge(compat)}
                                                         {statusBadge(status)}
                                                     </div>
@@ -743,6 +754,7 @@ export function WeaponEditModal({ charIndex, item, source, onClose, workspace, w
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body,
     );
 }
