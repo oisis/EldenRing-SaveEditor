@@ -4,31 +4,12 @@ import { db, editor, main } from '../../wailsjs/go/models';
 import toast from '../lib/toast';
 import { useInventoryWorkspace, ContainerKind } from '../hooks/useInventoryWorkspace';
 import { WeaponEditModal } from './WeaponEditModal';
+import { adaptForWeaponModal } from './weaponPatch';
 
 // Phase 8A removed the public JSON template import/export surface from
 // this tab. Template export, import, library access and weapon level
 // override now live in the global Templates shell modal (sidebar
 // button), which speaks YAML only.
-
-// Build a main.InventoryOrderItem-shaped adapter from a workspace EditableItem,
-// so the legacy WeaponEditModal can render without changes. Workspace dispatch
-// goes through the `workspace` prop, not through these fields.
-function adaptForWeaponModal(it: editor.EditableItem): main.InventoryOrderItem {
-    return main.InventoryOrderItem.createFrom({
-        handle: it.originalHandle,
-        itemId: it.itemID,
-        baseItemId: it.baseItemID,
-        name: it.name,
-        category: it.category,
-        currentUpgrade: it.currentUpgrade,
-        maxUpgrade: it.maxUpgrade,
-        infusionName: it.infusionName ?? '',
-        quantity: it.quantity,
-        acquisitionIndex: it.acquisitionIndex,
-        iconPath: it.iconPath ?? '',
-        isWeapon: it.isWeapon,
-    });
-}
 
 type FrameDropTarget = ContainerKind | null;
 
@@ -717,8 +698,9 @@ export function SortOrderTab({ charIndex, inventoryVersion, onMutate }: Props) {
 
                 {!loading && sessionID && (
                     <div className="flex-1 min-h-0 flex gap-3">
-                        {/* ── Storage column ─────────────────────────────────── */}
-                        <section className="flex-1 min-w-0 flex flex-col min-h-0 gap-2">
+                        {/* Storage remains first in the DOM for stable test and
+                            drag wiring, but visual order places Inventory left. */}
+                        <section className="order-2 flex-1 min-w-0 flex flex-col min-h-0 gap-2">
                             <ColumnHeader
                                 label="Storage"
                                 count={storageView.length}
@@ -781,10 +763,10 @@ export function SortOrderTab({ charIndex, inventoryVersion, onMutate }: Props) {
                             </Frame>
                         </section>
 
-                        <div className="w-px shrink-0 bg-border/40" aria-hidden="true" />
+                        <div className="order-1 w-px shrink-0 bg-border/40" aria-hidden="true" />
 
-                        {/* ── Inventory column ────────────────────────────────── */}
-                        <section className="flex-1 min-w-0 flex flex-col min-h-0 gap-2">
+                        {/* ── Inventory column (left) ─────────────────────────── */}
+                        <section className="order-0 flex-1 min-w-0 flex flex-col min-h-0 gap-2">
                             <ColumnHeader
                                 label="Inventory"
                                 count={inventoryView.length}

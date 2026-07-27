@@ -4,6 +4,7 @@ import { EquipmentTab } from './EquipmentTab';
 import {
     AddItemsToCharacter,
     GetArmsSlotEligibleItems,
+    GetAoWAvailability,
     GetArrowSlotEligibleItems,
     GetBoltSlotEligibleItems,
     GetCharacter,
@@ -21,6 +22,7 @@ import {
     SaveEquippedSpells,
     SavePhysickMixture,
     SaveQuickPouchItems,
+    StartInventoryEditSession,
 } from '../../wailsjs/go/main/App';
 
 vi.mock('../../wailsjs/go/main/App', () => ({
@@ -43,6 +45,17 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetPouchEligibleItems: vi.fn(),
     GetPhysickEligibleItems: vi.fn(),
     GetItemList: vi.fn(),
+    GetAoWAvailability: vi.fn(),
+    StartInventoryEditSession: vi.fn(),
+    ValidateInventoryWorkspace: vi.fn(),
+    MoveInventoryWorkspaceItem: vi.fn(),
+    ReorderInventoryWorkspaceItems: vi.fn(),
+    TransferInventoryWorkspaceItem: vi.fn(),
+    AddInventoryWorkspaceItem: vi.fn(),
+    UpdateInventoryWorkspaceWeapon: vi.fn(),
+    RemoveInventoryWorkspaceItem: vi.fn(),
+    SaveInventoryWorkspaceChanges: vi.fn(),
+    DiscardInventoryEditSession: vi.fn().mockResolvedValue(undefined),
 }));
 
 const emptyView = { occupied: false, rawId: 0, handle: 0, quantity: 0, name: '', iconPath: '', resolved: false, memorySlots: 0 };
@@ -133,9 +146,57 @@ beforeEach(() => {
     vi.mocked(SavePhysickMixture).mockResolvedValue(undefined as never);
     vi.mocked(GetInfuseTypes).mockReset();
     vi.mocked(GetInfuseTypes).mockResolvedValue([] as never);
+    vi.mocked(GetAoWAvailability).mockReset();
+    vi.mocked(GetAoWAvailability).mockResolvedValue([] as never);
+    vi.mocked(StartInventoryEditSession).mockReset();
 });
 
 describe('EquipmentTab', () => {
+    it('opens the shared weapon editor from the upper-left edit button', async () => {
+        const handle = 0x80800010;
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            rightHandArmaments: [
+                view({ occupied: true, rawId: 0x00100000, handle, name: 'Claymore', iconPath: 'items/weapons/claymore.png', resolved: true }),
+                ...fill(2),
+            ],
+        }) as never);
+        vi.mocked(StartInventoryEditSession).mockResolvedValue({
+            sessionID: 'equipment-session',
+            characterIndex: 0,
+            inventoryItems: [{
+                uid: 'hnd:0x80800010',
+                source: 'original',
+                container: 'inventory',
+                position: 0,
+                originalHandle: handle,
+                itemID: 0x00100000,
+                baseItemID: 0x00100000,
+                name: 'Claymore',
+                category: 'melee_armaments',
+                quantity: 1,
+                currentUpgrade: 0,
+                maxUpgrade: 25,
+                infusionName: '',
+                iconPath: 'items/weapons/claymore.png',
+                isWeapon: true,
+                canMountAoW: false,
+                wepType: 5,
+            }],
+            storageItems: [],
+            dirty: false,
+            validation: { ok: true, errors: [], warnings: [] },
+        } as never);
+
+        render(<EquipmentTab charIdx={0} />);
+        const editButton = await screen.findByRole('button', { name: 'Edit Weapon slot 1' });
+        expect(editButton).toHaveClass('bg-red-700/85', 'hover:bg-red-600', 'text-white', 'w-4', 'h-4');
+        fireEvent.click(editButton);
+
+        await waitFor(() => expect(StartInventoryEditSession).toHaveBeenCalledWith(0));
+        expect(await screen.findByText('Infusion')).toBeInTheDocument();
+        expect(screen.getByText('Ash of War')).toBeInTheDocument();
+    });
+
     it('renders real sorceries and incantations from the equipment snapshot', async () => {
         vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
             spells: [

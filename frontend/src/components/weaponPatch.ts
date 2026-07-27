@@ -1,4 +1,4 @@
-import { editor } from '../../wailsjs/go/models';
+import { editor, main } from '../../wailsjs/go/models';
 
 // Helpers that build the WeaponPatch DTO for the four user actions the
 // WeaponEditModal exposes in workspace mode. Kept separate so the action
@@ -35,4 +35,24 @@ export function aowClearPatch(): editor.WeaponPatch {
 // tests share a single source of truth.
 export function aowApplyPatch(aowItemID: number): editor.WeaponPatch {
     return aowItemID === 0 ? aowClearPatch() : aowAssignPatch(aowItemID);
+}
+
+// WeaponEditModal still renders the legacy InventoryOrderItem projection while
+// all mutations go through the workspace EditableItem. Keep the adapter shared
+// by Sort Order and Equipment so both entry points open the exact same editor.
+export function adaptForWeaponModal(it: editor.EditableItem): main.InventoryOrderItem {
+    return main.InventoryOrderItem.createFrom({
+        handle: it.originalHandle,
+        itemId: it.itemID,
+        baseItemId: it.baseItemID,
+        name: it.name,
+        category: it.category,
+        currentUpgrade: it.currentUpgrade,
+        maxUpgrade: it.maxUpgrade,
+        infusionName: it.infusionName ?? '',
+        quantity: it.quantity,
+        acquisitionIndex: it.acquisitionIndex,
+        iconPath: it.iconPath ?? '',
+        isWeapon: it.isWeapon,
+    });
 }

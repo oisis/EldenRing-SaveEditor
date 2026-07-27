@@ -1,7 +1,10 @@
 import { useEffect, useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
 import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells, SavePhysickMixture, SaveQuickPouchItems } from '../../wailsjs/go/main/App';
-import type { main, vm } from '../../wailsjs/go/models';
+import { type editor, type main, type vm } from '../../wailsjs/go/models';
+import { useInventoryWorkspace, type ContainerKind } from '../hooks/useInventoryWorkspace';
 import { EquipmentItemPickerModal, type EquipmentPickerSelection } from './EquipmentItemPickerModal';
+import { WeaponEditModal } from './WeaponEditModal';
+import { adaptForWeaponModal } from './weaponPatch';
 
 type EquippedItem = main.EquipmentSlotView;
 
@@ -64,6 +67,7 @@ type SlotProps = {
     costBadge?: number;
     detail?: string;
     onRemove?: () => void;
+    onEdit?: () => void;
     children: ReactNode;
 };
 
@@ -86,7 +90,31 @@ function SlotRemoveIcon({ label, onRemove, showRemove = true }: { label: string;
     return <span data-testid="slot-remove-icon" role="button" tabIndex={0} aria-label={`Remove ${label}`} onClick={remove} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') remove(event); }} className="absolute bottom-0.5 left-1 z-20 cursor-pointer text-lg font-black leading-none text-red-600 drop-shadow-sm hover:text-red-500">×</span>;
 }
 
-function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, costBadge, detail, onRemove, children }: SlotProps) {
+function SlotEditIcon({ label, onEdit }: { label: string; onEdit?: () => void }) {
+    if (!onEdit) return null;
+    const edit = (event: SyntheticEvent) => { event.stopPropagation(); onEdit(); };
+    return (
+        <span
+            role="button"
+            tabIndex={0}
+            draggable={false}
+            aria-label={`Edit ${label}`}
+            title="Edit weapon level, infusion and Ash of War"
+            onClick={edit}
+            onPointerDown={(event) => event.stopPropagation()}
+            onMouseDown={(event) => event.stopPropagation()}
+            onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}
+            onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') edit(event); }}
+            className="absolute top-0.5 left-0.5 z-10 w-4 h-4 flex items-center justify-center rounded bg-red-700/85 hover:bg-red-600 text-white shadow ring-1 ring-red-900/40 transition-colors cursor-pointer"
+        >
+            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M14.7 6.3l3 3M4 20l3.5-1 9.8-9.8a2.1 2.1 0 0 0 0-3l-.5-.5a2.1 2.1 0 0 0-3 0L4 16.5 4 20z" />
+            </svg>
+        </span>
+    );
+}
+
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, costBadge, detail, onRemove, onEdit, children }: SlotProps) {
     // Occupied + resolved: real icon and item name. Occupied + unknown:
     // placeholder with the raw-ID name. Empty: placeholder + eligibility text.
     const tooltip = item?.occupied ? item.name : eligibleItems;
@@ -101,6 +129,7 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active 
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
             <SlotTooltip eligibleItems={tooltip} detail={item?.occupied ? detail : undefined} />
+            <SlotEditIcon label={label} onEdit={onEdit} />
             <SlotRemoveIcon label={label} onRemove={onRemove} showRemove={showRemove} />
             {quantity != null && <span className="pointer-events-none absolute left-1.5 top-1 z-20 text-xs font-black text-foreground">{quantity}</span>}
             {costBadge != null && costBadge > 1 && <span data-testid="spell-cost-badge" className="pointer-events-none absolute bottom-0.5 right-1 z-20 rounded bg-black/70 px-1 text-[8px] font-black leading-tight text-white">{costBadge} slots</span>}
@@ -194,6 +223,7 @@ function PhysickSlot({ label, onOpen, item, onRemove }: { label: string; onOpen:
 }
 
 export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate }: { charIdx?: number; saveLoadKey?: number; equipmentRevision?: number; onMutate?: () => void } = {}) {
+    const weaponWorkspace = useInventoryWorkspace();
     const [selectedSlot, setSelectedSlot] = useState('Weapon slot 1');
     const [modalOpen, setModalOpen] = useState(false);
     const [snapshot, setSnapshot] = useState<main.EquipmentSnapshot | null>(null);
@@ -208,11 +238,49 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const [physickDirty, setPhysickDirty] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [saveRevision, setSaveRevision] = useState(0);
+    const [weaponEditorUID, setWeaponEditorUID] = useState<string | null>(null);
     const openSlot = (label: string) => {
         setSelectedSlot(label);
         setModalOpen(true);
     };
     const selected = (label: string) => selectedSlot === label;
+
+    const workspaceWeapon = (uid: string | null): { item: editor.EditableItem; source: ContainerKind } | null => {
+        if (!uid) return null;
+        const inventoryItem = weaponWorkspace.inventoryItems.find(item => item.uid === uid);
+        if (inventoryItem) return { item: inventoryItem, source: 'inventory' };
+        const storageItem = weaponWorkspace.storageItems.find(item => item.uid === uid);
+        return storageItem ? { item: storageItem, source: 'storage' } : null;
+    };
+    const editedWeapon = workspaceWeapon(weaponEditorUID);
+    const openWeaponEditor = async (item?: EquippedItem) => {
+        if (charIdx == null || !item?.occupied || !item.handle) return;
+        let inventoryItems = weaponWorkspace.inventoryItems;
+        let storageItems = weaponWorkspace.storageItems;
+        if (!weaponWorkspace.sessionID || weaponWorkspace.characterIndex !== charIdx) {
+            const started = await weaponWorkspace.start(charIdx);
+            if (!started) {
+                setSaveError('Unable to start the weapon editing session.');
+                return;
+            }
+            inventoryItems = started.inventoryItems ?? [];
+            storageItems = started.storageItems ?? [];
+        }
+        const editable = [...inventoryItems, ...storageItems].find(candidate =>
+            candidate.isWeapon && candidate.originalHandle === item.handle);
+        if (!editable) {
+            setSaveError('The equipped weapon could not be found in Inventory.');
+            return;
+        }
+        setSaveError('');
+        setWeaponEditorUID(editable.uid);
+    };
+
+    useEffect(() => {
+        if (!weaponWorkspace.lastError) return;
+        setSaveError(weaponWorkspace.lastError);
+        weaponWorkspace.clearError();
+    }, [weaponWorkspace.lastError, weaponWorkspace.clearError]);
 
     // Read-only load of the equipped items for the selected character. Guard
     // against stale updates when the character changes or the tab unmounts.
@@ -341,6 +409,10 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const saveChanges = async () => {
         if (charIdx == null) return;
         try {
+            if (weaponWorkspace.dirty) {
+                const saved = await weaponWorkspace.save();
+                if (!saved) throw new Error('Unable to save pending weapon edits.');
+            }
             if (equipmentDirty) {
                 const changes = Object.entries(draftEquipment).map(([slot, item]) => ({
                     slot: Number(slot),
@@ -613,7 +685,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                             {weaponSlots.map((label, index) => {
                                 const slot = 1 + index * 2;
                                 const item = equipmentView(slot, snapshot?.rightHandArmaments[index]);
-                                return <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={item} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>;
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={item} onEdit={item?.occupied && item.handle ? () => void openWeaponEditor(item) : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/equipment/weapon-slot-placeholder.png" /></EquipmentSlot>;
                             })}
                             <span aria-hidden="true" />
                             {['Arrow slot 1', 'Arrow slot 2'].map((label, index) => {
@@ -626,7 +698,7 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                             {rangedSlots.map((label, index) => {
                                 const slot = index * 2;
                                 const item = equipmentView(slot, snapshot?.leftHandArmaments[index]);
-                                return <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={item} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>;
+                                return <EquipmentSlot key={label} label={label} eligibleItems="Weapons, shields, staves, seals and torches" selected={selected(label)} onOpen={openSlot} item={item} onEdit={item?.occupied && item.handle ? () => void openWeaponEditor(item) : undefined} onRemove={item?.occupied ? () => removeEquipment(slot) : undefined}><GhostIcon src="/equipment/ranged-slot-placeholder.png" /></EquipmentSlot>;
                             })}
                             <span aria-hidden="true" />
                             {['Bolt slot 1', 'Bolt slot 2'].map((label, index) => {
@@ -701,8 +773,21 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             <div className="mx-5 flex items-center justify-between border-t border-border px-0 pb-4 pt-3">
                 <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
                 <span role="status" className="text-xs text-red-600">{saveError}</span>
-                <button type="button" disabled={(!spellsDirty && !equipmentDirty && !quickPouchDirty && !physickDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
+                <button type="button" disabled={(!spellsDirty && !equipmentDirty && !quickPouchDirty && !physickDirty && !weaponWorkspace.dirty) || charIdx == null || weaponWorkspace.saving} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">{weaponWorkspace.saving ? 'Saving…' : 'Save changes'}</button>
             </div>
+            {editedWeapon && charIdx != null && (
+                <WeaponEditModal
+                    charIndex={charIdx}
+                    item={adaptForWeaponModal(editedWeapon.item)}
+                    source={editedWeapon.source}
+                    onClose={() => setWeaponEditorUID(null)}
+                    workspace={{
+                        sessionID: weaponWorkspace.sessionID,
+                        updateWeapon: (uid, patch) => weaponWorkspace.updateWeapon(uid, patch),
+                    }}
+                    workspaceItem={editedWeapon.item}
+                />
+            )}
             {modalOpen && <EquipmentItemPickerModal
                 slotLabel={selectedSlot}
                 charIdx={charIdx}

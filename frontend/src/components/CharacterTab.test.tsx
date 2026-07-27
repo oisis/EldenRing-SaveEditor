@@ -88,6 +88,16 @@ describe('CharacterTab — Type B appearance enabled', () => {
         { name: 'Ciri of Cintra', image: '', bodyType: 'Type B' },
     ];
 
+    it('uses the same ring carousel after a save is loaded', async () => {
+        mocks.ListAppearancePresets.mockResolvedValue(PRESETS);
+        renderTab();
+        await openAppearance();
+
+        expect(await screen.findByTestId('appearance-carousel')).toBeInTheDocument();
+        expect(screen.getByTestId('carousel-ring')).toBeInTheDocument();
+        expect(screen.getByRole('button', {name: 'Show favorite appearance presets only'})).toBeInTheDocument();
+    });
+
     it('applies a Type B preset (calls ApplyPresetToCharacter)', async () => {
         mocks.ListAppearancePresets.mockResolvedValue(PRESETS);
         mocks.ApplyPresetToCharacter.mockResolvedValue(undefined);
@@ -121,10 +131,12 @@ describe('CharacterTab — Type B appearance enabled', () => {
         renderTab();
         await openAppearance();
 
-        const addButtons = await screen.findAllByText('Add');
+        await waitFor(() => expect(screen.getAllByRole('button', {name: 'Add'})).toHaveLength(2));
+        const addButtons = screen.getAllByRole('button', {name: 'Add'});
         fireEvent.click(addButtons[1]); // Ciri (Type B)
 
         await waitFor(() => expect(mocks.WriteSelectedToFavorites).toHaveBeenCalledWith(0, ['Ciri of Cintra']));
+        await waitFor(() => expect(screen.getAllByRole('button', {name: 'Add'})).toHaveLength(2));
     });
 });
 

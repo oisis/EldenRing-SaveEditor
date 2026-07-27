@@ -7,6 +7,7 @@ import {CategorySelect} from './CategorySelect';
 import {RiskBadge} from './RiskBadge';
 import {useFavorites} from '../state/favorites';
 import {ItemDetailPanel} from './ItemDetailPanel';
+import {ItemCapacityBadge} from './ItemCapacityBadge';
 
 // Categories with sub-groupings — drives the Sub-Category column visibility.
 const CATEGORIES_WITH_SUBGROUPS = new Set([
@@ -595,13 +596,9 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                                     <span className="text-[8px] font-mono font-bold text-primary/60">+{item.currentUpgrade}/{item.maxUpgrade}</span>
                                                 )}
                                             </div>
-                                            <div className="flex items-center gap-2 text-[8px] font-black tabular-nums">
-                                                <span className={`px-1.5 py-0.5 rounded border ${item.inInventory ? 'text-green-500 bg-green-500/10 border-green-500/30' : 'text-muted-foreground/30 bg-muted/10 border-border/30'}`}>
-                                                    I:{item.nonStackable ? (item.inInventory ? 1 : 0) : item.invQty}
-                                                </span>
-                                                <span className={`px-1.5 py-0.5 rounded border ${item.inStorage ? 'text-green-500 bg-green-500/10 border-green-500/30' : 'text-muted-foreground/30 bg-muted/10 border-border/30'}`}>
-                                                    S:{item.nonStackable ? (item.inStorage ? 1 : 0) : item.storageQty}
-                                                </span>
+                                            <div className="flex items-center gap-2">
+                                                <ItemCapacityBadge owned={item.nonStackable ? (item.inInventory ? 1 : 0) : item.invQty} max={item.maxInv} label="Inventory" prefix="I" compact />
+                                                <ItemCapacityBadge owned={item.nonStackable ? (item.inStorage ? 1 : 0) : item.storageQty} max={item.maxStorage} label="Storage" prefix="S" compact />
                                             </div>
                                         </div>
                                     );
@@ -763,10 +760,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                             </td>
                                         )}
                                         <td className="px-3 py-4 text-center whitespace-nowrap">
-                                            {item.nonStackable || item.readOnly ? (
-                                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inInventory ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/60'}`}>
-                                                    {item.inInventory ? (item.nonStackable ? '✓' : item.invQty) : '—'}
-                                                </span>
+                                            {item.maxInv <= 1 || item.readOnly ? (
+                                                <ItemCapacityBadge owned={item.inInventory ? (item.nonStackable ? 1 : item.invQty) : 0} max={item.maxInv} label="Inventory" />
                                             ) : item.inInventory ? (
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input
@@ -784,10 +779,8 @@ export function InventoryTab({ charIndex, inventoryVersion, columnVisibility, sh
                                             )}
                                         </td>
                                         <td className="px-3 py-4 text-center whitespace-nowrap">
-                                            {item.nonStackable || item.readOnly ? (
-                                                <span className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded ${item.inStorage ? 'text-green-500 bg-green-500/10' : 'text-muted-foreground/60'}`}>
-                                                    {item.inStorage ? (item.nonStackable ? '✓' : item.storageQty) : '—'}
-                                                </span>
+                                            {item.maxStorage <= 1 || item.readOnly ? (
+                                                <ItemCapacityBadge owned={item.inStorage ? (item.nonStackable ? 1 : item.storageQty) : 0} max={item.maxStorage} label="Storage" />
                                             ) : item.inStorage ? (
                                                 <div className="flex items-center justify-center space-x-2">
                                                     <input

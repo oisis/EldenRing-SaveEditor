@@ -1,8 +1,9 @@
 import {useEffect, useRef, useState} from 'react';
 import toast from '../lib/toast';
-import {GetCharacter, SaveCharacter, ListAppearancePresets, ApplyMirrorFavoriteToCharacter, WriteSelectedToFavorites, GetFavoritesStatus, RemoveFavoritePreset, GetStartingClasses, SetCharacterGender, ApplyPresetToCharacter, GetCharacterAppearancePreset, SetOwnedWeaponLevels} from '../../wailsjs/go/main/App';
+import {GetCharacter, SaveCharacter, GetStartingClasses, SetCharacterGender, GetCharacterAppearancePreset, SetOwnedWeaponLevels} from '../../wailsjs/go/main/App';
 import {vm, main, db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
+import {AppearanceTab} from './AppearanceTab';
 import {RiskInfoIcon} from './RiskInfoIcon';
 import {getRunesRiskKey} from '../data/riskInfo';
 import {useSafetyMode} from '../state/safetyMode';
@@ -52,14 +53,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
     const prevCharIndex = useRef(charIndex);
 
     // Appearance state
-    const [presets, setPresets] = useState<main.PresetInfo[]>([]);
-    const [addingPreset, setAddingPreset] = useState<string | null>(null);
-    const [applyingPreset, setApplyingPreset] = useState<string | null>(null);
-    const [favSlots, setFavSlots] = useState<main.FavoriteSlotInfo[]>([]);
-    const [zoomed, setZoomed] = useState<string | null>(null);
-    const [presetSearch, setPresetSearch] = useState('');
-    const [showMale, setShowMale] = useState(true);
-    const [showFemale, setShowFemale] = useState(true);
     const [matchedPreset, setMatchedPreset] = useState<main.PresetInfo | null>(null);
 
     const refreshMatch = () => {
@@ -67,9 +60,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
     };
 
     useEffect(() => {
-        ListAppearancePresets().then(setPresets).catch(e => toast.error("" + e));
         GetStartingClasses().then(setStartingClasses).catch(e => toast.error("" + e));
-        refreshFavStatus();
     }, []);
 
     // Refresh the exact appearance match on initial load, character change, and
@@ -91,14 +82,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
             .then(res => { setChar(res); setLoading(false); })
             .catch(() => setLoading(false));
     }, [charIndex, refreshKey]);
-
-    const refreshFavStatus = () => {
-        GetFavoritesStatus().then(setFavSlots).catch(() => {});
-    };
-
-    const freeSlots = favSlots.filter(s => s.safe && !s.active).length;
-    const usedSafeSlots = favSlots.filter(s => s.safe && s.active);
-
 
     const getStatMin = (statId: string): number => {
         return char?.classBaseStats?.[statId] || 1;
@@ -202,47 +185,10 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
             .catch(err => toast.error('Fix failed: ' + err));
     };
 
-    // Appearance handlers
-    const handleAddPreset = async (name: string) => {
-        if (freeSlots === 0 || addingPreset !== null) return;
-        setAddingPreset(name);
-        try {
-            await WriteSelectedToFavorites(charIndex, [name]);
-            toast.success(`Added "${name.split(',')[0].trim()}" to Mirror Favorites`);
-            refreshFavStatus();
-        } catch (e) { toast.error("" + e); }
-        finally { setAddingPreset(null); }
-    };
-
-    const handleApplyPreset = async (name: string) => {
-        if (applyingPreset !== null) return;
-        setApplyingPreset(name);
-        try {
-            await ApplyPresetToCharacter(charIndex, name);
-            const updated = await GetCharacter(charIndex);
-            setChar(updated);
-            toast.success(`Applied "${name.split(',')[0].trim()}" to character`);
-            refreshMatch();
-            onMutate();
-        } catch (e) { toast.error('Apply failed: ' + e); }
-        finally { setApplyingPreset(null); }
-    };
-
-    const handleRemoveFav = async (slotIndex: number) => {
-        try {
-            await RemoveFavoritePreset(slotIndex);
-            toast.success(`Cleared Favorites slot ${slotIndex + 1}`);
-            refreshFavStatus();
-        } catch (e) { toast.error("" + e); }
-    };
-
-    const handleApplyFromMirror = async (slotIndex: number) => {
-        try {
-            await ApplyMirrorFavoriteToCharacter(charIndex, slotIndex);
-            toast.success(`Applied Mirror slot ${slotIndex + 1} to character`);
-            refreshMatch();
-            onMutate();
-        } catch (e) { toast.error("" + e); }
+    const handleAppearanceMutate = () => {
+        GetCharacter(charIndex).then(updated => { if (updated) setChar(updated); }).catch(() => {});
+        refreshMatch();
+        onMutate();
     };
 
     // Summaries for collapsed sections
@@ -520,118 +466,8 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
             <AccordionSection
                 id="char-presets"
                 title="Appearance Presets"
-                badge={`${presets.length} presets`}
             >
-                <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                        <input
-                            type="text"
-                            placeholder="Search…"
-                            value={presetSearch}
-                            onChange={e => setPresetSearch(e.target.value)}
-                            className="flex-1 bg-muted/20 border border-border rounded-md px-3 py-1.5 text-xs focus:ring-1 focus:ring-primary/30 outline-none transition-all"
-                        />
-                        <label className="flex items-center gap-1.5 cursor-pointer select-none">
-                            <input type="checkbox" checked={showMale} onChange={e => setShowMale(e.target.checked)} className="accent-primary" />
-                            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Male</span>
-                        </label>
-                        <label className="flex items-center gap-1.5 cursor-pointer select-none">
-                            <input type="checkbox" checked={showFemale} onChange={e => setShowFemale(e.target.checked)} className="accent-primary" />
-                            <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Female</span>
-                        </label>
-                    </div>
-
-                    <p className="text-[10px] text-muted-foreground">
-                        Click image to preview. Checkbox to select. Apply ✓ on a Mirror slot to copy preset onto current character.
-                    </p>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-                        {presets.filter(p => {
-                            if (p.bodyType === 'Type A' && !showMale) return false;
-                            if (p.bodyType === 'Type B' && !showFemale) return false;
-                            if (presetSearch && !p.name.toLowerCase().includes(presetSearch.toLowerCase())) return false;
-                            return true;
-                        }).map(p => {
-                            const isAdding = addingPreset === p.name;
-                            const isApplying = applyingPreset === p.name;
-                            const canAdd = freeSlots > 0 && addingPreset === null;
-                            const canApply = applyingPreset === null;
-                            return (
-                                <div key={p.name} className="group relative rounded-lg border border-border hover:border-primary/30 overflow-hidden transition-all">
-                                    <div className="relative aspect-[3/4] bg-muted/30 overflow-hidden cursor-pointer"
-                                         onClick={() => setZoomed(p.image ? `presets/${p.image}` : null)}>
-                                        {p.image ? (
-                                            <img src={`presets/${p.image}`} alt={p.name}
-                                                className="w-full h-full object-cover object-top transition-all duration-500 group-hover:scale-105" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <svg className="w-10 h-10 text-muted-foreground/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-                                                </svg>
-                                            </div>
-                                        )}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                                    </div>
-                                    <div className="p-2 bg-background">
-                                        <div className="text-[10px] font-black uppercase tracking-wider leading-tight text-foreground truncate">{p.name}</div>
-                                        <div className="flex items-center justify-between mt-1 gap-1">
-                                            <span className="text-[9px] text-muted-foreground font-medium uppercase tracking-widest">{p.bodyType}</span>
-                                            <div className="flex gap-1">
-                                                <button
-                                                    onClick={() => handleApplyPreset(p.name)}
-                                                    disabled={!canApply || isApplying}
-                                                    title="Apply appearance to current character"
-                                                    className="px-2 py-0.5 border border-blue-700/50 text-blue-700 rounded text-[9px] font-black uppercase tracking-wider hover:bg-blue-700/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
-                                                    {isApplying ? '…' : 'Apply'}
-                                                </button>
-                                                <button
-                                                    onClick={() => handleAddPreset(p.name)}
-                                                    disabled={!canAdd || isAdding}
-                                                    title={freeSlots === 0 ? 'No free Mirror slots' : 'Add to Mirror Favorites'}
-                                                    className="px-2 py-0.5 border border-primary/40 text-primary rounded text-[9px] font-black uppercase tracking-wider hover:bg-primary/10 transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0">
-                                                    {isAdding ? '…' : 'Add'}
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-
-                    {/* Mirror Favorites */}
-                    {usedSafeSlots.length > 0 && (
-                        <div className="pt-3 border-t border-border/50">
-                            <p className="text-[11px] font-normal uppercase tracking-widest text-foreground mb-2">Mirror Favorites ({usedSafeSlots.length} used · {freeSlots} free)</p>
-                            <div className="flex flex-wrap gap-2">
-                                {usedSafeSlots.map(s => (
-                                    <div key={s.index} className="flex items-center gap-2 bg-muted/30 rounded-md px-3 py-1.5">
-                                        {s.image && (
-                                            <img src={`presets/${s.image}`} alt={s.name}
-                                                className="w-8 h-10 object-cover object-top rounded transition-transform duration-150 ease-out hover:relative hover:z-10 hover:scale-200 hover:shadow-lg" />
-                                        )}
-                                        <div className="flex flex-col leading-tight min-w-[40px]">
-                                            <span className="text-[10px] font-bold uppercase tracking-wider">{s.name ? s.name.split(',')[0].trim() : 'In-game favorite'}</span>
-                                            <span className="text-[9px] text-muted-foreground">Slot {s.index + 1}</span>
-                                        </div>
-                                        <button onClick={() => handleApplyFromMirror(s.index)}
-                                            className="text-primary hover:text-primary/80 transition-colors" title="Apply this preset to character">
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-                                            </svg>
-                                        </button>
-                                        <button onClick={() => handleRemoveFav(s.index)}
-                                            className="text-red-400 hover:text-red-300 transition-colors" title="Remove">
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
+                <AppearanceTab charIndex={charIndex} onMutate={handleAppearanceMutate} embedded />
             </AccordionSection>
 
             {/* ═══ APPLY CHANGES ═══ */}
@@ -642,22 +478,6 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                     {applyingChanges ? 'Applying…' : 'Apply Changes'}
                 </button>
             </div>
-
-            {/* Zoom modal */}
-            {zoomed && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm cursor-pointer"
-                     onClick={() => setZoomed(null)}>
-                    <img src={zoomed} alt="Preview"
-                        className="max-h-[85vh] max-w-[85vw] rounded-xl shadow-2xl object-contain animate-in zoom-in-90 duration-300"
-                        onClick={e => e.stopPropagation()} />
-                    <button onClick={() => setZoomed(null)}
-                        className="absolute top-6 right-6 text-white/70 hover:text-white transition-colors">
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-            )}
         </div>
     );
 }

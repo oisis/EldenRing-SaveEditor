@@ -14,6 +14,7 @@ import {loadSafetyProfile, usesTechnicalCaps, SAFETY_PROFILE_EVENT, type SafetyP
 import {ItemDetailPanel} from './ItemDetailPanel';
 import {BanRiskWarningModal} from './database/BanRiskWarningModal';
 import {ErrorModal} from './database/ErrorModal';
+import {ItemCapacityBadge} from './ItemCapacityBadge';
 
 // Categories whose tab has sub-groupings — drives the Sub-Category column visibility.
 const CATEGORIES_WITH_SUBGROUPS = new Set([
@@ -890,7 +891,6 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                                 {filteredItems.map(item => {
                                     const owned = resolveOwned(item);
-                                    const hasOwned = owned.inv > 0 || owned.storage > 0;
                                     return (
                                         <div key={item.id}
                                             className={`relative rounded-xl border bg-card p-1.5 flex flex-col items-center gap-1 transition-all hover:border-primary/40 hover:bg-primary/[0.03] group ${!readOnly && selectedDbItems.has(item.id) ? 'border-primary/50 bg-primary/[0.05]' : 'border-border/50'}`}
@@ -927,12 +927,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                                     {item.flags?.includes('cut_content') && <RiskBadge flag="cut_content" />}
                                                 </div>
                                             </div>
-                                            {hasOwned && (
-                                                <div className="flex items-center gap-2 text-[8px] font-black tabular-nums">
-                                                    <span className={`px-1.5 py-0.5 rounded border ${owned.inv > 0 ? 'text-green-500 bg-green-500/10 border-green-500/30' : 'text-muted-foreground/30 bg-muted/10 border-border/30'}`}>I:{owned.inv}</span>
-                                                    <span className={`px-1.5 py-0.5 rounded border ${owned.storage > 0 ? 'text-green-500 bg-green-500/10 border-green-500/30' : 'text-muted-foreground/30 bg-muted/10 border-border/30'}`}>S:{owned.storage}</span>
-                                                </div>
-                                            )}
+                                            <div className="flex items-center gap-2">
+                                                <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" prefix="I" compact />
+                                                <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" prefix="S" compact />
+                                            </div>
                                         </div>
                                     );
                                 })}
@@ -1076,22 +1074,13 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                         )}
                                         {(() => {
                                             const owned = resolveOwned(item);
-                                            const cellClass = (have: number, max: number): string => {
-                                                if (have === 0) return 'text-muted-foreground/50 bg-muted/20 border-border/30';
-                                                if (max > 0 && have >= max) return 'text-amber-500 bg-amber-500/10 border-amber-500/30';
-                                                return 'text-green-500 bg-green-500/10 border-green-500/30';
-                                            };
                                             return (
                                                 <>
                                                     <td className="px-3 py-2 text-center">
-                                                        <span className={`inline-block text-[10px] font-black tabular-nums whitespace-nowrap px-2 py-1 rounded border ${cellClass(owned.inv, effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode))}`}>
-                                                            {owned.inv} / {effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)}
-                                                        </span>
+                                                        <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" />
                                                     </td>
                                                     <td className="px-3 py-2 text-center">
-                                                        <span className={`inline-block text-[10px] font-black tabular-nums whitespace-nowrap px-2 py-1 rounded border ${cellClass(owned.storage, effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode))}`}>
-                                                            {owned.storage} / {effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)}
-                                                        </span>
+                                                        <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" />
                                                     </td>
                                                 </>
                                             );

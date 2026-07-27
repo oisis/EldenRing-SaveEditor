@@ -130,4 +130,19 @@ describe('InventoryTab (Equipment)', () => {
         const order = screen.getAllByText(/Longsword|Broadsword|Battle Axe/).map(e => e.textContent);
         expect(order).toEqual(['Broadsword', 'Longsword', 'Battle Axe']); // 1, 5, 10
     });
+
+    it('uses a red X for an impossible container and a green check for 1 / 1', async () => {
+        mocks.GetCharacter.mockResolvedValue({
+            inventory: [{
+                ...owned(0x21, 'Sacred Key', 'Key', 1),
+                maxInventory: 1,
+                maxStorage: 0,
+            }],
+            storage: [],
+        });
+        render(tabElement());
+
+        expect(await screen.findByLabelText('Inventory 1 of 1')).toHaveTextContent('✓');
+        expect(screen.getByLabelText('Storage unavailable')).toHaveTextContent('×');
+    });
 });

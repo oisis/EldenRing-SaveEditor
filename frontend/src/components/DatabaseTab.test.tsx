@@ -204,6 +204,18 @@ describe('DatabaseTab', () => {
         // deterministically present in jsdom.
         fireEvent.click(screen.getByTitle('Grid view'));
         expect(await screen.findByText('Forbidden Trinket')).toBeInTheDocument();
+        expect(screen.getByLabelText('Storage unavailable')).toHaveTextContent('S:×');
+    });
+
+    it('shows a green check instead of 1 / 1 for a fully owned single-cap item', async () => {
+        const item = makeBlessingOfMarika();
+        mocks.GetItemList.mockResolvedValue([item]);
+        mocks.GetCharacter.mockResolvedValue({ inventory: [{ ...ownedVm(item.id, 1), maxInventory: 1 }], storage: [], clearCount: 0 });
+        renderTab({ category: 'tools' });
+        fireEvent.click(screen.getByTitle('Grid view'));
+
+        expect(await screen.findByText('Blessing of Marika')).toBeInTheDocument();
+        expect(screen.getByLabelText('Inventory 1 of 1')).toHaveTextContent('I:✓');
     });
 
     it('hides risk-flagged items when showFlaggedItems is off and Chaos is off', async () => {
@@ -264,7 +276,7 @@ describe('DatabaseTab', () => {
         fireEvent.click(screen.getByTitle('Grid view'));
 
         expect(await screen.findByText('Blessing of Marika')).toBeInTheDocument();
-        expect(screen.getByText('I:1')).toBeInTheDocument();
+        expect(screen.getByLabelText('Inventory 1 of 1')).toHaveTextContent('I:✓');
         expect(screen.getByText('S:600')).toBeInTheDocument();
     });
 

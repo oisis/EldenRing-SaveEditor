@@ -112,6 +112,12 @@ describe('SortOrderTab (workspace mode)', () => {
         expect(screen.queryByRole('button', { name: /Apply Order/i })).not.toBeInTheDocument();
     });
 
+    it('places Inventory on the left and Storage on the right', async () => {
+        await mount(makeSnapshot());
+        expect(screen.getByText('Inventory: 0 items').closest('section')).toHaveClass('order-0');
+        expect(screen.getByText('Storage: 0 items').closest('section')).toHaveClass('order-2');
+    });
+
     it('the shared Sort dropdown starts on Default and keeps the chosen label', async () => {
         await mount(makeSnapshot({ inventory: [makeItem('hnd:0x80800001', 'inventory', 0)] }));
         const sort = screen.getByLabelText('Sort') as HTMLSelectElement;
