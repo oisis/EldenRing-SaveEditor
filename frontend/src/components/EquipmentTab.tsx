@@ -700,7 +700,6 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             </div>
             <div className="mx-5 flex items-center justify-between border-t border-border px-0 pb-4 pt-3">
                 <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
-                <strong className="text-base text-red-600">Expermiental</strong>
                 <span role="status" className="text-xs text-red-600">{saveError}</span>
                 <button type="button" disabled={(!spellsDirty && !equipmentDirty && !quickPouchDirty && !physickDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
             </div>
