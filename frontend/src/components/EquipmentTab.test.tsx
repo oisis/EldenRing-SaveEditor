@@ -19,6 +19,7 @@ import {
     GetQuickItemEligibleItems,
     SaveEquipment,
     SaveEquippedSpells,
+    SavePhysickMixture,
     SaveQuickPouchItems,
 } from '../../wailsjs/go/main/App';
 
@@ -37,6 +38,7 @@ vi.mock('../../wailsjs/go/main/App', () => ({
     GetQuickItemEligibleItems: vi.fn(),
     SaveEquipment: vi.fn(),
     SaveEquippedSpells: vi.fn(),
+    SavePhysickMixture: vi.fn(),
     SaveQuickPouchItems: vi.fn(),
     GetPouchEligibleItems: vi.fn(),
     GetPhysickEligibleItems: vi.fn(),
@@ -127,6 +129,8 @@ beforeEach(() => {
     vi.mocked(SaveEquipment).mockResolvedValue(undefined as never);
     vi.mocked(SaveQuickPouchItems).mockReset();
     vi.mocked(SaveQuickPouchItems).mockResolvedValue(undefined as never);
+    vi.mocked(SavePhysickMixture).mockReset();
+    vi.mocked(SavePhysickMixture).mockResolvedValue(undefined as never);
     vi.mocked(GetInfuseTypes).mockReset();
     vi.mocked(GetInfuseTypes).mockResolvedValue([] as never);
 });
@@ -881,6 +885,98 @@ describe('EquipmentTab', () => {
         expect(await screen.findByText('Crimson Crystal Tear')).toBeInTheDocument();
         expect(screen.getByText('Greenburst Crystal Tear')).toBeInTheDocument();
         expect(screen.queryByText('Crimson Crystal Tear (Variant)')).not.toBeInTheDocument();
+    });
+
+    it('recognizes the current tear in an existing mixture: clears on reselect and blocks the other slot', async () => {
+        vi.mocked(GetPhysickEligibleItems).mockResolvedValue([
+            { id: 0x40002AF9, name: 'Greenspill Crystal Tear', category: 'key_items', iconPath: 'items/key_items/greenspill.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 0xB0002AF9, id: 0x40002AF9, baseId: 0x40002AF9, name: 'Greenspill Crystal Tear', category: 'Key Item', iconPath: 'items/key_items/greenspill.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            physick: [
+                view({ occupied: true, rawId: 0x40002AF9, handle: 0xB0002AF9, name: 'Greenspill Crystal Tear', iconPath: 'items/key_items/greenspill.png', resolved: true }),
+                { ...emptyView },
+            ],
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        // The owned handle blocks the same tear in the second slot.
+        fireEvent.click(screen.getByRole('button', { name: 'Physick tear 2' }));
+        expect(await screen.findByRole('button', { name: 'Select Greenspill Crystal Tear' })).toBeDisabled();
+        fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+        // Opening the occupied slot recognizes the current tear; reselecting clears it.
+        fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
+        const current = await screen.findByRole('button', { name: 'Select Greenspill Crystal Tear' });
+        expect(current.parentElement).toHaveAttribute('data-picker-selected', 'true');
+        fireEvent.click(current);
+
+        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SavePhysickMixture).toHaveBeenCalledWith(0, [{ slot: 0, handle: 0 }]));
+    });
+
+    it('equips an owned crystal tear and persists it through SavePhysickMixture', async () => {
+        vi.mocked(GetPhysickEligibleItems).mockResolvedValue([
+            { id: 0x40002AF9, name: 'Greenspill Crystal Tear', category: 'key_items', iconPath: 'items/key_items/greenspill.png', maxInventory: 1 },
+        ] as never);
+        vi.mocked(GetCharacter).mockResolvedValue({
+            inventory: [{ handle: 0xB0002AF9, id: 0x40002AF9, baseId: 0x40002AF9, name: 'Greenspill Crystal Tear', category: 'Key Item', iconPath: 'items/key_items/greenspill.png', quantity: 1, maxInventory: 1 }],
+        } as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Select Greenspill Crystal Tear' }));
+        fireEvent.click(screen.getByRole('button', { name: 'Ok' }));
+
+        await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+        fireEvent.click(screen.getByRole('button', { name: 'Save changes' }));
+        await waitFor(() => expect(SavePhysickMixture).toHaveBeenCalledWith(0, [{ slot: 0, handle: 0xB0002AF9 }]));
+    });
+
+    it('locks the Physick tear picker to Inventory with no Item Database source', async () => {
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Physick tear 1' }));
+        await screen.findByPlaceholderText('Search items...');
+
+        expect(screen.getByRole('button', { name: 'Inventory' })).toHaveAttribute('aria-pressed', 'true');
+        expect(screen.queryByRole('button', { name: 'Item Database' })).not.toBeInTheDocument();
+    });
+
+    it('shows the exact memory-slot requirement in each equipped spell tooltip, including N=1', async () => {
+        vi.mocked(GetEquipmentSnapshot).mockResolvedValue(makeSnapshot({
+            spells: [
+                view({ occupied: true, rawId: 0x0FA0, name: 'Glintstone Pebble', iconPath: 'items/sorceries/glintstone_pebble.png', resolved: true, memorySlots: 1 }),
+                view({ occupied: true, rawId: 0x1158, name: 'Carian Slicer', iconPath: 'items/sorceries/carian_slicer.png', resolved: true, memorySlots: 2 }),
+                view({ occupied: true, rawId: 0x1068, name: 'Comet Azur', iconPath: 'items/sorceries/comet_azur.png', resolved: true, memorySlots: 3 }),
+                ...fill(11),
+            ],
+        }) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        expect(await screen.findByText('Required memory slots: 1')).toBeInTheDocument();
+        expect(screen.getByText('Required memory slots: 2')).toBeInTheDocument();
+        expect(screen.getByText('Required memory slots: 3')).toBeInTheDocument();
+    });
+
+    it('shows the exact memory-slot requirement for every spell in the picker, including N=1', async () => {
+        const spells = [
+            { id: 0x40000FA0, name: 'Glintstone Pebble', category: 'sorceries', iconPath: 'items/sorceries/glintstone_pebble.png', maxInventory: 1, memorySlots: 1 },
+            { id: 0x40001158, name: 'Carian Slicer', category: 'sorceries', iconPath: 'items/sorceries/carian_slicer.png', maxInventory: 1, memorySlots: 2 },
+            { id: 0x40001068, name: 'Comet Azur', category: 'sorceries', iconPath: 'items/sorceries/comet_azur.png', maxInventory: 1, memorySlots: 3 },
+        ];
+        vi.mocked(GetItemList).mockImplementation((category: string) => Promise.resolve(category === 'sorceries' ? spells : []) as never);
+        render(<EquipmentTab charIdx={0} />);
+
+        fireEvent.click(screen.getByRole('button', { name: 'Spell slot 1' }));
+        fireEvent.click(await screen.findByRole('button', { name: 'Item Database' }));
+
+        expect(await screen.findByText('Required memory slots: 1')).toBeInTheDocument();
+        expect(screen.getByText('Required memory slots: 2')).toBeInTheDocument();
+        expect(screen.getByText('Required memory slots: 3')).toBeInTheDocument();
     });
 
     it('shows the eligible item types in a tooltip for each slot family', () => {

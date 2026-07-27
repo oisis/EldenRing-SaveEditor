@@ -294,6 +294,8 @@ export function SaveImportedBuildTemplateJSONToLibrary(arg1:string):Promise<temp
 
 export function SaveInventoryWorkspaceChanges(arg1:string):Promise<editor.InventoryWorkspaceSnapshot>;
 
+export function SavePhysickMixture(arg1:number,arg2:Array<main.PhysickChange>):Promise<void>;
+
 export function SaveQuickPouchItems(arg1:number,arg2:Array<main.QuickPouchChange>):Promise<void>;
 
 export function ScanInventoryIssues(arg1:number):Promise<main.InventoryIssuesScanReport>;

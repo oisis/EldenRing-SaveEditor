@@ -214,6 +214,9 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
     // Multi-slot spells advertise their real Memory Slot cost; a blocked spell
     // (over capacity or unknown cost) shows why so the disabled state is legible.
     const costLabel = item.isSpell && item.memorySlots != null && item.memorySlots > 1 ? `${item.memorySlots} slots` : null;
+    // Every spell shows its exact Memory Slot requirement as a persistent line,
+    // including N=1 — distinct from the compact ×N badge above.
+    const memoryLabel = item.isSpell && item.memorySlots != null ? `Required memory slots: ${item.memorySlots}` : null;
 
     if (view === 'list') {
         if (item.isWeapon) {
@@ -236,7 +239,8 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
                     <span className="min-w-0">
                         <span className={`block truncate font-bold text-foreground ${prominentListName ? 'text-sm' : 'text-xs'}`}>{item.name}</span>
                         {!prominentListName && <span className="block truncate text-[10px] text-muted-foreground">{item.category}{item.quantity != null ? ` · ${item.quantity}` : ''}</span>}
-                        {(costLabel || blockReason) && <span className="block truncate text-[10px] font-bold text-muted-foreground">{blockReason ?? costLabel}</span>}
+                        {memoryLabel && <span className="block truncate text-[10px] font-bold text-muted-foreground">{memoryLabel}</span>}
+                        {blockReason && <span className="block truncate text-[10px] font-bold text-muted-foreground">{blockReason}</span>}
                     </span>
                 </button>
             </div>
@@ -251,7 +255,8 @@ function ItemCard({ item, source, view, weaponList, physickPicker, selected, dis
                 <img className={`${source === 'database' ? 'h-20 w-20' : 'h-16 w-16'} object-contain`} src={iconSrc(item.iconPath)} alt={item.name} />
                 <span className="line-clamp-2 text-center text-[10px] font-bold leading-tight text-foreground">{item.name}</span>
                 {item.isWeapon && <span className="text-[10px] font-bold text-muted-foreground">+{item.upgradeLevel ?? 0}</span>}
-                {!item.isWeapon && item.quantity == null && !blockReason && <span className="text-[9px] text-muted-foreground">{item.category}</span>}
+                {!item.isWeapon && !item.isSpell && item.quantity == null && !blockReason && <span className="text-[9px] text-muted-foreground">{item.category}</span>}
+                {memoryLabel && <span className="text-center text-[9px] font-bold text-muted-foreground">{memoryLabel}</span>}
                 {blockReason && <span className="text-center text-[9px] font-bold text-muted-foreground">{blockReason}</span>}
             </button>
         </div>
@@ -464,7 +469,9 @@ export function EquipmentItemPickerModal({ slotLabel, charIdx, initialSelection,
                     </select>
 					<div className="ml-auto flex h-[32px] rounded-md border border-border p-0.5" aria-label="Item source">
                         <button type="button" aria-pressed={source === 'inventory'} onClick={() => setSource('inventory')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'inventory' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Inventory</button>
-                        <button type="button" aria-pressed={source === 'database'} onClick={() => setSource('database')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'database' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Item Database</button>
+                        {/* Physick tears are owned crystal tears only — never add one from the
+                            Item Database — so the source is locked to Inventory for that slot. */}
+                        {!physickPicker && <button type="button" aria-pressed={source === 'database'} onClick={() => setSource('database')} className={`h-full rounded px-3 text-[10px] font-black uppercase tracking-wider ${source === 'database' ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}>Item Database</button>}
                     </div>
                 </div>
 

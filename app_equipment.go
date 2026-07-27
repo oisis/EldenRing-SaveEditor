@@ -65,6 +65,13 @@ type QuickPouchChange struct {
 	Handle uint32                  `json:"handle"`
 }
 
+// PhysickChange is one writable Wondrous Physick tear request. Handle is the
+// exact owned goods handle of a crystal tear; zero clears the slot.
+type PhysickChange struct {
+	Slot   core.PhysickSlotKind `json:"slot"`
+	Handle uint32               `json:"handle"`
+}
+
 // equipClass selects how a raw stored value is normalized to a DB item ID.
 type equipClass int
 
@@ -332,11 +339,38 @@ func goodsView(slot *core.SaveSlot, pair core.RawEquipItem) EquipmentSlotView {
 // per EquipmentSlotView's contract, and is never resolved against the item DB.
 // Every other value — including 0, which is NOT a confirmed sentinel — falls
 // through the normal unresolved path and stays visible as "Unknown item (0x…)".
-func physickSlotView(raw uint32) EquipmentSlotView {
+func physickSlotView(slot *core.SaveSlot, raw uint32) EquipmentSlotView {
 	if raw == core.GaHandleInvalid {
 		return EquipmentSlotView{RawID: raw}
 	}
-	return resolveEquipView(raw, classPhysickTear)
+	view := resolveEquipView(raw, classPhysickTear)
+	view.Handle = physickTearHandle(slot, raw)
+	return view
+}
+
+// physickTearHandle returns the exact goods handle the character owns whose raw
+// GoodsParam ID equals rawID, so the picker can recognize the currently mixed
+// tear (clear-on-reselect) and block it in the other slot. It searches only the
+// two carried containers proper to tears (CommonItems, KeyItems) — never Storage
+// — and requires a positive quantity. No variant/alias canonicalization: Crimson
+// raw 0x40002AFA resolves to its exact owned handle 0xB0002AFA. Returns 0 when no
+// exact owned handle exists, leaving the view's Handle unset.
+func physickTearHandle(slot *core.SaveSlot, rawID uint32) uint32 {
+	if slot == nil {
+		return 0
+	}
+	for _, container := range [][]core.InventoryItem{slot.Inventory.CommonItems, slot.Inventory.KeyItems} {
+		for _, item := range container {
+			handle := item.GaItemHandle
+			if handle&core.GaHandleTypeMask != core.ItemTypeItem || item.Quantity&0x7FFFFFFF == 0 {
+				continue
+			}
+			if db.HandleToItemID(handle) == rawID {
+				return handle
+			}
+		}
+	}
+	return 0
 }
 
 func spellSlotView(raw uint32) EquipmentSlotView {
@@ -423,7 +457,7 @@ func (a *App) GetEquipmentSnapshot(charIdx int) (EquipmentSnapshot, error) {
 	// only in slot 2. Raw IDs preserved; display metadata follows explicit
 	// technical aliases via classPhysickTear.
 	for i := 0; i < 2; i++ {
-		snap.Physick[i] = physickSlotView(raw.Physick[i])
+		snap.Physick[i] = physickSlotView(&slot, raw.Physick[i])
 	}
 	for i := 0; i < core.EquippedSpellSlotCount; i++ {
 		snap.Spells[i] = spellSlotView(raw.Spells[i])
@@ -594,6 +628,103 @@ func (a *App) SaveQuickPouchItems(charIdx int, changes []QuickPouchChange) error
 	before := a.buildSlotSnapshotLocked(charIdx)
 	if err := slot.WriteQuickPouch(writes); err != nil {
 		return fmt.Errorf("SaveQuickPouchItems: %w", err)
+	}
+	a.pushUndoSnapshotLocked(charIdx, before)
+	return nil
+}
+
+// ownedTearQuantity returns the positive quantity of the exact goods handle if
+// the character owns it in either inventory container proper to crystal tears
+// (CommonItems or KeyItems). Storage is intentionally excluded: only items the
+// character carries can be mixed. A zero or missing quantity yields ok=false.
+func ownedTearQuantity(slot *core.SaveSlot, handle uint32) (uint32, bool) {
+	for _, container := range [][]core.InventoryItem{slot.Inventory.CommonItems, slot.Inventory.KeyItems} {
+		for _, item := range container {
+			if item.GaItemHandle != handle {
+				continue
+			}
+			if qty := item.Quantity & 0x7FFFFFFF; qty != 0 {
+				return qty, true
+			}
+			return 0, false
+		}
+	}
+	return 0, false
+}
+
+// hasWondrousPhysickFlask reports whether the character carries the Flask of
+// Wondrous Physick (either raw variant) with a positive quantity. A mixture is
+// only meaningful when the flask itself is owned.
+func hasWondrousPhysickFlask(slot *core.SaveSlot) bool {
+	for _, container := range [][]core.InventoryItem{slot.Inventory.CommonItems, slot.Inventory.KeyItems} {
+		for _, item := range container {
+			if item.Quantity&0x7FFFFFFF != 0 && db.IsWondrousPhysick(item.GaItemHandle) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// SavePhysickMixture applies one atomic Wondrous Physick tear batch in memory.
+// The normal Save/Save As action remains responsible for writing the .sl2 file.
+//
+// It writes only the two active-mixture u32 in EquipPhysicsData. Each non-empty
+// tear must be a crystal tear the character actually owns (CommonItems/KeyItems,
+// positive quantity); the exact raw ID of the owned record — derived via the
+// repository SSOT db.HandleToItemID — is written through unchanged, so technical
+// variants such as Crimson 0x40002AFA are preserved without a reverse map. A
+// Flask of Wondrous Physick must be owned. Handle 0 clears a slot (0xFFFFFFFF);
+// the surviving tear is never left-packed.
+func (a *App) SavePhysickMixture(charIdx int, changes []PhysickChange) error {
+	a.saveMu.RLock()
+	defer a.saveMu.RUnlock()
+	if a.save == nil {
+		return fmt.Errorf("no save loaded")
+	}
+	if charIdx < 0 || charIdx >= len(a.save.Slots) || !a.save.ActiveSlots[charIdx] {
+		return fmt.Errorf("invalid active character slot %d", charIdx)
+	}
+	if len(changes) == 0 {
+		return nil
+	}
+
+	a.slotMu[charIdx].Lock()
+	defer a.slotMu[charIdx].Unlock()
+	slot := &a.save.Slots[charIdx]
+
+	if !hasWondrousPhysickFlask(slot) {
+		return fmt.Errorf("SavePhysickMixture: character does not own a Flask of Wondrous Physick")
+	}
+
+	writes := make([]core.PhysickWrite, len(changes))
+	for i, change := range changes {
+		if change.Handle == 0 {
+			writes[i] = core.PhysickWrite{Slot: change.Slot, Value: core.GaHandleInvalid}
+			continue
+		}
+		if change.Handle == core.GaHandleInvalid {
+			return fmt.Errorf("SavePhysickMixture[%d]: handle 0xFFFFFFFF is invalid; use Handle=0 to clear a slot", i)
+		}
+		if change.Handle&core.GaHandleTypeMask != core.ItemTypeItem {
+			return fmt.Errorf("SavePhysickMixture[%d]: handle 0x%08X is not a goods handle", i, change.Handle)
+		}
+		if _, ok := ownedTearQuantity(slot, change.Handle); !ok {
+			return fmt.Errorf("SavePhysickMixture[%d]: handle 0x%08X is not an owned tear with a positive quantity", i, change.Handle)
+		}
+		// Repository SSOT for handle → raw item ID. The exact owned ID is written
+		// through, so an owned technical variant (e.g. Crimson 0x40002AFA) is
+		// preserved rather than canonicalized to its picker display alias.
+		rawID := db.HandleToItemID(change.Handle)
+		if db.GetItemData(rawID).SubCategory != data.SubcatKeyCrystalTears {
+			return fmt.Errorf("SavePhysickMixture[%d]: item 0x%08X is not a Wondrous Physick crystal tear", i, rawID)
+		}
+		writes[i] = core.PhysickWrite{Slot: change.Slot, Value: rawID}
+	}
+
+	before := a.buildSlotSnapshotLocked(charIdx)
+	if err := slot.WritePhysick(writes); err != nil {
+		return fmt.Errorf("SavePhysickMixture: %w", err)
 	}
 	a.pushUndoSnapshotLocked(charIdx, before)
 	return nil

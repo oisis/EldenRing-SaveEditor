@@ -1,5 +1,5 @@
 import { useEffect, useState, type CSSProperties, type ReactNode, type SyntheticEvent } from 'react';
-import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells, SaveQuickPouchItems } from '../../wailsjs/go/main/App';
+import { AddItemsToCharacter, GetCharacter, GetEquipmentSnapshot, SaveEquipment, SaveEquippedSpells, SavePhysickMixture, SaveQuickPouchItems } from '../../wailsjs/go/main/App';
 import type { main, vm } from '../../wailsjs/go/models';
 import { EquipmentItemPickerModal, type EquipmentPickerSelection } from './EquipmentItemPickerModal';
 
@@ -62,17 +62,19 @@ type SlotProps = {
     item?: EquippedItem;
     quantity?: number;
     costBadge?: number;
+    detail?: string;
     onRemove?: () => void;
     children: ReactNode;
 };
 
-function SlotTooltip({ eligibleItems }: { eligibleItems: string }) {
+function SlotTooltip({ eligibleItems, detail }: { eligibleItems: string; detail?: string }) {
     return (
         <span
             role="tooltip"
             className="pointer-events-none absolute bottom-[calc(100%+7px)] left-1/2 z-30 w-max max-w-[170px] -translate-x-1/2 rounded-md bg-[color:var(--eq-tooltip-bg)] px-2 py-1 text-center text-[9px] font-bold leading-tight text-[color:var(--eq-tooltip-text)] opacity-0 shadow-lg transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100"
         >
             {eligibleItems}
+            {detail && <span className="mt-0.5 block font-extrabold">{detail}</span>}
         </span>
     );
 }
@@ -84,7 +86,7 @@ function SlotRemoveIcon({ label, onRemove, showRemove = true }: { label: string;
     return <span data-testid="slot-remove-icon" role="button" tabIndex={0} aria-label={`Remove ${label}`} onClick={remove} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') remove(event); }} className="absolute bottom-0.5 left-1 z-20 cursor-pointer text-lg font-black leading-none text-red-600 drop-shadow-sm hover:text-red-500">×</span>;
 }
 
-function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, costBadge, onRemove, children }: SlotProps) {
+function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active = false, readOnly = false, showRemove = true, item, quantity, costBadge, detail, onRemove, children }: SlotProps) {
     // Occupied + resolved: real icon and item name. Occupied + unknown:
     // placeholder with the raw-ID name. Empty: placeholder + eligibility text.
     const tooltip = item?.occupied ? item.name : eligibleItems;
@@ -98,7 +100,7 @@ function EquipmentSlot({ label, eligibleItems, onOpen, selected = false, active 
             className={`${slotClass} ${selected ? 'border-2 border-[color:var(--eq-slot-selected-border)]' : ''} ${active ? 'border-2 border-amber-400 ring-2 ring-amber-400/60' : ''}`}
         >
             <span className="pointer-events-none absolute inset-[5px] border border-[color:var(--eq-slot-inset-border)]" />
-            <SlotTooltip eligibleItems={tooltip} />
+            <SlotTooltip eligibleItems={tooltip} detail={item?.occupied ? detail : undefined} />
             <SlotRemoveIcon label={label} onRemove={onRemove} showRemove={showRemove} />
             {quantity != null && <span className="pointer-events-none absolute left-1.5 top-1 z-20 text-xs font-black text-foreground">{quantity}</span>}
             {costBadge != null && costBadge > 1 && <span data-testid="spell-cost-badge" className="pointer-events-none absolute bottom-0.5 right-1 z-20 rounded bg-black/70 px-1 text-[8px] font-black leading-tight text-white">{costBadge} slots</span>}
@@ -160,7 +162,7 @@ function PouchSlot({ label, active, onOpen, item, onRemove }: { label: string; a
     );
 }
 
-function PhysickSlot({ label, onOpen, item }: { label: string; onOpen: (label: string) => void; item?: EquippedItem }) {
+function PhysickSlot({ label, onOpen, item, onRemove }: { label: string; onOpen: (label: string) => void; item?: EquippedItem; onRemove?: () => void }) {
     // Occupied + resolved: real icon and tear name. Occupied + unknown: the raw-ID
     // name, never the empty placeholder (the native empty-mixture encoding is
     // unconfirmed). Empty: placeholder + eligibility text.
@@ -176,7 +178,7 @@ function PhysickSlot({ label, onOpen, item }: { label: string; onOpen: (label: s
             className="group relative flex h-[82px] w-[82px] flex-col rounded-lg border border-[color:var(--eq-slot-border)] p-[5px] text-[color:var(--eq-physick-text)] hover:border-[color:var(--eq-slot-hover-border)]"
         >
             <SlotTooltip eligibleItems={tooltip} />
-            <SlotRemoveIcon label={label} />
+            <SlotRemoveIcon label={label} onRemove={onRemove} />
             <span className="line-clamp-2 min-h-[21px] text-center text-[8px] font-extrabold leading-[1.15]">{occupied ? item!.name : 'Physick tear'}</span>
             <span className="flex h-[51px] items-center justify-center">
                 {resolved ? (
@@ -202,6 +204,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     const [quickPouchDirty, setQuickPouchDirty] = useState(false);
     const [draftSpells, setDraftSpells] = useState<EquippedItem[] | null>(null);
     const [spellsDirty, setSpellsDirty] = useState(false);
+    const [draftPhysick, setDraftPhysick] = useState<Record<number, EquippedItem>>({});
+    const [physickDirty, setPhysickDirty] = useState(false);
     const [saveError, setSaveError] = useState('');
     const [saveRevision, setSaveRevision] = useState(0);
     const openSlot = (label: string) => {
@@ -223,6 +227,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         setQuickPouchDirty(false);
         setDraftSpells(null);
         setSpellsDirty(false);
+        setDraftPhysick({});
+        setPhysickDirty(false);
         setSaveError('');
         (async () => {
             try {
@@ -321,6 +327,17 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         setQuickPouchDirty(true);
         setSaveError('');
     };
+    const physickSlotForLabel = (label: string) => {
+        const match = /^Physick tear (\d+)$/.exec(label);
+        return match ? Number(match[1]) - 1 : -1;
+    };
+    const physickView = (slot: number): EquippedItem | undefined =>
+        Object.prototype.hasOwnProperty.call(draftPhysick, slot) ? draftPhysick[slot] : snapshot?.physick[slot];
+    const removePhysick = (slot: number) => {
+        setDraftPhysick(current => ({ ...current, [slot]: emptyEquipmentItem() }));
+        setPhysickDirty(true);
+        setSaveError('');
+    };
     const saveChanges = async () => {
         if (charIdx == null) return;
         try {
@@ -344,6 +361,14 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 }));
                 await SaveQuickPouchItems(charIdx, changes);
                 setQuickPouchDirty(false);
+            }
+            if (physickDirty) {
+                const changes = Object.entries(draftPhysick).map(([slot, item]) => ({
+                    slot: Number(slot),
+                    handle: item.occupied ? item.handle : 0,
+                }));
+                await SavePhysickMixture(charIdx, changes);
+                setPhysickDirty(false);
             }
             setSaveError('');
             setSaveRevision(value => value + 1);
@@ -404,6 +429,10 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
     }[equipLoadClass] ?? 'text-muted-foreground';
     const spellViews = draftSpells ?? Array.from(snapshot?.spells ?? []);
     const spellCost = (item?: EquippedItem) => (item?.occupied ? (item.memorySlots ?? 0) : 0);
+    // Exact per-spell Memory Slot requirement shown in each equipped spell's
+    // tooltip — always rendered for an equipped spell of known cost, including N=1.
+    const spellDetail = (item?: EquippedItem) =>
+        item?.occupied && item.memorySlots != null ? `Required memory slots: ${item.memorySlots}` : undefined;
     // Real memory usage is the SUM of per-spell costs (1-3 each), not the number
     // of equipped records — a multi-slot spell still occupies a single record.
     const usedSpellSlots = spellViews.reduce((sum, item) => sum + spellCost(item), 0);
@@ -479,8 +508,25 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
         : [];
     const disabledQuickPouchHandles = disabledQuickPouchItems.map(item => item.handle).filter(Boolean);
     const disabledQuickPouchIDs = disabledQuickPouchItems.map(item => 0x40000000 | (item.rawId & 0x0FFFFFFF));
+    const selectedPhysickSlot = physickSlotForLabel(selectedSlot);
+    const selectedPhysick = selectedPhysickSlot >= 0 ? physickView(selectedPhysickSlot) : undefined;
+    const selectedPhysickSelection = selectedPhysick?.occupied ? {
+        id: selectedPhysick.rawId,
+        handle: selectedPhysick.handle,
+        name: selectedPhysick.name,
+        iconPath: selectedPhysick.iconPath,
+        source: 'inventory' as const,
+    } : undefined;
+    // A single tear may not occupy both Physick slots, so block the other slot's
+    // owned handle in the picker (the backend rejects duplicates as well).
+    const disabledPhysickHandles = selectedPhysickSlot >= 0
+        ? [0, 1].filter(slot => slot !== selectedPhysickSlot)
+            .map(slot => physickView(slot))
+            .filter((item): item is EquippedItem => Boolean(item?.occupied && item.handle))
+            .map(item => item.handle)
+        : [];
     const disabledPickerItemIDs = selectedSpellIndex >= 0 ? disabledSpellIDs : selectedQuickPouchSlot >= 0 ? disabledQuickPouchIDs : disabledTalismanIDs;
-    const disabledPickerItemHandles = selectedQuickPouchSlot >= 0 ? disabledQuickPouchHandles : disabledEquipmentHandles;
+    const disabledPickerItemHandles = selectedQuickPouchSlot >= 0 ? disabledQuickPouchHandles : selectedPhysickSlot >= 0 ? disabledPhysickHandles : disabledEquipmentHandles;
     const setEquipmentSelection = async (selection: EquipmentPickerSelection) => {
         if (selectedEquipmentSlot == null) return;
         let handle = selection.handle;
@@ -530,6 +576,30 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
             },
         }));
         setQuickPouchDirty(true);
+        setSaveError('');
+    };
+    const setPhysickSelection = async (selection: EquipmentPickerSelection) => {
+        if (selectedPhysickSlot < 0) return;
+        // Physick tears are owned crystal tears only — the picker never offers the
+        // Item Database source for this slot, so a writable Inventory handle must
+        // already be present.
+        if (selection.source === 'database' || selection.handle == null || selection.handle === 0) {
+            throw new Error('Physick tears must be selected from Inventory.');
+        }
+        const writableHandle = selection.handle;
+        setDraftPhysick(current => ({
+            ...current,
+            [selectedPhysickSlot]: {
+                occupied: true,
+                rawId: selection.id,
+                handle: writableHandle,
+                quantity: 1,
+                name: selection.name,
+                iconPath: selection.iconPath,
+                resolved: true,
+            },
+        }));
+        setPhysickDirty(true);
         setSaveError('');
     };
 
@@ -605,8 +675,8 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                     <div aria-hidden="true" className="mt-[6px] h-[14px]" />
                     <h3 className="mb-3 w-[173px] whitespace-pre-line text-center text-[10px] font-black uppercase tracking-[0.1em] text-muted-foreground">{'Wondrous\nPhysick flask'}</h3>
                     <div className="grid grid-cols-[82px_82px] gap-[9px]">
-                        <PhysickSlot label="Physick tear 1" onOpen={openSlot} item={snapshot?.physick[0]} />
-                        <PhysickSlot label="Physick tear 2" onOpen={openSlot} item={snapshot?.physick[1]} />
+                        <PhysickSlot label="Physick tear 1" onOpen={openSlot} item={physickView(0)} onRemove={physickView(0)?.occupied ? () => removePhysick(0) : undefined} />
+                        <PhysickSlot label="Physick tear 2" onOpen={openSlot} item={physickView(1)} onRemove={physickView(1)?.occupied ? () => removePhysick(1) : undefined} />
                     </div>
                 </div>
 
@@ -615,13 +685,13 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                     <p data-testid="memory-slots-usage" className={`mb-2 w-[173px] text-center text-[10px] font-bold ${usedSpellSlots > activeSpellSlots ? 'text-red-600' : 'text-muted-foreground'}`}>Memory slots: {usedSpellSlots} / {activeSpellSlots}</p>
                     <div data-testid="spell-slot-area" className={`flex flex-1 flex-col ${moonSpellSlots.length ? 'justify-start' : 'justify-center'}`}>
                         <div data-testid="spell-primary-grid" className="grid grid-flow-col grid-cols-[repeat(2,82px)] grid-rows-[repeat(5,82px)] gap-[9px]">
-                            {primarySpellSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} costBadge={spellCost(spellViews[index])} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>)}
+                            {primarySpellSlots.map(([label, src], index) => <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} costBadge={spellCost(spellViews[index])} detail={spellDetail(spellViews[index])} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>)}
                         </div>
                         {moonSpellSlots.length > 0 && (
                             <div className="mt-[9px] grid grid-cols-[repeat(2,82px)] gap-[9px]">
                                 {moonSpellSlots.map(([label, src], offset) => {
                                     const index = offset + 10;
-                                    return <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} costBadge={spellCost(spellViews[index])} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>;
+                                    return <EquipmentSlot key={label} label={label} eligibleItems="Sorceries and Incantations" selected={selected(label)} active={index === activeSpellIndex} onOpen={openSlot} item={spellViews[index]} costBadge={spellCost(spellViews[index])} detail={spellDetail(spellViews[index])} onRemove={spellViews[index]?.occupied ? () => removeSpell(index) : undefined}><GhostIcon src={src} /></EquipmentSlot>;
                                 })}
                             </div>
                         )}
@@ -632,18 +702,18 @@ export function EquipmentTab({ charIdx, saveLoadKey, equipmentRevision, onMutate
                 <span className="text-[12px] font-extrabold tracking-[.04em] text-muted-foreground">Equip Load (<span className={equipLoadClassStyle}>{equipLoadClass}</span>): <strong className="text-foreground">{currentEquipLoad} / {maxEquipLoad}</strong></span>
                 <strong className="text-base text-red-600">Expermiental</strong>
                 <span role="status" className="text-xs text-red-600">{saveError}</span>
-                <button type="button" disabled={(!spellsDirty && !equipmentDirty && !quickPouchDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
+                <button type="button" disabled={(!spellsDirty && !equipmentDirty && !quickPouchDirty && !physickDirty) || charIdx == null} onClick={saveChanges} className="rounded-md bg-primary px-4 py-2 text-[10px] font-black uppercase tracking-[.13em] text-primary-foreground hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">Save changes</button>
             </div>
             {modalOpen && <EquipmentItemPickerModal
                 slotLabel={selectedSlot}
                 charIdx={charIdx}
-                initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedQuickPouchSlot >= 0 ? selectedQuickPouchSelection : selectedEquipmentSelection}
+                initialSelection={selectedSlot.startsWith('Spell slot') ? selectedSpellSelection : selectedQuickPouchSlot >= 0 ? selectedQuickPouchSelection : selectedPhysickSlot >= 0 ? selectedPhysickSelection : selectedEquipmentSelection}
                 disabledItemIDs={disabledPickerItemIDs}
                 disabledItemHandles={disabledPickerItemHandles}
                 spellCapacity={selectedSlot.startsWith('Spell slot') ? activeSpellSlots : undefined}
                 spellUsedExcludingSelected={spellUsedExcludingSelected}
-                onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedQuickPouchSlot >= 0 ? setQuickPouchSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
-                onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedQuickPouchSlot >= 0 ? () => removeQuickPouch(selectedQuickPouchSlot) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
+                onConfirm={selectedSlot.startsWith('Spell slot') ? setSpellSelection : selectedQuickPouchSlot >= 0 ? setQuickPouchSelection : selectedPhysickSlot >= 0 ? setPhysickSelection : selectedEquipmentSlot != null ? setEquipmentSelection : undefined}
+                onClear={selectedSlot.startsWith('Spell slot') ? (selectedSpellIndex >= 0 ? () => removeSpell(selectedSpellIndex) : undefined) : selectedQuickPouchSlot >= 0 ? () => removeQuickPouch(selectedQuickPouchSlot) : selectedPhysickSlot >= 0 ? () => removePhysick(selectedPhysickSlot) : selectedEquipmentSlot != null ? () => removeEquipment(selectedEquipmentSlot) : undefined}
                 onClose={() => setModalOpen(false)}
             />}
         </section>

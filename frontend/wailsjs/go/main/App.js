@@ -574,6 +574,10 @@ export function SaveInventoryWorkspaceChanges(arg1) {
   return window['go']['main']['App']['SaveInventoryWorkspaceChanges'](arg1);
 }
 
+export function SavePhysickMixture(arg1, arg2) {
+  return window['go']['main']['App']['SavePhysickMixture'](arg1, arg2);
+}
+
 export function SaveQuickPouchItems(arg1, arg2) {
   return window['go']['main']['App']['SaveQuickPouchItems'](arg1, arg2);
 }

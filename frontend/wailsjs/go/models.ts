@@ -2258,6 +2258,20 @@ export namespace main {
 		    return a;
 		}
 	}
+	export class PhysickChange {
+	    slot: number;
+	    handle: number;
+
+	    static createFrom(source: any = {}) {
+	        return new PhysickChange(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.slot = source["slot"];
+	        this.handle = source["handle"];
+	    }
+	}
 	export class PresetInfo {
 	    name: string;
 	    image: string;
