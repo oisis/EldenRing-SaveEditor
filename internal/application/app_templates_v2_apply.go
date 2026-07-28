@@ -36,6 +36,31 @@ type ApplyTemplateV2Options struct {
 	Mode                string               `json:"mode,omitempty"`
 	SessionID           string               `json:"sessionID,omitempty"`
 	WeaponLevelOverride *WeaponLevelOverride `json:"weaponLevelOverride,omitempty"`
+
+	// DeriveLevelFromStats marks the Apply-with-overrides path. When true
+	// the backend ignores any profile.level in the template, derives the
+	// level from the eight effective final stats (current character value
+	// for an unselected stat, override value for a selected one) via
+	// vm.RecalculateLevel, and runs class-aware stat / level / Soul Memory
+	// consistency validation before mutating. Direct Apply (false) keeps
+	// the legacy contract: manual profile.level is honoured, no new
+	// validation runs. Runtime-only; never persisted in a schema template.
+	DeriveLevelFromStats bool `json:"deriveLevelFromStats,omitempty"`
+
+	// ClassOverride is the Apply-with-overrides runtime selection of the
+	// character's starting class. Runtime-only and distinct from the
+	// skipped-by-design sections.profile.class. ClassID 0 (Vagabond) is a
+	// valid value, so the pointer — not a zero sentinel — signals "no class
+	// override". A non-nil override with an unknown ClassID is rejected
+	// fail-closed before any mutation.
+	ClassOverride *ClassOverride `json:"classOverride,omitempty"`
+}
+
+// ClassOverride carries the runtime class selection for the
+// Apply-with-overrides path. ClassID is matched exactly against
+// db.StartingClasses — no fuzzy / case-insensitive string resolution.
+type ClassOverride struct {
+	ClassID uint8 `json:"classID"`
 }
 
 // ApplyTemplateV2Result is the dual-purpose return of
@@ -248,6 +273,19 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 			Severity: "error",
 			Code:     templates.IssueCodeStructureInvalid,
 			Message:  "schema v2 template selects no applyable section (profile / stats / inventory.workspace / equipment / spells / items / inventoryLayout / storageLayout)",
+		})
+		return ApplyTemplateV2Result{
+			CharIndex: charIdx,
+			Preview:   report,
+			Applied:   false,
+		}, nil
+	}
+	if opts.ClassOverride != nil && !opts.DeriveLevelFromStats {
+		report.OK = false
+		report.Errors = append(report.Errors, templates.ImportPreviewIssue{
+			Severity: "error",
+			Code:     templates.IssueCodeStructureInvalid,
+			Message:  "class override requires deriveLevelFromStats=true",
 		})
 		return ApplyTemplateV2Result{
 			CharIndex: charIdx,
@@ -575,6 +613,89 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 		ap, sk := applyTemplateV2StatsToVM(charVM, tpl.Selection.Stats, tpl.Sections.Stats)
 		applied = append(applied, ap...)
 		skipped = append(skipped, sk...)
+	}
+
+	// Apply-with-overrides runtime preflight: class override + level derived
+	// from the eight effective final stats + class-aware validation. Runs on
+	// charVM only (no slot / workspace mutation yet) so any rejection returns
+	// a clean preview error with zero side effects — before pushUndoLocked
+	// and before the first slot/workspace write, preserving atomicity.
+	//
+	// Ordering (see spec/56 §17b): resolve class → fail-closed class-minimum
+	// stat check → RecalculateLevel → consistency validation → Soul Memory
+	// minimum. Direct Apply (DeriveLevelFromStats=false, ClassOverride=nil)
+	// skips this block entirely and keeps the legacy contract.
+	if opts.ClassOverride != nil || opts.DeriveLevelFromStats {
+		classForValidation := charVM.Class
+		if opts.ClassOverride != nil {
+			cs := db.GetClassStats(opts.ClassOverride.ClassID)
+			if cs == nil {
+				report.OK = false
+				report.Errors = append(report.Errors, templates.ImportPreviewIssue{
+					Severity: "error",
+					Code:     templates.IssueCodeStructureInvalid,
+					Message:  fmt.Sprintf("class override: unknown class ID %d", opts.ClassOverride.ClassID),
+				})
+				return ApplyTemplateV2Result{CharIndex: charIdx, Preview: report, Applied: false}, nil
+			}
+			charVM.Class = cs.ID
+			charVM.ClassName = cs.Name
+			classForValidation = cs.ID
+			applied = appendUniqueString(applied, "profile.class")
+			skipped = removeString(skipped, "profile.class")
+		}
+		if opts.DeriveLevelFromStats {
+			// Step 4 — fail-closed: every effective final stat must be >= the
+			// class minimum. No ClampToClassMinimums here: a below-minimum stat
+			// is a rejected payload, not something to silently raise (the UI
+			// raises + re-enables sub-minimum stats on class change; a payload
+			// that still violates the minimum is a bug we surface, not hide).
+			if cs := db.GetClassStats(classForValidation); cs != nil {
+				if errs := statsBelowClassMinimum(charVM, cs); len(errs) > 0 {
+					report.OK = false
+					for _, e := range errs {
+						report.Errors = append(report.Errors, templates.ImportPreviewIssue{
+							Severity: "error", Code: templates.IssueCodeStructureInvalid, Message: e,
+						})
+					}
+					return ApplyTemplateV2Result{CharIndex: charIdx, Preview: report, Applied: false}, nil
+				}
+			}
+			// Step 6 — derive level from the eight effective final stats.
+			charVM.RecalculateLevel()
+			applied = appendUniqueString(applied, "profile.level")
+
+			// Step 7 — class-aware consistency validation (stat minima, level
+			// formula, bounds). Overrides path only; Direct Apply keeps its
+			// partial-apply contract untouched.
+			if consistency := charVM.ValidateStatsConsistency(classForValidation); !consistency.Valid {
+				report.OK = false
+				for _, e := range consistency.Errors {
+					report.Errors = append(report.Errors, templates.ImportPreviewIssue{
+						Severity: "error", Code: templates.IssueCodeStructureInvalid, Message: e,
+					})
+				}
+				return ApplyTemplateV2Result{CharIndex: charIdx, Preview: report, Applied: false}, nil
+			}
+
+			// Steps 8-9 — Soul Memory minimum for the derived level. Reject an
+			// EXPLICIT override below the minimum (no silent clamp). When Soul
+			// Memory was not explicitly overridden, ApplyVMToParsedSlot's
+			// NormalizeSoulMemory floors it to the minimum — the effective
+			// value the UI previews to the user.
+			if containsString(applied, "profile.soulMemory") {
+				minSM := vm.MinimumSoulMemoryForLevel(charVM.Level)
+				if charVM.SoulMemory < minSM {
+					report.OK = false
+					report.Errors = append(report.Errors, templates.ImportPreviewIssue{
+						Severity: "error",
+						Code:     templates.IssueCodeStructureInvalid,
+						Message:  fmt.Sprintf("soul memory %d is below the minimum %d required for the calculated level %d", charVM.SoulMemory, minSM, charVM.Level),
+					})
+					return ApplyTemplateV2Result{CharIndex: charIdx, Preview: report, Applied: false}, nil
+				}
+			}
+		}
 	}
 
 	// Phase 7b.1 — equipment resolver runs before the inventory.workspace
@@ -1033,6 +1154,36 @@ func singleErrorPreview(code, message string) templates.ImportPreviewReport {
 	}
 }
 
+// statsBelowClassMinimum returns one error string per effective final stat
+// that sits below the starting-class minimum. Used by the Apply-with-overrides
+// preflight for a fail-closed check BEFORE the level is derived, so a rejected
+// payload never advances to mutation. Distinct from ValidateStatsConsistency
+// (which also checks the level formula) precisely because it must run before
+// RecalculateLevel.
+func statsBelowClassMinimum(v *vm.CharacterViewModel, cs *db.ClassStats) []string {
+	var errs []string
+	type check struct {
+		name string
+		cur  uint32
+		base uint32
+	}
+	for _, a := range []check{
+		{"Vigor", v.Vigor, cs.Vigor},
+		{"Mind", v.Mind, cs.Mind},
+		{"Endurance", v.Endurance, cs.Endurance},
+		{"Strength", v.Strength, cs.Strength},
+		{"Dexterity", v.Dexterity, cs.Dexterity},
+		{"Intelligence", v.Intelligence, cs.Intelligence},
+		{"Faith", v.Faith, cs.Faith},
+		{"Arcane", v.Arcane, cs.Arcane},
+	} {
+		if a.cur < a.base {
+			errs = append(errs, fmt.Sprintf("%s (%d) is below the %s class minimum (%d)", a.name, a.cur, cs.Name, a.base))
+		}
+	}
+	return errs
+}
+
 func containsString(haystack []string, needle string) bool {
 	for _, s := range haystack {
 		if s == needle {
@@ -1040,6 +1191,23 @@ func containsString(haystack []string, needle string) bool {
 		}
 	}
 	return false
+}
+
+func appendUniqueString(values []string, value string) []string {
+	if containsString(values, value) {
+		return values
+	}
+	return append(values, value)
+}
+
+func removeString(values []string, value string) []string {
+	out := values[:0]
+	for _, candidate := range values {
+		if candidate != value {
+			out = append(out, candidate)
+		}
+	}
+	return out
 }
 
 // ─── Phase 5B — sibling endpoints: from library / from file ───────────

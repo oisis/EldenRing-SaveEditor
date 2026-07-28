@@ -729,6 +729,17 @@ The first user-visible value is the public sharing format (YAML) for the **alrea
 - **Out of scope**: weapon level override at apply time (Phase 6b below), inventory / storage / equipment / spells / appearance / sort order / world progress edits at apply time, item quantities, URL import, multi-character pack, "Save edited copy" of an in-modal edit back to the library.
 - **Requires separate user decision before continuing**: completed.
 
+### Current Apply-with-overrides contract — ✅ Updated 2026-07-28
+
+- `Apply with overrides…` no longer accepts a manual `profile.level`. The frontend removes `profile.level` from the mutated canonical JSON and sends the runtime-only `ApplyTemplateV2Options.DeriveLevelFromStats = true`. The backend derives the final level as `max(1, sum(eight effective stats) - 79)` after applying the selected stat values.
+- All eight attributes use the same shared slider + number-input component as Character → Attributes. Unselected attributes use the target character's current values. The displayed calculated level therefore matches the effective final stat block, not only the fields present in the template.
+- Starting class is an explicit checkbox + dropdown populated by `GetStartingClasses`. The runtime-only `ClassOverride *ClassOverride{ClassID}` distinguishes “not selected” from valid class ID `0`. Changing the dropdown raises and enables any attributes below the new class minimum; the backend independently rejects unknown classes or below-minimum final stats before any mutation.
+- An explicit Soul Memory override must be at least `vm.MinimumSoulMemoryForLevel(calculatedLevel)`. A lower value is rejected before the undo snapshot or any slot/workspace write. If Soul Memory is not selected, the existing `ApplyVMToParsedSlot` normalization may raise the persisted value to the same minimum; the modal displays that effective value.
+- Direct Apply is unchanged: it still honours template `profile.level`, skips template `profile.class`, and does not enable the new derived-level preflight.
+- The existing weapon controls remain titled **Weapon Levels**. Spirit Ashes are intentionally not part of this phase because they are not yet an editor-supported add/update category in the template workspace pipeline.
+- Every Templates dialog consumes `Escape` at its dialog root and closes only the topmost modal. Escape is ignored while the modal owns an in-flight apply/preview/save operation.
+- Apply-with-overrides stays atomic: class/stat/level/Soul Memory validation runs against the projected VM before `pushUndoLocked` and before any slot or workspace mutation. Rejection leaves slot bytes, workspace and undo depth unchanged.
+
 ### Phase 6b — weapon level override for the v1 inventory.workspace Apply path — ✅ Shipped 2026-05-31
 
 - **Goal**: let the user, at apply time on the existing v1 `inventory.workspace` Apply path (the `Apply Template ▾` action inside `SortOrderTab.tsx`), force every standard-upgradeable weapon the template adds to `+N` and every somber/special weapon to `+M`, clamped to each weapon's `MaxUpgrade` from the DB. Default = no override (`Enabled = false`), behaviour byte-for-byte identical to the pre-Phase-6b path. No v2 schema change, no v2 inventory writer, no equipment writer.

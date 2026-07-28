@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import toast from '../../lib/toast';
 import {
     ApplyBuildTemplateV2FromLibraryToCharacter,
@@ -14,9 +14,10 @@ import { application as main, templates } from '../../../wailsjs/go/models';
 import { TemplateLibraryModal } from './TemplateLibraryModal';
 import { ImportTemplatePreviewModal, isCancelledPreview } from './ImportTemplatePreviewModal';
 import { CreateTemplateV2Modal } from './CreateTemplateV2Modal';
-import { ApplyOverridesModal } from './ApplyOverridesPanel';
+import { ApplyOverridesModal, CharacterOverridePayload } from './ApplyOverridesPanel';
 import { WeaponOverridePayload } from './WeaponLevelOverridePanel';
 import { ImportTemplateFromURLModal } from './ImportTemplateFromURLModal';
+import { useModalEscape } from './useModalEscape';
 
 // TemplatesShellModal is the global, sidebar-mounted Templates surface.
 // Phase 1 scope: library-only. Apply / Create-from-current-workspace
@@ -562,7 +563,11 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
     );
 
     const handleConfirmOverrides = useCallback(
-        async (mutatedJSON: string, weaponOverride?: WeaponOverridePayload) => {
+        async (
+            mutatedJSON: string,
+            weaponOverride: WeaponOverridePayload,
+            characterOverride: CharacterOverridePayload,
+        ) => {
             if (!overridesSource) return;
             if (!saveLoaded || charIndex === undefined) return;
             if (applyingV2WithOverrides) return;
@@ -612,6 +617,8 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
                         mode: 'append',
                         sessionID: sessionID ?? '',
                         weaponLevelOverride: weaponOverride,
+                        deriveLevelFromStats: characterOverride.deriveLevelFromStats,
+                        classOverride: characterOverride.classOverride,
                     }),
                 );
                 if (!result.applied) {
@@ -622,9 +629,6 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
                 toast.success(
                     `Applied ${overridesSource.sourceLabel} with overrides to character slot ${charIndex + 1}.`,
                 );
-                if ((result.skippedFields ?? []).includes('profile.class')) {
-                    toast('Class was skipped in this phase.');
-                }
                 onCharacterTemplateApplied?.(charIndex);
                 if (overridesSource.kind === 'import') {
                     setImportedPreview(null);
@@ -803,6 +807,7 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
                 <ApplyOverridesModal
                     sourceLabel={overridesSource.sourceLabel}
                     canonicalJSON={overridesSource.canonicalJSON}
+                    charIndex={charIndex}
                     onCancel={handleCancelOverrides}
                     onConfirm={handleConfirmOverrides}
                     applying={applyingV2WithOverrides}
@@ -931,6 +936,11 @@ function ApplyItemsResultModal({
     result,
     onClose,
 }: ApplyItemsResultModalProps) {
+    const dialogRef = useRef<HTMLDivElement | null>(null);
+    const onDialogKeyDown = useModalEscape(onClose);
+    useEffect(() => {
+        dialogRef.current?.focus();
+    }, []);
     const warnings = result.preview?.warnings ?? [];
     const skippedFields = result.skippedFields ?? [];
     const grouped = new Map<string, templates.ImportPreviewIssue[]>();
@@ -1002,6 +1012,9 @@ function ApplyItemsResultModal({
             role="dialog"
             aria-modal="true"
             aria-label="Template apply result"
+            ref={dialogRef}
+            tabIndex={-1}
+            onKeyDown={onDialogKeyDown}
             className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4"
         >
             <div className="w-full max-w-xl rounded-lg bg-card border border-border/60 shadow-xl flex flex-col max-h-[80vh]">

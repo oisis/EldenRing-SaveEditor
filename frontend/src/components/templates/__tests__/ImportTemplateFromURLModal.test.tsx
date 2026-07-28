@@ -135,4 +135,11 @@ describe('ImportTemplateFromURLModal — Phase 9 URL import', () => {
             expect(onPreview).toHaveBeenCalledTimes(1);
         });
     });
+
+    it('closes on Escape', () => {
+        const onCancel = vi.fn();
+        render(<ImportTemplateFromURLModal onPreview={vi.fn()} onCancel={onCancel} />);
+        fireEvent.keyDown(screen.getByTestId('import-url-input'), { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalledTimes(1);
+    });
 });

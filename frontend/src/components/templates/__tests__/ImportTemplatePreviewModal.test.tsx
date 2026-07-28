@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { templates } from '../../../../wailsjs/go/models';
 import { ImportTemplatePreviewModal, isCancelledPreview } from '../ImportTemplatePreviewModal';
@@ -1285,5 +1285,12 @@ describe('ImportTemplatePreviewModal — Phase 8C.1 items / inventoryLayout / st
         expect(screen.queryByTestId('import-preview-inventory-layout-count')).not.toBeInTheDocument();
         expect(screen.queryByTestId('import-preview-storage-layout-count')).not.toBeInTheDocument();
         expect(screen.queryByTestId('import-preview-items-export-only')).not.toBeInTheDocument();
+    });
+
+    it('closes on Escape', () => {
+        const onClose = vi.fn();
+        render(<ImportTemplatePreviewModal report={makeReport()} onClose={onClose} />);
+        fireEvent.keyDown(screen.getByTestId('import-preview-modal'), { key: 'Escape' });
+        expect(onClose).toHaveBeenCalledTimes(1);
     });
 });

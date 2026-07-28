@@ -29,6 +29,16 @@ func runesCostForLevel(level uint32) uint32 {
 	return uint32(total)
 }
 
+// MinimumSoulMemoryForLevel returns the minimum Soul Memory a character at the
+// given level must carry: the total runes required to reach that level. It is
+// the authoritative backend formula the Apply-with-overrides preflight uses to
+// fail-closed reject an explicit Soul Memory override below the minimum. Thin
+// exported wrapper over runesCostForLevel so callers outside the package cannot
+// re-derive a second, drifting formula.
+func MinimumSoulMemoryForLevel(level uint32) uint32 {
+	return runesCostForLevel(level)
+}
+
 // NormalizeSoulMemory returns the Soul Memory that will actually be persisted
 // for a character at the given level: the requested value floored to the
 // minimum runes required to reach that level. ApplyVMToParsedSlot and the

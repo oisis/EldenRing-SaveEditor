@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### feat(templates): add class-aware character overrides
+
+Apply with overrides now derives character level from the eight final
+attributes, supports starting-class selection with enforced minimum stats, and
+validates Soul Memory against the calculated level. Attribute controls reuse
+the Character sliders, while Escape closes the topmost Templates modal when no
+operation is in progress. Direct Apply remains unchanged.
+
 ## [1.6.3] - 2026-07-27
 
 ### fix(game-items): correct inventory capacity and Ash of War ownership

@@ -160,10 +160,24 @@ export namespace application {
 		    return a;
 		}
 	}
+	export class ClassOverride {
+	    classID: number;
+
+	    static createFrom(source: any = {}) {
+	        return new ClassOverride(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.classID = source["classID"];
+	    }
+	}
 	export class ApplyTemplateV2Options {
 	    mode?: string;
 	    sessionID?: string;
 	    weaponLevelOverride?: WeaponLevelOverride;
+	    deriveLevelFromStats?: boolean;
+	    classOverride?: ClassOverride;
 
 	    static createFrom(source: any = {}) {
 	        return new ApplyTemplateV2Options(source);
@@ -174,6 +188,8 @@ export namespace application {
 	        this.mode = source["mode"];
 	        this.sessionID = source["sessionID"];
 	        this.weaponLevelOverride = this.convertValues(source["weaponLevelOverride"], WeaponLevelOverride);
+	        this.deriveLevelFromStats = source["deriveLevelFromStats"];
+	        this.classOverride = this.convertValues(source["classOverride"], ClassOverride);
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -356,6 +372,7 @@ export namespace application {
 	        this.className = source["className"];
 	    }
 	}
+
 	export class ConversionInfo {
 	    path: string;
 	    platform: string;

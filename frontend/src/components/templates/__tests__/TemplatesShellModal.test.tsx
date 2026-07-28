@@ -17,6 +17,8 @@ vi.mock('../../../../wailsjs/go/main/App', () => ({
     SaveBuildTemplateV2FromCharacterToLibrary: vi.fn(),
     RebuildBuildTemplateLibraryIndex: vi.fn(),
     GetBuildTemplateLibraryPath: vi.fn(),
+    GetCharacter: vi.fn(),
+    GetStartingClasses: vi.fn(),
     // Phase 7a — active-session lookup the shell calls before any v2
     // apply that may carry inventory.workspace.
     GetActiveInventoryEditSessionForCharacter: vi.fn(),
@@ -82,6 +84,48 @@ beforeEach(() => {
     // profile/stats-only tests keep their pre-Phase-7a behaviour
     // (sessionID forwarded as empty string; backend ignores it).
     mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: false, sessionID: '' });
+    mocks.GetCharacter.mockResolvedValue({
+        name: 'Target',
+        level: 9,
+        souls: 1000,
+        class: 0,
+        className: 'Vagabond',
+        vigor: 15,
+        mind: 10,
+        endurance: 11,
+        strength: 14,
+        dexterity: 13,
+        intelligence: 9,
+        faith: 9,
+        arcane: 7,
+        talismanSlots: 2,
+        clearCount: 1,
+        scadutreeBlessing: 0,
+        shadowRealmBlessing: 0,
+        soulMemory: 999999,
+        inventory: [],
+        storage: [],
+        attachedItems: [],
+        warnings: [],
+        eventFlagsAvailable: true,
+        classBaseStats: {},
+        useTechnicalItemCaps: false,
+    });
+    mocks.GetStartingClasses.mockResolvedValue([
+        {
+            id: 0,
+            name: 'Vagabond',
+            level: 9,
+            vigor: 15,
+            mind: 10,
+            endurance: 11,
+            strength: 14,
+            dexterity: 13,
+            intelligence: 9,
+            faith: 9,
+            arcane: 7,
+        },
+    ]);
 });
 
 afterEach(() => {
@@ -1098,8 +1142,9 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
             fireEvent.click(btn);
         });
         expect(await screen.findByTestId('apply-overrides-modal')).toBeInTheDocument();
-        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue('25');
-        expect(screen.getByTestId('apply-overrides-profile-input-level')).toHaveValue('50');
+        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue(25);
+        expect(screen.queryByTestId('apply-overrides-profile-input-level')).not.toBeInTheDocument();
+        expect(screen.getByTestId('apply-overrides-calculated-level')).toBeInTheDocument();
         expect(screen.getByTestId('apply-overrides-source-label')).toHaveTextContent(/imported\.yaml/);
     });
 
@@ -1129,7 +1174,7 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
         const parsed = JSON.parse(call[1] as string);
         expect(parsed.sections.stats.vigor).toBe(40);
         expect(parsed.selection.stats.vigor).toBe(true);
-        expect((call[2] as { mode: string }).mode).toBe('append');
+        expect(call[2]).toMatchObject({ mode: 'append', deriveLevelFromStats: true });
         // FromLibrary endpoint must NOT have been touched — Phase 6 import
         // path goes through the JSON endpoint.
         expect(mocks.ApplyBuildTemplateV2FromLibraryToCharacter).not.toHaveBeenCalled();
@@ -1265,8 +1310,9 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
             fireEvent.click(await screen.findByTestId('import-preview-apply-v2-overrides'));
         });
         await screen.findByTestId('apply-overrides-modal');
-        fireEvent.change(screen.getByTestId('apply-overrides-stats-input-vigor'), {
-            target: { value: '999' },
+        fireEvent.click(screen.getByTestId('apply-overrides-profile-toggle-soulMemory'));
+        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-soulMemory'), {
+            target: { value: '1' },
         });
         const applyBtn = screen.getByTestId('apply-overrides-apply');
         expect(applyBtn).toBeDisabled();
@@ -1291,7 +1337,7 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
         });
         expect(await screen.findByTestId('apply-overrides-modal')).toBeInTheDocument();
         expect(screen.getByTestId('apply-overrides-source-label')).toHaveTextContent(/Library/);
-        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue('25');
+        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue(25);
     });
 
     it('Library: confirming overrides calls ApplyBuildTemplateV2ToCharacterJSON with mutated JSON (not FromLibrary)', async () => {
@@ -1308,8 +1354,8 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
             fireEvent.click(screen.getByTestId('library-apply-overrides'));
         });
         await screen.findByTestId('apply-overrides-modal');
-        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-level'), {
-            target: { value: '99' },
+        fireEvent.change(screen.getByTestId('apply-overrides-stats-input-vigor'), {
+            target: { value: '40' },
         });
         await act(async () => {
             fireEvent.click(screen.getByTestId('apply-overrides-apply'));
@@ -1320,7 +1366,10 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
         const call = mocks.ApplyBuildTemplateV2ToCharacterJSON.mock.calls[0];
         expect(call[0]).toBe(2);
         const parsed = JSON.parse(call[1] as string);
-        expect(parsed.sections.profile.level).toBe(99);
+        expect(parsed.sections.profile?.level).toBeUndefined();
+        expect(parsed.selection.profile?.level).toBeUndefined();
+        expect(parsed.sections.stats.vigor).toBe(40);
+        expect(call[2]).toMatchObject({ deriveLevelFromStats: true });
         // Fast library Apply path must NOT have been used.
         expect(mocks.ApplyBuildTemplateV2FromLibraryToCharacter).not.toHaveBeenCalled();
     });
@@ -1368,7 +1417,7 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
         expect(screen.queryByTestId('apply-overrides-modal')).not.toBeInTheDocument();
     });
 
-    it('Library: skippedFields containing profile.class emits an info toast on success', async () => {
+    it('Library: overrides success does not emit the obsolete class-skipped toast', async () => {
         mocks.ListBuildTemplateLibrary.mockResolvedValue([v2LibraryEntry]);
         mocks.PreviewBuildTemplateFromLibrary.mockResolvedValue({
             report: { ok: true, errors: [], warnings: [], summary: { version: 2, selectedSections: ['profile'] } },
@@ -1397,7 +1446,7 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
             expect(toastFn.success).toHaveBeenCalled();
         });
         const infoCall = toastFn.mock.calls.find(args => /class/i.test(String(args[0])));
-        expect(infoCall).toBeTruthy();
+        expect(infoCall).toBeUndefined();
     });
 });
 
@@ -1554,7 +1603,7 @@ describe('TemplatesShellModal — Phase 9 URL import', () => {
         });
         const overrides = await screen.findByTestId('apply-overrides-modal');
         expect(overrides).toBeInTheDocument();
-        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue('25');
+        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue(25);
         fireEvent.change(screen.getByTestId('apply-overrides-stats-input-vigor'), {
             target: { value: '40' },
         });
@@ -2157,10 +2206,6 @@ describe('TemplatesShellModal — Phase 7a.2 v2 weapon level override', () => {
             fireEvent.click(await screen.findByTestId('import-preview-apply-v2-overrides'));
         });
         await screen.findByTestId('apply-overrides-modal');
-        // mutate profile.level
-        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-level'), {
-            target: { value: '77' },
-        });
         // mutate stats.vigor
         fireEvent.change(screen.getByTestId('apply-overrides-stats-input-vigor'), {
             target: { value: '40' },
@@ -2179,14 +2224,16 @@ describe('TemplatesShellModal — Phase 7a.2 v2 weapon level override', () => {
         });
         const call = mocks.ApplyBuildTemplateV2ToCharacterJSON.mock.calls[0];
         const parsed = JSON.parse(call[1] as string);
-        expect(parsed.sections.profile.level).toBe(77);
+        expect(parsed.sections.profile?.level).toBeUndefined();
         expect(parsed.sections.stats.vigor).toBe(40);
         const opts = call[2] as {
             sessionID: string;
             weaponLevelOverride?: { enabled: boolean; standardLevel?: number };
+            deriveLevelFromStats?: boolean;
         };
         expect(opts.sessionID).toBe(ACTIVE_SESSION_ID);
         expect(opts.weaponLevelOverride).toEqual({ enabled: true, standardLevel: 20 });
+        expect(opts.deriveLevelFromStats).toBe(true);
     });
 
     it('fast library Apply (no overrides modal) never sends weaponLevelOverride', async () => {
@@ -2575,6 +2622,28 @@ describe('TemplatesShellModal — Phase 8D.2 items apply', () => {
         await waitFor(() => {
             expect(screen.queryByTestId('items-apply-result-modal')).not.toBeInTheDocument();
         });
+    });
+
+    it('result modal closes on Escape without closing the underlying Templates shell', async () => {
+        mocks.PreviewBuildTemplateImportYAMLFromFile.mockResolvedValue(itemsPreview(itemsCanonical()));
+        mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: true, sessionID: 'ses-1' });
+        mocks.ApplyBuildTemplateV2ToCharacterJSON.mockResolvedValue(itemsApplyResultOK());
+        const onClose = vi.fn();
+        render(<TemplatesShellModal onClose={onClose} charIndex={0} saveLoaded />);
+        await screen.findAllByTestId('library-entry');
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('templates-shell-import-yaml'));
+        });
+        await act(async () => {
+            fireEvent.click(await screen.findByTestId('import-preview-apply-v2'));
+        });
+        const resultModal = await screen.findByTestId('items-apply-result-modal');
+        fireEvent.keyDown(resultModal, { key: 'Escape' });
+        await waitFor(() => {
+            expect(screen.queryByTestId('items-apply-result-modal')).not.toBeInTheDocument();
+        });
+        expect(screen.getByTestId('template-library-modal')).toBeInTheDocument();
+        expect(onClose).not.toHaveBeenCalled();
     });
 
     it('profile/stats-only apply does NOT open the items result modal', async () => {

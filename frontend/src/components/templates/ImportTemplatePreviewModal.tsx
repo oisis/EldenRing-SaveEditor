@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { templates } from '../../../wailsjs/go/models';
+import { useModalEscape } from './useModalEscape';
 
 // ImportTemplatePreviewModal renders the dry-run report produced by
 // PreviewBuildTemplateImportFromFile / PreviewBuildTemplateImportJSON.
@@ -112,6 +113,10 @@ export function ImportTemplatePreviewModal({
     onApplyV2WithOverrides,
 }: Props) {
     const dialogRef = useRef<HTMLDivElement | null>(null);
+    const onDialogKeyDown = useModalEscape(
+        onClose,
+        !!applying || !!savingToLibrary || !!applyingV2,
+    );
     useEffect(() => {
         dialogRef.current?.focus();
     }, []);
@@ -198,6 +203,7 @@ export function ImportTemplatePreviewModal({
             aria-label="Build Template Import Preview"
             ref={dialogRef}
             tabIndex={-1}
+            onKeyDown={onDialogKeyDown}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
         >
             <div className="w-full max-w-2xl rounded-lg bg-card border border-border/60 shadow-xl flex flex-col max-h-[80vh]">
