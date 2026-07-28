@@ -126,6 +126,11 @@ export function ImportTemplatePreviewModal({
     const selectedSections = summary?.selectedSections ?? [];
     const profileFieldsPresent = summary?.profileFieldsPresent ?? [];
     const statFieldsPresent = summary?.statFieldsPresent ?? [];
+    // Phase — exact stored values (key/value pairs) for profile/stats.
+    // Present on reports from a backend that carries them; older reports
+    // leave these empty and the modal falls back to the field-name lists.
+    const profileFieldValues = summary?.profileFieldValues ?? [];
+    const statFieldValues = summary?.statFieldValues ?? [];
     const equipmentSlotsPresent = summary?.equipmentSlotsPresent ?? [];
     const spellSlotsPresent = summary?.spellSlotsPresent ?? [];
     const itemsEntries = summary?.itemsEntries ?? 0;
@@ -235,14 +240,37 @@ export function ImportTemplatePreviewModal({
                                     Sections: <span className="font-bold">{selectedSections.join(', ')}</span>
                                 </div>
                             )}
-                            {profileFieldsPresent.length > 0 && (
+                            {(profileFieldValues.length > 0 || profileFieldsPresent.length > 0) && (
                                 <div data-testid="import-preview-profile-fields">
-                                    Profile fields: <span className="font-bold">{profileFieldsPresent.join(', ')}</span>
+                                    {profileFieldValues.length > 0 ? (
+                                        <FieldValueTable
+                                            heading="Profile"
+                                            values={profileFieldValues}
+                                            labels={PROFILE_FIELD_LABELS}
+                                            testidPrefix="import-preview-profile"
+                                        />
+                                    ) : (
+                                        <>
+                                            Profile fields:{' '}
+                                            <span className="font-bold">{profileFieldsPresent.join(', ')}</span>
+                                        </>
+                                    )}
                                 </div>
                             )}
-                            {statFieldsPresent.length > 0 && (
+                            {(statFieldValues.length > 0 || statFieldsPresent.length > 0) && (
                                 <div data-testid="import-preview-stat-fields">
-                                    Stats: <span className="font-bold">{statFieldsPresent.join(', ')}</span>
+                                    {statFieldValues.length > 0 ? (
+                                        <FieldValueTable
+                                            heading="Stats"
+                                            values={statFieldValues}
+                                            labels={STAT_FIELD_LABELS}
+                                            testidPrefix="import-preview-stat"
+                                        />
+                                    ) : (
+                                        <>
+                                            Stats: <span className="font-bold">{statFieldsPresent.join(', ')}</span>
+                                        </>
+                                    )}
                                 </div>
                             )}
                             {equipmentSlotsPresent.length > 0 && (
@@ -462,6 +490,63 @@ export function ImportTemplatePreviewModal({
                         </button>
                     )}
                 </div>
+            </div>
+        </div>
+    );
+}
+
+// Human-readable labels for the profile / stat keys carried by the
+// preview's FieldValue pairs. Unknown keys fall back to the raw key so a
+// future backend field still renders (just un-prettified) instead of
+// disappearing.
+const PROFILE_FIELD_LABELS: Record<string, string> = {
+    name: 'Name',
+    level: 'Level',
+    runes: 'Runes',
+    soulMemory: 'Soul Memory',
+    class: 'Class',
+    clearCount: 'NG+ Cycle',
+    scadutreeBlessing: 'Scadutree Blessing',
+    shadowRealmBlessing: 'Shadow Realm Blessing',
+    talismanSlots: 'Talisman Slots',
+};
+
+const STAT_FIELD_LABELS: Record<string, string> = {
+    vigor: 'Vigor',
+    mind: 'Mind',
+    endurance: 'Endurance',
+    strength: 'Strength',
+    dexterity: 'Dexterity',
+    intelligence: 'Intelligence',
+    faith: 'Faith',
+    arcane: 'Arcane',
+};
+
+// FieldValueTable renders the exact stored profile/stat values as a
+// compact two-column read-only grid ("Level: 129"). Order is preserved
+// from the backend (canonical character-sheet order); this component does
+// not sort. A value of "0" renders faithfully — it is a valid value, not
+// a missing field.
+function FieldValueTable({
+    heading,
+    values,
+    labels,
+    testidPrefix,
+}: {
+    heading: string;
+    values: templates.FieldValue[];
+    labels: Record<string, string>;
+    testidPrefix: string;
+}) {
+    return (
+        <div>
+            <span className="text-muted-foreground">{heading}</span>
+            <div className="mt-0.5 grid grid-cols-2 gap-x-4 gap-y-0.5">
+                {values.map(fv => (
+                    <div key={`${testidPrefix}-${fv.key}`} data-testid={`${testidPrefix}-${fv.key}`}>
+                        {labels[fv.key] ?? fv.key}: <span className="font-bold">{fv.value}</span>
+                    </div>
+                ))}
             </div>
         </div>
     );
