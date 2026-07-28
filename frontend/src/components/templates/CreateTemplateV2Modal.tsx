@@ -56,8 +56,8 @@ interface Props {
     onError?: (err: unknown) => void;
 }
 
-// ContainerSelection bundles the Phase 8C.1 export-only sections: items
-// is the actual payload; inventoryLayout and storageLayout reference the
+// ContainerSelection bundles the container sections: items is the actual
+// payload; inventoryLayout and storageLayout reference the
 // items entries and require items to be selected first. The UI enforces
 // the dependency by disabling the layout toggles when items is unchecked
 // (matches the BuildV2Template guard in backend/templates/export_v2.go).
@@ -226,8 +226,8 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                     <h2 className="text-sm font-black uppercase tracking-wider">Create Build Template</h2>
                     <p className="mt-1 text-[11px] text-muted-foreground">
                         Pick the profile, stat, and container sections to capture from the current character.
-                        Schema v2 templates carry only the fields you check — items and layout sections are
-                        export-only in this phase.
+                        Schema v2 templates carry only the fields you check. Items and layout sections apply
+                        back into a character through the Sort Order workspace — open it before applying.
                     </p>
                 </div>
 
@@ -311,15 +311,16 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                                 Containers
                             </h3>
                             <span
-                                data-testid="create-template-v2-containers-export-only"
+                                data-testid="create-template-v2-containers-session-note"
                                 className="text-[10px] uppercase tracking-wider text-warning-foreground"
                             >
-                                Export-only
+                                Needs workspace
                             </span>
                         </div>
                         <p className="text-[10px] text-muted-foreground">
-                            Items and layout are written into the saved template for review and sharing. Apply
-                            back into a character is not supported yet.
+                            Items apply as add-missing and layout as reorder-only. Both require an open Sort
+                            Order workspace for the target character; they cannot be applied while the workspace
+                            is closed.
                         </p>
                         <ul className="grid grid-cols-1 gap-y-1">
                             <li className="flex items-center gap-2">

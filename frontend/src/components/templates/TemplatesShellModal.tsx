@@ -196,6 +196,32 @@ function injectExplicitApplyDefaults(canonical: string): string {
 const NO_SESSION_MESSAGE =
     'Open the Sort Order workspace before applying inventory templates.';
 
+// OPEN_SESSION_CONFLICT_MESSAGE is the counterpart surfaced when the
+// template touches only profile / stats / equipment / spells but an
+// Inventory Edit Session is open for the target character. The backend
+// (app_templates_v2_apply.go, IssueCodeStructureInvalid "close the
+// inventory edit session…") rejects that combination outright, so we
+// refuse up-front with actionable guidance instead of letting the button
+// look live and fail late with the raw backend message.
+//
+// SaveInventoryWorkspaceChanges only persists pending edits — it does NOT
+// end the session, so the conflict survives a bare save. The wording must
+// therefore spell out both steps: save/discard, THEN close the workspace.
+const OPEN_SESSION_CONFLICT_MESSAGE =
+    'Save or discard pending Sort Order changes, then close the Sort Order workspace for this character before applying a profile / stats / equipment / spells template.';
+
+// sessionGateError encodes the two symmetric active-session rules the
+// backend enforces so every Apply path (library, imported preview,
+// overrides) stays in lock-step. Returns the user-facing message to
+// surface, or undefined when the apply may proceed.
+//   - needsSession && no session  → must open the workspace first.
+//   - !needsSession && a session  → save or discard pending changes, then close the workspace first.
+function sessionGateError(needsSession: boolean, sessionID: string | undefined): string | undefined {
+    if (needsSession && !sessionID) return NO_SESSION_MESSAGE;
+    if (!needsSession && sessionID) return OPEN_SESSION_CONFLICT_MESSAGE;
+    return undefined;
+}
+
 // fetchActiveSessionID resolves the current session ID for the given
 // character via the read-only Wails endpoint. Returns undefined when
 // there is no active session — the caller decides whether that is a
@@ -403,9 +429,10 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
             const needsSession =
                 selectedSections.includes(INVENTORY_WORKSPACE_SECTION) || hasItems || hasLayout;
             const sessionID = await fetchActiveSessionID(charIndex);
-            if (needsSession && !sessionID) {
-                toast.error(`Templates: ${NO_SESSION_MESSAGE}`);
-                throw new Error(NO_SESSION_MESSAGE);
+            const gateError = sessionGateError(needsSession, sessionID);
+            if (gateError) {
+                toast.error(`Templates: ${gateError}`);
+                throw new Error(gateError);
             }
             // Phase 8D.3 / 8E.2 — for items- or layout-bearing library
             // entries we want applyOptions.items.mode and
@@ -589,8 +616,9 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
             const needsSession =
                 canonicalJSONNeedsSession(mutatedJSON) || hasItems || hasLayout;
             const sessionID = await fetchActiveSessionID(charIndex);
-            if (needsSession && !sessionID) {
-                toast.error(`Templates: ${NO_SESSION_MESSAGE}`);
+            const gateError = sessionGateError(needsSession, sessionID);
+            if (gateError) {
+                toast.error(`Templates: ${gateError}`);
                 return;
             }
             // Phase 8D.2 / 8E.2 — surface the explicit addMissing and
@@ -681,8 +709,9 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
         const needsSession =
             selectedSections.includes(INVENTORY_WORKSPACE_SECTION) || hasItems || hasLayout;
         const sessionID = await fetchActiveSessionID(charIndex);
-        if (needsSession && !sessionID) {
-            toast.error(`Templates: ${NO_SESSION_MESSAGE}`);
+        const gateError = sessionGateError(needsSession, sessionID);
+        if (gateError) {
+            toast.error(`Templates: ${gateError}`);
             return;
         }
         // Phase 8D.2 / 8E.2 — make addMissing (items) and reorderOnly

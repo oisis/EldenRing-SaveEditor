@@ -2024,6 +2024,45 @@ describe('TemplatesShellModal — Phase 7a v2 inventory.workspace apply', () => 
         const opts = mocks.ApplyBuildTemplateV2ToCharacterJSON.mock.calls[0][2] as { sessionID: string };
         expect(opts.sessionID).toBe('');
     });
+
+    it('Apply with overrides on a profile-only mutated JSON with an open workspace refuses with the close-workspace guidance', async () => {
+        const mutated = JSON.stringify({
+            schema: 'saveforge.build-template',
+            version: 2,
+            selection: { profile: { level: true } },
+            sections: { profile: { level: 75 } },
+        });
+        mocks.PreviewBuildTemplateImportYAMLFromFile.mockResolvedValue(
+            v2InventoryImportedPreview({
+                selectedSections: ['profile'],
+                canonical: mutated,
+            }),
+        );
+        mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: true, sessionID: 'ses-conflict' });
+        const { default: toast } = await import('../../../lib/toast');
+        const toastError = (toast as unknown as { error: ReturnType<typeof vi.fn> }).error;
+        toastError.mockClear();
+
+        render(<TemplatesShellModal onClose={vi.fn()} charIndex={0} saveLoaded />);
+        await screen.findAllByTestId('library-entry');
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('templates-shell-import-yaml'));
+        });
+        const overridesBtn = await screen.findByTestId('import-preview-apply-v2-overrides');
+        await act(async () => {
+            fireEvent.click(overridesBtn);
+        });
+        await screen.findByTestId('apply-overrides-modal');
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('apply-overrides-apply'));
+        });
+
+        await waitFor(() => {
+            expect(toastError).toHaveBeenCalled();
+        });
+        expect(toastError.mock.calls.some(c => /save or discard pending sort order changes, then close the sort order workspace/i.test(c[0] as string))).toBe(true);
+        expect(mocks.ApplyBuildTemplateV2ToCharacterJSON).not.toHaveBeenCalled();
+    });
 });
 
 // Phase 7a.2 — runtime weapon level override threaded through the v2
@@ -2393,11 +2432,14 @@ describe('TemplatesShellModal — Phase 7b.1 v2 equipment apply', () => {
         expect(onCharacterTemplateApplied).toHaveBeenCalledWith(0);
     });
 
-    it('library Apply forwards sessionID transparently when one happens to be open (no special-casing)', async () => {
+    it('library Apply for equipment-only entry with an open workspace refuses with the close-workspace guidance', async () => {
         const activeSessionID = 'ses-eq-active';
         mocks.ListBuildTemplateLibrary.mockResolvedValue([v2EquipmentEntry]);
         mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: true, sessionID: activeSessionID });
         mocks.ApplyBuildTemplateV2FromLibraryToCharacter.mockResolvedValue(applyV2EquipmentOK());
+        const { default: toast } = await import('../../../lib/toast');
+        const toastError = (toast as unknown as { error: ReturnType<typeof vi.fn> }).error;
+        toastError.mockClear();
 
         render(<TemplatesShellModal onClose={vi.fn()} charIndex={0} saveLoaded />);
         fireEvent.click(await screen.findByTestId('library-apply'));
@@ -2405,13 +2447,14 @@ describe('TemplatesShellModal — Phase 7b.1 v2 equipment apply', () => {
         await act(async () => {
             fireEvent.click(screen.getByTestId('library-apply-v2-confirm-button'));
         });
+        // The backend rejects a non-inventory apply while a session is open,
+        // so the shell refuses up-front and never invokes the binding.
         await waitFor(() => {
-            expect(mocks.ApplyBuildTemplateV2FromLibraryToCharacter).toHaveBeenCalledTimes(1);
+            expect(toastError).toHaveBeenCalled();
         });
-        const call = mocks.ApplyBuildTemplateV2FromLibraryToCharacter.mock.calls[0];
-        // The shell forwards the existing session ID even though equipment
-        // doesn't need it — backend silently ignores it.
-        expect((call[2] as { sessionID?: string }).sessionID).toBe(activeSessionID);
+        expect(mocks.ApplyBuildTemplateV2FromLibraryToCharacter).not.toHaveBeenCalled();
+        const msgs = toastError.mock.calls.map(c => c[0] as string);
+        expect(msgs.some(m => /save or discard pending sort order changes, then close the sort order workspace/i.test(m))).toBe(true);
     });
 
     it('library Apply for equipment-only entry surfaces the apply error toast when the backend rejects', async () => {
@@ -2753,7 +2796,9 @@ describe('TemplatesShellModal — Phase 8D.2 items apply', () => {
             selectedSections: ['equipment'],
         };
         mocks.ListBuildTemplateLibrary.mockResolvedValue([v2EquipmentEntry]);
-        mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: true, sessionID: 'ses-x' });
+        // No open workspace: an equipment-only entry does not need one and
+        // (post session-conflict gate) must not have one open either.
+        mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: false, sessionID: '' });
         mocks.ApplyBuildTemplateV2FromLibraryToCharacter.mockResolvedValue(itemsApplyResultOK());
         render(<TemplatesShellModal onClose={vi.fn()} charIndex={0} saveLoaded />);
         fireEvent.click(await screen.findByTestId('library-apply'));

@@ -364,12 +364,12 @@ describe('CreateTemplateV2Modal — Save from preview flow', () => {
 });
 
 describe('CreateTemplateV2Modal — containers (Phase 8C.1)', () => {
-    it('renders items, inventory layout, and storage layout checkboxes with the export-only badge', () => {
+    it('renders items, inventory layout, and storage layout checkboxes with the workspace-session note', () => {
         render(<CreateTemplateV2Modal {...defaultProps()} />);
         expect(screen.getByTestId('create-template-v2-items')).toBeInTheDocument();
         expect(screen.getByTestId('create-template-v2-inventory-layout')).toBeInTheDocument();
         expect(screen.getByTestId('create-template-v2-storage-layout')).toBeInTheDocument();
-        expect(screen.getByTestId('create-template-v2-containers-export-only')).toBeInTheDocument();
+        expect(screen.getByTestId('create-template-v2-containers-session-note')).toBeInTheDocument();
     });
 
     it('keeps layout checkboxes disabled until Items is selected', () => {
