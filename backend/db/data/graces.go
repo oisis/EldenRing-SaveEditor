@@ -451,7 +451,7 @@ var Graces = map[uint32]GraceData{
 	0x00012AD9: G("First Church of Marika (Mountaintops of the Giants West)"),
 	0x00012AE8: G("Whiteridge Road (Mountaintops of the Giants West)"),
 	0x00012AE9: G("Snow Valley Ruins Overlook (Mountaintops of the Giants West)"),
-	0x00012AEA: B("Castle Sol Main Gate (Mountaintops of the Giants West)"),
+	0x00012AEA: G("Castle Sol Main Gate (Mountaintops of the Giants West)"),
 	0x00012AEB: G("Church of the Eclipse (Mountaintops of the Giants West)"),
 	0x00012AEC: B("Castle Sol Rooftop (Mountaintops of the Giants West)"),
 
