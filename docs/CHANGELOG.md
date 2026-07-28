@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.4] - 2026-07-28
+
 ### feat(templates): add class-aware character overrides
 
 Apply with overrides now derives character level from the eight final
@@ -11,6 +13,23 @@ attributes, supports starting-class selection with enforced minimum stats, and
 validates Soul Memory against the calculated level. Attribute controls reuse
 the Character sliders, while Escape closes the topmost Templates modal when no
 operation is in progress. Direct Apply remains unchanged.
+
+### fix(templates): show accurate template preview values
+
+Template previews now display the stored profile and attribute values instead
+of only their field names. Item, Inventory and Storage summaries use the v2
+items section as their source of truth, so non-empty templates no longer report
+zero counts.
+
+### fix(game-items): show separate-instance counts in Item Database
+
+Non-stackable items such as Ashes of War now show their actual Inventory and
+Storage copy counts as `N/1` in Item Database. The owned-items Inventory view
+keeps its existing compact indicators.
+
+### docs: refresh application screenshots
+
+The documentation screenshots now reflect the current application interface.
 
 ## [1.6.3] - 2026-07-27
 
