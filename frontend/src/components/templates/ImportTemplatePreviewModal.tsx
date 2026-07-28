@@ -4,10 +4,12 @@ import { templates } from '../../../wailsjs/go/models';
 // ImportTemplatePreviewModal renders the dry-run report produced by
 // PreviewBuildTemplateImportFromFile / PreviewBuildTemplateImportJSON.
 //
-// Phase C scope: read-only display. The modal has no "Apply" button —
-// import-to-workspace is Phase D/E. The wording on the panel ("Preview
-// only — does not change your workspace or save.") is load-bearing for
-// user trust and is checked by tests.
+// The preview itself never mutates the workspace or save (the "Preview
+// only — does not change your workspace or save." wording is load-bearing
+// for user trust and is checked by tests). The modal does, however, expose
+// active apply paths when the caller wires them: Apply to workspace (v1),
+// Apply to character / Apply with overrides (v2), and Save to Library.
+// Each button is optional and gated on report.ok.
 
 interface Props {
     report: templates.ImportPreviewReport;
@@ -307,12 +309,14 @@ export function ImportTemplatePreviewModal({
                                                     ? ' Missing items are added first, then layout is applied (reorder-only).'
                                                     : ''}
                                             </div>
-                                            <div
-                                                data-testid="import-preview-items-weapon-hint"
-                                                className="text-[10px] text-muted-foreground italic"
-                                            >
-                                                Direct Apply uses template / default upgrade levels. Use “Apply with overrides…” to override standard (+0–25) or somber (+0–10) weapon levels for newly added items.
-                                            </div>
+                                            {(summary?.weapons ?? 0) > 0 && (
+                                                <div
+                                                    data-testid="import-preview-items-weapon-hint"
+                                                    className="text-[10px] text-muted-foreground italic"
+                                                >
+                                                    Direct Apply uses template/default upgrade levels for newly added weapons. Use “Apply with overrides…” to override standard (+0–25) or somber (+0–10) levels.
+                                                </div>
+                                            )}
                                         </>
                                     )}
                                     {isLayoutOnly && (
@@ -405,7 +409,7 @@ export function ImportTemplatePreviewModal({
 
                     {errors.length === 0 && warnings.length === 0 && report.ok && (
                         <p className="text-muted-foreground italic">
-                            Template validated cleanly. Apply / import flow lands in a later phase.
+                            Template validated cleanly.
                         </p>
                     )}
                 </div>

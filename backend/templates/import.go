@@ -390,10 +390,73 @@ func PreviewBuildTemplateImport(tpl *BuildTemplate, opts ImportPreviewOptions) I
 		rep.Summary.StorageItems = len(sec.StorageItems)
 		previewItems(sec.InventoryItems, ContainerInventory, &rep)
 		previewItems(sec.StorageItems, ContainerStorage, &rep)
+	} else if tpl.Sections.Items != nil {
+		// v2 items-only shape. Legacy inventory.workspace keeps priority
+		// above; the two formats are never summed. Category is already
+		// validated by validateItemsSection, so this only tallies.
+		c := summarizeItemsSection(tpl.Sections.Items)
+		rep.Summary.InventoryItems = c.InventoryItems
+		rep.Summary.StorageItems = c.StorageItems
+		rep.Summary.Weapons = c.Weapons
+		rep.Summary.Armor = c.Armor
+		rep.Summary.Talismans = c.Talismans
+		rep.Summary.Stackables = c.Stackables
+		rep.Summary.AoWAssignments = c.AoWAssignments
 	}
 
 	rep.OK = len(rep.Errors) == 0
 	return rep
+}
+
+// itemsSummaryCounts holds the container/category tallies derived from a
+// v2 ItemsSection. Container membership is read from Entry.Location
+// (the SSOT) — never from inventoryLayout/storageLayout, which describe
+// ordering, not container assignment.
+type itemsSummaryCounts struct {
+	InventoryItems int
+	StorageItems   int
+	Weapons        int
+	Armor          int
+	Talismans      int
+	Stackables     int
+	AoWAssignments int
+}
+
+// summarizeItemsSection tallies a v2 ItemsSection by Location and DB
+// category. Shared by the import preview summary and the library index
+// counters so both surfaces agree. Location=both counts the entry in
+// both containers; category and AoW are counted once per entry.
+func summarizeItemsSection(s *ItemsSection) itemsSummaryCounts {
+	var c itemsSummaryCounts
+	if s == nil {
+		return c
+	}
+	for i := range s.Entries {
+		e := &s.Entries[i]
+		switch e.Location {
+		case ItemLocationInventory:
+			c.InventoryItems++
+		case ItemLocationStorage:
+			c.StorageItems++
+		case ItemLocationBoth:
+			c.InventoryItems++
+			c.StorageItems++
+		}
+		switch {
+		case weaponCategories[e.Category]:
+			c.Weapons++
+		case armorCategories[e.Category]:
+			c.Armor++
+		case e.Category == ItemCategoryTalismans:
+			c.Talismans++
+		default:
+			c.Stackables++
+		}
+		if e.AshOfWarItemID != nil {
+			c.AoWAssignments++
+		}
+	}
+	return c
 }
 
 // previewItems applies the per-item validation rules. The errors /

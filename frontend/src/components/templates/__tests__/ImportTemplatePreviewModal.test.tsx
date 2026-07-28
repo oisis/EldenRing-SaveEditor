@@ -48,6 +48,12 @@ describe('ImportTemplatePreviewModal', () => {
         expect(note).toHaveTextContent(/does not change your workspace or save/i);
     });
 
+    it('shows the neutral "validated cleanly" note for a clean report and never the stale phase copy', () => {
+        render(<ImportTemplatePreviewModal report={makeReport()} onClose={() => {}} />);
+        expect(screen.getByText('Template validated cleanly.')).toBeInTheDocument();
+        expect(screen.queryByText(/lands in a later phase/i)).not.toBeInTheDocument();
+    });
+
     it('renders error rows when errors are present', () => {
         const report = makeReport({
             ok: false,
@@ -1122,8 +1128,8 @@ describe('ImportTemplatePreviewModal — Phase 8C.1 items / inventoryLayout / st
         expect(copy).not.toMatch(/export-only/i);
     });
 
-    it('Phase 8D.3 — items-bearing template shows the Apply-with-overrides weapon hint', () => {
-        const report = makeReport({ summary: itemsSummary() });
+    it('Phase 8D.3 — items-bearing template with weapons shows the Apply-with-overrides weapon hint', () => {
+        const report = makeReport({ summary: itemsSummary({ weapons: 2 }) });
         render(
             <ImportTemplatePreviewModal
                 report={report}
@@ -1134,9 +1140,40 @@ describe('ImportTemplatePreviewModal — Phase 8C.1 items / inventoryLayout / st
             />,
         );
         const hint = screen.getByTestId('import-preview-items-weapon-hint');
+        expect(hint).toHaveTextContent(/newly added weapons/);
         expect(hint).toHaveTextContent(/Apply with overrides/);
         expect(hint).toHaveTextContent(/standard.*0–25/);
         expect(hint).toHaveTextContent(/somber.*0–10/);
+    });
+
+    it('weapon hint is hidden for an items template with no weapons', () => {
+        const report = makeReport({
+            summary: itemsSummary({
+                selectedSections: ['items'],
+                itemsEntries: 3,
+                weapons: 0,
+                armor: 2,
+                talismans: 1,
+                inventoryLayoutCount: 0,
+                storageLayoutCount: 0,
+            }),
+        });
+        render(
+            <ImportTemplatePreviewModal
+                report={report}
+                onClose={() => {}}
+                onApplyV2={() => {}}
+                charIndex={0}
+                saveLoaded
+            />,
+        );
+        // apply-supported copy still shows; only the weapon override hint is gated.
+        expect(
+            screen.getByTestId('import-preview-items-apply-supported'),
+        ).toBeInTheDocument();
+        expect(
+            screen.queryByTestId('import-preview-items-weapon-hint'),
+        ).not.toBeInTheDocument();
     });
 
     it('Phase 8D.3 — items-bearing weapon hint is absent when no items section is selected', () => {

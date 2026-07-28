@@ -487,6 +487,67 @@ func TestLibrary_RebuildIndex_PreservesV2Metadata(t *testing.T) {
 	}
 }
 
+// makeV2ItemsLibraryTemplate builds a valid items-only v2 template with
+// one inventory-only, one storage-only and one both-location entry so the
+// index counters can be exercised end to end.
+func makeV2ItemsLibraryTemplate(name string) *BuildTemplate {
+	return &BuildTemplate{
+		Schema:     SchemaKey,
+		Version:    2,
+		CreatedAt:  time.Date(2026, time.May, 17, 10, 0, 0, 0, time.UTC).Format(time.RFC3339),
+		AppVersion: "0.15.0-beta",
+		Metadata:   &TemplateMetadata{Name: name, Description: "v2 items test"},
+		Selection: &TemplateSelection{
+			Items: &SectionSelection{All: true},
+		},
+		Sections: TemplateSections{
+			Items: &ItemsSection{Entries: []TemplateItemEntryV2{
+				entry("inv", 0x1, ItemCategoryMeleeArmaments, ItemLocationInventory),
+				entry("sto", 0x2, ItemCategoryArmorChest, ItemLocationStorage),
+				entry("both", 0x3, ItemCategoryTalismans, ItemLocationBoth),
+			}},
+		},
+	}
+}
+
+func TestLibrary_SaveTemplate_V2_Items_CountsByLocation(t *testing.T) {
+	lib := NewTemplateLibrary(t.TempDir())
+	entry, err := lib.SaveTemplate(makeV2ItemsLibraryTemplate("v2 items"))
+	if err != nil {
+		t.Fatalf("SaveTemplate: %v", err)
+	}
+	// inventory: inv + both = 2 ; storage: sto + both = 2
+	if entry.InventoryItems != 2 || entry.StorageItems != 2 {
+		t.Errorf("counts = inv %d / stor %d, want 2/2", entry.InventoryItems, entry.StorageItems)
+	}
+	if len(entry.SelectedSections) != 1 || entry.SelectedSections[0] != "items" {
+		t.Errorf("SelectedSections = %v, want [items]", entry.SelectedSections)
+	}
+}
+
+func TestLibrary_RebuildIndex_V2_Items_CountsByLocation(t *testing.T) {
+	lib := NewTemplateLibrary(t.TempDir())
+	if _, err := lib.SaveTemplate(makeV2ItemsLibraryTemplate("rebuilt items")); err != nil {
+		t.Fatalf("SaveTemplate: %v", err)
+	}
+	if err := os.Remove(filepath.Join(lib.RootDir(), LibraryIndexFile)); err != nil {
+		t.Fatalf("remove index: %v", err)
+	}
+	if err := lib.RebuildIndex(); err != nil {
+		t.Fatalf("RebuildIndex: %v", err)
+	}
+	entries, err := lib.ListTemplates()
+	if err != nil {
+		t.Fatalf("ListTemplates: %v", err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("want 1 entry, got %d", len(entries))
+	}
+	if entries[0].InventoryItems != 2 || entries[0].StorageItems != 2 {
+		t.Errorf("rebuilt counts = inv %d / stor %d, want 2/2", entries[0].InventoryItems, entries[0].StorageItems)
+	}
+}
+
 func TestLibrary_BackwardCompat_OldIndexWithoutVersionParses(t *testing.T) {
 	dir := t.TempDir()
 	legacyIndex := `{
