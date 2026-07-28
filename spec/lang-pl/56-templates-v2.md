@@ -729,6 +729,17 @@ Pierwsza user-visible wartość to publiczny format wymiany (YAML) dla **już wd
 - **Out of scope**: weapon level override przy apply (Phase 6b poniżej), inventory / storage / equipment / spells / appearance / sort order / world progress edits przy apply, item quantities, URL import, multi-character pack, "Save edited copy" edits z modala z powrotem do biblioteki.
 - **Wymaga osobnej decyzji użytkownika przed kontynuacją**: zakończone.
 
+### Aktualny kontrakt Apply with overrides — ✅ Zaktualizowano 2026-07-28
+
+- `Apply with overrides…` nie przyjmuje już ręcznego `profile.level`. Frontend usuwa `profile.level` ze zmutowanego canonical JSON i wysyła runtime-only `ApplyTemplateV2Options.DeriveLevelFromStats = true`. Backend wylicza finalny level jako `max(1, suma(ośmiu effective stats) - 79)` po nałożeniu wybranych statystyk.
+- Wszystkie osiem statystyk używa tego samego współdzielonego komponentu suwaka + number input co Character → Attributes. Niewybrane statystyki biorą aktualne wartości postaci docelowej, więc wyświetlany calculated level odpowiada całemu finalnemu blokowi stats, a nie tylko polom obecnym w template.
+- Starting class jest checkboxem i dropdownem zasilanym przez `GetStartingClasses`. Runtime-only `ClassOverride *ClassOverride{ClassID}` rozróżnia „nie wybrano” od poprawnego class ID `0`. Zmiana klasy podnosi i włącza każdą statystykę poniżej nowego minimum; backend niezależnie odrzuca nieznaną klasę lub finalne stats poniżej minimum przed mutacją.
+- Jawny override Soul Memory musi być co najmniej równy `vm.MinimumSoulMemoryForLevel(calculatedLevel)`. Niższa wartość jest odrzucana przed snapshotem Undo i przed zapisem slotu/workspace. Gdy Soul Memory nie jest wybrane, istniejąca normalizacja `ApplyVMToParsedSlot` może podnieść zapisywaną wartość do tego samego minimum; modal pokazuje tę effective value.
+- Direct Apply pozostaje bez zmian: nadal respektuje template `profile.level`, pomija template `profile.class` i nie włącza nowego derived-level preflight.
+- Istniejące kontrolki broni zachowują tytuł **Weapon Levels**. Spirit Ashes celowo nie należą do tej fazy, ponieważ nie są jeszcze kategorią obsługiwaną przez editor add/update w template workspace pipeline.
+- Każdy modal Templates konsumuje `Escape` na root dialogu i zamyka wyłącznie najwyższy modal. Escape jest ignorowany podczas trwającej operacji apply/preview/save należącej do modalu.
+- Apply-with-overrides pozostaje atomowy: walidacja class/stats/level/Soul Memory działa na projekcji VM przed `pushUndoLocked` oraz przed dowolną mutacją slotu/workspace. Odrzucenie nie zmienia bajtów slotu, workspace ani głębokości Undo.
+
 ### Phase 6b — weapon level override dla ścieżki Apply v1 inventory.workspace — ✅ Dostarczone 2026-05-31
 
 - **Cel**: pozwolić użytkownikowi, przy apply na istniejącej ścieżce v1 `inventory.workspace` (akcja `Apply Template ▾` wewnątrz `SortOrderTab.tsx`), wymusić na każdej standard-upgradeable broni dodawanej przez szablon `+N`, a na każdej somber/special broni `+M`, clampowane do `MaxUpgrade` każdej broni z DB. Default = brak override (`Enabled = false`), zachowanie byte-for-byte identyczne ze ścieżką sprzed Phase 6b. Bez zmiany schematu v2, bez writera v2 inventory, bez writera equipment.

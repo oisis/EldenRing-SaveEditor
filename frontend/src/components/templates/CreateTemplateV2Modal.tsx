@@ -5,6 +5,7 @@ import {
 } from '../../../wailsjs/go/main/App';
 import { application as main, templates } from '../../../wailsjs/go/models';
 import { ImportTemplatePreviewModal } from './ImportTemplatePreviewModal';
+import { useModalEscape } from './useModalEscape';
 
 // CreateTemplateV2Modal collects metadata + per-field profile/stats
 // selection for a schema v2 build template, calls the preview backend
@@ -118,6 +119,7 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
     const [pendingOpts, setPendingOpts] = useState<main.BuildTemplateV2ExportOptions | null>(null);
 
     const dialogRef = useRef<HTMLDivElement | null>(null);
+    const onDialogKeyDown = useModalEscape(onClose, previewing || savingToLibrary);
     useEffect(() => {
         dialogRef.current?.focus();
     }, []);
@@ -216,6 +218,7 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
             aria-label="Create Build Template"
             ref={dialogRef}
             tabIndex={-1}
+            onKeyDown={onDialogKeyDown}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
         >
             <div className="w-full max-w-2xl rounded-lg bg-card border border-border/60 shadow-xl flex flex-col max-h-[85vh]">

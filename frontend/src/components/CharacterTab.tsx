@@ -4,21 +4,14 @@ import {GetCharacter, SaveCharacter, GetStartingClasses, SetCharacterGender, Get
 import {vm, application as main, db} from '../../wailsjs/go/models';
 import {AccordionSection} from './AccordionSection';
 import {AppearanceTab} from './AppearanceTab';
+import {StatSlider} from './StatSlider';
 import {RiskInfoIcon} from './RiskInfoIcon';
 import {getRunesRiskKey} from '../data/riskInfo';
 import {useSafetyMode} from '../state/safetyMode';
+import {calculateLevel, minimumSoulMemoryForLevel} from '../lib/characterProgression';
 import type {AddSettings} from '../App';
 
 const RUNES_LEGAL_MAX = 999_999_999;
-
-function runesCostForLevel(level: number): number {
-    let total = 0;
-    for (let n = 2; n <= level; n++) {
-        const cost = Math.floor(0.02 * n * n * n + 3.06 * n * n + 105.6 * n - 895);
-        if (cost > 0) total += cost;
-    }
-    return Math.min(total, 4_294_967_295);
-}
 
 interface Props {
     charIndex: number;
@@ -92,9 +85,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
         const min = getStatMin(key);
         const clampedVal = Math.min(99, Math.max(min, val));
         const updatedData = {...char, [key]: clampedVal} as any;
-        const sum = updatedData.vigor + updatedData.mind + updatedData.endurance + updatedData.strength +
-                    updatedData.dexterity + updatedData.intelligence + updatedData.faith + updatedData.arcane;
-        updatedData.level = Math.max(1, sum - 79);
+        updatedData.level = calculateLevel(updatedData);
         isDirty.current = true;
         setCharacterDirty(true);
         setChar(vm.CharacterViewModel.createFrom(updatedData));
@@ -112,7 +103,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
         const intelligence = Math.max(char.intelligence, nc.intelligence);
         const faith        = Math.max(char.faith,        nc.faith);
         const arcane       = Math.max(char.arcane,       nc.arcane);
-        const level = Math.max(1, vigor + mind + endurance + strength + dexterity + intelligence + faith + arcane - 79);
+        const level = calculateLevel({vigor, mind, endurance, strength, dexterity, intelligence, faith, arcane});
         isDirty.current = true;
         setCharacterDirty(true);
         setChar(vm.CharacterViewModel.createFrom({
@@ -169,7 +160,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
 
     const handleFixSoulMemory = () => {
         if (!char) return;
-        const minRequired = runesCostForLevel(char.level);
+        const minRequired = minimumSoulMemoryForLevel(char.level);
         const buffered = Math.min(Math.floor(minRequired * 1.1), 4_294_967_295);
         const updated = vm.CharacterViewModel.createFrom({...char, soulMemory: buffered});
         setChar(updated);
@@ -336,7 +327,7 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                                 } />
                         </div>
                         {(() => {
-                            const minSM = runesCostForLevel(char.level);
+                            const minSM = minimumSoulMemoryForLevel(char.level);
                             const consistent = (char.soulMemory || 0) >= minSM;
                             return (
                                 <div className="space-y-1.5">
@@ -374,29 +365,14 @@ export function CharacterTab({charIndex, onNameChange, onMutate, refreshKey, add
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6">
                     {ATTRIBUTES.map(stat => {
                         const statMin = getStatMin(stat.id);
-                        const redZonePct = ((statMin - 1) / 98) * 100;
                         return (
-                            <div key={stat.id} className="flex items-center gap-3 py-1.5 border-b border-border/30">
-                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider w-20 flex-shrink-0"
-                                    title={`Base: ${statMin}`}>
-                                    {stat.label}
-                                </span>
-                                <input
-                                    type="range" min={1} max={99}
-                                    value={(char as any)[stat.id]}
-                                    onChange={e => updateStat(stat.id, parseInt(e.target.value))}
-                                    className="flex-1 h-1.5 rounded-lg appearance-none cursor-pointer"
-                                    style={{
-                                        background: `linear-gradient(to right, rgb(239 68 68 / 0.4) 0%, rgb(239 68 68 / 0.4) ${redZonePct}%, hsl(var(--border)) ${redZonePct}%, hsl(var(--border)) 100%)`,
-                                    }}
-                                />
-                                <input
-                                    type="number" min={statMin} max={99}
-                                    value={(char as any)[stat.id]}
-                                    onChange={e => updateStat(stat.id, parseInt(e.target.value) || statMin)}
-                                    className="w-12 bg-muted/30 border border-border rounded text-center text-xs py-1 focus:ring-1 focus:ring-primary/30 outline-none"
-                                />
-                            </div>
+                            <StatSlider
+                                key={stat.id}
+                                label={stat.label}
+                                min={statMin}
+                                value={(char as any)[stat.id]}
+                                onChange={value => updateStat(stat.id, value)}
+                            />
                         );
                     })}
                 </div>

@@ -9,6 +9,7 @@ import {
     RenameBuildTemplateInLibrary,
 } from '../../../wailsjs/go/main/App';
 import { application as main, templates } from '../../../wailsjs/go/models';
+import { useModalEscape } from './useModalEscape';
 
 // TemplateLibraryModal lists locally-stored build templates and exposes
 // the actions a user needs to manage them: preview, apply to workspace,
@@ -109,6 +110,7 @@ export function TemplateLibraryModal({
     const [libraryPath, setLibraryPath] = useState<string>('');
 
     const dialogRef = useRef<HTMLDivElement | null>(null);
+    const onDialogKeyDown = useModalEscape(onClose);
 
     const refresh = useCallback(async () => {
         setLoading(true);
@@ -286,6 +288,7 @@ export function TemplateLibraryModal({
             aria-label={title}
             ref={dialogRef}
             tabIndex={-1}
+            onKeyDown={onDialogKeyDown}
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
         >
             <div className="w-full max-w-3xl rounded-lg bg-card border border-border/60 shadow-xl">

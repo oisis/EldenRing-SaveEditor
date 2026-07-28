@@ -41,7 +41,7 @@ Reference chapters we do **not** repeat:
 |---|---|---|
 | **A** | Schema + exporter (`backend/templates/schema.go`, `export.go`), spec, tests | ✅ |
 | **B** | Wails bindings `ExportBuildTemplateJSON` / `ExportBuildTemplateToFile`, `ExportTemplateModal`, dropdown in SortOrderTab | ✅ |
-| **C** | Import preview: `ParseBuildTemplateJSON`, `PreviewBuildTemplateImport`, endpoints `PreviewBuildTemplateImportJSON/FromFile`, `ImportTemplatePreviewModal` (read-only) | ✅ |
+| **C** | Import preview: `ParseBuildTemplateJSON`, `PreviewBuildTemplateImport`, endpoints `PreviewBuildTemplateImportJSON/FromFile`, `ImportTemplatePreviewModal` (preview never mutates; Apply paths wired from Phase D onward) | ✅ |
 | **D** | Apply to workspace: `ApplyBuildTemplateToWorkspaceJSON/FromFile`, capacity preflight, RAM-only mutation with rollback | ✅ |
 | **E** | Local template library under `$UserConfigDir/EldenRing-SaveEditor/templates/`, 9 App endpoints, `TemplateLibraryModal` | ✅ |
 | 2+ | `character.profile` section (level, stats, talisman slots), opt-in via `$enabled` | 🔲 deferred |
@@ -63,7 +63,7 @@ Reference chapters we do **not** repeat:
 | Apply mutation | `app_templates.go::applyTemplateItemsToWorkspace` → `editor.AddItem` + `editor.UpdateWeapon`. |
 | Capacity preflight | `app_templates.go::capacityPreflight`. |
 | Rollback | `app_templates.go::deepCopySnapshot`. |
-| Frontend modals | `frontend/src/components/templates/`: `ExportTemplateModal.tsx` (calls `ExportBuildTemplateToFile`, `SaveBuildTemplateToLibrary`), `ImportTemplatePreviewModal.tsx` (read-only props, does not call Wails directly), `TemplateLibraryModal.tsx` (calls 8 library Wails methods). |
+| Frontend modals | `frontend/src/components/templates/`: `ExportTemplateModal.tsx` (calls `ExportBuildTemplateToFile`, `SaveBuildTemplateToLibrary`), `ImportTemplatePreviewModal.tsx` (renders the dry-run report; exposes optional Apply / Apply-with-overrides / Save-to-Library callback props gated on `report.ok`, but does not call Wails directly), `TemplateLibraryModal.tsx` (calls 8 library Wails methods). |
 | Frontend orchestrator | `frontend/src/components/SortOrderTab.tsx` (calls `ExportBuildTemplateToFile`, `PreviewBuildTemplateImportFromFile`, `ApplyBuildTemplateToWorkspaceJSON`; orchestrates the modals + `useInventoryWorkspace.replaceSnapshot` after Apply). |
 
 ---

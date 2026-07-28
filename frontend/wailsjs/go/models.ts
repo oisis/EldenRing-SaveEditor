@@ -160,10 +160,24 @@ export namespace application {
 		    return a;
 		}
 	}
+	export class ClassOverride {
+	    classID: number;
+
+	    static createFrom(source: any = {}) {
+	        return new ClassOverride(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.classID = source["classID"];
+	    }
+	}
 	export class ApplyTemplateV2Options {
 	    mode?: string;
 	    sessionID?: string;
 	    weaponLevelOverride?: WeaponLevelOverride;
+	    deriveLevelFromStats?: boolean;
+	    classOverride?: ClassOverride;
 
 	    static createFrom(source: any = {}) {
 	        return new ApplyTemplateV2Options(source);
@@ -174,6 +188,8 @@ export namespace application {
 	        this.mode = source["mode"];
 	        this.sessionID = source["sessionID"];
 	        this.weaponLevelOverride = this.convertValues(source["weaponLevelOverride"], WeaponLevelOverride);
+	        this.deriveLevelFromStats = source["deriveLevelFromStats"];
+	        this.classOverride = this.convertValues(source["classOverride"], ClassOverride);
 	    }
 
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -356,6 +372,7 @@ export namespace application {
 	        this.className = source["className"];
 	    }
 	}
+
 	export class ConversionInfo {
 	    path: string;
 	    platform: string;
@@ -2763,6 +2780,20 @@ export namespace templates {
 	        this.message = source["message"];
 	    }
 	}
+	export class FieldValue {
+	    key: string;
+	    value: string;
+
+	    static createFrom(source: any = {}) {
+	        return new FieldValue(source);
+	    }
+
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.key = source["key"];
+	        this.value = source["value"];
+	    }
+	}
 	export class ImportPreviewIssue {
 	    severity: string;
 	    code: string;
@@ -2799,6 +2830,8 @@ export namespace templates {
 	    selectedSections?: string[];
 	    profileFieldsPresent?: string[];
 	    statFieldsPresent?: string[];
+	    profileFieldValues?: FieldValue[];
+	    statFieldValues?: FieldValue[];
 	    equipmentSlotsPresent?: string[];
 	    spellSlotsPresent?: string[];
 	    itemsEntries?: number;
@@ -2822,12 +2855,32 @@ export namespace templates {
 	        this.selectedSections = source["selectedSections"];
 	        this.profileFieldsPresent = source["profileFieldsPresent"];
 	        this.statFieldsPresent = source["statFieldsPresent"];
+	        this.profileFieldValues = this.convertValues(source["profileFieldValues"], FieldValue);
+	        this.statFieldValues = this.convertValues(source["statFieldValues"], FieldValue);
 	        this.equipmentSlotsPresent = source["equipmentSlotsPresent"];
 	        this.spellSlotsPresent = source["spellSlotsPresent"];
 	        this.itemsEntries = source["itemsEntries"];
 	        this.inventoryLayoutCount = source["inventoryLayoutCount"];
 	        this.storageLayoutCount = source["storageLayoutCount"];
 	    }
+
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
 	}
 	export class ImportPreviewReport {
 	    ok: boolean;

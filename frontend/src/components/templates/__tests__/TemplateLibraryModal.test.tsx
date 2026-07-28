@@ -1012,4 +1012,12 @@ describe('TemplateLibraryModal — Phase 8D.2 items entries', () => {
             screen.queryByTestId('library-apply-v2-items-mode'),
         ).not.toBeInTheDocument();
     });
+
+    it('closes on Escape', async () => {
+        const onClose = vi.fn();
+        render(<TemplateLibraryModal {...defaultProps({ onClose })} />);
+        const dialog = await screen.findByTestId('template-library-modal');
+        fireEvent.keyDown(dialog, { key: 'Escape' });
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
 });

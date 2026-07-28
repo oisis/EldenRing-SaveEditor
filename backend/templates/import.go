@@ -3,6 +3,7 @@ package templates
 import (
 	"encoding/json"
 	"fmt"
+	"strconv"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/db"
 )
@@ -21,10 +22,10 @@ type ImportPreviewOptions struct {
 // the frontend can render it without coordinating lifetime with a
 // session.
 type ImportPreviewReport struct {
-	OK       bool                  `json:"ok"`
-	Errors   []ImportPreviewIssue  `json:"errors"`
-	Warnings []ImportPreviewIssue  `json:"warnings"`
-	Summary  ImportPreviewSummary  `json:"summary"`
+	OK       bool                 `json:"ok"`
+	Errors   []ImportPreviewIssue `json:"errors"`
+	Warnings []ImportPreviewIssue `json:"warnings"`
+	Summary  ImportPreviewSummary `json:"summary"`
 }
 
 // ImportPreviewIssue is one row in the preview's errors/warnings table.
@@ -39,6 +40,15 @@ type ImportPreviewIssue struct {
 	Position   int    `json:"position,omitempty"`
 	BaseItemID uint32 `json:"baseItemID,omitempty"`
 	AoWItemID  uint32 `json:"aowItemID,omitempty"`
+}
+
+// FieldValue is one presentation-only key/value pair surfaced by the
+// import preview. Value is a pre-formatted string (the source pointer was
+// type-checked and dereferenced before formatting) so the frontend can
+// render the exact stored value without re-parsing the template payload.
+type FieldValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
 }
 
 // ImportPreviewSummary counts items by resolved DB category so the UI
@@ -69,6 +79,20 @@ type ImportPreviewSummary struct {
 	SelectedSections     []string `json:"selectedSections,omitempty"`
 	ProfileFieldsPresent []string `json:"profileFieldsPresent,omitempty"`
 	StatFieldsPresent    []string `json:"statFieldsPresent,omitempty"`
+
+	// Presentation-only key/value pairs for the profile and stats
+	// sections. Where ProfileFieldsPresent / StatFieldsPresent (retained
+	// unchanged for backward compatibility) list only field names, these
+	// carry the exact stored value so the preview can show e.g.
+	// "Level: 129", "Vigor: 60". Built from the already-parsed & validated
+	// BuildTemplate; each Value is a pre-formatted string after a
+	// type-checked deref of the source pointer. Order is canonical
+	// character-sheet order (deterministic, never map iteration). A field
+	// pointing at 0 is present with Value "0" — zero is a valid value for
+	// runes / soulMemory / clearCount / blessings / talismanSlots and is
+	// never treated as "absent".
+	ProfileFieldValues []FieldValue `json:"profileFieldValues,omitempty"`
+	StatFieldValues    []FieldValue `json:"statFieldValues,omitempty"`
 
 	// Phase 7b.1 — list of equipment slot keys whose pointer is non-nil
 	// in sections.equipment. Stable canonical order (EquipmentSlotOrder).
@@ -283,11 +307,11 @@ func ParseBuildTemplateJSON(data []byte) (*BuildTemplate, error) {
 //   - InfusionName, when present, must match a db.InfuseTypes entry.
 //   - Upgrade must satisfy 0 <= Upgrade <= MaxUpgrade for the resolved item.
 //   - If aowItemID is set:
-//     * the AoW item must resolve and have category "ashes_of_war"
-//     * the target item must be weapon-like (db category in weaponCategories)
-//     * db.IsAshOfWarCompatibleWithWeapon must report (true, true).
-//       known=false produces an error (fail-closed) per the rule
-//       documented in db.IsAoWCompatibleWithWepType.
+//   - the AoW item must resolve and have category "ashes_of_war"
+//   - the target item must be weapon-like (db category in weaponCategories)
+//   - db.IsAshOfWarCompatibleWithWeapon must report (true, true).
+//     known=false produces an error (fail-closed) per the rule
+//     documented in db.IsAoWCompatibleWithWepType.
 //   - Template's own Name / Category fields are debug only.
 //   - "name_mismatch_ignored" warning surfaces when the template's
 //     Name field doesn't match the DB — informational, never blocking.
@@ -328,6 +352,8 @@ func PreviewBuildTemplateImport(tpl *BuildTemplate, opts ImportPreviewOptions) I
 	rep.Summary.SelectedSections = selectedSectionsForTemplate(tpl)
 	rep.Summary.ProfileFieldsPresent = profileFieldsPresent(tpl.Sections.Profile)
 	rep.Summary.StatFieldsPresent = statFieldsPresent(tpl.Sections.Stats)
+	rep.Summary.ProfileFieldValues = profileFieldValues(tpl.Sections.Profile)
+	rep.Summary.StatFieldValues = statFieldValues(tpl.Sections.Stats)
 	rep.Summary.EquipmentSlotsPresent = equipmentSlotsPresent(tpl.Sections.Equipment)
 	rep.Summary.SpellSlotsPresent = spellSlotsPresent(tpl.Sections.Spells)
 	if tpl.Sections.Items != nil {
@@ -364,10 +390,73 @@ func PreviewBuildTemplateImport(tpl *BuildTemplate, opts ImportPreviewOptions) I
 		rep.Summary.StorageItems = len(sec.StorageItems)
 		previewItems(sec.InventoryItems, ContainerInventory, &rep)
 		previewItems(sec.StorageItems, ContainerStorage, &rep)
+	} else if tpl.Sections.Items != nil {
+		// v2 items-only shape. Legacy inventory.workspace keeps priority
+		// above; the two formats are never summed. Category is already
+		// validated by validateItemsSection, so this only tallies.
+		c := summarizeItemsSection(tpl.Sections.Items)
+		rep.Summary.InventoryItems = c.InventoryItems
+		rep.Summary.StorageItems = c.StorageItems
+		rep.Summary.Weapons = c.Weapons
+		rep.Summary.Armor = c.Armor
+		rep.Summary.Talismans = c.Talismans
+		rep.Summary.Stackables = c.Stackables
+		rep.Summary.AoWAssignments = c.AoWAssignments
 	}
 
 	rep.OK = len(rep.Errors) == 0
 	return rep
+}
+
+// itemsSummaryCounts holds the container/category tallies derived from a
+// v2 ItemsSection. Container membership is read from Entry.Location
+// (the SSOT) — never from inventoryLayout/storageLayout, which describe
+// ordering, not container assignment.
+type itemsSummaryCounts struct {
+	InventoryItems int
+	StorageItems   int
+	Weapons        int
+	Armor          int
+	Talismans      int
+	Stackables     int
+	AoWAssignments int
+}
+
+// summarizeItemsSection tallies a v2 ItemsSection by Location and DB
+// category. Shared by the import preview summary and the library index
+// counters so both surfaces agree. Location=both counts the entry in
+// both containers; category and AoW are counted once per entry.
+func summarizeItemsSection(s *ItemsSection) itemsSummaryCounts {
+	var c itemsSummaryCounts
+	if s == nil {
+		return c
+	}
+	for i := range s.Entries {
+		e := &s.Entries[i]
+		switch e.Location {
+		case ItemLocationInventory:
+			c.InventoryItems++
+		case ItemLocationStorage:
+			c.StorageItems++
+		case ItemLocationBoth:
+			c.InventoryItems++
+			c.StorageItems++
+		}
+		switch {
+		case weaponCategories[e.Category]:
+			c.Weapons++
+		case armorCategories[e.Category]:
+			c.Armor++
+		case e.Category == ItemCategoryTalismans:
+			c.Talismans++
+		default:
+			c.Stackables++
+		}
+		if e.AshOfWarItemID != nil {
+			c.AoWAssignments++
+		}
+	}
+	return c
 }
 
 // previewItems applies the per-item validation rules. The errors /
@@ -707,5 +796,72 @@ func statFieldsPresent(s *StatsSection) []string {
 	if s.Vigor != nil {
 		out = append(out, "vigor")
 	}
+	return out
+}
+
+// profileFieldValues returns canonical-ordered key/value pairs for every
+// present profile field. Distinct from profileFieldsPresent (name-only,
+// alphabetic, retained for compatibility): this carries the exact stored
+// value so the preview can display it. Order follows the character sheet
+// (name → level → runes → soulMemory → class → clearCount → blessings →
+// talismanSlots) rather than alphabetic, so the preview reads naturally.
+// A pointer at 0 is present and formats as "0"; nil fields are omitted.
+func profileFieldValues(p *ProfileSection) []FieldValue {
+	if p == nil {
+		return nil
+	}
+	var out []FieldValue
+	if p.Name != nil {
+		out = append(out, FieldValue{"name", *p.Name})
+	}
+	if p.Level != nil {
+		out = append(out, FieldValue{"level", strconv.FormatUint(uint64(*p.Level), 10)})
+	}
+	if p.Runes != nil {
+		out = append(out, FieldValue{"runes", strconv.FormatUint(uint64(*p.Runes), 10)})
+	}
+	if p.SoulMemory != nil {
+		out = append(out, FieldValue{"soulMemory", strconv.FormatUint(uint64(*p.SoulMemory), 10)})
+	}
+	if p.Class != nil {
+		out = append(out, FieldValue{"class", *p.Class})
+	}
+	if p.ClearCount != nil {
+		out = append(out, FieldValue{"clearCount", strconv.FormatUint(uint64(*p.ClearCount), 10)})
+	}
+	if p.ScadutreeBlessing != nil {
+		out = append(out, FieldValue{"scadutreeBlessing", strconv.FormatUint(uint64(*p.ScadutreeBlessing), 10)})
+	}
+	if p.ShadowRealmBlessing != nil {
+		out = append(out, FieldValue{"shadowRealmBlessing", strconv.FormatUint(uint64(*p.ShadowRealmBlessing), 10)})
+	}
+	if p.TalismanSlots != nil {
+		out = append(out, FieldValue{"talismanSlots", strconv.FormatUint(uint64(*p.TalismanSlots), 10)})
+	}
+	return out
+}
+
+// statFieldValues mirrors profileFieldValues for the eight stats in
+// canonical character-sheet order. Zero is a valid stat value only in a
+// hand-authored template (the validator caps live stats at 1..99); it is
+// still surfaced faithfully as "0" rather than dropped.
+func statFieldValues(s *StatsSection) []FieldValue {
+	if s == nil {
+		return nil
+	}
+	var out []FieldValue
+	appendStat := func(key string, v *uint32) {
+		if v != nil {
+			out = append(out, FieldValue{key, strconv.FormatUint(uint64(*v), 10)})
+		}
+	}
+	appendStat("vigor", s.Vigor)
+	appendStat("mind", s.Mind)
+	appendStat("endurance", s.Endurance)
+	appendStat("strength", s.Strength)
+	appendStat("dexterity", s.Dexterity)
+	appendStat("intelligence", s.Intelligence)
+	appendStat("faith", s.Faith)
+	appendStat("arcane", s.Arcane)
 	return out
 }

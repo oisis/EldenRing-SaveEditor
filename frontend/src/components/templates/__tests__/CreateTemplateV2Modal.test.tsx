@@ -431,3 +431,12 @@ describe('CreateTemplateV2Modal — containers (Phase 8C.1)', () => {
         expect(JSON.parse(json)).toEqual({ items: true, inventoryLayout: true });
     });
 });
+
+describe('CreateTemplateV2Modal — keyboard', () => {
+    it('closes on Escape', () => {
+        const onClose = vi.fn();
+        render(<CreateTemplateV2Modal {...defaultProps({ onClose })} />);
+        fireEvent.keyDown(screen.getByTestId('create-template-v2-modal'), { key: 'Escape' });
+        expect(onClose).toHaveBeenCalledTimes(1);
+    });
+});

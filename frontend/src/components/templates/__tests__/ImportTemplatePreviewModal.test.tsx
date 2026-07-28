@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { templates } from '../../../../wailsjs/go/models';
 import { ImportTemplatePreviewModal, isCancelledPreview } from '../ImportTemplatePreviewModal';
@@ -46,6 +46,12 @@ describe('ImportTemplatePreviewModal', () => {
         render(<ImportTemplatePreviewModal report={makeReport()} onClose={() => {}} />);
         const note = screen.getByTestId('import-preview-disclaimer');
         expect(note).toHaveTextContent(/does not change your workspace or save/i);
+    });
+
+    it('shows the neutral "validated cleanly" note for a clean report and never the stale phase copy', () => {
+        render(<ImportTemplatePreviewModal report={makeReport()} onClose={() => {}} />);
+        expect(screen.getByText('Template validated cleanly.')).toBeInTheDocument();
+        expect(screen.queryByText(/lands in a later phase/i)).not.toBeInTheDocument();
     });
 
     it('renders error rows when errors are present', () => {
@@ -711,6 +717,103 @@ describe('ImportTemplatePreviewModal — Phase 6 Apply with overrides', () => {
     });
 });
 
+describe('ImportTemplatePreviewModal — profile/stat exact values', () => {
+    function valuesSummary(overrides: Partial<templates.ImportPreviewSummary> = {}) {
+        return templates.ImportPreviewSummary.createFrom({
+            inventoryItems: 0,
+            storageItems: 0,
+            weapons: 0,
+            armor: 0,
+            talismans: 0,
+            stackables: 0,
+            aowAssignments: 0,
+            version: 2,
+            selectedSections: ['profile', 'stats'],
+            profileFieldsPresent: [
+                'class',
+                'clearCount',
+                'level',
+                'name',
+                'runes',
+                'talismanSlots',
+            ],
+            statFieldsPresent: [
+                'arcane',
+                'dexterity',
+                'endurance',
+                'faith',
+                'intelligence',
+                'mind',
+                'strength',
+                'vigor',
+            ],
+            profileFieldValues: [
+                { key: 'name', value: 'Tarnished' },
+                { key: 'level', value: '129' },
+                { key: 'runes', value: '5337' },
+                { key: 'class', value: 'Vagabond' },
+                { key: 'clearCount', value: '0' },
+                { key: 'talismanSlots', value: '0' },
+            ],
+            statFieldValues: [
+                { key: 'vigor', value: '60' },
+                { key: 'mind', value: '10' },
+                { key: 'endurance', value: '25' },
+                { key: 'strength', value: '50' },
+                { key: 'dexterity', value: '12' },
+                { key: 'intelligence', value: '9' },
+                { key: 'faith', value: '8' },
+                { key: 'arcane', value: '7' },
+            ],
+            ...overrides,
+        });
+    }
+
+    it('renders profile field labels with their exact values', () => {
+        render(<ImportTemplatePreviewModal report={makeReport({ summary: valuesSummary() })} onClose={() => {}} />);
+        expect(screen.getByTestId('import-preview-profile-level')).toHaveTextContent(/Level:\s*129/);
+        expect(screen.getByTestId('import-preview-profile-runes')).toHaveTextContent(/Runes:\s*5337/);
+        expect(screen.getByTestId('import-preview-profile-name')).toHaveTextContent(/Name:\s*Tarnished/);
+        expect(screen.getByTestId('import-preview-profile-class')).toHaveTextContent(/Class:\s*Vagabond/);
+    });
+
+    it('renders all eight stats with their values', () => {
+        render(<ImportTemplatePreviewModal report={makeReport({ summary: valuesSummary() })} onClose={() => {}} />);
+        expect(screen.getByTestId('import-preview-stat-vigor')).toHaveTextContent(/Vigor:\s*60/);
+        expect(screen.getByTestId('import-preview-stat-mind')).toHaveTextContent(/Mind:\s*10/);
+        expect(screen.getByTestId('import-preview-stat-strength')).toHaveTextContent(/Strength:\s*50/);
+        expect(screen.getByTestId('import-preview-stat-arcane')).toHaveTextContent(/Arcane:\s*7/);
+    });
+
+    it('renders a value of 0 rather than dropping the field', () => {
+        render(<ImportTemplatePreviewModal report={makeReport({ summary: valuesSummary() })} onClose={() => {}} />);
+        const row = screen.getByTestId('import-preview-profile-talismanSlots');
+        expect(row).toHaveTextContent(/Talisman Slots:\s*0/);
+        expect(screen.getByTestId('import-preview-profile-clearCount')).toHaveTextContent(/NG\+ Cycle:\s*0/);
+    });
+
+    it('does not render fields absent from the template', () => {
+        render(<ImportTemplatePreviewModal report={makeReport({ summary: valuesSummary() })} onClose={() => {}} />);
+        // soulMemory / scadutreeBlessing are not in profileFieldValues here.
+        expect(screen.queryByTestId('import-preview-profile-soulMemory')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('import-preview-profile-scadutreeBlessing')).not.toBeInTheDocument();
+    });
+
+    it('falls back to name-only lists when the report carries no values (legacy report)', () => {
+        const report = makeReport({
+            summary: valuesSummary({ profileFieldValues: [], statFieldValues: [] }),
+        });
+        render(<ImportTemplatePreviewModal report={report} onClose={() => {}} />);
+        const profileRow = screen.getByTestId('import-preview-profile-fields');
+        expect(profileRow).toHaveTextContent(/level/);
+        expect(profileRow).toHaveTextContent(/runes/);
+        const statRow = screen.getByTestId('import-preview-stat-fields');
+        expect(statRow).toHaveTextContent(/vigor/);
+        // No per-value rows in legacy mode.
+        expect(screen.queryByTestId('import-preview-profile-level')).not.toBeInTheDocument();
+    });
+});
+
 describe('isCancelledPreview', () => {
     it('returns true for the cancelled sentinel report', () => {
         expect(
@@ -1025,8 +1128,8 @@ describe('ImportTemplatePreviewModal — Phase 8C.1 items / inventoryLayout / st
         expect(copy).not.toMatch(/export-only/i);
     });
 
-    it('Phase 8D.3 — items-bearing template shows the Apply-with-overrides weapon hint', () => {
-        const report = makeReport({ summary: itemsSummary() });
+    it('Phase 8D.3 — items-bearing template with weapons shows the Apply-with-overrides weapon hint', () => {
+        const report = makeReport({ summary: itemsSummary({ weapons: 2 }) });
         render(
             <ImportTemplatePreviewModal
                 report={report}
@@ -1037,9 +1140,40 @@ describe('ImportTemplatePreviewModal — Phase 8C.1 items / inventoryLayout / st
             />,
         );
         const hint = screen.getByTestId('import-preview-items-weapon-hint');
+        expect(hint).toHaveTextContent(/newly added weapons/);
         expect(hint).toHaveTextContent(/Apply with overrides/);
         expect(hint).toHaveTextContent(/standard.*0–25/);
         expect(hint).toHaveTextContent(/somber.*0–10/);
+    });
+
+    it('weapon hint is hidden for an items template with no weapons', () => {
+        const report = makeReport({
+            summary: itemsSummary({
+                selectedSections: ['items'],
+                itemsEntries: 3,
+                weapons: 0,
+                armor: 2,
+                talismans: 1,
+                inventoryLayoutCount: 0,
+                storageLayoutCount: 0,
+            }),
+        });
+        render(
+            <ImportTemplatePreviewModal
+                report={report}
+                onClose={() => {}}
+                onApplyV2={() => {}}
+                charIndex={0}
+                saveLoaded
+            />,
+        );
+        // apply-supported copy still shows; only the weapon override hint is gated.
+        expect(
+            screen.getByTestId('import-preview-items-apply-supported'),
+        ).toBeInTheDocument();
+        expect(
+            screen.queryByTestId('import-preview-items-weapon-hint'),
+        ).not.toBeInTheDocument();
     });
 
     it('Phase 8D.3 — items-bearing weapon hint is absent when no items section is selected', () => {
@@ -1151,5 +1285,12 @@ describe('ImportTemplatePreviewModal — Phase 8C.1 items / inventoryLayout / st
         expect(screen.queryByTestId('import-preview-inventory-layout-count')).not.toBeInTheDocument();
         expect(screen.queryByTestId('import-preview-storage-layout-count')).not.toBeInTheDocument();
         expect(screen.queryByTestId('import-preview-items-export-only')).not.toBeInTheDocument();
+    });
+
+    it('closes on Escape', () => {
+        const onClose = vi.fn();
+        render(<ImportTemplatePreviewModal report={makeReport()} onClose={onClose} />);
+        fireEvent.keyDown(screen.getByTestId('import-preview-modal'), { key: 'Escape' });
+        expect(onClose).toHaveBeenCalledTimes(1);
     });
 });

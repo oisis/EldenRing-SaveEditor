@@ -559,16 +559,26 @@ func buildEntryFromTemplate(tpl *BuildTemplate, filename string, prev LibraryTem
 	return entry
 }
 
+// countInventoryItems / countStorageItems tally the index counters.
+// Legacy inventory.workspace keeps priority and its historical result;
+// v2 items-only templates fall back to Location-based counting (see
+// summarizeItemsSection). The two formats are never summed.
 func countInventoryItems(tpl *BuildTemplate) int {
-	if tpl == nil || tpl.Sections.InventoryWorkspace == nil {
+	if tpl == nil {
 		return 0
 	}
-	return len(tpl.Sections.InventoryWorkspace.InventoryItems)
+	if tpl.Sections.InventoryWorkspace != nil {
+		return len(tpl.Sections.InventoryWorkspace.InventoryItems)
+	}
+	return summarizeItemsSection(tpl.Sections.Items).InventoryItems
 }
 
 func countStorageItems(tpl *BuildTemplate) int {
-	if tpl == nil || tpl.Sections.InventoryWorkspace == nil {
+	if tpl == nil {
 		return 0
 	}
-	return len(tpl.Sections.InventoryWorkspace.StorageItems)
+	if tpl.Sections.InventoryWorkspace != nil {
+		return len(tpl.Sections.InventoryWorkspace.StorageItems)
+	}
+	return summarizeItemsSection(tpl.Sections.Items).StorageItems
 }

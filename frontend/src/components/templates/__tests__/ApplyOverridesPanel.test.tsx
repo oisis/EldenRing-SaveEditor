@@ -1,10 +1,95 @@
+import { ComponentProps } from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
+import { db, vm } from '../../../../wailsjs/go/models';
 import {
-    ApplyOverridesModal,
-    ApplyOverridesPanel,
+    ApplyOverridesModal as RealApplyOverridesModal,
+    ApplyOverridesPanel as RealApplyOverridesPanel,
     applyOverridesToCanonical,
 } from '../ApplyOverridesPanel';
+
+const TEST_CHARACTER = new vm.CharacterViewModel({
+    name: 'Target',
+    level: 9,
+    souls: 1234,
+    class: 0,
+    className: 'Vagabond',
+    vigor: 15,
+    mind: 10,
+    endurance: 11,
+    strength: 14,
+    dexterity: 13,
+    intelligence: 9,
+    faith: 9,
+    arcane: 7,
+    talismanSlots: 2,
+    clearCount: 1,
+    scadutreeBlessing: 3,
+    shadowRealmBlessing: 2,
+    memoryStones: 0,
+    gender: 0,
+    soulMemory: 999999,
+    inventory: [],
+    storage: [],
+    attachedItems: [],
+    warnings: [],
+    eventFlagsAvailable: true,
+    classBaseStats: {},
+    useTechnicalItemCaps: false,
+});
+
+const TEST_CLASSES = [
+    new db.ClassStats({
+        id: 0,
+        name: 'Vagabond',
+        level: 9,
+        vigor: 15,
+        mind: 10,
+        endurance: 11,
+        strength: 14,
+        dexterity: 13,
+        intelligence: 9,
+        faith: 9,
+        arcane: 7,
+    }),
+    new db.ClassStats({
+        id: 1,
+        name: 'Warrior',
+        level: 8,
+        vigor: 11,
+        mind: 12,
+        endurance: 11,
+        strength: 10,
+        dexterity: 16,
+        intelligence: 10,
+        faith: 8,
+        arcane: 9,
+    }),
+];
+
+function ApplyOverridesPanel(
+    props: Omit<ComponentProps<typeof RealApplyOverridesPanel>, 'character' | 'startingClasses'>,
+) {
+    return (
+        <RealApplyOverridesPanel
+            {...props}
+            character={TEST_CHARACTER}
+            startingClasses={TEST_CLASSES}
+        />
+    );
+}
+
+function ApplyOverridesModal(
+    props: Omit<ComponentProps<typeof RealApplyOverridesModal>, 'character' | 'startingClasses'>,
+) {
+    return (
+        <RealApplyOverridesModal
+            {...props}
+            character={TEST_CHARACTER}
+            startingClasses={TEST_CLASSES}
+        />
+    );
+}
 
 const baseTemplate = {
     schema: 'saveforge.build-template',
@@ -31,25 +116,34 @@ describe('ApplyOverridesPanel — rendering', () => {
                 onMutatedChange={() => {}}
             />,
         );
-        expect(screen.getByTestId('apply-overrides-profile-input-level')).toHaveValue('50');
+        expect(screen.queryByTestId('apply-overrides-profile-input-level')).not.toBeInTheDocument();
+        expect(screen.getByTestId('apply-overrides-calculated-level')).toHaveTextContent(
+            'Calculated Level: 28',
+        );
         expect(screen.getByTestId('apply-overrides-profile-input-name')).toHaveValue('Tarnished');
-        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue('25');
-        expect(screen.getByTestId('apply-overrides-stats-input-faith')).toHaveValue('18');
+        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue(25);
+        expect(screen.getByTestId('apply-overrides-stats-input-faith')).toHaveValue(18);
     });
 
-    it('renders profile.class as read-only when present', () => {
+    it('renders profile.class as an enabled dropdown when selected by the template', () => {
+        const template = {
+            ...baseTemplate,
+            selection: {
+                ...baseTemplate.selection,
+                profile: { ...baseTemplate.selection.profile, class: true },
+            },
+        };
         render(
             <ApplyOverridesPanel
-                canonicalJSON={canonicalJSON()}
+                canonicalJSON={JSON.stringify(template)}
                 onMutatedChange={() => {}}
             />,
         );
-        const row = screen.getByTestId('apply-overrides-profile-class-readonly');
-        expect(row).toHaveTextContent(/Vagabond/);
-        expect(row).toHaveTextContent(/Skipped on apply/i);
+        expect(screen.getByTestId('apply-overrides-profile-toggle-class')).toBeChecked();
+        expect(screen.getByTestId('apply-overrides-profile-input-class')).toHaveValue('0');
     });
 
-    it('does not render profile.class row when the field is absent from the template', () => {
+    it('renders an unchecked class override when class is absent from the template', () => {
         const tpl = {
             schema: 'saveforge.build-template',
             version: 2,
@@ -62,7 +156,8 @@ describe('ApplyOverridesPanel — rendering', () => {
                 onMutatedChange={() => {}}
             />,
         );
-        expect(screen.queryByTestId('apply-overrides-profile-class-readonly')).not.toBeInTheDocument();
+        expect(screen.getByTestId('apply-overrides-profile-toggle-class')).not.toBeChecked();
+        expect(screen.getByTestId('apply-overrides-profile-input-class')).toBeDisabled();
     });
 
     it('does not render any field outside the profile/stats overridable list', () => {
@@ -124,7 +219,7 @@ describe('ApplyOverridesPanel — mutation', () => {
         expect(parsed.selection.stats.vigor).toBe(true);
     });
 
-    it('marks state invalid when stat value is outside [1, 99]', () => {
+    it('clamps stat number input to [class minimum, 99]', () => {
         const onMutatedChange = vi.fn();
         render(
             <ApplyOverridesPanel
@@ -137,11 +232,10 @@ describe('ApplyOverridesPanel — mutation', () => {
         });
         const lastCall = onMutatedChange.mock.calls.at(-1);
         expect(lastCall).toBeDefined();
-        const [json, invalid, fieldErrors] = lastCall!;
-        expect(json).toBeNull();
-        expect(invalid).toBe(true);
-        expect(fieldErrors).toMatchObject({ 'stats.vigor': expect.stringMatching(/1–99|1-99/) });
-        expect(screen.getByTestId('apply-overrides-stats-error-vigor')).toBeInTheDocument();
+        const [json, invalid] = lastCall!;
+        expect(invalid).toBe(false);
+        expect(JSON.parse(json as string).sections.stats.vigor).toBe(99);
+        expect(screen.getByTestId('apply-overrides-stats-input-vigor')).toHaveValue(99);
     });
 
     it('disables input for an unselected field; toggle on enables editing and selection', () => {
@@ -199,11 +293,11 @@ describe('ApplyOverridesPanel — mutation', () => {
             schema: 'saveforge.build-template',
             version: 2,
             selection: {
-                profile: { level: true },
+                profile: { level: true, name: true },
                 inventory: { workspace: true },
             },
             sections: {
-                profile: { level: 50 },
+                profile: { level: 50, name: 'Before' },
                 inventory: { workspace: { entries: [{ id: 'item1' }] } },
             },
         };
@@ -214,8 +308,8 @@ describe('ApplyOverridesPanel — mutation', () => {
                 onMutatedChange={onMutatedChange}
             />,
         );
-        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-level'), {
-            target: { value: '60' },
+        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-name'), {
+            target: { value: 'After' },
         });
         const lastCall = onMutatedChange.mock.calls.at(-1);
         const [json] = lastCall!;
@@ -266,6 +360,29 @@ describe('ApplyOverridesPanel — mutation', () => {
         expect(JSON.parse(json as string).sections.profile.runes).toBe(1_500_000_000);
         expect(screen.getByTestId('apply-overrides-profile-soft-warning-runes')).toBeInTheDocument();
     });
+
+    it('changing class raises and enables stats below the new class minimums', () => {
+        render(
+            <ApplyOverridesPanel
+                canonicalJSON={canonicalJSON()}
+                onMutatedChange={() => {}}
+            />,
+        );
+        fireEvent.click(screen.getByTestId('apply-overrides-profile-toggle-class'));
+        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-class'), {
+            target: { value: '1' },
+        });
+
+        expect(screen.getByTestId('apply-overrides-stats-toggle-dexterity')).toBeChecked();
+        expect(screen.getByTestId('apply-overrides-stats-toggle-dexterity')).toBeDisabled();
+        expect(screen.getByTestId('apply-overrides-stats-input-dexterity')).toHaveValue(16);
+        expect(screen.getByTestId('apply-overrides-stats-toggle-intelligence')).toBeChecked();
+        expect(screen.getByTestId('apply-overrides-stats-toggle-intelligence')).toBeDisabled();
+        expect(screen.getByTestId('apply-overrides-stats-input-intelligence')).toHaveValue(10);
+        expect(screen.getByTestId('apply-overrides-stats-toggle-arcane')).toBeChecked();
+        expect(screen.getByTestId('apply-overrides-stats-toggle-arcane')).toBeDisabled();
+        expect(screen.getByTestId('apply-overrides-stats-input-arcane')).toHaveValue(9);
+    });
 });
 
 describe('applyOverridesToCanonical — direct helper', () => {
@@ -275,14 +392,18 @@ describe('applyOverridesToCanonical — direct helper', () => {
         expect(result.hasInvalid).toBe(true);
     });
 
-    it('round-trips an unedited template byte-equivalent (modulo key order)', () => {
+    it('removes manual profile.level while preserving the remaining template', () => {
         const json = canonicalJSON();
         const result = applyOverridesToCanonical(json, {
             profile: {},
             stats: {},
         });
         expect(result.json).not.toBeNull();
-        expect(JSON.parse(result.json!)).toEqual(JSON.parse(json));
+        const parsed = JSON.parse(result.json!);
+        expect(parsed.sections.profile.level).toBeUndefined();
+        expect(parsed.selection.profile.level).toBeUndefined();
+        expect(parsed.sections.profile.name).toBe('Tarnished');
+        expect(parsed.sections.stats).toEqual({ vigor: 25, faith: 18 });
     });
 });
 
@@ -332,8 +453,9 @@ describe('ApplyOverridesModal — modal wrapper', () => {
                 onConfirm={() => {}}
             />,
         );
-        fireEvent.change(screen.getByTestId('apply-overrides-stats-input-vigor'), {
-            target: { value: '999' },
+        fireEvent.click(screen.getByTestId('apply-overrides-profile-toggle-soulMemory'));
+        fireEvent.change(screen.getByTestId('apply-overrides-profile-input-soulMemory'), {
+            target: { value: '1' },
         });
         const applyBtn = screen.getByTestId('apply-overrides-apply');
         expect(applyBtn).toBeDisabled();
@@ -355,6 +477,51 @@ describe('ApplyOverridesModal — modal wrapper', () => {
         fireEvent.click(screen.getByTestId('apply-overrides-cancel'));
         expect(onCancel).toHaveBeenCalledTimes(1);
         expect(onConfirm).not.toHaveBeenCalled();
+    });
+
+    it('forwards class ID 0 as an explicit runtime override', () => {
+        const onConfirm = vi.fn();
+        render(
+            <ApplyOverridesModal
+                sourceLabel="Imported YAML"
+                canonicalJSON={canonicalJSON()}
+                onCancel={() => {}}
+                onConfirm={onConfirm}
+            />,
+        );
+        fireEvent.click(screen.getByTestId('apply-overrides-profile-toggle-class'));
+        fireEvent.click(screen.getByTestId('apply-overrides-apply'));
+        expect(onConfirm).toHaveBeenCalledTimes(1);
+        expect(onConfirm.mock.calls[0][2]).toMatchObject({
+            deriveLevelFromStats: true,
+            classOverride: { classID: 0 },
+        });
+    });
+
+    it('Escape closes the modal, but not while apply is busy', () => {
+        const onCancel = vi.fn();
+        const { rerender } = render(
+            <ApplyOverridesModal
+                sourceLabel="Imported YAML"
+                canonicalJSON={canonicalJSON()}
+                onCancel={onCancel}
+                onConfirm={() => {}}
+            />,
+        );
+        fireEvent.keyDown(screen.getByTestId('apply-overrides-modal'), { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalledTimes(1);
+
+        rerender(
+            <ApplyOverridesModal
+                sourceLabel="Imported YAML"
+                canonicalJSON={canonicalJSON()}
+                onCancel={onCancel}
+                onConfirm={() => {}}
+                applying
+            />,
+        );
+        fireEvent.keyDown(screen.getByTestId('apply-overrides-modal'), { key: 'Escape' });
+        expect(onCancel).toHaveBeenCalledTimes(1);
     });
 
     it('Apply button label switches to "Applying…" and disables while applying', () => {

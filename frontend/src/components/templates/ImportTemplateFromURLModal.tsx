@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useModalEscape } from './useModalEscape';
 
 // ImportTemplateFromURLModal — Phase 9 of spec/56-templates-v2.md.
 // Small dedicated modal that takes a single https:// URL, runs the
@@ -31,6 +32,7 @@ export function ImportTemplateFromURLModal({ onPreview, onCancel }: Props) {
     const [url, setURL] = useState('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string>('');
+    const onDialogKeyDown = useModalEscape(onCancel, loading);
 
     useEffect(() => {
         // Autofocus the input so user can immediately paste.
@@ -78,6 +80,7 @@ export function ImportTemplateFromURLModal({ onPreview, onCancel }: Props) {
             aria-label="Import Build Template from URL"
             ref={dialogRef}
             tabIndex={-1}
+            onKeyDown={onDialogKeyDown}
             className="fixed inset-0 z-[55] flex items-center justify-center bg-black/60 p-4"
         >
             <div className="w-full max-w-lg rounded-lg bg-card border border-border/60 shadow-xl flex flex-col">
