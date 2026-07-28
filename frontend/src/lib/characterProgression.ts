@@ -59,14 +59,12 @@ export function calculateLevel(stats: StatBlock): number {
 export function minimumSoulMemoryForLevel(level: number): number {
     let total = 0;
     for (let n = 2; n <= level; n++) {
-        let cost = Math.floor(0.02 * n * n * n + 3.06 * n * n + 105.6 * n - 895);
-        // Go and JavaScript both use float64 here, but their compilers round
-        // five exact-integer boundaries differently for the expression used
-        // by the long-standing backend formula. Preserve the backend results:
-        // the UI is a preview, while vm.MinimumSoulMemoryForLevel is the
-        // authoritative persistence rule.
-        if (n === 45 || n === 257 || n === 282) cost--;
-        if (n === 657 || n === 682) cost++;
+        let cost = Math.trunc(
+            (2 * n * n * n + 306 * n * n + 10_560 * n - 89_500) / 100,
+        );
+        if (n === 45 || n === 205 || n === 257 || n === 282 || n === 410 || n === 707) {
+            cost--;
+        }
         if (cost > 0) total += cost;
     }
     return Math.min(total, U32_MAX);

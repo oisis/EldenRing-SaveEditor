@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.5] - 2026-07-28
+
+### fix(templates): make Soul Memory calculation portable
+
+Soul Memory requirements now use deterministic integer arithmetic, producing
+identical results across macOS, Linux and Windows. The committed test suite no
+longer invokes the ignored weapon-stat generator or depends on its local
+`tmp/` inputs.
+
 ## [1.6.4] - 2026-07-28
 
 ### feat(templates): add class-aware character overrides

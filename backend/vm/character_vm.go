@@ -17,8 +17,17 @@ import (
 func runesCostForLevel(level uint32) uint32 {
 	total := int64(0)
 	for n := uint32(2); n <= level; n++ {
-		fn := float64(n)
-		cost := int64(0.02*fn*fn*fn + 3.06*fn*fn + 105.6*fn - 895.0)
+		n64 := int64(n)
+		cost := (2*n64*n64*n64 + 306*n64*n64 + 10_560*n64 - 89_500) / 100
+
+		// Preserve the established formula's results at the six integer
+		// boundaries where floating-point evaluation historically rounded
+		// down on the application's supported platforms. Expressing the
+		// calculation as integers makes those results architecture-independent.
+		switch n {
+		case 45, 205, 257, 282, 410, 707:
+			cost--
+		}
 		if cost > 0 {
 			total += cost
 		}

@@ -1,12 +1,6 @@
 package data
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"io"
-	"os"
-	"os/exec"
-	"path/filepath"
 	"testing"
 )
 
@@ -185,63 +179,6 @@ func TestWeaponStatsV1Ammo(t *testing.T) {
 				c.name, s.GuardPhysical, s.GuardMagic, s.GuardBoost)
 		}
 	}
-}
-
-// TestWeaponStatsV1GeneratorReproducible runs the generator a second
-// time and asserts the generated file's SHA256 is unchanged. We hash
-// before and after invocation rather than diffing to keep the test
-// lightweight, and skip when the generator can't be invoked (e.g. in a
-// minimal sandbox without `go run`).
-func TestWeaponStatsV1GeneratorReproducible(t *testing.T) {
-	// Resolve repo root: this test file lives at backend/db/data, so walk up.
-	wd, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("os.Getwd: %v", err)
-	}
-	repoRoot := filepath.Join(wd, "..", "..", "..")
-	genScript := filepath.Join(repoRoot, "tmp", "scripts", "generate_weapon_stats.go")
-	if _, err := os.Stat(genScript); err != nil {
-		t.Skipf("generator script not found at %s: %v", genScript, err)
-	}
-	genInput := filepath.Join(repoRoot, "tmp", "item-audit", "app_items.csv")
-	if _, err := os.Stat(genInput); err != nil {
-		t.Skipf("generator input not found at %s: %v", genInput, err)
-	}
-	target := filepath.Join(repoRoot, "backend", "db", "data", "weapon_stats_generated.go")
-
-	hashBefore, err := sha256OfFile(target)
-	if err != nil {
-		t.Fatalf("hash before: %v", err)
-	}
-
-	cmd := exec.Command("go", "run", "tmp/scripts/generate_weapon_stats.go")
-	cmd.Dir = repoRoot
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		t.Fatalf("re-run generator: %v\n%s", err, out)
-	}
-
-	hashAfter, err := sha256OfFile(target)
-	if err != nil {
-		t.Fatalf("hash after: %v", err)
-	}
-	if hashBefore != hashAfter {
-		t.Errorf("generator output changed across runs:\n  before: %s\n  after:  %s\n  output:\n%s",
-			hashBefore, hashAfter, out)
-	}
-}
-
-func sha256OfFile(path string) (string, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return "", err
-	}
-	defer f.Close()
-	h := sha256.New()
-	if _, err := io.Copy(h, f); err != nil {
-		return "", err
-	}
-	return hex.EncodeToString(h.Sum(nil)), nil
 }
 
 // TestWeaponStatsV1NoPanicOnMissing asserts that map lookups for unknown
