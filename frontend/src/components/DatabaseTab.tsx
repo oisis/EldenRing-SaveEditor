@@ -928,8 +928,8 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                                <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" prefix="I" compact mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
-                                                <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" prefix="S" compact mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
+                                                <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" prefix="I" compact mode={item.recordMode === 'separate_instances' ? 'instance-count' : 'quantity'} />
+                                                <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" prefix="S" compact mode={item.recordMode === 'separate_instances' ? 'instance-count' : 'quantity'} />
                                             </div>
                                         </div>
                                     );
@@ -1077,10 +1077,10 @@ export function DatabaseTab({columnVisibility, platform, charIndex, inventoryVer
                                             return (
                                                 <>
                                                     <td className="px-3 py-2 text-center">
-                                                        <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
+                                                        <ItemCapacityBadge owned={owned.inv} max={effectiveCap(item, 'inv', clearCount, useTechnicalCapsMode)} label="Inventory" mode={item.recordMode === 'separate_instances' ? 'instance-count' : 'quantity'} />
                                                     </td>
                                                     <td className="px-3 py-2 text-center">
-                                                        <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" mode={item.recordMode === 'separate_instances' ? 'instance' : 'quantity'} />
+                                                        <ItemCapacityBadge owned={owned.storage} max={effectiveCap(item, 'storage', clearCount, useTechnicalCapsMode)} label="Storage" mode={item.recordMode === 'separate_instances' ? 'instance-count' : 'quantity'} />
                                                     </td>
                                                 </>
                                             );

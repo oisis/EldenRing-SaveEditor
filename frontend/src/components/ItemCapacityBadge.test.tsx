@@ -18,4 +18,23 @@ describe('ItemCapacityBadge', () => {
         rerender(<ItemCapacityBadge owned={0} max={0} label="Storage" mode="instance" />);
         expect(screen.getByLabelText('Storage not present')).toHaveTextContent('—');
     });
+
+    describe('instance-count mode', () => {
+        it('shows the real copy count over a fixed 1 denominator', () => {
+            render(<ItemCapacityBadge owned={3} max={1} label="Inventory" mode="instance-count" />);
+            expect(screen.getByLabelText('Inventory 3 of 1')).toHaveTextContent('3 / 1');
+        });
+
+        it('keeps the container prefix in compact form', () => {
+            render(<ItemCapacityBadge owned={3} max={1} label="Inventory" prefix="I" compact mode="instance-count" />);
+            expect(screen.getByLabelText('Inventory 3 of 1')).toHaveTextContent('I:3/1');
+        });
+
+        it('renders 0 / 1 for an unowned instance item instead of a dash', () => {
+            render(<ItemCapacityBadge owned={0} max={1} label="Storage" mode="instance-count" />);
+            const badge = screen.getByLabelText('Storage 0 of 1');
+            expect(badge).toHaveTextContent('0 / 1');
+            expect(badge).not.toHaveTextContent('—');
+        });
+    });
 });

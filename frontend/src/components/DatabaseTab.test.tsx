@@ -218,6 +218,69 @@ describe('DatabaseTab', () => {
         expect(screen.getByLabelText('Inventory 1 of 1')).toHaveTextContent('I:✓');
     });
 
+    // Ash of War: an instance-backed catalog item (recordMode
+    // 'separate_instances'). Each physical copy is one inventory/storage record
+    // with quantity 1, so the Item Database must show the real copy count over a
+    // fixed per-record cap of 1 — independently for Inventory and Storage — and
+    // never collapse to a plain ✓.
+    function makeAshOfWar(): db.ItemEntry {
+        return db.ItemEntry.createFrom({
+            id: 0x80000010,
+            name: 'Ash of War: Storm Stomp',
+            category: 'ashes_of_war',
+            subCategory: '',
+            recordMode: 'separate_instances',
+            maxInventory: 1,
+            maxStorage: 600,
+            maxUpgrade: 0,
+            iconPath: '',
+            flags: [],
+        });
+    }
+
+    function ashInstance(baseId: number) {
+        return { id: baseId, baseId, name: 'Ash of War: Storm Stomp', category: 'ashes_of_war', subCategory: '', quantity: 1, maxInventory: 1, maxStorage: 600, flags: [] };
+    }
+
+    it('shows independent instance counts (N / 1) for separate-instance items, not a check', async () => {
+        const aow = makeAshOfWar();
+        mocks.GetItemList.mockResolvedValue([aow]);
+        mocks.GetCharacter.mockResolvedValue({
+            inventory: [ashInstance(aow.id), ashInstance(aow.id), ashInstance(aow.id)], // 3 copies
+            storage: [ashInstance(aow.id), ashInstance(aow.id)], // 2 copies
+            clearCount: 0,
+        });
+        renderTab({ category: 'ashes_of_war' });
+        fireEvent.click(screen.getByTitle('Grid view'));
+
+        expect(await screen.findByText('Ash of War: Storm Stomp')).toBeInTheDocument();
+        // Inventory and Storage counters are independent, each over a fixed 1.
+        expect(screen.getByLabelText('Inventory 3 of 1')).toHaveTextContent('I:3/1');
+        expect(screen.getByLabelText('Storage 2 of 1')).toHaveTextContent('S:2/1');
+        // The old instance semantics (a bare ✓) must not appear for these rows.
+        expect(screen.queryByLabelText('Inventory present')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Storage present')).not.toBeInTheDocument();
+    });
+
+    // The table view shares the same sorted list and the same instance-count
+    // badge; its non-compact "3 / 1" form is asserted directly in the
+    // ItemCapacityBadge unit test. jsdom does not lay out the virtualized table
+    // rows (see the owned-sort test), so we assert the counter through the grid.
+    it('never renders separate-instance rows as a plain check in the table view', async () => {
+        const aow = makeAshOfWar();
+        mocks.GetItemList.mockResolvedValue([aow]);
+        mocks.GetCharacter.mockResolvedValue({
+            inventory: [ashInstance(aow.id), ashInstance(aow.id), ashInstance(aow.id)],
+            storage: [ashInstance(aow.id), ashInstance(aow.id)],
+            clearCount: 0,
+        });
+        renderTab({ category: 'ashes_of_war' }); // default (table) view
+        await screen.findByLabelText('Subcategory'); // wait for load
+        // No presence-only ✓ badge exists anywhere for this instance-backed item.
+        expect(screen.queryByLabelText('Inventory present')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Storage present')).not.toBeInTheDocument();
+    });
+
     it('hides risk-flagged items when showFlaggedItems is off and Chaos is off', async () => {
         renderTab({ showFlaggedItems: false });
         fireEvent.click(screen.getByTitle('Grid view'));

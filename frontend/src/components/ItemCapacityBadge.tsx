@@ -4,7 +4,7 @@ interface ItemCapacityBadgeProps {
     label: 'Inventory' | 'Storage';
     prefix?: 'I' | 'S';
     compact?: boolean;
-    mode?: 'quantity' | 'instance';
+    mode?: 'quantity' | 'instance' | 'instance-count';
 }
 
 export function ItemCapacityBadge({ owned, max, label, prefix, compact = false, mode = 'quantity' }: ItemCapacityBadgeProps) {
@@ -36,6 +36,21 @@ export function ItemCapacityBadge({ owned, max, label, prefix, compact = false, 
                 className={`${common} border-border/30 bg-muted/20 text-muted-foreground/50`}
             >
                 {prefixText}<span aria-hidden="true">—</span>
+            </span>
+        );
+    }
+
+    // Catalog counter for instance-backed items: shows the real number of
+    // physical copies over the per-record quantity cap of 1 (e.g. "3 / 1").
+    // The denominator is always 1 — it is the single-record limit, not the
+    // container's technical storage cap.
+    if (mode === 'instance-count') {
+        const tone = owned > 0
+            ? 'border-green-500/30 bg-green-500/10 text-green-500'
+            : 'border-border/30 bg-muted/20 text-muted-foreground/50';
+        return (
+            <span aria-label={`${label} ${owned} of 1`} title={`${label}: ${owned} / 1`} className={`${common} ${tone}`}>
+                {compact ? `${prefixText}${owned}/1` : `${owned} / 1`}
             </span>
         );
     }

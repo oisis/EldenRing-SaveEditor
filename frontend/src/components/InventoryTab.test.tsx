@@ -292,6 +292,11 @@ describe('InventoryTab (Equipment)', () => {
         expect(within(equipped).getByLabelText('Inventory not present')).toBeInTheDocument();
         expect(within(equipped).getByLabelText('Storage not present')).toBeInTheDocument();
         expect(screen.getByTitle('Attached to Claymore. Edit it from the weapon.')).toBeInTheDocument();
+        // Regression: the Item Database's instance-count format (N / 1) must not
+        // leak into the Inventory tab — separate instances keep the ✓ / —
+        // presence semantics here.
+        expect(screen.queryByText('1 / 1')).not.toBeInTheDocument();
+        expect(screen.queryByLabelText(/Inventory \d+ of 1/)).not.toBeInTheDocument();
     });
 
     it('shows the AoW column and opens the shared weapon editor from the red edit button', async () => {
