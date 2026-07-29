@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/db"
 )
@@ -147,15 +148,20 @@ const (
 	// Phase 7b.1 — sections.equipment apply codes.
 	//
 	// equipment_inventory_combo_unsupported is a hard error: combining
-	// sections.equipment with sections.inventory.workspace in the same
-	// template is rejected at preview time. The reason is the writer's
+	// sections.equipment with ANY Inventory-mutating section in the same
+	// template is rejected at preview time. The conflicting family is
+	// inventory.workspace, items, inventoryLayout and storageLayout — see
+	// EquipmentInventoryConflicts. The reason is the writer's
 	// GaMap-freshness requirement (Phase 7b.0 strict-reject of missing
-	// handles): the inventory section only adds items into the workspace
-	// snapshot, and slot.GaMap is not refreshed until the user clicks
-	// Save changes. Equipping an item the workspace just added would
-	// fail with "not present in inventory (GaMap)". Lifting this
-	// restriction needs a workspace-backed equipment model or auto-
-	// commit — both out of scope for Phase 7b.1.
+	// handles): equipment resolves native item handles from the
+	// already-saved Inventory (slot.Inventory.CommonItems + slot.GaMap),
+	// while those sections only stage additions / reorderings in the Sort
+	// Order workspace snapshot, and slot.GaMap is not refreshed until the
+	// user clicks Save changes. Equipping an item the workspace just added
+	// (or reordered) would fail with "not present in inventory (GaMap)".
+	// The rule holds on every path: Create from Character, import preview
+	// and direct apply. Lifting it needs a workspace-backed equipment
+	// model or auto-commit — both out of scope for Phase 7b.1.
 	//
 	// equipment_item_not_in_inventory is a warning: the resolver could
 	// not find the referenced item in slot.Inventory.CommonItems (storage
@@ -296,6 +302,40 @@ func ParseBuildTemplateJSON(data []byte) (*BuildTemplate, error) {
 	return &tpl, nil
 }
 
+// EquipmentInventoryConflicts returns the canonical-ordered list of
+// Inventory-mutating selection keys that cannot coexist with a populated
+// Equipment selection. The list is empty when the selection is nil, when
+// equipment is not selected, or when no conflicting section is selected.
+// Shared by the import preview and the direct-apply boundary so both
+// surfaces name the same sections in the same order. See
+// IssueCodeEquipmentInventoryComboUnsupported for the rationale.
+func EquipmentInventoryConflicts(sel *TemplateSelection) []string {
+	if sel == nil || !sel.Equipment.HasAny() {
+		return nil
+	}
+	var out []string
+	if sel.InventoryWorkspace.HasAny() {
+		out = append(out, "inventory.workspace")
+	}
+	if sel.Items.HasAny() {
+		out = append(out, "items")
+	}
+	if sel.InventoryLayout.HasAny() {
+		out = append(out, "inventoryLayout")
+	}
+	if sel.StorageLayout.HasAny() {
+		out = append(out, "storageLayout")
+	}
+	return out
+}
+
+// EquipmentInventoryComboMessage renders the hard-error message for the
+// equipment ↔ Inventory conflict, naming the actually-conflicting
+// sections. conflicts must be non-empty (see EquipmentInventoryConflicts).
+func EquipmentInventoryComboMessage(conflicts []string) string {
+	return fmt.Sprintf("sections.equipment cannot be applied together with %s in the same template: equipment resolves native item handles from the already-saved Inventory (slot.GaMap), while those sections only mutate the Sort Order workspace, so items they stage or reorder are not yet committed to the slot's GaMap.", strings.Join(conflicts, ", "))
+}
+
 // PreviewBuildTemplateImport produces a dry-run report against the
 // current DB. It does NOT touch any save, workspace, or session — the
 // only state it reads is the in-memory item database loaded at app
@@ -366,16 +406,18 @@ func PreviewBuildTemplateImport(tpl *BuildTemplate, opts ImportPreviewOptions) I
 		rep.Summary.StorageLayoutCount = len(tpl.Sections.StorageLayout.Entries)
 	}
 
-	// Phase 7b.1 — equipment + inventory.workspace combo guard.
+	// Phase 7b.1 — equipment + Inventory-mutating combo guard.
 	// Detected at preview time so the user sees a single, clean error in
 	// the preview modal even before they click Apply. The apply path
 	// double-checks this exact rule to stay robust against direct callers
-	// of the JSON endpoint that bypass the preview.
-	if tpl.Selection != nil && tpl.Selection.Equipment.HasAny() && tpl.Selection.InventoryWorkspace.HasAny() {
+	// of the JSON endpoint that bypass the preview. The conflicting family
+	// is inventory.workspace / items / inventoryLayout / storageLayout —
+	// see EquipmentInventoryConflicts.
+	if conflicts := EquipmentInventoryConflicts(tpl.Selection); len(conflicts) > 0 {
 		rep.Errors = append(rep.Errors, ImportPreviewIssue{
 			Severity: "error",
 			Code:     IssueCodeEquipmentInventoryComboUnsupported,
-			Message:  "sections.equipment cannot be applied together with sections.inventory.workspace in the same template (Phase 7b.1 limitation: inventory items are only added to the workspace and the equipment writer needs them already committed to the slot's GaMap).",
+			Message:  EquipmentInventoryComboMessage(conflicts),
 		})
 	}
 

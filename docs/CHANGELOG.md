@@ -17,7 +17,9 @@ DB-confirmed arrows_and_bolts item the target owns, so a hand-authored template
 cannot force a weapon or ordinary goods into an arrows/bolts slot. An Equipment
 export cannot be combined with Items or
 Inventory/Storage layout in a single template. A previewed template is saved to
-the library exactly as shown, without re-reading the character.
+the library exactly as shown, without re-reading the character. Imported and
+hand-authored templates that combine Equipment with Items or Inventory/Storage
+layout are now rejected before any mutation.
 
 ## [1.6.5] - 2026-07-28
 

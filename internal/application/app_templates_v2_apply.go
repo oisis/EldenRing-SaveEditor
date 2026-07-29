@@ -294,18 +294,21 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 		}, nil
 	}
 
-	// Phase 7b.1 — hard reject equipment + inventory.workspace combo at the
+	// Phase 7b.1 — hard reject equipment + any Inventory-mutating section
+	// (inventory.workspace / items / inventoryLayout / storageLayout) at the
 	// apply boundary too. The preview already injects this error in
 	// PreviewBuildTemplateImport, but the apply double-checks here so direct
 	// callers of the JSON endpoint that bypass the preview cannot smuggle a
-	// combo through. See IssueCodeEquipmentInventoryComboUnsupported for
-	// the GaMap-freshness rationale.
-	if hasEquipment && hasInventory {
+	// combo through. This guard runs before the session-required check and
+	// before any slot / workspace mutation. See
+	// IssueCodeEquipmentInventoryComboUnsupported for the GaMap-freshness
+	// rationale.
+	if conflicts := templates.EquipmentInventoryConflicts(tpl.Selection); len(conflicts) > 0 {
 		report.OK = false
 		report.Errors = append(report.Errors, templates.ImportPreviewIssue{
 			Severity: "error",
 			Code:     templates.IssueCodeEquipmentInventoryComboUnsupported,
-			Message:  "sections.equipment cannot be applied together with sections.inventory.workspace in the same template (Phase 7b.1 limitation).",
+			Message:  templates.EquipmentInventoryComboMessage(conflicts),
 		})
 		return ApplyTemplateV2Result{
 			CharIndex: charIdx,
