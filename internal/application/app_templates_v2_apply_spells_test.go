@@ -60,9 +60,10 @@ func readHash10(t *testing.T, app *App) uint32 {
 
 // spellsTemplateJSON marshals a hand-built v2 template (selection +
 // sections, no extra noise) into the canonical JSON the apply endpoint
-// consumes. Kept inline because makeV2Template requires a full Export
-// round-trip and spells aren't yet wired into the export path for
-// arbitrary fixtures (the export source comes from raw save bytes).
+// consumes. Kept inline so each apply test can target precise per-slot
+// spell sections in isolation; the full create-from-character export path
+// (which now produces spells) is exercised end to end by the round-trip
+// test instead.
 func spellsTemplateJSON(t *testing.T, sel *templates.SectionSelection, sec *templates.SpellsSection) string {
 	t.Helper()
 	tpl := &templates.BuildTemplate{

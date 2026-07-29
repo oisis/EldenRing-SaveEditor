@@ -153,7 +153,7 @@ const allTalismansUnlocked = 4
 func TestResolveEquipmentWrites_MatchesOwnedWeapon(t *testing.T) {
 	items := []editor.EditableItem{{BaseItemID: 0x100000, OriginalHandle: 0x80000010, IsWeapon: true}}
 	sec := &templates.EquipmentSection{WeaponRightHand1: &templates.EquipmentItemRef{BaseItemID: 0x100000}}
-	writes, warnings, err := resolveEquipmentWritesFromItems(items, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(items, nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}
@@ -169,7 +169,7 @@ func TestResolveEquipmentWrites_EquipsTalisman(t *testing.T) {
 	// Talisman handle carries the accessory (0xA0) type prefix.
 	items := []editor.EditableItem{{BaseItemID: 0x200003E8, OriginalHandle: 0xA0000010, IsTalisman: true}}
 	sec := &templates.EquipmentSection{Talisman1: &templates.EquipmentItemRef{BaseItemID: 0x200003E8}}
-	writes, warnings, err := resolveEquipmentWritesFromItems(items, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(items, nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}
@@ -183,7 +183,7 @@ func TestResolveEquipmentWrites_EquipsTalisman(t *testing.T) {
 
 func TestResolveEquipmentWrites_ClearsTalisman(t *testing.T) {
 	sec := &templates.EquipmentSection{Talisman2: &templates.EquipmentItemRef{BaseItemID: 0}}
-	writes, warnings, err := resolveEquipmentWritesFromItems(nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}
@@ -205,7 +205,7 @@ func TestResolveEquipmentWrites_SkipsLockedTalismanSlot(t *testing.T) {
 		Talisman2: &templates.EquipmentItemRef{BaseItemID: 0x200003E9},
 		Talisman3: &templates.EquipmentItemRef{BaseItemID: 0}, // clear on a locked slot
 	}
-	writes, warnings, err := resolveEquipmentWritesFromItems(items, 1, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(items, nil, 1, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}
@@ -226,7 +226,7 @@ func TestResolveEquipmentWrites_SkipsLockedTalismanSlot(t *testing.T) {
 
 func TestResolveEquipmentWrites_SkipsTalisman5(t *testing.T) {
 	sec := &templates.EquipmentSection{Talisman5: &templates.EquipmentItemRef{BaseItemID: 0x200003E8}}
-	writes, warnings, err := resolveEquipmentWritesFromItems(nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}
@@ -240,7 +240,7 @@ func TestResolveEquipmentWrites_SkipsTalisman5(t *testing.T) {
 
 func TestResolveEquipmentWrites_ExplicitClear(t *testing.T) {
 	sec := &templates.EquipmentSection{ArmorHead: &templates.EquipmentItemRef{BaseItemID: 0}}
-	writes, warnings, err := resolveEquipmentWritesFromItems(nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}
@@ -252,13 +252,222 @@ func TestResolveEquipmentWrites_ExplicitClear(t *testing.T) {
 	}
 }
 
+// ─── ammo resolver (pass-through category, GaMap-backed candidates) ──────
+
+const (
+	ammoTestItemID = uint32(0x02FAF080)           // Arrow
+	ammoTestHandle = core.ItemTypeWeapon | 0x00A3 // native arrows GaItem handle
+)
+
+func TestResolveEquipmentWrites_EquipsOwnedAmmo(t *testing.T) {
+	ammo := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 1}},
+		map[uint32]uint32{ammoTestHandle: ammoTestItemID},
+	)
+	sec := &templates.EquipmentSection{Arrows1: &templates.EquipmentItemRef{BaseItemID: ammoTestItemID}}
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, ammo, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if len(warnings) != 0 {
+		t.Fatalf("warnings = %+v", warnings)
+	}
+	if len(writes) != 1 || writes[0] != (core.EquipmentWrite{Slot: core.EquipSlotArrows1, Handle: ammoTestHandle}) {
+		t.Fatalf("writes = %+v", writes)
+	}
+}
+
+func TestResolveEquipmentWrites_AmmoNotInInventory(t *testing.T) {
+	// Owned ammo is a different item ID than the ref asks for.
+	ammo := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 1}},
+		map[uint32]uint32{ammoTestHandle: 0x02000000},
+	)
+	sec := &templates.EquipmentSection{Arrows1: &templates.EquipmentItemRef{BaseItemID: ammoTestItemID}}
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, ammo, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if len(writes) != 0 {
+		t.Fatalf("no ammo match → no write, got %+v", writes)
+	}
+	if n := countWarningsByCode(warnings, templates.IssueCodeEquipmentItemNotInInventory, "arrows1"); n != 1 {
+		t.Fatalf("expected one not-in-inventory warning for arrows1, got %+v", warnings)
+	}
+}
+
+func TestResolveEquipmentWrites_AmmoOnlyInStorageIgnored(t *testing.T) {
+	// Production collects candidates from Inventory only; Storage is never
+	// passed. Ammo present solely in Storage is therefore invisible and the
+	// slot resolves to not-in-inventory.
+	inventory := []core.InventoryItem{} // no ammo in inventory
+	storage := []core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 99}}
+	gaMap := map[uint32]uint32{ammoTestHandle: ammoTestItemID}
+	if got := collectAmmoCandidates(storage, gaMap); len(got) != 1 {
+		t.Fatalf("sanity: storage record should be a candidate when scanned directly, got %+v", got)
+	}
+	ammo := collectAmmoCandidates(inventory, gaMap) // production only ever scans inventory
+	sec := &templates.EquipmentSection{Arrows1: &templates.EquipmentItemRef{BaseItemID: ammoTestItemID}}
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, ammo, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if len(writes) != 0 {
+		t.Fatalf("storage-only ammo must not equip, got %+v", writes)
+	}
+	if n := countWarningsByCode(warnings, templates.IssueCodeEquipmentItemNotInInventory, "arrows1"); n != 1 {
+		t.Fatalf("expected one not-in-inventory warning for arrows1, got %+v", warnings)
+	}
+}
+
+func TestResolveEquipmentWrites_AmmoDuplicateHandleNoFalseAmbiguity(t *testing.T) {
+	// Two inventory rows share the SAME handle (e.g. a stacked/duplicated
+	// record). That is one owned item, not an ambiguity.
+	ammo := collectAmmoCandidates(
+		[]core.InventoryItem{
+			{GaItemHandle: ammoTestHandle, Quantity: 1},
+			{GaItemHandle: ammoTestHandle, Quantity: 1},
+		},
+		map[uint32]uint32{ammoTestHandle: ammoTestItemID},
+	)
+	sec := &templates.EquipmentSection{Arrows1: &templates.EquipmentItemRef{BaseItemID: ammoTestItemID}}
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, ammo, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if n := countWarningsByCode(warnings, templates.IssueCodeEquipmentItemAmbiguous, "arrows1"); n != 0 {
+		t.Fatalf("same-handle duplicates must not warn ambiguous, got %+v", warnings)
+	}
+	if len(writes) != 1 || writes[0].Handle != ammoTestHandle {
+		t.Fatalf("writes = %+v", writes)
+	}
+}
+
+func TestResolveEquipmentWrites_AmmoDistinctHandlesFirstWins(t *testing.T) {
+	// Two DIFFERENT handles resolve to the same item ID → genuine ambiguity,
+	// first record wins.
+	const otherHandle = core.ItemTypeWeapon | 0x00A4
+	ammo := collectAmmoCandidates(
+		[]core.InventoryItem{
+			{GaItemHandle: ammoTestHandle, Quantity: 1},
+			{GaItemHandle: otherHandle, Quantity: 1},
+		},
+		map[uint32]uint32{ammoTestHandle: ammoTestItemID, otherHandle: ammoTestItemID},
+	)
+	sec := &templates.EquipmentSection{Arrows1: &templates.EquipmentItemRef{BaseItemID: ammoTestItemID}}
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, ammo, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if len(writes) != 1 || writes[0].Handle != ammoTestHandle {
+		t.Fatalf("first handle must win, got %+v", writes)
+	}
+	if n := countWarningsByCode(warnings, templates.IssueCodeEquipmentItemAmbiguous, "arrows1"); n != 1 {
+		t.Fatalf("distinct handles for one item ID must warn ambiguous, got %+v", warnings)
+	}
+}
+
+// ─── ammo candidate fail-closed category / prefix gate ──────────────────
+//
+// collectAmmoCandidates must never let a hand-authored template point an
+// arrows/bolts slot at anything that is not a real, DB-confirmed
+// arrows_and_bolts item carried on a weapon (0x80) or goods (0xB0) handle.
+
+const (
+	longswordItemID   = uint32(0x001E8480) // melee_armaments (not ammo)
+	boludsGoodsItemID = uint32(0x40000384) // Neutralizing Boluses, category "tools"
+	unknownItemID     = uint32(0x40000320) // resolves to no DB entry
+	goodsAmmoHandle   = core.ItemTypeItem | 0x0384
+)
+
+func TestCollectAmmoCandidates_AcceptsKnownArrowsAndBolts(t *testing.T) {
+	got := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 1}},
+		map[uint32]uint32{ammoTestHandle: ammoTestItemID},
+	)
+	if len(got) != 1 {
+		t.Fatalf("known arrows_and_bolts must be accepted, got %+v", got)
+	}
+	// Handle stays the native inventory handle; itemID is the canonical BaseItemID.
+	if got[0].handle != ammoTestHandle || got[0].itemID != ammoTestItemID {
+		t.Fatalf("candidate = %+v, want handle=0x%08X itemID=0x%08X", got[0], ammoTestHandle, ammoTestItemID)
+	}
+}
+
+func TestCollectAmmoCandidates_RejectsWeaponBaseItemID(t *testing.T) {
+	// A weapon carried on a weapon-prefix handle: right prefix, wrong category.
+	got := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 1}},
+		map[uint32]uint32{ammoTestHandle: longswordItemID},
+	)
+	if len(got) != 0 {
+		t.Fatalf("weapon item must not qualify as ammo, got %+v", got)
+	}
+}
+
+func TestCollectAmmoCandidates_RejectsOrdinaryGoods(t *testing.T) {
+	// Ordinary goods on a goods (0xB0) handle: allowed prefix, wrong category.
+	got := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: goodsAmmoHandle, Quantity: 1}},
+		map[uint32]uint32{goodsAmmoHandle: boludsGoodsItemID},
+	)
+	if len(got) != 0 {
+		t.Fatalf("ordinary goods must not qualify as ammo, got %+v", got)
+	}
+}
+
+func TestCollectAmmoCandidates_RejectsUnknownItemID(t *testing.T) {
+	got := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 1}},
+		map[uint32]uint32{ammoTestHandle: unknownItemID},
+	)
+	if len(got) != 0 {
+		t.Fatalf("unknown item ID must not qualify as ammo, got %+v", got)
+	}
+}
+
+func TestCollectAmmoCandidates_RejectsDisallowedHandlePrefix(t *testing.T) {
+	// Real arrows_and_bolts item, but carried on an armor (0x90) handle — a
+	// prefix real ammo GaItem records never use. Fail-closed on the prefix.
+	const armorPrefixHandle = core.ItemTypeArmor | 0x00A3
+	got := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: armorPrefixHandle, Quantity: 1}},
+		map[uint32]uint32{armorPrefixHandle: ammoTestItemID},
+	)
+	if len(got) != 0 {
+		t.Fatalf("disallowed handle prefix must be rejected, got %+v", got)
+	}
+}
+
+// TestResolveEquipmentWrites_HandAuthoredWeaponInAmmoSlot proves the end-to-end
+// guarantee: a hand-authored equipment.arrows1 ref pointing at an OWNED weapon's
+// BaseItemID produces no EquipmentWrite and resolves to not-in-inventory, because
+// the weapon never becomes an ammo candidate.
+func TestResolveEquipmentWrites_HandAuthoredWeaponInAmmoSlot(t *testing.T) {
+	ammo := collectAmmoCandidates(
+		[]core.InventoryItem{{GaItemHandle: ammoTestHandle, Quantity: 1}},
+		map[uint32]uint32{ammoTestHandle: longswordItemID}, // owns a weapon on a weapon handle
+	)
+	sec := &templates.EquipmentSection{Arrows1: &templates.EquipmentItemRef{BaseItemID: longswordItemID}}
+	writes, warnings, err := resolveEquipmentWritesFromItems(nil, ammo, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if len(writes) != 0 {
+		t.Fatalf("weapon pointed at ammo slot must not write, got %+v", writes)
+	}
+	if n := countWarningsByCode(warnings, templates.IssueCodeEquipmentItemNotInInventory, "arrows1"); n != 1 {
+		t.Fatalf("expected one not-in-inventory warning for arrows1, got %+v", warnings)
+	}
+}
+
 func TestResolveEquipmentWrites_AmbiguousMatchWarns(t *testing.T) {
 	items := []editor.EditableItem{
 		{BaseItemID: 0x100000, OriginalHandle: 0x80000010, IsWeapon: true},
 		{BaseItemID: 0x100000, OriginalHandle: 0x80000011, IsWeapon: true},
 	}
 	sec := &templates.EquipmentSection{WeaponRightHand1: &templates.EquipmentItemRef{BaseItemID: 0x100000}}
-	writes, warnings, err := resolveEquipmentWritesFromItems(items, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
+	writes, warnings, err := resolveEquipmentWritesFromItems(items, nil, allTalismansUnlocked, &templates.SectionSelection{All: true}, sec)
 	if err != nil {
 		t.Fatalf("resolver: %v", err)
 	}

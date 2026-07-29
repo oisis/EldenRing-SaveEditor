@@ -1184,6 +1184,138 @@ describe('TemplatesShellModal — Phase 6 Apply with overrides', () => {
         expect(mocks.ApplyBuildTemplateV2FromLibraryToCharacter).not.toHaveBeenCalled();
     });
 
+    // ── Apply-with-overrides must not drop equipment / spells ──────────────
+    // A create-from-character template carries profile + stats + the whole
+    // equipment / spell loadout. Editing a stat override must rewrite only
+    // profile / stats and forward the equipment / spell sections untouched to
+    // the backend, so the loadout still lands on the target.
+    const loadoutEquipmentSection = {
+        weaponRightHand1: { baseItemID: 2000000 }, // Longsword base
+        talisman1: { baseItemID: 536872936 }, // 0x200003E8 Crimson Amber
+        arrows1: { baseItemID: 0 }, // explicit clear
+    };
+    const loadoutSpellsSection = {
+        spell1: { baseItemID: 1073748848 }, // 0x40001770 Catch Flame
+        spell2: { baseItemID: 0 }, // explicit clear
+    };
+    const loadoutCanonicalJSON = JSON.stringify({
+        schema: 'saveforge.build-template',
+        version: 2,
+        selection: {
+            profile: { level: true },
+            stats: { vigor: true },
+            equipment: true,
+            spells: true,
+        },
+        sections: {
+            profile: { level: 50 },
+            stats: { vigor: 25 },
+            equipment: loadoutEquipmentSection,
+            spells: loadoutSpellsSection,
+        },
+    });
+
+    function v2LoadoutImportedPreview() {
+        return {
+            report: {
+                ok: true,
+                errors: [],
+                warnings: [],
+                summary: {
+                    inventoryItems: 0,
+                    storageItems: 0,
+                    weapons: 0,
+                    armor: 0,
+                    talismans: 0,
+                    stackables: 0,
+                    aowAssignments: 0,
+                    version: 2,
+                    selectedSections: ['profile', 'stats', 'equipment', 'spells'],
+                    profileFieldsPresent: ['level'],
+                    statFieldsPresent: ['vigor'],
+                },
+            },
+            json: loadoutCanonicalJSON,
+            path: '/fake/loadout.yaml',
+        };
+    }
+
+    async function openLoadoutOverrides() {
+        await screen.findAllByTestId('library-entry');
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('templates-shell-import-yaml'));
+        });
+        await act(async () => {
+            fireEvent.click(await screen.findByTestId('import-preview-apply-v2-overrides'));
+        });
+        await screen.findByTestId('apply-overrides-modal');
+    }
+
+    it('Import: overriding a stat keeps equipment/spells in the payload and needs no session', async () => {
+        mocks.PreviewBuildTemplateImportYAMLFromFile.mockResolvedValue(v2LoadoutImportedPreview());
+        mocks.ApplyBuildTemplateV2ToCharacterJSON.mockResolvedValue(applyV2OKResult());
+        // No open Sort Order workspace (default beforeEach): equipment/spells
+        // apply must proceed without a sessionID.
+        render(<TemplatesShellModal onClose={vi.fn()} charIndex={1} saveLoaded />);
+        await openLoadoutOverrides();
+
+        fireEvent.change(screen.getByTestId('apply-overrides-stats-input-vigor'), {
+            target: { value: '40' },
+        });
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('apply-overrides-apply'));
+        });
+
+        await waitFor(() => {
+            expect(mocks.ApplyBuildTemplateV2ToCharacterJSON).toHaveBeenCalledTimes(1);
+        });
+        const call = mocks.ApplyBuildTemplateV2ToCharacterJSON.mock.calls[0];
+        expect(call[0]).toBe(1);
+        const parsed = JSON.parse(call[1] as string);
+        // Profile/stats carry the edited value.
+        expect(parsed.sections.stats.vigor).toBe(40);
+        expect(parsed.selection.stats.vigor).toBe(true);
+        // Equipment / spells selection stays present.
+        expect(parsed.selection.equipment).toBe(true);
+        expect(parsed.selection.spells).toBe(true);
+        // Equipment / spells sections travel semantically unchanged.
+        expect(parsed.sections.equipment).toEqual(loadoutEquipmentSection);
+        expect(parsed.sections.spells).toEqual(loadoutSpellsSection);
+        // deriveLevelFromStats is always on for the overrides apply; no
+        // sessionID is required for equipment/spells.
+        expect(call[2]).toMatchObject({ mode: 'append', deriveLevelFromStats: true });
+        expect(call[2].sessionID === '' || call[2].sessionID === undefined).toBe(true);
+    });
+
+    it('Import: an OPEN Sort Order workspace blocks the loadout apply with a clear gate', async () => {
+        mocks.PreviewBuildTemplateImportYAMLFromFile.mockResolvedValue(v2LoadoutImportedPreview());
+        mocks.ApplyBuildTemplateV2ToCharacterJSON.mockResolvedValue(applyV2OKResult());
+        // An open edit session for this character is a conflict for a
+        // profile/stats/equipment/spells template: the existing gate must fire
+        // and the apply binding must never be reached.
+        mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({
+            active: true,
+            sessionID: 'sess-open',
+        });
+        const { default: toast } = await import('../../../lib/toast');
+        const toastError = (toast as unknown as { error: ReturnType<typeof vi.fn> }).error;
+        toastError.mockClear();
+
+        render(<TemplatesShellModal onClose={vi.fn()} charIndex={1} saveLoaded />);
+        await openLoadoutOverrides();
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('apply-overrides-apply'));
+        });
+
+        await waitFor(() => {
+            expect(toastError).toHaveBeenCalled();
+        });
+        expect(toastError.mock.calls.some(c => /close the Sort Order workspace/i.test(String(c[0])))).toBe(true);
+        expect(mocks.ApplyBuildTemplateV2ToCharacterJSON).not.toHaveBeenCalled();
+        // Modal stays open so the user can close the workspace and retry.
+        expect(screen.getByTestId('apply-overrides-modal')).toBeInTheDocument();
+    });
+
     it('Import: applied=true closes both modals, toasts success, and calls onCharacterTemplateApplied', async () => {
         mocks.PreviewBuildTemplateImportYAMLFromFile.mockResolvedValue(v2OKImportedPreviewPhase6());
         mocks.ApplyBuildTemplateV2ToCharacterJSON.mockResolvedValue(applyV2OKResult());

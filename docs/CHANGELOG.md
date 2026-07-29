@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### feat(templates): export character loadouts
+
+Create Template can now capture a character's Equipment and all 14 equipped
+spells straight from a loaded save. Equipment covers weapons, ammo, armor and
+the active talisman slots. Empty slots are recorded as explicit clears, so
+applying a loadout also removes the target's old gear and spells. Every
+equipped item — weapons, ammo, armor and talismans alike — must already exist
+in the target's Inventory for the slot to apply; missing items are skipped with
+a warning. Ammo slots are fail-closed: a slot only fills from a real,
+DB-confirmed arrows_and_bolts item the target owns, so a hand-authored template
+cannot force a weapon or ordinary goods into an arrows/bolts slot. An Equipment
+export cannot be combined with Items or
+Inventory/Storage layout in a single template. A previewed template is saved to
+the library exactly as shown, without re-reading the character.
+
 ## [1.6.5] - 2026-07-28
 
 ### fix(templates): make Soul Memory calculation portable

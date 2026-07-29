@@ -566,10 +566,9 @@ describe('TemplateLibraryModal — Phase 5D.1 v2 Apply (library)', () => {
     // Phase 7a: inventory.workspace entries are now applyable. The
     // session lookup happens in the shell after the click, so the
     // library button itself stays enabled and surfaces the normal
-    // "Apply schema v2 template..." tooltip. The "not supported yet"
-    // copy is reserved for v2 sections that have no apply path at all
-    // (e.g. future equipment / talismans / spells before their writers
-    // ship).
+    // "Apply schema v2 template..." tooltip. Equipment and spells apply
+    // too (their writers shipped in Phase 7d.4b); the "not supported yet"
+    // copy is reserved for any v2 section that still has no apply path.
     it('enables v2 Apply for inventory.workspace-only entries with the standard apply tooltip', async () => {
         mocks.ListBuildTemplateLibrary.mockResolvedValue([v2InventoryOnlyEntry]);
         const onApplyV2 = vi.fn();

@@ -248,7 +248,10 @@ func decodeEquipmentSlotToRef(raw uint32, class equipClass, byEquipped map[uint3
 //     (optional), AoWItemID (optional). Multi-match resolves to the
 //     first hit + emits equipment_item_ambiguous warning. No match
 //     emits equipment_item_not_in_inventory warning and the slot is
-//     skipped.
+//     skipped. Ammo slots (arrows/bolts) are a pass-through category, so
+//     they resolve against the GaMap-backed ammo candidate list
+//     (collectAmmoCandidates) instead of the editable inventory, but keep
+//     the same first-wins / not-in-inventory semantics.
 //
 // Returned warnings carry the canonical slot key in Container (reusing
 // the existing optional string field on ImportPreviewIssue so the UI
@@ -270,7 +273,93 @@ func resolveEquipmentWrites(slot *core.SaveSlot, effectiveTalismanSlots int, sel
 	if err != nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: BuildSnapshot: %w", err)
 	}
-	return resolveEquipmentWritesFromItems(snap.InventoryItems, effectiveTalismanSlots, sel, sec)
+	// Ammo (arrows / bolts) is a pass-through category (not in
+	// editor.SupportedCategories), so it never appears in snap.InventoryItems.
+	// Collect owned ammo directly from the parsed inventory + GaMap — the same
+	// two structures WriteEquipment consults — so an occupied arrows/bolts ref
+	// can still resolve to a real native handle. Storage is never scanned.
+	ammo := collectAmmoCandidates(slot.Inventory.CommonItems, slot.GaMap)
+	return resolveEquipmentWritesFromItems(snap.InventoryItems, ammo, effectiveTalismanSlots, sel, sec)
+}
+
+// ammoCandidate is one owned-ammo record the equipment resolver can equip into
+// an arrows/bolts slot. handle is the original native inventory GaItem handle —
+// a real ammo handle already accepted by WriteEquipment (arrows/bolts use
+// 0x80/0xB0 GaItem records) — and is the value written into the slot. itemID is
+// the canonical BaseItemID the DB resolver returns for that handle, so it
+// matches against templates.EquipmentItemRef.BaseItemID (never the raw GaMap
+// value, which may differ from the resolver's canonical base).
+type ammoCandidate struct {
+	handle uint32
+	itemID uint32
+}
+
+// collectAmmoCandidates is the single source of ammo candidates for the
+// resolver. It is fail-closed: a hand-authored template must never be able to
+// smuggle a weapon, armor, talisman, ordinary goods, or an unknown/technical
+// placeholder into an arrows/bolts slot by pointing the ref at its BaseItemID.
+//
+// A record qualifies only when ALL of the following hold:
+//   - positive quantity (Quantity & 0x7FFFFFFF > 0),
+//   - a GaMap entry resolving the handle to an item ID that is neither 0 nor
+//     GaHandleInvalid,
+//   - the native handle carries a weapon (0x80) or goods/item (0xB0) prefix —
+//     the only two families real arrows/bolts GaItem records use; armor,
+//     accessory/talisman, AoW, and any other prefix are rejected outright,
+//   - db.GetItemDataFuzzy resolves that item ID to exactly the
+//     arrows_and_bolts category.
+//
+// The candidate stores the canonical BaseItemID the resolver returns (for
+// matching against the ref) but keeps the ORIGINAL native handle (for
+// WriteEquipment). Only the passed inventory slice is scanned; the caller never
+// passes Storage, so ammo present only in Storage is invisible here.
+func collectAmmoCandidates(inv []core.InventoryItem, gaMap map[uint32]uint32) []ammoCandidate {
+	out := make([]ammoCandidate, 0, len(inv))
+	for _, it := range inv {
+		if it.Quantity&0x7FFFFFFF == 0 {
+			continue
+		}
+		itemID, ok := gaMap[it.GaItemHandle]
+		if !ok || itemID == 0 || itemID == core.GaHandleInvalid {
+			continue
+		}
+		switch it.GaItemHandle & core.GaHandleTypeMask {
+		case core.ItemTypeWeapon, core.ItemTypeItem:
+		default:
+			continue
+		}
+		itemData, baseID := db.GetItemDataFuzzy(itemID)
+		if itemData.Category != templates.ItemCategoryArrowsAndBolts {
+			continue
+		}
+		out = append(out, ammoCandidate{handle: it.GaItemHandle, itemID: baseID})
+	}
+	return out
+}
+
+// lookupAmmoHandle returns (handle, ambiguous, found) for the first ammo
+// candidate whose resolved item ID matches baseItemID. Duplicate records that
+// share the same handle collapse to one match (positional first-wins); two
+// DIFFERENT handles resolving to the same item ID are a genuine ambiguity and
+// set ambiguous=true, mirroring the weapon/armor/talisman first-wins contract.
+func lookupAmmoHandle(candidates []ammoCandidate, baseItemID uint32) (uint32, bool, bool) {
+	var winner uint32
+	found := false
+	seen := map[uint32]struct{}{}
+	for _, c := range candidates {
+		if c.itemID != baseItemID {
+			continue
+		}
+		if !found {
+			winner = c.handle
+			found = true
+		}
+		seen[c.handle] = struct{}{}
+	}
+	if !found {
+		return 0, false, false
+	}
+	return winner, len(seen) > 1, true
 }
 
 // resolveEquipmentWritesFromItems is the pure-logic core of the
@@ -283,7 +372,7 @@ func resolveEquipmentWrites(slot *core.SaveSlot, effectiveTalismanSlots int, sel
 // from activeTalismanSlotCount). Talisman writes for ordinals at or beyond
 // that capacity are skipped so the core writer never rejects the batch over a
 // locked slot.
-func resolveEquipmentWritesFromItems(items []editor.EditableItem, unlockedTalismans int, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
+func resolveEquipmentWritesFromItems(items []editor.EditableItem, ammo []ammoCandidate, unlockedTalismans int, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
 	if sec == nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: nil equipment section")
 	}
@@ -332,7 +421,21 @@ func resolveEquipmentWritesFromItems(items []editor.EditableItem, unlockedTalism
 			continue
 		}
 
-		handle, ambiguous, found := lookupEquipmentHandle(items, ref)
+		// Ammo is a pass-through category (never in the editable inventory
+		// snapshot), so occupied arrows/bolts refs resolve against the ammo
+		// candidate list collected from slot.Inventory.CommonItems + GaMap.
+		// Weapons/armor/talismans keep the editable-inventory resolution with
+		// the optional Upgrade / InfusionName / AoWItemID disambiguators.
+		var (
+			handle    uint32
+			ambiguous bool
+			found     bool
+		)
+		if equipmentSlotEquipClass(slotKey) == classAmmo {
+			handle, ambiguous, found = lookupAmmoHandle(ammo, ref.BaseItemID)
+		} else {
+			handle, ambiguous, found = lookupEquipmentHandle(items, ref)
+		}
 		if !found {
 			warnings = append(warnings, templates.ImportPreviewIssue{
 				Severity:   "warning",
