@@ -279,8 +279,10 @@ func buildItemsSourceFromSlot(slot *core.SaveSlot, charIndex int) (*templates.It
 }
 
 // buildEquipmentSpellsSourcesFromSlot reads the equipped loadout and the raw
-// 14-slot spell loadout from an already-detached slot snapshot. Lock-free by
-// contract — see cloneCharacterSlot. Read-only: the snapshot is never mutated.
+// 14-record spell region from an already-detached slot snapshot. Character
+// exports expose only the 10 player-visible slots, or 12 with Moon of Nokstella.
+// Lock-free by contract — see cloneCharacterSlot. Read-only: the snapshot is
+// never mutated.
 //
 // Both sections come from ONE core.SaveSlot.ReadEquippedState call, so
 // equipment and spells are always drawn from the same equipped-armaments read

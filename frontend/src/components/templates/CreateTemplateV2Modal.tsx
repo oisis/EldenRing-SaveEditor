@@ -71,8 +71,9 @@ interface ContainerSelection {
 // character's current equipment and equipped-spell loadout. Each is a plain
 // boolean shortcut (All=true) — the backend emits up to 18 supported equipment
 // slots (weapons, ammo, armor, and the talisman slots the source has unlocked)
-// and the 14-slot spell section, with empty slots exported as explicit clears
-// so applying the template also removes stale gear / spells.
+// and 10 player-visible spell slots, or 12 with Moon of Nokstella. Empty slots
+// are exported as explicit clears so applying the template also removes stale
+// gear / spells.
 interface LoadoutSelection {
     equipment?: boolean;
     spells?: boolean;

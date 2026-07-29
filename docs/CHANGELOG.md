@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.6] - 2026-07-29
+
 ### feat(templates): export character loadouts
 
 Create Template can now capture a character's Equipment and equipped spells
@@ -35,6 +37,11 @@ Unarmed / bare-body technical records automatically. Fresh class-start saves no
 longer fail `Save changes` merely because a slot's empty placeholder did not
 already exist in Inventory/GaMap; existing native empty-hand records are
 preserved and shared in the same way as an in-game clear.
+
+### fix(world): correct Castle Sol Main Gate classification
+
+Castle Sol Main Gate is now treated as a normal Site of Grace instead of a
+boss-arena grace. Castle Sol Rooftop remains classified as a boss-arena grace.
 
 ## [1.6.5] - 2026-07-28
 
