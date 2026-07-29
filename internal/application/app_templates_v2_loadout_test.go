@@ -59,9 +59,37 @@ func TestExportV2_SpellsOnly_FullLoadoutWithClears(t *testing.T) {
 	if tpl.Sections.Spells.Spell2 == nil || tpl.Sections.Spells.Spell2.BaseItemID != 0 {
 		t.Errorf("spell2 (empty) should be explicit clear, got %+v", tpl.Sections.Spells.Spell2)
 	}
-	// Full loadout = all 14 slots present.
-	if tpl.Sections.Spells.Spell14 == nil {
-		t.Error("spell14 should be present in a full loadout")
+	// New character templates expose the game's normal 10-slot maximum,
+	// not the save's two extra non-playable physical records.
+	if tpl.Sections.Spells.Spell10 == nil {
+		t.Error("spell10 should be present in a normal full loadout")
+	}
+	if tpl.Sections.Spells.Spell11 != nil || tpl.Sections.Spells.Spell12 != nil ||
+		tpl.Sections.Spells.Spell13 != nil || tpl.Sections.Spells.Spell14 != nil {
+		t.Errorf("normal full loadout leaked spell slots 11-14: %+v", tpl.Sections.Spells)
+	}
+}
+
+func TestExportV2_SpellsOnly_MoonOfNokstellaExportsTwelveSlots(t *testing.T) {
+	app := spellsApplyFixture(t)
+	equipped := allEmptyEquipped()
+	equipped[17] = moonOfNokstellaItemID
+	seedFixtureEquipped(t, app, equipped)
+
+	out, err := app.ExportBuildTemplateV2JSONFromCharacter(
+		0,
+		`{"spells":true}`,
+		BuildTemplateV2ExportOptions{Name: "moon spells"},
+	)
+	if err != nil {
+		t.Fatalf("export spells: %v", err)
+	}
+	tpl := decodeExport(t, out)
+	if tpl.Sections.Spells == nil || tpl.Sections.Spells.Spell12 == nil {
+		t.Fatalf("Moon of Nokstella loadout should include spell12: %+v", tpl.Sections.Spells)
+	}
+	if tpl.Sections.Spells.Spell13 != nil || tpl.Sections.Spells.Spell14 != nil {
+		t.Errorf("Moon of Nokstella loadout leaked physical slots 13-14: %+v", tpl.Sections.Spells)
 	}
 }
 
@@ -370,7 +398,7 @@ func TestCloneCharacterSlot_SnapshotIndependence(t *testing.T) {
 	if err != nil {
 		t.Fatalf("items source (before): %v", err)
 	}
-	equipBefore, spellsBefore, err := buildEquipmentSpellsSourcesFromSlot(clone, 0, true, true)
+	equipBefore, spellsBefore, spellLimitBefore, err := buildEquipmentSpellsSourcesFromSlot(clone, 0, true, true)
 	if err != nil {
 		t.Fatalf("equipment/spells source (before): %v", err)
 	}
@@ -430,7 +458,7 @@ func TestCloneCharacterSlot_SnapshotIndependence(t *testing.T) {
 		t.Errorf("items source diverged after live mutation: before=%+v after=%+v", wBefore, wAfter)
 	}
 
-	equipAfter, spellsAfter, err := buildEquipmentSpellsSourcesFromSlot(clone, 0, true, true)
+	equipAfter, spellsAfter, spellLimitAfter, err := buildEquipmentSpellsSourcesFromSlot(clone, 0, true, true)
 	if err != nil {
 		t.Fatalf("equipment/spells source (after): %v", err)
 	}
@@ -443,6 +471,9 @@ func TestCloneCharacterSlot_SnapshotIndependence(t *testing.T) {
 	// applied later by BuildV2Template), so the seeded 0x1770 stays raw here.
 	if spellsBefore[0] != 0x1770 || spellsAfter[0] != spellsBefore[0] {
 		t.Errorf("spells source diverged after live mutation: before=0x%X after=0x%X", spellsBefore[0], spellsAfter[0])
+	}
+	if spellLimitBefore != standardSpellSlotLimit || spellLimitAfter != spellLimitBefore {
+		t.Errorf("spell slot limit diverged after live mutation: before=%d after=%d", spellLimitBefore, spellLimitAfter)
 	}
 }
 

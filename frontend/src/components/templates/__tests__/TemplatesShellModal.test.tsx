@@ -2951,6 +2951,57 @@ describe('TemplatesShellModal — Phase 8D.2 items apply', () => {
         expect(mocks.ApplyBuildTemplateV2ToCharacterJSON).not.toHaveBeenCalled();
     });
 
+    it('equipment-only partial apply opens a visible report for missing exact variants', async () => {
+        mocks.ListBuildTemplateLibrary.mockResolvedValue([{
+            id: 'tpl-v2-equip-warning',
+            name: 'Equipment loadout',
+            description: 'equipment-only',
+            tags: [],
+            filename: 'tpl-v2-equip-warning.json',
+            createdAt: '2026-06-08T12:00:00Z',
+            updatedAt: '2026-06-08T12:00:00Z',
+            inventoryItems: 0,
+            storageItems: 0,
+            warnings: 0,
+            version: 2,
+            selectedSections: ['equipment'],
+        }]);
+        mocks.GetActiveInventoryEditSessionForCharacter.mockResolvedValue({ active: false, sessionID: '' });
+        mocks.ApplyBuildTemplateV2FromLibraryToCharacter.mockResolvedValue(
+            itemsApplyResultOK({
+                preview: {
+                    ok: true,
+                    errors: [],
+                    warnings: [{
+                        severity: 'warning',
+                        code: 'equipment_item_not_in_inventory',
+                        container: 'weaponRightHand1',
+                        message: 'requested upgrade +0; owned same-item variant: upgrade +25; slot skipped',
+                    }],
+                    summary: {},
+                },
+            }),
+        );
+
+        render(<TemplatesShellModal onClose={vi.fn()} charIndex={0} saveLoaded />);
+        fireEvent.click(await screen.findByTestId('library-apply'));
+        await screen.findByTestId('library-apply-v2-confirm');
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('library-apply-v2-confirm-button'));
+        });
+
+        await screen.findByTestId('items-apply-result-modal');
+        const missingEquipment = screen.getByTestId('items-apply-result-equipment-missing');
+        expect(missingEquipment).toHaveTextContent(/upgrade \+0/i);
+        expect(missingEquipment).toHaveTextContent(/upgrade \+25/i);
+        expect(missingEquipment).toHaveClass('bg-amber-500/10');
+        const warningItem = missingEquipment.querySelector('li');
+        expect(warningItem).toHaveClass('text-foreground');
+        expect(warningItem).not.toHaveClass('text-amber-100');
+        expect(screen.queryByTestId('items-apply-result-inv-added')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('items-apply-result-sto-added')).not.toBeInTheDocument();
+    });
+
     it('Phase 8D.3 — result modal collapses warning groups beyond the first 5 entries with a "+ N more (total: X)" line', async () => {
         const manyAlreadyPresent = Array.from({ length: 8 }).map((_, i) => ({
             severity: 'warning',

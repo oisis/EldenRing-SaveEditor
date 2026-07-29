@@ -6,8 +6,11 @@ All notable changes to this project will be documented in this file.
 
 ### feat(templates): export character loadouts
 
-Create Template can now capture a character's Equipment and all 14 equipped
-spells straight from a loaded save. Equipment covers weapons, ammo, armor and
+Create Template can now capture a character's Equipment and equipped spells
+straight from a loaded save. New character templates export the game's
+player-visible spell limit: 10 slots normally or 12 while Moon of Nokstella is
+equipped; the two additional physical save records are no longer exposed.
+Equipment covers weapons, ammo, armor and
 the active talisman slots. Empty slots are recorded as explicit clears, so
 applying a loadout also removes the target's old gear and spells. Every
 equipped item — weapons, ammo, armor and talismans alike — must already exist
@@ -20,6 +23,12 @@ Inventory/Storage layout in a single template. A previewed template is saved to
 the library exactly as shown, without re-reading the character. Imported and
 hand-authored templates that combine Equipment with Items or Inventory/Storage
 layout are now rejected before any mutation.
+
+Fail-soft Equipment and spell warnings now open the Apply result report on
+every Templates apply path. A requested weapon or armor variant that differs
+from the owned upgrade, infusion or Ash of War is still skipped rather than
+silently substituting a different build, but the report now identifies both
+the requested and owned variants instead of showing only a success toast.
 
 Clearing initially equipped weapons and armor now provisions the missing native
 Unarmed / bare-body technical records automatically. Fresh class-start saves no

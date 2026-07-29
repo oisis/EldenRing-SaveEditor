@@ -431,9 +431,10 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                         </h3>
                         <p className="text-[10px] text-muted-foreground">
                             Captures the full loadout: every weapon, ammo, and armor slot, the talisman
-                            slots the source currently has unlocked, and all 14 spell slots. Empty slots
-                            are stored as explicit clears, so applying a loadout template also removes
-                            gear/spells from slots the source leaves empty.
+                            slots the source currently has unlocked, and up to 10 spell slots (12 while
+                            Moon of Nokstella is equipped). Empty slots are stored as explicit clears,
+                            so applying a loadout template also removes gear/spells from slots the source
+                            leaves empty.
                             Equipment applies against items already in the target's inventory.
                         </p>
                         {includeEquipment && (
@@ -488,7 +489,7 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                                     htmlFor="create-template-v2-spells"
                                     className="cursor-pointer select-none"
                                 >
-                                    Equipped spells (all 14 slots)
+                                    Equipped spells (10 slots, or 12 with Moon of Nokstella)
                                 </label>
                             </li>
                         </ul>

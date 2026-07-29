@@ -81,6 +81,12 @@ type ExportV2Options struct {
 	// error — the builder refuses to silently truncate or pad because
 	// either would mis-bind slot indices to spell IDs.
 	EquippedSpellsRaw []uint32
+	// EquippedSpellsLimit bounds how many leading physical spell records
+	// are exported by the All=true shortcut. Character exports set this to
+	// the player-visible game limit: 10 normally, 12 while Moon of Nokstella
+	// is equipped. Zero preserves the legacy builder behaviour and exports
+	// all SpellSlotCount records for callers that do not provide a limit.
+	EquippedSpellsLimit int
 
 	// ItemsSource is the Phase 8C source for the v2 items /
 	// inventoryLayout / storageLayout sections. Producers fill the
@@ -160,6 +166,9 @@ func BuildV2Template(opts ExportV2Options) (*BuildTemplate, error) {
 		if len(opts.EquippedSpellsRaw) != SpellSlotCount {
 			return nil, fmt.Errorf("BuildV2Template: EquippedSpellsRaw length is %d, want %d", len(opts.EquippedSpellsRaw), SpellSlotCount)
 		}
+		if opts.EquippedSpellsLimit < 0 || opts.EquippedSpellsLimit > SpellSlotCount {
+			return nil, fmt.Errorf("BuildV2Template: EquippedSpellsLimit is %d, want 0 or a value in [1,%d]", opts.EquippedSpellsLimit, SpellSlotCount)
+		}
 	}
 
 	outSelection := &TemplateSelection{}
@@ -193,7 +202,11 @@ func BuildV2Template(opts ExportV2Options) (*BuildTemplate, error) {
 	}
 
 	if opts.Selection.Spells.HasAny() {
-		spells, emittedSlots := buildSpellsSection(opts.EquippedSpellsRaw, opts.Selection.Spells)
+		spells, emittedSlots := buildSpellsSection(
+			opts.EquippedSpellsRaw,
+			opts.Selection.Spells,
+			opts.EquippedSpellsLimit,
+		)
 		if opts.Selection.Spells.All {
 			outSections.Spells = spells
 			outSelection.Spells = &SectionSelection{All: true}
@@ -380,9 +393,9 @@ func buildStatsSection(src *StatsSource, sel *SectionSelection) (*StatsSection, 
 	return out, emitted
 }
 
-// buildSpellsSection translates the 14-slot raw spell loadout from the
-// save into the template's user-facing SpellsSection shape. Length is
-// pre-validated by BuildV2Template, so the index lookup is always safe.
+// buildSpellsSection translates the physical raw spell loadout from the save
+// into the template's user-facing SpellsSection shape. Length is pre-validated
+// by BuildV2Template, so the index lookup is always safe.
 //
 // Per-slot translation:
 //   - rawID == 0xFFFFFFFF (save empty-slot sentinel) → BaseItemID = 0
@@ -393,20 +406,28 @@ func buildStatsSection(src *StatsSource, sel *SectionSelection) (*StatsSection, 
 //     0x40001770 = Catch Flame).
 //
 // Per-selection behaviour mirrors buildEquipmentSection: the boolean
-// shortcut emits all 14 slots; per-field selection emits only the
-// listed slot keys.
+// The boolean shortcut emits the leading slots up to slotLimit. Character
+// exports use 10 normally or 12 with Moon of Nokstella; slotLimit == 0 keeps
+// the legacy all-physical-record behaviour for non-character callers.
+// Per-field selection is also bounded by the same limit.
 //
 // Name is intentionally left empty: the DB lookup that would resolve
 // raw IDs to human names belongs in a higher layer (the app endpoint
 // that already has the DB handy in 7d.3+), and ImportPreviewSummary
 // already documents Name as debug-only metadata. Keeping this builder
 // dependency-free preserves the package's lookup-free invariant.
-func buildSpellsSection(rawIDs []uint32, sel *SectionSelection) (*SpellsSection, map[string]bool) {
+func buildSpellsSection(rawIDs []uint32, sel *SectionSelection, slotLimit int) (*SpellsSection, map[string]bool) {
 	const saveEmptySentinel uint32 = 0xFFFFFFFF
 
+	if slotLimit == 0 {
+		slotLimit = SpellSlotCount
+	}
 	out := &SpellsSection{}
 	emitted := map[string]bool{}
 	for i, key := range SpellSlotOrder {
+		if i >= slotLimit {
+			break
+		}
 		if !sel.Selected(key) {
 			continue
 		}

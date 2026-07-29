@@ -205,12 +205,12 @@ func TestTemplateV2_CreatePreviewLibraryApply_RoundTrip(t *testing.T) {
 	}
 
 	// Counts: 6 weapon + 4 ammo + 4 armor + 3 active talismans = 17 equipment
-	// writes; all 14 spell slots written.
+	// writes; the normal player-visible 10 spell slots are written.
 	if res.EquipmentSlotsApplied != 17 {
 		t.Errorf("EquipmentSlotsApplied = %d, want 17", res.EquipmentSlotsApplied)
 	}
-	if res.SpellSlotsApplied != 14 {
-		t.Errorf("SpellSlotsApplied = %d, want 14", res.SpellSlotsApplied)
+	if res.SpellSlotsApplied != standardSpellSlotLimit {
+		t.Errorf("SpellSlotsApplied = %d, want %d", res.SpellSlotsApplied, standardSpellSlotLimit)
 	}
 
 	// Profile/stats transferred from the source.

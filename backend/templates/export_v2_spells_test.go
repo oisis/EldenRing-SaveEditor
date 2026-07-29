@@ -107,8 +107,8 @@ func TestBuildV2Template_Spells_EmptySentinelToExplicitClear(t *testing.T) {
 // what was emitted (and nothing more).
 func TestBuildV2Template_Spells_PerFieldSelection(t *testing.T) {
 	raw := emptySpellLoadout()
-	raw[0] = 0x00001770   // spell1: Catch Flame
-	raw[6] = 0x00002328   // spell7
+	raw[0] = 0x00001770  // spell1: Catch Flame
+	raw[6] = 0x00002328  // spell7
 	raw[13] = 0x000011A1 // spell14
 
 	tpl, err := BuildV2Template(ExportV2Options{
@@ -232,6 +232,51 @@ func TestBuildV2Template_Spells_AllShortcutFullyEmptyLoadout(t *testing.T) {
 		}
 		if ref.BaseItemID != 0 {
 			t.Errorf("%s.BaseItemID = 0x%08X, want 0 (explicit clear)", key, ref.BaseItemID)
+		}
+	}
+}
+
+func TestBuildV2Template_Spells_AllShortcutHonorsPlayerVisibleLimit(t *testing.T) {
+	for _, tt := range []struct {
+		name  string
+		limit int
+	}{
+		{name: "normal", limit: 10},
+		{name: "moon of nokstella", limit: 12},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			tpl, err := BuildV2Template(ExportV2Options{
+				Now:                 fixedNow(),
+				EquippedSpellsRaw:   emptySpellLoadout(),
+				EquippedSpellsLimit: tt.limit,
+				Selection:           &TemplateSelection{Spells: &SectionSelection{All: true}},
+			})
+			if err != nil {
+				t.Fatalf("BuildV2Template: %v", err)
+			}
+			for i, key := range SpellSlotOrder {
+				got := spellSlotRef(tpl.Sections.Spells, key)
+				if i < tt.limit && got == nil {
+					t.Errorf("%s: expected explicit clear below limit %d", key, tt.limit)
+				}
+				if i >= tt.limit && got != nil {
+					t.Errorf("%s: expected nil at or above limit %d, got %+v", key, tt.limit, got)
+				}
+			}
+		})
+	}
+}
+
+func TestBuildV2Template_Spells_RejectsInvalidPlayerVisibleLimit(t *testing.T) {
+	for _, limit := range []int{-1, SpellSlotCount + 1} {
+		_, err := BuildV2Template(ExportV2Options{
+			Now:                 fixedNow(),
+			EquippedSpellsRaw:   emptySpellLoadout(),
+			EquippedSpellsLimit: limit,
+			Selection:           &TemplateSelection{Spells: &SectionSelection{All: true}},
+		})
+		if err == nil || !strings.Contains(err.Error(), "EquippedSpellsLimit") {
+			t.Errorf("limit=%d: expected EquippedSpellsLimit error, got %v", limit, err)
 		}
 	}
 }

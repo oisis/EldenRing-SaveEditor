@@ -286,16 +286,16 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
     // immediately while preserving the modal's existing state
     // (selection, edit mode, etc.).
     const [libraryReloadSignal, setLibraryReloadSignal] = useState(0);
-    // Phase 8D.2 — items apply result modal state. Opened after a v2
-    // apply touches sections.items so the user can see counts, the
-    // skipped-already-present list, layout-ignored / weapon-override
-    // warnings, and any other backend issue codes. Profile/stats-only
-    // applies skip the modal and keep the existing toast UX.
-    const [itemsApplyResult, setItemsApplyResult] = useState<
+    // Apply result modal state. Items/layout applies always open it for
+    // counts; every other apply opens it when the backend returned warnings.
+    // This prevents fail-soft equipment/spell skips from being hidden behind
+    // an otherwise-successful toast.
+    const [applyResult, setApplyResult] = useState<
         | {
               sourceLabel: string;
               charIndex: number;
               result: main.ApplyTemplateV2Result;
+              showItemCounts: boolean;
           }
         | null
     >(null);
@@ -494,8 +494,8 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
                 toast('Class was skipped in this phase.');
             }
             onCharacterTemplateApplied?.(charIndex);
-            if (hasItems || hasLayout) {
-                setItemsApplyResult({ sourceLabel, charIndex, result });
+            if (hasItems || hasLayout || (result.preview?.warnings?.length ?? 0) > 0) {
+                setApplyResult({ sourceLabel, charIndex, result, showItemCounts: hasItems });
             }
         },
         [saveLoaded, charIndex, onCharacterTemplateApplied],
@@ -663,8 +663,8 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
                 }
                 const sourceLabel = overridesSource.sourceLabel;
                 setOverridesSource(null);
-                if (hasItems || hasLayout) {
-                    setItemsApplyResult({ sourceLabel, charIndex, result });
+                if (hasItems || hasLayout || (result.preview?.warnings?.length ?? 0) > 0) {
+                    setApplyResult({ sourceLabel, charIndex, result, showItemCounts: hasItems });
                 }
             } catch (err) {
                 toast.error(`Templates: ${String(err)}`);
@@ -746,12 +746,15 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
             }
             onCharacterTemplateApplied?.(charIndex);
             setImportedPreview(null);
-            // Phase 8D.2 / 8E.2 — surface per-items / per-layout
-            // detail when sections.items or layout sections were part
-            // of this apply. Profile/stats-only applies keep the
-            // existing toast UX without an extra modal.
-            if (hasItems || hasLayout) {
-                setItemsApplyResult({ sourceLabel: label, charIndex, result });
+            // Items/layout always show their counters. Other sections show
+            // this report only when fail-soft warnings need user attention.
+            if (hasItems || hasLayout || (result.preview?.warnings?.length ?? 0) > 0) {
+                setApplyResult({
+                    sourceLabel: label,
+                    charIndex,
+                    result,
+                    showItemCounts: hasItems,
+                });
             }
         } catch (err) {
             toast.error(`Templates: ${String(err)}`);
@@ -856,25 +859,23 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
                     onError={onCreateV2Error}
                 />
             )}
-            {itemsApplyResult && (
-                <ApplyItemsResultModal
-                    sourceLabel={itemsApplyResult.sourceLabel}
-                    charIndex={itemsApplyResult.charIndex}
-                    result={itemsApplyResult.result}
-                    onClose={() => setItemsApplyResult(null)}
+            {applyResult && (
+                <ApplyResultModal
+                    sourceLabel={applyResult.sourceLabel}
+                    charIndex={applyResult.charIndex}
+                    result={applyResult.result}
+                    showItemCounts={applyResult.showItemCounts}
+                    onClose={() => setApplyResult(null)}
                 />
             )}
         </>
     );
 }
 
-// ApplyItemsResultModal — Phase 8D.2 (8D.3 polish). Surfaces the
-// per-items detail of an ApplyTemplateV2Result after sections.items
-// was part of the apply: applied inventory / storage counts, the
-// canonical items_already_present skip list, layout-ignored warnings,
-// weapon override clamps, and any other backend issue codes that
-// flowed through preview.warnings. Profile/stats-only applies never
-// open this modal — those keep the existing toast UX.
+// ApplyResultModal surfaces actionable ApplyTemplateV2Result detail.
+// Items/layout applies show counters; any template section can open the modal
+// when preview.warnings contains a fail-soft skip. This is especially important
+// for equipment, where one missing exact item variant skips only that slot.
 //
 // Phase 8D.4 follow-up: backend AppliedFields currently emits the
 // literal "items" string rather than per-entry IDs. Once that lands,
@@ -882,10 +883,11 @@ export function TemplatesShellModal({ onClose, charIndex, saveLoaded, onCharacte
 // (today only counts come from inventoryItemsApplied /
 // storageItemsApplied). Warnings already carry entryID prefixes in
 // their `message` field — we render those as-is.
-interface ApplyItemsResultModalProps {
+interface ApplyResultModalProps {
     sourceLabel: string;
     charIndex: number;
     result: main.ApplyTemplateV2Result;
+    showItemCounts: boolean;
     onClose: () => void;
 }
 
@@ -916,15 +918,19 @@ function WarningGroup({
     const hiddenCount = Math.max(0, items.length - visible.length);
     const headerClass =
         tone === 'amber'
-            ? 'text-[10px] font-bold uppercase tracking-wider text-warning-foreground'
+            ? 'text-[10px] font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300'
             : 'text-[10px] font-bold uppercase tracking-wider text-muted-foreground';
-    const itemClass = tone === 'amber' ? 'text-amber-100' : 'text-muted-foreground';
+    const itemClass = tone === 'amber' ? 'text-foreground' : 'text-muted-foreground';
+    const sectionClass =
+        tone === 'amber'
+            ? 'space-y-1 rounded border border-amber-500/40 bg-amber-500/10 p-2'
+            : 'space-y-1';
     return (
         <section
             data-testid={testId}
             aria-label={title}
             data-warning-severity="info"
-            className="space-y-1"
+            className={sectionClass}
         >
             <h3 className={headerClass}>
                 {title} ({items.length})
@@ -959,12 +965,13 @@ function WarningGroup({
     );
 }
 
-function ApplyItemsResultModal({
+function ApplyResultModal({
     sourceLabel,
     charIndex,
     result,
+    showItemCounts,
     onClose,
-}: ApplyItemsResultModalProps) {
+}: ApplyResultModalProps) {
     const dialogRef = useRef<HTMLDivElement | null>(null);
     const onDialogKeyDown = useModalEscape(onClose);
     useEffect(() => {
@@ -986,6 +993,7 @@ function ApplyItemsResultModal({
         ...(grouped.get('weapon_unupgradeable') ?? []),
     ];
     const templateOverrideIgnored = grouped.get('items_template_override_ignored') ?? [];
+    const equipmentItemMissing = grouped.get('equipment_item_not_in_inventory') ?? [];
     // Phase 8E.2 — layout warning groups. layout_entry_missing and
     // layout_entry_ambiguous are amber (user-actionable: template
     // referenced something the live workspace can't resolve).
@@ -1006,6 +1014,7 @@ function ApplyItemsResultModal({
         'weapon_level_clamped',
         'weapon_unupgradeable',
         'items_template_override_ignored',
+        'equipment_item_not_in_inventory',
         'layout_entry_missing',
         'layout_entry_ambiguous',
         'layout_sparse_normalized',
@@ -1059,21 +1068,23 @@ function ApplyItemsResultModal({
                     </p>
                 </div>
                 <div className="px-4 py-3 space-y-3 overflow-y-auto text-[12px]">
-                    <section aria-label="Applied counts" className="space-y-0.5">
-                        <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Added
-                        </h3>
-                        <div data-testid="items-apply-result-inv-added">
-                            Inventory:{' '}
-                            <span className="font-bold">
-                                {result.inventoryItemsApplied}
-                            </span>
-                        </div>
-                        <div data-testid="items-apply-result-sto-added">
-                            Storage:{' '}
-                            <span className="font-bold">{result.storageItemsApplied}</span>
-                        </div>
-                    </section>
+                    {showItemCounts && (
+                        <section aria-label="Applied counts" className="space-y-0.5">
+                            <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                Added
+                            </h3>
+                            <div data-testid="items-apply-result-inv-added">
+                                Inventory:{' '}
+                                <span className="font-bold">
+                                    {result.inventoryItemsApplied}
+                                </span>
+                            </div>
+                            <div data-testid="items-apply-result-sto-added">
+                                Storage:{' '}
+                                <span className="font-bold">{result.storageItemsApplied}</span>
+                            </div>
+                        </section>
+                    )}
                     {showLayoutCounters && (
                         <section
                             data-testid="items-apply-result-layout-counters"
@@ -1176,6 +1187,12 @@ function ApplyItemsResultModal({
                         title="Template weapon override ignored"
                         items={templateOverrideIgnored}
                         tone="muted"
+                    />
+                    <WarningGroup
+                        testId="items-apply-result-equipment-missing"
+                        title="Equipment slots skipped — exact item variant missing"
+                        items={equipmentItemMissing}
+                        tone="amber"
                     />
                     <WarningGroup
                         testId="items-apply-result-other-warnings"

@@ -3,6 +3,7 @@ package application
 import (
 	"encoding/binary"
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
@@ -162,6 +163,45 @@ func TestResolveEquipmentWrites_MatchesOwnedWeapon(t *testing.T) {
 	}
 	if len(writes) != 1 || writes[0] != (core.EquipmentWrite{Slot: core.EquipSlotRightHandArmament1, Handle: 0x80000010}) {
 		t.Fatalf("writes = %+v", writes)
+	}
+}
+
+func TestResolveEquipmentWrites_ReportsOwnedVariantMismatch(t *testing.T) {
+	items := []editor.EditableItem{{
+		BaseItemID:     0x001E8480,
+		OriginalHandle: 0x80800000,
+		IsWeapon:       true,
+		CurrentUpgrade: 25,
+		InfusionName:   "Standard",
+	}}
+	zero := 0
+	sec := &templates.EquipmentSection{
+		WeaponRightHand1: &templates.EquipmentItemRef{
+			BaseItemID:   0x001E8480,
+			Upgrade:      &zero,
+			InfusionName: "Standard",
+		},
+	}
+	writes, warnings, err := resolveEquipmentWritesFromItems(
+		items,
+		nil,
+		allTalismansUnlocked,
+		&templates.SectionSelection{All: true},
+		sec,
+	)
+	if err != nil {
+		t.Fatalf("resolver: %v", err)
+	}
+	if len(writes) != 0 {
+		t.Fatalf("variant mismatch must not equip a different weapon, got %+v", writes)
+	}
+	if len(warnings) != 1 || warnings[0].Code != templates.IssueCodeEquipmentItemNotInInventory {
+		t.Fatalf("warnings = %+v, want one equipment_item_not_in_inventory", warnings)
+	}
+	for _, want := range []string{"upgrade +0", "owned same-item variant", "upgrade +25"} {
+		if !strings.Contains(warnings[0].Message, want) {
+			t.Errorf("warning %q does not contain %q", warnings[0].Message, want)
+		}
 	}
 }
 

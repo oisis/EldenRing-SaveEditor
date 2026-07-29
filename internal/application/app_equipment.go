@@ -86,9 +86,10 @@ const (
 
 	unarmedItemID uint32 = 0x0001ADB0
 
-	baseSpellSlotCount    = 2
-	maxSpellSlotCount     = 12
-	moonOfNokstellaItemID = 0x20000474
+	baseSpellSlotCount     = 2
+	standardSpellSlotLimit = 10
+	maxSpellSlotCount      = 12
+	moonOfNokstellaItemID  = 0x20000474
 )
 
 // bareArmorItemIDs are the four technical ProtectorParam rows Elden Ring uses
@@ -269,6 +270,21 @@ func activeSpellSlotCount(slot *core.SaveSlot, raw core.RawEquippedState, active
 		return maxSpellSlotCount
 	}
 	return slots
+}
+
+// templateSpellSlotLimit is the player-visible hard limit used by character
+// templates. Elden Ring exposes at most 10 spell slots normally and 12 only
+// while Moon of Nokstella is equipped in an unlocked talisman pouch. The save
+// keeps 14 physical records, but records 13-14 are not playable spell slots
+// and must not leak into newly created templates.
+func templateSpellSlotLimit(slot *core.SaveSlot, raw core.RawEquippedState) int {
+	activeTalismanSlots := activeTalismanSlotCount(slot.Player.TalismanSlots)
+	for i := 0; i < activeTalismanSlots; i++ {
+		if normalizeEquipItemID(raw.Equipped[17+i], classTalisman) == moonOfNokstellaItemID {
+			return maxSpellSlotCount
+		}
+	}
+	return standardSpellSlotLimit
 }
 
 // equipSlotView builds a view for an equipped-armaments slot, returning an

@@ -133,8 +133,9 @@ func (a *App) buildAndValidateTemplateV2FromCharacter(charIndex int, selectionJS
 	}
 	var equipment *templates.EquipmentSection
 	var equippedSpellsRaw []uint32
+	var equippedSpellsLimit int
 	if selection.Equipment.HasAny() || selection.Spells.HasAny() {
-		equipment, equippedSpellsRaw, err = buildEquipmentSpellsSourcesFromSlot(
+		equipment, equippedSpellsRaw, equippedSpellsLimit, err = buildEquipmentSpellsSourcesFromSlot(
 			slot, charIndex, selection.Equipment.HasAny(), selection.Spells.HasAny())
 		if err != nil {
 			return nil, "", fmt.Errorf("build v2 equipment/spells source: %w", err)
@@ -154,12 +155,13 @@ func (a *App) buildAndValidateTemplateV2FromCharacter(charIndex int, selectionJS
 			SourceCharacterIndex: charIndex,
 			SourceCharacterName:  charVM.Name,
 		},
-		Profile:           profile,
-		Stats:             stats,
-		ItemsSource:       itemsSource,
-		Equipment:         equipment,
-		EquippedSpellsRaw: equippedSpellsRaw,
-		Selection:         selection,
+		Profile:             profile,
+		Stats:               stats,
+		ItemsSource:         itemsSource,
+		Equipment:           equipment,
+		EquippedSpellsRaw:   equippedSpellsRaw,
+		EquippedSpellsLimit: equippedSpellsLimit,
+		Selection:           selection,
 	})
 	if err != nil {
 		return nil, "", fmt.Errorf("build v2 template: %w", err)
@@ -298,29 +300,31 @@ func buildItemsSourceFromSlot(slot *core.SaveSlot, charIndex int) (*templates.It
 // than emitting clears (the source never had that pouch slot to clear). A
 // slot whose equipped state cannot be read yields a hard error so the caller
 // fails closed rather than emitting a partial "full loadout".
-func buildEquipmentSpellsSourcesFromSlot(slot *core.SaveSlot, charIndex int, needEquipment, needSpells bool) (*templates.EquipmentSection, []uint32, error) {
+func buildEquipmentSpellsSourcesFromSlot(slot *core.SaveSlot, charIndex int, needEquipment, needSpells bool) (*templates.EquipmentSection, []uint32, int, error) {
 	raw, err := slot.ReadEquippedState()
 	if err != nil {
-		return nil, nil, fmt.Errorf("read equipped spells/equipment state: %w", err)
+		return nil, nil, 0, fmt.Errorf("read equipped spells/equipment state: %w", err)
 	}
 
 	var equipment *templates.EquipmentSection
 	if needEquipment {
 		snap, err := editor.BuildSnapshot(slot, "", charIndex)
 		if err != nil {
-			return nil, nil, fmt.Errorf("build equipment snapshot: %w", err)
+			return nil, nil, 0, fmt.Errorf("build equipment snapshot: %w", err)
 		}
 		activeTalismans := activeTalismanSlotCount(slot.Player.TalismanSlots)
 		equipment = buildEquipmentSectionFromEquipped(raw.Equipped, snap.InventoryItems, activeTalismans, true)
 		if equipment == nil {
-			return nil, nil, fmt.Errorf("equipment loadout unavailable for slot %d", charIndex)
+			return nil, nil, 0, fmt.Errorf("equipment loadout unavailable for slot %d", charIndex)
 		}
 	}
 
 	var equippedSpellsRaw []uint32
+	var equippedSpellsLimit int
 	if needSpells {
 		equippedSpellsRaw = append([]uint32(nil), raw.Spells[:]...)
+		equippedSpellsLimit = templateSpellSlotLimit(slot, raw)
 	}
 
-	return equipment, equippedSpellsRaw, nil
+	return equipment, equippedSpellsRaw, equippedSpellsLimit, nil
 }

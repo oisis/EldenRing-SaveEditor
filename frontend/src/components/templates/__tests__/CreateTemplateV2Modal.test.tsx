@@ -467,6 +467,8 @@ describe('CreateTemplateV2Modal — loadout (Equipment / Spells)', () => {
         render(<CreateTemplateV2Modal {...defaultProps()} />);
         expect(screen.getByTestId('create-template-v2-equipment')).toBeInTheDocument();
         expect(screen.getByTestId('create-template-v2-spells')).toBeInTheDocument();
+        expect(screen.getByText(/Equipped spells \(10 slots, or 12 with Moon of Nokstella\)/i)).toBeInTheDocument();
+        expect(screen.queryByText(/all 14 spell slots/i)).not.toBeInTheDocument();
     });
 
     it('Equipment alone enables Preview and sends equipment=true', async () => {

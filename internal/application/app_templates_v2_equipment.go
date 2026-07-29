@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
 	"github.com/oisis/EldenRing-SaveForge/backend/db"
@@ -437,10 +438,14 @@ func resolveEquipmentWritesFromItems(items []editor.EditableItem, ammo []ammoCan
 			handle, ambiguous, found = lookupEquipmentHandle(items, ref)
 		}
 		if !found {
+			message := fmt.Sprintf("equipment.%s: baseItemID 0x%08X is not in inventory; slot skipped", slotKey, ref.BaseItemID)
+			if equipmentSlotEquipClass(slotKey) != classAmmo {
+				message = equipmentItemNotFoundMessage(slotKey, ref, items)
+			}
 			warnings = append(warnings, templates.ImportPreviewIssue{
 				Severity:   "warning",
 				Code:       templates.IssueCodeEquipmentItemNotInInventory,
-				Message:    fmt.Sprintf("equipment.%s: baseItemID 0x%08X is not in inventory; slot skipped", slotKey, ref.BaseItemID),
+				Message:    message,
 				Container:  slotKey,
 				BaseItemID: ref.BaseItemID,
 			})
@@ -492,6 +497,73 @@ func lookupEquipmentHandle(items []editor.EditableItem, ref *templates.Equipment
 		return 0, false, false
 	}
 	return winner, matches > 1, true
+}
+
+// equipmentItemNotFoundMessage distinguishes a completely missing item from
+// the common case where the target owns the same base weapon or armor but not
+// the exact upgrade / infusion / AoW variant recorded by the template.
+func equipmentItemNotFoundMessage(slotKey string, ref *templates.EquipmentItemRef, items []editor.EditableItem) string {
+	owned := make([]string, 0, 3)
+	seen := map[string]struct{}{}
+	for i := range items {
+		it := &items[i]
+		if it.BaseItemID != ref.BaseItemID {
+			continue
+		}
+		variant := equipmentItemVariantDescription(it)
+		if _, ok := seen[variant]; ok {
+			continue
+		}
+		seen[variant] = struct{}{}
+		owned = append(owned, variant)
+		if len(owned) == 3 {
+			break
+		}
+	}
+	if len(owned) == 0 {
+		return fmt.Sprintf("equipment.%s: baseItemID 0x%08X is not in inventory; slot skipped", slotKey, ref.BaseItemID)
+	}
+	return fmt.Sprintf(
+		"equipment.%s: requested baseItemID 0x%08X (%s) has no exact inventory match; owned same-item variant(s): %s; slot skipped",
+		slotKey,
+		ref.BaseItemID,
+		equipmentRefVariantDescription(ref),
+		strings.Join(owned, ", "),
+	)
+}
+
+func equipmentRefVariantDescription(ref *templates.EquipmentItemRef) string {
+	parts := make([]string, 0, 3)
+	if ref.Upgrade != nil {
+		parts = append(parts, fmt.Sprintf("upgrade +%d", *ref.Upgrade))
+	}
+	if ref.InfusionName != "" {
+		parts = append(parts, "infusion "+ref.InfusionName)
+	}
+	if ref.AoWItemID != nil {
+		parts = append(parts, fmt.Sprintf("AoW 0x%08X", *ref.AoWItemID))
+	}
+	if len(parts) == 0 {
+		return "any variant"
+	}
+	return strings.Join(parts, ", ")
+}
+
+func equipmentItemVariantDescription(it *editor.EditableItem) string {
+	parts := make([]string, 0, 3)
+	if it.IsWeapon || it.IsArmor {
+		parts = append(parts, fmt.Sprintf("upgrade +%d", it.CurrentUpgrade))
+	}
+	if it.InfusionName != "" {
+		parts = append(parts, "infusion "+it.InfusionName)
+	}
+	if it.HasCurrentAoW {
+		parts = append(parts, fmt.Sprintf("AoW 0x%08X", it.CurrentAoWItemID))
+	}
+	if len(parts) == 0 {
+		return "base item"
+	}
+	return strings.Join(parts, ", ")
 }
 
 // itemToEquipmentRef projects an EditableItem onto the schema fields
