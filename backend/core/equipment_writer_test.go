@@ -5,6 +5,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -199,6 +200,188 @@ func TestWriteEquipment_ClearUsesNativeSentinels(t *testing.T) {
 				tc.equipIndex, tc.itemID, tc.handle, tc.dynamic)
 		}
 	}
+}
+
+func TestWriteEquipment_ClearProvisionsMissingBareArmorPlaceholder(t *testing.T) {
+	fixture := fragmentedGaItemRoundTripFixture(t)
+	slot := fixture.Slot
+	const occupiedArmorID = uint32(0x10000001)
+
+	if err := AddItemsToSlotBatch(slot, []ItemToAdd{{ItemID: occupiedArmorID, InvQty: 1}}); err != nil {
+		t.Fatalf("add occupied armor: %v", err)
+	}
+	occupiedHandle := inventoryHandleForItemID(slot, occupiedArmorID, nil)
+	if occupiedHandle == 0 {
+		t.Fatal("new occupied armor has no Inventory/GaMap handle")
+	}
+	if err := slot.WriteEquipment([]EquipmentWrite{{Slot: EquipSlotChest, Handle: occupiedHandle}}); err != nil {
+		t.Fatalf("equip chest: %v", err)
+	}
+	if got := countInventoryItemID(slot, bareArmorItemIDBySlot[13]); got != 0 {
+		t.Fatalf("fixture already has %d bare-chest placeholder(s), want 0", got)
+	}
+
+	if err := slot.WriteEquipment([]EquipmentWrite{{Slot: EquipSlotChest, Handle: 0}}); err != nil {
+		t.Fatalf("clear chest: %v", err)
+	}
+
+	equipIndex, itemID, handle, dynamic := nativeEquipmentValues(slot, 13)
+	if itemID != bareArmorItemIDBySlot[13]&0x0FFFFFFF || dynamic != bareArmorItemIDBySlot[13] {
+		t.Fatalf("cleared chest = itemID/dynamic %08X/%08X, want %08X/%08X",
+			itemID, dynamic, bareArmorItemIDBySlot[13]&0x0FFFFFFF, bareArmorItemIDBySlot[13])
+	}
+	if !nativeHandleMatches(slot, equipIndex, handle, bareArmorItemIDBySlot[13]) {
+		t.Fatalf("cleared chest handle %08X does not reference provisioned bare-body row %08X", handle, equipIndex)
+	}
+	if got := countInventoryItemID(slot, bareArmorItemIDBySlot[13]); got != 1 {
+		t.Fatalf("bare-chest placeholder count = %d, want 1", got)
+	}
+}
+
+func TestWriteEquipment_ClearReusesExistingNativeUnarmedPlaceholder(t *testing.T) {
+	fixture := fragmentedGaItemRoundTripFixture(t)
+	slot := fixture.Slot
+	const occupiedWeaponID = uint32(0x000F4240)
+
+	adds := make([]ItemToAdd, 6)
+	for i := range adds {
+		adds[i] = ItemToAdd{ItemID: occupiedWeaponID, InvQty: 1}
+	}
+	if err := AddItemsToSlotBatch(slot, adds); err != nil {
+		t.Fatalf("add occupied weapons: %v", err)
+	}
+	occupiedHandles := inventoryHandlesForItemID(slot, occupiedWeaponID)
+	if len(occupiedHandles) < 6 {
+		t.Fatalf("occupied weapon handles = %d, want at least 6", len(occupiedHandles))
+	}
+
+	equipWrites := make([]EquipmentWrite, 6)
+	clearWrites := make([]EquipmentWrite, 6)
+	for i := range equipWrites {
+		equipWrites[i] = EquipmentWrite{Slot: EquipmentSlotKind(i), Handle: occupiedHandles[i]}
+		clearWrites[i] = EquipmentWrite{Slot: EquipmentSlotKind(i), Handle: 0}
+	}
+	if err := slot.WriteEquipment(equipWrites); err != nil {
+		t.Fatalf("equip six hand slots: %v", err)
+	}
+	if got := countInventoryItemID(slot, unarmedEquipmentItemID); got != 1 {
+		t.Fatalf("initial Unarmed count = %d, want 1", got)
+	}
+
+	if err := slot.WriteEquipment(clearWrites); err != nil {
+		t.Fatalf("clear six hand slots: %v", err)
+	}
+
+	for index := 0; index < 6; index++ {
+		equipIndex, itemID, handle, dynamic := nativeEquipmentValues(slot, index)
+		if itemID != unarmedEquipmentItemID || dynamic != unarmedEquipmentItemID {
+			t.Errorf("hand slot %d = itemID/dynamic %08X/%08X, want Unarmed", index, itemID, dynamic)
+		}
+		if handle != fixture.Handles.Unarmed {
+			t.Errorf("hand slot %d handle = %08X, want existing native Unarmed %08X", index, handle, fixture.Handles.Unarmed)
+		}
+		if !nativeHandleMatches(slot, equipIndex, handle, unarmedEquipmentItemID) {
+			t.Errorf("hand slot %d handle %08X does not reference its Inventory row %08X", index, handle, equipIndex)
+		}
+	}
+	if got := countInventoryItemID(slot, unarmedEquipmentItemID); got != 1 {
+		t.Fatalf("final Unarmed count = %d, want the existing shared native record", got)
+	}
+}
+
+func TestWriteEquipment_ClearProvisionsOneMissingUnarmedPlaceholder(t *testing.T) {
+	fixture := fragmentedGaItemRoundTripFixture(t)
+	slot := fixture.Slot
+	const occupiedWeaponID = uint32(0x000F4240)
+
+	if err := RemoveItemsFromSlot(slot, []uint32{fixture.Handles.Unarmed}, true, false); err != nil {
+		t.Fatalf("remove fixture Unarmed: %v", err)
+	}
+	if got := countInventoryItemID(slot, unarmedEquipmentItemID); got != 0 {
+		t.Fatalf("Unarmed count after fixture preparation = %d, want 0", got)
+	}
+	adds := []ItemToAdd{
+		{ItemID: occupiedWeaponID, InvQty: 1},
+		{ItemID: occupiedWeaponID, InvQty: 1},
+	}
+	if err := AddItemsToSlotBatch(slot, adds); err != nil {
+		t.Fatalf("add occupied weapons: %v", err)
+	}
+	occupiedHandles := inventoryHandlesForItemID(slot, occupiedWeaponID)
+	if len(occupiedHandles) < 2 {
+		t.Fatalf("occupied weapon handles = %d, want at least 2", len(occupiedHandles))
+	}
+	if err := slot.WriteEquipment([]EquipmentWrite{
+		{Slot: EquipSlotLeftHandArmament1, Handle: occupiedHandles[0]},
+		{Slot: EquipSlotRightHandArmament1, Handle: occupiedHandles[1]},
+	}); err != nil {
+		t.Fatalf("equip two hand slots: %v", err)
+	}
+
+	if err := slot.WriteEquipment([]EquipmentWrite{
+		{Slot: EquipSlotLeftHandArmament1, Handle: 0},
+		{Slot: EquipSlotRightHandArmament1, Handle: 0},
+	}); err != nil {
+		t.Fatalf("clear two hand slots: %v", err)
+	}
+
+	_, _, leftHandle, _ := nativeEquipmentValues(slot, 0)
+	_, _, rightHandle, _ := nativeEquipmentValues(slot, 1)
+	if leftHandle == 0 || rightHandle != leftHandle {
+		t.Fatalf("provisioned Unarmed handles left/right = %08X/%08X, want one shared non-zero handle", leftHandle, rightHandle)
+	}
+	if got := countInventoryItemID(slot, unarmedEquipmentItemID); got != 1 {
+		t.Fatalf("final Unarmed count = %d, want one provisioned record", got)
+	}
+}
+
+func TestWriteEquipment_NativeEmptyProvisionRollsBackOnLaterError(t *testing.T) {
+	fixture := fragmentedGaItemRoundTripFixture(t)
+	slot := fixture.Slot
+	const occupiedArmorID = uint32(0x10000001)
+
+	if err := AddItemsToSlotBatch(slot, []ItemToAdd{{ItemID: occupiedArmorID, InvQty: 1}}); err != nil {
+		t.Fatalf("add occupied armor: %v", err)
+	}
+	occupiedHandle := inventoryHandleForItemID(slot, occupiedArmorID, nil)
+	if err := slot.WriteEquipment([]EquipmentWrite{{Slot: EquipSlotChest, Handle: occupiedHandle}}); err != nil {
+		t.Fatalf("equip chest: %v", err)
+	}
+	before := SnapshotSlot(slot)
+
+	err := slot.WriteEquipment([]EquipmentWrite{
+		{Slot: EquipSlotChest, Handle: 0},
+		{Slot: EquipSlotRightHandArmament1, Handle: 0x8080FFFF},
+	})
+	if err == nil || !strings.Contains(err.Error(), "WriteEquipment[1]") {
+		t.Fatalf("later invalid handle error = %v", err)
+	}
+	if after := SnapshotSlot(slot); !reflect.DeepEqual(after, before) {
+		t.Fatal("failed batch did not roll back provisioned placeholder and slot state")
+	}
+}
+
+func inventoryHandlesForItemID(slot *SaveSlot, itemID uint32) []uint32 {
+	var handles []uint32
+	for _, item := range slot.Inventory.CommonItems {
+		if item.Quantity&0x7FFFFFFF != 0 && slot.GaMap[item.GaItemHandle] == itemID {
+			handles = append(handles, item.GaItemHandle)
+		}
+	}
+	return handles
+}
+
+func inventoryHandleForItemID(slot *SaveSlot, itemID uint32, excluded map[uint32]bool) uint32 {
+	for _, handle := range inventoryHandlesForItemID(slot, itemID) {
+		if !excluded[handle] {
+			return handle
+		}
+	}
+	return 0
+}
+
+func countInventoryItemID(slot *SaveSlot, itemID uint32) int {
+	return len(inventoryHandlesForItemID(slot, itemID))
 }
 
 func TestWriteEquipment_TalismanWritesFourNativeRepresentations(t *testing.T) {

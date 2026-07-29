@@ -95,6 +95,12 @@ type resolvedEquipmentWrite struct {
 	dynamic uint32
 }
 
+type nativeEmptyEquipmentRequest struct {
+	writeIndex int
+	itemID     uint32
+	prefix     uint32
+}
+
 // WriteEquipment applies a batch of equipment slot writes atomically.
 //
 // The game stores this state in four representations: an inventory-row index,
@@ -120,15 +126,13 @@ func (s *SaveSlot) WriteEquipment(writes []EquipmentWrite) error {
 	if len(writes) == 0 {
 		return nil
 	}
-	armamentsOff, err := s.equippedArmamentsOffset()
-	if err != nil {
-		return fmt.Errorf("WriteEquipment: %w", err)
-	}
-	// Validate every write first and resolve every native representation before
-	// mutating any of them.
-	resolvedWrites := make([]resolvedEquipmentWrite, 0, len(writes))
-	seenIndex := make(map[int]int, len(writes)) // index → position in writes for duplicate-detection diagnostics
 
+	// Validate the whole batch before provisioning any technical placeholder.
+	// A supported clear may have to add a missing Unarmed / bare-armor record,
+	// but an invalid slot or duplicate must still reject without touching the
+	// slot.
+	infos := make([]equipmentSlotInfo, len(writes))
+	seenIndex := make(map[int]int, len(writes)) // index → position in writes for duplicate-detection diagnostics
 	for i, w := range writes {
 		info, ok := equipmentSlotTable[w.Slot]
 		if !ok {
@@ -138,17 +142,56 @@ func (s *SaveSlot) WriteEquipment(writes []EquipmentWrite) error {
 			return fmt.Errorf("WriteEquipment[%d]: slot index %d already written at writes[%d]", i, info.index, prev)
 		}
 		seenIndex[info.index] = i
+		infos[i] = info
+	}
 
+	armamentsOff, err := s.equippedArmamentsOffset()
+	if err != nil {
+		return fmt.Errorf("WriteEquipment: %w", err)
+	}
+
+	// Fresh class-start saves only carry technical empty records for slots that
+	// started empty. Clearing an initially-equipped hand or armor slot therefore
+	// has to provision its native Unarmed / bare-armor record first. Keep a
+	// rollback snapshot whenever that path is possible: AddItemsToSlotBatch may
+	// rebuild/reparse the slot before a later write in this batch is validated.
+	preparedWrites := append([]EquipmentWrite(nil), writes...)
+	var rollback *SlotSnapshot
+	if equipmentWritesNeedNativeEmptyPreparation(preparedWrites, infos) {
+		snapshot := SnapshotSlot(s)
+		rollback = &snapshot
+		if err := s.prepareNativeEmptyEquipmentHandles(preparedWrites, infos, armamentsOff); err != nil {
+			RestoreSlot(s, snapshot)
+			return fmt.Errorf("WriteEquipment: prepare native empty items: %w", err)
+		}
+		// Provisioning can rebuild the slot and shift every dynamic offset.
+		armamentsOff, err = s.equippedArmamentsOffset()
+		if err != nil {
+			RestoreSlot(s, snapshot)
+			return fmt.Errorf("WriteEquipment: %w", err)
+		}
+	}
+	rollbackError := func(err error) error {
+		if rollback != nil {
+			RestoreSlot(s, *rollback)
+		}
+		return err
+	}
+
+	// Resolve every native representation before writing any of the four live
+	// equipment copies.
+	resolvedWrites := make([]resolvedEquipmentWrite, 0, len(preparedWrites))
+	for i, w := range preparedWrites {
+		info := infos[i]
 		var native nativeEquipmentWrite
 		var dynamic uint32
-		var err error
 		if info.class == slotClassTalisman {
 			native, dynamic, err = s.resolveTalismanValues(info.index, w.Handle)
 		} else {
 			native, dynamic, err = s.resolveEquipmentValues(info.index, info.class, w.Handle)
 		}
 		if err != nil {
-			return fmt.Errorf("WriteEquipment[%d]: %w", i, err)
+			return rollbackError(fmt.Errorf("WriteEquipment[%d]: %w", i, err))
 		}
 		resolvedWrites = append(resolvedWrites, resolvedEquipmentWrite{
 			index:   info.index,
@@ -159,7 +202,7 @@ func (s *SaveSlot) WriteEquipment(writes []EquipmentWrite) error {
 	}
 
 	if err := validateTalismanDuplicates(s, armamentsOff, resolvedWrites); err != nil {
-		return fmt.Errorf("WriteEquipment: %w", err)
+		return rollbackError(fmt.Errorf("WriteEquipment: %w", err))
 	}
 
 	// All writes valid — perform the native updates.
@@ -170,6 +213,134 @@ func (s *SaveSlot) WriteEquipment(writes []EquipmentWrite) error {
 		binary.LittleEndian.PutUint32(s.Data[armamentsOff+r.index*4:], r.dynamic)
 	}
 	return nil
+}
+
+func equipmentWritesNeedNativeEmptyPreparation(writes []EquipmentWrite, infos []equipmentSlotInfo) bool {
+	for i, write := range writes {
+		if write.Handle == 0 && (infos[i].class == slotClassWeapon || infos[i].class == slotClassArmor) {
+			return true
+		}
+	}
+	return false
+}
+
+// prepareNativeEmptyEquipmentHandles replaces Handle=0 for weapon/armor clears
+// with real inventory-backed technical handles. Ammunition and talismans keep
+// their direct invalid-sentinel clear contract and never enter this helper.
+//
+// Native class-start saves do not pre-create every possible placeholder:
+// equipped armor has no matching bare-body record. Unarmed is different: native
+// T547 proves multiple cleared hand slots may share one existing Unarmed
+// record, so this helper preserves a slot's current empty handle where possible
+// and otherwise reuses (or provisions) one shared record.
+func (s *SaveSlot) prepareNativeEmptyEquipmentHandles(writes []EquipmentWrite, infos []equipmentSlotInfo, armamentsOff int) error {
+	currentHandleByIndex := make(map[int]uint32)
+
+	// A clear of an already-empty slot reuses its own technical handle, avoiding
+	// unnecessary normalization of valid native state.
+	for _, info := range equipmentSlotTable {
+		itemID, _, ok := nativeEmptyEquipmentIdentity(info)
+		if !ok {
+			continue
+		}
+		handle := s.currentNativeEmptyHandle(info.index, itemID, armamentsOff)
+		if handle == 0 {
+			continue
+		}
+		currentHandleByIndex[info.index] = handle
+	}
+
+	var missing []nativeEmptyEquipmentRequest
+	for i := range writes {
+		if writes[i].Handle != 0 {
+			continue
+		}
+		itemID, prefix, ok := nativeEmptyEquipmentIdentity(infos[i])
+		if !ok {
+			continue
+		}
+		if own := currentHandleByIndex[infos[i].index]; own != 0 {
+			writes[i].Handle = own
+			continue
+		}
+		if handle := s.nativeEmptyHandle(itemID, prefix); handle != 0 {
+			writes[i].Handle = handle
+			continue
+		}
+		missing = append(missing, nativeEmptyEquipmentRequest{
+			writeIndex: i,
+			itemID:     itemID,
+			prefix:     prefix,
+		})
+	}
+	if len(missing) == 0 {
+		return nil
+	}
+
+	// One physical placeholder per missing item ID is sufficient. The four armor
+	// slots have distinct IDs; every missing Unarmed request intentionally shares
+	// the single provisioned record, matching native T547.
+	seenItemID := make(map[uint32]bool, len(missing))
+	items := make([]ItemToAdd, 0, len(missing))
+	for _, request := range missing {
+		if seenItemID[request.itemID] {
+			continue
+		}
+		seenItemID[request.itemID] = true
+		items = append(items, ItemToAdd{ItemID: request.itemID, InvQty: 1})
+	}
+	if err := AddItemsToSlotBatch(s, items); err != nil {
+		return err
+	}
+
+	for _, request := range missing {
+		handle := s.nativeEmptyHandle(request.itemID, request.prefix)
+		if handle == 0 {
+			return fmt.Errorf("native empty item 0x%08X was provisioned but has no inventory/GaMap handle", request.itemID)
+		}
+		writes[request.writeIndex].Handle = handle
+	}
+	return nil
+}
+
+func nativeEmptyEquipmentIdentity(info equipmentSlotInfo) (itemID, prefix uint32, ok bool) {
+	switch info.class {
+	case slotClassWeapon:
+		return unarmedEquipmentItemID, ItemTypeWeapon, true
+	case slotClassArmor:
+		itemID, ok := bareArmorItemIDBySlot[info.index]
+		return itemID, ItemTypeArmor, ok
+	default:
+		return 0, 0, false
+	}
+}
+
+func (s *SaveSlot) currentNativeEmptyHandle(index int, itemID uint32, armamentsOff int) uint32 {
+	if binary.LittleEndian.Uint32(s.Data[armamentsOff+index*4:]) != itemID {
+		return 0
+	}
+	_, _, handleOff, err := s.equipmentRepresentationOffsets(index)
+	if err != nil {
+		return 0
+	}
+	handle := binary.LittleEndian.Uint32(s.Data[handleOff:])
+	if s.inventoryRowForHandle(handle) < 0 || s.GaMap[handle] != itemID {
+		return 0
+	}
+	return handle
+}
+
+func (s *SaveSlot) nativeEmptyHandle(itemID, prefix uint32) uint32 {
+	for _, item := range s.Inventory.CommonItems {
+		handle := item.GaItemHandle
+		if item.Quantity&0x7FFFFFFF == 0 || handle&GaHandleTypeMask != prefix {
+			continue
+		}
+		if s.GaMap[handle] == itemID {
+			return handle
+		}
+	}
+	return 0
 }
 
 const (

@@ -21,6 +21,12 @@ the library exactly as shown, without re-reading the character. Imported and
 hand-authored templates that combine Equipment with Items or Inventory/Storage
 layout are now rejected before any mutation.
 
+Clearing initially equipped weapons and armor now provisions the missing native
+Unarmed / bare-body technical records automatically. Fresh class-start saves no
+longer fail `Save changes` merely because a slot's empty placeholder did not
+already exist in Inventory/GaMap; existing native empty-hand records are
+preserved and shared in the same way as an in-game clear.
+
 ## [1.6.5] - 2026-07-28
 
 ### fix(templates): make Soul Memory calculation portable
