@@ -713,7 +713,13 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 	var equipmentWrites []core.EquipmentWrite
 	var equipmentSlotsApplied int
 	if hasEquipment {
-		writes, equipWarn, equipErr := resolveEquipmentWrites(slot, tpl.Selection.Equipment, tpl.Sections.Equipment)
+		// Talisman pouch capacity uses the EFFECTIVE final value: charVM
+		// already carries profile.talismanSlots from applyTemplateV2ProfileToVM
+		// above (when the same template sets it), so a template that unlocks a
+		// pouch slot and equips into it in one apply resolves against the
+		// post-profile capacity, not the target's pre-apply value.
+		effectiveTalismanSlots := activeTalismanSlotCount(charVM.TalismanSlots)
+		writes, equipWarn, equipErr := resolveEquipmentWrites(slot, effectiveTalismanSlots, tpl.Selection.Equipment, tpl.Sections.Equipment)
 		if equipErr != nil {
 			rollbackBoth()
 			return ApplyTemplateV2Result{
@@ -898,8 +904,9 @@ func (a *App) ApplyBuildTemplateV2ToCharacterJSON(charIdx int, jsonText string, 
 	// Phase 7b.1 — equipment apply. Runs AFTER profile/stats have
 	// flushed to slot.Data so any failure here is rolled back by the
 	// existing core.SnapshotSlot taken at the top of the slot lock.
-	// WriteEquipment writes the supported non-talisman ChrAsmEquipment slots
-	// directly to slot.Data; the rollback snapshot covers the whole batch.
+	// WriteEquipment writes the supported ChrAsmEquipment slots (weapons, ammo,
+	// armor, and talisman1..4) directly to slot.Data; the rollback snapshot
+	// covers the whole batch.
 	if len(equipmentWrites) > 0 {
 		if err := slot.WriteEquipment(equipmentWrites); err != nil {
 			rollbackBoth()

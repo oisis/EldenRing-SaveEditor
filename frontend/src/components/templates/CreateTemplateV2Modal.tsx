@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     PreviewBuildTemplateV2FromCharacter,
-    SaveBuildTemplateV2FromCharacterToLibrary,
+    SaveImportedBuildTemplateJSONToLibrary,
 } from '../../../wailsjs/go/main/App';
 import { application as main, templates } from '../../../wailsjs/go/models';
 import { ImportTemplatePreviewModal } from './ImportTemplatePreviewModal';
@@ -67,10 +67,22 @@ interface ContainerSelection {
     storageLayout?: boolean;
 }
 
+// LoadoutSelection bundles the two full-section toggles that capture the
+// character's current equipment and equipped-spell loadout. Each is a plain
+// boolean shortcut (All=true) — the backend emits up to 18 supported equipment
+// slots (weapons, ammo, armor, and the talisman slots the source has unlocked)
+// and the 14-slot spell section, with empty slots exported as explicit clears
+// so applying the template also removes stale gear / spells.
+interface LoadoutSelection {
+    equipment?: boolean;
+    spells?: boolean;
+}
+
 export function buildSelectionJSON(
     profile: SelectionMap<ProfileFieldKey>,
     stats: SelectionMap<StatsFieldKey>,
     containers: ContainerSelection = {},
+    loadout: LoadoutSelection = {},
 ): string {
     const out: Record<string, unknown> = {};
     const profilePairs: [string, boolean][] = [];
@@ -92,6 +104,8 @@ export function buildSelectionJSON(
         if (containers.inventoryLayout === true) out.inventoryLayout = true;
         if (containers.storageLayout === true) out.storageLayout = true;
     }
+    if (loadout.equipment === true) out.equipment = true;
+    if (loadout.spells === true) out.spells = true;
     return JSON.stringify(out);
 }
 
@@ -112,11 +126,16 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
     const [includeItems, setIncludeItems] = useState(false);
     const [includeInventoryLayout, setIncludeInventoryLayout] = useState(false);
     const [includeStorageLayout, setIncludeStorageLayout] = useState(false);
+    const [includeEquipment, setIncludeEquipment] = useState(false);
+    const [includeSpells, setIncludeSpells] = useState(false);
     const [previewing, setPreviewing] = useState(false);
     const [savingToLibrary, setSavingToLibrary] = useState(false);
     const [previewReport, setPreviewReport] = useState<templates.ImportPreviewReport | null>(null);
-    const [pendingSelectionJSON, setPendingSelectionJSON] = useState<string | null>(null);
-    const [pendingOpts, setPendingOpts] = useState<main.BuildTemplateV2ExportOptions | null>(null);
+    // The exact canonical JSON returned by Preview. Saving persists THIS
+    // payload (anti-TOCTOU): the library never re-reads the live character,
+    // so the saved template is byte-identical to what the user reviewed even
+    // if the character changed between Preview and Save.
+    const [pendingJSON, setPendingJSON] = useState<string | null>(null);
 
     const dialogRef = useRef<HTMLDivElement | null>(null);
     const onDialogKeyDown = useModalEscape(onClose, previewing || savingToLibrary);
@@ -133,7 +152,8 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
         [statsSelection],
     );
     const canPreview =
-        (hasAnyProfile || hasAnyStats || includeItems) && !previewing;
+        (hasAnyProfile || hasAnyStats || includeItems || includeEquipment || includeSpells) &&
+        !previewing;
 
     const selectAllProfile = useCallback(() => {
         const next: SelectionMap<ProfileFieldKey> = {};
@@ -149,12 +169,18 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
     const clearStats = useCallback(() => setStatsSelection({}), []);
 
     const onPreview = useCallback(async () => {
-        if (!hasAnyProfile && !hasAnyStats && !includeItems) return;
-        const selectionJSON = buildSelectionJSON(profileSelection, statsSelection, {
-            items: includeItems,
-            inventoryLayout: includeItems && includeInventoryLayout,
-            storageLayout: includeItems && includeStorageLayout,
-        });
+        if (!hasAnyProfile && !hasAnyStats && !includeItems && !includeEquipment && !includeSpells)
+            return;
+        const selectionJSON = buildSelectionJSON(
+            profileSelection,
+            statsSelection,
+            {
+                items: includeItems,
+                inventoryLayout: includeItems && includeInventoryLayout,
+                storageLayout: includeItems && includeStorageLayout,
+            },
+            { equipment: includeEquipment, spells: includeSpells },
+        );
         const opts = main.BuildTemplateV2ExportOptions.createFrom({
             name,
             description,
@@ -164,8 +190,7 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
         setPreviewing(true);
         try {
             const result = await PreviewBuildTemplateV2FromCharacter(charIndex, selectionJSON, opts);
-            setPendingSelectionJSON(selectionJSON);
-            setPendingOpts(opts);
+            setPendingJSON(result.json ?? null);
             setPreviewReport(result.report);
         } catch (err) {
             onError?.(err);
@@ -179,6 +204,8 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
         includeItems,
         includeInventoryLayout,
         includeStorageLayout,
+        includeEquipment,
+        includeSpells,
         profileSelection,
         statsSelection,
         name,
@@ -189,17 +216,15 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
     ]);
 
     const handleSaveFromPreview = useCallback(async () => {
-        if (pendingSelectionJSON === null || pendingOpts === null) {
+        if (pendingJSON === null) {
             onError?.(new Error('No preview available to save'));
             return;
         }
         setSavingToLibrary(true);
         try {
-            const entry = await SaveBuildTemplateV2FromCharacterToLibrary(
-                charIndex,
-                pendingSelectionJSON,
-                pendingOpts,
-            );
+            // Persist the exact previewed payload — never re-derive from the
+            // live character (that would reintroduce the Preview→Save TOCTOU).
+            const entry = await SaveImportedBuildTemplateJSONToLibrary(pendingJSON);
             onSaved?.(entry);
             setPreviewReport(null);
             onClose();
@@ -208,7 +233,7 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
         } finally {
             setSavingToLibrary(false);
         }
-    }, [charIndex, pendingSelectionJSON, pendingOpts, onSaved, onClose, onError]);
+    }, [pendingJSON, onSaved, onClose, onError]);
 
     return (
         <div
@@ -329,6 +354,7 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                                     id="create-template-v2-items"
                                     data-testid="create-template-v2-items"
                                     checked={includeItems}
+                                    disabled={includeEquipment}
                                     onChange={e => {
                                         const next = e.target.checked;
                                         setIncludeItems(next);
@@ -338,7 +364,15 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                                         }
                                     }}
                                 />
-                                <label htmlFor="create-template-v2-items" className="cursor-pointer select-none">
+                                <label
+                                    htmlFor="create-template-v2-items"
+                                    className={`select-none ${includeEquipment ? 'cursor-not-allowed text-muted-foreground/60' : 'cursor-pointer'}`}
+                                    title={
+                                        includeEquipment
+                                            ? 'Disabled while Equipment is selected — Equipment applies against items already in the target inventory.'
+                                            : ''
+                                    }
+                                >
                                     Items (inventory + storage contents)
                                 </label>
                             </li>
@@ -348,16 +382,18 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                                     id="create-template-v2-inventory-layout"
                                     data-testid="create-template-v2-inventory-layout"
                                     checked={includeItems && includeInventoryLayout}
-                                    disabled={!includeItems}
+                                    disabled={!includeItems || includeEquipment}
                                     onChange={e => setIncludeInventoryLayout(e.target.checked)}
                                 />
                                 <label
                                     htmlFor="create-template-v2-inventory-layout"
-                                    className={`select-none ${includeItems ? 'cursor-pointer' : 'cursor-not-allowed text-muted-foreground/60'}`}
+                                    className={`select-none ${includeItems && !includeEquipment ? 'cursor-pointer' : 'cursor-not-allowed text-muted-foreground/60'}`}
                                     title={
-                                        includeItems
-                                            ? ''
-                                            : 'Select Items first — layout entries reference item IDs.'
+                                        includeEquipment
+                                            ? 'Disabled while Equipment is selected.'
+                                            : includeItems
+                                              ? ''
+                                              : 'Select Items first — layout entries reference item IDs.'
                                     }
                                 >
                                     Inventory layout (requires items)
@@ -369,19 +405,90 @@ export function CreateTemplateV2Modal({ charIndex, onClose, onSaved, onError }: 
                                     id="create-template-v2-storage-layout"
                                     data-testid="create-template-v2-storage-layout"
                                     checked={includeItems && includeStorageLayout}
-                                    disabled={!includeItems}
+                                    disabled={!includeItems || includeEquipment}
                                     onChange={e => setIncludeStorageLayout(e.target.checked)}
                                 />
                                 <label
                                     htmlFor="create-template-v2-storage-layout"
-                                    className={`select-none ${includeItems ? 'cursor-pointer' : 'cursor-not-allowed text-muted-foreground/60'}`}
+                                    className={`select-none ${includeItems && !includeEquipment ? 'cursor-pointer' : 'cursor-not-allowed text-muted-foreground/60'}`}
                                     title={
-                                        includeItems
-                                            ? ''
-                                            : 'Select Items first — layout entries reference item IDs.'
+                                        includeEquipment
+                                            ? 'Disabled while Equipment is selected.'
+                                            : includeItems
+                                              ? ''
+                                              : 'Select Items first — layout entries reference item IDs.'
                                     }
                                 >
                                     Storage layout (requires items)
+                                </label>
+                            </li>
+                        </ul>
+                    </section>
+
+                    <section aria-label="Loadout" className="space-y-2">
+                        <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                            Loadout
+                        </h3>
+                        <p className="text-[10px] text-muted-foreground">
+                            Captures the full loadout: every weapon, ammo, and armor slot, the talisman
+                            slots the source currently has unlocked, and all 14 spell slots. Empty slots
+                            are stored as explicit clears, so applying a loadout template also removes
+                            gear/spells from slots the source leaves empty.
+                            Equipment applies against items already in the target's inventory.
+                        </p>
+                        {includeEquipment && (
+                            <p
+                                data-testid="create-template-v2-equipment-note"
+                                className="text-[10px] text-warning-foreground"
+                            >
+                                Equipment is exclusive with Items / Inventory / Storage layout: those
+                                sections are disabled. The equipped items must already exist in the
+                                target character's inventory when the template is applied.
+                            </p>
+                        )}
+                        <ul className="grid grid-cols-1 gap-y-1">
+                            <li className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="create-template-v2-equipment"
+                                    data-testid="create-template-v2-equipment"
+                                    checked={includeEquipment}
+                                    disabled={includeItems || includeInventoryLayout || includeStorageLayout}
+                                    onChange={e => {
+                                        const next = e.target.checked;
+                                        setIncludeEquipment(next);
+                                        if (next) {
+                                            setIncludeItems(false);
+                                            setIncludeInventoryLayout(false);
+                                            setIncludeStorageLayout(false);
+                                        }
+                                    }}
+                                />
+                                <label
+                                    htmlFor="create-template-v2-equipment"
+                                    className={`select-none ${includeItems ? 'cursor-not-allowed text-muted-foreground/60' : 'cursor-pointer'}`}
+                                    title={
+                                        includeItems
+                                            ? 'Disabled while Items / layout is selected — Equipment cannot add items, only equip ones already present.'
+                                            : ''
+                                    }
+                                >
+                                    Equipment loadout (weapons, ammo, armor, talismans)
+                                </label>
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <input
+                                    type="checkbox"
+                                    id="create-template-v2-spells"
+                                    data-testid="create-template-v2-spells"
+                                    checked={includeSpells}
+                                    onChange={e => setIncludeSpells(e.target.checked)}
+                                />
+                                <label
+                                    htmlFor="create-template-v2-spells"
+                                    className="cursor-pointer select-none"
+                                >
+                                    Equipped spells (all 14 slots)
                                 </label>
                             </li>
                         </ul>

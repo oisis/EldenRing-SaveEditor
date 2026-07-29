@@ -1,7 +1,6 @@
 package application
 
 import (
-	"encoding/binary"
 	"fmt"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
@@ -12,8 +11,10 @@ import (
 
 // equipmentSlotChrAsmIndex maps a canonical slot key to the corresponding
 // index inside the 22-entry core.ChrAsmEquipment array. Keys mirror
-// templates.EquipmentSlotOrder. Talisman entries are retained here for
-// read/export only; they are not writable.
+// templates.EquipmentSlotOrder. talisman5 (index 21) is present for read
+// completeness only — it has no native write contract, so it is excluded
+// from live-character export and from apply (see equipmentSlotKindForKey,
+// which is the single source of truth for the writable slot set).
 var equipmentSlotChrAsmIndex = map[string]int{
 	"weaponLeftHand1":  0,
 	"weaponRightHand1": 1,
@@ -69,97 +70,124 @@ func equipmentSlotKindForKey(slotKey string) (core.EquipmentSlotKind, bool) {
 		return core.EquipSlotArms, true
 	case "armorLegs":
 		return core.EquipSlotLegs, true
+	case "talisman1":
+		return core.EquipSlotTalisman1, true
+	case "talisman2":
+		return core.EquipSlotTalisman2, true
+	case "talisman3":
+		return core.EquipSlotTalisman3, true
+	case "talisman4":
+		return core.EquipSlotTalisman4, true
 	}
 	return 0, false
 }
 
-// equipmentSlotIsAmmo reports whether the slot key is one of the four
-// ammo positions (Arrows1/2, Bolts1/2). Ammo slots store goods item IDs
-// directly (0x40-prefixed), while weapon/armor slots store
-// `itemID | 0x80000000`.
-func equipmentSlotIsAmmo(slotKey string) bool {
+// talismanOrdinal returns the zero-based pouch ordinal for a talisman slot
+// key (talisman1 → 0 … talisman4 → 3) and whether the key is one of the four
+// writable talisman slots. talisman5 has no native write contract and is not
+// writable, so it returns (0, false).
+func talismanOrdinal(slotKey string) (int, bool) {
+	switch slotKey {
+	case "talisman1":
+		return 0, true
+	case "talisman2":
+		return 1, true
+	case "talisman3":
+		return 2, true
+	case "talisman4":
+		return 3, true
+	}
+	return 0, false
+}
+
+// equipmentSlotEquipClass maps a writable slot key to the equipClass that the
+// Equipment-tab reader (isEmptyEquipSlot / normalizeEquipItemID) uses. This is
+// the single source of truth for how a raw equipped-armaments value is decoded
+// per slot family — the export path must not re-invent it.
+func equipmentSlotEquipClass(slotKey string) equipClass {
 	switch slotKey {
 	case "arrows1", "bolts1", "arrows2", "bolts2":
-		return true
-	}
-	return false
-}
-
-// equipmentSlotIsTalisman reports whether the slot key is one of the five
-// talisman positions. Talisman slots store the talisman item ID directly
-// (the 0x20-prefixed form already present in the GaMap), with no
-// `| 0x80000000` mask applied.
-func equipmentSlotIsTalisman(slotKey string) bool {
-	switch slotKey {
+		return classAmmo
+	case "armorHead", "armorChest", "armorArms", "armorLegs":
+		return classArmor
 	case "talisman1", "talisman2", "talisman3", "talisman4", "talisman5":
-		return true
+		return classTalisman
+	default:
+		return classHandArmament
 	}
-	return false
 }
 
-// buildEquipmentSectionFromSlot scans the supported ChrAsmEquipment
-// slots (0–9, 12–15) on the given SaveSlot and returns a
-// templates.EquipmentSection whose pointer fields are populated for
-// every non-empty equipped slot. The matching strategy mirrors the
-// Phase 7b.1 export contract:
+// buildEquipmentSectionFromEquipped scans the writable ChrAsmEquipment slots
+// of one character's equipped-armaments block and returns a
+// templates.EquipmentSection whose pointer fields are populated for every
+// occupied slot.
 //
-//   - Read the raw u32 at slot.Data[EquipItemsIDOffset + idx*4].
-//   - 0xFFFFFFFF → field stays nil (slot is empty in-game).
-//   - Decode the equipped form back to an itemID (weapon/armor: strip
-//     the 0x80 high-bit flag; ammo: take the raw value as a goods
-//     itemID which already carries the 0x40 prefix).
-//   - Look up the corresponding editor.EditableItem in inventoryItems
-//     by matching encoded ItemID; copy BaseItemID, Name, current
-//     upgrade, infusion, and custom AoW into the EquipmentItemRef.
-//   - When no editable item matches (e.g. the equipped item is a
-//     pass-through record or absent from CommonItems entirely) but
-//     the DB recognises the decoded ID, fall back to the DB-derived
-//     baseItemID / name with no upgrade / infusion metadata.
-//   - When the DB does not recognise the ID either, the slot still
-//     emits a ref carrying just the raw decoded ItemID — the export
-//     report shows the user there is something in the slot rather
-//     than silently dropping it.
+// equipped is RawEquippedState.Equipped — the 22 direct item-ID values read by
+// core.SaveSlot.ReadEquippedState from the equipped-armaments block (past the
+// variable-length projectiles section). It is NOT the ChrAsm2 GaItem-handle
+// header at EquipItemsIDOffset; that header holds encoded handles the item DB
+// cannot resolve and must never be used as the equipment source.
 //
-// Returns nil when the slot's EquipItemsIDOffset has not been parsed
-// (empty / unreadable slot) or when no supported slot is populated.
-func buildEquipmentSectionFromSlot(slot *core.SaveSlot, inventoryItems []editor.EditableItem) *templates.EquipmentSection {
-	if slot == nil || slot.EquipItemsIDOffset <= 0 {
-		return nil
-	}
-	if slot.EquipItemsIDOffset+core.ChrAsmEquipmentSize > len(slot.Data) {
-		return nil
-	}
-
+// Per slot:
+//   - isEmptyEquipSlot decides empty (raw 0 / GaHandleInvalid / Unarmed for a
+//     hand slot / a bare-armor ID for an armor slot) — the same contract the
+//     Equipment tab uses.
+//   - Otherwise normalizeEquipItemID resolves the DB item ID, matched against
+//     inventoryItems (to carry upgrade / infusion / AoW metadata) and finally
+//     the DB.
+//
+// Only writable slots (equipmentSlotKindForKey ok — weapons, ammo, armor,
+// talisman1..4) are scanned; talisman5 is never exported from a live
+// character. Talisman slots past activeTalismanSlots stay nil (the source has
+// not unlocked them) — they are never emitted as clears.
+//
+// emitEmptyAsClear selects the export semantics for an empty writable slot:
+//   - false → the slot is omitted (occupied-only export); a fully-empty
+//     loadout yields nil.
+//   - true → the slot is emitted as an explicit clear (EquipmentItemRef with
+//     BaseItemID == 0), so applying a "full loadout" template removes whatever
+//     gear the target currently equips there rather than leaving stale
+//     equipment behind.
+func buildEquipmentSectionFromEquipped(equipped [core.ChrAsmFieldCount]uint32, inventoryItems []editor.EditableItem, activeTalismanSlots int, emitEmptyAsClear bool) *templates.EquipmentSection {
 	// Index editable inventory by the equipped-form encoded value so we
 	// can do a single O(1) lookup per slot. Weapons/armor encode as
-	// `ItemID | 0x80000000`; ammo (goods) encodes as ItemID directly.
+	// `ItemID | 0x80000000`; ammo / talismans (goods-like) encode as the
+	// bare ItemID.
 	byEquipped := make(map[uint32]*editor.EditableItem, len(inventoryItems))
 	for i := range inventoryItems {
 		it := &inventoryItems[i]
-		// weapons/armor candidate
 		byEquipped[it.ItemID|core.ItemTypeWeapon] = it
-		// ammo / goods candidate
 		byEquipped[it.ItemID] = it
 	}
 
 	out := &templates.EquipmentSection{}
 	any := false
 	for _, slotKey := range templates.EquipmentSlotOrder {
-		chrAsmIdx, ok := equipmentSlotChrAsmIndex[slotKey]
-		if !ok {
+		// equipmentSlotKindForKey is the single source of truth for the
+		// writable / exportable slot set: weapons, ammo, armor, and
+		// talisman1..4. talisman5 has no native write contract, so it is
+		// never exported from a live character (stays nil in the section).
+		if _, ok := equipmentSlotKindForKey(slotKey); !ok {
 			continue
 		}
-		off := slot.EquipItemsIDOffset + chrAsmIdx*4
-		raw := binary.LittleEndian.Uint32(slot.Data[off:])
-		if raw == 0xFFFFFFFF {
+		// Talisman slots the source has not unlocked stay nil — the source
+		// character never had that pouch capacity, so there is nothing to
+		// clear on it.
+		if ordinal, isTal := talismanOrdinal(slotKey); isTal && ordinal >= activeTalismanSlots {
+			continue
+		}
+		class := equipmentSlotEquipClass(slotKey)
+		raw := equipped[equipmentSlotChrAsmIndex[slotKey]]
+
+		if isEmptyEquipSlot(raw, class) {
+			if emitEmptyAsClear {
+				templates.SetEquipmentSlotRef(out, slotKey, &templates.EquipmentItemRef{})
+				any = true
+			}
 			continue
 		}
 
-		ref := decodeEquipmentSlotToRef(raw, slotKey, byEquipped)
-		if ref == nil {
-			continue
-		}
-		templates.SetEquipmentSlotRef(out, slotKey, ref)
+		templates.SetEquipmentSlotRef(out, slotKey, decodeEquipmentSlotToRef(raw, class, byEquipped))
 		any = true
 	}
 	if !any {
@@ -168,55 +196,45 @@ func buildEquipmentSectionFromSlot(slot *core.SaveSlot, inventoryItems []editor.
 	return out
 }
 
-// decodeEquipmentSlotToRef builds the EquipmentItemRef from a raw u32
-// pulled out of ChrAsmEquipment. byEquipped is the encoded-form lookup
-// indexed by ItemID|0x80000000 (weapons/armor) and bare ItemID (ammo).
-func decodeEquipmentSlotToRef(raw uint32, slotKey string, byEquipped map[uint32]*editor.EditableItem) *templates.EquipmentItemRef {
-	if raw == 0 || raw == 0xFFFFFFFF {
-		return nil
-	}
-
-	// Look up the matching editable item using the exact raw value first;
-	// fall back to the decoded ItemID (strip the 0x80 flag for weapon /
-	// armor; ammo slots store ItemID directly).
+// decodeEquipmentSlotToRef builds the EquipmentItemRef for an occupied slot.
+// raw is a direct equipped-armaments item value; class selects the
+// normalizeEquipItemID contract. byEquipped is the inventory lookup indexed by
+// ItemID|0x80000000 (weapons/armor) and bare ItemID (ammo/talismans). The
+// caller has already excluded empty slots via isEmptyEquipSlot.
+func decodeEquipmentSlotToRef(raw uint32, class equipClass, byEquipped map[uint32]*editor.EditableItem) *templates.EquipmentItemRef {
+	// Exact encoded-form match first, then the normalized DB item ID — both
+	// carry the inventory item's upgrade / infusion / AoW metadata.
 	if it, ok := byEquipped[raw]; ok {
 		return itemToEquipmentRef(it)
 	}
-
-	var candidateID uint32
-	if equipmentSlotIsAmmo(slotKey) || equipmentSlotIsTalisman(slotKey) {
-		candidateID = raw
-	} else {
-		candidateID = raw &^ core.ItemTypeWeapon
-	}
-	if it, ok := byEquipped[candidateID]; ok {
+	normID := normalizeEquipItemID(raw, class)
+	if it, ok := byEquipped[normID]; ok {
 		return itemToEquipmentRef(it)
 	}
 
-	// Editable inventory does not contain the equipped item — fall back
-	// to a DB-derived ref so the export still records which item the
-	// slot holds. This path is rare for weapons / armor but expected for
-	// Unarmed / placeholder slots.
-	itemData, baseID := db.GetItemDataFuzzy(candidateID)
+	// Not in editable inventory — fall back to a DB-derived ref so the export
+	// still records which item the slot holds.
+	itemData, baseID := db.GetItemDataFuzzy(normID)
 	if itemData.Name != "" {
 		return &templates.EquipmentItemRef{
 			BaseItemID: baseID,
 			Name:       itemData.Name,
 		}
 	}
-	// Last resort: unknown item, emit minimal ref with raw decoded ID so
-	// the user at least sees "there is something here we could not
-	// resolve".
-	return &templates.EquipmentItemRef{BaseItemID: candidateID}
+	// Last resort: unknown item, emit a minimal ref with the normalized ID so
+	// the user at least sees "there is something here we could not resolve".
+	return &templates.EquipmentItemRef{BaseItemID: normID}
 }
 
 // resolveEquipmentWrites walks the selected slots in
 // templates.EquipmentSection and produces a []core.EquipmentWrite batch
 // ready for SaveSlot.WriteEquipment.
 //
-// Talismans are kept in the template schema for export/import fidelity, but
-// selected talisman fields are skipped with a warning until their native write
-// contract is established.
+// Talisman1..4 route through the same core.WriteEquipment path as weapons,
+// ammo, and armor. Slots past the target's active pouch capacity are skipped
+// (equip and clear alike) so a locked-slot write can never make the core
+// writer reject the whole Equipment batch. talisman5 has no native write
+// contract, so it is skipped with a warning.
 //
 // Phase 7b.1 strict-existing-only policy:
 //   - sel must be non-nil and HasAny == true at the call site.
@@ -239,7 +257,7 @@ func decodeEquipmentSlotToRef(raw uint32, slotKey string, byEquipped map[uint32]
 // The Go error return is reserved for infrastructure problems (nil
 // slot, nil section pointer where the caller expected one); per-slot
 // resolution issues never surface as a Go error.
-func resolveEquipmentWrites(slot *core.SaveSlot, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
+func resolveEquipmentWrites(slot *core.SaveSlot, effectiveTalismanSlots int, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
 	if slot == nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: nil slot")
 	}
@@ -252,7 +270,7 @@ func resolveEquipmentWrites(slot *core.SaveSlot, sel *templates.SectionSelection
 	if err != nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: BuildSnapshot: %w", err)
 	}
-	return resolveEquipmentWritesFromItems(snap.InventoryItems, sel, sec)
+	return resolveEquipmentWritesFromItems(snap.InventoryItems, effectiveTalismanSlots, sel, sec)
 }
 
 // resolveEquipmentWritesFromItems is the pure-logic core of the
@@ -260,7 +278,12 @@ func resolveEquipmentWrites(slot *core.SaveSlot, sel *templates.SectionSelection
 // items. Factored out so tests can exercise the matching / warning
 // logic without standing up a full SaveSlot that BuildSnapshot can
 // parse.
-func resolveEquipmentWritesFromItems(items []editor.EditableItem, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
+//
+// unlockedTalismans is the target character's active pouch capacity (1–4,
+// from activeTalismanSlotCount). Talisman writes for ordinals at or beyond
+// that capacity are skipped so the core writer never rejects the batch over a
+// locked slot.
+func resolveEquipmentWritesFromItems(items []editor.EditableItem, unlockedTalismans int, sel *templates.SectionSelection, sec *templates.EquipmentSection) ([]core.EquipmentWrite, []templates.ImportPreviewIssue, error) {
 	if sec == nil {
 		return nil, nil, fmt.Errorf("resolveEquipmentWrites: nil equipment section")
 	}
@@ -276,23 +299,32 @@ func resolveEquipmentWritesFromItems(items []editor.EditableItem, sel *templates
 		if ref == nil {
 			continue
 		}
-		if equipmentSlotIsTalisman(slotKey) {
+		kind, ok := equipmentSlotKindForKey(slotKey)
+		if !ok {
+			// The only non-writable key in EquipmentSlotOrder is talisman5,
+			// which has no native write contract. Skip it with a warning
+			// rather than a hard error so an imported template that carries
+			// talisman5 still applies its other slots.
 			warnings = append(warnings, templates.ImportPreviewIssue{
 				Severity:  "warning",
 				Code:      templates.IssueCodeEquipmentSlotInvalid,
-				Message:   fmt.Sprintf("equipment.%s: talisman writes are disabled until the native write contract is established; slot skipped", slotKey),
+				Message:   fmt.Sprintf("equipment.%s: slot has no native write contract; skipped", slotKey),
 				Container: slotKey,
 			})
 			continue
 		}
-		kind, ok := equipmentSlotKindForKey(slotKey)
-		if !ok {
-			// Unreachable — equipmentSlotKindForKey covers every key in
-			// EquipmentSlotOrder. Defensive guard so a future
-			// EquipmentSlotOrder extension that forgets to update the
-			// mapping surfaces as a clear error rather than silently
-			// dropping slots.
-			return nil, nil, fmt.Errorf("resolveEquipmentWrites: no core slot kind for %q", slotKey)
+		// Skip talisman slots the target has not unlocked — both equips
+		// (which the writer would reject) and clears (which it would accept),
+		// so the batch composition never depends on the writer's clear/equip
+		// asymmetry for locked slots.
+		if ordinal, isTal := talismanOrdinal(slotKey); isTal && ordinal >= unlockedTalismans {
+			warnings = append(warnings, templates.ImportPreviewIssue{
+				Severity:  "warning",
+				Code:      templates.IssueCodeTalismanSlotPouchInsufficient,
+				Message:   fmt.Sprintf("equipment.%s: talisman slot %d exceeds the target's %d unlocked pouch slot(s); skipped", slotKey, ordinal+1, unlockedTalismans),
+				Container: slotKey,
+			})
+			continue
 		}
 
 		if ref.BaseItemID == 0 {

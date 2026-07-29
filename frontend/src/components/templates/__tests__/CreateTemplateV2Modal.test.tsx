@@ -3,12 +3,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 vi.mock('../../../../wailsjs/go/main/App', () => ({
     PreviewBuildTemplateV2FromCharacter: vi.fn(),
-    SaveBuildTemplateV2FromCharacterToLibrary: vi.fn(),
+    SaveImportedBuildTemplateJSONToLibrary: vi.fn(),
 }));
 
 import * as App from '../../../../wailsjs/go/main/App';
 import { templates } from '../../../../wailsjs/go/models';
-import { CreateTemplateV2Modal } from '../CreateTemplateV2Modal';
+import { buildSelectionJSON, CreateTemplateV2Modal } from '../CreateTemplateV2Modal';
 
 const mocks = App as unknown as Record<string, ReturnType<typeof vi.fn>>;
 
@@ -273,8 +273,12 @@ describe('CreateTemplateV2Modal — Preview flow', () => {
 });
 
 describe('CreateTemplateV2Modal — Save from preview flow', () => {
+    // The canonical JSON the preview backend returns; Save must persist THIS
+    // exact payload (anti-TOCTOU), never re-derive from the live character.
+    const PREVIEW_JSON = '{"schema":"saveforge.build-template","version":2,"selection":{"profile":{"level":true,"runes":true}}}';
+
     async function previewLevelRunes(props: ReturnType<typeof defaultProps>) {
-        mocks.PreviewBuildTemplateV2FromCharacter.mockResolvedValue({ report: makeV2Report() });
+        mocks.PreviewBuildTemplateV2FromCharacter.mockResolvedValue({ report: makeV2Report(), json: PREVIEW_JSON });
         render(<CreateTemplateV2Modal {...props} />);
 
         fireEvent.change(screen.getByTestId('create-template-v2-name'), { target: { value: 'RL150' } });
@@ -289,9 +293,9 @@ describe('CreateTemplateV2Modal — Save from preview flow', () => {
         await waitFor(() => expect(screen.getByTestId('import-preview-save-to-library')).toBeInTheDocument());
     }
 
-    it('Save to Library forwards the same charIndex, selection JSON, and opts used during preview', async () => {
+    it('Save to Library persists the exact previewed JSON, not a fresh character read', async () => {
         const props = defaultProps({ charIndex: 5 });
-        mocks.SaveBuildTemplateV2FromCharacterToLibrary.mockResolvedValue(
+        mocks.SaveImportedBuildTemplateJSONToLibrary.mockResolvedValue(
             templates.LibraryTemplateEntry.createFrom({
                 id: 'tpl-new',
                 name: 'RL150',
@@ -311,12 +315,9 @@ describe('CreateTemplateV2Modal — Save from preview flow', () => {
             fireEvent.click(screen.getByTestId('import-preview-save-to-library'));
         });
 
-        await waitFor(() => expect(mocks.SaveBuildTemplateV2FromCharacterToLibrary).toHaveBeenCalledTimes(1));
-        const previewCall = mocks.PreviewBuildTemplateV2FromCharacter.mock.calls[0];
-        const saveCall = mocks.SaveBuildTemplateV2FromCharacterToLibrary.mock.calls[0];
-        expect(saveCall[0]).toBe(previewCall[0]);
-        expect(saveCall[1]).toBe(previewCall[1]);
-        expect(saveCall[2]).toBe(previewCall[2]);
+        await waitFor(() => expect(mocks.SaveImportedBuildTemplateJSONToLibrary).toHaveBeenCalledTimes(1));
+        // Saved payload is byte-identical to the preview's canonical JSON.
+        expect(mocks.SaveImportedBuildTemplateJSONToLibrary.mock.calls[0][0]).toBe(PREVIEW_JSON);
     });
 
     it('Save success calls onSaved with the new entry and then onClose', async () => {
@@ -332,7 +333,7 @@ describe('CreateTemplateV2Modal — Save from preview flow', () => {
             warnings: 0,
             version: 2,
         });
-        mocks.SaveBuildTemplateV2FromCharacterToLibrary.mockResolvedValue(entry);
+        mocks.SaveImportedBuildTemplateJSONToLibrary.mockResolvedValue(entry);
 
         await previewLevelRunes(props);
 
@@ -348,7 +349,7 @@ describe('CreateTemplateV2Modal — Save from preview flow', () => {
     it('Save failure calls onError and leaves the preview overlay open', async () => {
         const props = defaultProps();
         const err = new Error('save boom');
-        mocks.SaveBuildTemplateV2FromCharacterToLibrary.mockRejectedValue(err);
+        mocks.SaveImportedBuildTemplateJSONToLibrary.mockRejectedValue(err);
 
         await previewLevelRunes(props);
 
@@ -429,6 +430,154 @@ describe('CreateTemplateV2Modal — containers (Phase 8C.1)', () => {
         await waitFor(() => expect(mocks.PreviewBuildTemplateV2FromCharacter).toHaveBeenCalledTimes(1));
         const json = mocks.PreviewBuildTemplateV2FromCharacter.mock.calls[0][1] as string;
         expect(JSON.parse(json)).toEqual({ items: true, inventoryLayout: true });
+    });
+});
+
+describe('buildSelectionJSON — loadout', () => {
+    it('emits equipment and spells as boolean shortcuts', () => {
+        const json = buildSelectionJSON({}, {}, {}, { equipment: true, spells: true });
+        expect(JSON.parse(json)).toEqual({ equipment: true, spells: true });
+    });
+
+    it('omits loadout keys when not selected', () => {
+        const json = buildSelectionJSON({ level: true }, {}, {}, {});
+        expect(JSON.parse(json)).toEqual({ profile: { level: true } });
+    });
+
+    it('combines profile, stats, equipment and spells in one selection', () => {
+        // Allowed combination: equipment rides with profile/stats/spells but
+        // NOT items/layout (that pairing is gated out at the UI level).
+        const json = buildSelectionJSON(
+            { level: true },
+            { vigor: true },
+            {},
+            { equipment: true, spells: true },
+        );
+        expect(JSON.parse(json)).toEqual({
+            profile: { level: true },
+            stats: { vigor: true },
+            equipment: true,
+            spells: true,
+        });
+    });
+});
+
+describe('CreateTemplateV2Modal — loadout (Equipment / Spells)', () => {
+    it('renders the equipment and spells checkboxes', () => {
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+        expect(screen.getByTestId('create-template-v2-equipment')).toBeInTheDocument();
+        expect(screen.getByTestId('create-template-v2-spells')).toBeInTheDocument();
+    });
+
+    it('Equipment alone enables Preview and sends equipment=true', async () => {
+        mocks.PreviewBuildTemplateV2FromCharacter.mockResolvedValue({ report: makeV2Report(['equipment']) });
+        render(<CreateTemplateV2Modal {...defaultProps({ charIndex: 8 })} />);
+
+        fireEvent.click(screen.getByTestId('create-template-v2-equipment'));
+        expect((screen.getByTestId('create-template-v2-preview') as HTMLButtonElement).disabled).toBe(false);
+
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('create-template-v2-preview'));
+        });
+
+        await waitFor(() => expect(mocks.PreviewBuildTemplateV2FromCharacter).toHaveBeenCalledTimes(1));
+        const call = mocks.PreviewBuildTemplateV2FromCharacter.mock.calls[0];
+        expect(call[0]).toBe(8);
+        expect(JSON.parse(call[1] as string)).toEqual({ equipment: true });
+    });
+
+    it('Spells alone enables Preview and sends spells=true', async () => {
+        mocks.PreviewBuildTemplateV2FromCharacter.mockResolvedValue({ report: makeV2Report(['spells']) });
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+
+        fireEvent.click(screen.getByTestId('create-template-v2-spells'));
+        expect((screen.getByTestId('create-template-v2-preview') as HTMLButtonElement).disabled).toBe(false);
+
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('create-template-v2-preview'));
+        });
+
+        await waitFor(() => expect(mocks.PreviewBuildTemplateV2FromCharacter).toHaveBeenCalledTimes(1));
+        const json = mocks.PreviewBuildTemplateV2FromCharacter.mock.calls[0][1] as string;
+        expect(JSON.parse(json)).toEqual({ spells: true });
+    });
+
+    it('Equipment + Spells + a profile field all ride in one selection JSON', async () => {
+        mocks.PreviewBuildTemplateV2FromCharacter.mockResolvedValue({
+            report: makeV2Report(['profile', 'equipment', 'spells']),
+        });
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+
+        fireEvent.click(screen.getByTestId('create-template-v2-profile-level'));
+        fireEvent.click(screen.getByTestId('create-template-v2-equipment'));
+        fireEvent.click(screen.getByTestId('create-template-v2-spells'));
+
+        await act(async () => {
+            fireEvent.click(screen.getByTestId('create-template-v2-preview'));
+        });
+
+        await waitFor(() => expect(mocks.PreviewBuildTemplateV2FromCharacter).toHaveBeenCalledTimes(1));
+        const json = mocks.PreviewBuildTemplateV2FromCharacter.mock.calls[0][1] as string;
+        expect(JSON.parse(json)).toEqual({
+            profile: { level: true },
+            equipment: true,
+            spells: true,
+        });
+    });
+});
+
+describe('CreateTemplateV2Modal — Equipment vs Items/Layout gate', () => {
+    it('selecting Equipment disables Items + layout and shows the exclusivity note', () => {
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+
+        expect(screen.queryByTestId('create-template-v2-equipment-note')).toBeNull();
+
+        fireEvent.click(screen.getByTestId('create-template-v2-equipment'));
+
+        expect(screen.getByTestId('create-template-v2-equipment-note')).toBeInTheDocument();
+        expect((screen.getByTestId('create-template-v2-items') as HTMLInputElement).disabled).toBe(true);
+        expect((screen.getByTestId('create-template-v2-inventory-layout') as HTMLInputElement).disabled).toBe(true);
+        expect((screen.getByTestId('create-template-v2-storage-layout') as HTMLInputElement).disabled).toBe(true);
+    });
+
+    it('Equipment and Items exclude each other by disabling, reversibly', () => {
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+
+        const items = () => screen.getByTestId('create-template-v2-items') as HTMLInputElement;
+        const equipment = () => screen.getByTestId('create-template-v2-equipment') as HTMLInputElement;
+
+        // Selecting Items disables Equipment...
+        fireEvent.click(items());
+        expect(equipment().disabled).toBe(true);
+
+        // ...and deselecting Items re-enables it (the real browser path — a
+        // disabled checkbox is never clickable, so exclusivity is enforced by
+        // disabling, not by a silent programmatic uncheck).
+        fireEvent.click(items());
+        expect(equipment().disabled).toBe(false);
+
+        // Selecting Equipment now disables Items + both layout toggles.
+        fireEvent.click(equipment());
+        expect(items().disabled).toBe(true);
+        expect((screen.getByTestId('create-template-v2-inventory-layout') as HTMLInputElement).disabled).toBe(true);
+        expect((screen.getByTestId('create-template-v2-storage-layout') as HTMLInputElement).disabled).toBe(true);
+    });
+
+    it('selecting Items disables the Equipment checkbox', () => {
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+
+        fireEvent.click(screen.getByTestId('create-template-v2-items'));
+        expect((screen.getByTestId('create-template-v2-equipment') as HTMLInputElement).disabled).toBe(true);
+    });
+
+    it('Spells stays available alongside Equipment', () => {
+        render(<CreateTemplateV2Modal {...defaultProps()} />);
+
+        fireEvent.click(screen.getByTestId('create-template-v2-equipment'));
+        const spells = screen.getByTestId('create-template-v2-spells') as HTMLInputElement;
+        expect(spells.disabled).toBe(false);
+        fireEvent.click(spells);
+        expect(spells.checked).toBe(true);
     });
 });
 

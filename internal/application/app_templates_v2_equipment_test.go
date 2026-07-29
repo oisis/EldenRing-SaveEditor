@@ -1,46 +1,49 @@
 package application
 
 import (
-	"encoding/binary"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/core"
 	"github.com/oisis/EldenRing-SaveForge/backend/editor"
 )
 
-// makeEquipmentScanSlot builds a synthetic SaveSlot with empty
-// ChrAsmEquipment (all 0xFFFFFFFF) and a controllable inventory list.
-func makeEquipmentScanSlot() *core.SaveSlot {
-	data := make([]byte, core.SlotSize)
-	equipOff := 0x10000
-	for i := 0; i < core.ChrAsmFieldCount; i++ {
-		binary.LittleEndian.PutUint32(data[equipOff+i*4:], 0xFFFFFFFF)
+// allEmptyEquipped returns a 22-slot equipped-armaments array whose every
+// writable slot holds its class's real in-game-empty value, the way
+// ReadEquippedState reads back an unequipped character: Unarmed for hand
+// slots, the invalid sentinel for ammo / talismans, and the technical
+// bare-armor IDs for armor. isEmptyEquipSlot is the single source of truth for
+// recognising these — the export path never invents a second contract.
+func allEmptyEquipped() [core.ChrAsmFieldCount]uint32 {
+	var eq [core.ChrAsmFieldCount]uint32
+	for _, i := range []int{0, 1, 2, 3, 4, 5} { // hand armaments → Unarmed
+		eq[i] = core.ItemTypeWeapon | unarmedItemID
 	}
-	return &core.SaveSlot{
-		Data:               data,
-		EquipItemsIDOffset: equipOff,
-		GaMap:              map[uint32]uint32{},
+	for _, i := range []int{6, 7, 8, 9} { // arrows / bolts → invalid sentinel
+		eq[i] = core.GaHandleInvalid
 	}
+	eq[12] = 0x10002710                       // bare head
+	eq[13] = 0x10002774                       // bare chest
+	eq[14] = 0x100027D8                       // bare arms
+	eq[15] = 0x1000283C                       // bare legs
+	for _, i := range []int{17, 18, 19, 20} { // talismans → invalid sentinel
+		eq[i] = core.GaHandleInvalid
+	}
+	return eq
 }
 
-// writeEquipSlot writes a raw u32 at the given ChrAsmEquipment index.
-func writeEquipSlot(slot *core.SaveSlot, idx int, value uint32) {
-	off := slot.EquipItemsIDOffset + idx*4
-	binary.LittleEndian.PutUint32(slot.Data[off:], value)
-}
+const allTalismansActive = 4
 
-func TestBuildEquipmentSectionFromSlot_EmptyReturnsNil(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	got := buildEquipmentSectionFromSlot(slot, nil)
+func TestBuildEquipmentSection_EmptyReturnsNil(t *testing.T) {
+	got := buildEquipmentSectionFromEquipped(allEmptyEquipped(), nil, allTalismansActive, false)
 	if got != nil {
 		t.Errorf("empty equipment should return nil section, got %+v", got)
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_WeaponMatchesEditableItem(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	// Equip a weapon in RH1: encoded form = itemID | 0x80000000.
-	writeEquipSlot(slot, 1, 0x80100020)
+func TestBuildEquipmentSection_WeaponMatchesEditableItem(t *testing.T) {
+	eq := allEmptyEquipped()
+	// Equip a weapon in RH1 (idx 1): encoded form = itemID | 0x80000000.
+	eq[1] = 0x80100020
 
 	items := []editor.EditableItem{{
 		BaseItemID:     0x100000,
@@ -50,7 +53,7 @@ func TestBuildEquipmentSectionFromSlot_WeaponMatchesEditableItem(t *testing.T) {
 		CurrentUpgrade: 25,
 		InfusionName:   "Cold",
 	}}
-	sec := buildEquipmentSectionFromSlot(slot, items)
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, false)
 	if sec == nil || sec.WeaponRightHand1 == nil {
 		t.Fatalf("expected WeaponRightHand1 populated, got %+v", sec)
 	}
@@ -65,16 +68,16 @@ func TestBuildEquipmentSectionFromSlot_WeaponMatchesEditableItem(t *testing.T) {
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_AmmoMatchesGoodsItem(t *testing.T) {
-	slot := makeEquipmentScanSlot()
+func TestBuildEquipmentSection_AmmoMatchesGoodsItem(t *testing.T) {
+	eq := allEmptyEquipped()
 	// Equip Arrows1 (idx 6): goods item ID 0x40100050 (already 0x40-prefixed).
-	writeEquipSlot(slot, 6, 0x40100050)
+	eq[6] = 0x40100050
 	items := []editor.EditableItem{{
 		BaseItemID: 0x40100050,
 		ItemID:     0x40100050,
 		Name:       "Standard Arrow",
 	}}
-	sec := buildEquipmentSectionFromSlot(slot, items)
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, false)
 	if sec == nil || sec.Arrows1 == nil {
 		t.Fatalf("expected Arrows1 populated, got %+v", sec)
 	}
@@ -86,17 +89,17 @@ func TestBuildEquipmentSectionFromSlot_AmmoMatchesGoodsItem(t *testing.T) {
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_ArmorMatchesEditableItem(t *testing.T) {
-	slot := makeEquipmentScanSlot()
+func TestBuildEquipmentSection_ArmorMatchesEditableItem(t *testing.T) {
+	eq := allEmptyEquipped()
 	// Armor head idx 12: encoded = itemID | 0x80000000.
-	writeEquipSlot(slot, 12, 0x90100040)
+	eq[12] = 0x90100040
 	items := []editor.EditableItem{{
 		BaseItemID: 0x10100040,
 		ItemID:     0x10100040,
 		Name:       "Knight Helm",
 		IsArmor:    true,
 	}}
-	sec := buildEquipmentSectionFromSlot(slot, items)
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, false)
 	if sec == nil || sec.ArmorHead == nil {
 		t.Fatalf("expected ArmorHead populated, got %+v", sec)
 	}
@@ -105,54 +108,44 @@ func TestBuildEquipmentSectionFromSlot_ArmorMatchesEditableItem(t *testing.T) {
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_GreatRuneAndUnknownSlotsNotExported(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	writeEquipSlot(slot, 10, 0x80000001) // EquippedGreatRune — out of scope
-	writeEquipSlot(slot, 11, 0x80000004) // unk0x2C — out of scope
-	writeEquipSlot(slot, 16, 0x80000005) // unk0x40 — out of scope
+func TestBuildEquipmentSection_GreatRuneAndUnknownSlotsNotExported(t *testing.T) {
+	eq := allEmptyEquipped()
+	eq[10] = 0x80000001 // EquippedGreatRune — out of scope
+	eq[11] = 0x80000004 // unk0x2C — out of scope
+	eq[16] = 0x80000005 // unk0x40 — out of scope
 
-	sec := buildEquipmentSectionFromSlot(slot, nil)
+	sec := buildEquipmentSectionFromEquipped(eq, nil, allTalismansActive, false)
 	if sec != nil {
 		t.Errorf("section should be nil — only out-of-scope slots populated, got %+v", sec)
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_UnreadableSlotReturnsNil(t *testing.T) {
-	slot := &core.SaveSlot{
-		Data:               make([]byte, core.SlotSize),
-		EquipItemsIDOffset: 0, // not parsed
-	}
-	if buildEquipmentSectionFromSlot(slot, nil) != nil {
-		t.Error("expected nil section when EquipItemsIDOffset is unparsed")
-	}
-}
-
-func TestBuildEquipmentSectionFromSlot_UnknownItemEmitsRawBaseID(t *testing.T) {
-	slot := makeEquipmentScanSlot()
+func TestBuildEquipmentSection_UnknownItemEmitsNormalizedBaseID(t *testing.T) {
+	eq := allEmptyEquipped()
 	// Equip RH1 with an item ID that won't resolve to anything in the
 	// editable inventory or the DB; the scanner should still emit a ref
 	// rather than silently drop the slot.
-	writeEquipSlot(slot, 1, 0xDEADBEEF)
-	sec := buildEquipmentSectionFromSlot(slot, nil)
+	eq[1] = 0xDEADBEEF
+	sec := buildEquipmentSectionFromEquipped(eq, nil, allTalismansActive, false)
 	if sec == nil || sec.WeaponRightHand1 == nil {
 		t.Fatalf("unknown equipped item should still emit a ref, got %+v", sec)
 	}
 	if sec.WeaponRightHand1.BaseItemID == 0 {
-		t.Errorf("unknown item ref should carry the decoded itemID as baseItemID")
+		t.Errorf("unknown item ref should carry the normalized itemID as baseItemID")
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_MultiSlotPopulated(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	writeEquipSlot(slot, 1, 0x80100020)  // RH1 weapon
-	writeEquipSlot(slot, 6, 0x40100050)  // Arrows1
-	writeEquipSlot(slot, 12, 0x90100040) // Head armor
+func TestBuildEquipmentSection_MultiSlotPopulated(t *testing.T) {
+	eq := allEmptyEquipped()
+	eq[1] = 0x80100020  // RH1 weapon
+	eq[6] = 0x40100050  // Arrows1
+	eq[12] = 0x90100040 // Head armor
 	items := []editor.EditableItem{
 		{BaseItemID: 0x100000, ItemID: 0x00100020, Name: "Uchi", IsWeapon: true, CurrentUpgrade: 0},
 		{BaseItemID: 0x40100050, ItemID: 0x40100050, Name: "Arrow"},
 		{BaseItemID: 0x10100040, ItemID: 0x10100040, Name: "Helm", IsArmor: true},
 	}
-	sec := buildEquipmentSectionFromSlot(slot, items)
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, false)
 	if sec == nil {
 		t.Fatal("section nil")
 	}
@@ -164,20 +157,19 @@ func TestBuildEquipmentSectionFromSlot_MultiSlotPopulated(t *testing.T) {
 	}
 }
 
-// ─── Phase 7c — talisman export tests ───────────────────────────────────
+// ─── talisman export tests ──────────────────────────────────────────────
 
-func TestBuildEquipmentSectionFromSlot_TalismanMatchesEditableItem(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	// Equip Talisman1 (idx 17). Talisman slots store the talisman item ID
-	// directly (0x20-prefixed), with no 0x80 mask.
-	writeEquipSlot(slot, 17, 0x20100001)
+func TestBuildEquipmentSection_TalismanMatchesEditableItem(t *testing.T) {
+	eq := allEmptyEquipped()
+	// Talisman1 (idx 17): stored bare (0x20-prefixed), no 0x80 mask.
+	eq[17] = 0x20100001
 	items := []editor.EditableItem{{
 		BaseItemID: 0x20100001,
 		ItemID:     0x20100001,
 		Name:       "Radagon's Soreseal",
 		IsTalisman: true,
 	}}
-	sec := buildEquipmentSectionFromSlot(slot, items)
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, false)
 	if sec == nil || sec.Talisman1 == nil {
 		t.Fatalf("expected Talisman1 populated, got %+v", sec)
 	}
@@ -187,24 +179,37 @@ func TestBuildEquipmentSectionFromSlot_TalismanMatchesEditableItem(t *testing.T)
 	if sec.Talisman1.Name != "Radagon's Soreseal" {
 		t.Errorf("talisman1 name mismatch: %q", sec.Talisman1.Name)
 	}
-	if sec.Talisman1.Upgrade != nil {
-		t.Errorf("talisman ref should not carry an upgrade pointer")
-	}
-	if sec.Talisman1.InfusionName != "" {
-		t.Errorf("talisman ref should not carry an infusion")
-	}
-	if sec.Talisman1.AoWItemID != nil {
-		t.Errorf("talisman ref should not carry an AoW item ID")
+	if sec.Talisman1.Upgrade != nil || sec.Talisman1.InfusionName != "" || sec.Talisman1.AoWItemID != nil {
+		t.Errorf("talisman ref should carry no weapon metadata: %+v", sec.Talisman1)
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_AllFiveTalismansPopulated(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	writeEquipSlot(slot, 17, 0x20100001)
-	writeEquipSlot(slot, 18, 0x20100002)
-	writeEquipSlot(slot, 19, 0x20100003)
-	writeEquipSlot(slot, 20, 0x20100004)
-	writeEquipSlot(slot, 21, 0x20100005)
+// Source active-slot semantics: a source with one active pouch slot exports
+// only talisman1; occupied-but-locked talisman slots stay nil (never clears).
+func TestBuildEquipmentSection_SourceOneActiveSlot_ExportsOnlyTalisman1(t *testing.T) {
+	eq := allEmptyEquipped()
+	eq[17] = 0x20100001
+	eq[18] = 0x20100002 // occupied but locked on a 1-slot source
+	items := []editor.EditableItem{
+		{BaseItemID: 0x20100001, ItemID: 0x20100001, Name: "T1", IsTalisman: true},
+		{BaseItemID: 0x20100002, ItemID: 0x20100002, Name: "T2", IsTalisman: true},
+	}
+	sec := buildEquipmentSectionFromEquipped(eq, items, 1, true)
+	if sec == nil || sec.Talisman1 == nil {
+		t.Fatalf("talisman1 should be exported, got %+v", sec)
+	}
+	if sec.Talisman2 != nil || sec.Talisman3 != nil || sec.Talisman4 != nil {
+		t.Errorf("talisman slots beyond the source capacity must stay nil, got %+v", sec)
+	}
+}
+
+func TestBuildEquipmentSection_SourceFourActiveSlots_ExportsTalisman1Through4(t *testing.T) {
+	eq := allEmptyEquipped()
+	eq[17] = 0x20100001
+	eq[18] = 0x20100002
+	eq[19] = 0x20100003
+	eq[20] = 0x20100004
+	eq[21] = 0x20100005 // talisman5 — never exported
 	items := []editor.EditableItem{
 		{BaseItemID: 0x20100001, ItemID: 0x20100001, Name: "T1", IsTalisman: true},
 		{BaseItemID: 0x20100002, ItemID: 0x20100002, Name: "T2", IsTalisman: true},
@@ -212,43 +217,98 @@ func TestBuildEquipmentSectionFromSlot_AllFiveTalismansPopulated(t *testing.T) {
 		{BaseItemID: 0x20100004, ItemID: 0x20100004, Name: "T4", IsTalisman: true},
 		{BaseItemID: 0x20100005, ItemID: 0x20100005, Name: "T5", IsTalisman: true},
 	}
-	sec := buildEquipmentSectionFromSlot(slot, items)
-	if sec == nil {
-		t.Fatal("section nil")
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, false)
+	if sec == nil || sec.Talisman1 == nil || sec.Talisman2 == nil || sec.Talisman3 == nil || sec.Talisman4 == nil {
+		t.Fatalf("expected talisman1..4 populated, got %+v", sec)
 	}
-	if sec.Talisman1 == nil || sec.Talisman2 == nil || sec.Talisman3 == nil || sec.Talisman4 == nil || sec.Talisman5 == nil {
-		t.Errorf("expected all 5 talismans populated, got %+v", sec)
+	if sec.Talisman5 != nil {
+		t.Errorf("talisman5 must never be exported, got %+v", sec.Talisman5)
 	}
 }
 
-func TestBuildEquipmentSectionFromSlot_TalismanUnknownItemEmitsRawBaseID(t *testing.T) {
-	slot := makeEquipmentScanSlot()
-	// Unfamiliar talisman ID — not in inventory items nor DB.
-	writeEquipSlot(slot, 17, 0x2DEADBEE)
-	sec := buildEquipmentSectionFromSlot(slot, nil)
+func TestBuildEquipmentSection_TalismanUnknownItemEmitsRawBaseID(t *testing.T) {
+	eq := allEmptyEquipped()
+	eq[17] = 0x2DEADBEE // unfamiliar talisman ID — not in inventory nor DB
+	sec := buildEquipmentSectionFromEquipped(eq, nil, allTalismansActive, false)
 	if sec == nil || sec.Talisman1 == nil {
 		t.Fatalf("unknown talisman should still emit a ref, got %+v", sec)
 	}
-	// Without OR-mask: candidateID == raw (0x2DEADBEE).
 	if sec.Talisman1.BaseItemID == 0 {
-		t.Errorf("unknown talisman ref should carry the raw decoded itemID")
+		t.Errorf("unknown talisman ref should carry the normalized itemID")
 	}
 }
 
-func TestEquipmentSlotIsTalisman(t *testing.T) {
-	cases := map[string]bool{
-		"talisman1":        true,
-		"talisman2":        true,
-		"talisman3":        true,
-		"talisman4":        true,
-		"talisman5":        true,
-		"arrows1":          false,
-		"weaponRightHand1": false,
-		"armorHead":        false,
+// ─── full-loadout export (emitEmptyAsClear=true) ────────────────────────
+
+func TestBuildEquipmentSection_FullLoadout_NativeEmptyBecomesClears(t *testing.T) {
+	sec := buildEquipmentSectionFromEquipped(allEmptyEquipped(), nil, allTalismansActive, true)
+	if sec == nil {
+		t.Fatal("full-loadout export of an empty character must return a non-nil (all-clear) section")
+	}
+	if sec.WeaponRightHand1 == nil || sec.WeaponRightHand1.BaseItemID != 0 {
+		t.Errorf("weaponRightHand1 (Unarmed) should be explicit clear, got %+v", sec.WeaponRightHand1)
+	}
+	if sec.ArmorChest == nil || sec.ArmorChest.BaseItemID != 0 {
+		t.Errorf("armorChest (bare) should be explicit clear, got %+v", sec.ArmorChest)
+	}
+	if sec.Arrows1 == nil || sec.Arrows1.BaseItemID != 0 {
+		t.Errorf("arrows1 (sentinel) should be explicit clear, got %+v", sec.Arrows1)
+	}
+	if sec.Talisman1 == nil || sec.Talisman1.BaseItemID != 0 {
+		t.Errorf("talisman1 (sentinel) should be explicit clear, got %+v", sec.Talisman1)
+	}
+	if sec.Talisman5 != nil {
+		t.Errorf("talisman5 must not be exported, got %+v", sec.Talisman5)
+	}
+}
+
+func TestBuildEquipmentSection_FullLoadout_OccupiedAndEmptyMix(t *testing.T) {
+	eq := allEmptyEquipped()
+	eq[1] = 0x80100020 // RH1 weapon occupied
+	items := []editor.EditableItem{{
+		BaseItemID: 0x100000, ItemID: 0x00100020, Name: "Uchi", IsWeapon: true, CurrentUpgrade: 3,
+	}}
+	sec := buildEquipmentSectionFromEquipped(eq, items, allTalismansActive, true)
+	if sec == nil || sec.WeaponRightHand1 == nil {
+		t.Fatal("occupied slot must be populated")
+	}
+	if sec.WeaponRightHand1.BaseItemID != 0x100000 {
+		t.Errorf("occupied slot baseItemID wrong: %+v", sec.WeaponRightHand1)
+	}
+	// A different, empty slot must be an explicit clear, not omitted.
+	if sec.WeaponLeftHand1 == nil || sec.WeaponLeftHand1.BaseItemID != 0 {
+		t.Errorf("empty weaponLeftHand1 should be explicit clear, got %+v", sec.WeaponLeftHand1)
+	}
+}
+
+func TestEquipmentSlotEquipClass(t *testing.T) {
+	cases := map[string]equipClass{
+		"weaponRightHand1": classHandArmament,
+		"weaponLeftHand3":  classHandArmament,
+		"arrows1":          classAmmo,
+		"bolts2":           classAmmo,
+		"armorHead":        classArmor,
+		"armorLegs":        classArmor,
+		"talisman1":        classTalisman,
+		"talisman5":        classTalisman,
 	}
 	for key, want := range cases {
-		if got := equipmentSlotIsTalisman(key); got != want {
-			t.Errorf("equipmentSlotIsTalisman(%q): got %v want %v", key, got, want)
+		if got := equipmentSlotEquipClass(key); got != want {
+			t.Errorf("equipmentSlotEquipClass(%q) = %d, want %d", key, got, want)
 		}
+	}
+}
+
+func TestTalismanOrdinal(t *testing.T) {
+	for key, wantOrd := range map[string]int{"talisman1": 0, "talisman2": 1, "talisman3": 2, "talisman4": 3} {
+		if got, ok := talismanOrdinal(key); !ok || got != wantOrd {
+			t.Errorf("talismanOrdinal(%q) = (%d,%v), want (%d,true)", key, got, ok, wantOrd)
+		}
+	}
+	if _, ok := talismanOrdinal("talisman5"); ok {
+		t.Error("talisman5 must not be a writable talisman ordinal")
+	}
+	if _, ok := talismanOrdinal("armorHead"); ok {
+		t.Error("armorHead is not a talisman")
 	}
 }

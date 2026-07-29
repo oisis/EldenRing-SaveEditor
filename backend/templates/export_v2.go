@@ -132,6 +132,18 @@ func BuildV2Template(opts ExportV2Options) (*BuildTemplate, error) {
 	if opts.Selection.Equipment.HasAny() && opts.Equipment == nil {
 		return nil, fmt.Errorf("BuildV2Template: selection.equipment is selected but no Equipment source was provided")
 	}
+	// Equipment is mutually exclusive with items / inventoryLayout /
+	// storageLayout in a create-from-character export. Equipment applies
+	// against items that already exist in the target's inventory; bundling
+	// it with the sections that add / reorder those items would promise an
+	// atomic "add then equip" the apply path cannot deliver (equipment is
+	// resolved before the items land in the workspace). Rejected here so a
+	// direct BuildV2Template caller is gated the same as the UI. Spells may
+	// coexist with equipment — they touch a disjoint section.
+	if opts.Selection.Equipment.HasAny() &&
+		(opts.Selection.Items.HasAny() || opts.Selection.InventoryLayout.HasAny() || opts.Selection.StorageLayout.HasAny()) {
+		return nil, fmt.Errorf("BuildV2Template: equipment cannot be combined with items / inventoryLayout / storageLayout (equipment applies against items already present in the target inventory)")
+	}
 	if opts.Selection.Items.HasAny() && opts.ItemsSource == nil {
 		return nil, fmt.Errorf("BuildV2Template: selection.items is selected but no ItemsSource was provided")
 	}

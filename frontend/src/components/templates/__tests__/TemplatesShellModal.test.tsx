@@ -14,7 +14,6 @@ vi.mock('../../../../wailsjs/go/main/App', () => ({
     PreviewBuildTemplateImportYAMLFromURL: vi.fn(),
     SaveImportedBuildTemplateJSONToLibrary: vi.fn(),
     PreviewBuildTemplateV2FromCharacter: vi.fn(),
-    SaveBuildTemplateV2FromCharacterToLibrary: vi.fn(),
     RebuildBuildTemplateLibraryIndex: vi.fn(),
     GetBuildTemplateLibraryPath: vi.fn(),
     GetCharacter: vi.fn(),
@@ -433,8 +432,12 @@ describe('TemplatesShellModal — Phase 3D.2b create-from-character', () => {
         selectedSections: ['profile'],
     };
 
+    const v2PreviewCanonicalJSON =
+        '{"schema":"saveforge.build-template","version":2,"selection":{"profile":{"level":true}}}';
+
     function v2OKPreviewBundle() {
         return {
+            json: v2PreviewCanonicalJSON,
             report: {
                 ok: true,
                 errors: [],
@@ -492,7 +495,7 @@ describe('TemplatesShellModal — Phase 3D.2b create-from-character', () => {
 
     it('Save success refreshes library, closes the create modal, and toasts', async () => {
         mocks.PreviewBuildTemplateV2FromCharacter.mockResolvedValue(v2OKPreviewBundle());
-        mocks.SaveBuildTemplateV2FromCharacterToLibrary.mockResolvedValue(v2EntryFromSave);
+        mocks.SaveImportedBuildTemplateJSONToLibrary.mockResolvedValue(v2EntryFromSave);
         mocks.ListBuildTemplateLibrary
             .mockResolvedValueOnce(sampleEntries)
             .mockResolvedValue([...sampleEntries, v2EntryFromSave]);
@@ -515,9 +518,10 @@ describe('TemplatesShellModal — Phase 3D.2b create-from-character', () => {
             fireEvent.click(screen.getByTestId('import-preview-save-to-library'));
         });
         await waitFor(() => {
-            expect(mocks.SaveBuildTemplateV2FromCharacterToLibrary).toHaveBeenCalledTimes(1);
+            expect(mocks.SaveImportedBuildTemplateJSONToLibrary).toHaveBeenCalledTimes(1);
         });
-        expect(mocks.SaveBuildTemplateV2FromCharacterToLibrary.mock.calls[0][0]).toBe(1);
+        // Anti-TOCTOU: the previewed canonical JSON is persisted verbatim.
+        expect(mocks.SaveImportedBuildTemplateJSONToLibrary.mock.calls[0][0]).toBe(v2PreviewCanonicalJSON);
         await waitFor(() => {
             expect(screen.queryByTestId('create-template-v2-modal')).not.toBeInTheDocument();
         });

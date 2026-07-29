@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/core"
 	"github.com/oisis/EldenRing-SaveForge/backend/editor"
 	"github.com/oisis/EldenRing-SaveForge/backend/templates"
 	"github.com/oisis/EldenRing-SaveForge/backend/vm"
@@ -101,17 +102,22 @@ func buildTemplateV2SourcesFromCharacter(charVM *vm.CharacterViewModel, selectio
 // preview; later phases (3C.2) reuse this helper for YAML export and
 // library save without re-deriving sources.
 //
-// Source acquisition delegates to GetCharacter, which already handles
-// saveMu / slotMu locking and "no save loaded" / "invalid slot index"
-// error messages. SourceCharacterName is taken from charVM.Name rather
-// than sourceCharacterName(charIndex) so we never reach for saveMu a
-// second time outside the GetCharacter scope.
+// Every selected section of one export is derived from a single consistent
+// slot snapshot: cloneCharacterSlot takes one deep copy under one
+// saveMu.RLock + one slotMu[charIndex] hold, then releases both. All section
+// builders below run on that detached copy with no locks held, so a
+// concurrent writer mutating the live slot mid-build can never produce a
+// "torn template" whose sections come from different slot states.
 func (a *App) buildAndValidateTemplateV2FromCharacter(charIndex int, selectionJSON string, opts BuildTemplateV2ExportOptions) (*templates.BuildTemplate, string, error) {
 	selection, err := parseTemplateSelectionJSON(selectionJSON)
 	if err != nil {
 		return nil, "", err
 	}
-	charVM, err := a.GetCharacter(charIndex)
+	slot, err := a.cloneCharacterSlot(charIndex)
+	if err != nil {
+		return nil, "", err
+	}
+	charVM, err := vm.MapParsedSlotToVM(slot)
 	if err != nil {
 		return nil, "", err
 	}
@@ -120,9 +126,18 @@ func (a *App) buildAndValidateTemplateV2FromCharacter(charIndex int, selectionJS
 	if selection.Items.HasAny() ||
 		selection.InventoryLayout.HasAny() ||
 		selection.StorageLayout.HasAny() {
-		itemsSource, err = a.buildItemsSourceForCharacter(charIndex)
+		itemsSource, err = buildItemsSourceFromSlot(slot, charIndex)
 		if err != nil {
 			return nil, "", fmt.Errorf("build v2 items source: %w", err)
+		}
+	}
+	var equipment *templates.EquipmentSection
+	var equippedSpellsRaw []uint32
+	if selection.Equipment.HasAny() || selection.Spells.HasAny() {
+		equipment, equippedSpellsRaw, err = buildEquipmentSpellsSourcesFromSlot(
+			slot, charIndex, selection.Equipment.HasAny(), selection.Spells.HasAny())
+		if err != nil {
+			return nil, "", fmt.Errorf("build v2 equipment/spells source: %w", err)
 		}
 	}
 	tags := opts.Tags
@@ -139,10 +154,12 @@ func (a *App) buildAndValidateTemplateV2FromCharacter(charIndex int, selectionJS
 			SourceCharacterIndex: charIndex,
 			SourceCharacterName:  charVM.Name,
 		},
-		Profile:     profile,
-		Stats:       stats,
-		ItemsSource: itemsSource,
-		Selection:   selection,
+		Profile:           profile,
+		Stats:             stats,
+		ItemsSource:       itemsSource,
+		Equipment:         equipment,
+		EquippedSpellsRaw: equippedSpellsRaw,
+		Selection:         selection,
 	})
 	if err != nil {
 		return nil, "", fmt.Errorf("build v2 template: %w", err)
@@ -222,15 +239,16 @@ func (a *App) SaveBuildTemplateV2FromCharacterToLibrary(charIndex int, selection
 	return lib.SaveTemplate(tpl)
 }
 
-// buildItemsSourceForCharacter builds a read-only ItemsLayoutSource from
-// the live slot data of charIndex. Used by the v2 export pipeline when
-// selection asks for items / inventoryLayout / storageLayout — the save
-// is not mutated and no edit session is required.
+// cloneCharacterSlot returns a deep, independent copy of slot charIndex taken
+// under one saveMu.RLock + one slotMu[charIndex] hold. The copy is detached
+// from a.save, so every export section can be built from it after the locks
+// are released without risking a torn read against a concurrent writer.
 //
-// Locks: saveMu.RLock for the swap-safe a.save pointer, then slotMu
-// for the duration of BuildSnapshot so a concurrent writer cannot torn
-// the slot bytes mid-scan. Matches the audit pattern in app_save_audit.go.
-func (a *App) buildItemsSourceForCharacter(charIndex int) (*templates.ItemsLayoutSource, error) {
+// It replaces the previous per-section lock acquisitions (GetCharacter +
+// buildItemsSourceForCharacter + buildEquipmentSpellsSourcesForCharacter),
+// which each grabbed the same locks separately and could therefore mix data
+// from different slot states into one template.
+func (a *App) cloneCharacterSlot(charIndex int) (*core.SaveSlot, error) {
 	a.saveMu.RLock()
 	defer a.saveMu.RUnlock()
 	if a.save == nil {
@@ -241,7 +259,14 @@ func (a *App) buildItemsSourceForCharacter(charIndex int) (*templates.ItemsLayou
 	}
 	a.slotMu[charIndex].Lock()
 	defer a.slotMu[charIndex].Unlock()
-	snap, err := editor.BuildSnapshot(&a.save.Slots[charIndex], "", charIndex)
+	return core.CloneSlot(&a.save.Slots[charIndex]), nil
+}
+
+// buildItemsSourceFromSlot builds a read-only ItemsLayoutSource from an
+// already-detached slot snapshot. Lock-free by contract: the caller
+// (cloneCharacterSlot) has already isolated the slot bytes.
+func buildItemsSourceFromSlot(slot *core.SaveSlot, charIndex int) (*templates.ItemsLayoutSource, error) {
+	snap, err := editor.BuildSnapshot(slot, "", charIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -249,4 +274,53 @@ func (a *App) buildItemsSourceForCharacter(charIndex int) (*templates.ItemsLayou
 		InventoryItems: snap.InventoryItems,
 		StorageItems:   snap.StorageItems,
 	}, nil
+}
+
+// buildEquipmentSpellsSourcesFromSlot reads the equipped loadout and the raw
+// 14-slot spell loadout from an already-detached slot snapshot. Lock-free by
+// contract — see cloneCharacterSlot. Read-only: the snapshot is never mutated.
+//
+// Both sections come from ONE core.SaveSlot.ReadEquippedState call, so
+// equipment and spells are always drawn from the same equipped-armaments read
+// (single dynamic projectile-count decode, no second reader):
+//   - equipment: RawEquippedState.Equipped is the real equipped-armaments
+//     block (the ChrAsm2 GaItem-handle header at EquipItemsIDOffset is a decoy
+//     the item DB cannot resolve and is never read here).
+//     buildEquipmentSectionFromEquipped runs with emitEmptyAsClear=true, so an
+//     empty writable slot exports as an explicit clear (BaseItemID == 0) and
+//     applying the template strips stale gear from the target slot;
+//   - spells: RawEquippedState.Spells carries the save's empty-slot sentinel
+//     0xFFFFFFFF for unused slots, which BuildV2Template maps to the same
+//     explicit-clear form (BaseItemID == 0).
+//
+// Talisman slots are exported only up to the source character's active pouch
+// capacity; slots still locked beyond that active capacity stay nil rather
+// than emitting clears (the source never had that pouch slot to clear). A
+// slot whose equipped state cannot be read yields a hard error so the caller
+// fails closed rather than emitting a partial "full loadout".
+func buildEquipmentSpellsSourcesFromSlot(slot *core.SaveSlot, charIndex int, needEquipment, needSpells bool) (*templates.EquipmentSection, []uint32, error) {
+	raw, err := slot.ReadEquippedState()
+	if err != nil {
+		return nil, nil, fmt.Errorf("read equipped spells/equipment state: %w", err)
+	}
+
+	var equipment *templates.EquipmentSection
+	if needEquipment {
+		snap, err := editor.BuildSnapshot(slot, "", charIndex)
+		if err != nil {
+			return nil, nil, fmt.Errorf("build equipment snapshot: %w", err)
+		}
+		activeTalismans := activeTalismanSlotCount(slot.Player.TalismanSlots)
+		equipment = buildEquipmentSectionFromEquipped(raw.Equipped, snap.InventoryItems, activeTalismans, true)
+		if equipment == nil {
+			return nil, nil, fmt.Errorf("equipment loadout unavailable for slot %d", charIndex)
+		}
+	}
+
+	var equippedSpellsRaw []uint32
+	if needSpells {
+		equippedSpellsRaw = append([]uint32(nil), raw.Spells[:]...)
+	}
+
+	return equipment, equippedSpellsRaw, nil
 }
