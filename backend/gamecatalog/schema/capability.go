@@ -1,18 +1,18 @@
 package schema
 
 type Capability[T any] struct {
-	Known      bool
-	Enabled    bool
-	Rules      *T
-	Provenance Provenance
+	Known      bool       `json:"known"`
+	Enabled    bool       `json:"enabled"`
+	Rules      *T         `json:"rules"`
+	Provenance Provenance `json:"provenance"`
 }
 
 type ItemCapabilities struct {
-	Upgrade       Capability[UpgradeRules]
-	Infusion      Capability[InfusionRules]
-	AshOfWarMount Capability[AshOfWarMountRules]
-	Stack         Capability[StackRules]
-	Equipment     Capability[EquipmentRules]
+	Upgrade       Capability[UpgradeRules]       `json:"upgrade"`
+	Infusion      Capability[InfusionRules]      `json:"infusion"`
+	AshOfWarMount Capability[AshOfWarMountRules] `json:"ashOfWarMount"`
+	Stack         Capability[StackRules]         `json:"stack"`
+	Equipment     Capability[EquipmentRules]     `json:"equipment"`
 }
 
 type UpgradeModel string
@@ -22,8 +22,8 @@ const (
 )
 
 type UpgradeRules struct {
-	Model    UpgradeModel
-	MaxLevel uint8
+	Model    UpgradeModel `json:"model"`
+	MaxLevel uint8        `json:"maxLevel"`
 }
 
 type Affinity string
@@ -45,7 +45,7 @@ const (
 )
 
 type InfusionRules struct {
-	AllowedAffinities []Affinity
+	AllowedAffinities []Affinity `json:"allowedAffinities"`
 }
 
 type AshOfWarMountMode string
@@ -55,13 +55,13 @@ const (
 )
 
 type AshOfWarMountRules struct {
-	Mode             AshOfWarMountMode
-	WeaponType       string
-	CompatibilityBit uint8
+	Mode             AshOfWarMountMode `json:"mode"`
+	WeaponType       string            `json:"weaponType"`
+	CompatibilityBit uint8             `json:"compatibilityBit"`
 }
 
 type StackRules struct {
-	MaxPerStack uint32
+	MaxPerStack uint32 `json:"maxPerStack"`
 }
 
 type EquipmentSlot string
@@ -72,5 +72,5 @@ const (
 )
 
 type EquipmentRules struct {
-	AllowedSlots []EquipmentSlot
+	AllowedSlots []EquipmentSlot `json:"allowedSlots"`
 }

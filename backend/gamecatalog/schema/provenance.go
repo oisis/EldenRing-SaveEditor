@@ -12,28 +12,28 @@ const (
 )
 
 type DataSource struct {
-	ID       SourceID
-	Kind     string
-	Location string
-	Version  string
-	Evidence EvidenceLevel
-	Reviewed bool
+	ID       SourceID      `json:"id"`
+	Kind     string        `json:"kind"`
+	Location string        `json:"location"`
+	Version  string        `json:"version"`
+	Evidence EvidenceLevel `json:"evidence"`
+	Reviewed bool          `json:"reviewed"`
 }
 
 type Manifest struct {
-	SchemaVersion uint32
-	DataVersion   string
-	GameVersion   string
-	Sources       []DataSource
+	SchemaVersion uint32       `json:"schemaVersion"`
+	DataVersion   string       `json:"dataVersion"`
+	GameVersion   string       `json:"gameVersion"`
+	Sources       []DataSource `json:"sources"`
 }
 
 type Provenance struct {
-	Source SourceID
-	Method string
+	Source SourceID `json:"source"`
+	Method string   `json:"method"`
 }
 
 type Fact[T any] struct {
-	Known      bool
-	Value      T
-	Provenance Provenance
+	Known      bool       `json:"known"`
+	Value      T          `json:"value"`
+	Provenance Provenance `json:"provenance"`
 }

@@ -1,0 +1,97 @@
+{{define "item"}}
+{{template "header" .}}
+<nav class="breadcrumbs"><a href="/">Resources</a><span>/</span>{{.Name}}</nav>
+
+<section class="item-heading">
+  <div>
+    <p class="eyebrow">{{.Key}}</p>
+    <h1>{{.Name}}</h1>
+    <p><code>{{.GameID}}</code> · <code>{{.DocumentPath}}</code></p>
+  </div>
+  <div class="heading-actions">
+    {{if .UnknownCount}}<span class="badge unknown">{{.UnknownCount}} unknown fields</span>{{end}}
+    <a class="button secondary" href="/items/{{.GameIDPath}}/raw">Raw JSON</a>
+  </div>
+</section>
+
+<div class="section-grid">
+  <section class="panel">
+    <h2>Identity</h2>
+    {{template "facts" .Identity}}
+  </section>
+  <section class="panel">
+    <h2>Storage</h2>
+    {{template "facts" .Storage}}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Presentation</h2>
+  {{template "facts" .Presentation}}
+</section>
+
+<section class="panel">
+  <h2>Capabilities</h2>
+  <div class="capability-grid">
+    {{range .Capabilities}}
+    <article class="capability">
+      <div class="capability-title">
+        <h3>{{.Name}}</h3>
+        <span class="badge {{.StateClass}}">{{.State}}</span>
+      </div>
+      {{if .Details}}
+      <ul>{{range .Details}}<li>{{.}}</li>{{end}}</ul>
+      {{end}}
+      <small>
+        <code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}
+        {{if .Method}}<br>{{.Method}}{{end}}
+      </small>
+    </article>
+    {{end}}
+  </div>
+</section>
+
+<div class="section-grid">
+  <section class="panel">
+    <h2>Family data</h2>
+    {{if .FamilyData}}{{template "facts" .FamilyData}}{{else}}<p>No family data.</p>{{end}}
+  </section>
+  <section class="panel">
+    <h2>Safety</h2>
+    {{template "facts" .Safety}}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Variants</h2>
+  {{if .Variants}}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Game ID</th><th>Affinity</th><th>Source row ID</th></tr></thead>
+      <tbody>
+      {{range .Variants}}
+        <tr><td><code>{{.GameID}}</code></td><td>{{.Affinity}}</td><td>{{.SourceRowID}}</td></tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}<p>No variants.</p>{{end}}
+</section>
+
+<section class="panel">
+  <h2>Relations</h2>
+  {{if .Relations}}
+  <ul class="relation-list">
+    {{range .Relations}}
+    <li>
+      <span class="badge neutral">{{.Direction}}</span>
+      <code>{{.Kind}}</code>
+      <a href="/items/{{.GameIDPath}}">{{.Name}}</a>
+      <code>{{.GameID}}</code>
+    </li>
+    {{end}}
+  </ul>
+  {{else}}<p>No relations.</p>{{end}}
+</section>
+{{template "footer" .}}
+{{end}}

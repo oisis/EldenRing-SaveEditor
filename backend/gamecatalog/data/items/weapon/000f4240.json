@@ -1,0 +1,261 @@
+{
+  "id": 1,
+  "key": "item:000F4240",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Dagger",
+    "provenance": {
+      "source": "regulation_text",
+      "method": "normalized from WeaponName and WeaponCaption FMG entries 1000000"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 1000000,
+      "provenance": {
+        "source": "regulation_weapon",
+        "method": "normalized from EquipParamWeapon rows 1000000-1001200"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "weapon",
+      "provenance": {
+        "source": "regulation_weapon",
+        "method": "normalized from EquipParamWeapon rows 1000000-1001200"
+      }
+    },
+    "subcategory": {
+      "known": true,
+      "value": "dagger",
+      "provenance": {
+        "source": "verified_save_research",
+        "method": "normalized from verified save-format research"
+      }
+    },
+    "presentation": {
+      "canonicalName": {
+        "known": true,
+        "value": "Dagger",
+        "provenance": {
+          "source": "regulation_text",
+          "method": "normalized from WeaponName and WeaponCaption FMG entries 1000000"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "A standard dagger with a straight blade.\n\nThough modest in reach and capacity for harm, this weapon is light enough to jab in rapid succession and delivers devastating critical hits.",
+        "provenance": {
+          "source": "regulation_text",
+          "method": "normalized from WeaponName and WeaponCaption FMG entries 1000000"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "items/melee_armaments/dagger.png",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied as data from the legacy catalog"
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "verified_save_research",
+          "method": "normalized from verified save-format research"
+        }
+      },
+      "maxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      },
+      "maxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "model": "standard",
+          "maxLevel": 25
+        },
+        "provenance": {
+          "source": "regulation_weapon",
+          "method": "normalized from EquipParamWeapon rows 1000000-1001200"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedAffinities": [
+            "standard",
+            "heavy",
+            "keen",
+            "quality",
+            "fire",
+            "flame_art",
+            "lightning",
+            "sacred",
+            "magic",
+            "cold",
+            "poison",
+            "blood",
+            "occult"
+          ]
+        },
+        "provenance": {
+          "source": "regulation_weapon",
+          "method": "normalized from EquipParamWeapon rows 1000000-1001200"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "mode": "custom",
+          "weaponType": "dagger",
+          "compatibilityBit": 0
+        },
+        "provenance": {
+          "source": "regulation_weapon",
+          "method": "normalized from EquipParamWeapon rows 1000000-1001200"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "verified_save_research",
+          "method": "normalized from verified save-format research"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "left_hand",
+            "right_hand"
+          ]
+        },
+        "provenance": {
+          "source": "regulation_weapon",
+          "method": "normalized from EquipParamWeapon rows 1000000-1001200"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": false,
+        "value": false,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      },
+      "banRisk": {
+        "known": false,
+        "value": false,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      }
+    },
+    "variants": [
+      {
+        "gameID": {"known": true, "value": 1000000, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "standard", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000000, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000100, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "heavy", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000100, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000200, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "keen", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000200, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000300, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "quality", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000300, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000400, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "fire", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000400, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000500, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "flame_art", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000500, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000600, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "lightning", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000600, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000700, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "sacred", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000700, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000800, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "magic", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000800, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1000900, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "cold", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1000900, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1001000, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "poison", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1001000, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1001100, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "blood", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1001100, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      },
+      {
+        "gameID": {"known": true, "value": 1001200, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "affinity": {"known": true, "value": "occult", "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+        "sourceRowID": {"known": true, "value": 1001200, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+      }
+    ],
+    "weapon": {
+      "sourceRowID": {"known": true, "value": 1000000, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+      "weaponTypeID": {"known": true, "value": 1, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+      "weight": {"known": true, "value": 1.5, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+      "attackPhysical": {"known": true, "value": 74, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+      "requiredStrength": {"known": true, "value": 5, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+      "requiredDexterity": {"known": true, "value": 9, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}},
+      "critical": {"known": true, "value": 130, "provenance": {"source": "regulation_weapon", "method": "normalized from EquipParamWeapon rows 1000000-1001200"}}
+    },
+    "ashOfWar": null
+  }
+}

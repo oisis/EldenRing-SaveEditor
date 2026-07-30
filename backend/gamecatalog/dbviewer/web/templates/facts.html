@@ -1,0 +1,18 @@
+{{define "facts"}}
+<dl class="facts">
+  {{range .}}
+  <div class="fact {{if not .Known}}fact-unknown{{end}}">
+    <dt>{{.Label}}</dt>
+    <dd>
+      <span class="fact-value">{{.Value}}</span>
+      {{if .Known}}<button class="copy-button" type="button" data-copy="{{.Value}}">Copy</button>{{end}}
+      <small>
+        Source: <code>{{.Source}}</code>
+        {{if .SourceLocation}}· <code>{{.SourceLocation}}</code>{{end}}
+        {{if .Method}}<br>{{.Method}}{{end}}
+      </small>
+    </dd>
+  </div>
+  {{end}}
+</dl>
+{{end}}

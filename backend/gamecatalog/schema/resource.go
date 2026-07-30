@@ -9,9 +9,9 @@ const (
 )
 
 type Resource struct {
-	ID    ResourceID
-	Key   string
-	Kind  ResourceKind
-	Label Fact[string]
-	Item  *ItemDocument
+	ID    ResourceID    `json:"id"`
+	Key   string        `json:"key"`
+	Kind  ResourceKind  `json:"kind"`
+	Label Fact[string]  `json:"label"`
+	Item  *ItemDocument `json:"item"`
 }

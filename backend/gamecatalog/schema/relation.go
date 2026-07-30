@@ -7,8 +7,8 @@ const (
 )
 
 type Relation struct {
-	From       ResourceID
-	To         ResourceID
-	Kind       RelationKind
-	Provenance Provenance
+	From       ResourceID   `json:"from"`
+	To         ResourceID   `json:"to"`
+	Kind       RelationKind `json:"kind"`
+	Provenance Provenance   `json:"provenance"`
 }

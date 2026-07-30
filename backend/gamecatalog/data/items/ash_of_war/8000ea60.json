@@ -1,0 +1,176 @@
+{
+  "id": 2,
+  "key": "item:8000EA60",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Ash of War: Determination",
+    "provenance": {
+      "source": "regulation_text",
+      "method": "normalized from GemName and GemCaption FMG entries 60000"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 2147543648,
+      "provenance": {
+        "source": "regulation_gem",
+        "method": "normalized from EquipParamGem row 60000"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "ash_of_war",
+      "provenance": {
+        "source": "regulation_gem",
+        "method": "normalized from EquipParamGem row 60000"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "prototype_unknown",
+        "method": "not established in the prototype"
+      }
+    },
+    "presentation": {
+      "canonicalName": {
+        "known": true,
+        "value": "Ash of War: Determination",
+        "provenance": {
+          "source": "regulation_text",
+          "method": "normalized from GemName and GemCaption FMG entries 60000"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "This Ash of War grants an armament the Quality affinity and the following skill:\n\n\"Determination: A knightly skill. Hold the flat of the armament to your face and pledge your resolve, powering up your next attack.\"\n\nUsable on all melee armaments.",
+        "provenance": {
+          "source": "regulation_text",
+          "method": "normalized from GemName and GemCaption FMG entries 60000"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "items/ashes_of_war/determination.png",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied as data from the legacy catalog"
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "verified_save_research",
+          "method": "normalized from verified save-format research"
+        }
+      },
+      "maxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      },
+      "maxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_gem",
+          "method": "normalized from EquipParamGem row 60000"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_gem",
+          "method": "normalized from EquipParamGem row 60000"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "verified_save_research",
+          "method": "normalized from verified save-format research"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "verified_save_research",
+          "method": "normalized from verified save-format research"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "verified_save_research",
+          "method": "normalized from verified save-format research"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": false,
+        "value": false,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      },
+      "banRisk": {
+        "known": false,
+        "value": false,
+        "provenance": {
+          "source": "prototype_unknown",
+          "method": "not established in the prototype"
+        }
+      }
+    },
+    "variants": null,
+    "weapon": null,
+    "ashOfWar": {
+      "sourceRowID": {
+        "known": true,
+        "value": 60000,
+        "provenance": {
+          "source": "regulation_gem",
+          "method": "normalized from EquipParamGem row 60000"
+        }
+      },
+      "compatibilityMask": {
+        "known": true,
+        "value": 16767569035263,
+        "provenance": {
+          "source": "regulation_gem",
+          "method": "normalized from EquipParamGem row 60000"
+        }
+      }
+    }
+  }
+}

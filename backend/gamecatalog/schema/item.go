@@ -8,22 +8,22 @@ const (
 )
 
 type ItemDocument struct {
-	GameID       Fact[uint32]
-	Family       Fact[ItemFamily]
-	Subcategory  Fact[string]
-	Presentation ItemPresentation
-	Storage      ItemStorage
-	Capabilities ItemCapabilities
-	Safety       ItemSafety
-	Variants     []ItemVariant
-	Weapon       *WeaponData
-	AshOfWar     *AshOfWarData
+	GameID       Fact[uint32]     `json:"gameID"`
+	Family       Fact[ItemFamily] `json:"family"`
+	Subcategory  Fact[string]     `json:"subcategory"`
+	Presentation ItemPresentation `json:"presentation"`
+	Storage      ItemStorage      `json:"storage"`
+	Capabilities ItemCapabilities `json:"capabilities"`
+	Safety       ItemSafety       `json:"safety"`
+	Variants     []ItemVariant    `json:"variants"`
+	Weapon       *WeaponData      `json:"weapon"`
+	AshOfWar     *AshOfWarData    `json:"ashOfWar"`
 }
 
 type ItemPresentation struct {
-	CanonicalName Fact[string]
-	Description   Fact[string]
-	IconPath      Fact[string]
+	CanonicalName Fact[string] `json:"canonicalName"`
+	Description   Fact[string] `json:"description"`
+	IconPath      Fact[string] `json:"iconPath"`
 }
 
 type RecordMode string
@@ -34,18 +34,18 @@ const (
 )
 
 type ItemStorage struct {
-	RecordMode   Fact[RecordMode]
-	MaxInventory Fact[uint32]
-	MaxStorage   Fact[uint32]
+	RecordMode   Fact[RecordMode] `json:"recordMode"`
+	MaxInventory Fact[uint32]     `json:"maxInventory"`
+	MaxStorage   Fact[uint32]     `json:"maxStorage"`
 }
 
 type ItemSafety struct {
-	CutContent Fact[bool]
-	BanRisk    Fact[bool]
+	CutContent Fact[bool] `json:"cutContent"`
+	BanRisk    Fact[bool] `json:"banRisk"`
 }
 
 type ItemVariant struct {
-	GameID      Fact[uint32]
-	Affinity    Fact[Affinity]
-	SourceRowID Fact[uint32]
+	GameID      Fact[uint32]   `json:"gameID"`
+	Affinity    Fact[Affinity] `json:"affinity"`
+	SourceRowID Fact[uint32]   `json:"sourceRowID"`
 }

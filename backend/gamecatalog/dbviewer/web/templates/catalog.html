@@ -1,0 +1,69 @@
+{{define "catalog"}}
+{{template "header" .}}
+<section class="page-heading">
+  <div>
+    <p class="eyebrow">Database</p>
+    <h1>Resources</h1>
+  </div>
+  <span class="result-count">{{len .Items}} shown</span>
+</section>
+
+<form class="filters" action="/" method="get">
+  <label>
+    Search
+    <input name="q" value="{{.Query}}" placeholder="Name, key or hexadecimal ID">
+  </label>
+  <label>
+    Family
+    <select name="family">
+      <option value="">All families</option>
+      {{range .Families}}
+        <option value="{{.}}" {{if eq $.Family .}}selected{{end}}>{{.}}</option>
+      {{end}}
+    </select>
+  </label>
+  <button type="submit">Apply filters</button>
+  {{if or .Query .Family}}<a class="button secondary" href="/">Clear</a>{{end}}
+</form>
+
+{{if .Items}}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Game ID</th>
+        <th>Family</th>
+        <th>Subcategory</th>
+        <th>Unknown</th>
+        <th>Document</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range .Items}}
+      <tr>
+        <td><a class="item-link" href="/items/{{.GameIDPath}}">{{.Name}}</a></td>
+        <td><code>{{.GameID}}</code></td>
+        <td><span class="badge neutral">{{.Family}}</span></td>
+        <td>{{.Subcategory}}</td>
+        <td>
+          {{if .UnknownCount}}
+            <span class="badge unknown">{{.UnknownCount}}</span>
+          {{else}}
+            <span class="badge enabled">0</span>
+          {{end}}
+        </td>
+        <td><code class="path">{{.DocumentPath}}</code></td>
+      </tr>
+      {{end}}
+    </tbody>
+  </table>
+</div>
+{{else}}
+<div class="empty-state">
+  <h2>No resources found</h2>
+  <p>Change the search text or family filter.</p>
+</div>
+{{end}}
+{{template "footer" .}}
+{{end}}

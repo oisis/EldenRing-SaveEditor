@@ -1,0 +1,14 @@
+{{define "raw"}}
+{{template "header" .}}
+<nav class="breadcrumbs"><a href="/">Resources</a><span>/</span><a href="/items/{{.GameIDPath}}">{{.Name}}</a><span>/</span>Raw JSON</nav>
+<section class="item-heading">
+  <div>
+    <p class="eyebrow">{{.DocumentPath}}</p>
+    <h1>{{.Name}} — raw document</h1>
+    <p><code>{{.GameID}}</code></p>
+  </div>
+  <button class="button copy-button" type="button" data-copy-target="raw-json">Copy JSON</button>
+</section>
+<pre id="raw-json" class="raw-json">{{.JSON}}</pre>
+{{template "footer" .}}
+{{end}}

@@ -1,0 +1,24 @@
+{{define "header"}}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{.Meta.Title}} · GameCatalog DB Viewer</title>
+  <link rel="stylesheet" href="/assets/styles.css">
+  <script src="/assets/app.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div>
+      <a class="brand" href="/">GameCatalog DB Viewer</a>
+      <p>Read-only view of validated game resource documents.</p>
+    </div>
+    <dl class="catalog-meta">
+      <div><dt>Resources</dt><dd>{{.Meta.ResourceCount}}</dd></div>
+      <div><dt>Data</dt><dd>{{.Meta.Manifest.DataVersion}}</dd></div>
+      <div><dt>Game</dt><dd>{{.Meta.Manifest.GameVersion}}</dd></div>
+    </dl>
+  </header>
+  <main>
+{{end}}

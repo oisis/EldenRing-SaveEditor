@@ -1,0 +1,61 @@
+{
+  "manifest": {
+    "schemaVersion": 1,
+    "dataVersion": "prototype-1",
+    "gameVersion": "regulation-version-not-recorded",
+    "sources": [
+      {
+        "id": "regulation_weapon",
+        "kind": "regulation",
+        "location": "regulation.bin/csv/EquipParamWeapon.csv",
+        "version": "version-not-recorded",
+        "evidence": "regulation",
+        "reviewed": false
+      },
+      {
+        "id": "regulation_gem",
+        "kind": "regulation",
+        "location": "regulation.bin/csv/EquipParamGem.csv",
+        "version": "version-not-recorded",
+        "evidence": "regulation",
+        "reviewed": false
+      },
+      {
+        "id": "regulation_text",
+        "kind": "regulation",
+        "location": "regulation.bin/msg/item.msgbnd",
+        "version": "version-not-recorded",
+        "evidence": "regulation",
+        "reviewed": false
+      },
+      {
+        "id": "legacy_db_data",
+        "kind": "curated_data",
+        "location": "backend/db/data",
+        "version": "working-tree",
+        "evidence": "curated",
+        "reviewed": false
+      },
+      {
+        "id": "verified_save_research",
+        "kind": "research",
+        "location": "docs/sl2-binary-format-spec.md",
+        "version": "working-tree",
+        "evidence": "verified_research",
+        "reviewed": true
+      },
+      {
+        "id": "prototype_unknown",
+        "kind": "unresolved",
+        "location": "unresolved",
+        "version": "prototype-1",
+        "evidence": "unknown",
+        "reviewed": false
+      }
+    ]
+  },
+  "documents": [
+    "items/weapon/000f4240.json",
+    "items/ash_of_war/8000ea60.json"
+  ]
+}
