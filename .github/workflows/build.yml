@@ -198,6 +198,37 @@ jobs:
           echo "version=${VER}" >> "$GITHUB_OUTPUT"
           echo "tag=v${VER}" >> "$GITHUB_OUTPUT"
 
+      - name: Extract release notes from changelog
+        run: |
+          awk -v version="${{ steps.version.outputs.version }}" '
+            BEGIN {
+              target = "## [" version "]"
+            }
+            $0 == target || index($0, target " - ") == 1 {
+              found = 1
+              next
+            }
+            found && /^## \[/ {
+              exit
+            }
+            found {
+              print
+              if ($0 !~ /^[[:space:]]*$/) {
+                has_content = 1
+              }
+            }
+            END {
+              if (!found) {
+                print "Missing changelog section for version " version > "/dev/stderr"
+                exit 1
+              }
+              if (!has_content) {
+                print "Changelog section for version " version " is empty" > "/dev/stderr"
+                exit 1
+              }
+            }
+          ' docs/CHANGELOG.md > release-notes.md
+
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
@@ -207,10 +238,11 @@ jobs:
         run: find artifacts -type f
 
       - name: Create or update GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ steps.version.outputs.tag }}
           name: "Elden Ring SaveForge ${{ steps.version.outputs.tag }}"
           draft: false
-          generate_release_notes: true
+          body_path: release-notes.md
+          generate_release_notes: false
           files: artifacts/**/*.zip
