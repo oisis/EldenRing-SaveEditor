@@ -349,7 +349,13 @@ func containerUsedQuantities(records []ResolvedRecord) map[uint32]uint64 {
 func scanInventoryRepairIssues(slotIndex int, records []ResolvedRecord) ([]RepairIssue, int, int) {
 	var out []RepairIssue
 	seenHandles := make(map[uint32]bool)
-	seenBuckets := make(map[uint32]bool) // shared across index-dedup scopes only
+	var acquisitionIndices []uint32
+	for _, record := range records {
+		if record.IndexDedup && record.AcquisitionIndex > 0 {
+			acquisitionIndices = append(acquisitionIndices, record.AcquisitionIndex)
+		}
+	}
+	indexCollisions := NewInventoryIndexCollisionSet(acquisitionIndices)
 
 	// Container ownership is resolved once for the whole slot: pot/aromatic caps
 	// depend on how many of the required container the character owns, not on the
@@ -432,25 +438,26 @@ func scanInventoryRepairIssues(slotIndex int, records []ResolvedRecord) ([]Repai
 		// conservative floor for newly generated editor indices only, not a
 		// validation rule for existing records.
 		//
-		// Elden Ring keys "Order of Acquisition" by Index>>1 (spec 52), so two
-		// records sharing a BUCKET (Index>>1) collide in-game even when their raw
-		// indices differ by one (e.g. 670/671). Dedup on the bucket, not the raw
-		// index, to match ScanDuplicateInventoryIndices and the Integrity Modal —
-		// repair_index (AssignFreshInventoryIndex) moves the later record to a
-		// fresh, bucket-unique index.
+		// Apply the shared mixed-range contract. A bucket containing any
+		// editor-range index uses Index>>1 for every member, so 432/433 is a
+		// collision while native-only 118/119 remains legal.
 		if r.IndexDedup && r.AcquisitionIndex > 0 {
-			bucket := r.AcquisitionIndex >> 1
-			if seenBuckets[bucket] {
+			indexKey, _, collided := indexCollisions.Add(r.AcquisitionIndex)
+			if collided {
+				field, value := indexKey.issueField()
+				description := fmt.Sprintf("item 0x%08X duplicates acquisition index %d", h, r.AcquisitionIndex)
+				if field == "bucket" {
+					description = fmt.Sprintf("item 0x%08X (index %d) shares acquisition-order bucket %d", h, r.AcquisitionIndex, value)
+				}
 				key := IssueKey{Slot: slotIndex, Domain: repairDomainInventory, Code: RepairCodeDuplicateAcquisitionIndex,
 					Scope: r.Scope, Row: r.Row, Handle: h,
-					Field: "bucket", Value: fmt.Sprintf("%d", bucket)}
+					Field: field, Value: fmt.Sprintf("%d", value)}
 				out = append(out, mkIssue(key,
-					fmt.Sprintf("item 0x%08X (index %d) shares acquisition-order bucket %d", h, r.AcquisitionIndex, bucket),
+					description,
 					repairSeverityError,
 					[]string{RepairActionRepairIndex},
 					RepairActionRepairIndex, r.Fingerprint))
 			}
-			seenBuckets[bucket] = true
 		}
 
 		// Category/container quantity rule — runs ONLY for records that carry an

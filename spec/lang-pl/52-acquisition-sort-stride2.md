@@ -21,7 +21,7 @@ Rozdział opisuje:
 Co rozdział **NIE** robi:
 
 - Nie opisuje `Index` jako pola binarnego ani layoutu rekordu inventory — [07-inventory → Binary structures](07-inventory.md#binary--runtime-structures).
-- Nie opisuje semantyki transferu Inventory ↔ Storage (przypisywanie świeżego `Index` w `MoveItemsBetweenContainers` używa single-stride, nie stride-2) — [53-inventory-storage-transfer](53-inventory-storage-transfer.md).
+- Nie opisuje zależnego od kierunku przypisywania świeżego `Index` w transferze Inventory ↔ Storage — [53-inventory-storage-transfer](53-inventory-storage-transfer.md).
 - Nie opisuje `Index` assignment przy Add Items — [43-transactional-item-adding](43-transactional-item-adding.md).
 - Nie opisuje allocator/counter invariantów ani capacity check — [35-gaitem-allocator-invariants](35-gaitem-allocator-invariants.md).
 - Nie opisuje SortOrder UI flow (drag-and-drop, dropdowny sort mode) — pełna semantyka po stronie frontendu pozostaje w [53-inventory-storage-transfer → Frontend](53-inventory-storage-transfer.md) (z zastrzeżeniem, że aktualny `SortOrderTab.tsx` nie eksponuje sort dropdownów — patrz "Direction naming and UI caveats" w tym rozdziale).
@@ -86,6 +86,29 @@ Konsekwencje:
 - W trybie sort **innym niż Acquisition Order** (Weight, Type, Attack Power, Alphabetical) gra liczy klucz sort runtime z `regulation.bin` (parametry `EquipParamWeapon.sortGroupId/sortId/...`); zmiana `Index` w save jest dla nich niewidoczna.
 - Wartości ≤ `InvEquipReservedMax = 432` są **zarezerwowane dla równich slotów** (`backend/core/offset_defs.go:341`); reorder MUSI używać `Index > 432`.
 - Wartości `>= 10000` powodują **crash gry przy load** (sentinel v1 discovery — zob. niżej). Algorytm zaczyna od `NextAcquisitionSortId` (typowo 500–2000 dla long-running save), więc w praktyce nie zbliża się do tego limitu.
+
+### Granica walidacji istniejących danych natywnych
+
+Model zapisu stride-2 jest inwariantem danych generowanych przez edytor, a nie
+ogólną regułą uszkodzenia dla każdego istniejącego rekordu. Natywne rekordy gry
+o `Index <= 432` legalnie używają sąsiednich wartości, np. `118/119` i
+`120/121`. Skaner ani naprawa nie mogą zmieniać takich par tylko dlatego, że
+współdzielą `Index >> 1`.
+
+Kanoniczna polityka kolizji dla istniejących rekordów Inventory:
+
+- bucket zawierający wyłącznie `Index <= 432`: kolidują tylko identyczne surowe
+  wartości `Index`;
+- bucket zawierający dowolny `Index > 432`: wszystkie rekordy kolidują po
+  `Index >> 1`. Dotyczy to także pary granicznej `432/433` w bucketcie `216`.
+
+Nowe indeksy generowane przez edytor i naprawę pozostają powyżej 432 i używają
+stride-2. Dokładne duplikaty niskich indeksów nadal są raportowane i przenoszone
+do świeżego wysokiego bucketu. Jedynym źródłem tej reguły jest
+`backend/core/acquisition_index.go::InventoryIndexCollisionSet`, używany przez
+preflight, Repair Issues, naprawę duplikatów i modal integralności. Legacy
+transfer Storage → Inventory korzysta z tego samego przydziału świeżego bucketu,
+więc nie może utworzyć `433` obok natywnego `432`.
 
 ---
 
@@ -343,7 +366,7 @@ Pełna semantyka transactional safety dla `AddItemsToCharacter`/`MoveItemsBetwee
 - [35-gaitem-allocator-invariants](35-gaitem-allocator-invariants.md) — allocator/capacity/counters, transactional safety, snapshot/rollback (canonical reference dla reszty write-side semantyki).
 - [39-inventory-reorder](39-inventory-reorder.md) — historyczny design doc; **stride-1 algorytm z 39 jest niepoprawny** (zob. sentinel v2 discovery).
 - [43-transactional-item-adding](43-transactional-item-adding.md) — Add Items pipeline; `Index` przypisywany single-stride z `NextAcquisitionSortId` (nie stride-2).
-- [53-inventory-storage-transfer](53-inventory-storage-transfer.md) — Inventory ↔ Storage transfer; przypisanie `Index` przy transferze (single-stride, monotoniczne advancement); UI flow Sort Order (z historical wzmiankami o sort dropdownach — patrz "Direction naming and UI caveats" tutaj).
+- [53-inventory-storage-transfer](53-inventory-storage-transfer.md) — Inventory ↔ Storage transfer; zależne od kierunku przypisanie świeżego `Index` i monotoniczne advancement; UI flow Sort Order (z historical wzmiankami o sort dropdownach — patrz "Direction naming and UI caveats" tutaj).
 
 ---
 

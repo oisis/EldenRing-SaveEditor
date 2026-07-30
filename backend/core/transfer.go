@@ -424,11 +424,8 @@ func clearRecord(data []byte, start, i int, c containerKind) {
 // applying the same clamps as addToInventory for the corresponding side.
 func assignDestIndex(slot *SaveSlot, c containerKind) uint32 {
 	if c == containerInventory {
-		acq := slot.Inventory.NextAcquisitionSortId
-		if acq <= InvEquipReservedMax {
-			acq = InvEquipReservedMax + 1
-		}
-		return acq
+		mark := nextAcquisitionWriteIndex(slot.Inventory.NextAcquisitionSortId, InvEquipReservedMax+2)
+		return mark + 1
 	}
 	// Storage: use next_equip_index clamped above InvEquipReservedMax and above
 	// max existing Index of any valid record (matches writer.go:766-790).

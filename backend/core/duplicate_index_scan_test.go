@@ -27,6 +27,55 @@ func TestScanDuplicateInventoryIndices_Clean(t *testing.T) {
 	}
 }
 
+// TestScanDuplicateInventoryIndices_LowNativeAdjacentIndicesAreClean locks in
+// the native low-range contract. Game-created records at or below
+// InvEquipReservedMax legitimately use adjacent raw indices, including pairs
+// that share Index>>1. Only an exact raw duplicate is a conflict in this range.
+func TestScanDuplicateInventoryIndices_LowNativeAdjacentIndicesAreClean(t *testing.T) {
+	slot := newSlotWithItems(
+		[]InventoryItem{
+			{GaItemHandle: 0xB0002774, Quantity: 1, Index: 118},
+			{GaItemHandle: 0xB0002775, Quantity: 1, Index: 119},
+		},
+		[]InventoryItem{
+			{GaItemHandle: 0xB0002776, Quantity: 1, Index: 120},
+			{GaItemHandle: 0xB0002777, Quantity: 1, Index: 121},
+		},
+	)
+
+	if issues := ScanDuplicateInventoryIndices(slot); len(issues) != 0 {
+		t.Fatalf("native adjacent low indices must be clean, got %d issues: %+v", len(issues), issues)
+	}
+}
+
+func TestScanDuplicateInventoryIndices_ReservedBoundary(t *testing.T) {
+	t.Run("431_and_432_are_distinct_native_buckets", func(t *testing.T) {
+		slot := newSlotWithItems([]InventoryItem{
+			{GaItemHandle: 0xB0002774, Quantity: 1, Index: InvEquipReservedMax - 1},
+			{GaItemHandle: 0xB0002775, Quantity: 1, Index: InvEquipReservedMax},
+		}, nil)
+
+		if issues := ScanDuplicateInventoryIndices(slot); len(issues) != 0 {
+			t.Fatalf("431/432 must remain clean, got %d issues: %+v", len(issues), issues)
+		}
+	})
+
+	t.Run("432_and_433_collide_across_native_editor_boundary", func(t *testing.T) {
+		slot := newSlotWithItems([]InventoryItem{
+			{GaItemHandle: 0xB0002774, Quantity: 1, Index: InvEquipReservedMax},
+			{GaItemHandle: 0xB0002775, Quantity: 1, Index: InvEquipReservedMax + 1},
+		}, nil)
+
+		issues := ScanDuplicateInventoryIndices(slot)
+		if len(issues) != 1 {
+			t.Fatalf("432/433 must produce one bucket collision, got %d: %+v", len(issues), issues)
+		}
+		if issues[0].Bucket != InvEquipReservedMax>>1 {
+			t.Errorf("collision bucket = %d, want %d", issues[0].Bucket, InvEquipReservedMax>>1)
+		}
+	})
+}
+
 func TestScanDuplicateInventoryIndices_IgnoresEmptyHandles(t *testing.T) {
 	slot := newSlotWithItems(
 		[]InventoryItem{

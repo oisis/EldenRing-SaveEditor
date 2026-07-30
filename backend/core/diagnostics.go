@@ -296,16 +296,16 @@ func (e IntegrityError) Error() string {
 	return fmt.Sprintf("%s: %s", e.Check, e.Message)
 }
 
-// DuplicateInventoryIndexIssue describes a single acquisition-order bucket
-// collision discovered by ScanDuplicateInventoryIndices. Used by pre-flight
-// guards to abort mutations on already-corrupt saves with a precise diagnostic
-// instead of a misleading post-mutation rollback.
+// DuplicateInventoryIndexIssue describes a collision discovered by
+// ScanDuplicateInventoryIndices. Used by pre-flight guards to abort mutations on
+// already-corrupt saves with a precise diagnostic instead of a misleading
+// post-mutation rollback.
 //
-// Elden Ring keys the in-game "Order of Acquisition" by Index>>1 (spec 52), so
-// two records whose Index values share a bucket — including adjacent pairs like
-// 670/671, not only exact duplicates — collide and swap/revert on restart.
-// Index holds the acquisition Index of the colliding (later) record; Bucket is
-// the shared Index>>1 key.
+// Existing native indices <= InvEquipReservedMax collide only when the raw
+// Index is identical. A bucket containing any editor-range value above that
+// floor uses Index>>1 for every member, including the 432/433 boundary. Index
+// holds the colliding later record's raw value; Bucket remains its Index>>1
+// value for integrity-report display.
 type DuplicateInventoryIndexIssue struct {
 	Index           uint32 `json:"index"`
 	Bucket          uint32 `json:"bucket"`
@@ -314,14 +314,18 @@ type DuplicateInventoryIndexIssue struct {
 	FirstHandle     uint32 `json:"firstHandle"`
 	DuplicateRow    int    `json:"duplicateRow"`
 	DuplicateHandle uint32 `json:"duplicateHandle"`
+	collisionKey    InventoryIndexCollisionKey
+}
+
+func (i DuplicateInventoryIndexIssue) CollisionKey() InventoryIndexCollisionKey {
+	return i.collisionKey
 }
 
 // ScanDuplicateInventoryIndices walks Inventory.CommonItems and Inventory.KeyItems
-// and reports every acquisition-order bucket (Index>>1) that is claimed by more
-// than one record across the combined inventory list. The first record in a
-// bucket is kept; every subsequent one is reported. Empty / invalid handles are
-// ignored. Storage is not scanned — post-mutation validation only covers
-// inventory.
+// and reports every collision under InventoryIndexCollisionSet across the
+// combined inventory list. The first record claiming a group is kept; every
+// subsequent one is reported. Empty / invalid handles are ignored. Storage is
+// not scanned — post-mutation validation only covers inventory.
 //
 // Read-only: never modifies slot. Safe to call before snapshot/mutation as a
 // pre-flight guard.
@@ -333,7 +337,18 @@ func ScanDuplicateInventoryIndices(slot *SaveSlot) []DuplicateInventoryIndexIssu
 		row    int
 		handle uint32
 	}
-	seen := make(map[uint32]seenEntry) // keyed by bucket = Index>>1
+	var indices []uint32
+	collect := func(items []InventoryItem) {
+		for _, item := range items {
+			if item.GaItemHandle != GaHandleEmpty && item.GaItemHandle != GaHandleInvalid {
+				indices = append(indices, item.Index)
+			}
+		}
+	}
+	collect(slot.Inventory.CommonItems)
+	collect(slot.Inventory.KeyItems)
+	collisions := NewInventoryIndexCollisionSet(indices)
+	firstByIndex := make(map[uint32]seenEntry)
 	var issues []DuplicateInventoryIndexIssue
 
 	scan := func(scope string, items []InventoryItem) {
@@ -341,20 +356,24 @@ func ScanDuplicateInventoryIndices(slot *SaveSlot) []DuplicateInventoryIndexIssu
 			if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
 				continue
 			}
-			bucket := item.Index >> 1
-			if prev, ok := seen[bucket]; ok {
+			key, firstIndex, collided := collisions.Add(item.Index)
+			if collided {
+				prev := firstByIndex[firstIndex]
 				issues = append(issues, DuplicateInventoryIndexIssue{
 					Index:           item.Index,
-					Bucket:          bucket,
+					Bucket:          item.Index >> 1,
 					Scope:           scope,
 					FirstRow:        prev.row,
 					FirstHandle:     prev.handle,
 					DuplicateRow:    i,
 					DuplicateHandle: item.GaItemHandle,
+					collisionKey:    key,
 				})
 				continue
 			}
-			seen[bucket] = seenEntry{row: i, handle: item.GaItemHandle}
+			if _, exists := firstByIndex[item.Index]; !exists {
+				firstByIndex[item.Index] = seenEntry{row: i, handle: item.GaItemHandle}
+			}
 		}
 	}
 	scan("inventory_common", slot.Inventory.CommonItems)

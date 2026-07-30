@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+### fix(inventory): preserve native low acquisition indices
+
+Inventory integrity checks and Repair Issues no longer classify legitimate
+adjacent native acquisition indices at or below 432 as duplicate buckets.
+Exact raw duplicates in the native range and acquisition-bucket collisions in
+the editor-generated range remain blocked and repairable, including a
+cross-boundary `432/433` collision. The automatic repair therefore no longer
+rewrites valid game-created inventory records, and Storage → Inventory transfer
+now starts in a fresh bucket above the native boundary.
+
 ## [1.6.7] - 2026-07-30
 
 ### fix(items): flag unobtainable content

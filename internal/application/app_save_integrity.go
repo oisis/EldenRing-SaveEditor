@@ -28,7 +28,9 @@ type SlotInventoryIntegrityReport struct {
 
 // InventoryIntegrityConflict groups records participating in one integrity
 // problem. Kind is "acquisition_bucket_collision" or "duplicate_physick".
-// For an acquisition_bucket_collision, Index carries the shared Index>>1 bucket.
+// For an acquisition_bucket_collision, Index carries the shared Index>>1 value
+// used by the existing UI label. Native low-range adjacent values are not
+// conflicts; exact low duplicates still share this displayed bucket.
 type InventoryIntegrityConflict struct {
 	Kind  string                           `json:"kind,omitempty"`
 	Index uint32                           `json:"index"`
@@ -86,21 +88,31 @@ func (a *App) GetSaveInventoryIntegrityReport() (SaveInventoryIntegrityReport, e
 }
 
 func buildSlotIntegrityReport(save *core.SaveFile, slotIdx int, slot *core.SaveSlot, indexIssues []core.DuplicateInventoryIndexIssue, physickIssues []core.WondrousPhysickOccurrence, active bool) SlotInventoryIntegrityReport {
-	// Group by acquisition-order bucket (Index>>1): the two colliding records
-	// hold different Index values but share one bucket, which is what the game
-	// keys Order of Acquisition on.
-	conflictingBuckets := make(map[uint32]struct{}, len(indexIssues))
+	// Group with the same canonical key as the core scanner. Recomputing only
+	// Index>>1 here previously reintroduced low-range false positives.
+	conflictingKeys := make(map[core.InventoryIndexCollisionKey]struct{}, len(indexIssues))
+	displayBuckets := make(map[core.InventoryIndexCollisionKey]uint32, len(indexIssues))
 	for _, issue := range indexIssues {
-		conflictingBuckets[issue.Bucket] = struct{}{}
+		key := issue.CollisionKey()
+		conflictingKeys[key] = struct{}{}
+		displayBuckets[key] = issue.Bucket
 	}
 
-	conflictByBucket := make(map[uint32]*InventoryIntegrityConflict, len(conflictingBuckets))
-	conflictOrder := make([]uint32, 0, len(conflictingBuckets))
+	conflictByKey := make(map[core.InventoryIndexCollisionKey]*InventoryIntegrityConflict, len(conflictingKeys))
+	conflictOrder := make([]core.InventoryIndexCollisionKey, 0, len(conflictingKeys))
 	seenRow := make(map[[2]int]bool, len(indexIssues)*2)
 
 	appendRow := func(scope string, row int, item core.InventoryItem) {
-		bucket := item.Index >> 1
-		if _, conflicted := conflictingBuckets[bucket]; !conflicted {
+		var indexKey core.InventoryIndexCollisionKey
+		matched := false
+		for key := range conflictingKeys {
+			if key.Matches(item.Index) {
+				indexKey = key
+				matched = true
+				break
+			}
+		}
+		if !matched {
 			return
 		}
 		scopeKey := 0
@@ -113,11 +125,11 @@ func buildSlotIntegrityReport(save *core.SaveFile, slotIdx int, slot *core.SaveS
 		}
 		seenRow[key] = true
 
-		group, ok := conflictByBucket[bucket]
+		group, ok := conflictByKey[indexKey]
 		if !ok {
-			group = &InventoryIntegrityConflict{Kind: "acquisition_bucket_collision", Index: bucket}
-			conflictByBucket[bucket] = group
-			conflictOrder = append(conflictOrder, bucket)
+			group = &InventoryIntegrityConflict{Kind: "acquisition_bucket_collision", Index: displayBuckets[indexKey]}
+			conflictByKey[indexKey] = group
+			conflictOrder = append(conflictOrder, indexKey)
 		}
 		group.Items = append(group.Items, resolveConflictItem(scope, row, item, slot))
 	}
@@ -136,8 +148,8 @@ func buildSlotIntegrityReport(save *core.SaveFile, slotIdx int, slot *core.SaveS
 	}
 
 	conflicts := make([]InventoryIntegrityConflict, 0, len(conflictOrder)+1)
-	for _, bucket := range conflictOrder {
-		conflicts = append(conflicts, *conflictByBucket[bucket])
+	for _, key := range conflictOrder {
+		conflicts = append(conflicts, *conflictByKey[key])
 	}
 	if len(physickIssues) > 1 {
 		conflict := InventoryIntegrityConflict{Kind: "duplicate_physick"}
@@ -155,7 +167,7 @@ func buildSlotIntegrityReport(save *core.SaveFile, slotIdx int, slot *core.SaveS
 		CharacterName:         resolveCharacterName(save, slotIdx),
 		Active:                active,
 		DuplicateEntryCount:   len(indexIssues) + max(0, len(physickIssues)-1),
-		ConflictingIndexCount: len(conflictingBuckets),
+		ConflictingIndexCount: len(conflictingKeys),
 		Conflicts:             conflicts,
 	}
 }

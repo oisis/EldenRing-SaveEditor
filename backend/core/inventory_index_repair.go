@@ -24,10 +24,9 @@ type InventoryIndexRepairReport struct {
 }
 
 // RepairDuplicateInventoryIndices reassigns the Index of every record that
-// shares an acquisition-order bucket (Index>>1) with an earlier record in
-// Inventory.CommonItems + KeyItems, so that every non-empty entry occupies a
-// distinct bucket. The first record in a bucket is kept; every subsequent one
-// is moved to a fresh bucket.
+// collides under InventoryIndexCollisionSet with an earlier record in
+// Inventory.CommonItems + KeyItems. The first record claiming a key is kept;
+// every subsequent one is moved to a fresh high-range bucket.
 //
 // Elden Ring keys "Order of Acquisition" by Index>>1 (spec 52), so fresh
 // indices MUST follow the native stride-2 pattern — an even mark, the record's
@@ -81,9 +80,17 @@ func RepairDuplicateInventoryIndices(slot *SaveSlot) (InventoryIndexRepairReport
 	}
 	mark := nextAcquisitionWriteIndex(seed, InvEquipReservedMax+2)
 
-	// seenBucket tracks Index>>1 keys already claimed (kept records + freshly
-	// assigned ones) so no reassignment reuses a bucket.
-	seenBucket := make(map[uint32]bool)
+	var indices []uint32
+	collectIndices := func(items []InventoryItem) {
+		for _, item := range items {
+			if item.GaItemHandle != GaHandleEmpty && item.GaItemHandle != GaHandleInvalid {
+				indices = append(indices, item.Index)
+			}
+		}
+	}
+	collectIndices(slot.Inventory.CommonItems)
+	collectIndices(slot.Inventory.KeyItems)
+	collisions := NewInventoryIndexCollisionSet(indices)
 
 	reassign := func(scope string, entryStart int, items []InventoryItem) error {
 		for i := range items {
@@ -91,22 +98,19 @@ func RepairDuplicateInventoryIndices(slot *SaveSlot) (InventoryIndexRepairReport
 			if it.GaItemHandle == GaHandleEmpty || it.GaItemHandle == GaHandleInvalid {
 				continue
 			}
-			bucket := it.Index >> 1
-			if !seenBucket[bucket] {
-				seenBucket[bucket] = true
+			if _, _, collided := collisions.Add(it.Index); !collided {
 				continue
 			}
 			// Collision: allocate the next free stride-2 bucket. mark is even,
 			// so newIdx = mark+1 lands in bucket mark>>1; mark += 2 moves to the
 			// next bucket. Belt-and-braces skip if a bucket is somehow taken.
-			newBucket := mark >> 1
-			for seenBucket[newBucket] {
-				mark += 2
-				newBucket = mark >> 1
-			}
 			newIdx := mark + 1
+			for collisions.Conflicts(newIdx) {
+				mark += 2
+				newIdx = mark + 1
+			}
 			mark += 2
-			seenBucket[newBucket] = true
+			collisions.Add(newIdx)
 
 			off := entryStart + i*InvRecordLen + 8
 			if off < 0 || off+4 > len(slot.Data) {
@@ -205,15 +209,15 @@ func AssignFreshInventoryIndex(slot *SaveSlot, scope string, row int) (Inventory
 		return zero, fmt.Errorf("AssignFreshInventoryIndex: row %d has empty/invalid handle", row)
 	}
 
-	// Collect every existing bucket (Index>>1) across both scopes so the fresh
+	// Collect every existing index across both scopes so the fresh high-range
 	// index lands in an unclaimed bucket, plus the max Index to seed the mark.
-	seenBucket := make(map[uint32]bool)
+	var indices []uint32
 	var maxIdx uint32
 	for _, item := range slot.Inventory.CommonItems {
 		if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
 			continue
 		}
-		seenBucket[item.Index>>1] = true
+		indices = append(indices, item.Index)
 		if item.Index > maxIdx {
 			maxIdx = item.Index
 		}
@@ -222,10 +226,14 @@ func AssignFreshInventoryIndex(slot *SaveSlot, scope string, row int) (Inventory
 		if item.GaItemHandle == GaHandleEmpty || item.GaItemHandle == GaHandleInvalid {
 			continue
 		}
-		seenBucket[item.Index>>1] = true
+		indices = append(indices, item.Index)
 		if item.Index > maxIdx {
 			maxIdx = item.Index
 		}
+	}
+	collisions := NewInventoryIndexCollisionSet(indices)
+	for _, index := range indices {
+		collisions.Add(index)
 	}
 
 	seed := maxIdx + 1
@@ -233,7 +241,7 @@ func AssignFreshInventoryIndex(slot *SaveSlot, scope string, row int) (Inventory
 		seed = slot.Inventory.NextAcquisitionSortId
 	}
 	mark := nextAcquisitionWriteIndex(seed, InvEquipReservedMax+2)
-	for seenBucket[mark>>1] {
+	for collisions.Conflicts(mark + 1) {
 		mark += 2
 	}
 	newIdx := mark + 1

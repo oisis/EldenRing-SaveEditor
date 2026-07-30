@@ -97,6 +97,55 @@ func TestGetSaveInventoryIntegrityReport_AllSlotsClean_ReturnsClean(t *testing.T
 	}
 }
 
+func TestGetSaveInventoryIntegrityReport_LowNativeAdjacentIndices_ReturnsClean(t *testing.T) {
+	app := integrityFixture()
+	handles := knownGoodsHandles(t, 4)
+	slot := &app.save.Slots[0]
+	for i, handle := range handles {
+		slot.Inventory.CommonItems = append(slot.Inventory.CommonItems, core.InventoryItem{
+			GaItemHandle: handle,
+			Quantity:     1,
+			Index:        uint32(118 + i),
+		})
+	}
+
+	report, err := app.GetSaveInventoryIntegrityReport()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !report.Clean || len(report.Slots) != 0 {
+		t.Fatalf("native adjacent low indices must not open the integrity modal: %+v", report)
+	}
+}
+
+func TestGetSaveInventoryIntegrityReport_ReservedBoundaryCollision(t *testing.T) {
+	app := integrityFixture()
+	handles := knownGoodsHandles(t, 2)
+	slot := &app.save.Slots[0]
+	slot.Inventory.CommonItems = []core.InventoryItem{
+		{GaItemHandle: handles[0], Quantity: 1, Index: core.InvEquipReservedMax},
+		{GaItemHandle: handles[1], Quantity: 1, Index: core.InvEquipReservedMax + 1},
+	}
+
+	report, err := app.GetSaveInventoryIntegrityReport()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if report.Clean || len(report.Slots) != 1 {
+		t.Fatalf("432/433 boundary collision must be reported: %+v", report)
+	}
+	if len(report.Slots[0].Conflicts) != 1 {
+		t.Fatalf("conflicts = %d, want 1: %+v", len(report.Slots[0].Conflicts), report.Slots[0].Conflicts)
+	}
+	conflict := report.Slots[0].Conflicts[0]
+	if conflict.Kind != "acquisition_bucket_collision" || conflict.Index != core.InvEquipReservedMax>>1 {
+		t.Errorf("unexpected conflict: %+v", conflict)
+	}
+	if len(conflict.Items) != 2 {
+		t.Errorf("conflict items = %d, want 2", len(conflict.Items))
+	}
+}
+
 func TestGetSaveInventoryIntegrityReport_SingleConflict_KnownItems(t *testing.T) {
 	app := integrityFixture()
 	handles := knownGoodsHandles(t, 2)
