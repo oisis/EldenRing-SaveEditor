@@ -52,7 +52,7 @@ var KeyItems = map[uint32]ItemData{
 	0x4000229F: {Name: "Golden Order Principles", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/golden_order_principles.png", Flags: []string{"cut_content", "ban_risk"}},
 	0x40002310: {Name: "Unalloyed Gold Needle", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/unalloyed_gold_needle.png"},
 	0x40001FD7: {Name: "Rykard's Great Rune", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/rykards_great_rune.png"},
-	0x4000229C: {Name: "Erdtree Prayerbook", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/erdtree_prayerbook.png"},
+	0x4000229C: {Name: "Erdtree Prayerbook", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/erdtree_prayerbook.png", Flags: []string{"cut_content"}},
 	0x401EA3C8: {Name: "Hole-Laden Necklace", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/hole_laden_necklace.png", Flags: []string{"dlc"}},
 	0x40001FD4: {Name: "Godrick's Great Rune", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/godricks_great_rune.png"},
 	0x4000229E: {Name: "Golden Order Principia", Category: "key_items", MaxInventory: 1, MaxStorage: 0, MaxUpgrade: 0, IconPath: "items/key_items/golden_order_principia.png"},

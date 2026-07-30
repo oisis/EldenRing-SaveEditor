@@ -75,7 +75,7 @@ var Helms = map[uint32]ItemData{
 	0x100900B0: {Name: "All-Knowing Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/all_knowing_helm.png"},
 	0x100927C0: {Name: "Twinned Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/twinned_helm.png"},
 	0x10094ED0: {Name: "Ragged Hat", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/ragged_hat.png", Flags: []string{"cut_content", "ban_risk"}},
-	0x100952B8: {Name: "Ragged Hat (Altered)", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/ragged_hat_altered.png"},
+	0x100952B8: {Name: "Ragged Hat (Altered)", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/ragged_hat_altered.png", Flags: []string{"cut_content", "ban_risk"}},
 	0x10099CF0: {Name: "Astrologer Hood", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/astrologer_hood.png"},
 	0x1009C400: {Name: "Lionel's Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/lionel_s_helm.png"},
 	0x1009EB10: {Name: "Hoslow's Helm", Category: "head", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/head/hoslow_s_helm.png"},
