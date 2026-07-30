@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.7] - 2026-07-30
+
+### fix(items): flag unobtainable content
+
+Safe Mode now excludes Ragged Hat (Altered), Ragged Armor (Altered),
+Brave's Battlewear (Altered), Erdtree Prayerbook, The Carian Oath and
+Fetal Position. The three altered armor variants also carry ban-risk warnings.
+All six records remain available in Chaos Mode.
+
 ## [1.6.6] - 2026-07-29
 
 ### feat(templates): export character loadouts
