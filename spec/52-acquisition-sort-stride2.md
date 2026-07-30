@@ -21,7 +21,7 @@ The chapter describes:
 What the chapter does **NOT** do:
 
 - Does not describe `Index` as a binary field or the inventory record layout — [07-inventory → Binary structures](07-inventory.md#binary--runtime-structures).
-- Does not describe the semantics of Inventory ↔ Storage transfer (the fresh `Index` assignment in `MoveItemsBetweenContainers` uses single-stride, not stride-2) — [53-inventory-storage-transfer](53-inventory-storage-transfer.md).
+- Does not describe the direction-specific fresh `Index` assignment in Inventory ↔ Storage transfer — [53-inventory-storage-transfer](53-inventory-storage-transfer.md).
 - Does not describe `Index` assignment on Add Items — [43-transactional-item-adding](43-transactional-item-adding.md).
 - Does not describe allocator/counter invariants or capacity check — [35-gaitem-allocator-invariants](35-gaitem-allocator-invariants.md).
 - Does not describe the SortOrder UI flow (drag-and-drop, sort-mode dropdowns) — the full frontend semantics remain in [53-inventory-storage-transfer → Frontend](53-inventory-storage-transfer.md) (with the caveat that the current `SortOrderTab.tsx` does not expose sort dropdowns — see "Direction naming and UI caveats" in this chapter).
@@ -86,6 +86,29 @@ Consequences:
 - In a sort mode **other than Acquisition Order** (Weight, Type, Attack Power, Alphabetical) the game computes the sort key at runtime from `regulation.bin` (`EquipParamWeapon.sortGroupId/sortId/...` parameters); a change to `Index` in the save is invisible to them.
 - Values ≤ `InvEquipReservedMax = 432` are **reserved for equipment-equivalent slots** (`backend/core/offset_defs.go:341`); reorder MUST use `Index > 432`.
 - Values `>= 10000` cause a **game crash on load** (sentinel v1 discovery — see below). The algorithm starts at `NextAcquisitionSortId` (typically 500–2000 for a long-running save), so in practice it does not approach that limit.
+
+### Validation boundary for existing native data
+
+The stride-2 write model is an editor-output invariant, not a blanket corruption
+rule for every pre-existing record. Native game-created records at or below
+`InvEquipReservedMax = 432` legitimately use adjacent raw values such as
+`118/119` and `120/121`. A scanner or repair tool must not rewrite those pairs
+merely because they share `Index >> 1`.
+
+The canonical collision policy for existing Inventory records is therefore:
+
+- a bucket containing only `Index <= 432`: only identical raw `Index` values
+  collide;
+- a bucket containing any `Index > 432`: all members collide on `Index >> 1`.
+  This includes the boundary pair `432/433`, which shares bucket `216`.
+
+Fresh editor-generated and repaired indices remain strictly above 432 and use
+the stride-2 model. Exact low-range duplicates are still reported and repaired
+to a fresh high-range bucket. This boundary is implemented once in
+`backend/core/acquisition_index.go::InventoryIndexCollisionSet` and shared by
+the pre-flight scanner, Repair Issues, duplicate repair, and the integrity
+modal. Legacy Storage → Inventory transfer uses the same fresh-bucket allocator,
+so it cannot create `433` next to a native `432`.
 
 ---
 
@@ -343,7 +366,7 @@ Full transactional safety semantics for `AddItemsToCharacter`/`MoveItemsBetweenC
 - [35-gaitem-allocator-invariants](35-gaitem-allocator-invariants.md) — allocator/capacity/counters, transactional safety, snapshot/rollback (canonical reference for the rest of the write-side semantics).
 - [39-inventory-reorder](39-inventory-reorder.md) — historical design doc; **the stride-1 algorithm from 39 is incorrect** (see the sentinel v2 discovery).
 - [43-transactional-item-adding](43-transactional-item-adding.md) — Add Items pipeline; `Index` assigned single-stride from `NextAcquisitionSortId` (not stride-2).
-- [53-inventory-storage-transfer](53-inventory-storage-transfer.md) — Inventory ↔ Storage transfer; `Index` assignment on transfer (single-stride, monotonic advancement); Sort Order UI flow (with historical mentions of sort dropdowns — see "Direction naming and UI caveats" here).
+- [53-inventory-storage-transfer](53-inventory-storage-transfer.md) — Inventory ↔ Storage transfer; direction-specific fresh `Index` assignment and monotonic advancement; Sort Order UI flow (with historical mentions of sort dropdowns — see "Direction naming and UI caveats" here).
 
 ---
 

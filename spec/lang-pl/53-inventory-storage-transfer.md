@@ -242,7 +242,15 @@ Instance-move dla handle prefiksów `0x80`/`0x90`/`0xA0`/`0xC0`:
 
 ### Empty dest slot — prosta ścieżka
 
-`writeRecord(dst, handle, srcQty, newIndex)` + `clearRecord(src)`. Handle zostaje, GaItem zostaje, `Index` po stronie docelowej jest **świeży** (z `assignDestIndex` — clamp powyżej `InvEquipReservedMax`).
+`writeRecord(dst, handle, srcQty, newIndex)` + `clearRecord(src)`. Handle i
+GaItem pozostają bez zmian. `assignDestIndex` stosuje kontrakt kontenera
+docelowego:
+
+- Storage → Inventory używa tego samego stabilnego parzystościowo przydziału
+  nowego bucketu co nowe rekordy Inventory (`mark` parzysty,
+  `Index = mark + 1`, minimum `435`), więc przeniesiony przedmiot nie może
+  współdzielić bucketu `216` z natywnym `Index = 432`;
+- Inventory → Storage zachowuje niezależną politykę liczników Storage.
 
 ### Dest ma już ten sam handle — ścieżka rehandle (`materializeRehandledInstance`)
 

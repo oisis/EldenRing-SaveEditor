@@ -352,6 +352,29 @@ func TestScanRepairIssues_LowAcquisitionIndexNotReserved(t *testing.T) {
 	}
 }
 
+// TestScanRepairIssues_LowNativeAdjacentIndicesAreClean protects real
+// game-created inventory layouts: adjacent raw indices in the low native range
+// are legal even when they share Index>>1.
+func TestScanRepairIssues_LowNativeAdjacentIndicesAreClean(t *testing.T) {
+	slot := &SaveSlot{
+		GaMap: map[uint32]uint32{},
+		Inventory: EquipInventoryData{
+			CommonItems: []InventoryItem{
+				{GaItemHandle: 0xB0002774, Quantity: 1, Index: 118},
+				{GaItemHandle: 0xB0002775, Quantity: 1, Index: 119},
+				{GaItemHandle: 0xB0002776, Quantity: 1, Index: 120},
+				{GaItemHandle: 0xB0002777, Quantity: 1, Index: 121},
+			},
+		},
+	}
+
+	for _, issue := range ScanRepairIssues(0, slot) {
+		if issue.Key.Code == RepairCodeDuplicateAcquisitionIndex {
+			t.Fatalf("native adjacent low indices must not produce duplicate_acquisition_index: %+v", issue)
+		}
+	}
+}
+
 // TestScanRepairIssues_LowDuplicateIndexStillDetected confirms that accepting
 // low indices did not weaken duplicate detection: two records sharing a low
 // acquisition index are still suspicious and must report
@@ -413,6 +436,31 @@ func TestScanRepairIssues_AcquisitionBucketCollision_670_671(t *testing.T) {
 	if got[0].DefaultAction != RepairActionRepairIndex ||
 		len(got[0].Actions) != 1 || got[0].Actions[0] != RepairActionRepairIndex {
 		t.Errorf("action = %+v/%q, want [repair_index]/repair_index", got[0].Actions, got[0].DefaultAction)
+	}
+}
+
+func TestScanRepairIssues_AcquisitionBucketCollision_432_433(t *testing.T) {
+	slot := &SaveSlot{
+		GaMap: map[uint32]uint32{},
+		Inventory: EquipInventoryData{
+			CommonItems: []InventoryItem{
+				{GaItemHandle: testHandleSmithingStone, Quantity: 1, Index: InvEquipReservedMax},
+				{GaItemHandle: 0xB0002775, Quantity: 1, Index: InvEquipReservedMax + 1},
+			},
+		},
+	}
+
+	var got []RepairIssue
+	for _, issue := range ScanRepairIssues(0, slot) {
+		if issue.Key.Code == RepairCodeDuplicateAcquisitionIndex {
+			got = append(got, issue)
+		}
+	}
+	if len(got) != 1 {
+		t.Fatalf("want one boundary bucket collision, got %d: %+v", len(got), got)
+	}
+	if got[0].Key.Field != "bucket" || got[0].Key.Value != "216" {
+		t.Errorf("issue key = %+v, want field=bucket value=216", got[0].Key)
 	}
 }
 

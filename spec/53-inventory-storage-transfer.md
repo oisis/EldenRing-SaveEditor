@@ -242,7 +242,13 @@ Instance-move for handle prefixes `0x80`/`0x90`/`0xA0`/`0xC0`:
 
 ### Empty dest slot — simple path
 
-`writeRecord(dst, handle, srcQty, newIndex)` + `clearRecord(src)`. The handle stays, the GaItem stays, the `Index` on the destination side is **fresh** (from `assignDestIndex` — clamp above `InvEquipReservedMax`).
+`writeRecord(dst, handle, srcQty, newIndex)` + `clearRecord(src)`. The handle
+stays and the GaItem stays. `assignDestIndex` follows the destination contract:
+
+- Storage → Inventory uses the same parity-stable fresh-bucket allocation as
+  new Inventory records (`mark` even, `Index = mark + 1`, minimum `435`), so a
+  transferred item cannot share bucket `216` with a native `Index = 432`;
+- Inventory → Storage preserves Storage's independent counter policy.
 
 ### Dest already has the same handle — rehandle path (`materializeRehandledInstance`)
 

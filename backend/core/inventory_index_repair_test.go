@@ -1,6 +1,7 @@
 package core
 
 import (
+	"bytes"
 	"encoding/binary"
 	"testing"
 )
@@ -106,6 +107,57 @@ func TestRepairDuplicateInventoryIndices_Clean_NoOp(t *testing.T) {
 	}
 	if issues := ScanDuplicateInventoryIndices(slot); len(issues) != 0 {
 		t.Errorf("scanner still reports issues after no-op: %+v", issues)
+	}
+}
+
+func TestRepairDuplicateInventoryIndices_LowNativeAdjacentIndices_NoOp(t *testing.T) {
+	slot := buildRepairFixture(t, []InventoryItem{
+		{GaItemHandle: 0xB0002774, Quantity: 1, Index: 118},
+		{GaItemHandle: 0xB0002775, Quantity: 1, Index: 119},
+		{GaItemHandle: 0xB0002776, Quantity: 1, Index: 120},
+		{GaItemHandle: 0xB0002777, Quantity: 1, Index: 121},
+	}, nil)
+	beforeData := append([]byte(nil), slot.Data...)
+	beforeAcq := slot.Inventory.NextAcquisitionSortId
+	beforeEquip := slot.Inventory.NextEquipIndex
+
+	report, err := RepairDuplicateInventoryIndices(slot)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if report.Changed != 0 || len(report.Changes) != 0 {
+		t.Fatalf("native adjacent low indices must be a no-op, got %+v", report)
+	}
+	if !bytes.Equal(slot.Data, beforeData) {
+		t.Fatal("no-op repair mutated raw slot data")
+	}
+	if slot.Inventory.NextAcquisitionSortId != beforeAcq || slot.Inventory.NextEquipIndex != beforeEquip {
+		t.Fatalf("no-op repair changed counters: acquisition %d -> %d, equip %d -> %d",
+			beforeAcq, slot.Inventory.NextAcquisitionSortId, beforeEquip, slot.Inventory.NextEquipIndex)
+	}
+}
+
+func TestRepairDuplicateInventoryIndices_LowExactDuplicate_Repairs(t *testing.T) {
+	slot := buildRepairFixture(t, []InventoryItem{
+		{GaItemHandle: 0xB0002774, Quantity: 1, Index: 118},
+		{GaItemHandle: 0xB0002775, Quantity: 1, Index: 118},
+	}, nil)
+
+	report, err := RepairDuplicateInventoryIndices(slot)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if report.Changed != 1 || len(report.Changes) != 1 {
+		t.Fatalf("exact low duplicate must repair the later record, got %+v", report)
+	}
+	if report.Changes[0].Row != 1 || report.Changes[0].OldIndex != 118 {
+		t.Fatalf("wrong repaired record: %+v", report.Changes[0])
+	}
+	if report.Changes[0].NewIndex <= InvEquipReservedMax {
+		t.Fatalf("fresh repair index %d must be above %d", report.Changes[0].NewIndex, InvEquipReservedMax)
+	}
+	if issues := ScanDuplicateInventoryIndices(slot); len(issues) != 0 {
+		t.Fatalf("scan still reports issues after low duplicate repair: %+v", issues)
 	}
 }
 
@@ -527,6 +579,27 @@ func TestRepairDuplicateInventoryIndices_AdjacentPair670671(t *testing.T) {
 	if slot.Inventory.CommonItems[1].Index >= slot.Inventory.NextAcquisitionSortId {
 		t.Errorf("NextAcquisitionSortId=%d not > reassigned Index %d",
 			slot.Inventory.NextAcquisitionSortId, slot.Inventory.CommonItems[1].Index)
+	}
+}
+
+func TestRepairDuplicateInventoryIndices_ReservedBoundary432433(t *testing.T) {
+	slot := buildRepairFixture(t, []InventoryItem{
+		{GaItemHandle: 0xB0000A01, Quantity: 1, Index: InvEquipReservedMax},
+		{GaItemHandle: 0xB0000A02, Quantity: 1, Index: InvEquipReservedMax + 1},
+	}, nil)
+
+	rep, err := RepairDuplicateInventoryIndices(slot)
+	if err != nil {
+		t.Fatalf("repair: %v", err)
+	}
+	if rep.Changed != 1 {
+		t.Fatalf("Changed = %d, want 1", rep.Changed)
+	}
+	if slot.Inventory.CommonItems[0].Index != InvEquipReservedMax {
+		t.Errorf("native boundary record changed to %d", slot.Inventory.CommonItems[0].Index)
+	}
+	if issues := ScanDuplicateInventoryIndices(slot); len(issues) != 0 {
+		t.Errorf("scanner still reports %d issue(s) after boundary repair: %+v", len(issues), issues)
 	}
 }
 
