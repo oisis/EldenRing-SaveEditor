@@ -5,7 +5,7 @@ import (
 	"io/fs"
 )
 
-//go:embed catalog.json items/*/*.json
+//go:embed catalog.json items/*/*.json assets/icons/items/*/*.png
 var catalogFiles embed.FS
 
 func Files() fs.FS {

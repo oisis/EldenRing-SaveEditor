@@ -5,7 +5,7 @@
     <p class="eyebrow">Database</p>
     <h1>Resources</h1>
   </div>
-  <span class="result-count">{{len .Items}} shown</span>
+  <span class="result-count">{{if .Items}}{{.First}}–{{.Last}} of {{.Total}}{{else}}0 of {{.Total}}{{end}} shown</span>
 </section>
 
 <form class="filters" action="/" method="get">
@@ -31,8 +31,10 @@
   <table>
     <thead>
       <tr>
+        <th>Icon</th>
         <th>Name</th>
         <th>Game ID</th>
+        <th>Entry</th>
         <th>Family</th>
         <th>Subcategory</th>
         <th>Unknown</th>
@@ -42,8 +44,10 @@
     <tbody>
       {{range .Items}}
       <tr>
+        <td>{{if .IconURL}}<img class="catalog-icon" src="{{.IconURL}}" alt="" loading="lazy">{{else}}—{{end}}</td>
         <td><a class="item-link" href="/items/{{.GameIDPath}}">{{.Name}}</a></td>
         <td><code>{{.GameID}}</code></td>
+        <td><span class="badge neutral">{{.EntryType}}</span></td>
         <td><span class="badge neutral">{{.Family}}</span></td>
         <td>{{.Subcategory}}</td>
         <td>
@@ -59,6 +63,11 @@
     </tbody>
   </table>
 </div>
+<nav class="pagination" aria-label="Catalog pages">
+  {{if .Previous}}<a class="button secondary" href="{{.Previous}}">Previous</a>{{else}}<span></span>{{end}}
+  <span>Page {{.Page}} of {{.Pages}}</span>
+  {{if .Next}}<a class="button secondary" href="{{.Next}}">Next</a>{{else}}<span></span>{{end}}
+</nav>
 {{else}}
 <div class="empty-state">
   <h2>No resources found</h2>

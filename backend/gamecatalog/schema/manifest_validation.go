@@ -46,7 +46,7 @@ func ValidateManifest(manifest Manifest) (map[SourceID]struct{}, error) {
 
 func validEvidenceLevel(level EvidenceLevel) bool {
 	switch level {
-	case EvidenceRegulation, EvidenceVerifiedResearch, EvidenceCurated, EvidenceUnknown:
+	case EvidenceRegulation, EvidenceGameData, EvidenceVerifiedResearch, EvidenceCurated, EvidenceUnknown:
 		return true
 	default:
 		return false

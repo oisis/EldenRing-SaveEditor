@@ -8,6 +8,9 @@ import (
 )
 
 func (catalog *Catalog) deriveRelations(sources map[schema.SourceID]struct{}) error {
+	if err := catalog.deriveRequiredContainerRelations(sources); err != nil {
+		return err
+	}
 	weapons, ashes := catalog.itemsForCompatibility()
 	for _, weapon := range weapons {
 		mount := weapon.Item.Capabilities.AshOfWarMount
@@ -35,6 +38,42 @@ func (catalog *Catalog) deriveRelations(sources map[schema.SourceID]struct{}) er
 			catalog.outgoing[weapon.ID] = append(catalog.outgoing[weapon.ID], relation)
 			catalog.incoming[ash.ID] = append(catalog.incoming[ash.ID], relation)
 		}
+	}
+	return nil
+}
+
+func (catalog *Catalog) deriveRequiredContainerRelations(sources map[schema.SourceID]struct{}) error {
+	resources := make([]schema.Resource, 0, len(catalog.byID))
+	for _, resource := range catalog.byID {
+		resources = append(resources, resource)
+	}
+	sort.Slice(resources, func(i, j int) bool {
+		return resources[i].ID < resources[j].ID
+	})
+	for _, resource := range resources {
+		required := resource.Item.Acquisition.RequiredContainerID
+		if !required.Known {
+			continue
+		}
+		targetID, exists := catalog.byItemGameID[required.Value]
+		if !exists {
+			return fmt.Errorf(
+				"resource %q: required container item 0x%08X is missing",
+				resource.Key,
+				required.Value,
+			)
+		}
+		relation := schema.Relation{
+			From:       resource.ID,
+			To:         targetID,
+			Kind:       schema.RelationRequiresContainer,
+			Provenance: required.Provenance,
+		}
+		if err := schema.ValidateRelation(relation, sources); err != nil {
+			return fmt.Errorf("derived required-container relation for %q: %w", resource.Key, err)
+		}
+		catalog.outgoing[resource.ID] = append(catalog.outgoing[resource.ID], relation)
+		catalog.incoming[targetID] = append(catalog.incoming[targetID], relation)
 	}
 	return nil
 }

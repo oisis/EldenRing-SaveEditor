@@ -1,10 +1,11 @@
 package schema
 
 type Capability[T any] struct {
-	Known      bool       `json:"known"`
-	Enabled    bool       `json:"enabled"`
-	Rules      *T         `json:"rules"`
-	Provenance Provenance `json:"provenance"`
+	Known         bool         `json:"known"`
+	Enabled       bool         `json:"enabled"`
+	Rules         *T           `json:"rules"`
+	Provenance    Provenance   `json:"provenance"`
+	RulesEvidence []Provenance `json:"rulesEvidence,omitempty"`
 }
 
 type ItemCapabilities struct {
@@ -18,7 +19,10 @@ type ItemCapabilities struct {
 type UpgradeModel string
 
 const (
-	UpgradeModelStandard UpgradeModel = "standard"
+	UpgradeModelStandard       UpgradeModel = "standard"
+	UpgradeModelSomber         UpgradeModel = "somber"
+	UpgradeModelGraveGlovewort UpgradeModel = "grave_glovewort"
+	UpgradeModelGhostGlovewort UpgradeModel = "ghost_glovewort"
 )
 
 type UpgradeRules struct {
@@ -67,8 +71,19 @@ type StackRules struct {
 type EquipmentSlot string
 
 const (
-	EquipmentSlotLeftHand  EquipmentSlot = "left_hand"
-	EquipmentSlotRightHand EquipmentSlot = "right_hand"
+	EquipmentSlotLeftHand    EquipmentSlot = "left_hand"
+	EquipmentSlotRightHand   EquipmentSlot = "right_hand"
+	EquipmentSlotArrow       EquipmentSlot = "arrow"
+	EquipmentSlotBolt        EquipmentSlot = "bolt"
+	EquipmentSlotHead        EquipmentSlot = "head"
+	EquipmentSlotChest       EquipmentSlot = "chest"
+	EquipmentSlotArms        EquipmentSlot = "arms"
+	EquipmentSlotLegs        EquipmentSlot = "legs"
+	EquipmentSlotTalisman    EquipmentSlot = "talisman"
+	EquipmentSlotSpellMemory EquipmentSlot = "spell_memory"
+	EquipmentSlotQuickItem   EquipmentSlot = "quick_item"
+	EquipmentSlotPouch       EquipmentSlot = "pouch"
+	EquipmentSlotPhysick     EquipmentSlot = "physick"
 )
 
 type EquipmentRules struct {

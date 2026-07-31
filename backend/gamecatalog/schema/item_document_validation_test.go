@@ -95,3 +95,19 @@ func TestValidateResourceRejectsUnknownProvenanceSource(t *testing.T) {
 		t.Fatalf("ValidateResource error = %v, want unknown provenance rejection", err)
 	}
 }
+
+func TestValidateResourceRejectsVariantProvenanceWithoutItsOwnSourceRecord(t *testing.T) {
+	manifest, resources := prototype.Data()
+	sources := mustValidateManifest(t, manifest)
+	dagger := resources[0]
+	variant := &dagger.Item.Variants[0]
+	variant.SourceRecords = variant.SourceRecords[1:]
+
+	err := schema.ValidateResource(dagger, sources)
+	if err == nil || !strings.Contains(err.Error(), "not covered by sourceRecords") {
+		t.Fatalf(
+			"ValidateResource error = %v, want uncovered variant provenance rejection",
+			err,
+		)
+	}
+}

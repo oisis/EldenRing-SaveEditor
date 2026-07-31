@@ -15,7 +15,16 @@ func validateItemDocument(item ItemDocument, sources map[SourceID]struct{}) erro
 	if !item.Family.Known {
 		return fmt.Errorf("item.family must be known")
 	}
+	if err := validateOptionalNonEmptyString("item.category", item.Category, sources); err != nil {
+		return err
+	}
 	if err := validateFact("item.subcategory", item.Subcategory, sources); err != nil {
+		return err
+	}
+	if item.Subcategory.Known && item.Subcategory.Value == "" {
+		return fmt.Errorf("item.subcategory cannot be empty when known")
+	}
+	if err := validateOptionalStringList("item.flags", item.Flags, sources); err != nil {
 		return err
 	}
 	if err := validatePresentation(item.Presentation, sources); err != nil {
@@ -27,16 +36,57 @@ func validateItemDocument(item ItemDocument, sources map[SourceID]struct{}) erro
 	if err := validateSafety(item.Safety, sources); err != nil {
 		return err
 	}
+	if err := validateAcquisition(item.Acquisition, sources); err != nil {
+		return err
+	}
+	if err := validateModifiers(item.Modifiers, sources); err != nil {
+		return err
+	}
+	if err := validateItemLinks("item.links", item.Links, item.GameID.Value, item.Unlocks, sources); err != nil {
+		return err
+	}
+	if err := validateRelatedTechnicalRecords(
+		"item.relatedTechnicalRecords",
+		item.RelatedTechnicalRecords,
+		item.GameID.Value,
+		sources,
+	); err != nil {
+		return err
+	}
 	if err := validateCapabilities(item.Capabilities, sources); err != nil {
 		return err
 	}
-	if err := validateVariants(item.Variants, sources); err != nil {
+	if err := validateVariants(item, sources); err != nil {
 		return err
 	}
-	return validateFamilyDocument(item, sources)
+	if err := validateAliases(item.Aliases, item, sources); err != nil {
+		return err
+	}
+	if err := validateUnlocks(item.Unlocks, sources); err != nil {
+		return err
+	}
+	if err := validateParameterRecords("item.sourceRecords", item.SourceRecords, sources); err != nil {
+		return err
+	}
+	if err := validateFamilyDocument(item, sources); err != nil {
+		return err
+	}
+	document := item
+	document.Variants = nil
+	document.Aliases = nil
+	document.RelatedTechnicalRecords = nil
+	document.SourceRecords = nil
+	return validateRegulationProvenanceCoverage(
+		"item",
+		document,
+		item.SourceRecords,
+	)
 }
 
 func validatePresentation(presentation ItemPresentation, sources map[SourceID]struct{}) error {
+	if err := validateOptionalNonEmptyString("item.presentation.displayName", presentation.DisplayName, sources); err != nil {
+		return err
+	}
 	if err := validateFact("item.presentation.canonicalName", presentation.CanonicalName, sources); err != nil {
 		return err
 	}
@@ -47,18 +97,20 @@ func validatePresentation(presentation ItemPresentation, sources map[SourceID]st
 		name string
 		fact Fact[string]
 	}{
+		{"item.presentation.caption", presentation.Caption},
 		{"item.presentation.description", presentation.Description},
+		{"item.presentation.location", presentation.Location},
 		{"item.presentation.iconPath", presentation.IconPath},
 	}
 	for _, entry := range optional {
-		if err := validateFact(entry.name, entry.fact, sources); err != nil {
+		if err := validateOptionalFact(entry.name, entry.fact, sources); err != nil {
 			return err
 		}
 		if entry.fact.Known && entry.fact.Value == "" {
 			return fmt.Errorf("%s cannot be empty when known", entry.name)
 		}
 	}
-	return nil
+	return validateTextMetadata(presentation.TextMetadata, sources)
 }
 
 func validateStorage(storage ItemStorage, sources map[SourceID]struct{}) error {
@@ -73,41 +125,64 @@ func validateStorage(storage ItemStorage, sources map[SourceID]struct{}) error {
 	if err := validateFact("item.storage.maxInventory", storage.MaxInventory, sources); err != nil {
 		return err
 	}
-	return validateFact("item.storage.maxStorage", storage.MaxStorage, sources)
+	if err := validateFact("item.storage.maxStorage", storage.MaxStorage, sources); err != nil {
+		return err
+	}
+	if err := validateOptionalFact("item.storage.gameMaxInventory", storage.GameMaxInventory, sources); err != nil {
+		return err
+	}
+	return validateOptionalFact("item.storage.gameMaxStorage", storage.GameMaxStorage, sources)
 }
 
 func validateSafety(safety ItemSafety, sources map[SourceID]struct{}) error {
 	if err := validateFact("item.safety.cutContent", safety.CutContent, sources); err != nil {
 		return err
 	}
-	return validateFact("item.safety.banRisk", safety.BanRisk, sources)
+	if err := validateFact("item.safety.banRisk", safety.BanRisk, sources); err != nil {
+		return err
+	}
+	optional := []struct {
+		name string
+		fact Fact[bool]
+	}{
+		{"item.safety.dlc", safety.DLC},
+		{"item.safety.noDatabase", safety.NoDatabase},
+		{"item.safety.scalesWithNG", safety.ScalesWithNG},
+	}
+	for _, entry := range optional {
+		if err := validateOptionalFact(entry.name, entry.fact, sources); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
-func validateVariants(variants []ItemVariant, sources map[SourceID]struct{}) error {
-	seen := make(map[uint32]struct{}, len(variants))
-	for index, variant := range variants {
-		if err := validateFact(fmt.Sprintf("item.variants[%d].gameID", index), variant.GameID, sources); err != nil {
-			return err
+func validateOptionalNonEmptyString(name string, fact Fact[string], sources map[SourceID]struct{}) error {
+	if err := validateOptionalFact(name, fact, sources); err != nil {
+		return err
+	}
+	if fact.Known && fact.Value == "" {
+		return fmt.Errorf("%s cannot be empty when known", name)
+	}
+	return nil
+}
+
+func validateOptionalStringList(name string, fact Fact[[]string], sources map[SourceID]struct{}) error {
+	if err := validateOptionalFact(name, fact, sources); err != nil {
+		return err
+	}
+	if !fact.Known {
+		return nil
+	}
+	seen := make(map[string]struct{}, len(fact.Value))
+	for index, value := range fact.Value {
+		if value == "" {
+			return fmt.Errorf("%s[%d] cannot be empty", name, index)
 		}
-		if !variant.GameID.Known || variant.GameID.Value == 0 {
-			return fmt.Errorf("item.variants[%d].gameID must be known and greater than zero", index)
+		if _, exists := seen[value]; exists {
+			return fmt.Errorf("%s contains duplicate value %q", name, value)
 		}
-		if _, exists := seen[variant.GameID.Value]; exists {
-			return fmt.Errorf("item.variants[%d]: duplicate game ID 0x%08X", index, variant.GameID.Value)
-		}
-		seen[variant.GameID.Value] = struct{}{}
-		if err := validateFact(fmt.Sprintf("item.variants[%d].affinity", index), variant.Affinity, sources); err != nil {
-			return err
-		}
-		if !variant.Affinity.Known || !validAffinity(variant.Affinity.Value) {
-			return fmt.Errorf("item.variants[%d].affinity must be known and supported", index)
-		}
-		if err := validateFact(fmt.Sprintf("item.variants[%d].sourceRowID", index), variant.SourceRowID, sources); err != nil {
-			return err
-		}
-		if !variant.SourceRowID.Known || variant.SourceRowID.Value == 0 {
-			return fmt.Errorf("item.variants[%d].sourceRowID must be known and greater than zero", index)
-		}
+		seen[value] = struct{}{}
 	}
 	return nil
 }

@@ -1,0 +1,515 @@
+{
+  "id": 2064,
+  "key": "item:40002359",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "The Ring (Pre-Order)",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy AllGestures"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 1073750873,
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "parsed Row ID plus item-family prefix from row 9049",
+        "table": "EquipParamGoods",
+        "row": "9049",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "gesture",
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamGoods",
+        "row": "9049",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "gestures",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "normalized from legacy AllGestures"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "legacy field is empty"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": [
+        "ban_risk",
+        "pre_order"
+      ],
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy AllGestures flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "The Ring (Pre-Order)",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy AllGestures"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "The Ring (Pre-Order)",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy AllGestures"
+        }
+      },
+      "caption": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy caption is unknown"
+        }
+      },
+      "description": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy description is unknown"
+        }
+      },
+      "location": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy location is unknown"
+        }
+      },
+      "iconPath": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy item has no icon path"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy display-name source is unknown"
+          }
+        },
+        "canonicalSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy canonical-name source is unknown"
+          }
+        },
+        "captionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy caption source is unknown"
+          }
+        },
+        "descriptionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy description source is unknown"
+          }
+        },
+        "locationSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy location source is unknown"
+          }
+        },
+        "dlcSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy DLC text source is unknown"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy text notes are unknown"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no legacy ItemData record mode"
+        }
+      },
+      "maxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 9049",
+          "table": "EquipParamGoods",
+          "row": "9049",
+          "field": "maxNum"
+        }
+      },
+      "gameMaxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 9049",
+          "table": "EquipParamGoods",
+          "row": "9049",
+          "field": "maxRepositoryNum"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": false,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no ItemData capability contract"
+        }
+      },
+      "infusion": {
+        "known": false,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no ItemData capability contract"
+        }
+      },
+      "ashOfWarMount": {
+        "known": false,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no ItemData capability contract"
+        }
+      },
+      "stack": {
+        "known": false,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_unknown",
+          "method": "slot-only gesture has no ItemData capability contract"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "gestures are invoked through gesture slots, not item equipment slots"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamGoods",
+        "rowID": 9049,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "maxNum"
+          },
+          {
+            "name": "maxRepositoryNum"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamGoods",
+          "row": "9049",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "GestureParam",
+        "rowID": 108,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_gesture_param",
+          "method": "referenced Regulation parameter row",
+          "table": "GestureParam",
+          "row": "108",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": {
+      "goodsSourceRowID": {
+        "known": true,
+        "value": 9049,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed Row ID from row 9049",
+          "table": "EquipParamGoods",
+          "row": "9049",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 7050,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed iconId from row 9049",
+          "table": "EquipParamGoods",
+          "row": "9049",
+          "field": "iconId"
+        }
+      },
+      "slots": [
+        {
+          "slotID": {
+            "known": true,
+            "value": 217,
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures save slot ID"
+            }
+          },
+          "itemID": {
+            "known": true,
+            "value": 1073750873,
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures item ID"
+            }
+          },
+          "name": {
+            "known": true,
+            "value": "The Ring (Pre-Order)",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures name"
+            }
+          },
+          "category": {
+            "known": true,
+            "value": "Special",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures category"
+            }
+          },
+          "flags": {
+            "known": true,
+            "value": [
+              "pre_order",
+              "ban_risk"
+            ],
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures flags"
+            }
+          },
+          "sourceRecords": null
+        }
+      ]
+    }
+  }
+}

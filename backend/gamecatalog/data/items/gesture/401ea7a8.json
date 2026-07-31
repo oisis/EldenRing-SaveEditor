@@ -1,0 +1,579 @@
+{
+  "id": 2571,
+  "key": "item:401EA7A8",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Ring of Miquella",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 1075750824,
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "parsed Row ID plus item-family prefix from row 2009000",
+        "table": "EquipParamGoods",
+        "row": "2009000",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "gesture",
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamGoods",
+        "row": "2009000",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "gestures",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "legacy field is empty"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": [
+        "dlc"
+      ],
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Ring of Miquella",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Ring of Miquella",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy field is empty"
+        }
+      },
+      "description": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy field is empty"
+        }
+      },
+      "location": {
+        "known": true,
+        "value": "Pre-order bonus for Shadow of the Erdtree or awarded in co-op.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Location"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/gestures/ring_of_miquella.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "app",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        },
+        "captionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        },
+        "descriptionSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        },
+        "locationSource": {
+          "known": true,
+          "value": "curated",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.LocationSource"
+          }
+        },
+        "dlcSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "quantity_stack",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 2009000",
+          "table": "EquipParamGoods",
+          "row": "2009000",
+          "field": "maxNum"
+        }
+      },
+      "gameMaxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 2009000",
+          "table": "EquipParamGoods",
+          "row": "2009000",
+          "field": "maxRepositoryNum"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy ItemData.MaxUpgrade is zero"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows affinity changes"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows custom Ash of War mounting"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "EquipParamGoods.maxNum does not allow a quantity stack",
+          "table": "EquipParamGoods",
+          "row": "2009000",
+          "field": "maxNum"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "gestures are invoked through gesture slots, not item equipment slots"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamGoods",
+        "rowID": 2009000,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "maxNum"
+          },
+          {
+            "name": "maxRepositoryNum"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamGoods",
+          "row": "2009000",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "GestureParam",
+        "rowID": 113,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_gesture_param",
+          "method": "referenced Regulation parameter row",
+          "table": "GestureParam",
+          "row": "113",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "GestureParam",
+        "rowID": 116,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_gesture_param",
+          "method": "referenced Regulation parameter row",
+          "table": "GestureParam",
+          "row": "116",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": {
+      "goodsSourceRowID": {
+        "known": true,
+        "value": 2009000,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed Row ID from row 2009000",
+          "table": "EquipParamGoods",
+          "row": "2009000",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 7100,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed iconId from row 2009000",
+          "table": "EquipParamGoods",
+          "row": "2009000",
+          "field": "iconId"
+        }
+      },
+      "slots": [
+        {
+          "slotID": {
+            "known": true,
+            "value": 227,
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures save slot ID"
+            }
+          },
+          "itemID": {
+            "known": true,
+            "value": 1075750824,
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures item ID"
+            }
+          },
+          "name": {
+            "known": true,
+            "value": "Ring of Miquella (Pre-Order)",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures name"
+            }
+          },
+          "category": {
+            "known": true,
+            "value": "Special",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures category"
+            }
+          },
+          "flags": {
+            "known": true,
+            "value": [
+              "pre_order",
+              "ban_risk"
+            ],
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures flags"
+            }
+          },
+          "sourceRecords": null
+        },
+        {
+          "slotID": {
+            "known": true,
+            "value": 233,
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures save slot ID"
+            }
+          },
+          "itemID": {
+            "known": true,
+            "value": 1075750824,
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures item ID"
+            }
+          },
+          "name": {
+            "known": true,
+            "value": "Ring of Miquella",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures name"
+            }
+          },
+          "category": {
+            "known": true,
+            "value": "Special",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures category"
+            }
+          },
+          "flags": {
+            "known": true,
+            "value": [
+              "dlc_duplicate",
+              "ban_risk"
+            ],
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from legacy AllGestures flags"
+            }
+          },
+          "sourceRecords": null
+        }
+      ]
+    }
+  }
+}

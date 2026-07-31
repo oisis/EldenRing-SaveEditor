@@ -1,0 +1,621 @@
+{
+  "id": 2776,
+  "key": "item:8000FEB0",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Beast's Roar",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 2147548848,
+      "provenance": {
+        "source": "regulation_equip_param_gem",
+        "method": "parsed Row ID plus item-family prefix from row 65200",
+        "table": "EquipParamGem",
+        "row": "65200",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "ash_of_war",
+      "provenance": {
+        "source": "regulation_equip_param_gem",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamGem",
+        "row": "65200",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "ashes_of_war",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "legacy field is empty"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": null,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Beast's Roar",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Ash of War: Beast's Roar",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "This Ash of War grants an armament the Keen affinity and the following skill:\n\n\"Beast's Roar: Unleash a beastly roar, rending the air as a forward-travelling projectile.\"\n\nUsable on all melee armaments.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Caption"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Grants affinities and skills to an armament",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Description"
+        }
+      },
+      "location": {
+        "known": true,
+        "value": "Bestial Sanctum: Reward from Gurranq after the 4th Deathroot.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Location"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/ashes_of_war/beast_s_roar.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CanonicalSource"
+          }
+        },
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CaptionSource"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DescriptionSource"
+          }
+        },
+        "locationSource": {
+          "known": true,
+          "value": "curated",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.LocationSource"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DLCSource"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy game inventory limit is unknown"
+        }
+      },
+      "gameMaxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy game storage limit is unknown"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy ItemData.MaxUpgrade is zero"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows affinity changes"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows custom Ash of War mounting"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "item record mode uses separate instances"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "Ashes of War are mounted through the Ash of War operation, not item equipment slots"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [
+      {
+        "kind": {
+          "known": true,
+          "value": "ash_of_war",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy item-to-event-flag mapping"
+          }
+        },
+        "eventFlagID": {
+          "known": true,
+          "value": 65869,
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy item-to-event-flag mapping"
+          }
+        },
+        "name": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        },
+        "category": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    ],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamGem",
+        "rowID": 65200,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "defaultWepAttr"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "swordArtsParamId"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "SwordArtsParam",
+        "rowID": 652,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_sword_arts_param",
+          "method": "referenced Regulation parameter row",
+          "table": "SwordArtsParam",
+          "row": "652",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "EquipParamGem",
+        "rowID": 65200,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "canMountWep[0:44]"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_gem_raw",
+          "method": "referenced full-width Regulation parameter field",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "canMountWep[0:44]"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": {
+      "sourceRowID": {
+        "known": true,
+        "value": 65200,
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "parsed Row ID from row 65200",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 8442,
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "parsed iconId from row 65200",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "iconId"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 351100,
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "parsed sortId from row 65200",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 20,
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "parsed sortGroupId from row 65200",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "sortGroupId"
+        }
+      },
+      "swordArtsParamID": {
+        "known": true,
+        "value": 652,
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "parsed swordArtsParamId from row 65200",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "swordArtsParamId"
+        }
+      },
+      "swordArtsName": {
+        "known": true,
+        "value": "Beast's Roar",
+        "provenance": {
+          "source": "game_text_arts_name_base",
+          "method": "resolved SwordArtsParam row 652 textId 652 from the English game-text FMG extract"
+        }
+      },
+      "defaultAffinity": {
+        "known": true,
+        "value": 2,
+        "provenance": {
+          "source": "regulation_equip_param_gem",
+          "method": "parsed defaultWepAttr from row 65200",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "defaultWepAttr"
+        }
+      },
+      "compatibilityMask": {
+        "known": true,
+        "value": 17523483279359,
+        "provenance": {
+          "source": "regulation_equip_param_gem_raw",
+          "method": "parsed the full 44-bit compatibility field and cross-checked its lower 40 bits against EquipParamGem.csv",
+          "table": "EquipParamGem",
+          "row": "65200",
+          "field": "canMountWep[0:44]"
+        }
+      },
+      "compatibleClassNames": {
+        "known": true,
+        "value": [
+          "Dagger",
+          "SwordNormal",
+          "SwordLarge",
+          "SwordGigantic",
+          "SaberNormal",
+          "SaberLarge",
+          "katana",
+          "SwordDoubleEdge",
+          "SwordPierce",
+          "RapierHeavy",
+          "AxeNormal",
+          "AxeLarge",
+          "HammerNormal",
+          "HammerLarge",
+          "Flail",
+          "SpearNormal",
+          "SpearHeavy",
+          "SpearAxe",
+          "Sickle",
+          "Knuckle",
+          "Claw",
+          "Whip",
+          "AxhammerLarge",
+          "canMountWep_HandToHand",
+          "canMountWep_PerfumeBottle",
+          "canMountWep_ThrustingShield",
+          "canMountWep_ThrowingWeapon",
+          "canMountWep_ReverseHandSword",
+          "canMountWep_LightGreatsword",
+          "canMountWep_GreatKatana",
+          "canMountWep_BeastClaw"
+        ],
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy AoWCompatMasks and CanMountWepNames"
+        }
+      }
+    },
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

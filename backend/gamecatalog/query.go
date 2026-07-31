@@ -26,7 +26,29 @@ func (catalog *Catalog) ItemByGameID(gameID uint32) (schema.Resource, bool) {
 	if !exists {
 		return schema.Resource{}, false
 	}
-	return catalog.ResourceByID(id)
+	resource, exists := catalog.ResourceByID(id)
+	if !exists || resource.Item == nil || resource.Item.GameID.Value == gameID {
+		return resource, exists
+	}
+	for _, variant := range resource.Item.Variants {
+		if !variant.GameID.Known || variant.GameID.Value != gameID {
+			continue
+		}
+		materialized := schema.MaterializeVariant(*resource.Item, variant)
+		resource.Item = &materialized
+		if materialized.Presentation.DisplayName.Known {
+			resource.Label = materialized.Presentation.DisplayName
+		} else if materialized.Presentation.CanonicalName.Known {
+			resource.Label = materialized.Presentation.CanonicalName
+		}
+		return resource, true
+	}
+	for _, alias := range resource.Item.Aliases {
+		if alias.GameID.Known && alias.GameID.Value == gameID {
+			return resource, true
+		}
+	}
+	return schema.Resource{}, false
 }
 
 func (catalog *Catalog) ItemViewByGameID(gameID uint32) (ItemView, bool) {

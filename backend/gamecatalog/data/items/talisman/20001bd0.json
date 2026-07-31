@@ -1,0 +1,490 @@
+{
+  "id": 1399,
+  "key": "item:20001BD0",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Golden Braid",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 536878032,
+      "provenance": {
+        "source": "regulation_equip_param_accessory",
+        "method": "parsed Row ID plus item-family prefix from row 7120",
+        "table": "EquipParamAccessory",
+        "row": "7120",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "talisman",
+      "provenance": {
+        "source": "regulation_equip_param_accessory",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamAccessory",
+        "row": "7120",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "talismans",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "legacy field is empty"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": [
+        "dlc"
+      ],
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Golden Braid",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Golden Braid",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "A braid of golden hair, cut loose.\nQueen Marika's offering to the Grandmother.\n\nBoosts holy damage negation by the utmost.\n\nWhat was her prayer? Her wish, her confession?\nThere is no one left to answer, and Marika never returned home again.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Caption"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Boosts holy damage negation by the utmost",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Description"
+        }
+      },
+      "location": {
+        "known": true,
+        "value": "Scaduview: Looted from a corpse found inside the trunk of a tree.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Location"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/talismans/golden_braid.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "app",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CanonicalSource"
+          }
+        },
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CaptionSource"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DescriptionSource"
+          }
+        },
+        "locationSource": {
+          "known": true,
+          "value": "curated",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.LocationSource"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "dlc01",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DLCSource"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy game inventory limit is unknown"
+        }
+      },
+      "gameMaxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy game storage limit is unknown"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy ItemData.MaxUpgrade is zero"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows affinity changes"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows custom Ash of War mounting"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "item record mode uses separate instances"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "talisman"
+          ]
+        },
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the legacy item family"
+        },
+        "rulesEvidence": [
+          {
+            "source": "legacy_db_data",
+            "method": "normalized from the legacy item family"
+          }
+        ]
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamAccessory",
+        "rowID": 7120,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "weight"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_accessory",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamAccessory",
+          "row": "7120",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": {
+      "sourceRowID": {
+        "known": true,
+        "value": 7120,
+        "provenance": {
+          "source": "regulation_equip_param_accessory",
+          "method": "parsed Row ID from row 7120",
+          "table": "EquipParamAccessory",
+          "row": "7120",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 18912,
+        "provenance": {
+          "source": "regulation_equip_param_accessory",
+          "method": "parsed iconId from row 7120",
+          "table": "EquipParamAccessory",
+          "row": "7120",
+          "field": "iconId"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 401151,
+        "provenance": {
+          "source": "regulation_equip_param_accessory",
+          "method": "parsed sortId from row 7120",
+          "table": "EquipParamAccessory",
+          "row": "7120",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 20,
+        "provenance": {
+          "source": "regulation_equip_param_accessory",
+          "method": "parsed sortGroupId from row 7120",
+          "table": "EquipParamAccessory",
+          "row": "7120",
+          "field": "sortGroupId"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 0.8999999761581421,
+        "provenance": {
+          "source": "regulation_equip_param_accessory",
+          "method": "parsed weight from row 7120",
+          "table": "EquipParamAccessory",
+          "row": "7120",
+          "field": "weight"
+        }
+      }
+    },
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

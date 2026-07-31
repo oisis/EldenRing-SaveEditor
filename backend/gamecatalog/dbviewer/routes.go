@@ -8,6 +8,7 @@ import (
 func (server *Server) routes() http.Handler {
 	mux := http.NewServeMux()
 	mux.Handle("GET /assets/", http.StripPrefix("/assets/", http.FileServer(http.FS(assetFiles()))))
+	mux.HandleFunc("GET /catalog-assets/{assetPath...}", server.iconAssetHandler)
 	mux.HandleFunc("GET /healthz", healthHandler)
 	mux.HandleFunc("GET /items/{gameID}/raw", server.rawItemHandler)
 	mux.HandleFunc("GET /items/{gameID}", server.itemHandler)

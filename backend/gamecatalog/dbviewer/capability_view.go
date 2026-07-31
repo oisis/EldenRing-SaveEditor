@@ -18,17 +18,21 @@ type capabilityView struct {
 }
 
 func (server *Server) capabilityViews(item *schema.ItemDocument) []capabilityView {
+	return server.capabilityViewsFor(item.Capabilities)
+}
+
+func (server *Server) capabilityViewsFor(capabilities schema.ItemCapabilities) []capabilityView {
 	return []capabilityView{
-		server.capability("Upgrade", item.Capabilities.Upgrade.Known, item.Capabilities.Upgrade.Enabled,
-			upgradeDetails(item.Capabilities.Upgrade.Rules), item.Capabilities.Upgrade.Provenance),
-		server.capability("Infusion", item.Capabilities.Infusion.Known, item.Capabilities.Infusion.Enabled,
-			infusionDetails(item.Capabilities.Infusion.Rules), item.Capabilities.Infusion.Provenance),
-		server.capability("Ash of War mount", item.Capabilities.AshOfWarMount.Known, item.Capabilities.AshOfWarMount.Enabled,
-			ashOfWarMountDetails(item.Capabilities.AshOfWarMount.Rules), item.Capabilities.AshOfWarMount.Provenance),
-		server.capability("Stack", item.Capabilities.Stack.Known, item.Capabilities.Stack.Enabled,
-			stackDetails(item.Capabilities.Stack.Rules), item.Capabilities.Stack.Provenance),
-		server.capability("Equipment", item.Capabilities.Equipment.Known, item.Capabilities.Equipment.Enabled,
-			equipmentDetails(item.Capabilities.Equipment.Rules), item.Capabilities.Equipment.Provenance),
+		server.capability("Upgrade", capabilities.Upgrade.Known, capabilities.Upgrade.Enabled,
+			upgradeDetails(capabilities.Upgrade.Rules), capabilities.Upgrade.Provenance),
+		server.capability("Infusion", capabilities.Infusion.Known, capabilities.Infusion.Enabled,
+			infusionDetails(capabilities.Infusion.Rules), capabilities.Infusion.Provenance),
+		server.capability("Ash of War mount", capabilities.AshOfWarMount.Known, capabilities.AshOfWarMount.Enabled,
+			ashOfWarMountDetails(capabilities.AshOfWarMount.Rules), capabilities.AshOfWarMount.Provenance),
+		server.capability("Stack", capabilities.Stack.Known, capabilities.Stack.Enabled,
+			stackDetails(capabilities.Stack.Rules), capabilities.Stack.Provenance),
+		server.capability("Equipment", capabilities.Equipment.Known, capabilities.Equipment.Enabled,
+			equipmentDetails(capabilities.Equipment.Rules), capabilities.Equipment.Provenance),
 	}
 }
 

@@ -24,6 +24,18 @@ func validateCapabilities(capabilities ItemCapabilities, sources map[SourceID]st
 	if capabilities.Equipment.Enabled && len(capabilities.Equipment.Rules.AllowedSlots) == 0 {
 		return fmt.Errorf("equipment: at least one slot is required")
 	}
+	if capabilities.Equipment.Enabled {
+		seen := make(map[EquipmentSlot]struct{}, len(capabilities.Equipment.Rules.AllowedSlots))
+		for _, slot := range capabilities.Equipment.Rules.AllowedSlots {
+			if !validEquipmentSlot(slot) {
+				return fmt.Errorf("equipment: unsupported slot %q", slot)
+			}
+			if _, exists := seen[slot]; exists {
+				return fmt.Errorf("equipment: duplicate slot %q", slot)
+			}
+			seen[slot] = struct{}{}
+		}
+	}
 	return nil
 }
 
@@ -34,13 +46,46 @@ func validateUpgradeCapability(capability Capability[UpgradeRules], sources map[
 	if !capability.Enabled {
 		return nil
 	}
-	if capability.Rules.Model != UpgradeModelStandard {
+	if !validUpgradeModel(capability.Rules.Model) {
 		return fmt.Errorf("upgrade: unsupported model %q", capability.Rules.Model)
 	}
 	if capability.Rules.MaxLevel == 0 {
 		return fmt.Errorf("upgrade: max level must be greater than zero")
 	}
 	return nil
+}
+
+func validUpgradeModel(model UpgradeModel) bool {
+	switch model {
+	case UpgradeModelStandard,
+		UpgradeModelSomber,
+		UpgradeModelGraveGlovewort,
+		UpgradeModelGhostGlovewort:
+		return true
+	default:
+		return false
+	}
+}
+
+func validEquipmentSlot(slot EquipmentSlot) bool {
+	switch slot {
+	case EquipmentSlotLeftHand,
+		EquipmentSlotRightHand,
+		EquipmentSlotArrow,
+		EquipmentSlotBolt,
+		EquipmentSlotHead,
+		EquipmentSlotChest,
+		EquipmentSlotArms,
+		EquipmentSlotLegs,
+		EquipmentSlotTalisman,
+		EquipmentSlotSpellMemory,
+		EquipmentSlotQuickItem,
+		EquipmentSlotPouch,
+		EquipmentSlotPhysick:
+		return true
+	default:
+		return false
+	}
 }
 
 func validateInfusionCapability(capability Capability[InfusionRules], sources map[SourceID]struct{}) error {
@@ -87,7 +132,7 @@ func validateCapability[T any](name string, capability Capability[T], sources ma
 		return err
 	}
 	if !capability.Known {
-		if capability.Enabled || capability.Rules != nil {
+		if capability.Enabled || capability.Rules != nil || len(capability.RulesEvidence) != 0 {
 			return fmt.Errorf("%s: unknown capability cannot be enabled or contain rules", name)
 		}
 		return nil
@@ -97,6 +142,22 @@ func validateCapability[T any](name string, capability Capability[T], sources ma
 	}
 	if !capability.Enabled && capability.Rules != nil {
 		return fmt.Errorf("%s: disabled capability cannot contain rules", name)
+	}
+	if capability.Enabled {
+		if len(capability.RulesEvidence) == 0 {
+			return fmt.Errorf("%s: enabled capability requires rules evidence", name)
+		}
+		for index, provenance := range capability.RulesEvidence {
+			if err := validateProvenance(
+				fmt.Sprintf("%s.rulesEvidence[%d]", name, index),
+				provenance,
+				sources,
+			); err != nil {
+				return err
+			}
+		}
+	} else if len(capability.RulesEvidence) != 0 {
+		return fmt.Errorf("%s: disabled capability cannot contain rules evidence", name)
 	}
 	return nil
 }

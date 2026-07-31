@@ -27,8 +27,11 @@ func LoadFS(catalogFS fs.FS) (Data, error) {
 	}
 
 	data := Data{
-		Manifest:  index.Manifest,
-		Documents: make([]Document, 0, len(index.Documents)),
+		Manifest:      index.Manifest,
+		Documents:     make([]Document, 0, len(index.Documents)),
+		sourceFS:      catalogFS,
+		documentPaths: make(map[string]struct{}, len(index.Documents)),
+		assets:        make(map[string]string),
 	}
 	seenPaths := make(map[string]struct{}, len(index.Documents))
 	for index, documentPath := range index.Documents {
@@ -39,6 +42,7 @@ func LoadFS(catalogFS fs.FS) (Data, error) {
 			return Data{}, fmt.Errorf("document %d path %q: duplicate path", index, documentPath)
 		}
 		seenPaths[documentPath] = struct{}{}
+		data.documentPaths[documentPath] = struct{}{}
 
 		rawJSON, err := fs.ReadFile(catalogFS, documentPath)
 		if err != nil {
@@ -48,10 +52,12 @@ func LoadFS(catalogFS fs.FS) (Data, error) {
 		if err := decodeJSON(rawJSON, &resource); err != nil {
 			return Data{}, fmt.Errorf("decode document %q: %w", documentPath, err)
 		}
+		if err := loadKnownIconAssets(catalogFS, resource, data.assets); err != nil {
+			return Data{}, fmt.Errorf("document %q: %w", documentPath, err)
+		}
 		data.Documents = append(data.Documents, Document{
 			Path:     documentPath,
 			Resource: resource,
-			RawJSON:  append([]byte(nil), rawJSON...),
 		})
 	}
 	return data, nil

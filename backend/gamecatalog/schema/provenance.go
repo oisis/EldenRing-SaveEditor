@@ -6,6 +6,7 @@ type EvidenceLevel string
 
 const (
 	EvidenceRegulation       EvidenceLevel = "regulation"
+	EvidenceGameData         EvidenceLevel = "game_data"
 	EvidenceVerifiedResearch EvidenceLevel = "verified_research"
 	EvidenceCurated          EvidenceLevel = "curated"
 	EvidenceUnknown          EvidenceLevel = "unknown"
@@ -30,6 +31,9 @@ type Manifest struct {
 type Provenance struct {
 	Source SourceID `json:"source"`
 	Method string   `json:"method"`
+	Table  string   `json:"table,omitempty"`
+	Row    string   `json:"row,omitempty"`
+	Field  string   `json:"field,omitempty"`
 }
 
 type Fact[T any] struct {

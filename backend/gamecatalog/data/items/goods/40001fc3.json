@@ -1,0 +1,616 @@
+{
+  "id": 1834,
+  "key": "item:40001FC3",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Irina's Letter",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 1073749955,
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "parsed Row ID plus item-family prefix from row 8131",
+        "table": "EquipParamGoods",
+        "row": "8131",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "goods",
+      "provenance": {
+        "source": "regulation_equip_param_goods",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamGoods",
+        "row": "8131",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "info",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": true,
+      "value": "Letters / Maps / Paintings",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.SubCategory"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": null,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Irina's Letter",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Irina's Letter",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "Letter given by Irina, addressed to her father, the commander of Castle Morne.\n\nGorgeous silken handkerchief, lightly stained with blood. Words can be made out within.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Caption"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Letter addressed to the commander of Castle Morne",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Description"
+        }
+      },
+      "location": {
+        "known": true,
+        "value": "Given by Irina near the Bridge of Sacrifice in the Weeping Peninsula.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Location"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/info/irinas_letter.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "app",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CanonicalSource"
+          }
+        },
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CaptionSource"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DescriptionSource"
+          }
+        },
+        "locationSource": {
+          "known": true,
+          "value": "curated",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.LocationSource"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DLCSource"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "quantity_stack",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "maxNum"
+        }
+      },
+      "gameMaxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "maxRepositoryNum"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy ItemData.MaxUpgrade is zero"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows affinity changes"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows custom Ash of War mounting"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "EquipParamGoods.maxNum does not allow a quantity stack",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "maxNum"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "EquipParamGoods does not allow a supported equipment slot",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "goodsType,isEquip"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": true,
+        "value": 400080,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy WorldPickupFlagID"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamGoods",
+        "rowID": 8131,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "goodsType"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "isConsume"
+          },
+          {
+            "name": "isDeposit"
+          },
+          {
+            "name": "isDiscard"
+          },
+          {
+            "name": "isDrop"
+          },
+          {
+            "name": "isEquip"
+          },
+          {
+            "name": "itemGetTutorialFlagId"
+          },
+          {
+            "name": "maxNum"
+          },
+          {
+            "name": "maxRepositoryNum"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "weight"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": {
+      "sourceRowID": {
+        "known": true,
+        "value": 8131,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed Row ID from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 3059,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed iconId from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "iconId"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 204020,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed sortId from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 50,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed sortGroupId from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "sortGroupId"
+        }
+      },
+      "goodsType": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed goodsType from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "goodsType"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed weight from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "weight"
+        }
+      },
+      "maxQuantity": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "maxNum"
+        }
+      },
+      "maxRepository": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "maxRepositoryNum"
+        }
+      },
+      "tutorialFlagID": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed itemGetTutorialFlagId from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "itemGetTutorialFlagId"
+        }
+      },
+      "isEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isEquip from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "isEquip"
+        }
+      },
+      "isConsumable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isConsume from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "isConsume"
+        }
+      },
+      "isDiscardable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isDiscard from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "isDiscard"
+        }
+      },
+      "isDepositable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isDeposit from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "isDeposit"
+        }
+      },
+      "isDroppable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed isDrop from row 8131",
+          "table": "EquipParamGoods",
+          "row": "8131",
+          "field": "isDrop"
+        }
+      }
+    },
+    "gesture": null
+  }
+}

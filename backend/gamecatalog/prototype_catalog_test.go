@@ -39,8 +39,15 @@ func TestPrototypeCatalogContainsTwoItems(t *testing.T) {
 	if got := len(dagger.Item.Capabilities.Infusion.Rules.AllowedAffinities); got != 13 {
 		t.Errorf("Dagger affinities = %d, want 13", got)
 	}
-	if dagger.Item.Storage.MaxInventory.Known || dagger.Item.Storage.MaxStorage.Known {
-		t.Error("prototype must not convert unresolved Dagger limits into authoritative values")
+	if !dagger.Item.Storage.MaxInventory.Known ||
+		dagger.Item.Storage.MaxInventory.Value != 1 ||
+		!dagger.Item.Storage.MaxStorage.Known ||
+		dagger.Item.Storage.MaxStorage.Value != 1 {
+		t.Errorf("Dagger effective storage limits = %+v", dagger.Item.Storage)
+	}
+	if dagger.Item.Storage.GameMaxInventory.Known ||
+		dagger.Item.Storage.GameMaxStorage.Known {
+		t.Error("Regulation zero sentinels must not become known game limits")
 	}
 
 	determination, ok := catalog.ItemByGameID(prototype.DeterminationGameID)
@@ -69,8 +76,8 @@ func TestPrototypeCatalogIndexesWeaponVariants(t *testing.T) {
 	if !ok {
 		t.Fatalf("Quality Dagger 0x%08X not found", qualityDaggerID)
 	}
-	if resource.Item.GameID.Value != prototype.DaggerGameID {
-		t.Errorf("variant resolved to base game ID 0x%08X", resource.Item.GameID.Value)
+	if resource.Item.GameID.Value != qualityDaggerID {
+		t.Errorf("variant resolved to game ID 0x%08X", resource.Item.GameID.Value)
 	}
 }
 

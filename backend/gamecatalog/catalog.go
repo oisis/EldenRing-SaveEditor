@@ -51,6 +51,17 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 			}
 			catalog.byItemGameID[variant.GameID.Value] = cloned.ID
 		}
+		for _, alias := range cloned.Item.Aliases {
+			if existing, exists := catalog.byItemGameID[alias.GameID.Value]; exists {
+				return nil, fmt.Errorf(
+					"resource %d: alias game ID 0x%08X already belongs to resource %d",
+					index,
+					alias.GameID.Value,
+					existing,
+				)
+			}
+			catalog.byItemGameID[alias.GameID.Value] = cloned.ID
+		}
 		keys[cloned.Key] = struct{}{}
 	}
 

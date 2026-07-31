@@ -1,0 +1,1180 @@
+{
+  "id": 472,
+  "key": "item:02FD3A70",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Poisonbone Arrow (Fletched)",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 50150000,
+      "provenance": {
+        "source": "regulation_equip_param_weapon",
+        "method": "parsed Row ID plus item-family prefix from row 50150000",
+        "table": "EquipParamWeapon",
+        "row": "50150000",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "weapon",
+      "provenance": {
+        "source": "regulation_equip_param_weapon",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamWeapon",
+        "row": "50150000",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "arrows_and_bolts",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": true,
+      "value": "Arrows",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.SubCategory"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": [
+        "stackable"
+      ],
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Poisonbone Arrow (Fletched)",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Poisonbone Arrow (Fletched)",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "Arrow whittled from animal bones. The tip is daubed with venom. Afflicts targets with poison.\n\nCraftable item. The fletching adds distance to the arrow's flight.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Caption"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Fletched animal bone arrow with poison-daubed tip",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Description"
+        }
+      },
+      "location": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy field is empty"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/arrows_and_bolts/poisonbone_arrow_fletched.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "app",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CanonicalSource"
+          }
+        },
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CaptionSource"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DescriptionSource"
+          }
+        },
+        "locationSource": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DLCSource"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "quantity_stack",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 99,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 600,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": true,
+        "value": 99,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy GameLimitsByItemID.MaxInventory"
+        }
+      },
+      "gameMaxStorage": {
+        "known": true,
+        "value": 600,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy GameLimitsByItemID.MaxStorage"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "ReinforceParamWeapon band contains no upgrade levels",
+          "table": "ReinforceParamWeapon",
+          "row": "3000",
+          "field": "Row ID"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "disabled by EquipParamWeapon gemMountType or disableGemAttr",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "gemMountType,disableGemAttr"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "disabled by EquipParamWeapon.gemMountType",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "gemMountType"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "maxPerStack": 99
+        },
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "derived from EquipParamWeapon.maxArrowQuantity",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "maxArrowQuantity"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_equip_param_weapon",
+            "method": "derived from EquipParamWeapon.maxArrowQuantity",
+            "table": "EquipParamWeapon",
+            "row": "50150000",
+            "field": "maxArrowQuantity"
+          }
+        ]
+      },
+      "equipment": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "regulation row does not enable any supported equipment slot",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "rightHandEquipable,leftHandEquipable,bothHandEquipable,arrowSlotEquipable,boltSlotEquipable"
+        }
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamWeapon",
+        "rowID": 50150000,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "arrowSlotEquipable"
+          },
+          {
+            "name": "attackBaseDark"
+          },
+          {
+            "name": "attackBaseFire"
+          },
+          {
+            "name": "attackBaseMagic"
+          },
+          {
+            "name": "attackBasePhysics"
+          },
+          {
+            "name": "attackBaseStamina"
+          },
+          {
+            "name": "attackBaseThunder"
+          },
+          {
+            "name": "boltSlotEquipable"
+          },
+          {
+            "name": "bothHandEquipable"
+          },
+          {
+            "name": "correctAgility"
+          },
+          {
+            "name": "correctFaith"
+          },
+          {
+            "name": "correctLuck"
+          },
+          {
+            "name": "correctMagic"
+          },
+          {
+            "name": "correctStrength"
+          },
+          {
+            "name": "darkGuardCutRate"
+          },
+          {
+            "name": "disableGemAttr"
+          },
+          {
+            "name": "fireGuardCutRate"
+          },
+          {
+            "name": "gemMountType"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "leftHandEquipable"
+          },
+          {
+            "name": "magGuardCutRate"
+          },
+          {
+            "name": "maxArrowQuantity"
+          },
+          {
+            "name": "physGuardCutRate"
+          },
+          {
+            "name": "properAgility"
+          },
+          {
+            "name": "properFaith"
+          },
+          {
+            "name": "properLuck"
+          },
+          {
+            "name": "properMagic"
+          },
+          {
+            "name": "properStrength"
+          },
+          {
+            "name": "reinforceTypeId"
+          },
+          {
+            "name": "rightHandEquipable"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "spEffectBehaviorId2"
+          },
+          {
+            "name": "staminaGuardDef"
+          },
+          {
+            "name": "swordArtsParamId"
+          },
+          {
+            "name": "throwAtkRate"
+          },
+          {
+            "name": "thunGuardCutRate"
+          },
+          {
+            "name": "weight"
+          },
+          {
+            "name": "wepType"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "SwordArtsParam",
+        "rowID": 0,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_sword_arts_param",
+          "method": "referenced Regulation parameter row",
+          "table": "SwordArtsParam",
+          "row": "0",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "SpEffectParam",
+        "rowID": 6500,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "poizonAttackPower"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_sp_effect_param",
+          "method": "referenced Regulation parameter row",
+          "table": "SpEffectParam",
+          "row": "6500",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "ReinforceParamWeapon",
+        "rowID": 3000,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "referenced Regulation parameter row",
+          "table": "ReinforceParamWeapon",
+          "row": "3000",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": {
+      "sourceRowID": {
+        "known": true,
+        "value": 50150000,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed Row ID from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 17014,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed iconId from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "iconId"
+        }
+      },
+      "weaponTypeID": {
+        "known": true,
+        "value": 81,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed wepType from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "wepType"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 6011000,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed sortId from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 10,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed sortGroupId from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "sortGroupId"
+        }
+      },
+      "reinforceTypeID": {
+        "known": true,
+        "value": 3000,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed reinforceTypeId from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "reinforceTypeId"
+        }
+      },
+      "gemMountType": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed gemMountType from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "gemMountType"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed weight with zero equip-load normalization for ammunition from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "weight"
+        }
+      },
+      "attackPhysical": {
+        "known": true,
+        "value": 28,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBasePhysics from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "attackBasePhysics"
+        }
+      },
+      "attackMagic": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseMagic from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "attackBaseMagic"
+        }
+      },
+      "attackFire": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseFire from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "attackBaseFire"
+        }
+      },
+      "attackLightning": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseThunder from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "attackBaseThunder"
+        }
+      },
+      "attackHoly": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseDark from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "attackBaseDark"
+        }
+      },
+      "attackStamina": {
+        "known": true,
+        "value": 5,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed attackBaseStamina from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "attackBaseStamina"
+        }
+      },
+      "guardPhysical": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed physGuardCutRate from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "physGuardCutRate"
+        }
+      },
+      "guardMagic": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed magGuardCutRate from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "magGuardCutRate"
+        }
+      },
+      "guardFire": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed fireGuardCutRate from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "fireGuardCutRate"
+        }
+      },
+      "guardLightning": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed thunGuardCutRate from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "thunGuardCutRate"
+        }
+      },
+      "guardHoly": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed darkGuardCutRate from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "darkGuardCutRate"
+        }
+      },
+      "guardBoost": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed staminaGuardDef from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "staminaGuardDef"
+        }
+      },
+      "requiredStrength": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properStrength from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "properStrength"
+        }
+      },
+      "requiredDexterity": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properAgility from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "properAgility"
+        }
+      },
+      "requiredIntelligence": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properMagic from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "properMagic"
+        }
+      },
+      "requiredFaith": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properFaith from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "properFaith"
+        }
+      },
+      "requiredArcane": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed properLuck from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "properLuck"
+        }
+      },
+      "scalingStrengthRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctStrength from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "correctStrength"
+        }
+      },
+      "scalingDexterityRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctAgility from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "correctAgility"
+        }
+      },
+      "scalingIntelligenceRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctMagic from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "correctMagic"
+        }
+      },
+      "scalingFaithRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctFaith from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "correctFaith"
+        }
+      },
+      "scalingArcaneRaw": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed correctLuck from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "correctLuck"
+        }
+      },
+      "critical": {
+        "known": true,
+        "value": 100,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed base 100 plus throwAtkRate from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "throwAtkRate"
+        }
+      },
+      "statusPoison": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
+        }
+      },
+      "statusBleed": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
+        }
+      },
+      "statusFrost": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
+        }
+      },
+      "statusSleep": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
+        }
+      },
+      "statusMadness": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
+        }
+      },
+      "statusScarletRot": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
+        }
+      },
+      "passiveEffects": [
+        {
+          "kind": {
+            "known": true,
+            "value": "on_hit",
+            "provenance": {
+              "source": "regulation_equip_param_weapon",
+              "method": "classified from spEffectBehaviorId2",
+              "table": "EquipParamWeapon",
+              "row": "50150000",
+              "field": "spEffectBehaviorId2"
+            }
+          },
+          "source": {
+            "known": true,
+            "value": "spEffectBehaviorId2",
+            "provenance": {
+              "source": "regulation_equip_param_weapon",
+              "method": "parsed spEffectBehaviorId2 field name from row 50150000",
+              "table": "EquipParamWeapon",
+              "row": "50150000",
+              "field": "spEffectBehaviorId2"
+            }
+          },
+          "spEffectID": {
+            "known": true,
+            "value": 6500,
+            "provenance": {
+              "source": "regulation_equip_param_weapon",
+              "method": "parsed spEffectBehaviorId2 from row 50150000",
+              "table": "EquipParamWeapon",
+              "row": "50150000",
+              "field": "spEffectBehaviorId2"
+            }
+          },
+          "label": {
+            "known": true,
+            "value": "Poison",
+            "provenance": {
+              "source": "legacy_db_data",
+              "method": "copied from the legacy passive-effect interpretation"
+            }
+          },
+          "value": {
+            "known": true,
+            "value": 60,
+            "provenance": {
+              "source": "regulation_sp_effect_param",
+              "method": "parsed poizonAttackPower from row 6500",
+              "table": "SpEffectParam",
+              "row": "6500",
+              "field": "poizonAttackPower"
+            }
+          },
+          "known": {
+            "known": true,
+            "value": true,
+            "provenance": {
+              "source": "regulation_sp_effect_param",
+              "method": "parsed verified nonzero poizonAttackPower from row 6500",
+              "table": "SpEffectParam",
+              "row": "6500",
+              "field": "poizonAttackPower"
+            }
+          }
+        }
+      ],
+      "defaultAshOfWarID": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed swordArtsParamId from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "swordArtsParamId"
+        }
+      },
+      "swordArtsName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "no nonblank FMG text or legacy SwordArtsNames entry for SwordArtsParam row 0"
+        }
+      },
+      "isInfusable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "derived from gemMountType == 2 and disableGemAttr == 0",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "gemMountType,disableGemAttr"
+        }
+      },
+      "isSomber": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "derived from an 11-row reinforcement band",
+          "table": "ReinforceParamWeapon",
+          "row": "3000",
+          "field": "Row ID"
+        }
+      },
+      "maxUpgrade": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_reinforce_param_weapon",
+          "method": "derived from the reinforcement band row count",
+          "table": "ReinforceParamWeapon",
+          "row": "3000",
+          "field": "Row ID"
+        }
+      },
+      "warnings": {
+        "known": true,
+        "value": [
+          "status-deferred"
+        ],
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy WeaponStatsV1.Warnings"
+        }
+      },
+      "rightHandEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed rightHandEquipable from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "rightHandEquipable"
+        }
+      },
+      "leftHandEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed leftHandEquipable from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "leftHandEquipable"
+        }
+      },
+      "bothHandEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed bothHandEquipable from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "bothHandEquipable"
+        }
+      },
+      "arrowSlotEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed arrowSlotEquipable from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "arrowSlotEquipable"
+        }
+      },
+      "boltSlotEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_weapon",
+          "method": "parsed boltSlotEquipable from row 50150000",
+          "table": "EquipParamWeapon",
+          "row": "50150000",
+          "field": "boltSlotEquipable"
+        }
+      }
+    },
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

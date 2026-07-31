@@ -3,10 +3,13 @@
 <nav class="breadcrumbs"><a href="/">Resources</a><span>/</span>{{.Name}}</nav>
 
 <section class="item-heading">
-  <div>
-    <p class="eyebrow">{{.Key}}</p>
-    <h1>{{.Name}}</h1>
-    <p><code>{{.GameID}}</code> · <code>{{.DocumentPath}}</code></p>
+  <div class="item-title">
+    {{if .IconURL}}<img class="item-icon" src="{{.IconURL}}" alt="" loading="lazy">{{end}}
+    <div>
+      <p class="eyebrow">{{.Key}}</p>
+      <h1>{{.Name}}</h1>
+      <p><span class="badge neutral">{{.EntryType}}</span> · <code>{{.GameID}}</code> · <code>{{.DocumentPath}}</code></p>
+    </div>
   </div>
   <div class="heading-actions">
     {{if .UnknownCount}}<span class="badge unknown">{{.UnknownCount}} unknown fields</span>{{end}}
@@ -29,6 +32,40 @@
   <h2>Presentation</h2>
   {{template "facts" .Presentation}}
 </section>
+
+<div class="section-grid">
+  <section class="panel">
+    <h2>Text metadata</h2>
+    {{if .TextMetadata}}{{template "facts" .TextMetadata}}{{else}}<p>No text metadata.</p>{{end}}
+  </section>
+  <section class="panel">
+    <h2>Acquisition</h2>
+    {{if .Acquisition}}{{template "facts" .Acquisition}}{{else}}<p>No acquisition data.</p>{{end}}
+  </section>
+</div>
+
+<section class="panel">
+  <h2>Modifiers</h2>
+  {{if .Modifiers}}{{template "facts" .Modifiers}}{{else}}<p>No modifiers.</p>{{end}}
+</section>
+
+<div class="section-grid">
+  <section class="panel">
+    <h2>Related game data</h2>
+    {{if .Links}}{{template "facts" .Links}}{{else}}<p>No related game data.</p>{{end}}
+  </section>
+  <section class="panel">
+    <h2>Unlocks</h2>
+    {{if .Unlocks}}{{template "facts" .Unlocks}}{{else}}<p>No unlocks.</p>{{end}}
+  </section>
+</div>
+
+{{if .TechnicalData}}
+<section class="panel">
+  <h2>Related technical records</h2>
+  {{template "facts" .TechnicalData}}
+</section>
+{{end}}
 
 <section class="panel">
   <h2>Capabilities</h2>
@@ -67,15 +104,56 @@
   {{if .Variants}}
   <div class="table-wrap">
     <table>
-      <thead><tr><th>Game ID</th><th>Affinity</th><th>Source row ID</th></tr></thead>
+      <thead><tr><th>Icon</th><th>Name</th><th>Game ID</th><th>Kind</th><th>Affinity</th><th>Upgrade</th><th>Source row ID</th></tr></thead>
       <tbody>
       {{range .Variants}}
-        <tr><td><code>{{.GameID}}</code></td><td>{{.Affinity}}</td><td>{{.SourceRowID}}</td></tr>
+        <tr>
+          <td>{{if .IconURL}}<img class="catalog-icon" src="{{.IconURL}}" alt="" loading="lazy">{{else}}—{{end}}</td>
+          <td><a href="/items/{{.GameIDPath}}">{{.Name}}</a></td>
+          <td><code>{{.GameID}}</code></td>
+          <td>{{.Kind}}</td>
+          <td>{{.Affinity}}</td>
+          <td>{{.UpgradeLevel}}</td>
+          <td>{{.SourceRowID}}</td>
+        </tr>
       {{end}}
       </tbody>
     </table>
   </div>
   {{else}}<p>No variants.</p>{{end}}
+</section>
+
+<section class="panel">
+  <h2>Aliases</h2>
+  {{if .Aliases}}
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Game ID</th><th>Source</th><th>Method</th></tr></thead>
+      <tbody>
+      {{range .Aliases}}
+        <tr>
+          <td><code>{{.GameID}}</code></td>
+          <td><code>{{.Source}}</code>{{if .SourceLocation}}<br><code>{{.SourceLocation}}</code>{{end}}</td>
+          <td>{{.Method}}</td>
+        </tr>
+      {{end}}
+      </tbody>
+    </table>
+  </div>
+  {{else}}<p>No aliases.</p>{{end}}
+</section>
+
+<section class="panel">
+  <h2>Source references</h2>
+  {{if .SourceRecords}}
+    {{range .SourceRecords}}
+    <details class="source-record">
+      <summary><span class="badge neutral">{{.Scope}}</span> <code>{{.Table}}</code> · row {{.RowID}}</summary>
+      <p><code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}{{if .Method}}<br>{{.Method}}{{end}}</p>
+      {{if .Fields}}<p>Used fields: {{range .Fields}}<code>{{.Name}}</code> {{end}}</p>{{end}}
+    </details>
+    {{end}}
+  {{else}}<p>No raw source records.</p>{{end}}
 </section>
 
 <section class="panel">

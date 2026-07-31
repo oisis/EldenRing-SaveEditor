@@ -37,3 +37,12 @@ func TestValidateManifestRejectsAbsoluteSourceLocation(t *testing.T) {
 		t.Fatalf("ValidateManifest error = %v, want absolute location rejection", err)
 	}
 }
+
+func TestValidateManifestAcceptsGameDataEvidence(t *testing.T) {
+	manifest, _ := prototype.Data()
+	manifest.Sources[0].Evidence = schema.EvidenceGameData
+
+	if _, err := schema.ValidateManifest(manifest); err != nil {
+		t.Fatalf("ValidateManifest: %v", err)
+	}
+}

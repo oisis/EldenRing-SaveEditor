@@ -9,7 +9,8 @@ func ValidateRelation(relation Relation, sources map[SourceID]struct{}) error {
 	if relation.From == relation.To {
 		return fmt.Errorf("relation cannot point to the same resource")
 	}
-	if relation.Kind != RelationCompatibleWithAshOfWar {
+	if relation.Kind != RelationCompatibleWithAshOfWar &&
+		relation.Kind != RelationRequiresContainer {
 		return fmt.Errorf("unsupported relation kind %q", relation.Kind)
 	}
 	return validateProvenance("relation", relation.Provenance, sources)

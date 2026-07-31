@@ -30,13 +30,22 @@ func (server *Server) rawItemHandler(response http.ResponseWriter, request *http
 		http.Error(response, "Catalog document is unavailable.", http.StatusInternalServerError)
 		return
 	}
-	baseGameID := formatGameID(resource.Item.GameID.Value)
+	rawJSON, exists := server.data.ReadDocument(document.Path)
+	if !exists {
+		http.Error(response, "Raw catalog document is unavailable.", http.StatusInternalServerError)
+		return
+	}
+	name := resource.Label.Value
+	if variant, variantExists := findVariant(resource.Item, gameID); variantExists {
+		name = variantDisplayName(resource.Label.Value, variant)
+	}
+	requestedGameID := formatGameID(gameID)
 	server.render(response, "raw", rawPage{
-		Meta:         server.pageMeta(resource.Label.Value + " raw JSON"),
-		Name:         resource.Label.Value,
-		GameID:       baseGameID,
-		GameIDPath:   strings.TrimPrefix(baseGameID, "0x"),
+		Meta:         server.pageMeta(name + " raw JSON"),
+		Name:         name,
+		GameID:       requestedGameID,
+		GameIDPath:   strings.TrimPrefix(requestedGameID, "0x"),
 		DocumentPath: document.Path,
-		JSON:         string(document.RawJSON),
+		JSON:         string(rawJSON),
 	})
 }

@@ -6,6 +6,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/prototype"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
 func TestCatalogRejectsDuplicateResourceID(t *testing.T) {
@@ -44,5 +45,69 @@ func TestCatalogLookupUnknownItem(t *testing.T) {
 	}
 	if _, ok := catalog.ItemViewByGameID(0xDEADBEEF); ok {
 		t.Fatal("unknown item view unexpectedly resolved")
+	}
+}
+
+func TestCatalogIndexesTechnicalAlias(t *testing.T) {
+	manifest, resources := prototype.Data()
+	aliasID := uint32(0x7F000001)
+	resources[0].Item.Aliases = []schema.ItemAlias{{
+		GameID: catalogKnownFact(manifest, aliasID),
+	}}
+
+	catalog, err := gamecatalog.New(manifest, resources)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	resource, ok := catalog.ItemByGameID(aliasID)
+	if !ok || resource.ID != resources[0].ID {
+		t.Fatalf("ItemByGameID(alias) = (%d, %t), want resource %d", resource.ID, ok, resources[0].ID)
+	}
+}
+
+func TestCatalogRejectsAliasOwnedByAnotherResource(t *testing.T) {
+	manifest, resources := prototype.Data()
+	resources[1].Item.Aliases = []schema.ItemAlias{{
+		GameID: catalogKnownFact(manifest, prototype.DaggerGameID),
+	}}
+
+	_, err := gamecatalog.New(manifest, resources)
+	if err == nil || !strings.Contains(err.Error(), "alias game ID") {
+		t.Fatalf("New error = %v, want alias collision", err)
+	}
+}
+
+func TestCatalogDoesNotIndexRelatedTechnicalRecordAsItem(t *testing.T) {
+	manifest, resources := prototype.Data()
+	technicalID := uint32(0x400000B6)
+	p := schema.Provenance{Source: manifest.Sources[0].ID, Method: "test fixture"}
+	resources[0].Item.RelatedTechnicalRecords = []schema.RelatedTechnicalRecord{{
+		Kind:             catalogKnownFact(manifest, schema.TechnicalRecordAppearanceState),
+		GameID:           catalogKnownFact(manifest, technicalID),
+		GameMaxInventory: catalogKnownFact(manifest, uint32(999)),
+		GameMaxStorage:   catalogKnownFact(manifest, uint32(999)),
+		SourceRecords: []schema.ParameterRecord{{
+			Table: "EquipParamGoods", RowID: 182, Provenance: p,
+			Fields: []schema.ParameterField{{Name: "Row ID"}},
+		}},
+	}}
+
+	catalog, err := gamecatalog.New(manifest, resources)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	if _, exists := catalog.ItemByGameID(technicalID); exists {
+		t.Fatal("related technical record was indexed as a writable item")
+	}
+}
+
+func catalogKnownFact[T any](manifest schema.Manifest, value T) schema.Fact[T] {
+	return schema.Fact[T]{
+		Known: true,
+		Value: value,
+		Provenance: schema.Provenance{
+			Source: manifest.Sources[0].ID,
+			Method: "test fixture",
+		},
 	}
 }

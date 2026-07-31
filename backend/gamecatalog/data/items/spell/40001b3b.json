@@ -1,0 +1,586 @@
+{
+  "id": 1791,
+  "key": "item:40001B3B",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Dragonbolt Blessing",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 1073748795,
+      "provenance": {
+        "source": "regulation_magic",
+        "method": "parsed Row ID plus item-family prefix from row 6971",
+        "table": "Magic",
+        "row": "6971",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "spell",
+      "provenance": {
+        "source": "regulation_magic",
+        "method": "classified from the primary parameter table",
+        "table": "Magic",
+        "row": "6971",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "incantations",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "legacy field is empty"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": null,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Dragonbolt Blessing",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Dragonbolt Blessing",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "Superior incantation of the capital's ancient dragon cult.\n\nSummons lightning to bolster the caster's body. Attacks become easier to deflect and resistance to all ailments is increased. However, lightning damage negation will be reduced.\n\nOnly those loved by dragons can survive the ordeal of cladding their bodies in lightning.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Caption"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Bolsters caster's body with lightning",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Description"
+        }
+      },
+      "location": {
+        "known": true,
+        "value": "Stormcaller Church (Altus Plateau): Found in a chest.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Location"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/incantations/dragonbolt_blessing.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "app",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CanonicalSource"
+          }
+        },
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CaptionSource"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DescriptionSource"
+          }
+        },
+        "locationSource": {
+          "known": true,
+          "value": "curated",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.LocationSource"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DLCSource"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "quantity_stack",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": true,
+        "value": 99,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 6971",
+          "table": "EquipParamGoods",
+          "row": "6971",
+          "field": "maxNum"
+        }
+      },
+      "gameMaxStorage": {
+        "known": true,
+        "value": 600,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 6971",
+          "table": "EquipParamGoods",
+          "row": "6971",
+          "field": "maxRepositoryNum"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy ItemData.MaxUpgrade is zero"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows affinity changes"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows custom Ash of War mounting"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "maxPerStack": 99
+        },
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "derived from EquipParamGoods.maxNum",
+          "table": "EquipParamGoods",
+          "row": "6971",
+          "field": "maxNum"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_equip_param_goods",
+            "method": "derived from EquipParamGoods.maxNum",
+            "table": "EquipParamGoods",
+            "row": "6971",
+            "field": "maxNum"
+          }
+        ]
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "spell_memory"
+          ]
+        },
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the legacy item family"
+        },
+        "rulesEvidence": [
+          {
+            "source": "legacy_db_data",
+            "method": "normalized from the legacy item family"
+          }
+        ]
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "Magic",
+        "rowID": 6971,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "iconId"
+          },
+          {
+            "name": "mp"
+          },
+          {
+            "name": "requirementFaith"
+          },
+          {
+            "name": "requirementIntellect"
+          },
+          {
+            "name": "requirementLuck"
+          },
+          {
+            "name": "slotLength"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "stamina"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "referenced Regulation parameter row",
+          "table": "Magic",
+          "row": "6971",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "EquipParamGoods",
+        "rowID": 6971,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "maxNum"
+          },
+          {
+            "name": "maxRepositoryNum"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamGoods",
+          "row": "6971",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": null,
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": {
+      "sourceRowID": {
+        "known": true,
+        "value": 6971,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed Row ID from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "Row ID"
+        }
+      },
+      "iconID": {
+        "known": true,
+        "value": 3043,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed iconId from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "iconId"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 6260,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed sortId from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "sortId"
+        }
+      },
+      "fpCost": {
+        "known": true,
+        "value": 20,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed mp from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "mp"
+        }
+      },
+      "staminaCost": {
+        "known": true,
+        "value": 20,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed stamina from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "stamina"
+        }
+      },
+      "memorySlots": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed slotLength from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "slotLength"
+        }
+      },
+      "requiredIntelligence": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed requirementIntellect from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "requirementIntellect"
+        }
+      },
+      "requiredFaith": {
+        "known": true,
+        "value": 21,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed requirementFaith from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "requirementFaith"
+        }
+      },
+      "requiredArcane": {
+        "known": true,
+        "value": 0,
+        "provenance": {
+          "source": "regulation_magic",
+          "method": "parsed requirementLuck from row 6971",
+          "table": "Magic",
+          "row": "6971",
+          "field": "requirementLuck"
+        }
+      }
+    },
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}

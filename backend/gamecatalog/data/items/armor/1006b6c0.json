@@ -1,0 +1,762 @@
+{
+  "id": 724,
+  "key": "item:1006B6C0",
+  "kind": "item",
+  "label": {
+    "known": true,
+    "value": "Pumpkin Helm",
+    "provenance": {
+      "source": "legacy_db_data",
+      "method": "copied from legacy item text"
+    }
+  },
+  "item": {
+    "gameID": {
+      "known": true,
+      "value": 268875456,
+      "provenance": {
+        "source": "regulation_equip_param_protector",
+        "method": "parsed Row ID plus item-family prefix from row 440000",
+        "table": "EquipParamProtector",
+        "row": "440000",
+        "field": "Row ID"
+      }
+    },
+    "family": {
+      "known": true,
+      "value": "armor",
+      "provenance": {
+        "source": "regulation_equip_param_protector",
+        "method": "classified from the primary parameter table",
+        "table": "EquipParamProtector",
+        "row": "440000",
+        "field": "Row ID"
+      }
+    },
+    "category": {
+      "known": true,
+      "value": "head",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Category"
+      }
+    },
+    "subcategory": {
+      "known": false,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "legacy field is empty"
+      }
+    },
+    "flags": {
+      "known": true,
+      "value": null,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "copied from legacy ItemData.Flags"
+      }
+    },
+    "presentation": {
+      "displayName": {
+        "known": true,
+        "value": "Pumpkin Helm",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "canonicalName": {
+        "known": true,
+        "value": "Pumpkin Helm",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item text"
+        }
+      },
+      "caption": {
+        "known": true,
+        "value": "An oval helm large enough to cover any head.\nVery heavy and very hard.\n\nReduces damage from headshots and impacts.\n\nThe inside of the helm is pitch black, keeping the crazed warrior within from panicking.\nPerhaps its rather roomy interior also helps alleviate feelings of pressure and claustrophobia.",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Caption"
+        }
+      },
+      "description": {
+        "known": true,
+        "value": "Oval helmet large enough to cover any head",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Description"
+        }
+      },
+      "location": {
+        "known": true,
+        "value": "Saintsbridge, Limgrave [ Map Link ]; Fort Haight [ Map Link ]; Castle Morne [ Map Link ]",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemTexts.Location"
+        }
+      },
+      "iconPath": {
+        "known": true,
+        "value": "assets/icons/items/head/pumpkin_helm.png",
+        "provenance": {
+          "source": "legacy_item_icons",
+          "method": "copied once from the shared legacy item asset"
+        }
+      },
+      "textMetadata": {
+        "displayNameSource": {
+          "known": true,
+          "value": "app",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DisplayNameSource"
+          }
+        },
+        "canonicalSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CanonicalSource"
+          }
+        },
+        "captionSource": {
+          "known": true,
+          "value": "fmg",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.CaptionSource"
+          }
+        },
+        "descriptionSource": {
+          "known": true,
+          "value": "mixed",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DescriptionSource"
+          }
+        },
+        "locationSource": {
+          "known": true,
+          "value": "curated",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.LocationSource"
+          }
+        },
+        "dlcSource": {
+          "known": true,
+          "value": "base",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "copied from legacy ItemTexts.DLCSource"
+          }
+        },
+        "notes": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "legacy field is empty"
+          }
+        }
+      }
+    },
+    "storage": {
+      "recordMode": {
+        "known": true,
+        "value": "separate_instances",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "normalized from the verified item record family"
+        }
+      },
+      "maxInventory": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxInventory"
+        }
+      },
+      "maxStorage": {
+        "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ItemData.MaxStorage"
+        }
+      },
+      "gameMaxInventory": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy game inventory limit is unknown"
+        }
+      },
+      "gameMaxStorage": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy game storage limit is unknown"
+        }
+      }
+    },
+    "capabilities": {
+      "upgrade": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy ItemData.MaxUpgrade is zero"
+        }
+      },
+      "infusion": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows affinity changes"
+        }
+      },
+      "ashOfWarMount": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy weapon edit metadata disallows custom Ash of War mounting"
+        }
+      },
+      "stack": {
+        "known": true,
+        "enabled": false,
+        "rules": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "item record mode uses separate instances"
+        }
+      },
+      "equipment": {
+        "known": true,
+        "enabled": true,
+        "rules": {
+          "allowedSlots": [
+            "head"
+          ]
+        },
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "copied from explicit EquipParamProtector equipment-slot flags",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "headEquip,bodyEquip,armEquip,legEquip"
+        },
+        "rulesEvidence": [
+          {
+            "source": "regulation_equip_param_protector",
+            "method": "copied from explicit EquipParamProtector equipment-slot flags",
+            "table": "EquipParamProtector",
+            "row": "440000",
+            "field": "headEquip,bodyEquip,armEquip,legEquip"
+          }
+        ]
+      }
+    },
+    "safety": {
+      "cutContent": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "banRisk": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "dlc": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "noDatabase": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      }
+    },
+    "acquisition": {
+      "requiredContainerID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy RequiredContainer has no entry for this item"
+        }
+      },
+      "isContainer": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerItemIDs"
+        }
+      },
+      "containerPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerPickupFlags"
+        }
+      },
+      "containerVendorFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy ContainerVendorPurchaseFlags"
+        }
+      },
+      "bolsteringPickupFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy BolsteringPickupFlags"
+        }
+      },
+      "worldPickupFlagID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy WorldPickupFlagID has no entry for this item"
+        }
+      },
+      "companionEventFlagIDs": {
+        "known": true,
+        "value": null,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "copied from legacy item companion event flags"
+        }
+      }
+    },
+    "modifiers": {},
+    "links": {
+      "aboutTutorialID": {
+        "known": false,
+        "value": 0,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy AboutTutorialID has no entry for this item"
+        }
+      },
+      "relatedEventFlags": [],
+      "relatedItems": [],
+      "whetbladeName": {
+        "known": false,
+        "value": "",
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "legacy Whetblades has no entry for this item"
+        }
+      },
+      "mapFragment": null
+    },
+    "variants": [],
+    "aliases": [],
+    "unlocks": [],
+    "relatedTechnicalRecords": null,
+    "sourceRecords": [
+      {
+        "table": "EquipParamProtector",
+        "rowID": 440000,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "armEquip"
+          },
+          {
+            "name": "blowDamageCutRate"
+          },
+          {
+            "name": "bodyEquip"
+          },
+          {
+            "name": "darkDamageCutRate"
+          },
+          {
+            "name": "fireDamageCutRate"
+          },
+          {
+            "name": "headEquip"
+          },
+          {
+            "name": "iconIdF"
+          },
+          {
+            "name": "iconIdM"
+          },
+          {
+            "name": "legEquip"
+          },
+          {
+            "name": "magicDamageCutRate"
+          },
+          {
+            "name": "neutralDamageCutRate"
+          },
+          {
+            "name": "resistBlood"
+          },
+          {
+            "name": "resistCurse"
+          },
+          {
+            "name": "resistPoison"
+          },
+          {
+            "name": "resistSleep"
+          },
+          {
+            "name": "slashDamageCutRate"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
+          },
+          {
+            "name": "thrustDamageCutRate"
+          },
+          {
+            "name": "thunderDamageCutRate"
+          },
+          {
+            "name": "toughnessCorrectRate"
+          },
+          {
+            "name": "weight"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "referenced Regulation parameter row",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "ReinforceParamProtector",
+        "rowID": 0,
+        "fields": [
+          {
+            "name": "Row ID"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_reinforce_param_protector",
+          "method": "referenced Regulation parameter row",
+          "table": "ReinforceParamProtector",
+          "row": "0",
+          "field": "Row ID"
+        }
+      }
+    ],
+    "weapon": null,
+    "armor": {
+      "sourceRowID": {
+        "known": true,
+        "value": 440000,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed Row ID from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "Row ID"
+        }
+      },
+      "iconIDMale": {
+        "known": true,
+        "value": 13620,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed iconIdM from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "iconIdM"
+        }
+      },
+      "iconIDFemale": {
+        "known": true,
+        "value": 13620,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed iconIdF from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "iconIdF"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 510050,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed sortId from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 110,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed sortGroupId from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "sortGroupId"
+        }
+      },
+      "weight": {
+        "known": true,
+        "value": 12.3,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed weight converted to one-decimal display value from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "weight"
+        }
+      },
+      "physical": {
+        "known": true,
+        "value": 7,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed neutralDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "neutralDamageCutRate"
+        }
+      },
+      "strike": {
+        "known": true,
+        "value": 5.9,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed blowDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "blowDamageCutRate"
+        }
+      },
+      "slash": {
+        "known": true,
+        "value": 6.7,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed slashDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "slashDamageCutRate"
+        }
+      },
+      "pierce": {
+        "known": true,
+        "value": 6.7,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed thrustDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "thrustDamageCutRate"
+        }
+      },
+      "magic": {
+        "known": true,
+        "value": 4.6,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed magicDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "magicDamageCutRate"
+        }
+      },
+      "fire": {
+        "known": true,
+        "value": 4.7,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed fireDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "fireDamageCutRate"
+        }
+      },
+      "lightning": {
+        "known": true,
+        "value": 5.2,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed thunderDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "thunderDamageCutRate"
+        }
+      },
+      "holy": {
+        "known": true,
+        "value": 4.5,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed darkDamageCutRate converted to display negation from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "darkDamageCutRate"
+        }
+      },
+      "immunity": {
+        "known": true,
+        "value": 27,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistPoison from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "resistPoison"
+        }
+      },
+      "robustness": {
+        "known": true,
+        "value": 42,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistBlood from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "resistBlood"
+        }
+      },
+      "focus": {
+        "known": true,
+        "value": 44,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistSleep from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "resistSleep"
+        }
+      },
+      "vitality": {
+        "known": true,
+        "value": 18,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed resistCurse from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "resistCurse"
+        }
+      },
+      "poise": {
+        "known": true,
+        "value": 11,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed toughnessCorrectRate converted to display poise from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "toughnessCorrectRate"
+        }
+      },
+      "headEquipable": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed headEquip from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "headEquip"
+        }
+      },
+      "bodyEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed bodyEquip from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "bodyEquip"
+        }
+      },
+      "armEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed armEquip from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "armEquip"
+        }
+      },
+      "legEquipable": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "regulation_equip_param_protector",
+          "method": "parsed legEquip from row 440000",
+          "table": "EquipParamProtector",
+          "row": "440000",
+          "field": "legEquip"
+        }
+      }
+    },
+    "talisman": null,
+    "ashOfWar": null,
+    "spell": null,
+    "spiritAsh": null,
+    "goods": null,
+    "gesture": null
+  }
+}
