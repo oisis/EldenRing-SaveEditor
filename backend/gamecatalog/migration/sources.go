@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	sourceLegacyData    schema.SourceID = "legacy_db_data"
+	sourceLegacyData    schema.SourceID = schema.SourceSaveForgeLegacy
 	sourceLegacyIcons   schema.SourceID = "legacy_item_icons"
 	sourceLegacyUnknown schema.SourceID = "legacy_unknown"
 )
@@ -79,7 +79,7 @@ func buildManifest(
 		},
 	)
 	return schema.Manifest{
-		SchemaVersion: 2,
+		SchemaVersion: schema.CurrentSchemaVersion,
 		GameVersion:   options.GameVersion,
 		Sources:       sources,
 	}

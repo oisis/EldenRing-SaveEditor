@@ -13,9 +13,25 @@ func buildSwordArtsNameFacts(
 	gameText *GameTextData,
 	legacy []swordArtsNameSeed,
 ) (map[int32]schema.Fact[string], error) {
+	facts, _, err := buildSwordArtsNameData(regulation, gameText, legacy)
+	return facts, err
+}
+
+func buildSwordArtsNameData(
+	regulation *RegulationData,
+	gameText *GameTextData,
+	legacy []swordArtsNameSeed,
+) (
+	map[int32]schema.Fact[string],
+	map[int32]*schema.Fact[string],
+	error,
+) {
 	table, exists := regulation.Table(RegulationTableSwordArts)
 	if !exists {
-		return nil, fmt.Errorf("regulation table %q is not loaded", RegulationTableSwordArts)
+		return nil, nil, fmt.Errorf(
+			"regulation table %q is not loaded",
+			RegulationTableSwordArts,
+		)
 	}
 	legacyByID := make(map[int32]string, len(legacy))
 	for _, value := range legacy {
@@ -23,16 +39,17 @@ func buildSwordArtsNameFacts(
 	}
 
 	result := make(map[int32]schema.Fact[string], table.RowCount())
+	saveForgeValues := make(map[int32]*schema.Fact[string])
 	for _, row := range table.Rows() {
 		if row.RowID > math.MaxInt32 {
-			return nil, fmt.Errorf(
+			return nil, nil, fmt.Errorf(
 				"SwordArtsParam Row ID %d exceeds signed 32-bit range",
 				row.RowID,
 			)
 		}
 		textID, err := regulationInt32(row, "textId")
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		legacyName := legacyByID[int32(row.RowID)]
 		gameName, hasGameName := gameText.lookupName(textID)
@@ -44,6 +61,12 @@ func buildSwordArtsNameFacts(
 				" from the English game-text FMG extract"
 			if legacyName != "" && legacyName != gameName.text {
 				method += "; replaced conflicting legacy name " + strconv.Quote(legacyName)
+				saveForgeValues[int32(row.RowID)] = saveForgeValue(
+					true,
+					legacyName,
+					gameName.text,
+					"preserved conflicting legacy SwordArtsNames value",
+				)
 			}
 			result[int32(row.RowID)] = schema.Fact[string]{
 				Known: true,
@@ -69,7 +92,7 @@ func buildSwordArtsNameFacts(
 				decimalRowID(row.RowID),
 		)
 	}
-	return result, nil
+	return result, saveForgeValues, nil
 }
 
 func (context *generationContext) swordArtsNameFact(id int32) schema.Fact[string] {
@@ -80,4 +103,10 @@ func (context *generationContext) swordArtsNameFact(id int32) schema.Fact[string
 		)
 	}
 	return name
+}
+
+func (context *generationContext) swordArtsNameSaveForgeValue(
+	id int32,
+) *schema.Fact[string] {
+	return context.swordArtsNamesSFV[id]
 }

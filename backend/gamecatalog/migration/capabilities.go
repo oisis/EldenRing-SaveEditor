@@ -186,6 +186,13 @@ func (context *generationContext) buildCapabilities(
 		return schema.ItemCapabilities{}, err
 	}
 	capabilities.Equipment = equipment
+	if err := attachUpgradeSaveForgeValue(
+		&capabilities.Upgrade,
+		item,
+		family,
+	); err != nil {
+		return schema.ItemCapabilities{}, err
+	}
 	return capabilities, nil
 }
 

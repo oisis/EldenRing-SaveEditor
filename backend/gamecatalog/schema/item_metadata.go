@@ -15,8 +15,10 @@ type ItemModifiers struct {
 }
 
 type EquipLoadModifier struct {
-	EnduranceBonus Fact[int32]   `json:"enduranceBonus"`
-	EquipLoadRate  Fact[float64] `json:"equipLoadRate"`
+	EnduranceBonus    Fact[int32]    `json:"enduranceBonus"`
+	EnduranceBonusSFV *Fact[int32]   `json:"enduranceBonus-sfv,omitempty"`
+	EquipLoadRate     Fact[float64]  `json:"equipLoadRate"`
+	EquipLoadRateSFV  *Fact[float64] `json:"equipLoadRate-sfv,omitempty"`
 }
 
 type ItemDescriptionRecord struct {

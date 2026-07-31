@@ -52,5 +52,8 @@ func buildArmorData(item seed, row ParameterRow) (*schema.ArmorData, error) {
 		ArmEquipable:  knownRegulationFact(equipment.arms, RegulationTableProtector, "armEquip", row.RowID),
 		LegEquipable:  knownRegulationFact(equipment.legs, RegulationTableProtector, "legEquip", row.RowID),
 	}
+	if err := attachArmorSaveForgeValues(data, item, stats, sortID, sortGroupID); err != nil {
+		return nil, err
+	}
 	return data, nil
 }

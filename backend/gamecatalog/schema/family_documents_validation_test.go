@@ -184,6 +184,7 @@ func validSpellData(p schema.Provenance) *schema.SpellData {
 func validSpiritAshData(p schema.Provenance) *schema.SpiritAshData {
 	return &schema.SpiritAshData{
 		SourceRowID: knownFact(p, uint32(1)), IconID: knownFact(p, uint32(2)),
+		SortID: knownFact(p, uint32(3)), SortGroupID: knownFact(p, uint8(4)),
 		ReinforceGoodsID: knownFact(p, int32(3)), ReinforceMaterialID: knownFact(p, int32(4)),
 		ReinforcePrice: knownFact(p, uint32(5)),
 	}

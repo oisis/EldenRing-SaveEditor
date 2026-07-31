@@ -178,16 +178,22 @@
         "known": true,
         "value": 1,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxInventory"
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 110",
+          "table": "EquipParamGoods",
+          "row": "110",
+          "field": "maxNum"
         }
       },
       "maxStorage": {
         "known": true,
         "value": 0,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxStorage"
+          "source": "regulation_equip_param_goods",
+          "method": "maxRepositoryNum is the zero sentinel; retained the migrated effective limit",
+          "table": "EquipParamGoods",
+          "row": "110",
+          "field": "maxRepositoryNum"
         }
       },
       "gameMaxInventory": {

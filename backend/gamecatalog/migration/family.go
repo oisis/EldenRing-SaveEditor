@@ -62,7 +62,7 @@ func (context *generationContext) attachFamilyData(
 		if !exists {
 			return fmt.Errorf("talisman primary row %d is missing", identity.RowID)
 		}
-		document.Talisman, err = buildTalismanData(lookup.Row)
+		document.Talisman, err = buildTalismanData(item, lookup.Row)
 	case schema.ItemFamilyAshOfWar:
 		if !exists {
 			return fmt.Errorf("Ash of War primary row %d is missing", identity.RowID)
@@ -72,17 +72,17 @@ func (context *generationContext) attachFamilyData(
 		if !exists {
 			return fmt.Errorf("spell primary row %d is missing", identity.RowID)
 		}
-		document.Spell, err = buildSpellData(lookup.Row)
+		document.Spell, err = buildSpellData(item, lookup.Row)
 	case schema.ItemFamilySpiritAsh:
 		if !exists {
 			return fmt.Errorf("spirit ash primary row %d is missing", identity.RowID)
 		}
-		document.SpiritAsh, err = buildSpiritAshData(lookup.Row)
+		document.SpiritAsh, err = buildSpiritAshData(item, lookup.Row)
 	case schema.ItemFamilyGoods:
 		if !exists {
 			return fmt.Errorf("goods primary row %d is missing", identity.RowID)
 		}
-		document.Goods, err = buildGoodsData(lookup.Row)
+		document.Goods, err = buildGoodsData(item, lookup.Row)
 	case schema.ItemFamilyGesture:
 		document.Gesture, err = context.buildGestureData(item, lookup.Row, exists)
 	default:

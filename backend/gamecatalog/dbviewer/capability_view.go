@@ -66,7 +66,20 @@ func upgradeDetails(rules *schema.UpgradeRules) []string {
 	if rules == nil {
 		return nil
 	}
-	return []string{fmt.Sprintf("Model: %s", rules.Model), fmt.Sprintf("Maximum level: +%d", rules.MaxLevel)}
+	details := []string{
+		fmt.Sprintf("Model: %s", rules.Model),
+		fmt.Sprintf("Maximum level: +%d", rules.MaxLevel),
+	}
+	if rules.MaxLevelSFV != nil {
+		details = append(
+			details,
+			fmt.Sprintf(
+				"Maximum level — SaveForge value: +%d",
+				rules.MaxLevelSFV.Value,
+			),
+		)
+	}
+	return details
 }
 
 func infusionDetails(rules *schema.InfusionRules) []string {

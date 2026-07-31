@@ -22,8 +22,17 @@
       {{end}}
     </select>
   </label>
+  <label>
+    Subcategory
+    <select name="subcategory">
+      <option value="">All subcategories</option>
+      {{range .Subcategories}}
+        <option value="{{.}}" {{if eq $.Subcategory .}}selected{{end}}>{{.}}</option>
+      {{end}}
+    </select>
+  </label>
   <button type="submit">Apply filters</button>
-  {{if or .Query .Family}}<a class="button secondary" href="/">Clear</a>{{end}}
+  {{if or .Query .Family .Subcategory}}<a class="button secondary" href="/">Clear</a>{{end}}
 </form>
 
 {{if .Items}}
@@ -71,7 +80,7 @@
 {{else}}
 <div class="empty-state">
   <h2>No resources found</h2>
-  <p>Change the search text or family filter.</p>
+  <p>Change the search text or filters.</p>
 </div>
 {{end}}
 {{template "footer" .}}

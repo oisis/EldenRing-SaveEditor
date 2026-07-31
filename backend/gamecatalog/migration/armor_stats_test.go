@@ -44,6 +44,26 @@ func TestGenerateBuildsAllArmorStatsFromRegulation(t *testing.T) {
 	)
 }
 
+func TestGenerateDoesNotPreserveUnpopulatedLegacyPoise(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+	for _, resource := range catalog.Resources {
+		if resource.Item == nil ||
+			resource.Item.Family.Value != schema.ItemFamilyArmor {
+			continue
+		}
+		if resource.Item.Armor.PoiseSFV != nil {
+			t.Fatalf(
+				"armor %s poise-sfv = %#v, want nil",
+				resource.Key,
+				resource.Item.Armor.PoiseSFV,
+			)
+		}
+	}
+}
+
 func assertArmorStatsKnownFromRegulation(
 	t *testing.T,
 	armor *schema.ArmorData,

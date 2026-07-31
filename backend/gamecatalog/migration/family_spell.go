@@ -2,7 +2,7 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildSpellData(row ParameterRow) (*schema.SpellData, error) {
+func buildSpellData(item seed, row ParameterRow) (*schema.SpellData, error) {
 	iconID, err := regulationUint32(row, "iconId")
 	if err != nil {
 		return nil, err
@@ -35,7 +35,7 @@ func buildSpellData(row ParameterRow) (*schema.SpellData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &schema.SpellData{
+	data := &schema.SpellData{
 		SourceRowID:          knownRegulationFact(row.RowID, RegulationTableMagic, "Row ID", row.RowID),
 		IconID:               knownRegulationFact(iconID, RegulationTableMagic, "iconId", row.RowID),
 		SortID:               knownRegulationFact(sortID, RegulationTableMagic, "sortId", row.RowID),
@@ -45,5 +45,18 @@ func buildSpellData(row ParameterRow) (*schema.SpellData, error) {
 		RequiredIntelligence: knownRegulationFact(requiredIntelligence, RegulationTableMagic, "requirementIntellect", row.RowID),
 		RequiredFaith:        knownRegulationFact(requiredFaith, RegulationTableMagic, "requirementFaith", row.RowID),
 		RequiredArcane:       knownRegulationFact(requiredArcane, RegulationTableMagic, "requirementLuck", row.RowID),
-	}, nil
+	}
+	if err := attachSpellSaveForgeValues(
+		data,
+		item,
+		sortID,
+		fpCost,
+		memorySlots,
+		requiredIntelligence,
+		requiredFaith,
+		requiredArcane,
+	); err != nil {
+		return nil, err
+	}
+	return data, nil
 }

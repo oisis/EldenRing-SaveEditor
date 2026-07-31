@@ -21,14 +21,6 @@ func (context *generationContext) buildAshOfWarData(
 			row.RowID,
 		)
 	}
-	if *item.AoWCompatMask != rawMask {
-		return nil, fmt.Errorf(
-			"row %d full AoW compatibility mismatch: legacy 0x%X, Regulation PARAM 0x%X",
-			row.RowID,
-			*item.AoWCompatMask,
-			rawMask,
-		)
-	}
 	if err := crossCheckAoWCompatibilityMask(rawMask, row); err != nil {
 		return nil, err
 	}
@@ -52,13 +44,14 @@ func (context *generationContext) buildAshOfWarData(
 	if err != nil {
 		return nil, err
 	}
-	return &schema.AshOfWarData{
+	data := &schema.AshOfWarData{
 		SourceRowID:      knownRegulationFact(row.RowID, RegulationTableGem, "Row ID", row.RowID),
 		IconID:           knownRegulationFact(iconID, RegulationTableGem, "iconId", row.RowID),
 		SortID:           knownRegulationFact(sortID, RegulationTableGem, "sortId", row.RowID),
 		SortGroupID:      knownRegulationFact(sortGroupID, RegulationTableGem, "sortGroupId", row.RowID),
 		SwordArtsParamID: knownRegulationFact(swordArtsParamID, RegulationTableGem, "swordArtsParamId", row.RowID),
 		SwordArtsName:    context.swordArtsNameFact(swordArtsParamID),
+		SwordArtsNameSFV: context.swordArtsNameSaveForgeValue(swordArtsParamID),
 		DefaultAffinity:  knownRegulationFact(defaultAffinity, RegulationTableGem, "defaultWepAttr", row.RowID),
 		CompatibilityMask: schema.Fact[uint64]{
 			Known: true,
@@ -72,7 +65,30 @@ func (context *generationContext) buildAshOfWarData(
 			},
 		},
 		CompatibleClassNames: knownLegacyFact(cloneStrings(item.AoWCompatibleClasses), "derived from legacy AoWCompatMasks and CanMountWepNames"),
-	}, nil
+	}
+	if item.HasLegacyItem {
+		if item.SortKey != nil {
+			data.SortIDSFV = saveForgeValue(
+				true,
+				item.SortKey.SortID,
+				sortID,
+				"preserved conflicting SaveForge value from ItemSortKeys.SortId",
+			)
+			data.SortGroupIDSFV = saveForgeValue(
+				true,
+				item.SortKey.SortGroupID,
+				sortGroupID,
+				"preserved conflicting SaveForge value from ItemSortKeys.SortGroupId",
+			)
+		}
+		data.CompatibilityMaskSFV = saveForgeValue(
+			true,
+			*item.AoWCompatMask,
+			rawMask,
+			"preserved conflicting SaveForge value from AoWCompatMasks",
+		)
+	}
+	return data, nil
 }
 
 func crossCheckAoWCompatibilityMask(rawMask uint64, row ParameterRow) error {

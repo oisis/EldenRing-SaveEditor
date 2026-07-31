@@ -117,17 +117,6 @@ func (context *generationContext) readRegulationWeaponCoreStats(
 	result.maxUpgrade = int32(bandSize - 1)
 	result.isInfusable = result.gemMountType == 2 && disableGemAffinity == 0
 	result.isSomber = bandSize == 11
-	if item.WeaponEdit != nil &&
-		item.WeaponEdit.CanChangeAffinity != result.isInfusable {
-		return result, fmt.Errorf(
-			"legacy weapon affinity gate differs from EquipParamWeapon gemMountType/disableGemAttr",
-		)
-	}
-	if item.HasLegacyItem {
-		if err := verifyLegacyWeaponCoreStats(item.WeaponStats, result); err != nil {
-			return result, err
-		}
-	}
 	return result, nil
 }
 
@@ -155,42 +144,4 @@ func (context *generationContext) weaponReinforcementBandSize(
 		return 0, fmt.Errorf("ReinforceParamWeapon band %d is missing", reinforceTypeID)
 	}
 	return count, nil
-}
-
-func verifyLegacyWeaponCoreStats(
-	legacy *weaponStatsSeed,
-	actual regulationWeaponCoreStats,
-) error {
-	if legacy == nil {
-		return fmt.Errorf("legacy WeaponStatsV1 row is missing")
-	}
-	if legacy.WepType != actual.weaponTypeID ||
-		legacy.SortGroupID != actual.sortGroupID ||
-		legacy.ReinforceTypeID != actual.reinforceTypeID ||
-		legacy.GemMountType != actual.gemMountType ||
-		legacy.Weight != actual.weight ||
-		legacy.AttackPhysical != actual.attackPhysical ||
-		legacy.AttackMagic != actual.attackMagic ||
-		legacy.AttackFire != actual.attackFire ||
-		legacy.AttackLightning != actual.attackLightning ||
-		legacy.AttackHoly != actual.attackHoly ||
-		legacy.AttackStamina != actual.attackStamina ||
-		legacy.GuardPhysical != actual.guardPhysical ||
-		legacy.GuardMagic != actual.guardMagic ||
-		legacy.GuardFire != actual.guardFire ||
-		legacy.GuardLightning != actual.guardLightning ||
-		legacy.GuardHoly != actual.guardHoly ||
-		legacy.GuardBoost != actual.guardBoost ||
-		legacy.StatReqStr != int32(actual.requiredStrength) ||
-		legacy.StatReqDex != int32(actual.requiredDexterity) ||
-		legacy.StatReqInt != actual.requiredIntelligence ||
-		legacy.StatReqFai != actual.requiredFaith ||
-		legacy.StatReqArc != actual.requiredArcane ||
-		legacy.Critical != actual.critical ||
-		legacy.DefaultAoWID != actual.defaultAshOfWarID ||
-		legacy.IsSomber != actual.isSomber ||
-		legacy.MaxUpgrade != actual.maxUpgrade {
-		return fmt.Errorf("legacy WeaponStatsV1 core values differ from Regulation")
-	}
-	return nil
 }

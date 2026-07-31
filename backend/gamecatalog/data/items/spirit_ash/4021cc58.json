@@ -180,16 +180,30 @@
         "known": true,
         "value": 1,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxInventory"
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 2215000",
+          "table": "EquipParamGoods",
+          "row": "2215000",
+          "field": "maxNum"
         }
       },
       "maxStorage": {
         "known": true,
+        "value": 600,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 2215000",
+          "table": "EquipParamGoods",
+          "row": "2215000",
+          "field": "maxRepositoryNum"
+        }
+      },
+      "maxStorage-sfv": {
+        "known": true,
         "value": 1,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxStorage"
+          "method": "preserved conflicting legacy ItemData.MaxStorage"
         }
       },
       "gameMaxInventory": {
@@ -772,16 +786,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215001",
+                "table": "EquipParamGoods",
+                "row": "2215001",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215001",
+                "table": "EquipParamGoods",
+                "row": "2215001",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -1177,6 +1205,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61481,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215001",
+                "table": "EquipParamGoods",
+                "row": "2215001",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215001",
+                "table": "EquipParamGoods",
+                "row": "2215001",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215002,
@@ -1237,6 +1287,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -1880,16 +1936,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215002",
+                "table": "EquipParamGoods",
+                "row": "2215002",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215002",
+                "table": "EquipParamGoods",
+                "row": "2215002",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -2285,6 +2355,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61482,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215002",
+                "table": "EquipParamGoods",
+                "row": "2215002",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215002",
+                "table": "EquipParamGoods",
+                "row": "2215002",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215003,
@@ -2345,6 +2437,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -2988,16 +3086,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215003",
+                "table": "EquipParamGoods",
+                "row": "2215003",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215003",
+                "table": "EquipParamGoods",
+                "row": "2215003",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -3393,6 +3505,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61483,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215003",
+                "table": "EquipParamGoods",
+                "row": "2215003",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215003",
+                "table": "EquipParamGoods",
+                "row": "2215003",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215004,
@@ -3453,6 +3587,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -4096,16 +4236,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215004",
+                "table": "EquipParamGoods",
+                "row": "2215004",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215004",
+                "table": "EquipParamGoods",
+                "row": "2215004",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -4501,6 +4655,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61484,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215004",
+                "table": "EquipParamGoods",
+                "row": "2215004",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215004",
+                "table": "EquipParamGoods",
+                "row": "2215004",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215005,
@@ -4561,6 +4737,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -5204,16 +5386,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215005",
+                "table": "EquipParamGoods",
+                "row": "2215005",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215005",
+                "table": "EquipParamGoods",
+                "row": "2215005",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -5609,6 +5805,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61485,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215005",
+                "table": "EquipParamGoods",
+                "row": "2215005",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215005",
+                "table": "EquipParamGoods",
+                "row": "2215005",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215006,
@@ -5669,6 +5887,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -6312,16 +6536,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215006",
+                "table": "EquipParamGoods",
+                "row": "2215006",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215006",
+                "table": "EquipParamGoods",
+                "row": "2215006",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -6717,6 +6955,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61486,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215006",
+                "table": "EquipParamGoods",
+                "row": "2215006",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215006",
+                "table": "EquipParamGoods",
+                "row": "2215006",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215007,
@@ -6777,6 +7037,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -7420,16 +7686,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215007",
+                "table": "EquipParamGoods",
+                "row": "2215007",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215007",
+                "table": "EquipParamGoods",
+                "row": "2215007",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -7825,6 +8105,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61487,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215007",
+                "table": "EquipParamGoods",
+                "row": "2215007",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215007",
+                "table": "EquipParamGoods",
+                "row": "2215007",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215008,
@@ -7885,6 +8187,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -8528,16 +8836,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215008",
+                "table": "EquipParamGoods",
+                "row": "2215008",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215008",
+                "table": "EquipParamGoods",
+                "row": "2215008",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -8933,6 +9255,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61488,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215008",
+                "table": "EquipParamGoods",
+                "row": "2215008",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215008",
+                "table": "EquipParamGoods",
+                "row": "2215008",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215009,
@@ -8993,6 +9337,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -9636,16 +9986,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215009",
+                "table": "EquipParamGoods",
+                "row": "2215009",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215009",
+                "table": "EquipParamGoods",
+                "row": "2215009",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -10041,6 +10405,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61489,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215009",
+                "table": "EquipParamGoods",
+                "row": "2215009",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215009",
+                "table": "EquipParamGoods",
+                "row": "2215009",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": 2215010,
@@ -10101,6 +10487,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -10744,16 +11136,30 @@
               "known": true,
               "value": 1,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxInventory"
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxNum from row 2215010",
+                "table": "EquipParamGoods",
+                "row": "2215010",
+                "field": "maxNum"
               }
             },
             "maxStorage": {
               "known": true,
+              "value": 600,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed maxRepositoryNum from row 2215010",
+                "table": "EquipParamGoods",
+                "row": "2215010",
+                "field": "maxRepositoryNum"
+              }
+            },
+            "maxStorage-sfv": {
+              "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "copied from legacy ItemData.MaxStorage"
+                "method": "preserved conflicting legacy ItemData.MaxStorage"
               }
             },
             "gameMaxInventory": {
@@ -11149,6 +11555,28 @@
                 "field": "iconId"
               }
             },
+            "sortID": {
+              "known": true,
+              "value": 61490,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortId from row 2215010",
+                "table": "EquipParamGoods",
+                "row": "2215010",
+                "field": "sortId"
+              }
+            },
+            "sortGroupID": {
+              "known": true,
+              "value": 30,
+              "provenance": {
+                "source": "regulation_equip_param_goods",
+                "method": "parsed sortGroupId from row 2215010",
+                "table": "EquipParamGoods",
+                "row": "2215010",
+                "field": "sortGroupId"
+              }
+            },
             "reinforceGoodsID": {
               "known": true,
               "value": -1,
@@ -11209,6 +11637,12 @@
               },
               {
                 "name": "reinforcePrice"
+              },
+              {
+                "name": "sortGroupId"
+              },
+              {
+                "name": "sortId"
               }
             ],
             "provenance": {
@@ -11675,6 +12109,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11709,6 +12149,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11743,6 +12189,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11777,6 +12229,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11811,6 +12269,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11845,6 +12309,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11879,6 +12349,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11913,6 +12389,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11947,6 +12429,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -11981,6 +12469,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -12015,6 +12509,12 @@
           },
           {
             "name": "reinforcePrice"
+          },
+          {
+            "name": "sortGroupId"
+          },
+          {
+            "name": "sortId"
           }
         ],
         "provenance": {
@@ -12242,6 +12742,28 @@
           "table": "EquipParamGoods",
           "row": "2215000",
           "field": "iconId"
+        }
+      },
+      "sortID": {
+        "known": true,
+        "value": 61480,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed sortId from row 2215000",
+          "table": "EquipParamGoods",
+          "row": "2215000",
+          "field": "sortId"
+        }
+      },
+      "sortGroupID": {
+        "known": true,
+        "value": 30,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed sortGroupId from row 2215000",
+          "table": "EquipParamGoods",
+          "row": "2215000",
+          "field": "sortGroupId"
         }
       },
       "reinforceGoodsID": {

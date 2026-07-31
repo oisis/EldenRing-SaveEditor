@@ -2,7 +2,7 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildGoodsData(row ParameterRow) (*schema.GoodsData, error) {
+func buildGoodsData(item seed, row ParameterRow) (*schema.GoodsData, error) {
 	iconID, err := regulationUint32(row, "iconId")
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func buildGoodsData(row ParameterRow) (*schema.GoodsData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &schema.GoodsData{
+	data := &schema.GoodsData{
 		SourceRowID:    knownRegulationFact(row.RowID, RegulationTableGoods, "Row ID", row.RowID),
 		IconID:         knownRegulationFact(iconID, RegulationTableGoods, "iconId", row.RowID),
 		SortID:         knownRegulationFact(sortID, RegulationTableGoods, "sortId", row.RowID),
@@ -70,5 +70,17 @@ func buildGoodsData(row ParameterRow) (*schema.GoodsData, error) {
 		IsDiscardable:  knownRegulationFact(isDiscardable, RegulationTableGoods, "isDiscard", row.RowID),
 		IsDepositable:  knownRegulationFact(isDepositable, RegulationTableGoods, "isDeposit", row.RowID),
 		IsDroppable:    knownRegulationFact(isDroppable, RegulationTableGoods, "isDrop", row.RowID),
-	}, nil
+	}
+	if err := attachSimpleFamilySaveForgeValues(
+		item,
+		sortID,
+		sortGroupID,
+		weight,
+		&data.SortIDSFV,
+		&data.SortGroupIDSFV,
+		&data.WeightSFV,
+	); err != nil {
+		return nil, err
+	}
+	return data, nil
 }

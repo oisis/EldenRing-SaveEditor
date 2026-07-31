@@ -1,6 +1,7 @@
 package migration
 
 import (
+	"fmt"
 	"sort"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
@@ -44,13 +45,54 @@ func (context *generationContext) buildGestureData(
 	})
 	data.Slots = make([]schema.GestureSlotRecord, len(slots))
 	for index, slot := range slots {
+		slotID := knownLegacyFact(slot.SlotID, "copied from legacy AllGestures save slot ID")
+		itemID := knownLegacyFact(slot.ItemID, "copied from legacy AllGestures item ID")
+		var sourceRecords []schema.ParameterRecord
+		rows := context.gestureRows[slot.ItemID&0x0FFFFFFF]
+		if len(rows) > 0 {
+			matchingRows := make([]ParameterRow, 0, 1)
+			for _, row := range rows {
+				if row.RowID*2+1 == slot.SlotID {
+					matchingRows = append(matchingRows, row)
+				}
+			}
+			if len(matchingRows) != 1 {
+				return nil, fmt.Errorf(
+					"legacy gesture slot %d for item 0x%08X has %d matching GestureParam rows",
+					slot.SlotID,
+					slot.ItemID,
+					len(matchingRows),
+				)
+			}
+			row := matchingRows[0]
+			slotID = knownRegulationDerivedFact(
+				row.RowID*2+1,
+				RegulationTableGesture,
+				"derived canonical save slot ID as GestureParam Row ID * 2 + 1",
+				row.RowID,
+				"Row ID",
+			)
+			itemID = knownRegulationDerivedFact(
+				uint32(0x40000000)|(slot.ItemID&0x0FFFFFFF),
+				RegulationTableGesture,
+				"derived full goods item ID from GestureParam itemId",
+				row.RowID,
+				"itemId",
+			)
+			sourceRecords = parameterRecordsForRows(
+				RegulationTableGesture,
+				matchingRows,
+				context.regulation,
+				"itemId",
+			)
+		}
 		data.Slots[index] = schema.GestureSlotRecord{
-			SlotID:        knownLegacyFact(slot.SlotID, "copied from legacy AllGestures save slot ID"),
-			ItemID:        knownLegacyFact(slot.ItemID, "copied from legacy AllGestures item ID"),
+			SlotID:        slotID,
+			ItemID:        itemID,
 			Name:          knownLegacyFact(slot.Name, "copied from legacy AllGestures name"),
 			Category:      knownLegacyFact(slot.Category, "copied from legacy AllGestures category"),
 			Flags:         knownLegacyFact(cloneStrings(slot.Flags), "copied from legacy AllGestures flags"),
-			SourceRecords: nil,
+			SourceRecords: sourceRecords,
 		}
 	}
 	return data, nil

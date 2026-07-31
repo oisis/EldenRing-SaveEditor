@@ -180,16 +180,30 @@
         "known": true,
         "value": 1,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxInventory"
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 2009004",
+          "table": "EquipParamGoods",
+          "row": "2009004",
+          "field": "maxNum"
         }
       },
       "maxStorage": {
         "known": true,
+        "value": 1,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 2009004",
+          "table": "EquipParamGoods",
+          "row": "2009004",
+          "field": "maxRepositoryNum"
+        }
+      },
+      "maxStorage-sfv": {
+        "known": true,
         "value": 0,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxStorage"
+          "method": "preserved conflicting legacy ItemData.MaxStorage"
         }
       },
       "gameMaxInventory": {
@@ -423,6 +437,9 @@
         "fields": [
           {
             "name": "Row ID"
+          },
+          {
+            "name": "itemId"
           }
         ],
         "provenance": {
@@ -470,16 +487,22 @@
             "known": true,
             "value": 231,
             "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy AllGestures save slot ID"
+              "source": "regulation_gesture_param",
+              "method": "derived canonical save slot ID as GestureParam Row ID * 2 + 1",
+              "table": "GestureParam",
+              "row": "115",
+              "field": "Row ID"
             }
           },
           "itemID": {
             "known": true,
             "value": 1075750828,
             "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy AllGestures item ID"
+              "source": "regulation_gesture_param",
+              "method": "derived full goods item ID from GestureParam itemId",
+              "table": "GestureParam",
+              "row": "115",
+              "field": "itemId"
             }
           },
           "name": {
@@ -506,7 +529,27 @@
               "method": "copied from legacy AllGestures flags"
             }
           },
-          "sourceRecords": null
+          "sourceRecords": [
+            {
+              "table": "GestureParam",
+              "rowID": 115,
+              "fields": [
+                {
+                  "name": "Row ID"
+                },
+                {
+                  "name": "itemId"
+                }
+              ],
+              "provenance": {
+                "source": "regulation_gesture_param",
+                "method": "referenced Regulation parameter row",
+                "table": "GestureParam",
+                "row": "115",
+                "field": "Row ID"
+              }
+            }
+          ]
         }
       ]
     }

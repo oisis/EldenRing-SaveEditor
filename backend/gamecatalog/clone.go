@@ -16,6 +16,7 @@ func cloneResource(resource schema.Resource) schema.Resource {
 
 	item := *resource.Item
 	item.Flags.Value = cloneStrings(resource.Item.Flags.Value)
+	item.Storage = cloneStorage(resource.Item.Storage)
 	item.Acquisition = cloneAcquisition(resource.Item.Acquisition)
 	item.Modifiers = cloneModifiers(resource.Item.Modifiers)
 	item.Links = cloneItemLinks(resource.Item.Links)
@@ -30,28 +31,27 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		item.Weapon = &weapon
 	}
 	if resource.Item.Armor != nil {
-		armor := *resource.Item.Armor
+		armor := cloneArmorData(*resource.Item.Armor)
 		item.Armor = &armor
 	}
 	if resource.Item.Talisman != nil {
-		talisman := *resource.Item.Talisman
+		talisman := cloneTalismanData(*resource.Item.Talisman)
 		item.Talisman = &talisman
 	}
 	if resource.Item.AshOfWar != nil {
-		ash := *resource.Item.AshOfWar
-		ash.CompatibleClassNames.Value = cloneStrings(resource.Item.AshOfWar.CompatibleClassNames.Value)
+		ash := cloneAshOfWarData(*resource.Item.AshOfWar)
 		item.AshOfWar = &ash
 	}
 	if resource.Item.Spell != nil {
-		spell := *resource.Item.Spell
+		spell := cloneSpellData(*resource.Item.Spell)
 		item.Spell = &spell
 	}
 	if resource.Item.SpiritAsh != nil {
-		spiritAsh := *resource.Item.SpiritAsh
+		spiritAsh := cloneSpiritAshData(*resource.Item.SpiritAsh)
 		item.SpiritAsh = &spiritAsh
 	}
 	if resource.Item.Goods != nil {
-		goods := *resource.Item.Goods
+		goods := cloneGoodsData(*resource.Item.Goods)
 		item.Goods = &goods
 	}
 	if resource.Item.Gesture != nil {
@@ -93,6 +93,7 @@ func cloneVariants(variants []schema.ItemVariant) []schema.ItemVariant {
 func cloneVariantDocumentData(data schema.VariantDocumentData) schema.VariantDocumentData {
 	cloned := data
 	cloned.Flags.Value = cloneStrings(data.Flags.Value)
+	cloned.Storage = cloneStorage(data.Storage)
 	cloned.Acquisition = cloneAcquisition(data.Acquisition)
 	cloned.Modifiers = cloneModifiers(data.Modifiers)
 	cloned.Links = cloneItemLinks(data.Links)
@@ -104,7 +105,7 @@ func cloneVariantDocumentData(data schema.VariantDocumentData) schema.VariantDoc
 		cloned.Weapon = &weapon
 	}
 	if data.SpiritAsh != nil {
-		spiritAsh := *data.SpiritAsh
+		spiritAsh := cloneSpiritAshData(*data.SpiritAsh)
 		cloned.SpiritAsh = &spiritAsh
 	}
 	return cloned
@@ -112,7 +113,13 @@ func cloneVariantDocumentData(data schema.VariantDocumentData) schema.VariantDoc
 
 func cloneCapabilities(capabilities schema.ItemCapabilities) schema.ItemCapabilities {
 	cloned := capabilities
-	cloned.Upgrade = cloneCapability(capabilities.Upgrade, nil)
+	cloned.Upgrade = cloneCapability(
+		capabilities.Upgrade,
+		func(rules schema.UpgradeRules) schema.UpgradeRules {
+			rules.MaxLevelSFV = cloneFactPointer(rules.MaxLevelSFV)
+			return rules
+		},
+	)
 	cloned.Infusion = cloneCapability(
 		capabilities.Infusion,
 		func(rules schema.InfusionRules) schema.InfusionRules {
@@ -145,6 +152,8 @@ func cloneModifiers(modifiers schema.ItemModifiers) schema.ItemModifiers {
 	cloned := modifiers
 	if modifiers.EquipLoad != nil {
 		equipLoad := *modifiers.EquipLoad
+		equipLoad.EnduranceBonusSFV = cloneFactPointer(modifiers.EquipLoad.EnduranceBonusSFV)
+		equipLoad.EquipLoadRateSFV = cloneFactPointer(modifiers.EquipLoad.EquipLoadRateSFV)
 		cloned.EquipLoad = &equipLoad
 	}
 	return cloned
@@ -189,9 +198,120 @@ func cloneRelatedTechnicalRecords(records []schema.RelatedTechnicalRecord) []sch
 
 func cloneWeaponData(data schema.WeaponData) schema.WeaponData {
 	cloned := data
+	cloned.WeaponTypeIDSFV = cloneFactPointer(data.WeaponTypeIDSFV)
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.SortGroupIDSFV = cloneFactPointer(data.SortGroupIDSFV)
+	cloned.ReinforceTypeIDSFV = cloneFactPointer(data.ReinforceTypeIDSFV)
+	cloned.GemMountTypeSFV = cloneFactPointer(data.GemMountTypeSFV)
+	cloned.WeightSFV = cloneFactPointer(data.WeightSFV)
+	cloned.AttackPhysicalSFV = cloneFactPointer(data.AttackPhysicalSFV)
+	cloned.AttackMagicSFV = cloneFactPointer(data.AttackMagicSFV)
+	cloned.AttackFireSFV = cloneFactPointer(data.AttackFireSFV)
+	cloned.AttackLightningSFV = cloneFactPointer(data.AttackLightningSFV)
+	cloned.AttackHolySFV = cloneFactPointer(data.AttackHolySFV)
+	cloned.AttackStaminaSFV = cloneFactPointer(data.AttackStaminaSFV)
+	cloned.GuardPhysicalSFV = cloneFactPointer(data.GuardPhysicalSFV)
+	cloned.GuardMagicSFV = cloneFactPointer(data.GuardMagicSFV)
+	cloned.GuardFireSFV = cloneFactPointer(data.GuardFireSFV)
+	cloned.GuardLightningSFV = cloneFactPointer(data.GuardLightningSFV)
+	cloned.GuardHolySFV = cloneFactPointer(data.GuardHolySFV)
+	cloned.GuardBoostSFV = cloneFactPointer(data.GuardBoostSFV)
+	cloned.RequiredStrengthSFV = cloneFactPointer(data.RequiredStrengthSFV)
+	cloned.RequiredDexteritySFV = cloneFactPointer(data.RequiredDexteritySFV)
+	cloned.RequiredIntelligenceSFV = cloneFactPointer(data.RequiredIntelligenceSFV)
+	cloned.RequiredFaithSFV = cloneFactPointer(data.RequiredFaithSFV)
+	cloned.RequiredArcaneSFV = cloneFactPointer(data.RequiredArcaneSFV)
+	cloned.CriticalSFV = cloneFactPointer(data.CriticalSFV)
+	cloned.DefaultAshOfWarIDSFV = cloneFactPointer(data.DefaultAshOfWarIDSFV)
+	cloned.SwordArtsNameSFV = cloneFactPointer(data.SwordArtsNameSFV)
+	cloned.IsInfusableSFV = cloneFactPointer(data.IsInfusableSFV)
+	cloned.IsSomberSFV = cloneFactPointer(data.IsSomberSFV)
+	cloned.MaxUpgradeSFV = cloneFactPointer(data.MaxUpgradeSFV)
 	cloned.PassiveEffects = append([]schema.WeaponPassiveEffectData(nil), data.PassiveEffects...)
 	cloned.Warnings.Value = cloneStrings(data.Warnings.Value)
 	return cloned
+}
+
+func cloneStorage(storage schema.ItemStorage) schema.ItemStorage {
+	cloned := storage
+	cloned.MaxInventorySFV = cloneFactPointer(storage.MaxInventorySFV)
+	cloned.MaxStorageSFV = cloneFactPointer(storage.MaxStorageSFV)
+	cloned.GameMaxInventorySFV = cloneFactPointer(storage.GameMaxInventorySFV)
+	cloned.GameMaxStorageSFV = cloneFactPointer(storage.GameMaxStorageSFV)
+	return cloned
+}
+
+func cloneArmorData(data schema.ArmorData) schema.ArmorData {
+	cloned := data
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.SortGroupIDSFV = cloneFactPointer(data.SortGroupIDSFV)
+	cloned.WeightSFV = cloneFactPointer(data.WeightSFV)
+	cloned.PhysicalSFV = cloneFactPointer(data.PhysicalSFV)
+	cloned.StrikeSFV = cloneFactPointer(data.StrikeSFV)
+	cloned.SlashSFV = cloneFactPointer(data.SlashSFV)
+	cloned.PierceSFV = cloneFactPointer(data.PierceSFV)
+	cloned.MagicSFV = cloneFactPointer(data.MagicSFV)
+	cloned.FireSFV = cloneFactPointer(data.FireSFV)
+	cloned.LightningSFV = cloneFactPointer(data.LightningSFV)
+	cloned.HolySFV = cloneFactPointer(data.HolySFV)
+	cloned.ImmunitySFV = cloneFactPointer(data.ImmunitySFV)
+	cloned.RobustnessSFV = cloneFactPointer(data.RobustnessSFV)
+	cloned.FocusSFV = cloneFactPointer(data.FocusSFV)
+	cloned.VitalitySFV = cloneFactPointer(data.VitalitySFV)
+	cloned.PoiseSFV = cloneFactPointer(data.PoiseSFV)
+	return cloned
+}
+
+func cloneTalismanData(data schema.TalismanData) schema.TalismanData {
+	cloned := data
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.SortGroupIDSFV = cloneFactPointer(data.SortGroupIDSFV)
+	cloned.WeightSFV = cloneFactPointer(data.WeightSFV)
+	return cloned
+}
+
+func cloneAshOfWarData(data schema.AshOfWarData) schema.AshOfWarData {
+	cloned := data
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.SortGroupIDSFV = cloneFactPointer(data.SortGroupIDSFV)
+	cloned.SwordArtsNameSFV = cloneFactPointer(data.SwordArtsNameSFV)
+	cloned.CompatibilityMaskSFV = cloneFactPointer(data.CompatibilityMaskSFV)
+	cloned.CompatibleClassNames.Value = cloneStrings(data.CompatibleClassNames.Value)
+	return cloned
+}
+
+func cloneSpellData(data schema.SpellData) schema.SpellData {
+	cloned := data
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.FPCostSFV = cloneFactPointer(data.FPCostSFV)
+	cloned.MemorySlotsSFV = cloneFactPointer(data.MemorySlotsSFV)
+	cloned.RequiredIntelligenceSFV = cloneFactPointer(data.RequiredIntelligenceSFV)
+	cloned.RequiredFaithSFV = cloneFactPointer(data.RequiredFaithSFV)
+	cloned.RequiredArcaneSFV = cloneFactPointer(data.RequiredArcaneSFV)
+	return cloned
+}
+
+func cloneSpiritAshData(data schema.SpiritAshData) schema.SpiritAshData {
+	cloned := data
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.SortGroupIDSFV = cloneFactPointer(data.SortGroupIDSFV)
+	return cloned
+}
+
+func cloneGoodsData(data schema.GoodsData) schema.GoodsData {
+	cloned := data
+	cloned.SortIDSFV = cloneFactPointer(data.SortIDSFV)
+	cloned.SortGroupIDSFV = cloneFactPointer(data.SortGroupIDSFV)
+	cloned.WeightSFV = cloneFactPointer(data.WeightSFV)
+	return cloned
+}
+
+func cloneFactPointer[T any](fact *schema.Fact[T]) *schema.Fact[T] {
+	if fact == nil {
+		return nil
+	}
+	cloned := *fact
+	return &cloned
 }
 
 func cloneAliases(aliases []schema.ItemAlias) []schema.ItemAlias {

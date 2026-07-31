@@ -14,18 +14,20 @@ import (
 const catalogPageSize = 100
 
 type catalogPage struct {
-	Meta     pageMeta
-	Query    string
-	Family   string
-	Families []string
-	Items    []catalogItemRow
-	Total    int
-	First    int
-	Last     int
-	Page     int
-	Pages    int
-	Previous string
-	Next     string
+	Meta          pageMeta
+	Query         string
+	Family        string
+	Families      []string
+	Subcategory   string
+	Subcategories []string
+	Items         []catalogItemRow
+	Total         int
+	First         int
+	Last          int
+	Page          int
+	Pages         int
+	Previous      string
+	Next          string
 }
 
 type catalogItemRow struct {
@@ -43,31 +45,38 @@ type catalogItemRow struct {
 func (server *Server) catalogHandler(response http.ResponseWriter, request *http.Request) {
 	query := strings.TrimSpace(request.URL.Query().Get("q"))
 	family := strings.TrimSpace(request.URL.Query().Get("family"))
+	subcategory := strings.TrimSpace(request.URL.Query().Get("subcategory"))
 	requestedPage, _ := strconv.Atoi(request.URL.Query().Get("page"))
-	rows := server.catalogRows(query, family)
+	rows := server.catalogRowsFiltered(query, family, subcategory)
 	items, currentPage, pages, first, last := paginateCatalogRows(rows, requestedPage)
 	page := catalogPage{
-		Meta:     server.pageMeta("Catalog"),
-		Query:    query,
-		Family:   family,
-		Families: server.families(),
-		Items:    items,
-		Total:    len(rows),
-		First:    first,
-		Last:     last,
-		Page:     currentPage,
-		Pages:    pages,
+		Meta:          server.pageMeta("Catalog"),
+		Query:         query,
+		Family:        family,
+		Families:      server.families(),
+		Subcategory:   subcategory,
+		Subcategories: server.subcategories(),
+		Items:         items,
+		Total:         len(rows),
+		First:         first,
+		Last:          last,
+		Page:          currentPage,
+		Pages:         pages,
 	}
 	if currentPage > 1 {
-		page.Previous = catalogPageURL(query, family, currentPage-1)
+		page.Previous = catalogPageURL(query, family, subcategory, currentPage-1)
 	}
 	if currentPage < pages {
-		page.Next = catalogPageURL(query, family, currentPage+1)
+		page.Next = catalogPageURL(query, family, subcategory, currentPage+1)
 	}
 	server.render(response, "catalog", page)
 }
 
 func (server *Server) catalogRows(query string, family string) []catalogItemRow {
+	return server.catalogRowsFiltered(query, family, "")
+}
+
+func (server *Server) catalogRowsFiltered(query string, family string, subcategory string) []catalogItemRow {
 	query = strings.ToLower(query)
 	rows := make([]catalogItemRow, 0, len(server.data.Documents))
 	for _, document := range server.data.Documents {
@@ -77,6 +86,10 @@ func (server *Server) catalogRows(query string, family string) []catalogItemRow 
 			continue
 		}
 		if family != "" && string(item.Family.Value) != family {
+			continue
+		}
+		if subcategory != "" &&
+			(!item.Subcategory.Known || item.Subcategory.Value != subcategory) {
 			continue
 		}
 
@@ -194,6 +207,23 @@ func (server *Server) families() []string {
 	return families
 }
 
+func (server *Server) subcategories() []string {
+	seen := make(map[string]struct{})
+	for _, document := range server.data.Documents {
+		item := document.Resource.Item
+		if item == nil || !item.Subcategory.Known || item.Subcategory.Value == "" {
+			continue
+		}
+		seen[item.Subcategory.Value] = struct{}{}
+	}
+	subcategories := make([]string, 0, len(seen))
+	for subcategory := range seen {
+		subcategories = append(subcategories, subcategory)
+	}
+	sort.Strings(subcategories)
+	return subcategories
+}
+
 func paginateCatalogRows(
 	rows []catalogItemRow,
 	requestedPage int,
@@ -218,13 +248,16 @@ func paginateCatalogRows(
 	return rows[start:end], page, pages, start + 1, end
 }
 
-func catalogPageURL(query string, family string, page int) string {
+func catalogPageURL(query string, family string, subcategory string, page int) string {
 	values := make(url.Values)
 	if query != "" {
 		values.Set("q", query)
 	}
 	if family != "" {
 		values.Set("family", family)
+	}
+	if subcategory != "" {
+		values.Set("subcategory", subcategory)
 	}
 	if page > 1 {
 		values.Set("page", strconv.Itoa(page))

@@ -2,7 +2,7 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildSpiritAshData(row ParameterRow) (*schema.SpiritAshData, error) {
+func buildSpiritAshData(item seed, row ParameterRow) (*schema.SpiritAshData, error) {
 	iconID, err := regulationUint32(row, "iconId")
 	if err != nil {
 		return nil, err
@@ -19,11 +19,36 @@ func buildSpiritAshData(row ParameterRow) (*schema.SpiritAshData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &schema.SpiritAshData{
+	sortID, err := regulationUint32(row, "sortId")
+	if err != nil {
+		return nil, err
+	}
+	sortGroupID, err := regulationUint8(row, "sortGroupId")
+	if err != nil {
+		return nil, err
+	}
+	data := &schema.SpiritAshData{
 		SourceRowID:         knownRegulationFact(row.RowID, RegulationTableGoods, "Row ID", row.RowID),
 		IconID:              knownRegulationFact(iconID, RegulationTableGoods, "iconId", row.RowID),
+		SortID:              knownRegulationFact(sortID, RegulationTableGoods, "sortId", row.RowID),
+		SortGroupID:         knownRegulationFact(sortGroupID, RegulationTableGoods, "sortGroupId", row.RowID),
 		ReinforceGoodsID:    knownRegulationFact(reinforceGoodsID, RegulationTableGoods, "reinforceGoodsId", row.RowID),
 		ReinforceMaterialID: knownRegulationFact(reinforceMaterialID, RegulationTableGoods, "reinforceMaterialId", row.RowID),
 		ReinforcePrice:      knownRegulationFact(reinforcePrice, RegulationTableGoods, "reinforcePrice", row.RowID),
-	}, nil
+	}
+	if item.HasLegacyItem && item.SortKey != nil {
+		data.SortIDSFV = saveForgeValue(
+			true,
+			item.SortKey.SortID,
+			sortID,
+			"preserved conflicting SaveForge value from ItemSortKeys.SortId",
+		)
+		data.SortGroupIDSFV = saveForgeValue(
+			true,
+			item.SortKey.SortGroupID,
+			sortGroupID,
+			"preserved conflicting SaveForge value from ItemSortKeys.SortGroupId",
+		)
+	}
+	return data, nil
 }

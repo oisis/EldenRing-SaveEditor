@@ -70,6 +70,8 @@ func validateSpiritAshData(data SpiritAshData, sources map[SourceID]struct{}) er
 	}{
 		{"item.spiritAsh.sourceRowID", factValidator(data.SourceRowID)},
 		{"item.spiritAsh.iconID", factValidator(data.IconID)},
+		{"item.spiritAsh.sortID", factValidator(data.SortID)},
+		{"item.spiritAsh.sortGroupID", factValidator(data.SortGroupID)},
 		{"item.spiritAsh.reinforceGoodsID", factValidator(data.ReinforceGoodsID)},
 		{"item.spiritAsh.reinforceMaterialID", factValidator(data.ReinforceMaterialID)},
 		{"item.spiritAsh.reinforcePrice", factValidator(data.ReinforcePrice)},

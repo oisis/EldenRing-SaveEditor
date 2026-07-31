@@ -1092,6 +1092,14 @@
           "field": "gemMountType,disableGemAttr"
         }
       },
+      "isInfusable-sfv": {
+        "known": true,
+        "value": true,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "preserved conflicting SaveForge value from WeaponStatsV1.IsInfusable"
+        }
+      },
       "isSomber": {
         "known": true,
         "value": false,

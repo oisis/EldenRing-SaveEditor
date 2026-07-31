@@ -120,6 +120,51 @@ func TestCatalogPageSearchesHexadecimalGameID(t *testing.T) {
 	}
 }
 
+func TestCatalogPageFiltersBySubcategory(t *testing.T) {
+	response := request(t, testServer(t).Handler(), http.MethodGet, "/?subcategory=Daggers")
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", response.Code)
+	}
+	body := response.Body.String()
+	for _, expected := range []string{
+		`<option value="Daggers" selected>Daggers</option>`,
+		`href="/items/000F4240">Dagger</a>`,
+		`href="/items/000F436C">Dagger (quality)</a>`,
+	} {
+		if !strings.Contains(body, expected) {
+			t.Errorf("subcategory-filtered catalog does not contain %q", expected)
+		}
+	}
+	if strings.Contains(body, ">Determination</a>") {
+		t.Error("subcategory-filtered catalog unexpectedly contains Determination")
+	}
+}
+
+func TestCatalogSubcategoryFilterIsPreservedInPaginationURL(t *testing.T) {
+	got := catalogPageURL("needle", "weapon", "Daggers", 2)
+	want := "/?family=weapon&page=2&q=needle&subcategory=Daggers"
+	if got != want {
+		t.Fatalf("catalog pagination URL = %q, want %q", got, want)
+	}
+}
+
+func TestCatalogSubcategoryFilterOptionsAreUniqueAndSorted(t *testing.T) {
+	server := testServer(t)
+	server.data.Documents = append(server.data.Documents, loader.Document{
+		Path: "items/weapon/another-dagger.json",
+		Resource: schema.Resource{
+			Item: &schema.ItemDocument{
+				Subcategory: schema.Fact[string]{Known: true, Value: "Daggers"},
+			},
+		},
+	})
+
+	got := server.subcategories()
+	if len(got) != 1 || got[0] != "Daggers" {
+		t.Fatalf("subcategories = %v, want [Daggers]", got)
+	}
+}
+
 func TestCatalogPageListsVariantsAsSearchableEntries(t *testing.T) {
 	response := request(t, testServer(t).Handler(), http.MethodGet, "/?q=0x000F436C")
 	if response.Code != http.StatusOK {

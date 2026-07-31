@@ -9,14 +9,15 @@ import (
 )
 
 type generationContext struct {
-	regulation       *RegulationData
-	regulationParams *RegulationParameterData
-	manifest         schema.Manifest
-	aliasesByItem    map[uint32][]aliasSeed
-	gesturesByItem   map[uint32][]gestureSlotSeed
-	gestureRows      map[uint32][]ParameterRow
-	swordArtsNames   map[int32]schema.Fact[string]
-	technicalItems   map[uint32]technicalRecordSeed
+	regulation        *RegulationData
+	regulationParams  *RegulationParameterData
+	manifest          schema.Manifest
+	aliasesByItem     map[uint32][]aliasSeed
+	gesturesByItem    map[uint32][]gestureSlotSeed
+	gestureRows       map[uint32][]ParameterRow
+	swordArtsNames    map[int32]schema.Fact[string]
+	swordArtsNamesSFV map[int32]*schema.Fact[string]
+	technicalItems    map[uint32]technicalRecordSeed
 }
 
 func newGenerationContext(
@@ -28,7 +29,7 @@ func newGenerationContext(
 	if err != nil {
 		return nil, err
 	}
-	swordArtsNames, err := buildSwordArtsNameFacts(
+	swordArtsNames, swordArtsNamesSFV, err := buildSwordArtsNameData(
 		options.Regulation,
 		options.GameText,
 		snapshot.SwordArtsNames,
@@ -37,14 +38,15 @@ func newGenerationContext(
 		return nil, err
 	}
 	context := &generationContext{
-		regulation:       options.Regulation,
-		regulationParams: options.RegulationParams,
-		manifest:         buildManifest(options, sourceVersions),
-		aliasesByItem:    make(map[uint32][]aliasSeed),
-		gesturesByItem:   make(map[uint32][]gestureSlotSeed),
-		gestureRows:      gestureRows,
-		swordArtsNames:   swordArtsNames,
-		technicalItems:   make(map[uint32]technicalRecordSeed, len(snapshot.TechnicalRecords)),
+		regulation:        options.Regulation,
+		regulationParams:  options.RegulationParams,
+		manifest:          buildManifest(options, sourceVersions),
+		aliasesByItem:     make(map[uint32][]aliasSeed),
+		gesturesByItem:    make(map[uint32][]gestureSlotSeed),
+		gestureRows:       gestureRows,
+		swordArtsNames:    swordArtsNames,
+		swordArtsNamesSFV: swordArtsNamesSFV,
+		technicalItems:    make(map[uint32]technicalRecordSeed, len(snapshot.TechnicalRecords)),
 	}
 	for _, alias := range snapshot.Aliases {
 		context.aliasesByItem[alias.CanonicalID] = append(

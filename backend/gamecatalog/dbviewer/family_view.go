@@ -138,6 +138,11 @@ func fieldLabel(field reflect.StructField) string {
 	if name == "attackPhysical" {
 		return "Physical attack"
 	}
+	if strings.HasSuffix(name, "-sfv") {
+		return humanizeIdentifier(
+			strings.TrimSuffix(name, "-sfv"),
+		) + " — SaveForge value"
+	}
 	return humanizeIdentifier(name)
 }
 

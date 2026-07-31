@@ -26,8 +26,12 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Generate: %v", err)
 	}
-	if catalog.Manifest.SchemaVersion != 2 {
-		t.Fatalf("schema version = %d, want 2", catalog.Manifest.SchemaVersion)
+	if catalog.Manifest.SchemaVersion != schema.CurrentSchemaVersion {
+		t.Fatalf(
+			"schema version = %d, want %d",
+			catalog.Manifest.SchemaVersion,
+			schema.CurrentSchemaVersion,
+		)
 	}
 	if decoded, err := hex.DecodeString(catalog.Manifest.DataVersion); err != nil || len(decoded) != sha256.Size {
 		t.Fatalf("data version = %q, want SHA-256: %v", catalog.Manifest.DataVersion, err)
@@ -234,6 +238,7 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 	assertAllFactProvenance(t, catalog.Resources)
 	assertDataVersionCoversOutput(t, catalog)
 	assertGestureParameterCoverage(t, options.Regulation, catalog)
+	assertSaveForgeValueCoverage(t, catalog.Resources)
 }
 
 func assertGestureIdentityProvenance(
@@ -861,5 +866,59 @@ func writeJSONDigest(t *testing.T, sum interface{ Write([]byte) (int, error) }, 
 	}
 	if _, err := sum.Write([]byte{0}); err != nil {
 		t.Fatalf("hash digest separator: %v", err)
+	}
+}
+
+func assertSaveForgeValueCoverage(
+	t *testing.T,
+	resources []schema.Resource,
+) {
+	t.Helper()
+	actual := make(map[string]int)
+	for index := range resources {
+		countSaveForgeValues(reflect.ValueOf(resources[index]), actual)
+	}
+	expected := map[string]int{
+		"isInfusable-sfv":  58,
+		"maxInventory-sfv": 318,
+		"maxStorage-sfv":   1723,
+	}
+	if !reflect.DeepEqual(actual, expected) {
+		t.Fatalf("SaveForge value coverage = %#v, want %#v", actual, expected)
+	}
+}
+
+func countSaveForgeValues(value reflect.Value, counts map[string]int) {
+	if !value.IsValid() {
+		return
+	}
+	for value.Kind() == reflect.Interface || value.Kind() == reflect.Pointer {
+		if value.IsNil() {
+			return
+		}
+		value = value.Elem()
+	}
+	switch value.Kind() {
+	case reflect.Struct:
+		valueType := value.Type()
+		for index := 0; index < value.NumField(); index++ {
+			fieldType := valueType.Field(index)
+			if fieldType.PkgPath != "" {
+				continue
+			}
+			jsonName := strings.Split(fieldType.Tag.Get("json"), ",")[0]
+			fieldValue := value.Field(index)
+			if strings.HasSuffix(jsonName, "-sfv") {
+				if fieldValue.Kind() == reflect.Pointer && !fieldValue.IsNil() {
+					counts[jsonName]++
+				}
+				continue
+			}
+			countSaveForgeValues(fieldValue, counts)
+		}
+	case reflect.Array, reflect.Slice:
+		for index := 0; index < value.Len(); index++ {
+			countSaveForgeValues(value.Index(index), counts)
+		}
 	}
 }

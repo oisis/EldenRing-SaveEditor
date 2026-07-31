@@ -2,7 +2,7 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildTalismanData(row ParameterRow) (*schema.TalismanData, error) {
+func buildTalismanData(item seed, row ParameterRow) (*schema.TalismanData, error) {
 	iconID, err := regulationUint32(row, "iconId")
 	if err != nil {
 		return nil, err
@@ -19,11 +19,23 @@ func buildTalismanData(row ParameterRow) (*schema.TalismanData, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &schema.TalismanData{
+	data := &schema.TalismanData{
 		SourceRowID: knownRegulationFact(row.RowID, RegulationTableAccessory, "Row ID", row.RowID),
 		IconID:      knownRegulationFact(iconID, RegulationTableAccessory, "iconId", row.RowID),
 		SortID:      knownRegulationFact(sortID, RegulationTableAccessory, "sortId", row.RowID),
 		SortGroupID: knownRegulationFact(sortGroupID, RegulationTableAccessory, "sortGroupId", row.RowID),
 		Weight:      knownRegulationFact(weight, RegulationTableAccessory, "weight", row.RowID),
-	}, nil
+	}
+	if err := attachSimpleFamilySaveForgeValues(
+		item,
+		sortID,
+		sortGroupID,
+		weight,
+		&data.SortIDSFV,
+		&data.SortGroupIDSFV,
+		&data.WeightSFV,
+	); err != nil {
+		return nil, err
+	}
+	return data, nil
 }

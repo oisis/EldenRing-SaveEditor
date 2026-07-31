@@ -134,13 +134,7 @@ func (server *Server) buildItemPage(
 			server.fact("Location", presentation.Location.Known, presentation.Location.Value, presentation.Location.Provenance),
 			server.fact("Icon path", presentation.IconPath.Known, presentation.IconPath.Value, presentation.IconPath.Provenance),
 		},
-		Storage: []factView{
-			server.fact("Record mode", storage.RecordMode.Known, storage.RecordMode.Value, storage.RecordMode.Provenance),
-			server.fact("Maximum inventory", storage.MaxInventory.Known, storage.MaxInventory.Value, storage.MaxInventory.Provenance),
-			server.fact("Maximum storage", storage.MaxStorage.Known, storage.MaxStorage.Value, storage.MaxStorage.Provenance),
-			server.fact("Game maximum inventory", storage.GameMaxInventory.Known, storage.GameMaxInventory.Value, storage.GameMaxInventory.Provenance),
-			server.fact("Game maximum storage", storage.GameMaxStorage.Known, storage.GameMaxStorage.Value, storage.GameMaxStorage.Provenance),
-		},
+		Storage: server.storageFacts(storage),
 		Safety: []factView{
 			server.fact("Cut content", safety.CutContent.Known, safety.CutContent.Value, safety.CutContent.Provenance),
 			server.fact("Ban risk", safety.BanRisk.Known, safety.BanRisk.Value, safety.BanRisk.Provenance),

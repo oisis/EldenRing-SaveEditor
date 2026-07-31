@@ -69,11 +69,15 @@ const (
 )
 
 type ItemStorage struct {
-	RecordMode       Fact[RecordMode] `json:"recordMode"`
-	MaxInventory     Fact[uint32]     `json:"maxInventory"`
-	MaxStorage       Fact[uint32]     `json:"maxStorage"`
-	GameMaxInventory Fact[uint32]     `json:"gameMaxInventory"`
-	GameMaxStorage   Fact[uint32]     `json:"gameMaxStorage"`
+	RecordMode          Fact[RecordMode] `json:"recordMode"`
+	MaxInventory        Fact[uint32]     `json:"maxInventory"`
+	MaxInventorySFV     *Fact[uint32]    `json:"maxInventory-sfv,omitempty"`
+	MaxStorage          Fact[uint32]     `json:"maxStorage"`
+	MaxStorageSFV       *Fact[uint32]    `json:"maxStorage-sfv,omitempty"`
+	GameMaxInventory    Fact[uint32]     `json:"gameMaxInventory"`
+	GameMaxInventorySFV *Fact[uint32]    `json:"gameMaxInventory-sfv,omitempty"`
+	GameMaxStorage      Fact[uint32]     `json:"gameMaxStorage"`
+	GameMaxStorageSFV   *Fact[uint32]    `json:"gameMaxStorage-sfv,omitempty"`
 }
 
 type ItemSafety struct {

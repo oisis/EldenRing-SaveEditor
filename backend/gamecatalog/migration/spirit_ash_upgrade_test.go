@@ -34,6 +34,27 @@ func TestGenerateBuildsEverySpiritAshUpgradeFromRegulationChain(t *testing.T) {
 				upgrade.Rules.MaxLevel,
 			)
 		}
+		if upgrade.Rules.MaxLevelSFV != nil {
+			t.Fatalf(
+				"Spirit Ash 0x%08X retains maxLevel-sfv: %+v",
+				item.GameID.Value,
+				upgrade.Rules.MaxLevelSFV,
+			)
+		}
+		for _, variant := range item.Variants {
+			variantUpgrade := variant.Data.Capabilities.Upgrade
+			if !variantUpgrade.Known ||
+				!variantUpgrade.Enabled ||
+				variantUpgrade.Rules == nil ||
+				variantUpgrade.Rules.MaxLevel != 10 ||
+				variantUpgrade.Rules.MaxLevelSFV != nil {
+				t.Fatalf(
+					"Spirit Ash variant 0x%08X upgrade = %+v",
+					variant.GameID.Value,
+					variantUpgrade,
+				)
+			}
+		}
 		switch upgrade.Rules.Model {
 		case schema.UpgradeModelGraveGlovewort:
 			grave++

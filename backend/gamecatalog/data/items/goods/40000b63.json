@@ -180,16 +180,22 @@
         "known": true,
         "value": 99,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxInventory"
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 2915",
+          "table": "EquipParamGoods",
+          "row": "2915",
+          "field": "maxNum"
         }
       },
       "maxStorage": {
         "known": true,
         "value": 600,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxStorage"
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 2915",
+          "table": "EquipParamGoods",
+          "row": "2915",
+          "field": "maxRepositoryNum"
         }
       },
       "gameMaxInventory": {

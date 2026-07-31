@@ -421,6 +421,9 @@
         "fields": [
           {
             "name": "Row ID"
+          },
+          {
+            "name": "itemId"
           }
         ],
         "provenance": {
@@ -468,16 +471,22 @@
             "known": true,
             "value": 217,
             "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy AllGestures save slot ID"
+              "source": "regulation_gesture_param",
+              "method": "derived canonical save slot ID as GestureParam Row ID * 2 + 1",
+              "table": "GestureParam",
+              "row": "108",
+              "field": "Row ID"
             }
           },
           "itemID": {
             "known": true,
             "value": 1073750873,
             "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy AllGestures item ID"
+              "source": "regulation_gesture_param",
+              "method": "derived full goods item ID from GestureParam itemId",
+              "table": "GestureParam",
+              "row": "108",
+              "field": "itemId"
             }
           },
           "name": {
@@ -507,7 +516,27 @@
               "method": "copied from legacy AllGestures flags"
             }
           },
-          "sourceRecords": null
+          "sourceRecords": [
+            {
+              "table": "GestureParam",
+              "rowID": 108,
+              "fields": [
+                {
+                  "name": "Row ID"
+                },
+                {
+                  "name": "itemId"
+                }
+              ],
+              "provenance": {
+                "source": "regulation_gesture_param",
+                "method": "referenced Regulation parameter row",
+                "table": "GestureParam",
+                "row": "108",
+                "field": "Row ID"
+              }
+            }
+          ]
         }
       ]
     }

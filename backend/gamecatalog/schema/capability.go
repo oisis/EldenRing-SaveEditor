@@ -26,8 +26,9 @@ const (
 )
 
 type UpgradeRules struct {
-	Model    UpgradeModel `json:"model"`
-	MaxLevel uint8        `json:"maxLevel"`
+	Model       UpgradeModel `json:"model"`
+	MaxLevel    uint8        `json:"maxLevel"`
+	MaxLevelSFV *Fact[uint8] `json:"maxLevel-sfv,omitempty"`
 }
 
 type Affinity string

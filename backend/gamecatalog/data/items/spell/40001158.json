@@ -176,18 +176,40 @@
       },
       "maxInventory": {
         "known": true,
+        "value": 99,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxNum from row 4440",
+          "table": "EquipParamGoods",
+          "row": "4440",
+          "field": "maxNum"
+        }
+      },
+      "maxInventory-sfv": {
+        "known": true,
         "value": 1,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxInventory"
+          "method": "preserved conflicting legacy ItemData.MaxInventory"
         }
       },
       "maxStorage": {
         "known": true,
+        "value": 600,
+        "provenance": {
+          "source": "regulation_equip_param_goods",
+          "method": "parsed maxRepositoryNum from row 4440",
+          "table": "EquipParamGoods",
+          "row": "4440",
+          "field": "maxRepositoryNum"
+        }
+      },
+      "maxStorage-sfv": {
+        "known": true,
         "value": 0,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy ItemData.MaxStorage"
+          "method": "preserved conflicting legacy ItemData.MaxStorage"
         }
       },
       "gameMaxInventory": {

@@ -1,0 +1,66 @@
+package dbviewer
+
+import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+
+func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
+	result := []factView{
+		server.fact("Record mode", storage.RecordMode.Known, storage.RecordMode.Value, storage.RecordMode.Provenance),
+		server.fact("Maximum inventory", storage.MaxInventory.Known, storage.MaxInventory.Value, storage.MaxInventory.Provenance),
+	}
+	result = appendSaveForgeStorageFact(
+		server,
+		result,
+		"Maximum inventory — SaveForge value",
+		storage.MaxInventorySFV,
+	)
+	result = append(
+		result,
+		server.fact("Maximum storage", storage.MaxStorage.Known, storage.MaxStorage.Value, storage.MaxStorage.Provenance),
+	)
+	result = appendSaveForgeStorageFact(
+		server,
+		result,
+		"Maximum storage — SaveForge value",
+		storage.MaxStorageSFV,
+	)
+	result = append(
+		result,
+		server.fact("Game maximum inventory", storage.GameMaxInventory.Known, storage.GameMaxInventory.Value, storage.GameMaxInventory.Provenance),
+	)
+	result = appendSaveForgeStorageFact(
+		server,
+		result,
+		"Game maximum inventory — SaveForge value",
+		storage.GameMaxInventorySFV,
+	)
+	result = append(
+		result,
+		server.fact("Game maximum storage", storage.GameMaxStorage.Known, storage.GameMaxStorage.Value, storage.GameMaxStorage.Provenance),
+	)
+	return appendSaveForgeStorageFact(
+		server,
+		result,
+		"Game maximum storage — SaveForge value",
+		storage.GameMaxStorageSFV,
+	)
+}
+
+func appendSaveForgeStorageFact(
+	server *Server,
+	facts []factView,
+	label string,
+	value *schema.Fact[uint32],
+) []factView {
+	if value == nil {
+		return facts
+	}
+	return append(
+		facts,
+		server.fact(
+			label,
+			value.Known,
+			value.Value,
+			value.Provenance,
+		),
+	)
+}

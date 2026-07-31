@@ -141,6 +141,29 @@ func (context *generationContext) sourceRecordsForItem(
 			},
 		})
 	}
+	if item.EquipLoad != nil {
+		family, _, familyErr := itemFamily(item)
+		if familyErr != nil {
+			return nil, familyErr
+		}
+		modifier, modifierErr := context.readRegulationEquipLoadModifier(
+			item.ID,
+			family,
+			primary.Row,
+		)
+		if modifierErr != nil {
+			return nil, modifierErr
+		}
+		record, recordErr := context.requiredParameterRecord(
+			RegulationTableSpEffect,
+			modifier.row.RowID,
+			modifier.referenceField,
+		)
+		if recordErr != nil {
+			return nil, recordErr
+		}
+		records = append(records, record)
+	}
 	return records, nil
 }
 

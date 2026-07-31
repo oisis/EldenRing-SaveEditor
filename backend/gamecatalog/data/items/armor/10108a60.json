@@ -376,16 +376,22 @@
           "known": true,
           "value": 2,
           "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy EquipLoadModifiers.EnduranceBonus"
+            "source": "regulation_sp_effect_param",
+            "method": "read the permanent equip-load endurance bonus from the SpEffect referenced by residentSpEffectId",
+            "table": "SpEffectParam",
+            "row": "6108400",
+            "field": "addEndureStatus"
           }
         },
         "equipLoadRate": {
           "known": true,
           "value": 0,
           "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy EquipLoadModifiers.EquipLoadRate"
+            "source": "regulation_sp_effect_param",
+            "method": "converted the permanent equip-load multiplier to an additive rate from the SpEffect referenced by residentSpEffectId",
+            "table": "SpEffectParam",
+            "row": "6108400",
+            "field": "equipWeightChangeRate"
           }
         }
       }
@@ -511,6 +517,28 @@
           "method": "referenced Regulation parameter row",
           "table": "ReinforceParamProtector",
           "row": "0",
+          "field": "Row ID"
+        }
+      },
+      {
+        "table": "SpEffectParam",
+        "rowID": 6108400,
+        "fields": [
+          {
+            "name": "Row ID"
+          },
+          {
+            "name": "addEndureStatus"
+          },
+          {
+            "name": "equipWeightChangeRate"
+          }
+        ],
+        "provenance": {
+          "source": "regulation_sp_effect_param",
+          "method": "referenced Regulation parameter row",
+          "table": "SpEffectParam",
+          "row": "6108400",
           "field": "Row ID"
         }
       }

@@ -1,6 +1,9 @@
 package schema
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+)
 
 func validateItemDocument(item ItemDocument, sources map[SourceID]struct{}) error {
 	if err := validateFact("item.gameID", item.GameID, sources); err != nil {
@@ -69,6 +72,13 @@ func validateItemDocument(item ItemDocument, sources map[SourceID]struct{}) erro
 		return err
 	}
 	if err := validateFamilyDocument(item, sources); err != nil {
+		return err
+	}
+	if err := validateSaveForgeValues(
+		"item",
+		reflect.ValueOf(item),
+		sources,
+	); err != nil {
 		return err
 	}
 	document := item

@@ -72,6 +72,10 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 	if err != nil {
 		return builtDocumentData{}, err
 	}
+	modifiers, err := context.buildModifiers(item, family, row, hasPrimaryRow)
+	if err != nil {
+		return builtDocumentData{}, err
+	}
 	data := builtDocumentData{
 		Category:                itemCategoryFact(item),
 		Subcategory:             itemSubcategoryFact(item),
@@ -81,7 +85,7 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 		Capabilities:            capabilities,
 		Safety:                  context.buildSafety(item),
 		Acquisition:             buildAcquisition(item),
-		Modifiers:               buildModifiers(item),
+		Modifiers:               modifiers,
 		Links:                   buildLinks(item.Links),
 		Unlocks:                 buildUnlocks(item.Unlocks),
 		RelatedTechnicalRecords: relatedTechnicalRecords,
@@ -102,7 +106,7 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 				item.ID,
 			)
 		}
-		data.SpiritAsh, err = buildSpiritAshData(row)
+		data.SpiritAsh, err = buildSpiritAshData(item, row)
 	}
 	return data, err
 }

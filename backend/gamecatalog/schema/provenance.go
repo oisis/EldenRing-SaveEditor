@@ -2,6 +2,13 @@ package schema
 
 type SourceID string
 
+const SourceSaveForgeLegacy SourceID = "legacy_db_data"
+
+const (
+	MinimumSchemaVersion uint32 = 1
+	CurrentSchemaVersion uint32 = 3
+)
+
 type EvidenceLevel string
 
 const (

@@ -22,18 +22,6 @@ func (context *generationContext) buildWeaponData(
 	if err != nil {
 		return nil, err
 	}
-	swordArtsParamID, err := regulationInt32(row, "swordArtsParamId")
-	if err != nil {
-		return nil, err
-	}
-	if item.HasLegacyItem && swordArtsParamID != stats.DefaultAoWID {
-		return nil, fmt.Errorf(
-			"legacy WeaponStatsV1.DefaultAoWID %d differs from EquipParamWeapon row %d swordArtsParamId %d",
-			stats.DefaultAoWID,
-			row.RowID,
-			swordArtsParamID,
-		)
-	}
 	equipment, err := readWeaponEquipmentFlags(row)
 	if err != nil {
 		return nil, err
@@ -86,6 +74,7 @@ func (context *generationContext) buildWeaponData(
 		StatusScarletRot:       weaponStatusFact(stats.StatusScarletRot, "StatusScarletRot", stats.Warnings),
 		DefaultAshOfWarID:      knownRegulationFact(core.defaultAshOfWarID, RegulationTableWeapon, "swordArtsParamId", row.RowID),
 		SwordArtsName:          context.swordArtsNameFact(core.defaultAshOfWarID),
+		SwordArtsNameSFV:       context.swordArtsNameSaveForgeValue(core.defaultAshOfWarID),
 		IsInfusable:            knownRegulationDerivedFact(core.isInfusable, RegulationTableWeapon, "derived from gemMountType == 2 and disableGemAttr == 0", row.RowID, "gemMountType,disableGemAttr"),
 		IsSomber:               knownRegulationDerivedFact(core.isSomber, RegulationTableReinforceWeapon, "derived from an 11-row reinforcement band", uint32(core.reinforceTypeID), "Row ID"),
 		MaxUpgrade:             knownRegulationDerivedFact(core.maxUpgrade, RegulationTableReinforceWeapon, "derived from the reinforcement band row count", uint32(core.reinforceTypeID), "Row ID"),
@@ -108,6 +97,15 @@ func (context *generationContext) buildWeaponData(
 		passiveEffects,
 	)
 	if err != nil {
+		return nil, err
+	}
+	if err := context.attachWeaponSaveForgeValues(
+		data,
+		item,
+		core,
+		sortID,
+		row.RowID,
+	); err != nil {
 		return nil, err
 	}
 	return data, nil

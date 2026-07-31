@@ -46,3 +46,13 @@ func TestValidateManifestAcceptsGameDataEvidence(t *testing.T) {
 		t.Fatalf("ValidateManifest: %v", err)
 	}
 }
+
+func TestValidateManifestRejectsFutureSchemaVersion(t *testing.T) {
+	manifest, _ := prototype.Data()
+	manifest.SchemaVersion = schema.CurrentSchemaVersion + 1
+
+	_, err := schema.ValidateManifest(manifest)
+	if err == nil || !strings.Contains(err.Error(), "unsupported") {
+		t.Fatalf("ValidateManifest error = %v, want unsupported-version rejection", err)
+	}
+}

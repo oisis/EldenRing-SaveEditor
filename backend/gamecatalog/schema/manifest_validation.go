@@ -3,8 +3,14 @@ package schema
 import "fmt"
 
 func ValidateManifest(manifest Manifest) (map[SourceID]struct{}, error) {
-	if manifest.SchemaVersion == 0 {
-		return nil, fmt.Errorf("schema version must be greater than zero")
+	if manifest.SchemaVersion < MinimumSchemaVersion ||
+		manifest.SchemaVersion > CurrentSchemaVersion {
+		return nil, fmt.Errorf(
+			"schema version %d is unsupported; supported range is %d-%d",
+			manifest.SchemaVersion,
+			MinimumSchemaVersion,
+			CurrentSchemaVersion,
+		)
 	}
 	if manifest.DataVersion == "" {
 		return nil, fmt.Errorf("data version is required")

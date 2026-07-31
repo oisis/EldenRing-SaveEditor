@@ -288,18 +288,49 @@ func (context *generationContext) buildStorage(
 		if err != nil {
 			return schema.ItemStorage{}, err
 		}
-		storage.GameMaxInventory = regulationGameLimitFact(
+		authoritativeInventory := regulationGameLimitFact(
 			maxInventory,
 			storage.GameMaxInventory,
 			"maxNum",
 			goodsRow.RowID,
 		)
-		storage.GameMaxStorage = regulationGameLimitFact(
+		authoritativeStorage := regulationGameLimitFact(
 			maxStorage,
 			storage.GameMaxStorage,
 			"maxRepositoryNum",
 			goodsRow.RowID,
 		)
+		if item.HasLegacyItem || item.RegulationOnlyVariant {
+			storage.MaxInventorySFV = saveForgeValue(
+				item.HasLegacyItem,
+				storage.MaxInventory.Value,
+				authoritativeInventory.Value,
+				"preserved conflicting legacy ItemData.MaxInventory",
+			)
+			storage.MaxStorageSFV = saveForgeValue(
+				item.HasLegacyItem,
+				storage.MaxStorage.Value,
+				authoritativeStorage.Value,
+				"preserved conflicting legacy ItemData.MaxStorage",
+			)
+			storage.MaxInventory = authoritativeInventory
+			storage.MaxStorage = authoritativeStorage
+		}
+		storage.GameMaxInventorySFV = saveForgeValue(
+			item.HasLegacyItem && storage.GameMaxInventory.Known,
+			storage.GameMaxInventory.Value,
+			authoritativeInventory.Value,
+			"preserved conflicting legacy technical inventory limit",
+		)
+		storage.GameMaxStorageSFV = saveForgeValue(
+			item.HasLegacyItem && storage.GameMaxStorage.Known,
+			storage.GameMaxStorage.Value,
+			authoritativeStorage.Value,
+			"preserved conflicting legacy technical storage limit",
+		)
+		storage.GameMaxInventory = authoritativeInventory
+		storage.GameMaxStorage = authoritativeStorage
+		discardReviewedStorageSaveForgeValues(&storage, item, family)
 		return storage, nil
 	}
 	return storage, nil

@@ -6,7 +6,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
-func TestGoodsStorageGameLimitsRegulationOverridesLegacy(t *testing.T) {
+func TestGoodsStorageRegulationValuesPreserveConflictingSaveForgeValues(t *testing.T) {
 	context := generationContext{}
 	item := seed{
 		HasLegacyItem:         true,
@@ -40,9 +40,9 @@ func TestGoodsStorageGameLimitsRegulationOverridesLegacy(t *testing.T) {
 	if err != nil {
 		t.Fatalf("buildStorage: %v", err)
 	}
-	if storage.MaxInventory.Value != 7 || storage.MaxStorage.Value != 8 {
+	if storage.MaxInventory.Value != 17 || storage.MaxStorage.Value != 18 {
 		t.Fatalf(
-			"authored limits = %d/%d, want 7/8",
+			"storage limits = %d/%d, want Regulation 17/18",
 			storage.MaxInventory.Value,
 			storage.MaxStorage.Value,
 		)
@@ -63,6 +63,57 @@ func TestGoodsStorageGameLimitsRegulationOverridesLegacy(t *testing.T) {
 			storage.GameMaxInventory.Provenance.Source,
 			storage.GameMaxStorage.Provenance.Source,
 		)
+	}
+	if storage.MaxInventorySFV == nil ||
+		storage.MaxInventorySFV.Value != 7 ||
+		storage.MaxStorageSFV == nil ||
+		storage.MaxStorageSFV.Value != 8 {
+		t.Fatalf("SaveForge storage values = %#v", storage)
+	}
+	if storage.GameMaxInventorySFV == nil ||
+		storage.GameMaxInventorySFV.Value != 99 ||
+		storage.GameMaxStorageSFV == nil ||
+		storage.GameMaxStorageSFV.Value != 100 {
+		t.Fatalf("SaveForge technical limits = %#v", storage)
+	}
+}
+
+func TestCrystalTorrentStorageUsesRegulationAndPreservesSaveForgeValues(t *testing.T) {
+	regulation := readLocalRegulationFixture(t)
+	context := generationContext{regulation: regulation}
+	item := findSeed(t, collectLegacySnapshot().Items, 0x400011A8)
+	identity, err := primaryRegulationForLegacyItem(*item)
+	if err != nil {
+		t.Fatal(err)
+	}
+	primary, exists, err := regulation.LookupFamilyRow(
+		identity.Family,
+		RegulationTableRolePrimary,
+		identity.RowID,
+	)
+	if err != nil || !exists {
+		t.Fatalf("Magic row lookup = %+v, %t, %v", primary, exists, err)
+	}
+	storage, err := context.buildStorage(
+		*item,
+		schema.ItemFamilySpell,
+		primary.Row,
+		true,
+	)
+	if err != nil {
+		t.Fatalf("buildStorage: %v", err)
+	}
+	if storage.MaxInventory.Value != 99 ||
+		storage.MaxStorage.Value != 600 ||
+		storage.GameMaxInventory.Value != 99 ||
+		storage.GameMaxStorage.Value != 600 {
+		t.Fatalf("Crystal Torrent Regulation limits = %#v", storage)
+	}
+	if storage.MaxInventorySFV == nil ||
+		storage.MaxInventorySFV.Value != 1 ||
+		storage.MaxStorageSFV == nil ||
+		storage.MaxStorageSFV.Value != 0 {
+		t.Fatalf("Crystal Torrent SaveForge limits = %#v", storage)
 	}
 }
 
