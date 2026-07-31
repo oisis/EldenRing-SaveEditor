@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.8] - 2026-07-31
+
 ### fix(inventory): preserve native low acquisition indices
 
 Inventory integrity checks and Repair Issues no longer classify legitimate
