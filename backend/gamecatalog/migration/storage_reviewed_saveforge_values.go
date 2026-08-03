@@ -110,6 +110,69 @@ var reviewedNonDepositableKeyItemStorageIDs = map[uint32]struct{}{
 	0x400022D6: {},
 	0x400022D7: {},
 	0x400022D8: {},
+	0x400022D9: {}, // Nomadic Merchant's Bell Bearing [1]
+	0x400022DA: {}, // Nomadic Merchant's Bell Bearing [2]
+	0x400022DB: {}, // Nomadic Merchant's Bell Bearing [3]
+	0x400022DC: {}, // Nomadic Merchant's Bell Bearing [4]
+	0x400022DD: {}, // Nomadic Merchant's Bell Bearing [5]
+	0x400022DE: {}, // Isolated Merchant's Bell Bearing [1]
+	0x400022DF: {}, // Isolated Merchant's Bell Bearing [2]
+	0x400022E0: {}, // Nomadic Merchant's Bell Bearing [6]
+	0x400022E1: {}, // Hermit Merchant's Bell Bearing [1]
+	0x400022E2: {}, // Nomadic Merchant's Bell Bearing [7]
+	0x400022E3: {}, // Nomadic Merchant's Bell Bearing [8]
+	0x400022E4: {}, // Nomadic Merchant's Bell Bearing [9]
+	0x400022E5: {}, // Nomadic Merchant's Bell Bearing [10]
+	0x400022E6: {}, // Nomadic Merchant's Bell Bearing [11]
+	0x400022E7: {}, // Isolated Merchant's Bell Bearing [3]
+	0x400022E8: {}, // Hermit Merchant's Bell Bearing [2]
+	0x400022E9: {}, // Abandoned Merchant's Bell Bearing
+	0x400022EA: {}, // Hermit Merchant's Bell Bearing [3]
+	0x400022EB: {}, // Imprisoned Merchant's Bell Bearing
+	0x400022EC: {}, // Iji's Bell Bearing
+	0x400022ED: {}, // Rogier's Bell Bearing
+	0x400022EE: {}, // Blackguard's Bell Bearing
+	0x400022EF: {}, // Corhyn's Bell Bearing
+	0x400022F0: {}, // Gowry's Bell Bearing
+	0x400022F1: {}, // Bone Peddler's Bell Bearing
+	0x400022F2: {}, // Meat Peddler's Bell Bearing
+	0x400022F3: {}, // Medicine Peddler's Bell Bearing
+	0x400022F4: {}, // Gravity Stone Peddler's Bell Bearing
+	0x400022F7: {}, // Smithing-Stone Miner's Bell Bearing [1]
+	0x400022F8: {}, // Smithing-Stone Miner's Bell Bearing [2]
+	0x400022F9: {}, // Smithing-Stone Miner's Bell Bearing [3]
+	0x400022FA: {}, // Smithing-Stone Miner's Bell Bearing [4]
+	0x400022FB: {}, // Somberstone Miner's Bell Bearing [1]
+	0x400022FC: {}, // Somberstone Miner's Bell Bearing [2]
+	0x400022FD: {}, // Somberstone Miner's Bell Bearing [3]
+	0x400022FE: {}, // Somberstone Miner's Bell Bearing [4]
+	0x400022FF: {}, // Somberstone Miner's Bell Bearing [5]
+	0x40002300: {}, // Glovewort Picker's Bell Bearing [1]
+	0x40002301: {}, // Glovewort Picker's Bell Bearing [2]
+	0x40002302: {}, // Glovewort Picker's Bell Bearing [3]
+	0x40002303: {}, // Ghost-Glovewort Picker's Bell Bearing [1]
+	0x40002304: {}, // Ghost-Glovewort Picker's Bell Bearing [2]
+	0x40002305: {}, // Ghost-Glovewort Picker's Bell Bearing [3]
+	0x40002310: {}, // Unalloyed Gold Needle
+	0x40002311: {}, // Valkyrie's Prosthesis
+	0x40002313: {}, // Beast Eye
+	0x40002314: {}, // Weathered Dagger
+	0x40002458: {}, // Fugitive Warrior's Recipe [5]
+	0x40002760: {}, // Great Rune of the Unborn
+	0x401EA3C3: {}, // Igon's Furled Finger
+	0x401EA3C8: {}, // Hole-Laden Necklace
+	0x401EA3D3: {}, // Black Syrup
+	0x401EA3D5: {}, // Messmer's Kindling
+	0x401EA744: {}, // Moore's Bell Bearing
+	0x401EA745: {}, // Ymir's Bell Bearing
+	0x401EA746: {}, // Herbalist's Bell Bearing
+	0x401EA747: {}, // Mushroom-Seller's Bell Bearing [1]
+	0x401EA748: {}, // Mushroom-Seller's Bell Bearing [2]
+	0x401EA749: {}, // Greasemonger's Bell Bearing
+	0x401EA74A: {}, // Moldmonger's Bell Bearing
+	0x401EA74B: {}, // Igon's Bell Bearing
+	0x401EA74C: {}, // Spellmachinist's Bell Bearing
+	0x401EA74D: {}, // String-Seller's Bell Bearing
 }
 
 func promoteSafeModeStorageLimits(

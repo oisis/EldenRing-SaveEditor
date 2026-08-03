@@ -162,8 +162,8 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 			t.Fatalf("item 0x%08X isDepositable = %+v, want false", itemID, item.Goods)
 		}
 	}
-	if len(reviewedNonDepositableKeyItemStorageIDs) != 62 {
-		t.Fatalf("reviewed non-depositable Key Item IDs = %d, want 62", len(reviewedNonDepositableKeyItemStorageIDs))
+	if len(reviewedNonDepositableKeyItemStorageIDs) != 125 {
+		t.Fatalf("reviewed non-depositable Key Item IDs = %d, want 125", len(reviewedNonDepositableKeyItemStorageIDs))
 	}
 
 	infoCount := 0
