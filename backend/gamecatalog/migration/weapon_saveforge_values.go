@@ -67,7 +67,6 @@ func (context *generationContext) attachWeaponSaveForgeValues(
 	}
 	weaponEditType := legacyCandidate[uint16]{}
 	weaponEditGem := legacyCandidate[uint8]{}
-	weaponEditAffinity := legacyCandidate[bool]{}
 	if item.WeaponEdit != nil {
 		weaponEditType = legacyCandidate[uint16]{
 			available: true,
@@ -78,11 +77,6 @@ func (context *generationContext) attachWeaponSaveForgeValues(
 			available: true,
 			value:     item.WeaponEdit.GemMountType,
 			source:    "WeaponGemMounts.GemMountType",
-		}
-		weaponEditAffinity = legacyCandidate[bool]{
-			available: true,
-			value:     item.WeaponEdit.CanChangeAffinity,
-			source:    "WeaponGemMounts.CanChangeAffinity",
 		}
 	}
 	sortIDCandidate := legacyCandidate[uint32]{}
@@ -186,14 +180,6 @@ func (context *generationContext) attachWeaponSaveForgeValues(
 		if err != nil {
 			return err
 		}
-	}
-	if data.IsInfusableSFV, err = saveForgeConsensusValue(
-		"isInfusable",
-		core.isInfusable,
-		legacyCandidate[bool]{true, stats.IsInfusable, "WeaponStatsV1.IsInfusable"},
-		weaponEditAffinity,
-	); err != nil {
-		return err
 	}
 	if data.IsSomberSFV, err = saveForgeConsensusValue(
 		"isSomber",

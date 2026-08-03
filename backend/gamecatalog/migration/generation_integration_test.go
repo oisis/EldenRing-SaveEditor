@@ -879,7 +879,6 @@ func assertSaveForgeValueCoverage(
 		countSaveForgeValues(reflect.ValueOf(resources[index]), actual)
 	}
 	expected := map[string]int{
-		"isInfusable-sfv":  58,
 		"maxInventory-sfv": 318,
 		"maxStorage-sfv":   1723,
 	}
