@@ -47,6 +47,12 @@ var nonDepositableKeyItemIDs = map[uint32]struct{}{
 	0x400004D8: {}, // Shabriri Grape
 }
 
+var reviewedDepositableKeyItemStorageIDs = map[uint32]struct{}{
+	0x40000852: {}, // Celestial Dew
+	0x4000274C: {}, // Dragon Heart
+	0x40001F40: {}, // Stonesword Key
+}
+
 var reviewedNonDepositableKeyItemStorageIDs = map[uint32]struct{}{
 	0x40000073: {},
 	0x40001F4A: {},
@@ -238,6 +244,9 @@ func promoteKeyItemNG0InventoryLimits(
 	}
 	storage.MaxInventorySFV = nil
 
+	if _, ok := reviewedDepositableKeyItemStorageIDs[item.ID]; ok {
+		storage.MaxStorageSFV = nil
+	}
 	if _, ok := nonDepositableKeyItemIDs[item.ID]; ok {
 		storage.MaxStorageSFV = nil
 	}

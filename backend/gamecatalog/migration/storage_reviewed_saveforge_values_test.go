@@ -528,9 +528,9 @@ func TestKeyItemNG0InventoryLimitsAreSafeModeCaps(t *testing.T) {
 		maxStorageSFV int
 		depositable   bool
 	}{
-		0x40000852: {inventory: 10, maxStorageSFV: 0, depositable: true},   // Celestial Dew
+		0x40000852: {inventory: 10, maxStorageSFV: -1, depositable: true},  // Celestial Dew
 		0x4000082A: {inventory: 9, maxStorageSFV: -1, depositable: true},   // Deathroot
-		0x4000274C: {inventory: 27, maxStorageSFV: 0, depositable: true},   // Dragon Heart
+		0x4000274C: {inventory: 27, maxStorageSFV: -1, depositable: true},  // Dragon Heart
 		0x401EA3CB: {inventory: 1, maxStorageSFV: -1, depositable: true},   // Heart of Bayle
 		0x40001FFA: {inventory: 4, maxStorageSFV: -1, depositable: false},  // Imbued Sword Key
 		0x40001FF9: {inventory: 18, maxStorageSFV: -1, depositable: false}, // Larval Tear
@@ -539,7 +539,7 @@ func TestKeyItemNG0InventoryLimitsAreSafeModeCaps(t *testing.T) {
 		0x40000087: {inventory: 3, maxStorageSFV: -1, depositable: false},  // Phantom Great Rune
 		0x40002001: {inventory: 6, maxStorageSFV: -1, depositable: false},  // Seedbed Curse
 		0x400004D8: {inventory: 3, maxStorageSFV: -1, depositable: false},  // Shabriri Grape
-		0x40001F40: {inventory: 81, maxStorageSFV: 0, depositable: true},   // Stonesword Key
+		0x40001F40: {inventory: 81, maxStorageSFV: -1, depositable: true},  // Stonesword Key
 	}
 
 	for itemID, want := range expected {
