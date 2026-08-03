@@ -6,7 +6,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
-func TestGoodsStorageRegulationValuesPreserveConflictingSaveForgeValues(t *testing.T) {
+func TestGoodsStorageRegulationValuesDiscardReviewedSaveForgeValues(t *testing.T) {
 	context := generationContext{}
 	item := seed{
 		HasLegacyItem:         true,
@@ -64,11 +64,8 @@ func TestGoodsStorageRegulationValuesPreserveConflictingSaveForgeValues(t *testi
 			storage.GameMaxStorage.Provenance.Source,
 		)
 	}
-	if storage.MaxInventorySFV == nil ||
-		storage.MaxInventorySFV.Value != 7 ||
-		storage.MaxStorageSFV == nil ||
-		storage.MaxStorageSFV.Value != 8 {
-		t.Fatalf("SaveForge storage values = %#v", storage)
+	if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
+		t.Fatalf("reviewed tool retains SaveForge storage values: %#v", storage)
 	}
 	if storage.GameMaxInventorySFV == nil ||
 		storage.GameMaxInventorySFV.Value != 99 ||
@@ -127,7 +124,7 @@ func TestStoragePromotesLegacyLimitsToSafeMode(t *testing.T) {
 	}
 }
 
-func TestCrystalTorrentStorageUsesRegulationAndPreservesSaveForgeValues(t *testing.T) {
+func TestCrystalTorrentStorageUsesRegulationAndDiscardsReviewedSaveForgeValues(t *testing.T) {
 	regulation := readLocalRegulationFixture(t)
 	context := generationContext{regulation: regulation}
 	item := findSeed(t, collectLegacySnapshot().Items, 0x400011A8)
@@ -158,11 +155,8 @@ func TestCrystalTorrentStorageUsesRegulationAndPreservesSaveForgeValues(t *testi
 		storage.GameMaxStorage.Value != 600 {
 		t.Fatalf("Crystal Torrent Regulation limits = %#v", storage)
 	}
-	if storage.MaxInventorySFV == nil ||
-		storage.MaxInventorySFV.Value != 1 ||
-		storage.MaxStorageSFV == nil ||
-		storage.MaxStorageSFV.Value != 0 {
-		t.Fatalf("Crystal Torrent SaveForge limits = %#v", storage)
+	if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
+		t.Fatalf("Crystal Torrent retains reviewed SaveForge limits: %#v", storage)
 	}
 }
 
