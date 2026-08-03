@@ -17,9 +17,23 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 
 	theRing := findGeneratedItem(t, catalog, 0x4000235A).Storage
 	if theRing.MaxStorage.Value != 1 ||
-		theRing.MaxStorageSFV == nil ||
-		theRing.MaxStorageSFV.Value != 0 {
+		theRing.MaxStorageSFV != nil {
 		t.Fatalf("The Ring storage = %+v", theRing)
+	}
+
+	gestureCount := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != gesturesCategory {
+			continue
+		}
+		gestureCount++
+		if item.Storage.MaxStorageSFV != nil {
+			t.Fatalf("gesture 0x%08X retains maxStorage-sfv: %+v", item.GameID.Value, item.Storage)
+		}
+	}
+	if gestureCount != 56 {
+		t.Fatalf("gesture records = %d, want 56", gestureCount)
 	}
 }
 

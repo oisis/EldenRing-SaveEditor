@@ -7,6 +7,7 @@ const waitGestureItemID uint32 = 0x40002337
 const bolsteringMaterialsCategory = "bolstering_materials"
 const incantationsCategory = "incantations"
 const sorceriesCategory = "sorceries"
+const gesturesCategory = "gestures"
 
 func promoteSafeModeStorageLimits(
 	storage *schema.ItemStorage,
@@ -40,7 +41,11 @@ func discardReviewedStorageSaveForgeValues(
 	item seed,
 	family schema.ItemFamily,
 ) {
-	if family == schema.ItemFamilyGesture && item.ID == waitGestureItemID {
+	if family != schema.ItemFamilyGesture {
+		return
+	}
+	storage.MaxStorageSFV = nil
+	if item.ID == waitGestureItemID {
 		storage.MaxInventorySFV = nil
 	}
 }
