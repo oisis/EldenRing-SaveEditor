@@ -111,6 +111,25 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("World Map records = %d, want 24", worldMapCount)
 	}
 
+	spellbookCount := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != "key_items" ||
+			item.Subcategory.Value != spellbooksSubcategory {
+			continue
+		}
+		spellbookCount++
+		if item.Storage.MaxInventorySFV != nil || item.Storage.MaxStorageSFV != nil {
+			t.Fatalf("Spellbook 0x%08X retains SaveForge storage values: %+v", item.GameID.Value, item.Storage)
+		}
+		if item.Goods == nil || item.Goods.IsDepositable.Value {
+			t.Fatalf("Spellbook 0x%08X isDepositable = %+v, want false", item.GameID.Value, item.Goods)
+		}
+	}
+	if spellbookCount != 15 {
+		t.Fatalf("Spellbook records = %d, want 15", spellbookCount)
+	}
+
 	infoCount := 0
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item

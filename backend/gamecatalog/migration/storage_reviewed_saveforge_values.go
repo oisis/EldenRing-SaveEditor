@@ -18,6 +18,7 @@ const infoCategory = "info"
 const cookbooksSubcategory = "Cookbooks"
 const crystalTearsSubcategory = "Crystal Tears"
 const worldMapsSubcategory = "World Maps"
+const spellbooksSubcategory = "Sorcery Scrolls + Incantation Scrolls"
 
 var safeModeNG0InventoryByKeyItemID = map[uint32]uint32{
 	0x40000852: 10, // Celestial Dew
@@ -132,6 +133,10 @@ func discardReviewedStorageSaveForgeValues(
 		storage.MaxStorageSFV = nil
 	}
 	if item.Category == "key_items" && item.Subcategory == worldMapsSubcategory {
+		storage.MaxInventorySFV = nil
+		storage.MaxStorageSFV = nil
+	}
+	if item.Category == "key_items" && item.Subcategory == spellbooksSubcategory {
 		storage.MaxInventorySFV = nil
 		storage.MaxStorageSFV = nil
 	}
