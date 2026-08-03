@@ -16,6 +16,7 @@ const toolsCategory = "tools"
 const gesturesCategory = "gestures"
 const infoCategory = "info"
 const cookbooksSubcategory = "Cookbooks"
+const crystalTearsSubcategory = "Crystal Tears"
 
 func promoteSafeModeStorageLimits(
 	storage *schema.ItemStorage,
@@ -73,6 +74,10 @@ func discardReviewedStorageSaveForgeValues(
 		storage.MaxStorageSFV = nil
 	}
 	if item.Category == "key_items" && item.Subcategory == cookbooksSubcategory {
+		storage.MaxInventorySFV = nil
+		storage.MaxStorageSFV = nil
+	}
+	if item.Category == "key_items" && item.Subcategory == crystalTearsSubcategory {
 		storage.MaxInventorySFV = nil
 		storage.MaxStorageSFV = nil
 	}

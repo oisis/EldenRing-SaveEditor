@@ -73,6 +73,25 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("Cookbook records = %d, want 120", cookbookCount)
 	}
 
+	crystalTearCount := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != "key_items" ||
+			item.Subcategory.Value != crystalTearsSubcategory {
+			continue
+		}
+		crystalTearCount++
+		if item.Storage.MaxInventorySFV != nil || item.Storage.MaxStorageSFV != nil {
+			t.Fatalf("Crystal Tear 0x%08X retains SaveForge storage values: %+v", item.GameID.Value, item.Storage)
+		}
+		if item.Goods == nil || item.Goods.IsDepositable.Value {
+			t.Fatalf("Crystal Tear 0x%08X isDepositable = %+v, want false", item.GameID.Value, item.Goods)
+		}
+	}
+	if crystalTearCount != 40 {
+		t.Fatalf("Crystal Tear records = %d, want 40", crystalTearCount)
+	}
+
 	infoCount := 0
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
