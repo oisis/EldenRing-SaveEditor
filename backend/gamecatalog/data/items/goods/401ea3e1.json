@@ -189,12 +189,12 @@
           "field": "maxNum"
         }
       },
-      "maxInventory-sfv": {
+      "safeModeMaxInventory": {
         "known": true,
-        "value": 6,
+        "value": 9,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxInventory"
+          "method": "defined Safe Mode maximum inventory for a single full NG0 playthrough"
         }
       },
       "maxStorage": {
@@ -206,14 +206,6 @@
           "table": "EquipParamGoods",
           "row": "2008033",
           "field": "maxRepositoryNum"
-        }
-      },
-      "maxStorage-sfv": {
-        "known": true,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxStorage"
         }
       },
       "gameMaxInventory": {

@@ -442,3 +442,50 @@ func TestCutContentToolStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("cut-content tools missing from catalog: %#v", expectedLimits)
 	}
 }
+
+func TestKeyItemNG0InventoryLimitsAreSafeModeCaps(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	expected := map[uint32]struct {
+		inventory     uint32
+		maxStorageSFV int
+		depositable   bool
+	}{
+		0x40000852: {inventory: 10, maxStorageSFV: 0, depositable: true},   // Celestial Dew
+		0x4000082A: {inventory: 9, maxStorageSFV: 0, depositable: true},    // Deathroot
+		0x4000274C: {inventory: 27, maxStorageSFV: 0, depositable: true},   // Dragon Heart
+		0x401EA3CB: {inventory: 1, maxStorageSFV: -1, depositable: true},   // Heart of Bayle
+		0x40001FFA: {inventory: 4, maxStorageSFV: -1, depositable: false},  // Imbued Sword Key
+		0x40001FF9: {inventory: 18, maxStorageSFV: -1, depositable: false}, // Larval Tear
+		0x401EA3E1: {inventory: 9, maxStorageSFV: -1, depositable: false},  // Larval Tear (DLC)
+		0x40002756: {inventory: 20, maxStorageSFV: 0, depositable: true},   // Lost Ashes of War
+		0x40000087: {inventory: 3, maxStorageSFV: -1, depositable: false},  // Phantom Great Rune
+		0x40002001: {inventory: 6, maxStorageSFV: -1, depositable: false},  // Seedbed Curse
+		0x400004D8: {inventory: 3, maxStorageSFV: -1, depositable: false},  // Shabriri Grape
+		0x40001F40: {inventory: 81, maxStorageSFV: 0, depositable: true},   // Stonesword Key
+	}
+
+	for itemID, want := range expected {
+		item := findGeneratedItem(t, catalog, itemID)
+		storage := item.Storage
+		if storage.MaxInventorySFV != nil ||
+			storage.SafeModeMaxInventory == nil ||
+			storage.SafeModeMaxInventory.Value != want.inventory ||
+			storage.SafeModeMaxStorage != nil {
+			t.Fatalf("item 0x%08X Safe Mode inventory = %+v, want %d", itemID, storage, want.inventory)
+		}
+		if want.maxStorageSFV < 0 {
+			if storage.MaxStorageSFV != nil {
+				t.Fatalf("item 0x%08X retains maxStorage-sfv: %+v", itemID, storage)
+			}
+		} else if storage.MaxStorageSFV == nil || storage.MaxStorageSFV.Value != uint32(want.maxStorageSFV) {
+			t.Fatalf("item 0x%08X maxStorage-sfv = %+v, want %d", itemID, storage.MaxStorageSFV, want.maxStorageSFV)
+		}
+		if item.Goods == nil || item.Goods.IsDepositable.Value != want.depositable {
+			t.Fatalf("item 0x%08X isDepositable = %+v, want %t", itemID, item.Goods, want.depositable)
+		}
+	}
+}

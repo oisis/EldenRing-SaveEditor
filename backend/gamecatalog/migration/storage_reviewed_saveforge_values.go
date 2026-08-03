@@ -18,6 +18,30 @@ const infoCategory = "info"
 const cookbooksSubcategory = "Cookbooks"
 const crystalTearsSubcategory = "Crystal Tears"
 
+var safeModeNG0InventoryByKeyItemID = map[uint32]uint32{
+	0x40000852: 10, // Celestial Dew
+	0x4000082A: 9,  // Deathroot
+	0x4000274C: 27, // Dragon Heart
+	0x401EA3CB: 1,  // Heart of Bayle
+	0x40001FFA: 4,  // Imbued Sword Key
+	0x40001FF9: 18, // Larval Tear
+	0x401EA3E1: 9,  // Larval Tear (DLC)
+	0x40002756: 20, // Lost Ashes of War
+	0x40000087: 3,  // Phantom Great Rune
+	0x40002001: 6,  // Seedbed Curse
+	0x400004D8: 3,  // Shabriri Grape
+	0x40001F40: 81, // Stonesword Key
+}
+
+var nonDepositableKeyItemIDs = map[uint32]struct{}{
+	0x40001FFA: {}, // Imbued Sword Key
+	0x40001FF9: {}, // Larval Tear
+	0x401EA3E1: {}, // Larval Tear (DLC)
+	0x40000087: {}, // Phantom Great Rune
+	0x40002001: {}, // Seedbed Curse
+	0x400004D8: {}, // Shabriri Grape
+}
+
 func promoteSafeModeStorageLimits(
 	storage *schema.ItemStorage,
 	item seed,
@@ -59,6 +83,31 @@ func promoteSafeModeStorageLimits(
 	}
 	storage.MaxInventorySFV = nil
 	storage.MaxStorageSFV = nil
+}
+
+func promoteKeyItemNG0InventoryLimits(
+	storage *schema.ItemStorage,
+	item seed,
+) {
+	if item.Category != "key_items" {
+		return
+	}
+	limit, ok := safeModeNG0InventoryByKeyItemID[item.ID]
+	if !ok {
+		return
+	}
+
+	storage.SafeModeMaxInventory = storage.MaxInventorySFV
+	if storage.SafeModeMaxInventory != nil {
+		storage.SafeModeMaxInventory.Value = limit
+		storage.SafeModeMaxInventory.Provenance.Method =
+			"defined Safe Mode maximum inventory for a single full NG0 playthrough"
+	}
+	storage.MaxInventorySFV = nil
+
+	if _, ok := nonDepositableKeyItemIDs[item.ID]; ok {
+		storage.MaxStorageSFV = nil
+	}
 }
 
 func discardReviewedStorageSaveForgeValues(

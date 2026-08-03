@@ -185,12 +185,12 @@
           "field": "maxNum"
         }
       },
-      "maxInventory-sfv": {
+      "safeModeMaxInventory": {
         "known": true,
-        "value": 1,
+        "value": 3,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxInventory"
+          "method": "defined Safe Mode maximum inventory for a single full NG0 playthrough"
         }
       },
       "maxStorage": {
