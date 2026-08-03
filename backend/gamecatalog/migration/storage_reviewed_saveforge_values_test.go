@@ -59,6 +59,45 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 	}
 }
 
+func TestPotLegacyInventoryLimitsAreDiscarded(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	potIDs := []uint32{
+		0x4000012C, // Fire Pot
+		0x40000140, // Lightning Pot
+		0x4000014A, // Fetid Pot
+		0x40000154, // Swarm Pot
+		0x4000015E, // Holy Water Pot
+		0x40000172, // Poison Pot
+		0x4000017C, // Oil Pot
+		0x40000190, // Roped Fire Pot
+		0x400001A4, // Roped Lightning Pot
+		0x400001AE, // Roped Fetid Pot
+		0x400001B8, // Roped Poison Pot
+		0x400001C2, // Roped Oil Pot
+		0x400001CC, // Roped Magic Pot
+		0x400001D6, // Roped Fly Pot
+		0x400001EA, // Roped Volcano Pot
+		0x400001FE, // Roped Holy Water Pot
+		0x40000258, // Volcano Pot
+		0x40000280, // Sleep Pot
+		0x4000028A, // Rancor Pot
+		0x40000294, // Magic Pot
+		0x401E873C, // Red Lightning Pot
+		0x401E8746, // Frenzied Flame Pot
+		0x401E8778, // Roped Frenzied Flame Pot
+	}
+	for _, itemID := range potIDs {
+		storage := findGeneratedItem(t, catalog, itemID).Storage
+		if storage.MaxInventory.Value != 10 || storage.MaxInventorySFV != nil {
+			t.Fatalf("pot 0x%08X storage = %+v, want Regulation maxInventory 10 without maxInventory-sfv", itemID, storage)
+		}
+	}
+}
+
 func TestBolsteringMaterialLegacyLimitsAreSafeModeCaps(t *testing.T) {
 	catalog, err := Generate(localGenerateOptions(t))
 	if err != nil {

@@ -879,7 +879,7 @@ func assertSaveForgeValueCoverage(
 		countSaveForgeValues(reflect.ValueOf(resources[index]), actual)
 	}
 	expected := map[string]int{
-		"maxInventory-sfv": 39,
+		"maxInventory-sfv": 16,
 		"maxStorage-sfv":   361,
 	}
 	if !reflect.DeepEqual(actual, expected) {
