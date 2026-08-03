@@ -234,7 +234,9 @@ func cloneWeaponData(data schema.WeaponData) schema.WeaponData {
 
 func cloneStorage(storage schema.ItemStorage) schema.ItemStorage {
 	cloned := storage
+	cloned.SafeModeMaxInventory = cloneFactPointer(storage.SafeModeMaxInventory)
 	cloned.MaxInventorySFV = cloneFactPointer(storage.MaxInventorySFV)
+	cloned.SafeModeMaxStorage = cloneFactPointer(storage.SafeModeMaxStorage)
 	cloned.MaxStorageSFV = cloneFactPointer(storage.MaxStorageSFV)
 	cloned.GameMaxInventorySFV = cloneFactPointer(storage.GameMaxInventorySFV)
 	cloned.GameMaxStorageSFV = cloneFactPointer(storage.GameMaxStorageSFV)

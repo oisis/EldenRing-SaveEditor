@@ -31,17 +31,33 @@ func TestStorageFactsShowsSaveForgeValueNextToRegulationValue(t *testing.T) {
 		},
 	}
 	storage := schema.ItemStorage{
-		RecordMode:       schema.Fact[schema.RecordMode]{Known: true, Value: schema.RecordModeQuantityStack, Provenance: regulation},
-		MaxInventory:     schema.Fact[uint32]{Known: true, Value: 99, Provenance: regulation},
-		MaxInventorySFV:  &saveForge,
-		MaxStorage:       schema.Fact[uint32]{Known: true, Value: 600, Provenance: regulation},
-		GameMaxInventory: schema.Fact[uint32]{Known: true, Value: 99, Provenance: regulation},
-		GameMaxStorage:   schema.Fact[uint32]{Known: true, Value: 600, Provenance: regulation},
+		RecordMode:           schema.Fact[schema.RecordMode]{Known: true, Value: schema.RecordModeQuantityStack, Provenance: regulation},
+		MaxInventory:         schema.Fact[uint32]{Known: true, Value: 99, Provenance: regulation},
+		SafeModeMaxInventory: &saveForge,
+		MaxInventorySFV:      &saveForge,
+		MaxStorage:           schema.Fact[uint32]{Known: true, Value: 600, Provenance: regulation},
+		SafeModeMaxStorage:   &saveForge,
+		GameMaxInventory:     schema.Fact[uint32]{Known: true, Value: 99, Provenance: regulation},
+		GameMaxStorage:       schema.Fact[uint32]{Known: true, Value: 600, Provenance: regulation},
 	}
 
 	facts := server.storageFacts(storage)
 	if !containsFact(facts, "Maximum inventory", "99") {
 		t.Fatal("Regulation maximum inventory is missing")
+	}
+	if !containsFact(
+		facts,
+		"Safe Mode maximum inventory",
+		"1",
+	) {
+		t.Fatal("Safe Mode maximum inventory is missing")
+	}
+	if !containsFact(
+		facts,
+		"Safe Mode maximum storage",
+		"1",
+	) {
+		t.Fatal("Safe Mode maximum storage is missing")
 	}
 	if !containsFact(
 		facts,

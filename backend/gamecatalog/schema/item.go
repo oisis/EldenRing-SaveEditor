@@ -69,15 +69,17 @@ const (
 )
 
 type ItemStorage struct {
-	RecordMode          Fact[RecordMode] `json:"recordMode"`
-	MaxInventory        Fact[uint32]     `json:"maxInventory"`
-	MaxInventorySFV     *Fact[uint32]    `json:"maxInventory-sfv,omitempty"`
-	MaxStorage          Fact[uint32]     `json:"maxStorage"`
-	MaxStorageSFV       *Fact[uint32]    `json:"maxStorage-sfv,omitempty"`
-	GameMaxInventory    Fact[uint32]     `json:"gameMaxInventory"`
-	GameMaxInventorySFV *Fact[uint32]    `json:"gameMaxInventory-sfv,omitempty"`
-	GameMaxStorage      Fact[uint32]     `json:"gameMaxStorage"`
-	GameMaxStorageSFV   *Fact[uint32]    `json:"gameMaxStorage-sfv,omitempty"`
+	RecordMode           Fact[RecordMode] `json:"recordMode"`
+	MaxInventory         Fact[uint32]     `json:"maxInventory"`
+	SafeModeMaxInventory *Fact[uint32]    `json:"safeModeMaxInventory,omitempty"`
+	MaxInventorySFV      *Fact[uint32]    `json:"maxInventory-sfv,omitempty"`
+	MaxStorage           Fact[uint32]     `json:"maxStorage"`
+	SafeModeMaxStorage   *Fact[uint32]    `json:"safeModeMaxStorage,omitempty"`
+	MaxStorageSFV        *Fact[uint32]    `json:"maxStorage-sfv,omitempty"`
+	GameMaxInventory     Fact[uint32]     `json:"gameMaxInventory"`
+	GameMaxInventorySFV  *Fact[uint32]    `json:"gameMaxInventory-sfv,omitempty"`
+	GameMaxStorage       Fact[uint32]     `json:"gameMaxStorage"`
+	GameMaxStorageSFV    *Fact[uint32]    `json:"gameMaxStorage-sfv,omitempty"`
 }
 
 type ItemSafety struct {

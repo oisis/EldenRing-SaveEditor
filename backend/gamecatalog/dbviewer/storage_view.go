@@ -7,7 +7,13 @@ func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
 		server.fact("Record mode", storage.RecordMode.Known, storage.RecordMode.Value, storage.RecordMode.Provenance),
 		server.fact("Maximum inventory", storage.MaxInventory.Known, storage.MaxInventory.Value, storage.MaxInventory.Provenance),
 	}
-	result = appendSaveForgeStorageFact(
+	result = appendOptionalStorageFact(
+		server,
+		result,
+		"Safe Mode maximum inventory",
+		storage.SafeModeMaxInventory,
+	)
+	result = appendOptionalStorageFact(
 		server,
 		result,
 		"Maximum inventory — SaveForge value",
@@ -17,7 +23,13 @@ func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
 		result,
 		server.fact("Maximum storage", storage.MaxStorage.Known, storage.MaxStorage.Value, storage.MaxStorage.Provenance),
 	)
-	result = appendSaveForgeStorageFact(
+	result = appendOptionalStorageFact(
+		server,
+		result,
+		"Safe Mode maximum storage",
+		storage.SafeModeMaxStorage,
+	)
+	result = appendOptionalStorageFact(
 		server,
 		result,
 		"Maximum storage — SaveForge value",
@@ -27,7 +39,7 @@ func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
 		result,
 		server.fact("Game maximum inventory", storage.GameMaxInventory.Known, storage.GameMaxInventory.Value, storage.GameMaxInventory.Provenance),
 	)
-	result = appendSaveForgeStorageFact(
+	result = appendOptionalStorageFact(
 		server,
 		result,
 		"Game maximum inventory — SaveForge value",
@@ -37,7 +49,7 @@ func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
 		result,
 		server.fact("Game maximum storage", storage.GameMaxStorage.Known, storage.GameMaxStorage.Value, storage.GameMaxStorage.Provenance),
 	)
-	return appendSaveForgeStorageFact(
+	return appendOptionalStorageFact(
 		server,
 		result,
 		"Game maximum storage — SaveForge value",
@@ -45,7 +57,7 @@ func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
 	)
 }
 
-func appendSaveForgeStorageFact(
+func appendOptionalStorageFact(
 	server *Server,
 	facts []factView,
 	label string,

@@ -19,7 +19,8 @@ func TestCloneResourceDeepCopiesFullVariantDocument(t *testing.T) {
 			Data: schema.VariantDocumentData{
 				Flags: schema.Fact[[]string]{Value: []string{"variant"}},
 				Storage: schema.ItemStorage{
-					MaxInventorySFV: &saveForgeStorage,
+					SafeModeMaxInventory: &saveForgeStorage,
+					MaxInventorySFV:      &saveForgeStorage,
 				},
 				Modifiers: schema.ItemModifiers{
 					EquipLoad: &schema.EquipLoadModifier{
@@ -44,6 +45,7 @@ func TestCloneResourceDeepCopiesFullVariantDocument(t *testing.T) {
 	cloned := cloneResource(resource)
 	variant := &cloned.Item.Variants[0]
 	variant.Data.Flags.Value[0] = "mutated"
+	variant.Data.Storage.SafeModeMaxInventory.Value = 98
 	variant.Data.Storage.MaxInventorySFV.Value = 99
 	variant.Data.Modifiers.EquipLoad.EnduranceBonusSFV.Value = 99
 	variant.Data.Weapon.Warnings.Value[0] = "mutated"
@@ -54,6 +56,7 @@ func TestCloneResourceDeepCopiesFullVariantDocument(t *testing.T) {
 
 	original := resource.Item.Variants[0]
 	if original.Data.Flags.Value[0] != "variant" ||
+		original.Data.Storage.SafeModeMaxInventory.Value != 1 ||
 		original.Data.Storage.MaxInventorySFV.Value != 1 ||
 		original.Data.Modifiers.EquipLoad.EnduranceBonusSFV.Value != 3 ||
 		original.Data.Weapon.Warnings.Value[0] != "warning" ||

@@ -135,8 +135,18 @@ func validateStorage(storage ItemStorage, sources map[SourceID]struct{}) error {
 	if err := validateFact("item.storage.maxInventory", storage.MaxInventory, sources); err != nil {
 		return err
 	}
+	if storage.SafeModeMaxInventory != nil {
+		if err := validateFact("item.storage.safeModeMaxInventory", *storage.SafeModeMaxInventory, sources); err != nil {
+			return err
+		}
+	}
 	if err := validateFact("item.storage.maxStorage", storage.MaxStorage, sources); err != nil {
 		return err
+	}
+	if storage.SafeModeMaxStorage != nil {
+		if err := validateFact("item.storage.safeModeMaxStorage", *storage.SafeModeMaxStorage, sources); err != nil {
+			return err
+		}
 	}
 	if err := validateOptionalFact("item.storage.gameMaxInventory", storage.GameMaxInventory, sources); err != nil {
 		return err
