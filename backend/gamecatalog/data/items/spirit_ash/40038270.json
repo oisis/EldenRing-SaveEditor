@@ -196,12 +196,12 @@
           "field": "maxRepositoryNum"
         }
       },
-      "maxStorage-sfv": {
+      "safeModeMaxStorage": {
         "known": true,
         "value": 1,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxStorage"
+          "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
         }
       },
       "gameMaxInventory": {
@@ -800,12 +800,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -1948,12 +1948,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -3096,12 +3096,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -4244,12 +4244,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -5392,12 +5392,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -6540,12 +6540,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -7688,12 +7688,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -8836,12 +8836,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -9984,12 +9984,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {
@@ -11132,12 +11132,12 @@
                 "field": "maxRepositoryNum"
               }
             },
-            "maxStorage-sfv": {
+            "safeModeMaxStorage": {
               "known": true,
               "value": 1,
               "provenance": {
                 "source": "legacy_db_data",
-                "method": "preserved conflicting legacy ItemData.MaxStorage"
+                "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
             },
             "gameMaxInventory": {

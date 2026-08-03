@@ -7,6 +7,7 @@ const waitGestureItemID uint32 = 0x40002337
 const bolsteringMaterialsCategory = "bolstering_materials"
 const incantationsCategory = "incantations"
 const sorceriesCategory = "sorceries"
+const ashesCategory = "ashes"
 const gesturesCategory = "gestures"
 const infoCategory = "info"
 
@@ -16,7 +17,8 @@ func promoteSafeModeStorageLimits(
 ) {
 	if item.Category != bolsteringMaterialsCategory &&
 		item.Category != incantationsCategory &&
-		item.Category != sorceriesCategory {
+		item.Category != sorceriesCategory &&
+		item.Category != ashesCategory {
 		return
 	}
 	storage.SafeModeMaxInventory = storage.MaxInventorySFV

@@ -134,3 +134,32 @@ func TestSpellLegacyLimitsAreSafeModeCaps(t *testing.T) {
 		}
 	}
 }
+
+func TestSpiritAshLegacyStorageLimitIsSafeModeCap(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	count := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != ashesCategory {
+			continue
+		}
+		count++
+		storage := item.Storage
+		if storage.MaxInventory.Value != 1 || storage.MaxStorage.Value != 600 {
+			t.Fatalf("item 0x%08X Regulation limits = %+v, want 1/600", item.GameID.Value, storage)
+		}
+		if storage.MaxStorageSFV != nil {
+			t.Fatalf("item 0x%08X retains maxStorage-sfv: %+v", item.GameID.Value, storage)
+		}
+		if storage.SafeModeMaxStorage == nil || storage.SafeModeMaxStorage.Value != 1 {
+			t.Fatalf("item 0x%08X Safe Mode storage = %+v, want 1", item.GameID.Value, storage)
+		}
+	}
+	if count != 84 {
+		t.Fatalf("spirit ash records = %d, want 84", count)
+	}
+}
