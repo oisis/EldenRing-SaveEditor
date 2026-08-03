@@ -185,14 +185,6 @@
           "field": "maxNum"
         }
       },
-      "maxInventory-sfv": {
-        "known": true,
-        "value": 1,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxInventory"
-        }
-      },
       "maxStorage": {
         "known": true,
         "value": 0,

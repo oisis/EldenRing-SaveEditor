@@ -39,6 +39,21 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("gesture records = %d, want 56", gestureCount)
 	}
 
+	toolCount := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != toolsCategory {
+			continue
+		}
+		toolCount++
+		if item.Storage.MaxInventorySFV != nil || item.Storage.MaxStorageSFV != nil {
+			t.Fatalf("tool 0x%08X retains SaveForge storage values: %+v", item.GameID.Value, item.Storage)
+		}
+	}
+	if toolCount == 0 {
+		t.Fatal("tool records = 0")
+	}
+
 	infoCount := 0
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
