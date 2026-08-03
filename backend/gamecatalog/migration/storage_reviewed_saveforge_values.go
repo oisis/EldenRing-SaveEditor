@@ -47,6 +47,71 @@ var nonDepositableKeyItemIDs = map[uint32]struct{}{
 	0x400004D8: {}, // Shabriri Grape
 }
 
+var reviewedNonDepositableKeyItemStorageIDs = map[uint32]struct{}{
+	0x40000073: {},
+	0x40001F4A: {},
+	0x40001FA9: {},
+	0x40001FAA: {},
+	0x40001FAB: {},
+	0x40001FAD: {},
+	0x40001FAF: {},
+	0x40001FB9: {},
+	0x40001FBE: {},
+	0x40001FC0: {},
+	0x40001FC1: {},
+	0x40001FC6: {},
+	0x40001FC8: {},
+	0x40001FC9: {},
+	0x40001FCE: {},
+	0x40001FCF: {},
+	0x40001FD0: {},
+	0x40001FD2: {},
+	0x40001FD3: {},
+	0x40001FD4: {},
+	0x40001FD5: {},
+	0x40001FD6: {},
+	0x40001FD7: {},
+	0x40001FD8: {},
+	0x40001FD9: {},
+	0x40001FDB: {},
+	0x40001FDF: {},
+	0x40001FE4: {},
+	0x40001FE6: {},
+	0x40001FE8: {},
+	0x40001FE9: {},
+	0x40001FEB: {},
+	0x40001FEC: {},
+	0x40001FEE: {},
+	0x40001FEF: {},
+	0x40001FF0: {},
+	0x40001FF6: {},
+	0x40001FF7: {},
+	0x40001FF8: {},
+	0x40001FFB: {},
+	0x40001FFD: {},
+	0x40001FFE: {},
+	0x40001FFF: {},
+	0x40002000: {},
+	0x40002002: {},
+	0x40002003: {},
+	0x40002005: {},
+	0x40002006: {},
+	0x40002007: {},
+	0x4000201E: {},
+	0x4000218E: {},
+	0x400021D4: {},
+	0x400022CE: {},
+	0x400022CF: {},
+	0x400022D0: {},
+	0x400022D1: {},
+	0x400022D3: {},
+	0x400022D4: {},
+	0x400022D5: {},
+	0x400022D6: {},
+	0x400022D7: {},
+	0x400022D8: {},
+}
+
 func promoteSafeModeStorageLimits(
 	storage *schema.ItemStorage,
 	item seed,
@@ -145,6 +210,9 @@ func discardReviewedStorageSaveForgeValues(
 	}
 	if item.Category == "key_items" &&
 		(item.Subcategory == dlcKeysSubcategory || item.ID == deathrootItemID || item.ID == lostAshesOfWarItemID) {
+		storage.MaxStorageSFV = nil
+	}
+	if _, ok := reviewedNonDepositableKeyItemStorageIDs[item.ID]; ok {
 		storage.MaxStorageSFV = nil
 	}
 	if family != schema.ItemFamilyGesture {

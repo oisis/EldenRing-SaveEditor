@@ -149,6 +149,23 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("DLC Key records = %d, want 7", dlcKeyCount)
 	}
 
+	for itemID := range reviewedNonDepositableKeyItemStorageIDs {
+		item := findGeneratedItem(t, catalog, itemID)
+		if item.Category.Value != "key_items" ||
+			item.Subcategory.Value != "Inactive Great Runes + Keys + Medallions" {
+			t.Fatalf("item 0x%08X category/subcategory = %q/%q", itemID, item.Category.Value, item.Subcategory.Value)
+		}
+		if item.Storage.MaxStorageSFV != nil {
+			t.Fatalf("item 0x%08X retains maxStorage-sfv: %+v", itemID, item.Storage)
+		}
+		if item.Goods == nil || item.Goods.IsDepositable.Value {
+			t.Fatalf("item 0x%08X isDepositable = %+v, want false", itemID, item.Goods)
+		}
+	}
+	if len(reviewedNonDepositableKeyItemStorageIDs) != 62 {
+		t.Fatalf("reviewed non-depositable Key Item IDs = %d, want 62", len(reviewedNonDepositableKeyItemStorageIDs))
+	}
+
 	infoCount := 0
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
