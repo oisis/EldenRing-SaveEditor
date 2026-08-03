@@ -316,7 +316,7 @@ func (context *generationContext) buildStorage(
 			storage.MaxInventory = authoritativeInventory
 			storage.MaxStorage = authoritativeStorage
 		}
-		promoteBolsteringMaterialSafeModeLimits(&storage, item)
+		promoteSafeModeStorageLimits(&storage, item)
 		storage.GameMaxInventorySFV = saveForgeValue(
 			item.HasLegacyItem && storage.GameMaxInventory.Known,
 			storage.GameMaxInventory.Value,

@@ -62,3 +62,42 @@ func TestBolsteringMaterialLegacyLimitsAreSafeModeCaps(t *testing.T) {
 		}
 	}
 }
+
+func TestSpellLegacyLimitsAreSafeModeCaps(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	wantByCategory := map[string]int{
+		incantationsCategory: 128,
+		sorceriesCategory:    85,
+	}
+	actualByCategory := make(map[string]int, len(wantByCategory))
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil {
+			continue
+		}
+		if _, wanted := wantByCategory[item.Category.Value]; !wanted {
+			continue
+		}
+		actualByCategory[item.Category.Value]++
+		storage := item.Storage
+		if storage.MaxInventory.Value != 99 || storage.MaxStorage.Value != 600 {
+			t.Fatalf("item 0x%08X Regulation limits = %+v, want 99/600", item.GameID.Value, storage)
+		}
+		if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
+			t.Fatalf("item 0x%08X retains legacy suffixes: %+v", item.GameID.Value, storage)
+		}
+		if storage.SafeModeMaxInventory == nil || storage.SafeModeMaxInventory.Value != 1 ||
+			storage.SafeModeMaxStorage == nil || storage.SafeModeMaxStorage.Value != 0 {
+			t.Fatalf("item 0x%08X Safe Mode limits = %+v, want 1/0", item.GameID.Value, storage)
+		}
+	}
+	for category, want := range wantByCategory {
+		if actualByCategory[category] != want {
+			t.Fatalf("%s records = %d, want %d", category, actualByCategory[category], want)
+		}
+	}
+}

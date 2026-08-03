@@ -78,39 +78,52 @@ func TestGoodsStorageRegulationValuesPreserveConflictingSaveForgeValues(t *testi
 	}
 }
 
-func TestBolsteringMaterialStoragePromotesLegacyLimitsToSafeMode(t *testing.T) {
-	context := generationContext{}
-	item := seed{
-		HasLegacyItem: true,
-		Category:      bolsteringMaterialsCategory,
-		MaxInventory:  7,
-		MaxStorage:    8,
+func TestStoragePromotesLegacyLimitsToSafeMode(t *testing.T) {
+	tests := []struct {
+		name     string
+		category string
+	}{
+		{name: "bolstering material", category: bolsteringMaterialsCategory},
+		{name: "incantation", category: incantationsCategory},
+		{name: "sorcery", category: sorceriesCategory},
 	}
-	row := ParameterRow{
-		RowID: 123,
-		Fields: []ParameterField{
-			{Name: "maxNum", RawValue: "17"},
-			{Name: "maxRepositoryNum", RawValue: "18"},
-		},
-	}
-	storage, err := context.buildStorage(
-		item,
-		schema.ItemFamilyGoods,
-		row,
-		true,
-	)
-	if err != nil {
-		t.Fatalf("buildStorage: %v", err)
-	}
-	if storage.MaxInventory.Value != 17 || storage.MaxStorage.Value != 18 {
-		t.Fatalf("Regulation limits = %d/%d, want 17/18", storage.MaxInventory.Value, storage.MaxStorage.Value)
-	}
-	if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
-		t.Fatalf("bolstering material retains SaveForge limits: %#v", storage)
-	}
-	if storage.SafeModeMaxInventory == nil || storage.SafeModeMaxInventory.Value != 7 ||
-		storage.SafeModeMaxStorage == nil || storage.SafeModeMaxStorage.Value != 8 {
-		t.Fatalf("Safe Mode limits = %#v, want 7/8", storage)
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			context := generationContext{}
+			item := seed{
+				HasLegacyItem: true,
+				Category:      test.category,
+				MaxInventory:  7,
+				MaxStorage:    8,
+			}
+			row := ParameterRow{
+				RowID: 123,
+				Fields: []ParameterField{
+					{Name: "maxNum", RawValue: "17"},
+					{Name: "maxRepositoryNum", RawValue: "18"},
+				},
+			}
+			storage, err := context.buildStorage(
+				item,
+				schema.ItemFamilyGoods,
+				row,
+				true,
+			)
+			if err != nil {
+				t.Fatalf("buildStorage: %v", err)
+			}
+			if storage.MaxInventory.Value != 17 || storage.MaxStorage.Value != 18 {
+				t.Fatalf("Regulation limits = %d/%d, want 17/18", storage.MaxInventory.Value, storage.MaxStorage.Value)
+			}
+			if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
+				t.Fatalf("item retains SaveForge limits: %#v", storage)
+			}
+			if storage.SafeModeMaxInventory == nil || storage.SafeModeMaxInventory.Value != 7 ||
+				storage.SafeModeMaxStorage == nil || storage.SafeModeMaxStorage.Value != 8 {
+				t.Fatalf("Safe Mode limits = %#v, want 7/8", storage)
+			}
+		})
 	}
 }
 
