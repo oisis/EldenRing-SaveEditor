@@ -8,6 +8,7 @@ const bolsteringMaterialsCategory = "bolstering_materials"
 const incantationsCategory = "incantations"
 const sorceriesCategory = "sorceries"
 const gesturesCategory = "gestures"
+const infoCategory = "info"
 
 func promoteSafeModeStorageLimits(
 	storage *schema.ItemStorage,
@@ -41,6 +42,9 @@ func discardReviewedStorageSaveForgeValues(
 	item seed,
 	family schema.ItemFamily,
 ) {
+	if item.Category == infoCategory {
+		storage.MaxStorageSFV = nil
+	}
 	if family != schema.ItemFamilyGesture {
 		return
 	}

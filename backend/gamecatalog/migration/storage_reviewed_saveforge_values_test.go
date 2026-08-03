@@ -35,6 +35,25 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 	if gestureCount != 56 {
 		t.Fatalf("gesture records = %d, want 56", gestureCount)
 	}
+
+	infoCount := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != infoCategory {
+			continue
+		}
+		infoCount++
+		storage := item.Storage
+		if storage.MaxInventory.Value != 1 || storage.MaxStorage.Value != 1 {
+			t.Fatalf("info item 0x%08X Regulation limits = %+v, want 1/1", item.GameID.Value, storage)
+		}
+		if storage.MaxStorageSFV != nil {
+			t.Fatalf("info item 0x%08X retains maxStorage-sfv: %+v", item.GameID.Value, storage)
+		}
+	}
+	if infoCount != 102 {
+		t.Fatalf("info records = %d, want 102", infoCount)
+	}
 }
 
 func TestBolsteringMaterialLegacyLimitsAreSafeModeCaps(t *testing.T) {
