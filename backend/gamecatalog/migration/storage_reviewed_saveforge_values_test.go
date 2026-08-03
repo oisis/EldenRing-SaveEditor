@@ -301,3 +301,52 @@ func TestTearsFlaskLegacyLimitsAreDiscarded(t *testing.T) {
 		t.Fatalf("Tears flask records = %#v, want crimson/cerulean 13/13", countByFamily)
 	}
 }
+
+func TestCutContentToolStorageSaveForgeValuesAreDiscarded(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	expectedLimits := map[string]struct {
+		inventory uint32
+		storage   uint32
+	}{
+		"?GoodsName? Holy Water Pot": {inventory: 999, storage: 600},
+		"Deathsbane Jerky":           {inventory: 10, storage: 999},
+		"Deathsbane White Jerky":     {inventory: 10, storage: 999},
+		"Drawstring Freezing Grease": {inventory: 30, storage: 600},
+		"Holy Water Grease":          {inventory: 5, storage: 600},
+		"Roped Freezing Pot":         {inventory: 10, storage: 600},
+	}
+
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != toolsCategory {
+			continue
+		}
+
+		name := item.Presentation.DisplayName.Value
+		limits, found := expectedLimits[name]
+		if !found {
+			continue
+		}
+		delete(expectedLimits, name)
+
+		if !item.Safety.CutContent.Known || !item.Safety.CutContent.Value {
+			t.Fatalf("%s cutContent = %+v, want known true", name, item.Safety.CutContent)
+		}
+		storage := item.Storage
+		if storage.MaxInventory.Value != limits.inventory || storage.MaxStorage.Value != limits.storage {
+			t.Fatalf("%s Regulation limits = %+v, want %d/%d", name, storage, limits.inventory, limits.storage)
+		}
+		if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil ||
+			storage.SafeModeMaxInventory != nil || storage.SafeModeMaxStorage != nil {
+			t.Fatalf("%s retains reviewed storage values: %+v", name, storage)
+		}
+	}
+
+	if len(expectedLimits) != 0 {
+		t.Fatalf("cut-content tools missing from catalog: %#v", expectedLimits)
+	}
+}

@@ -189,14 +189,6 @@
           "field": "maxNum"
         }
       },
-      "maxInventory-sfv": {
-        "known": true,
-        "value": 99,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxInventory"
-        }
-      },
       "maxStorage": {
         "known": true,
         "value": 999,
@@ -206,14 +198,6 @@
           "table": "EquipParamGoods",
           "row": "1220",
           "field": "maxRepositoryNum"
-        }
-      },
-      "maxStorage-sfv": {
-        "known": true,
-        "value": 600,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxStorage"
         }
       },
       "gameMaxInventory": {
