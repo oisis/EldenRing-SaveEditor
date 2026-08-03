@@ -15,6 +15,7 @@ const ashesCategory = "ashes"
 const toolsCategory = "tools"
 const gesturesCategory = "gestures"
 const infoCategory = "info"
+const cookbooksSubcategory = "Cookbooks"
 
 func promoteSafeModeStorageLimits(
 	storage *schema.ItemStorage,
@@ -69,6 +70,10 @@ func discardReviewedStorageSaveForgeValues(
 		storage.MaxStorageSFV = nil
 	}
 	if item.Category == infoCategory {
+		storage.MaxStorageSFV = nil
+	}
+	if item.Category == "key_items" && item.Subcategory == cookbooksSubcategory {
+		storage.MaxInventorySFV = nil
 		storage.MaxStorageSFV = nil
 	}
 	if family != schema.ItemFamilyGesture {
