@@ -229,3 +229,32 @@ func TestRemembranceLegacyLimitsAreSafeModeCaps(t *testing.T) {
 		t.Fatalf("Remembrances = %d, want 25", count)
 	}
 }
+
+func TestSelectedToolStorageSaveForgeValues(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	telescope := findGeneratedItem(t, catalog, 0x400007F8).Storage
+	if telescope.MaxInventory.Value != 1 || telescope.MaxStorage.Value != 600 ||
+		telescope.MaxInventorySFV != nil || telescope.MaxStorageSFV != nil ||
+		telescope.SafeModeMaxInventory != nil ||
+		telescope.SafeModeMaxStorage == nil || telescope.SafeModeMaxStorage.Value != 0 {
+		t.Fatalf("Telescope storage = %+v, want Regulation 1/600 and Safe Mode nil/0", telescope)
+	}
+
+	physick := findGeneratedItem(t, catalog, 0x400000FB).Storage
+	if physick.MaxInventory.Value != 1 || physick.MaxStorage.Value != 1 ||
+		physick.MaxInventorySFV != nil || physick.MaxStorageSFV != nil ||
+		physick.SafeModeMaxInventory != nil || physick.SafeModeMaxStorage != nil {
+		t.Fatalf("Flask of Wondrous Physick storage = %+v, want Regulation 1/1 without Safe Mode values", physick)
+	}
+
+	festering := findGeneratedItem(t, catalog, 0x4000006F).Storage
+	if festering.MaxInventory.Value != 99 || festering.MaxStorage.Value != 99 ||
+		festering.MaxInventorySFV != nil || festering.MaxStorageSFV != nil ||
+		festering.SafeModeMaxInventory != nil || festering.SafeModeMaxStorage != nil {
+		t.Fatalf("Festering Bloody Finger storage = %+v, want Regulation 99/99 without Safe Mode values", festering)
+	}
+}

@@ -23,12 +23,14 @@ func promoteSafeModeStorageLimits(
 	isPrattlingPate := item.Category == toolsCategory && strings.HasPrefix(item.Name, "Prattling Pate")
 	isRemembrance := item.Category == toolsCategory &&
 		(item.Name == "Elden Remembrance" || strings.HasPrefix(item.Name, "Remembrance"))
+	isTelescope := item.Category == toolsCategory && item.Name == "Telescope"
 	if item.Category != bolsteringMaterialsCategory &&
 		item.Category != incantationsCategory &&
 		item.Category != sorceriesCategory &&
 		item.Category != ashesCategory &&
 		!isPrattlingPate &&
-		!isRemembrance {
+		!isRemembrance &&
+		!isTelescope {
 		return
 	}
 	storage.SafeModeMaxInventory = storage.MaxInventorySFV
@@ -42,6 +44,10 @@ func promoteSafeModeStorageLimits(
 	if isRemembrance {
 		storage.SafeModeMaxInventory.Value = 2
 		inventoryMethod = "defined Safe Mode maximum Remembrance inventory for a single NG0 playthrough"
+	}
+	if isTelescope {
+		storage.SafeModeMaxStorage.Value = 0
+		storageMethod = "defined Safe Mode maximum Telescope storage"
 	}
 	if storage.SafeModeMaxInventory != nil {
 		storage.SafeModeMaxInventory.Provenance.Method = inventoryMethod
@@ -58,6 +64,12 @@ func discardReviewedStorageSaveForgeValues(
 	item seed,
 	family schema.ItemFamily,
 ) {
+	if item.Category == toolsCategory && item.Name == "Flask of Wondrous Physick" {
+		storage.MaxStorageSFV = nil
+	}
+	if item.Category == toolsCategory && item.Name == "Festering Bloody Finger" {
+		storage.MaxInventorySFV = nil
+	}
 	if item.Category == infoCategory {
 		storage.MaxStorageSFV = nil
 	}

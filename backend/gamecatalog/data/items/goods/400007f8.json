@@ -196,12 +196,12 @@
           "field": "maxRepositoryNum"
         }
       },
-      "maxStorage-sfv": {
+      "safeModeMaxStorage": {
         "known": true,
-        "value": 1,
+        "value": 0,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxStorage"
+          "method": "defined Safe Mode maximum Telescope storage"
         }
       },
       "gameMaxInventory": {
