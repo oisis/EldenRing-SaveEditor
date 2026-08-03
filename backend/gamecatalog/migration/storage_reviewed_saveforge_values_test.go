@@ -1,6 +1,9 @@
 package migration
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 	catalog, err := Generate(localGenerateOptions(t))
@@ -161,5 +164,68 @@ func TestSpiritAshLegacyStorageLimitIsSafeModeCap(t *testing.T) {
 	}
 	if count != 84 {
 		t.Fatalf("spirit ash records = %d, want 84", count)
+	}
+}
+
+func TestPrattlingPateLegacyStorageLimitIsSafeModeCap(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	count := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != toolsCategory ||
+			!strings.HasPrefix(item.Presentation.DisplayName.Value, "Prattling Pate") {
+			continue
+		}
+		count++
+		storage := item.Storage
+		if storage.MaxInventory.Value != 1 || storage.MaxStorage.Value != 600 {
+			t.Fatalf("item 0x%08X Regulation limits = %+v, want 1/600", item.GameID.Value, storage)
+		}
+		if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
+			t.Fatalf("item 0x%08X retains legacy suffixes: %+v", item.GameID.Value, storage)
+		}
+		if storage.SafeModeMaxInventory != nil ||
+			storage.SafeModeMaxStorage == nil || storage.SafeModeMaxStorage.Value != 0 {
+			t.Fatalf("item 0x%08X Safe Mode limits = %+v, want nil/0", item.GameID.Value, storage)
+		}
+	}
+	if count != 9 {
+		t.Fatalf("Prattling Pates = %d, want 9", count)
+	}
+}
+
+func TestRemembranceLegacyLimitsAreSafeModeCaps(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	count := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != toolsCategory ||
+			(item.Presentation.DisplayName.Value != "Elden Remembrance" &&
+				!strings.HasPrefix(item.Presentation.DisplayName.Value, "Remembrance")) {
+			continue
+		}
+		count++
+		storage := item.Storage
+		if storage.MaxInventory.Value != 99 || storage.MaxStorage.Value != 600 {
+			t.Fatalf("item 0x%08X Regulation limits = %+v, want 99/600", item.GameID.Value, storage)
+		}
+		if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
+			t.Fatalf("item 0x%08X retains legacy suffixes: %+v", item.GameID.Value, storage)
+		}
+		if storage.SafeModeMaxInventory == nil || storage.SafeModeMaxInventory.Value != 2 ||
+			storage.SafeModeMaxStorage == nil || storage.SafeModeMaxStorage.Value != 0 {
+			t.Fatalf("item 0x%08X Safe Mode limits = %+v, want 2/0", item.GameID.Value, storage)
+		}
+	}
+	if count != 25 {
+		t.Fatalf("Remembrances = %d, want 25", count)
 	}
 }

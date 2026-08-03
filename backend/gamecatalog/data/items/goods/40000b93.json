@@ -185,12 +185,12 @@
           "field": "maxNum"
         }
       },
-      "maxInventory-sfv": {
+      "safeModeMaxInventory": {
         "known": true,
-        "value": 1,
+        "value": 2,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxInventory"
+          "method": "defined Safe Mode maximum Remembrance inventory for a single NG0 playthrough"
         }
       },
       "maxStorage": {
@@ -204,12 +204,12 @@
           "field": "maxRepositoryNum"
         }
       },
-      "maxStorage-sfv": {
+      "safeModeMaxStorage": {
         "known": true,
         "value": 0,
         "provenance": {
           "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxStorage"
+          "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
         }
       },
       "gameMaxInventory": {
