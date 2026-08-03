@@ -258,3 +258,46 @@ func TestSelectedToolStorageSaveForgeValues(t *testing.T) {
 		t.Fatalf("Festering Bloody Finger storage = %+v, want Regulation 99/99 without Safe Mode values", festering)
 	}
 }
+
+func TestTearsFlaskLegacyLimitsAreDiscarded(t *testing.T) {
+	catalog, err := Generate(localGenerateOptions(t))
+	if err != nil {
+		t.Fatalf("Generate: %v", err)
+	}
+
+	countByFamily := map[string]int{}
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != toolsCategory {
+			continue
+		}
+
+		name := item.Presentation.DisplayName.Value
+		family := ""
+		switch {
+		case strings.HasPrefix(name, "Flask of Crimson Tears"):
+			family = "crimson"
+		case strings.HasPrefix(name, "Flask of Cerulean Tears"):
+			family = "cerulean"
+		default:
+			continue
+		}
+		countByFamily[family]++
+
+		storage := item.Storage
+		if storage.MaxInventory.Value != 20 || storage.MaxStorage.Value != 20 {
+			t.Fatalf("%s Regulation limits = %+v, want 20/20", name, storage)
+		}
+		if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil ||
+			storage.SafeModeMaxInventory != nil || storage.SafeModeMaxStorage != nil {
+			t.Fatalf("%s retains reviewed storage values: %+v", name, storage)
+		}
+		if item.Goods == nil || item.Goods.IsDepositable.Value {
+			t.Fatalf("%s isDepositable = %+v, want false", name, item.Goods)
+		}
+	}
+
+	if countByFamily["crimson"] != 13 || countByFamily["cerulean"] != 13 {
+		t.Fatalf("Tears flask records = %#v, want crimson/cerulean 13/13", countByFamily)
+	}
+}

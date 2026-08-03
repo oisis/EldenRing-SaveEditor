@@ -64,6 +64,12 @@ func discardReviewedStorageSaveForgeValues(
 	item seed,
 	family schema.ItemFamily,
 ) {
+	if item.Category == toolsCategory &&
+		(strings.HasPrefix(item.Name, "Flask of Crimson Tears") ||
+			strings.HasPrefix(item.Name, "Flask of Cerulean Tears")) {
+		storage.MaxInventorySFV = nil
+		storage.MaxStorageSFV = nil
+	}
 	if item.Category == toolsCategory && item.Name == "Flask of Wondrous Physick" {
 		storage.MaxStorageSFV = nil
 	}
