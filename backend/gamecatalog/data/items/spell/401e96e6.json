@@ -2,14 +2,6 @@
   "id": 2488,
   "key": "item:401E96E6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravitational Missile",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

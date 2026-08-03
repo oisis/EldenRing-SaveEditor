@@ -2,14 +2,6 @@
   "id": 2411,
   "key": "item:401E880E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lulling Branch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

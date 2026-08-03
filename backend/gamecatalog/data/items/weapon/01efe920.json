@@ -2,14 +2,6 @@
   "id": 395,
   "key": "item:01EFE920",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Steel Greatshield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

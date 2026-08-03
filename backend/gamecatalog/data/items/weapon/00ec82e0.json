@@ -2,14 +2,6 @@
   "id": 214,
   "key": "item:00EC82E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Death Knight's Longhaft Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

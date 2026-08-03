@@ -2,14 +2,6 @@
   "id": 1320,
   "key": "item:20000816",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hammer Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

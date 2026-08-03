@@ -2,14 +2,6 @@
   "id": 715,
   "key": "item:1005F3D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Old Aristocrat Gown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

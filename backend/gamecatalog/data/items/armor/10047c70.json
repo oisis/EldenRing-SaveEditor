@@ -2,14 +2,6 @@
   "id": 669,
   "key": "item:10047C70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nox Swordstress Crown (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

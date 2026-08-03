@@ -2,14 +2,6 @@
   "id": 272,
   "key": "item:01321760",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Giant's Red Braid",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

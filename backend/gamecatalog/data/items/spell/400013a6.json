@@ -2,14 +2,6 @@
   "id": 1717,
   "key": "item:400013A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tibia's Summons",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

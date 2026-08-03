@@ -2,14 +2,6 @@
   "id": 694,
   "key": "item:1005346C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

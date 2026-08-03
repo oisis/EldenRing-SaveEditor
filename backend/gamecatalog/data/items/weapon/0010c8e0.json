@@ -2,14 +2,6 @@
   "id": 12,
   "key": "item:0010C8E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wakizashi",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

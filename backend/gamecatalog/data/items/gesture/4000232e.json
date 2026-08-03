@@ -2,14 +2,6 @@
   "id": 2021,
   "key": "item:4000232E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Warm Welcome",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

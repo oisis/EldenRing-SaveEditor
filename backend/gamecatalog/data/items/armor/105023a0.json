@@ -2,14 +2,6 @@
   "id": 1247,
   "key": "item:105023A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Divine Beast Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

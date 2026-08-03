@@ -2,14 +2,6 @@
   "id": 2025,
   "key": "item:40002332",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "As You Wish",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2754,
   "key": "item:80009DD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Enchanted Shot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

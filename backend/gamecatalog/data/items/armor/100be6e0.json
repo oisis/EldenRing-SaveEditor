@@ -2,14 +2,6 @@
   "id": 854,
   "key": "item:100BE6E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Veteran's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

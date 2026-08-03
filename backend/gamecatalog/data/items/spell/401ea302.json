@@ -2,14 +2,6 @@
   "id": 2522,
   "key": "item:401EA302",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rain of Fire",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

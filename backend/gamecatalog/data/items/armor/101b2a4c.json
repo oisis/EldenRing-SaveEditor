@@ -2,14 +2,6 @@
   "id": 1061,
   "key": "item:101B2A4C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cuckoo Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

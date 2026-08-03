@@ -2,14 +2,6 @@
   "id": 1181,
   "key": "item:104DF9B8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ansbach's Manchettes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

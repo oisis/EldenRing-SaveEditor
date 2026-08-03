@@ -2,14 +2,6 @@
   "id": 678,
   "key": "item:1004BB54",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravekeeper Cloak",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

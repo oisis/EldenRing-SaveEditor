@@ -2,14 +2,6 @@
   "id": 1393,
   "key": "item:20001B8A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Immunizing Horn Charm +2",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

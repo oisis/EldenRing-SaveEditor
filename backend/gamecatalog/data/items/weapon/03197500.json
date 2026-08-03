@@ -2,14 +2,6 @@
   "id": 502,
   "key": "item:03197500",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

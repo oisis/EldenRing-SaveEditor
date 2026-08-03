@@ -2,14 +2,6 @@
   "id": 1904,
   "key": "item:4000219C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Liurnia, North",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

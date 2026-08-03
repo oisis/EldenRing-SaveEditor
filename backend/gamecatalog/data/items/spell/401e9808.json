@@ -2,14 +2,6 @@
   "id": 2491,
   "key": "item:401E9808",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rings of Spectral Light",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

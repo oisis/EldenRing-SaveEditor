@@ -2,14 +2,6 @@
   "id": 2701,
   "key": "item:800029CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stamp (Sweep)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

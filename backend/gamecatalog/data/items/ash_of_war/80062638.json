@@ -2,14 +2,6 @@
   "id": 2791,
   "key": "item:80062638",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scattershot Throw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

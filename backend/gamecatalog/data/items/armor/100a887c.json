@@ -2,14 +2,6 @@
   "id": 823,
   "key": "item:100A887C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Royal Remains Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

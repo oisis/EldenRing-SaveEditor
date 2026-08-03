@@ -2,14 +2,6 @@
   "id": 1667,
   "key": "item:4000102C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Starlight",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

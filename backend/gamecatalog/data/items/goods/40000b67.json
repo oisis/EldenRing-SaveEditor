@@ -2,14 +2,6 @@
   "id": 1611,
   "key": "item:40000B67",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lord's Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

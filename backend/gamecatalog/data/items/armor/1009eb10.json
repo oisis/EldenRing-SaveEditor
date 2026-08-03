@@ -2,14 +2,6 @@
   "id": 800,
   "key": "item:1009EB10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

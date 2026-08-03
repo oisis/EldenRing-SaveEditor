@@ -2,14 +2,6 @@
   "id": 2676,
   "key": "item:402195A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodfiend Hexer's Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

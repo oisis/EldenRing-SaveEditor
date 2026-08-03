@@ -2,14 +2,6 @@
   "id": 1335,
   "key": "item:200008A2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Companion Jar",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2057,
   "key": "item:40002352",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Desperate Prayer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

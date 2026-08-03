@@ -2,14 +2,6 @@
   "id": 398,
   "key": "item:01F82680",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

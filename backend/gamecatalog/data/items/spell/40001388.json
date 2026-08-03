@@ -2,14 +2,6 @@
   "id": 1713,
   "key": "item:40001388",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rancorcall",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

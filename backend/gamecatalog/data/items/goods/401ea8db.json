@@ -2,14 +2,6 @@
   "id": 2585,
   "key": "item:401EA8DB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Igon's Cookbook [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

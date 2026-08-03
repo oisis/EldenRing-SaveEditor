@@ -2,14 +2,6 @@
   "id": 552,
   "key": "item:10009D6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leather Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2700,
   "key": "item:80002968",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stamp (Upward Cut)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

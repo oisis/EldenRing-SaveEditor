@@ -2,14 +2,6 @@
   "id": 1271,
   "key": "item:10515450",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Imp Head (Lion)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

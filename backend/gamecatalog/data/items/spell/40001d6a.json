@@ -2,14 +2,6 @@
   "id": 1819,
   "key": "item:40001D6A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

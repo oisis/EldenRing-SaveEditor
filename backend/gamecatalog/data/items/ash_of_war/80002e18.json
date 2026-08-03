@@ -2,14 +2,6 @@
   "id": 2711,
   "key": "item:80002E18",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Loretta's Slash",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

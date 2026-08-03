@@ -2,14 +2,6 @@
   "id": 526,
   "key": "item:03292C70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bone Ballista Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

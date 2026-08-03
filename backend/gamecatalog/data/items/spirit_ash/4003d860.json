@@ -2,14 +2,6 @@
   "id": 2378,
   "key": "item:4003D860",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leyndell Soldier Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

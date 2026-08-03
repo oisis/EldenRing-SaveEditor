@@ -2,14 +2,6 @@
   "id": 1285,
   "key": "item:20000411",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Erdtree's Favor +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 887,
   "key": "item:100CD1A4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marionette Soldier Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

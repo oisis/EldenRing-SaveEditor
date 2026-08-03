@@ -2,14 +2,6 @@
   "id": 2677,
   "key": "item:40219990",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravebird Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 143,
   "key": "item:0099F610",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gargoyle's Black Blades",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

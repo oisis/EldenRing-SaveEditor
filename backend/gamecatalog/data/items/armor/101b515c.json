@@ -2,14 +2,6 @@
   "id": 1066,
   "key": "item:101B515C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leyndell Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 10,
   "key": "item:00107AC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scorpion's Stinger",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

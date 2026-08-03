@@ -2,14 +2,6 @@
   "id": 2020,
   "key": "item:4000232D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "My Lord",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

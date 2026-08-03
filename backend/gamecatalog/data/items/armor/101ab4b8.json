@@ -2,14 +2,6 @@
   "id": 1046,
   "key": "item:101AB4B8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligtree Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

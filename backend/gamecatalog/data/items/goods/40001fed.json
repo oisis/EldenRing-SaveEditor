@@ -2,14 +2,6 @@
   "id": 1864,
   "key": "item:40001FED",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Letter to Bernahl",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

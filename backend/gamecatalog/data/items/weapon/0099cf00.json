@@ -2,14 +2,6 @@
   "id": 142,
   "key": "item:0099CF00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gargoyle's Twinblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

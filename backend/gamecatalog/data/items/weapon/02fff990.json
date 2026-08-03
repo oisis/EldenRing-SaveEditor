@@ -2,14 +2,6 @@
   "id": 489,
   "key": "item:02FFF990",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Coldbone Arrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

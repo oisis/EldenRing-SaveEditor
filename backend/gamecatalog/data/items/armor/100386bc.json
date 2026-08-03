@@ -2,14 +2,6 @@
   "id": 635,
   "key": "item:100386BC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Night's Cavalry Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

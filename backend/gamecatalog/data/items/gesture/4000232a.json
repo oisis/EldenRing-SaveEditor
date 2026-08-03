@@ -2,14 +2,6 @@
   "id": 2017,
   "key": "item:4000232A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "My Thanks",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

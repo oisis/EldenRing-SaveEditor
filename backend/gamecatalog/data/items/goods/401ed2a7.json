@@ -2,14 +2,6 @@
   "id": 2646,
   "key": "item:401ED2A7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintslab Firefly",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1102,
   "key": "item:101D24F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Tear Scarab",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

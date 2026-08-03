@@ -2,14 +2,6 @@
   "id": 809,
   "key": "item:100A134C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vagabond Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 792,
   "key": "item:10099DB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Astrologer Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

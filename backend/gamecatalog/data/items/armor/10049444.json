@@ -2,14 +2,6 @@
   "id": 672,
   "key": "item:10049444",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fur Raiment",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

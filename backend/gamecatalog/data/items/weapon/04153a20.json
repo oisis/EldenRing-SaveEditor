@@ -2,14 +2,6 @@
   "id": 547,
   "key": "item:04153A20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Claw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

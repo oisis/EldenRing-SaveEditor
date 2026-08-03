@@ -2,14 +2,6 @@
   "id": 2339,
   "key": "item:40034008",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Skeletal Bandit Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

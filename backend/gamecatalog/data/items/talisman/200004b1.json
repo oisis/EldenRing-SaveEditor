@@ -2,14 +2,6 @@
   "id": 1306,
   "key": "item:200004B1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mottled Necklace +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1412,
   "key": "item:20001FA4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dried Bouquet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1496,
   "key": "item:400003F1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flask of Crimson Tears +4",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

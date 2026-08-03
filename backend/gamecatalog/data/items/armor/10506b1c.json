@@ -2,14 +2,6 @@
   "id": 1260,
   "key": "item:10506B1C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Young Lion's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

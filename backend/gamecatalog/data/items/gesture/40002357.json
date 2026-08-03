@@ -2,14 +2,6 @@
   "id": 2062,
   "key": "item:40002357",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Inner Order",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

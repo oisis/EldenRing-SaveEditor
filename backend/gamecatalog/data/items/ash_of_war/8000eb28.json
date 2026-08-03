@@ -2,14 +2,6 @@
   "id": 2768,
   "key": "item:8000EB28",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Assassin's Gambit",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

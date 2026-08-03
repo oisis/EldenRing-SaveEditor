@@ -2,14 +2,6 @@
   "id": 1415,
   "key": "item:20001FC2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Retaliatory Crossed-Tree",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

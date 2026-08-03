@@ -2,14 +2,6 @@
   "id": 2289,
   "key": "item:400050CB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Sunflower",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

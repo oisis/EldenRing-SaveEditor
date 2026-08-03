@@ -2,14 +2,6 @@
   "id": 2807,
   "key": "item:80067070",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ghostflame Call",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

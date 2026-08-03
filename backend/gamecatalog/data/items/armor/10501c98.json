@@ -2,14 +2,6 @@
   "id": 1245,
   "key": "item:10501C98",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Warrior Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

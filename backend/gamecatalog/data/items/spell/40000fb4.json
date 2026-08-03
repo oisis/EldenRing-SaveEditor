@@ -2,14 +2,6 @@
   "id": 1654,
   "key": "item:40000FB4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintstone Cometshard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

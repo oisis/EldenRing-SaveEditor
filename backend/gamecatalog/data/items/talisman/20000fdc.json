@@ -2,14 +2,6 @@
   "id": 1364,
   "key": "item:20000FDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crucible Scale Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

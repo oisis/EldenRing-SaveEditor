@@ -2,14 +2,6 @@
   "id": 443,
   "key": "item:0280DE80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lion Greatbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

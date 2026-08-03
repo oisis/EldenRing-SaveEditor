@@ -2,14 +2,6 @@
   "id": 1053,
   "key": "item:101B0210",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godrick Knight Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 832,
   "key": "item:100AFD48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Champion Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

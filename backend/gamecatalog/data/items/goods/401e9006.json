@@ -2,14 +2,6 @@
   "id": 2459,
   "key": "item:401E9006",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leda's Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

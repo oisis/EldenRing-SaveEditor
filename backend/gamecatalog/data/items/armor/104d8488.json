@@ -2,14 +2,6 @@
   "id": 1166,
   "key": "item:104D8488",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dancer's Bracer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

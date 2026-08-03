@@ -2,14 +2,6 @@
   "id": 2099,
   "key": "item:400023AF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Containers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

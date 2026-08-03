@@ -2,14 +2,6 @@
   "id": 75,
   "key": "item:003DA540",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Zweihander",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

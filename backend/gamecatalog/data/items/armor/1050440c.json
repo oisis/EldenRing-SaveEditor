@@ -2,14 +2,6 @@
   "id": 1256,
   "key": "item:1050440C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rellana's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

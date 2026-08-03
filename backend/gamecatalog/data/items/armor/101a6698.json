@@ -2,14 +2,6 @@
   "id": 1039,
   "key": "item:101A6698",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radahn Soldier Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

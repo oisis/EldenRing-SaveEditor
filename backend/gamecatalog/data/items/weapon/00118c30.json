@@ -2,14 +2,6 @@
   "id": 16,
   "key": "item:00118C30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Erdsteel Dagger",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1261,
   "key": "item:10506E3C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Young Lion's Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

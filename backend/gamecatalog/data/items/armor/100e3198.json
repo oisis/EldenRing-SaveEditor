@@ -2,14 +2,6 @@
   "id": 931,
   "key": "item:100E3198",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bandit Manchettes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

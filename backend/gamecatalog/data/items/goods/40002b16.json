@@ -2,14 +2,6 @@
   "id": 2256,
   "key": "item:40002B16",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning-Shrouding Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

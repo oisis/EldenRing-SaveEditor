@@ -2,14 +2,6 @@
   "id": 2529,
   "key": "item:401EA3C7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cross Map",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

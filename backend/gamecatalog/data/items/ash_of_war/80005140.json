@@ -2,14 +2,6 @@
   "id": 2724,
   "key": "item:80005140",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prayerful Strike",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

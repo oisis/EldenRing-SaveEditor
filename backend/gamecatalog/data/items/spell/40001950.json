@@ -2,14 +2,6 @@
   "id": 1758,
   "key": "item:40001950",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Divine Fortification",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

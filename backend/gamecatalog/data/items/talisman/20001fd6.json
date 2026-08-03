@@ -2,14 +2,6 @@
   "id": 1417,
   "key": "item:20001FD6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sharpshot Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

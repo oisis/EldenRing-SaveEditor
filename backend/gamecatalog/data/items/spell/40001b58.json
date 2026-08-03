@@ -2,14 +2,6 @@
   "id": 1792,
   "key": "item:40001B58",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonfire",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2490,
   "key": "item:401E97AE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Impenetrable Thorns",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

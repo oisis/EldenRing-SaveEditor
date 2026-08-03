@@ -2,14 +2,6 @@
   "id": 1103,
   "key": "item:101D4C00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean Tear Scarab",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 389,
   "key": "item:01EC1890",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cuckoo Greatshield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

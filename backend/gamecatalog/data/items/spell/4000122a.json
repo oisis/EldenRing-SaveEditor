@@ -2,14 +2,6 @@
   "id": 1699,
   "key": "item:4000122A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Eternal Darkness",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1075,
   "key": "item:101B9F7C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mausoleum Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

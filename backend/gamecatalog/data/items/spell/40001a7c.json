@@ -2,14 +2,6 @@
   "id": 1774,
   "key": "item:40001A7C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Order Healing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1329,
   "key": "item:20000866",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Arrow's Sting Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

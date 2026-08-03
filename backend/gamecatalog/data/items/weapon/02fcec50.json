@@ -2,14 +2,6 @@
   "id": 470,
   "key": "item:02FCEC50",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Firebone Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

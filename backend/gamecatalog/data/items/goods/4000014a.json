@@ -2,14 +2,6 @@
   "id": 1453,
   "key": "item:4000014A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fetid Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 701,
   "key": "item:10055BE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blackflame Monk Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

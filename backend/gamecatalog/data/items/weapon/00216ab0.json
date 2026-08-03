@@ -2,14 +2,6 @@
   "id": 33,
   "key": "item:00216AB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sword of St. Trina",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

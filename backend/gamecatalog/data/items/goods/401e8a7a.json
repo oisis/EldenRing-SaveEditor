@@ -2,14 +2,6 @@
   "id": 2435,
   "key": "item:401E8A7A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Golden Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

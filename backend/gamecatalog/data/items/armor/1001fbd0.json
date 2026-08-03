@@ -2,14 +2,6 @@
   "id": 584,
   "key": "item:1001FBD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spellblade's Pointed Hat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 218,
   "key": "item:00F47220",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

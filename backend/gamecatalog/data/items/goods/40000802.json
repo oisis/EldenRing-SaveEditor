@@ -2,14 +2,6 @@
   "id": 1573,
   "key": "item:40000802",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Grace Mimic",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1989,
   "key": "item:400022F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravity Stone Peddler's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

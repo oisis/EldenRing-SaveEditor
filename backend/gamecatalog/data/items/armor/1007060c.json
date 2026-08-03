@@ -2,14 +2,6 @@
   "id": 728,
   "key": "item:1007060C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Elden Lord Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

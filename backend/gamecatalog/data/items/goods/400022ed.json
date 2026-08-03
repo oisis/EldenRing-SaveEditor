@@ -2,14 +2,6 @@
   "id": 1982,
   "key": "item:400022ED",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rogier's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1614,
   "key": "item:40000B88",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Omen King",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

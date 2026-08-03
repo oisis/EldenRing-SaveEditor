@@ -2,14 +2,6 @@
   "id": 1389,
   "key": "item:20001B62",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean Amber Medallion +3",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 277,
   "key": "item:014159A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Grafted Dragon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 867,
   "key": "item:100C394C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Festive Garb (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

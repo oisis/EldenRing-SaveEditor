@@ -2,14 +2,6 @@
   "id": 577,
   "key": "item:10018AEC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer's Traveling Garb (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

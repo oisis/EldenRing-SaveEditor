@@ -2,14 +2,6 @@
   "id": 2375,
   "key": "item:4003CCA8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Archer Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1526,
   "key": "item:4000049C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Holyproof Dried Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1134,
   "key": "item:102DEE98",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gaius's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

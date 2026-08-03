@@ -2,14 +2,6 @@
   "id": 2636,
   "key": "item:401EBF22",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spirit Calculus",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

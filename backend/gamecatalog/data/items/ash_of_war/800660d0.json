@@ -2,14 +2,6 @@
   "id": 2805,
   "key": "item:800660D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Sovereignty",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

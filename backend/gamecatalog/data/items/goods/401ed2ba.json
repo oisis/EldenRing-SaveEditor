@@ -2,14 +2,6 @@
   "id": 2665,
   "key": "item:401ED2BA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Congealed Putrescence",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

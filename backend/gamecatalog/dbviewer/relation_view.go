@@ -35,7 +35,7 @@ func newRelationView(direction string, kind schema.RelationKind, resource schema
 	return relationView{
 		Direction:  direction,
 		Kind:       kind,
-		Name:       resource.Label.Value,
+		Name:       resource.Item.Presentation.DisplayName.Value,
 		GameID:     gameID,
 		GameIDPath: strings.TrimPrefix(gameID, "0x"),
 	}

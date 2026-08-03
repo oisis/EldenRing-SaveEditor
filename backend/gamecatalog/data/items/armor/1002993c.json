@@ -2,14 +2,6 @@
   "id": 604,
   "key": "item:1002993C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blaidd's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

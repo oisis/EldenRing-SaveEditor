@@ -2,14 +2,6 @@
   "id": 1384,
   "key": "item:200017C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Furled Finger's Trick-Mirror",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

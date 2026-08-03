@@ -2,14 +2,6 @@
   "id": 2006,
   "key": "item:4000230B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red-Hot Whetblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

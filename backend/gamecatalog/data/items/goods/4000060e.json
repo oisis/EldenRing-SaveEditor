@@ -2,14 +2,6 @@
   "id": 1554,
   "key": "item:4000060E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Soporific Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2386,
   "key": "item:4003F7A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dung Eater Puppet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

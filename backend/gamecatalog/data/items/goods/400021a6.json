@@ -2,14 +2,6 @@
   "id": 1914,
   "key": "item:400021A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Lake of Rot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

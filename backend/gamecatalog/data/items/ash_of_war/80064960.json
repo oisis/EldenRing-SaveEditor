@@ -2,14 +2,6 @@
   "id": 2799,
   "key": "item:80064960",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wing Stance",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

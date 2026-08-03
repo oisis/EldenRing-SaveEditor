@@ -2,14 +2,6 @@
   "id": 805,
   "key": "item:1009F344",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1138,
   "key": "item:104C4C08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Oathseeker Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1253,
   "key": "item:105042E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rellana's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2100,
   "key": "item:400023B0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Adding Affinities",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 137,
   "key": "item:0090F560",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sword of Night",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2501,
   "key": "item:401E9EAC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Light of Miquella",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

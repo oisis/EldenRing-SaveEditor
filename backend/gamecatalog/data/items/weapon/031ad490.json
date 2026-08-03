@@ -2,14 +2,6 @@
   "id": 511,
   "key": "item:031AD490",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bone Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

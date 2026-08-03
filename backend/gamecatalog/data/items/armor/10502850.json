@@ -2,14 +2,6 @@
   "id": 1251,
   "key": "item:10502850",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Divine Bird Warrior Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2753,
   "key": "item:80009D08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mighty Shot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

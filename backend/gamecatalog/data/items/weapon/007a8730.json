@@ -2,14 +2,6 @@
   "id": 119,
   "key": "item:007A8730",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound's Fang",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

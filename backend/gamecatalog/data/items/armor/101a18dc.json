@@ -2,14 +2,6 @@
   "id": 1032,
   "key": "item:101A18DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Raya Lucarian Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

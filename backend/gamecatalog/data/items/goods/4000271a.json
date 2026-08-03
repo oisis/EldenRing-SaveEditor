@@ -2,14 +2,6 @@
   "id": 2180,
   "key": "item:4000271A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Seed",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

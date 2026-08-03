@@ -2,14 +2,6 @@
   "id": 1634,
   "key": "item:40000BEB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Large Glintstone Scrap",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

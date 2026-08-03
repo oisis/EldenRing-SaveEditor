@@ -2,14 +2,6 @@
   "id": 2627,
   "key": "item:401EAF78",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Viridian Hidden Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

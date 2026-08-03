@@ -2,14 +2,6 @@
   "id": 1897,
   "key": "item:40002021",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Weathered Map",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

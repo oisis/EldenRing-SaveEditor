@@ -2,14 +2,6 @@
   "id": 1334,
   "key": "item:20000898",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Curved Sword Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

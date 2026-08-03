@@ -2,14 +2,6 @@
   "id": 402,
   "key": "item:01F95F00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Digger's Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

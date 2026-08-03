@@ -2,14 +2,6 @@
   "id": 257,
   "key": "item:0114A450",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vulgar Militia Shotel",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

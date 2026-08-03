@@ -2,14 +2,6 @@
   "id": 1486,
   "key": "item:4000038E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stanching Boluses",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

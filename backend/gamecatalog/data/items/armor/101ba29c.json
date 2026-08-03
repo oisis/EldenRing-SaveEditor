@@ -2,14 +2,6 @@
   "id": 1076,
   "key": "item:101BA29C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mausoleum Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

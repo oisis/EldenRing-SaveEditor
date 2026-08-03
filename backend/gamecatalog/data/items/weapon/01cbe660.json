@@ -2,14 +2,6 @@
   "id": 334,
   "key": "item:01CBE660",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ice Crest Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

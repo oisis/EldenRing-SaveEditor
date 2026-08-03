@@ -2,14 +2,6 @@
   "id": 2181,
   "key": "item:40002724",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

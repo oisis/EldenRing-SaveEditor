@@ -2,14 +2,6 @@
   "id": 238,
   "key": "item:0103DB70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Serpent-Hunter",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

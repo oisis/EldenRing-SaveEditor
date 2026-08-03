@@ -2,14 +2,6 @@
   "id": 620,
   "key": "item:1003118C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

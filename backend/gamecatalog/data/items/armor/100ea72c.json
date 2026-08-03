@@ -2,14 +2,6 @@
   "id": 946,
   "key": "item:100EA72C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Consort's Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 975,
   "key": "item:100F6A7C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Snow Witch Skirt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

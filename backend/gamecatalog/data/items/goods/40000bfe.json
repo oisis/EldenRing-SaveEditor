@@ -2,14 +2,6 @@
   "id": 1636,
   "key": "item:40000BFE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravity Stone Chunk",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2472,
   "key": "item:401E90BA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Bairn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

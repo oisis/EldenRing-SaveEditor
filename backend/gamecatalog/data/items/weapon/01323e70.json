@@ -2,14 +2,6 @@
   "id": 273,
   "key": "item:01323E70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Urumi",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

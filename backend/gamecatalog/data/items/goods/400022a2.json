@@ -2,14 +2,6 @@
   "id": 1951,
   "key": "item:400022A2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Academy Scroll",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

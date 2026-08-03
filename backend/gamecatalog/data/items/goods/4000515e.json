@@ -2,14 +2,6 @@
   "id": 2316,
   "key": "item:4000515E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gold-Tinged Excrement",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

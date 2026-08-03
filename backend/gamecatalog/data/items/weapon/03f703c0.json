@@ -2,14 +2,6 @@
   "id": 543,
   "key": "item:03F703C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rakshasa's Great Katana",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

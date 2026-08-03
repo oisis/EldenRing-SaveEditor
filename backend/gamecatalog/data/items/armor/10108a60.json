@@ -2,14 +2,6 @@
   "id": 997,
   "key": "item:10108A60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Imp Head (Wolf)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

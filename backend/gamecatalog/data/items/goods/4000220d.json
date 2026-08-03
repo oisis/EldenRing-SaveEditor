@@ -2,14 +2,6 @@
   "id": 1937,
   "key": "item:4000220D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Below the Capital",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

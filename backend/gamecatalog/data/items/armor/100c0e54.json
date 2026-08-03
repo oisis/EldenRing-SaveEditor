@@ -2,14 +2,6 @@
   "id": 860,
   "key": "item:100C0E54",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

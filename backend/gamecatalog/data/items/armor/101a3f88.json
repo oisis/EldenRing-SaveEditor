@@ -2,14 +2,6 @@
   "id": 1035,
   "key": "item:101A3F88",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leyndell Soldier Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2582,
   "key": "item:401EA8D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Forager Brood Cookbook [3]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

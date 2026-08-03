@@ -2,14 +2,6 @@
   "id": 99,
   "key": "item:006ACFC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Falchion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

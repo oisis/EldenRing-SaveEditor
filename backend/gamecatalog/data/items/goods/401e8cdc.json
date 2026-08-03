@@ -2,14 +2,6 @@
   "id": 2447,
   "key": "item:401E8CDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Thiollier's Concoction",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

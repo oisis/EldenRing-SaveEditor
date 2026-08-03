@@ -2,14 +2,6 @@
   "id": 1563,
   "key": "item:400006CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Dart",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

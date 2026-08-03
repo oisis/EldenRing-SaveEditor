@@ -2,14 +2,6 @@
   "id": 1466,
   "key": "item:400001C2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Oil Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

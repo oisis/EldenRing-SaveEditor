@@ -2,14 +2,6 @@
   "id": 1986,
   "key": "item:400022F1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bone Peddler's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

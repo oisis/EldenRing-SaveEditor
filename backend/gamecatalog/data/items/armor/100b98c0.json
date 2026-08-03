@@ -2,14 +2,6 @@
   "id": 844,
   "key": "item:100B98C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Maliketh's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

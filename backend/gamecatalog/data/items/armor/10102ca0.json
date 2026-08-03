@@ -2,14 +2,6 @@
   "id": 987,
   "key": "item:10102CA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Albinauric Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

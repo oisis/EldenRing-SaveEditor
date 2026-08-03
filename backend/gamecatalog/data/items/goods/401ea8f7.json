@@ -2,14 +2,6 @@
   "id": 2613,
   "key": "item:401EA8F7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Grave Keeper's Cookbook [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

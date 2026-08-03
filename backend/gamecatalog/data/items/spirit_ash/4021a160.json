@@ -2,14 +2,6 @@
   "id": 2679,
   "key": "item:4021A160",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spider Scorpion Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

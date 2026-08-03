@@ -2,14 +2,6 @@
   "id": 1878,
   "key": "item:40001FFF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cursemark of Death",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

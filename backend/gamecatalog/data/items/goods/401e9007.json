@@ -2,14 +2,6 @@
   "id": 2460,
   "key": "item:401E9007",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Broken Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

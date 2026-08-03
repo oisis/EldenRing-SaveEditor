@@ -2,14 +2,6 @@
   "id": 913,
   "key": "item:100DBBA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Traveling Maiden Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

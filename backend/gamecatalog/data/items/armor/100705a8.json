@@ -2,14 +2,6 @@
   "id": 727,
   "key": "item:100705A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Elden Lord Bracers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

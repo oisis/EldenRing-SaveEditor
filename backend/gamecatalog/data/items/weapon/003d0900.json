@@ -2,14 +2,6 @@
   "id": 71,
   "key": "item:003D0900",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

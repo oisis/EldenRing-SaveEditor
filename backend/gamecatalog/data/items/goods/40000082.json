@@ -2,14 +2,6 @@
   "id": 1442,
   "key": "item:40000082",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spectral Steed Whistle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

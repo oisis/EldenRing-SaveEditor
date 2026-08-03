@@ -2,14 +2,6 @@
   "id": 343,
   "key": "item:01D9A200",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Albinauric Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

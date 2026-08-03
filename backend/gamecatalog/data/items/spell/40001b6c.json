@@ -2,14 +2,6 @@
   "id": 1796,
   "key": "item:40001B6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonice",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

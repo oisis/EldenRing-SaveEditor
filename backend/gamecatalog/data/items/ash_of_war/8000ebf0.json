@@ -2,14 +2,6 @@
   "id": 2770,
   "key": "item:8000EBF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Order",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

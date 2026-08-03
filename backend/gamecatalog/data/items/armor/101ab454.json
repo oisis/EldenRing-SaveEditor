@@ -2,14 +2,6 @@
   "id": 1045,
   "key": "item:101AB454",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligtree Crest Surcoat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

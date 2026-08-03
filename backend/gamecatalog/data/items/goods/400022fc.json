@@ -2,14 +2,6 @@
   "id": 1995,
   "key": "item:400022FC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Somberstone Miner's Bell Bearing [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

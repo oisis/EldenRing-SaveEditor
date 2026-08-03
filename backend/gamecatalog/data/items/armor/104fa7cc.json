@@ -2,14 +2,6 @@
   "id": 1232,
   "key": "item:104FA7CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

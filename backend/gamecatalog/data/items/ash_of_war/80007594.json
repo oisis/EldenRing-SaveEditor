@@ -2,14 +2,6 @@
   "id": 2743,
   "key": "item:80007594",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Barricade Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 114,
   "key": "item:007297F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Falx",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

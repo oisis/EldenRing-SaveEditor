@@ -2,14 +2,6 @@
   "id": 1880,
   "key": "item:40002001",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Seedbed Curse",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

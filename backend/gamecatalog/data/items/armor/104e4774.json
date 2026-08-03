@@ -2,14 +2,6 @@
   "id": 1190,
   "key": "item:104E4774",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Armor of Solitude",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

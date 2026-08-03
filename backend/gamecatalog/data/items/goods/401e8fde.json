@@ -2,14 +2,6 @@
   "id": 2458,
   "key": "item:401E8FDE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of Putrescence",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 466,
   "key": "item:02FC2900",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rainbow Stone Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

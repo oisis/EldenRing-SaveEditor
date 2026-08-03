@@ -2,14 +2,6 @@
   "id": 1807,
   "key": "item:40001C2A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Swarm of Flies",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

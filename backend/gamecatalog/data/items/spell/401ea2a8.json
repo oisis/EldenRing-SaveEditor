@@ -2,14 +2,6 @@
   "id": 2518,
   "key": "item:401EA2A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spira",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

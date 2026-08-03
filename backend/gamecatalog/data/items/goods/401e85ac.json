@@ -2,14 +2,6 @@
   "id": 2390,
   "key": "item:401E85AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Fire Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2741,
   "key": "item:80005910",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Poisonous Mist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

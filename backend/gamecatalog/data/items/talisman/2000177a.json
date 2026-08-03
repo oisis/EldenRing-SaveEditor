@@ -2,14 +2,6 @@
   "id": 1378,
   "key": "item:2000177A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Concealing Veil",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

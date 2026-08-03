@@ -2,14 +2,6 @@
   "id": 843,
   "key": "item:100B4E88",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Navy Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

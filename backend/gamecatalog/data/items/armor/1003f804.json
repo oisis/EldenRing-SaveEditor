@@ -2,14 +2,6 @@
   "id": 646,
   "key": "item:1003F804",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Malformed Dragon Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

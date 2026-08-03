@@ -2,14 +2,6 @@
   "id": 1615,
   "key": "item:40000B89",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Blasphemous",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1176,
   "key": "item:104DD30C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Igon's Loincloth",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

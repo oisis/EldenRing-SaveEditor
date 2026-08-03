@@ -2,14 +2,6 @@
   "id": 628,
   "key": "item:10035C8C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Page Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

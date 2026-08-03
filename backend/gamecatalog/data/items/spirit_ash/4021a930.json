@@ -2,14 +2,6 @@
   "id": 2681,
   "key": "item:4021A930",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Demi-Human Swordsman Yosh",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1000,
   "key": "item:1010C8E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Chain Coif",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

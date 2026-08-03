@@ -2,14 +2,6 @@
   "id": 1088,
   "key": "item:101C3A90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gilded Foot Soldier Cap",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 79,
   "key": "item:003E4180",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ruins Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

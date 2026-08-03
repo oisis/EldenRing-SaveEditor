@@ -2,14 +2,6 @@
   "id": 2315,
   "key": "item:40005159",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Silver Tear Husk",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2000,
   "key": "item:40002301",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glovewort Picker's Bell Bearing [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1243,
   "key": "item:10501BD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Warrior Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

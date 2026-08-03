@@ -2,14 +2,6 @@
   "id": 2409,
   "key": "item:401E87A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spirit Raisin",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

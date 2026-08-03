@@ -2,14 +2,6 @@
   "id": 1689,
   "key": "item:40001180",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lucidity",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

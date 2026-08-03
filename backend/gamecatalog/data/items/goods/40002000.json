@@ -2,14 +2,6 @@
   "id": 1879,
   "key": "item:40002000",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Asimi's Husk",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1370,
   "key": "item:20001388",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Seed Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

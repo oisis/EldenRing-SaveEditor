@@ -2,14 +2,6 @@
   "id": 1899,
   "key": "item:4000218E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Whetstone Knife",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

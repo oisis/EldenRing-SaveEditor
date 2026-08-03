@@ -2,14 +2,6 @@
   "id": 185,
   "key": "item:00CDFE60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Serpent Flail",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

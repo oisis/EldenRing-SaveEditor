@@ -2,14 +2,6 @@
   "id": 680,
   "key": "item:1004BF3C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravekeeper Cloak (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

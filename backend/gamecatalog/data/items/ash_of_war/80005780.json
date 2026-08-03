@@ -2,14 +2,6 @@
   "id": 2737,
   "key": "item:80005780",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blood Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

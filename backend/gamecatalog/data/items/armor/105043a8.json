@@ -2,14 +2,6 @@
   "id": 1255,
   "key": "item:105043A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rellana's Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

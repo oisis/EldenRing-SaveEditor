@@ -2,14 +2,6 @@
   "id": 2358,
   "key": "item:40038A40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lone Wolf Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1333,
   "key": "item:2000088E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roar Medallion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

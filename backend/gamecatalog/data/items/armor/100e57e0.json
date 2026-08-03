@@ -2,14 +2,6 @@
   "id": 934,
   "key": "item:100E57E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Eccentric's Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

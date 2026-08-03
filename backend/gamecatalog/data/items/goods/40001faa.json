@@ -2,14 +2,6 @@
   "id": 1825,
   "key": "item:40001FAA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dectus Medallion (Right)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1117,
   "key": "item:101E5D70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "High Page Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

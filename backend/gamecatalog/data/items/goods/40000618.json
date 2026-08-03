@@ -2,14 +2,6 @@
   "id": 1555,
   "key": "item:40000618",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Poison Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

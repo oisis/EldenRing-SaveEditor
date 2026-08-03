@@ -2,14 +2,6 @@
   "id": 828,
   "key": "item:100AB248",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Brave's Leather Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

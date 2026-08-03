@@ -2,14 +2,6 @@
   "id": 706,
   "key": "item:10057F6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Prelate Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

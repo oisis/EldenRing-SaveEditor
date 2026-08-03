@@ -2,14 +2,6 @@
   "id": 2689,
   "key": "item:4021C870",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Warrior Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

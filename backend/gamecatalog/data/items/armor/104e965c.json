@@ -2,14 +2,6 @@
   "id": 1202,
   "key": "item:104E965C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

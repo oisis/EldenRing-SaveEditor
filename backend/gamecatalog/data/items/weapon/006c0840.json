@@ -2,14 +2,6 @@
   "id": 107,
   "key": "item:006C0840",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scavenger's Curved Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

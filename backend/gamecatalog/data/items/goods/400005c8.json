@@ -2,14 +2,6 @@
   "id": 1547,
   "key": "item:400005C8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonwound Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

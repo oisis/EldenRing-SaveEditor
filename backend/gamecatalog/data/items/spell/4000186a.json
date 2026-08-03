@@ -2,14 +2,6 @@
   "id": 1736,
   "key": "item:4000186A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Flame Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

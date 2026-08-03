@@ -2,14 +2,6 @@
   "id": 2634,
   "key": "item:401EAFBE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Deflecting Hardtear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

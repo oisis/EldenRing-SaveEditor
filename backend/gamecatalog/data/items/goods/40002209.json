@@ -2,14 +2,6 @@
   "id": 1933,
   "key": "item:40002209",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Gateway",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

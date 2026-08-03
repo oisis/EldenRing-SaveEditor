@@ -2,14 +2,6 @@
   "id": 2547,
   "key": "item:401EA3DF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Sealed Spiritsprings",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

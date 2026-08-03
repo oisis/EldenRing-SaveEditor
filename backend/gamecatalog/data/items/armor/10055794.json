@@ -2,14 +2,6 @@
   "id": 696,
   "key": "item:10055794",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Monk Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

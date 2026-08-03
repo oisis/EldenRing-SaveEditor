@@ -2,14 +2,6 @@
   "id": 366,
   "key": "item:01E0A6E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

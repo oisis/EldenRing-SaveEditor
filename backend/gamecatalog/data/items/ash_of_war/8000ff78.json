@@ -2,14 +2,6 @@
   "id": 2778,
   "key": "item:8000FF78",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Braggart's Roar",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

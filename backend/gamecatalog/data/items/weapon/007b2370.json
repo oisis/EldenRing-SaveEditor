@@ -2,14 +2,6 @@
   "id": 123,
   "key": "item:007B2370",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Monk's Flameblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

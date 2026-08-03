@@ -2,14 +2,6 @@
   "id": 1269,
   "key": "item:10510630",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crucible Hammer-Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

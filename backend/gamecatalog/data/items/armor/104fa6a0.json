@@ -2,14 +2,6 @@
   "id": 1229,
   "key": "item:104FA6A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

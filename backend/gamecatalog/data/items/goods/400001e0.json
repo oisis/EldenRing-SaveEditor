@@ -2,14 +2,6 @@
   "id": 1469,
   "key": "item:400001E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Freezing Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

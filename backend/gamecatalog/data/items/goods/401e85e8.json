@@ -2,14 +2,6 @@
   "id": 2395,
   "key": "item:401E85E8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Freezing Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

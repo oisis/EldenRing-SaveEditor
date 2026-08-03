@@ -2,14 +2,6 @@
   "id": 2509,
   "key": "item:401E9FEC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ghostflame Breath",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 295,
   "key": "item:015EF3C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prelate's Inferno Crozier",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

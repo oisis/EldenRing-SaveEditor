@@ -2,14 +2,6 @@
   "id": 1419,
   "key": "item:20001FEA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Talisman of the Dread",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

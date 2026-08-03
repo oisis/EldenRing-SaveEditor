@@ -2,14 +2,6 @@
   "id": 2281,
   "key": "item:400050AB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Trina's Lily",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2177,
   "key": "item:4000251D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ritual Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

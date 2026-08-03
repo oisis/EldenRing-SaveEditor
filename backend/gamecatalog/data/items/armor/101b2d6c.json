@@ -2,14 +2,6 @@
   "id": 1062,
   "key": "item:101B2D6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cuckoo Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

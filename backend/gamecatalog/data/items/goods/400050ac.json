@@ -2,14 +2,6 @@
   "id": 2282,
   "key": "item:400050AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fulgurbloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1115,
   "key": "item:101E36C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Highwayman Cloth Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

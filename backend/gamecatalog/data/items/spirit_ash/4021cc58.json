@@ -2,14 +2,6 @@
   "id": 2690,
   "key": "item:4021CC58",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Dragon Florissax",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

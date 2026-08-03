@@ -2,14 +2,6 @@
   "id": 409,
   "key": "item:01FB0CB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Azur's Glintstone Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

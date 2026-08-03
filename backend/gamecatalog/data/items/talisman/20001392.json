@@ -2,14 +2,6 @@
   "id": 1371,
   "key": "item:20001392",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean Seed Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

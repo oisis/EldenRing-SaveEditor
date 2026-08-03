@@ -2,14 +2,6 @@
   "id": 480,
   "key": "item:02FE72F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shattershard Arrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

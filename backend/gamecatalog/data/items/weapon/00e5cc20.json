@@ -2,14 +2,6 @@
   "id": 208,
   "key": "item:00E5CC20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rusted Anchor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

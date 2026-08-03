@@ -2,14 +2,6 @@
   "id": 729,
   "key": "item:1007092C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Elden Lord Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

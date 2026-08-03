@@ -2,14 +2,6 @@
   "id": 2739,
   "key": "item:80005848",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spectral Lance",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

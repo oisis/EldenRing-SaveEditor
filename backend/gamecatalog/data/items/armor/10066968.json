@@ -2,14 +2,6 @@
   "id": 719,
   "key": "item:10066968",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vulgar Militia Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 58,
   "key": "item:002FC290",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Helphen's Steeple",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

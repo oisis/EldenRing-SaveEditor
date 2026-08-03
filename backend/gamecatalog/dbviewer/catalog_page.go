@@ -95,7 +95,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 
 		canonicalID := formatGameID(item.GameID.Value)
 		canonicalSearch := []string{
-			resource.Label.Value,
+			resource.Item.Presentation.DisplayName.Value,
 			resource.Key,
 			canonicalID,
 			string(item.Family.Value),
@@ -109,7 +109,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 			}
 		}
 		canonical := catalogItemRow{
-			Name:         resource.Label.Value,
+			Name:         resource.Item.Presentation.DisplayName.Value,
 			IconURL:      itemIconURL(item),
 			GameID:       canonicalID,
 			GameIDPath:   strings.TrimPrefix(canonicalID, "0x"),
@@ -128,10 +128,10 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 				continue
 			}
 			variantID := formatGameID(variant.GameID.Value)
-			variantName := variantDisplayName(resource.Label.Value, variant)
+			variantName := variantDisplayName(resource.Item.Presentation.DisplayName.Value, variant)
 			variantSearch := []string{
 				variantName,
-				resource.Label.Value,
+				resource.Item.Presentation.DisplayName.Value,
 				resource.Key,
 				variantID,
 				string(item.Family.Value),

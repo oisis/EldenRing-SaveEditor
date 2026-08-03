@@ -2,14 +2,6 @@
   "id": 2788,
   "key": "item:80061A80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spinning Gravity Thrust",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

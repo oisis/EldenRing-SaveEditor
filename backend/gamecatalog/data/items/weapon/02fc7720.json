@@ -2,14 +2,6 @@
   "id": 468,
   "key": "item:02FC7720",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dwelling Arrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

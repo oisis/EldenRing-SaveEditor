@@ -2,14 +2,6 @@
   "id": 504,
   "key": "item:0319C320",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer's Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

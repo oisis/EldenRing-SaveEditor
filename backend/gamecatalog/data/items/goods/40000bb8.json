@@ -2,14 +2,6 @@
   "id": 1628,
   "key": "item:40000BB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancestral Infant's Head",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

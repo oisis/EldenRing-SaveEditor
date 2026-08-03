@@ -2,14 +2,6 @@
   "id": 752,
   "key": "item:10083E8C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Depraved Perfumer Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

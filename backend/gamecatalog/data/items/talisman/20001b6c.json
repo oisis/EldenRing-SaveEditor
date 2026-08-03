@@ -2,14 +2,6 @@
   "id": 1390,
   "key": "item:20001B6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Viridian Amber Medallion +3",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

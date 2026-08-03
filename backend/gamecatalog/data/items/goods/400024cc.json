@@ -2,14 +2,6 @@
   "id": 2170,
   "key": "item:400024CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fevor's Cookbook [1]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

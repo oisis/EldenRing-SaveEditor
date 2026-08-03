@@ -2,14 +2,6 @@
   "id": 2321,
   "key": "item:4000516D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Yellow Ember",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

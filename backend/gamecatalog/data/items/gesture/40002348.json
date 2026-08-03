@@ -2,14 +2,6 @@
   "id": 2047,
   "key": "item:40002348",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Patches' Crouch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

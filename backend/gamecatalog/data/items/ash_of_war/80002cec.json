@@ -2,14 +2,6 @@
   "id": 2709,
   "key": "item:80002CEC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Square Off",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

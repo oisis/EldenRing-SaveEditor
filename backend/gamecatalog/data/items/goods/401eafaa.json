@@ -2,14 +2,6 @@
   "id": 2632,
   "key": "item:401EAFAA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodsucking Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

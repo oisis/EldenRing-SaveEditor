@@ -2,14 +2,6 @@
   "id": 2474,
   "key": "item:401E90CE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Call of Tibia",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

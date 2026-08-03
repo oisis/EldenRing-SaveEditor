@@ -2,14 +2,6 @@
   "id": 1404,
   "key": "item:20001F4A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fine Crucible Feather Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

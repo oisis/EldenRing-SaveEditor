@@ -2,14 +2,6 @@
   "id": 841,
   "key": "item:100B4B68",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Noble's Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

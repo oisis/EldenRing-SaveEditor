@@ -2,14 +2,6 @@
   "id": 1720,
   "key": "item:400013F6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Great Oracular Bubble",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

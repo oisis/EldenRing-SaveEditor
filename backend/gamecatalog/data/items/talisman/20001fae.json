@@ -2,14 +2,6 @@
   "id": 1413,
   "key": "item:20001FAE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smithing Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 612,
   "key": "item:1002E694",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Exile Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

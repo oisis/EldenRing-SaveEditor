@@ -2,14 +2,6 @@
   "id": 1773,
   "key": "item:40001A72",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Order's Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 986,
   "key": "item:101005F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fell Omen Cloak",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

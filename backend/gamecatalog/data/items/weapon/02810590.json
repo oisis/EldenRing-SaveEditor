@@ -2,14 +2,6 @@
   "id": 444,
   "key": "item:02810590",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golem Greatbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

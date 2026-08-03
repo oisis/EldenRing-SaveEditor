@@ -2,14 +2,6 @@
   "id": 26,
   "key": "item:001F95F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Epitaph",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

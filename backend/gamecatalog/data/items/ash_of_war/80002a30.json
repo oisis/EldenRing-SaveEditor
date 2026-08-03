@@ -2,14 +2,6 @@
   "id": 2702,
   "key": "item:80002A30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blood Tax",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

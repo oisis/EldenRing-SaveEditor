@@ -2,14 +2,6 @@
   "id": 1560,
   "key": "item:400006AE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bone Dart",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

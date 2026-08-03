@@ -2,14 +2,6 @@
   "id": 228,
   "key": "item:00F61FD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Inquisitor's Girandole",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

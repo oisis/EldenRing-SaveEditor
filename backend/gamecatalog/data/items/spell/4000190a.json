@@ -2,14 +2,6 @@
   "id": 1745,
   "key": "item:4000190A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wrath of Gold",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

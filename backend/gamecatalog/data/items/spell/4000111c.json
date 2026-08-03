@@ -2,14 +2,6 @@
   "id": 1677,
   "key": "item:4000111C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Loretta's Greatbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

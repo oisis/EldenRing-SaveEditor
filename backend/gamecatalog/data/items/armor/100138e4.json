@@ -2,14 +2,6 @@
   "id": 564,
   "key": "item:100138E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scaled Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

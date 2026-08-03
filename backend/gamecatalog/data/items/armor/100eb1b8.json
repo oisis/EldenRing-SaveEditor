@@ -2,14 +2,6 @@
   "id": 950,
   "key": "item:100EB1B8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marais Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2218,
   "key": "item:40002AA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ghost Glovewort [3]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

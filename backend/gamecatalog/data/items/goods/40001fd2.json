@@ -2,14 +2,6 @@
   "id": 1843,
   "key": "item:40001FD2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Miniature Ranni (Variant)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

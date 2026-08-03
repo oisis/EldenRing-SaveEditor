@@ -2,14 +2,6 @@
   "id": 178,
   "key": "item:00BF0A40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Steel Greathammer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

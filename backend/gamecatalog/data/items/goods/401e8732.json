@@ -2,14 +2,6 @@
   "id": 2404,
   "key": "item:401E8732",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Red Lightning Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

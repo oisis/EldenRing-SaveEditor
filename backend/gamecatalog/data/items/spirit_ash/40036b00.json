@@ -2,14 +2,6 @@
   "id": 2350,
   "key": "item:40036B00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Kindred of Rot Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1196,
   "key": "item:104E6EE8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

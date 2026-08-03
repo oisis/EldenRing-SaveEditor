@@ -2,14 +2,6 @@
   "id": 2550,
   "key": "item:401EA3E2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Message from Leda",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

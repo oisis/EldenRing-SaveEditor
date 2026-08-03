@@ -2,14 +2,6 @@
   "id": 2228,
   "key": "item:40002AFA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

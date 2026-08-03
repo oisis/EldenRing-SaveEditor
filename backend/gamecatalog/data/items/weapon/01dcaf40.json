@@ -2,14 +2,6 @@
   "id": 355,
   "key": "item:01DCAF40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horse Crest Wooden Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

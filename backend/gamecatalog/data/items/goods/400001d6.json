@@ -2,14 +2,6 @@
   "id": 1468,
   "key": "item:400001D6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Fly Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1467,
   "key": "item:400001CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Magic Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

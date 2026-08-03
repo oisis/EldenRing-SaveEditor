@@ -2,14 +2,6 @@
   "id": 718,
   "key": "item:10066904",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vulgar Militia Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

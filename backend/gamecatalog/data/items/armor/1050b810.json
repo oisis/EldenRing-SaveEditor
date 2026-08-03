@@ -2,14 +2,6 @@
   "id": 1267,
   "key": "item:1050B810",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Divine Beast Head",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

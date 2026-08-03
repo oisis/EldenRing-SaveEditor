@@ -2,14 +2,6 @@
   "id": 2285,
   "key": "item:400050B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Faded Erdleaf Flower",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

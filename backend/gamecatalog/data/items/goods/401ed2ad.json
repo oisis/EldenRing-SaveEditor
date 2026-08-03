@@ -2,14 +2,6 @@
   "id": 2652,
   "key": "item:401ED2AD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Frozen Maggot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

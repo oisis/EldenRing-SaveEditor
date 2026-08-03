@@ -2,14 +2,6 @@
   "id": 964,
   "key": "item:100F1B30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hierodas Glintstone Crown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

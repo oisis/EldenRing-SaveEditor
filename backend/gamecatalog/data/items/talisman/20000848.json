@@ -2,14 +2,6 @@
   "id": 1326,
   "key": "item:20000848",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinblade Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

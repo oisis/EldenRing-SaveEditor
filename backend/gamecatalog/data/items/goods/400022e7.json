@@ -2,14 +2,6 @@
   "id": 1976,
   "key": "item:400022E7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Isolated Merchant's Bell Bearing [3]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

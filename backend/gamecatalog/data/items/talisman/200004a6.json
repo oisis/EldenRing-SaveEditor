@@ -2,14 +2,6 @@
   "id": 1303,
   "key": "item:200004A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prince of Death's Pustule",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

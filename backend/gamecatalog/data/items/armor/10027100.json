@@ -2,14 +2,6 @@
   "id": 598,
   "key": "item:10027100",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Guilty Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 80,
   "key": "item:003E8FA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Grafted Blade Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

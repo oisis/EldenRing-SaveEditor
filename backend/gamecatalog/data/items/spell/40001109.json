@@ -2,14 +2,6 @@
   "id": 1675,
   "key": "item:40001109",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ranni's Dark Moon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

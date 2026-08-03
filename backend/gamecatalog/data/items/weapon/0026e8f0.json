@@ -2,14 +2,6 @@
   "id": 45,
   "key": "item:0026E8F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sword of Light",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

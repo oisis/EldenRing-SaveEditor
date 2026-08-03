@@ -2,14 +2,6 @@
   "id": 2306,
   "key": "item:4000512C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cracked Crystal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

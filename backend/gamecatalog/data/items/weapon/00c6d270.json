@@ -2,14 +2,6 @@
   "id": 183,
   "key": "item:00C6D270",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bastard's Stars",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

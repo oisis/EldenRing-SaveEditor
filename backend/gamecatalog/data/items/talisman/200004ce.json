@@ -2,14 +2,6 @@
   "id": 1310,
   "key": "item:200004CE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Warrior Jar Shard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

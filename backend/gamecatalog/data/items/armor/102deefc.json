@@ -2,14 +2,6 @@
   "id": 1135,
   "key": "item:102DEEFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gaius's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

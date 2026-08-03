@@ -2,14 +2,6 @@
   "id": 1172,
   "key": "item:104DABFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greaves of Night",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 695,
   "key": "item:10055730",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Monk Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

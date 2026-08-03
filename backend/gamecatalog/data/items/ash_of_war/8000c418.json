@@ -2,14 +2,6 @@
   "id": 2758,
   "key": "item:8000C418",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Storm Stomp",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

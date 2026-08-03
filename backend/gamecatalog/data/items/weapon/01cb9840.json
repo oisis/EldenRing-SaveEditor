@@ -2,14 +2,6 @@
   "id": 332,
   "key": "item:01CB9840",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iron Roundshield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

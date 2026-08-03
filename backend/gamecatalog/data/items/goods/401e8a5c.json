@@ -2,14 +2,6 @@
   "id": 2432,
   "key": "item:401E8A5C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Messmerfire Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

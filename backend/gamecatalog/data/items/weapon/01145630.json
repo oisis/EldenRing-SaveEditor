@@ -2,14 +2,6 @@
   "id": 256,
   "key": "item:01145630",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Guardian's Swordspear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

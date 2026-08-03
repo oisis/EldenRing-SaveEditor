@@ -2,14 +2,6 @@
   "id": 1431,
   "key": "item:40000068",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "White Cipher Ring",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

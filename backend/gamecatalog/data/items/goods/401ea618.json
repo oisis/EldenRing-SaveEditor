@@ -2,14 +2,6 @@
   "id": 2556,
   "key": "item:401EA618",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Gravesite Plain",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

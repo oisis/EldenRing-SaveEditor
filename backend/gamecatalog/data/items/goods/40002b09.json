@@ -2,14 +2,6 @@
   "id": 2243,
   "key": "item:40002B09",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ruptured Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

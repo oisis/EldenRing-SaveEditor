@@ -2,14 +2,6 @@
   "id": 2751,
   "key": "item:80009C40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Through and Through",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

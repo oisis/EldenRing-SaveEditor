@@ -2,14 +2,6 @@
   "id": 2066,
   "key": "item:4000238C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Sites of Grace",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

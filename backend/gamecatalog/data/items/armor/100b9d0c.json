@@ -2,14 +2,6 @@
   "id": 848,
   "key": "item:100B9D0C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Maliketh's Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

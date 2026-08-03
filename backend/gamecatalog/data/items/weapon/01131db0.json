@@ -2,14 +2,6 @@
   "id": 248,
   "key": "item:01131DB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight's Halberd",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

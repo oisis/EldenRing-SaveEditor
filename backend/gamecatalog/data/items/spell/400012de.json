@@ -2,14 +2,6 @@
   "id": 1710,
   "key": "item:400012DE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rykard's Rancor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

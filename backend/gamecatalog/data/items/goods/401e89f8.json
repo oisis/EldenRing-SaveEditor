@@ -2,14 +2,6 @@
   "id": 2426,
   "key": "item:401E89F8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmerfire Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

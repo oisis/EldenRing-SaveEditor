@@ -2,14 +2,6 @@
   "id": 668,
   "key": "item:100478EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Night Maiden Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

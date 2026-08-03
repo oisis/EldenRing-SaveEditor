@@ -2,14 +2,6 @@
   "id": 1452,
   "key": "item:40000141",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Dragonbolt Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

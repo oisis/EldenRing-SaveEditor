@@ -2,14 +2,6 @@
   "id": 18,
   "key": "item:0016E360",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Main-gauche",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

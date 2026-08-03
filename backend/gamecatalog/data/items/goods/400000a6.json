@@ -2,14 +2,6 @@
   "id": 1445,
   "key": "item:400000A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vision of Grace",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

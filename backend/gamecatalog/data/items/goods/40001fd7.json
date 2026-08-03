@@ -2,14 +2,6 @@
   "id": 1848,
   "key": "item:40001FD7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rykard's Great Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

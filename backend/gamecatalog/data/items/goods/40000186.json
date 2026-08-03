@@ -2,14 +2,6 @@
   "id": 1460,
   "key": "item:40000186",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Alluring Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

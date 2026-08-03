@@ -2,14 +2,6 @@
   "id": 1083,
   "key": "item:101BECD4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Chain-Draped Tabard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

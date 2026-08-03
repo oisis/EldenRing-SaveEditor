@@ -2,14 +2,6 @@
   "id": 2304,
   "key": "item:40005122",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Toxic Mushroom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

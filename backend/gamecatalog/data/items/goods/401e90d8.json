@@ -2,14 +2,6 @@
   "id": 2475,
   "key": "item:401E90D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Surging Frenzied Flame",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1233,
   "key": "item:104FAA88",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer's Helm (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

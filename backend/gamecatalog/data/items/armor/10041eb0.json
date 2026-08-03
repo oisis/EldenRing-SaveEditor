@@ -2,14 +2,6 @@
   "id": 649,
   "key": "item:10041EB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree Sentinel Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1048,
   "key": "item:101ADB00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gelmir Knight Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

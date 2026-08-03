@@ -2,14 +2,6 @@
   "id": 772,
   "key": "item:100901DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "All-Knowing Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

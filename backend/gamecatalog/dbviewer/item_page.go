@@ -64,7 +64,7 @@ func (server *Server) buildItemPage(
 ) itemPage {
 	resource := view.Resource
 	item := resource.Item
-	name := resource.Label.Value
+	name := resource.Item.Presentation.DisplayName.Value
 	iconURL := itemIconURL(item)
 	entryType := "Canonical"
 	unknownCount := countUnknownFacts(resource)
@@ -85,7 +85,7 @@ func (server *Server) buildItemPage(
 	familyData := server.familyFacts(item)
 	sourceRecords := server.parameterRecordViews(item)
 	if variant, exists := findVariant(item, requestedGameID); exists {
-		name = variantDisplayName(resource.Label.Value, variant)
+		name = variantDisplayName(resource.Item.Presentation.DisplayName.Value, variant)
 		iconURL = variantIconURL(item, variant)
 		entryType = "Variant"
 		unknownCount = countUnknownFacts(variant)

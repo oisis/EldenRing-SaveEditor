@@ -2,14 +2,6 @@
   "id": 363,
   "key": "item:01DDE7C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Inverted Hawk Heater Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

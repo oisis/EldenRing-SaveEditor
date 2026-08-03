@@ -2,14 +2,6 @@
   "id": 2671,
   "key": "item:401ED2C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red Fulgurbloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

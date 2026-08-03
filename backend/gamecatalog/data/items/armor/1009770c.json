@@ -2,14 +2,6 @@
   "id": 787,
   "key": "item:1009770C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prophet Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

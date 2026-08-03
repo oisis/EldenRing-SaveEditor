@@ -2,14 +2,6 @@
   "id": 880,
   "key": "item:100CAAF8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sorcerer Manchettes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

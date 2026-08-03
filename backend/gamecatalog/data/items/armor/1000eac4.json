@@ -2,14 +2,6 @@
   "id": 558,
   "key": "item:1000EAC4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drake Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

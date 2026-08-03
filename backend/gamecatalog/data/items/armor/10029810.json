@@ -2,14 +2,6 @@
   "id": 601,
   "key": "item:10029810",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Wolf Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

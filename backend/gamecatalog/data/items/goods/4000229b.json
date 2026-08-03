@@ -2,14 +2,6 @@
   "id": 1944,
   "key": "item:4000229B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Assassin's Prayerbook",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

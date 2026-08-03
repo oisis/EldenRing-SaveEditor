@@ -2,14 +2,6 @@
   "id": 2300,
   "key": "item:4000510F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rimed Crystal Bud",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

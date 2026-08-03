@@ -2,14 +2,6 @@
   "id": 1230,
   "key": "item:104FA704",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer's Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

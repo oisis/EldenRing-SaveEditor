@@ -2,14 +2,6 @@
   "id": 916,
   "key": "item:100DBCCC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Traveling Maiden Boots",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

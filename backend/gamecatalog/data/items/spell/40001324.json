@@ -2,14 +2,6 @@
   "id": 1711,
   "key": "item:40001324",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Briars of Sin",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

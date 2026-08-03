@@ -2,14 +2,6 @@
   "id": 969,
   "key": "item:100F4240",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haima Glintstone Crown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

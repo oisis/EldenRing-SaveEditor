@@ -2,14 +2,6 @@
   "id": 1186,
   "key": "item:104E20C8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Freyja's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

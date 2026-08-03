@@ -2,14 +2,6 @@
   "id": 1618,
   "key": "item:40000B8C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Black Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1990,
   "key": "item:400022F7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smithing-Stone Miner's Bell Bearing [1]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

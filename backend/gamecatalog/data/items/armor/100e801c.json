@@ -2,14 +2,6 @@
   "id": 942,
   "key": "item:100E801C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fingerprint Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

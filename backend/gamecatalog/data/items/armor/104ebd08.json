@@ -2,14 +2,6 @@
   "id": 1205,
   "key": "item:104EBD08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rakshasa Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

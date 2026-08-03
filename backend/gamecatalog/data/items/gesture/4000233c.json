@@ -2,14 +2,6 @@
   "id": 2035,
   "key": "item:4000233C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rallying Cry",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

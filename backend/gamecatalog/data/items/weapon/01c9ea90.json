@@ -2,14 +2,6 @@
   "id": 322,
   "key": "item:01C9EA90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer's Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

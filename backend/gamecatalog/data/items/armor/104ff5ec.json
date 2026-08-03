@@ -2,14 +2,6 @@
   "id": 1242,
   "key": "item:104FF5EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Common Soldier Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

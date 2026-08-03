@@ -2,14 +2,6 @@
   "id": 2439,
   "key": "item:401E8B2E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon Communion Harpoon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

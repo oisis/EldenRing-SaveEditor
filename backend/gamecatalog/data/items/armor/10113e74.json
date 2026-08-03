@@ -2,14 +2,6 @@
   "id": 1010,
   "key": "item:10113E74",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mushroom Body",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

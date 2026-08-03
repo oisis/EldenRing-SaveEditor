@@ -2,14 +2,6 @@
   "id": 801,
   "key": "item:1009EB74",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

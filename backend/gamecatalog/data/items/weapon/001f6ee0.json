@@ -2,14 +2,6 @@
   "id": 25,
   "key": "item:001F6EE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ornamental Straight Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1472,
   "key": "item:40000258",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Volcano Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

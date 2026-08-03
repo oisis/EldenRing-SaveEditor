@@ -2,14 +2,6 @@
   "id": 1659,
   "key": "item:40000FDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Barrage",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

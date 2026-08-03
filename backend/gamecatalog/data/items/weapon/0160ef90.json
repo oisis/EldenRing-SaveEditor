@@ -2,14 +2,6 @@
   "id": 307,
   "key": "item:0160EF90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Troll's Hammer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

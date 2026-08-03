@@ -2,14 +2,6 @@
   "id": 2730,
   "key": "item:80005460",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Thunderbolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 313,
   "key": "item:016E3600",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Torch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 237,
   "key": "item:0103B460",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Siluria's Tree",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 250,
   "key": "item:01136BD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nightrider Glaive",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2042,
   "key": "item:40002343",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Jump for Joy",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

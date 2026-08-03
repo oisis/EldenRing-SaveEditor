@@ -2,14 +2,6 @@
   "id": 1888,
   "key": "item:4000200A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Champion's Song Painting",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 252,
   "key": "item:0113B9F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vulgar Militia Saw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

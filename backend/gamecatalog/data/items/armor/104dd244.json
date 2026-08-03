@@ -2,14 +2,6 @@
   "id": 1174,
   "key": "item:104DD244",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Igon's Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

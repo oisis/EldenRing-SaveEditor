@@ -2,14 +2,6 @@
   "id": 1082,
   "key": "item:101BEC70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Foot Soldier Cap",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

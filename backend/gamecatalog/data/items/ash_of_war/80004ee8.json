@@ -2,14 +2,6 @@
   "id": 2719,
   "key": "item:80004EE8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ice Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

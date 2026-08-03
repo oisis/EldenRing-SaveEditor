@@ -2,14 +2,6 @@
   "id": 118,
   "key": "item:007A6020",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dismounter",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

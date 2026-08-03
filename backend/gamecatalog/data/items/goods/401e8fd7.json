@@ -2,14 +2,6 @@
   "id": 2452,
   "key": "item:401E8FD7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Twin Moon Knight",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

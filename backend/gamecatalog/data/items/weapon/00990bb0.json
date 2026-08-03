@@ -2,14 +2,6 @@
   "id": 140,
   "key": "item:00990BB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinned Knight Swords",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

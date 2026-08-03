@@ -2,14 +2,6 @@
   "id": 1776,
   "key": "item:40001A9A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stone of Gurranq",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

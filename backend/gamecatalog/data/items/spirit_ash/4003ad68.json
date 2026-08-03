@@ -2,14 +2,6 @@
   "id": 2367,
   "key": "item:4003AD68",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Noble Sorcerer Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

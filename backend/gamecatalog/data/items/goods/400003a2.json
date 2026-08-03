@@ -2,14 +2,6 @@
   "id": 1488,
   "key": "item:400003A2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stimulating Boluses",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

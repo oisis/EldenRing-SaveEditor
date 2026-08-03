@@ -2,14 +2,6 @@
   "id": 1114,
   "key": "item:101E3660",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Highwayman Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

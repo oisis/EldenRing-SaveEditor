@@ -2,14 +2,6 @@
   "id": 1070,
   "key": "item:101B7808",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Redmane Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2638,
   "key": "item:401EBF36",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scorpion Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

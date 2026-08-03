@@ -2,14 +2,6 @@
   "id": 1451,
   "key": "item:40000140",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

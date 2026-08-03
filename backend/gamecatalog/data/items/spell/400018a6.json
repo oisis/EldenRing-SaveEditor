@@ -2,14 +2,6 @@
   "id": 1740,
   "key": "item:400018A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodboon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

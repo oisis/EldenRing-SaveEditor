@@ -2,14 +2,6 @@
   "id": 1516,
   "key": "item:40000431",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flask of Cerulean Tears +11",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

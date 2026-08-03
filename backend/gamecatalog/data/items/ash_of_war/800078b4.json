@@ -2,14 +2,6 @@
   "id": 2749,
   "key": "item:800078B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "No Skill",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

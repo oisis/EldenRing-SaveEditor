@@ -2,14 +2,6 @@
   "id": 200,
   "key": "item:00DD8EC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier's Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

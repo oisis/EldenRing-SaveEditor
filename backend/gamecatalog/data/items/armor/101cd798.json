@@ -2,14 +2,6 @@
   "id": 1097,
   "key": "item:101CD798",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Omenkiller Long Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

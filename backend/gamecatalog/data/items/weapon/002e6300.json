@@ -2,14 +2,6 @@
   "id": 51,
   "key": "item:002E6300",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Knight's Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

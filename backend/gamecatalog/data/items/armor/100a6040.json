@@ -2,14 +2,6 @@
   "id": 815,
   "key": "item:100A6040",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "White Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

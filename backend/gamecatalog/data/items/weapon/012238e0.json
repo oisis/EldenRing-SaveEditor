@@ -2,14 +2,6 @@
   "id": 265,
   "key": "item:012238E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Halo Scythe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

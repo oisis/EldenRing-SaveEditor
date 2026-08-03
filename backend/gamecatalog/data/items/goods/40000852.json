@@ -2,14 +2,6 @@
   "id": 1579,
   "key": "item:40000852",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Celestial Dew",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

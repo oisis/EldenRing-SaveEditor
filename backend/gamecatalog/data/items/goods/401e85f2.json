@@ -2,14 +2,6 @@
   "id": 2396,
   "key": "item:401E85F2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Poison Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 77,
   "key": "item:003DF360",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Royal Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

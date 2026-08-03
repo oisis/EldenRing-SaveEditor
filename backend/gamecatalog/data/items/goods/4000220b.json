@@ -2,14 +2,6 @@
   "id": 1935,
   "key": "item:4000220B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Frenzied Flame Village",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

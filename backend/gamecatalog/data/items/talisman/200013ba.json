@@ -2,14 +2,6 @@
   "id": 1375,
   "key": "item:200013BA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Assassin's Crimson Dagger",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

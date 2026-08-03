@@ -2,14 +2,6 @@
   "id": 2760,
   "key": "item:8000C4E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Ram",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

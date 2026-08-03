@@ -2,14 +2,6 @@
   "id": 22,
   "key": "item:001ED2A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Broadsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

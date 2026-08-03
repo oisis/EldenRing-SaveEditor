@@ -2,14 +2,6 @@
   "id": 1795,
   "key": "item:40001B63",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Theodorix's Magma",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

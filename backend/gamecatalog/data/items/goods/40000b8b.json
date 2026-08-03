@@ -2,14 +2,6 @@
   "id": 1617,
   "key": "item:40000B8B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Blood Lord",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2299,
   "key": "item:4000510E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Bud",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

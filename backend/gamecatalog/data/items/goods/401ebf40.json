@@ -2,14 +2,6 @@
   "id": 2639,
   "key": "item:401EBF40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fly Mold",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

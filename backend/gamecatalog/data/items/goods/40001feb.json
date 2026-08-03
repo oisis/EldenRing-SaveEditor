@@ -2,14 +2,6 @@
   "id": 1862,
   "key": "item:40001FEB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Chrysalids' Memento",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

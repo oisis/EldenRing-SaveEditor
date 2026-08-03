@@ -2,14 +2,6 @@
   "id": 1865,
   "key": "item:40001FEE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Academy Glintstone Key",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1292,
   "key": "item:20000442",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Two Fingers Heirloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

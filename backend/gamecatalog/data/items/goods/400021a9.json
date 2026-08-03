@@ -2,14 +2,6 @@
   "id": 1917,
   "key": "item:400021A9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Deeproot Depths",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

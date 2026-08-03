@@ -2,14 +2,6 @@
   "id": 2645,
   "key": "item:401ED2A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Pyrefly",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

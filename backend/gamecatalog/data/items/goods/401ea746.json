@@ -2,14 +2,6 @@
   "id": 2563,
   "key": "item:401EA746",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Herbalist's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

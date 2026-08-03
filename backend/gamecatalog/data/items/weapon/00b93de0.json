@@ -2,14 +2,6 @@
   "id": 168,
   "key": "item:00B93DE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pickaxe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1414,
   "key": "item:20001FB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ailment Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

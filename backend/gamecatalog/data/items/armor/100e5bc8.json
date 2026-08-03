@@ -2,14 +2,6 @@
   "id": 938,
   "key": "item:100E5BC8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Eccentric's Hood (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

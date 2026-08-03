@@ -2,14 +2,6 @@
   "id": 836,
   "key": "item:100B23F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Champion Pauldron",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

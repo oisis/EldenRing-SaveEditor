@@ -2,14 +2,6 @@
   "id": 279,
   "key": "item:0141A7C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Star Fist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

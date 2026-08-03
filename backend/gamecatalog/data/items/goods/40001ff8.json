@@ -2,14 +2,6 @@
   "id": 1871,
   "key": "item:40001FF8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mending Rune of the Fell Curse",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

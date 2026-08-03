@@ -2,14 +2,6 @@
   "id": 1312,
   "key": "item:200004E2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Millicent's Prosthesis",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

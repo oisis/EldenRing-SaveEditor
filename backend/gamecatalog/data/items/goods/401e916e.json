@@ -2,14 +2,6 @@
   "id": 2480,
   "key": "item:401E916E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sunwarmth Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

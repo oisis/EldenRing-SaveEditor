@@ -2,14 +2,6 @@
   "id": 1409,
   "key": "item:20001F7C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Aged One's Exultation",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

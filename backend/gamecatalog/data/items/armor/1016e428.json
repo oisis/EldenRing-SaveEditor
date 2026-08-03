@@ -2,14 +2,6 @@
   "id": 1022,
   "key": "item:1016E428",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

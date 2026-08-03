@@ -2,14 +2,6 @@
   "id": 1889,
   "key": "item:4000200B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sorcerer Painting",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

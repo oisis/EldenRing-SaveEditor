@@ -2,14 +2,6 @@
   "id": 509,
   "key": "item:031A8670",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

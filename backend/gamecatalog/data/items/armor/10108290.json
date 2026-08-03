@@ -2,14 +2,6 @@
   "id": 995,
   "key": "item:10108290",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Imp Head (Long-Tongued)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

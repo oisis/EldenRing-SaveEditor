@@ -2,14 +2,6 @@
   "id": 2573,
   "key": "item:401EA7AA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "The Two Fingers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

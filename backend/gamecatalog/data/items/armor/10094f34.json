@@ -2,14 +2,6 @@
   "id": 780,
   "key": "item:10094F34",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ragged Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

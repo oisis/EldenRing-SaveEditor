@@ -2,14 +2,6 @@
   "id": 428,
   "key": "item:020EBBC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spiraltree Seal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

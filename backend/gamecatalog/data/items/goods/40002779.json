@@ -2,14 +2,6 @@
   "id": 2192,
   "key": "item:40002779",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smithing Stone [6]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

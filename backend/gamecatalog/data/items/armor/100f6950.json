@@ -2,14 +2,6 @@
   "id": 973,
   "key": "item:100F6950",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Snow Witch Hat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

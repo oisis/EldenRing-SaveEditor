@@ -2,14 +2,6 @@
   "id": 540,
   "key": "item:03D87F40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Curseblade's Cirque",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1426,
   "key": "item:20002030",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Talisman of All Crucibles",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

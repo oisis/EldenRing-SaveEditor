@@ -2,14 +2,6 @@
   "id": 1131,
   "key": "item:102DCB0C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dryleaf Robe (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

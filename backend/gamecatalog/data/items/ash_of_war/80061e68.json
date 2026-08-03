@@ -2,14 +2,6 @@
   "id": 2789,
   "key": "item:80061E68",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Palm Blast",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

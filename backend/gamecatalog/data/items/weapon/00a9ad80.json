@@ -2,14 +2,6 @@
   "id": 157,
   "key": "item:00A9AD80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nox Flowing Hammer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

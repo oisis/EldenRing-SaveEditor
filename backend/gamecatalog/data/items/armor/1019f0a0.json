@@ -2,14 +2,6 @@
   "id": 1025,
   "key": "item:1019F0A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godrick Soldier Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

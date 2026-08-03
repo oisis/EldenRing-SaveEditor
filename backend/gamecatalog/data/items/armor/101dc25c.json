@@ -2,14 +2,6 @@
   "id": 1111,
   "key": "item:101DC25C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Millicent's Boots",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

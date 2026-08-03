@@ -2,14 +2,6 @@
   "id": 2783,
   "key": "item:800138E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound's Step",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

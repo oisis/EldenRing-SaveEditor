@@ -2,14 +2,6 @@
   "id": 2808,
   "key": "item:8007B4A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "The Poison Flower Blooms Twice",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 215,
   "key": "item:00ECA9F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bonny Butchering Knife",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2628,
   "key": "item:401EAF82",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimsonburst Dried Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

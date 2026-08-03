@@ -2,14 +2,6 @@
   "id": 571,
   "key": "item:100160BC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer Sarong",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

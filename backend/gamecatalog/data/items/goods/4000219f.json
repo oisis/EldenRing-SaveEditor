@@ -2,14 +2,6 @@
   "id": 1907,
   "key": "item:4000219F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Leyndell, Royal Capital",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1287,
   "key": "item:2000041A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radagon's Scarseal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

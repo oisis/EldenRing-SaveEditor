@@ -2,14 +2,6 @@
   "id": 2173,
   "key": "item:400024CF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Missionary's Cookbook [7]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2523,
   "key": "item:401EA30C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer's Orb",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

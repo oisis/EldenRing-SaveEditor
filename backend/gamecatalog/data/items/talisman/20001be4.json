@@ -2,14 +2,6 @@
   "id": 1401,
   "key": "item:20001BE4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Seed Talisman +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

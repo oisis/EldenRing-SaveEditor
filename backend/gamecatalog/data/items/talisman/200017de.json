@@ -2,14 +2,6 @@
   "id": 1387,
   "key": "item:200017DE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancestral Spirit's Horn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

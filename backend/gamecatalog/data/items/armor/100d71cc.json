@@ -2,14 +2,6 @@
   "id": 908,
   "key": "item:100D71CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Confessor Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

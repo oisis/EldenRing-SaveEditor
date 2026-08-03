@@ -2,14 +2,6 @@
   "id": 303,
   "key": "item:01602C40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fallingstar Beast Jaw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1109,
   "key": "item:101DC194",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Millicent's Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1950,
   "key": "item:400022A1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Dragon Prayerbook",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 299,
   "key": "item:015F9000",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Duelist Greataxe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

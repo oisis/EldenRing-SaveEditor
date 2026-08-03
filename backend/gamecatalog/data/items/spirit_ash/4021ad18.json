@@ -2,14 +2,6 @@
   "id": 2682,
   "key": "item:4021AD18",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

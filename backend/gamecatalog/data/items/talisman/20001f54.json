@@ -2,14 +2,6 @@
   "id": 1405,
   "key": "item:20001F54",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Outer God Heirloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

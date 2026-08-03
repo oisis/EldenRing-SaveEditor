@@ -2,14 +2,6 @@
   "id": 568,
   "key": "item:10015F90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

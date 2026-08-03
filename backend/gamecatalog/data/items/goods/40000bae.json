@@ -2,14 +2,6 @@
   "id": 1627,
   "key": "item:40000BAE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lands Between Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

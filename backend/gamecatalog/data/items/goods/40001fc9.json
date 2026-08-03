@@ -2,14 +2,6 @@
   "id": 1839,
   "key": "item:40001FC9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Volcano Manor Invitation",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

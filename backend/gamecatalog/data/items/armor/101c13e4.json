@@ -2,14 +2,6 @@
   "id": 1087,
   "key": "item:101C13E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Foot Soldier Tabard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 539,
   "key": "item:03D85830",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smithscript Cirque",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

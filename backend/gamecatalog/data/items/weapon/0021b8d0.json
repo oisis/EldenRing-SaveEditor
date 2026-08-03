@@ -2,14 +2,6 @@
   "id": 35,
   "key": "item:0021B8D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cane Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

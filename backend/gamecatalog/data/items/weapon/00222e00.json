@@ -2,14 +2,6 @@
   "id": 38,
   "key": "item:00222E00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Warhawk's Talon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

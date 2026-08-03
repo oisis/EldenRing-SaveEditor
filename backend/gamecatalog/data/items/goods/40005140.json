@@ -2,14 +2,6 @@
   "id": 2308,
   "key": "item:40005140",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nascent Butterfly",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

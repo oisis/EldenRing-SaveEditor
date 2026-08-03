@@ -2,14 +2,6 @@
   "id": 1896,
   "key": "item:40002020",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: The Preceptor's Secret",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

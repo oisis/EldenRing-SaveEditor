@@ -2,14 +2,6 @@
   "id": 1687,
   "key": "item:4000116C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scholar's Armament",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

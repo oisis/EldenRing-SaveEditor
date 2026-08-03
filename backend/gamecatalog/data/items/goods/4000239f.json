@@ -2,14 +2,6 @@
   "id": 2084,
   "key": "item:4000239F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Vanquishing Enemy Groups",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

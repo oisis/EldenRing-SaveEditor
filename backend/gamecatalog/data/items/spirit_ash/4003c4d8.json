@@ -2,14 +2,6 @@
   "id": 2373,
   "key": "item:4003C4D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Omenkiller Rollo",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 230,
   "key": "item:00F66DF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iron Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2410,
   "key": "item:401E8804",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blessing of Marika",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

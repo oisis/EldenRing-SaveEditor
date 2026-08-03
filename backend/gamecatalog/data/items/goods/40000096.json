@@ -2,14 +2,6 @@
   "id": 1444,
   "key": "item:40000096",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Furlcalling Finger Remedy",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

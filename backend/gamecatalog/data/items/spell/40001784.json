@@ -2,14 +2,6 @@
   "id": 1724,
   "key": "item:40001784",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flame, Fall Upon Them",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

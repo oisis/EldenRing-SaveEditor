@@ -2,14 +2,6 @@
   "id": 595,
   "key": "item:10024AB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ronin's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

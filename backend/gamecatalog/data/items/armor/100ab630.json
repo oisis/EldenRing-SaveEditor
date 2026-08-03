@@ -2,14 +2,6 @@
   "id": 829,
   "key": "item:100AB630",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Brave's Battlewear (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

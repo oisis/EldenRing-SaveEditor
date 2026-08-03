@@ -2,14 +2,6 @@
   "id": 82,
   "key": "item:0044AA20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Meteoric Ore Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2564,
   "key": "item:401EA747",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mushroom-Seller's Bell Bearing [1]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

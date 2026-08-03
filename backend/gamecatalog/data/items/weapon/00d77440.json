@@ -2,14 +2,6 @@
   "id": 196,
   "key": "item:00D77440",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rosus' Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

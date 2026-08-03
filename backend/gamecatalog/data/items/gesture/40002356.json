@@ -2,14 +2,6 @@
   "id": 2061,
   "key": "item:40002356",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Outer Order",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

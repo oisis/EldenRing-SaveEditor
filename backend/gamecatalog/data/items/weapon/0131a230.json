@@ -2,14 +2,6 @@
   "id": 270,
   "key": "item:0131A230",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Magma Whip Candlestick",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

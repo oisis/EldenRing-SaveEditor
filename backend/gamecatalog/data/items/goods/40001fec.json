@@ -2,14 +2,6 @@
   "id": 1863,
   "key": "item:40001FEC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knifeprint",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

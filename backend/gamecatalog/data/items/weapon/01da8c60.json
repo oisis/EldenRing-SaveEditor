@@ -2,14 +2,6 @@
   "id": 349,
   "key": "item:01DA8C60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blue-Gold Kite Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

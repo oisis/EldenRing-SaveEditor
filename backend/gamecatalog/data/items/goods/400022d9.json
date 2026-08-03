@@ -2,14 +2,6 @@
   "id": 1962,
   "key": "item:400022D9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nomadic Merchant's Bell Bearing [1]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

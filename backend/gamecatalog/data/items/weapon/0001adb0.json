@@ -2,14 +2,6 @@
   "id": 1,
   "key": "item:0001ADB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Unarmed",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

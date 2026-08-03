@@ -2,14 +2,6 @@
   "id": 1410,
   "key": "item:20001F86",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Arrow's Soaring Sting Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

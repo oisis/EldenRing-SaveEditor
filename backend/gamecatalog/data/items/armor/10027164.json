@@ -2,14 +2,6 @@
   "id": 599,
   "key": "item:10027164",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cloth Garb",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

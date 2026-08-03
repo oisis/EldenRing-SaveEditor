@@ -2,14 +2,6 @@
   "id": 525,
   "key": "item:03290560",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Explosive Greatbolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

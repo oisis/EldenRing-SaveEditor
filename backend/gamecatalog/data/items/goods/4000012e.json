@@ -2,14 +2,6 @@
   "id": 1450,
   "key": "item:4000012E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Giantsflame Fire Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

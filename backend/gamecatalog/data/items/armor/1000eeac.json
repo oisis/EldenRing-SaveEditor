@@ -2,14 +2,6 @@
   "id": 562,
   "key": "item:1000EEAC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drake Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

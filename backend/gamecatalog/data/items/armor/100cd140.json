@@ -2,14 +2,6 @@
   "id": 886,
   "key": "item:100CD140",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marionette Soldier Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

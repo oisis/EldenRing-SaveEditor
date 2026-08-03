@@ -2,14 +2,6 @@
   "id": 586,
   "key": "item:1001FC98",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spellblade's Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

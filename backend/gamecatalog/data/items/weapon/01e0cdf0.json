@@ -2,14 +2,6 @@
   "id": 367,
   "key": "item:01E0CDF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wolf Crest Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

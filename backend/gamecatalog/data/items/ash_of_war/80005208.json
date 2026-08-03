@@ -2,14 +2,6 @@
   "id": 2726,
   "key": "item:80005208",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Storm Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

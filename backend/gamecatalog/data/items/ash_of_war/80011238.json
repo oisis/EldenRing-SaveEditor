@@ -2,14 +2,6 @@
   "id": 2781,
   "key": "item:80011238",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Holy Ground",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

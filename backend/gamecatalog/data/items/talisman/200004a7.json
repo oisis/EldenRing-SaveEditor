@@ -2,14 +2,6 @@
   "id": 1304,
   "key": "item:200004A7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prince of Death's Cyst",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

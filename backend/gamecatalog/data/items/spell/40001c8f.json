@@ -2,14 +2,6 @@
   "id": 1813,
   "key": "item:40001C8F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Unendurable Frenzy",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1631,
   "key": "item:40000BD6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cuckoo Glintstone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

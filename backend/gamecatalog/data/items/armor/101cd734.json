@@ -2,14 +2,6 @@
   "id": 1096,
   "key": "item:101CD734",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Omenkiller Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

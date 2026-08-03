@@ -2,14 +2,6 @@
   "id": 1920,
   "key": "item:400021FC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Hidden Cave",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

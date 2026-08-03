@@ -2,14 +2,6 @@
   "id": 2215,
   "key": "item:40002A9D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Great Grave Glovewort",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

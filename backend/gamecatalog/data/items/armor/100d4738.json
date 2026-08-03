@@ -2,14 +2,6 @@
   "id": 896,
   "key": "item:100D4738",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Land of Reeds Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

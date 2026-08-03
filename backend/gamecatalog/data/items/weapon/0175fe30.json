@@ -2,14 +2,6 @@
   "id": 320,
   "key": "item:0175FE30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lamenting Visage",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

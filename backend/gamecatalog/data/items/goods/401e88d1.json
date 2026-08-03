@@ -2,14 +2,6 @@
   "id": 2413,
   "key": "item:401E88D1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonscale Flesh",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 205,
   "key": "item:00E556F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crescent Moon Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

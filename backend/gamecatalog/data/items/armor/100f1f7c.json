@@ -2,14 +2,6 @@
   "id": 968,
   "key": "item:100F1F7C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Errant Sorcerer Robe (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

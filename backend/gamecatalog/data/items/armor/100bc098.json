@@ -2,14 +2,6 @@
   "id": 851,
   "key": "item:100BC098",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Malenia's Gauntlet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

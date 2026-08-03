@@ -2,14 +2,6 @@
   "id": 960,
   "key": "item:100EF484",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2696,
   "key": "item:80002774",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Impaling Thrust",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

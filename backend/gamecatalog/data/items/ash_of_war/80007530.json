@@ -2,14 +2,6 @@
   "id": 2742,
   "key": "item:80007530",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shield Bash",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

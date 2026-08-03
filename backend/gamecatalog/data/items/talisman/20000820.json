@@ -2,14 +2,6 @@
   "id": 1321,
   "key": "item:20000820",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Winged Sword Insignia",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

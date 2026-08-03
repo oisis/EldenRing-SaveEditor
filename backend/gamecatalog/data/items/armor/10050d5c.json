@@ -2,14 +2,6 @@
   "id": 688,
   "key": "item:10050D5C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Guardian Garb",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

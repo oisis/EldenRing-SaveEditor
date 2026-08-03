@@ -2,14 +2,6 @@
   "id": 2511,
   "key": "item:401EA0AA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pest-Thread Spears",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

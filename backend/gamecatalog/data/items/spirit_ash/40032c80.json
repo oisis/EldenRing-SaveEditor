@@ -2,14 +2,6 @@
   "id": 2334,
   "key": "item:40032C80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystalian Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

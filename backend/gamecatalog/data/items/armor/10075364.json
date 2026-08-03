@@ -2,14 +2,6 @@
   "id": 735,
   "key": "item:10075364",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lord of Blood's Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

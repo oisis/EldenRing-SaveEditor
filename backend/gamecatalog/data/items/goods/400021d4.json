@@ -2,14 +2,6 @@
   "id": 1919,
   "key": "item:400021D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mirage Riddle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

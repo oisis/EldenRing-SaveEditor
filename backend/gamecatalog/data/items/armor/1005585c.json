@@ -2,14 +2,6 @@
   "id": 698,
   "key": "item:1005585C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Monk Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

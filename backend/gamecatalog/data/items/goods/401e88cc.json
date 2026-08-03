@@ -2,14 +2,6 @@
   "id": 2412,
   "key": "item:401E88CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon Communion Flesh",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

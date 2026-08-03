@@ -2,14 +2,6 @@
   "id": 399,
   "key": "item:01F84D90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gelmir Glintstone Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2393,
   "key": "item:401E85CA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Fetid Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

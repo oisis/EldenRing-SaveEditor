@@ -2,14 +2,6 @@
   "id": 213,
   "key": "item:00E704A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gargoyle's Black Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

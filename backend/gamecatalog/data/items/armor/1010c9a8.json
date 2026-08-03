@@ -2,14 +2,6 @@
   "id": 1002,
   "key": "item:1010C9A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Chain Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

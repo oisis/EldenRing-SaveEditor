@@ -2,14 +2,6 @@
   "id": 130,
   "key": "item:00897B50",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nagakiba",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

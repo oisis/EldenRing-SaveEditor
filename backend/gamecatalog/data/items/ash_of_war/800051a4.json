@@ -2,14 +2,6 @@
   "id": 2725,
   "key": "item:800051A4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravitas",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

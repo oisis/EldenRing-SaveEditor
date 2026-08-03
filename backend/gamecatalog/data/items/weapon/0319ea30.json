@@ -2,14 +2,6 @@
   "id": 505,
   "key": "item:0319EA30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black-Key Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2167,
   "key": "item:400024B9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Dragon Apostle's Cookbook [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

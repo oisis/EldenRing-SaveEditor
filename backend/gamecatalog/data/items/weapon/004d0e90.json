@@ -2,14 +2,6 @@
   "id": 92,
   "key": "item:004D0E90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Frozen Needle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

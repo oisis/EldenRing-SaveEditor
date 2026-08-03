@@ -2,14 +2,6 @@
   "id": 1373,
   "key": "item:200013A6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Taker's Cameo",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

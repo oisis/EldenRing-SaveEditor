@@ -2,14 +2,6 @@
   "id": 268,
   "key": "item:01312D00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Whip",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

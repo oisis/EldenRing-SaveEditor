@@ -2,14 +2,6 @@
   "id": 291,
   "key": "item:014FD890",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Venomous Fang",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1336,
   "key": "item:200008AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer's Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

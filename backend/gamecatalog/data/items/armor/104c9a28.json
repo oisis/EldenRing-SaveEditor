@@ -2,14 +2,6 @@
   "id": 1147,
   "key": "item:104C9A28",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iron Rivet Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

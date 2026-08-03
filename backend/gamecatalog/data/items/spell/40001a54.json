@@ -2,14 +2,6 @@
   "id": 1770,
   "key": "item:40001A54",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Immutable Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

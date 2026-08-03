@@ -2,14 +2,6 @@
   "id": 767,
   "key": "item:1008DDEC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Azur's Glintstone Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

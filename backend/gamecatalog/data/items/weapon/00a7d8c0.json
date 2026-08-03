@@ -2,14 +2,6 @@
   "id": 146,
   "key": "item:00A7D8C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mace",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

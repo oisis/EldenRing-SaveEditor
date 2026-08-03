@@ -2,14 +2,6 @@
   "id": 2456,
   "key": "item:401E8FDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Lord of Frenzied Flame",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

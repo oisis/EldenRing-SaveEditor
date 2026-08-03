@@ -2,14 +2,6 @@
   "id": 31,
   "key": "item:0020CE70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

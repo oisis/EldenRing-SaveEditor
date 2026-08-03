@@ -2,14 +2,6 @@
   "id": 41,
   "key": "item:00264CB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Velvet Sword of St. Trina",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

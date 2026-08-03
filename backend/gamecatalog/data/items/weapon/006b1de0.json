@@ -2,14 +2,6 @@
   "id": 101,
   "key": "item:006B1DE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shotel",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

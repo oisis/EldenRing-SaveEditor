@@ -2,14 +2,6 @@
   "id": 2793,
   "key": "item:80062E08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rolling Sparks",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

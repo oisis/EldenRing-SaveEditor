@@ -2,14 +2,6 @@
   "id": 78,
   "key": "item:003E1A70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godslayer's Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2462,
   "key": "item:401E9009",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shadow Realm Rune [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

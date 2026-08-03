@@ -2,14 +2,6 @@
   "id": 1231,
   "key": "item:104FA768",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

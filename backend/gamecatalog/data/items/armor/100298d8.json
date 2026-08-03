@@ -2,14 +2,6 @@
   "id": 603,
   "key": "item:100298D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blaidd's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

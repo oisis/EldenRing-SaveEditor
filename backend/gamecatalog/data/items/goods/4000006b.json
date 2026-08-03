@@ -2,14 +2,6 @@
   "id": 1434,
   "key": "item:4000006B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Phantom Bloody Finger",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 94,
   "key": "item:005B8D80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloody Helice",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

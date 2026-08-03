@@ -2,14 +2,6 @@
   "id": 370,
   "key": "item:01E84800",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon Towershield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

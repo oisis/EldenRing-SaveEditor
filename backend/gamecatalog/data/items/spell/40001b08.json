@@ -2,14 +2,6 @@
   "id": 1783,
   "key": "item:40001B08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Strike",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1343,
   "key": "item:20000C08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Primal Glintstone Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

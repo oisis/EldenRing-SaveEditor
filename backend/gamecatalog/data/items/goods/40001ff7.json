@@ -2,14 +2,6 @@
   "id": 1870,
   "key": "item:40001FF7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mending Rune of the Death-Prince",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

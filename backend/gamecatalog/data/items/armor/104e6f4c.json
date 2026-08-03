@@ -2,14 +2,6 @@
   "id": 1197,
   "key": "item:104E6F4C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

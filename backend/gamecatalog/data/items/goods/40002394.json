@@ -2,14 +2,6 @@
   "id": 2074,
   "key": "item:40002394",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Guidance of Grace",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

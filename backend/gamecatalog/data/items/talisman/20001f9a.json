@@ -2,14 +2,6 @@
   "id": 1411,
   "key": "item:20001F9A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pearl Shield Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

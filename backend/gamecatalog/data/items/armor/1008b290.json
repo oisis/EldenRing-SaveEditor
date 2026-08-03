@@ -2,14 +2,6 @@
   "id": 754,
   "key": "item:1008B290",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crucible Axe Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

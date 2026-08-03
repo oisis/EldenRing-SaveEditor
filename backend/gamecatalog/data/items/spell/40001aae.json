@@ -2,14 +2,6 @@
   "id": 1778,
   "key": "item:40001AAE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gurranq's Beast Claw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

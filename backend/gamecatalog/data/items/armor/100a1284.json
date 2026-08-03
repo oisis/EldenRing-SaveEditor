@@ -2,14 +2,6 @@
   "id": 807,
   "key": "item:100A1284",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vagabond Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

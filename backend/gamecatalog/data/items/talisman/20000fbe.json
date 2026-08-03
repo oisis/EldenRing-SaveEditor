@@ -2,14 +2,6 @@
   "id": 1355,
   "key": "item:20000FBE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Boltdrake Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1742,
   "key": "item:400018BA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Barrier of Gold",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

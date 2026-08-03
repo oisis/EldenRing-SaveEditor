@@ -2,14 +2,6 @@
   "id": 837,
   "key": "item:100B2458",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Champion Bracers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2107,
   "key": "item:400023BF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About United Combat and Combat Ordeals",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

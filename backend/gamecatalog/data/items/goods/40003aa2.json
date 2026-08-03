@@ -2,14 +2,6 @@
   "id": 2259,
   "key": "item:40003AA2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

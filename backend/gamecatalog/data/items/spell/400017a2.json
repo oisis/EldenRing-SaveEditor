@@ -2,14 +2,6 @@
   "id": 1727,
   "key": "item:400017A2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flame, Grant Me Strength",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

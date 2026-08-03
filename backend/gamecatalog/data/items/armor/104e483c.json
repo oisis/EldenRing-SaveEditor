@@ -2,14 +2,6 @@
   "id": 1192,
   "key": "item:104E483C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greaves of Solitude",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

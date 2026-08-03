@@ -2,14 +2,6 @@
   "id": 2418,
   "key": "item:401E88FE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Holyproof Pickled Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

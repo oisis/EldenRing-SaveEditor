@@ -2,14 +2,6 @@
   "id": 2497,
   "key": "item:401E9E84",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Aspects of the Crucible: Bloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

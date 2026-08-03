@@ -2,14 +2,6 @@
   "id": 1162,
   "key": "item:104D5D78",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Braided Arm Wraps",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

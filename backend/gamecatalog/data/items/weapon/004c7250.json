@@ -2,14 +2,6 @@
   "id": 88,
   "key": "item:004C7250",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Knight's Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1012,
   "key": "item:10113F3C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mushroom Legs",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2512,
   "key": "item:401EA104",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Midra's Flame of Frenzy",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

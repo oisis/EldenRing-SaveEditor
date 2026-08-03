@@ -2,14 +2,6 @@
   "id": 782,
   "key": "item:10094FFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ragged Loincloth",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

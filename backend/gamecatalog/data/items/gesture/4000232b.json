@@ -2,14 +2,6 @@
   "id": 2018,
   "key": "item:4000232B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Curtsy",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

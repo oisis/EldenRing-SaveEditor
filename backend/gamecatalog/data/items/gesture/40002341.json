@@ -2,14 +2,6 @@
   "id": 2040,
   "key": "item:40002341",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "The Carian Oath",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

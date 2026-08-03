@@ -2,14 +2,6 @@
   "id": 643,
   "key": "item:1003D1BC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nomadic Merchant's Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

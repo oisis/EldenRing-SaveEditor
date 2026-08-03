@@ -2,14 +2,6 @@
   "id": 394,
   "key": "item:01ECDBE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lordsworn's Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

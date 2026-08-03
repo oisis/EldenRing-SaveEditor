@@ -2,14 +2,6 @@
   "id": 2695,
   "key": "item:80002710",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lion's Claw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

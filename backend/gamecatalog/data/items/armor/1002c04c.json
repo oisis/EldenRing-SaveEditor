@@ -2,14 +2,6 @@
   "id": 609,
   "key": "item:1002C04C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knife Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

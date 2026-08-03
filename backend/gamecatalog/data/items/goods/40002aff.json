@@ -2,14 +2,6 @@
   "id": 2233,
   "key": "item:40002AFF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Bubbletear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

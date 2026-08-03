@@ -2,14 +2,6 @@
   "id": 2360,
   "key": "item:40039210",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Demi-Human Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

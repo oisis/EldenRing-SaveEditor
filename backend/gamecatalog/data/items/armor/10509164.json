@@ -2,14 +2,6 @@
   "id": 1264,
   "key": "item:10509164",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shadow Militiaman Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

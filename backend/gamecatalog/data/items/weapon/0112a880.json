@@ -2,14 +2,6 @@
   "id": 245,
   "key": "item:0112A880",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Halberd",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

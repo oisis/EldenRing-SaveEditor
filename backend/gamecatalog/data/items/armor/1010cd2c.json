@@ -2,14 +2,6 @@
   "id": 1005,
   "key": "item:1010CD2C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Eye Surcoat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

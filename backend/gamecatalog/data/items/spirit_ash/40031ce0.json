@@ -2,14 +2,6 @@
   "id": 2330,
   "key": "item:40031CE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Latenna the Albinauric",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2230,
   "key": "item:40002AFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean Crystal Tear (Variant)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

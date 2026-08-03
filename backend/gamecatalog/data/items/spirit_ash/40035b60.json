@@ -2,14 +2,6 @@
   "id": 2346,
   "key": "item:40035B60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Page Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

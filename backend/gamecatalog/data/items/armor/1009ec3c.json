@@ -2,14 +2,6 @@
   "id": 803,
   "key": "item:1009EC3C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

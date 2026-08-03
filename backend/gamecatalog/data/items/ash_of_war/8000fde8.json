@@ -2,14 +2,6 @@
   "id": 2774,
   "key": "item:8000FDE8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Barbaric Roar",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

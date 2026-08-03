@@ -2,14 +2,6 @@
   "id": 1929,
   "key": "item:40002205",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Land Squirts",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

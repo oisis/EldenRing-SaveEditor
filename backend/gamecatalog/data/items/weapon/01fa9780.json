@@ -2,14 +2,6 @@
   "id": 407,
   "key": "item:01FA9780",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Academy Glintstone Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1146,
   "key": "item:104C99C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iron Rivet Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

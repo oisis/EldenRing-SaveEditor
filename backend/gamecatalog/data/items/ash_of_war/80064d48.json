@@ -2,14 +2,6 @@
   "id": 2800,
   "key": "item:80064D48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blinkbolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 147,
   "key": "item:00A7FFD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Club",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

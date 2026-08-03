@@ -2,14 +2,6 @@
   "id": 2586,
   "key": "item:401EA8DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Finger-Weaver's Cookbook [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

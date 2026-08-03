@@ -2,14 +2,6 @@
   "id": 1729,
   "key": "item:400017D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Giantsflame Take Thee",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

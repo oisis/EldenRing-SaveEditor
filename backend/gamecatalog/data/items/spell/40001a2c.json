@@ -2,14 +2,6 @@
   "id": 1765,
   "key": "item:40001A2C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Discus of Light",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2303,
   "key": "item:40005119",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Melted Mushroom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

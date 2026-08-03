@@ -2,14 +2,6 @@
   "id": 1014,
   "key": "item:1013DA08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iji's Mirrorhelm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

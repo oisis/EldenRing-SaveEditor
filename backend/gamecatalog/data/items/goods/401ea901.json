@@ -2,14 +2,6 @@
   "id": 2623,
   "key": "item:401EA901",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "St. Trina Disciple's Cookbook [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

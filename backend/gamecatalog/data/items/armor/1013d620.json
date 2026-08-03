@@ -2,14 +2,6 @@
   "id": 1013,
   "key": "item:1013D620",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nox Mirrorhelm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

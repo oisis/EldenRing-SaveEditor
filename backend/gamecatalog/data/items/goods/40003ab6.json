@@ -2,14 +2,6 @@
   "id": 2261,
   "key": "item:40003AB6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Blood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

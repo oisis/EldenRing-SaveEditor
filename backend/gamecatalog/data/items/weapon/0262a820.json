@@ -2,14 +2,6 @@
   "id": 431,
   "key": "item:0262A820",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red Branch Shortbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

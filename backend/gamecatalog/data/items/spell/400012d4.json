@@ -2,14 +2,6 @@
   "id": 1709,
   "key": "item:400012D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roiling Magma",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

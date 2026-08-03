@@ -2,14 +2,6 @@
   "id": 472,
   "key": "item:02FD3A70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Poisonbone Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

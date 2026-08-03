@@ -2,14 +2,6 @@
   "id": 1910,
   "key": "item:400021A2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Dragonbarrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

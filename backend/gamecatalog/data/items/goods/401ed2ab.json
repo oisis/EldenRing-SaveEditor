@@ -2,14 +2,6 @@
   "id": 2650,
   "key": "item:401ED2AB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scarlet Bud",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

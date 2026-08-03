@@ -2,14 +2,6 @@
   "id": 1056,
   "key": "item:101B033C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godrick Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

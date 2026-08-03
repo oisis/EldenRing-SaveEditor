@@ -2,14 +2,6 @@
   "id": 1345,
   "key": "item:20000FA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragoncrest Shield Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

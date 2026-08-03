@@ -2,14 +2,6 @@
   "id": 1288,
   "key": "item:2000041B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radagon's Soreseal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

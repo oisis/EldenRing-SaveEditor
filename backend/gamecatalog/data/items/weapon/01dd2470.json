@@ -2,14 +2,6 @@
   "id": 358,
   "key": "item:01DD2470",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hawk Crest Wooden Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

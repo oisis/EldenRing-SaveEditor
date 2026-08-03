@@ -2,14 +2,6 @@
   "id": 2059,
   "key": "item:40002354",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "?GoodsName?",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy AllGestures"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

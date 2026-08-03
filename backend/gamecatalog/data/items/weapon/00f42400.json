@@ -2,14 +2,6 @@
   "id": 216,
   "key": "item:00F42400",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Short Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

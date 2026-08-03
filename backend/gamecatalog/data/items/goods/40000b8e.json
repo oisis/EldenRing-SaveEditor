@@ -2,14 +2,6 @@
   "id": 1620,
   "key": "item:40000B8E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Dragonlord",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

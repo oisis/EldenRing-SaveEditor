@@ -2,14 +2,6 @@
   "id": 2235,
   "key": "item:40002B01",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimsonburst Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

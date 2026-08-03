@@ -2,14 +2,6 @@
   "id": 2735,
   "key": "item:80005654",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Flame Tornado",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

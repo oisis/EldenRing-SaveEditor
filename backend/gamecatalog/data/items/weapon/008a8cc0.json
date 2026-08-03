@@ -2,14 +2,6 @@
   "id": 136,
   "key": "item:008A8CC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Serpentbone Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

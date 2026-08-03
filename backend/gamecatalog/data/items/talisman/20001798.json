@@ -2,14 +2,6 @@
   "id": 1380,
   "key": "item:20001798",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Longtail Cat Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

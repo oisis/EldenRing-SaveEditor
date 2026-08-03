@@ -2,14 +2,6 @@
   "id": 1841,
   "key": "item:40001FCF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Seluvis's Introduction",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

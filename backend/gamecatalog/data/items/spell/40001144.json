@@ -2,14 +2,6 @@
   "id": 1682,
   "key": "item:40001144",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Freezing Mist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

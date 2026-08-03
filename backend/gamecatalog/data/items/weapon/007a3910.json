@@ -2,14 +2,6 @@
   "id": 117,
   "key": "item:007A3910",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Onyx Lord's Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

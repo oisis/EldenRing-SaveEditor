@@ -2,14 +2,6 @@
   "id": 376,
   "key": "item:01E9A790",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Beast Crest Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

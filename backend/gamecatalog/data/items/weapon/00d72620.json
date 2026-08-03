@@ -2,14 +2,6 @@
   "id": 194,
   "key": "item:00D72620",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Highland Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

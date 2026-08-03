@@ -2,14 +2,6 @@
   "id": 2756,
   "key": "item:80009E98",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rain of Arrows",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 30,
   "key": "item:0020A760",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sword of Night and Flame",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

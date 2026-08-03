@@ -2,14 +2,6 @@
   "id": 2030,
   "key": "item:40002337",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wait!",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1835,
   "key": "item:40001FC4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Letter from Volcano Manor (Rileigh)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

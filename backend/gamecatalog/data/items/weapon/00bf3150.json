@@ -2,14 +2,6 @@
   "id": 179,
   "key": "item:00BF3150",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodfiend's Arm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

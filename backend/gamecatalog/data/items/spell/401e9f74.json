@@ -2,14 +2,6 @@
   "id": 2504,
   "key": "item:401E9F74",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Knight's Lightning Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 667,
   "key": "item:10047888",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Night Maiden Twin Crown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

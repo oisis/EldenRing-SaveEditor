@@ -2,14 +2,6 @@
   "id": 1277,
   "key": "item:200003F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean Amber Medallion +2",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

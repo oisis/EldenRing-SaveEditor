@@ -2,14 +2,6 @@
   "id": 1279,
   "key": "item:200003FD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Viridian Amber Medallion +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 784,
   "key": "item:1009531C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ragged Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

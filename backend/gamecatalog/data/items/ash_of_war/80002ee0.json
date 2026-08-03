@@ -2,14 +2,6 @@
   "id": 2713,
   "key": "item:80002EE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spinning Weapon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

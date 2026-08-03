@@ -2,14 +2,6 @@
   "id": 432,
   "key": "item:0262CF30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Harp Bow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

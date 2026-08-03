@@ -2,14 +2,6 @@
   "id": 2275,
   "key": "item:40003BED",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Beast Bone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

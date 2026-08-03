@@ -2,14 +2,6 @@
   "id": 2732,
   "key": "item:80005528",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Grandeur",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

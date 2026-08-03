@@ -2,14 +2,6 @@
   "id": 1248,
   "key": "item:10502404",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Divine Beast Warrior Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

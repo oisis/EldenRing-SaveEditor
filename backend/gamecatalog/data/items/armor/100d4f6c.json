@@ -2,14 +2,6 @@
   "id": 902,
   "key": "item:100D4F6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "White Reed Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

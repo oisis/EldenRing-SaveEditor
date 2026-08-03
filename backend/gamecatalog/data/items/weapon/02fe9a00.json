@@ -2,14 +2,6 @@
   "id": 481,
   "key": "item:02FE9A00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spiritflame Arrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

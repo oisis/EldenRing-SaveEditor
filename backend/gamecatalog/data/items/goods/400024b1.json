@@ -2,14 +2,6 @@
   "id": 2165,
   "key": "item:400024B1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer's Cookbook (13)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

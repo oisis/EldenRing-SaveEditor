@@ -2,14 +2,6 @@
   "id": 1424,
   "key": "item:2000201C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rellana's Cameo",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1470,
   "key": "item:400001EA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Volcano Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

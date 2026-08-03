@@ -2,14 +2,6 @@
   "id": 1768,
   "key": "item:40001A40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Elden Stars",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

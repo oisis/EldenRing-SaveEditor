@@ -2,14 +2,6 @@
   "id": 930,
   "key": "item:100E3134",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Raptor's Black Feathers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2451,
   "key": "item:401E8FD6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Shadow Sunflower",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

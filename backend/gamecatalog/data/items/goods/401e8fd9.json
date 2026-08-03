@@ -2,14 +2,6 @@
   "id": 2454,
   "key": "item:401E8FD9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Dancing Lion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

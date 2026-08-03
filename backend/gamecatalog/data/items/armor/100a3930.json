@@ -2,14 +2,6 @@
   "id": 811,
   "key": "item:100A3930",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blue Cloth Cowl",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

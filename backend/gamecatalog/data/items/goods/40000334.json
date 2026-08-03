@@ -2,14 +2,6 @@
   "id": 1483,
   "key": "item:40000334",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Boiled Crab",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

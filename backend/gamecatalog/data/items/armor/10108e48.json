@@ -2,14 +2,6 @@
   "id": 998,
   "key": "item:10108E48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Imp Head (Elder)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

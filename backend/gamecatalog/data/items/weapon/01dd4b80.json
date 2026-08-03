@@ -2,14 +2,6 @@
   "id": 359,
   "key": "item:01DD4B80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Crest Heater Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

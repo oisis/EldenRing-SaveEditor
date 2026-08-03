@@ -2,14 +2,6 @@
   "id": 27,
   "key": "item:001FBD00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nox Flowing Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

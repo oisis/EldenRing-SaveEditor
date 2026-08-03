@@ -2,14 +2,6 @@
   "id": 536,
   "key": "item:03B9D3B0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Thrusting Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

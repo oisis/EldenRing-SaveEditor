@@ -2,14 +2,6 @@
   "id": 195,
   "key": "item:00D74D30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacrificial Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

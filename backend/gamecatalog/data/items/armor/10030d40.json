@@ -2,14 +2,6 @@
   "id": 615,
   "key": "item:10030D40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

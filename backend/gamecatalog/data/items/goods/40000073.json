@@ -2,14 +2,6 @@
   "id": 1441,
   "key": "item:40000073",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Memory of Grace",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

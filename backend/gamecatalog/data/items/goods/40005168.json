@@ -2,14 +2,6 @@
   "id": 2318,
   "key": "item:40005168",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cave Moss",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

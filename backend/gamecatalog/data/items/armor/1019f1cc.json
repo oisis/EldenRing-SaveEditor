@@ -2,14 +2,6 @@
   "id": 1028,
   "key": "item:1019F1CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godrick Soldier Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

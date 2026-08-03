@@ -2,14 +2,6 @@
   "id": 1100,
   "key": "item:101D01C8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Incantation Scarab",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

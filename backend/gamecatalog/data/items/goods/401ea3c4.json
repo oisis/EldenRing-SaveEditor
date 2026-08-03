@@ -2,14 +2,6 @@
   "id": 2526,
   "key": "item:401EA3C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Well Depths Key",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

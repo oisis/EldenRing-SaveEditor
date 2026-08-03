@@ -2,14 +2,6 @@
   "id": 1790,
   "key": "item:40001B3A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vyke's Dragonbolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

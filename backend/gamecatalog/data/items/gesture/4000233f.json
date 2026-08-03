@@ -2,14 +2,6 @@
   "id": 2038,
   "key": "item:4000233F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Oath",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

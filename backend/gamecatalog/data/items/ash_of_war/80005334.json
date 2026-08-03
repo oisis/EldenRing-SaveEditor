@@ -2,14 +2,6 @@
   "id": 2728,
   "key": "item:80005334",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Land",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

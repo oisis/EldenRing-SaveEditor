@@ -2,14 +2,6 @@
   "id": 924,
   "key": "item:100DE378",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Preceptor's Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

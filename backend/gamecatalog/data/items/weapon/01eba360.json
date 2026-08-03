@@ -2,14 +2,6 @@
   "id": 386,
   "key": "item:01EBA360",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ant's Skull Plate",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

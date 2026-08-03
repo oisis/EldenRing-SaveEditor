@@ -2,14 +2,6 @@
   "id": 93,
   "key": "item:004D35A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Noble's Estoc",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

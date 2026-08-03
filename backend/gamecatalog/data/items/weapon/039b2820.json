@@ -2,14 +2,6 @@
   "id": 528,
   "key": "item:039B2820",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dryleaf Arts",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

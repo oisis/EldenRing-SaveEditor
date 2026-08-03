@@ -2,14 +2,6 @@
   "id": 1684,
   "key": "item:4000114F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Adula's Moonblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

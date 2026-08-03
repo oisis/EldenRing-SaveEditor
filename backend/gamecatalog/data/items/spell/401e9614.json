@@ -2,14 +2,6 @@
   "id": 2485,
   "key": "item:401E9614",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintstone Nail",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

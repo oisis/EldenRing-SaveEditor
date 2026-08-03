@@ -2,14 +2,6 @@
   "id": 1008,
   "key": "item:10111700",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Jar",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2649,
   "key": "item:401ED2AA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Toxic Mossling",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

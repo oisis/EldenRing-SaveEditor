@@ -2,14 +2,6 @@
   "id": 2307,
   "key": "item:4000513B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sanctuary Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

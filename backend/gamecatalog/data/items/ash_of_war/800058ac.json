@@ -2,14 +2,6 @@
   "id": 2740,
   "key": "item:800058AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Chilling Mist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

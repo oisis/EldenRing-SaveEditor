@@ -2,14 +2,6 @@
   "id": 2225,
   "key": "item:40002AA7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Great Ghost Glovewort",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

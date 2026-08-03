@@ -2,14 +2,6 @@
   "id": 1936,
   "key": "item:4000220C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: The Lord of Frenzied Flame",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

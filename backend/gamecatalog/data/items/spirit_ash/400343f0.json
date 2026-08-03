@@ -2,14 +2,6 @@
   "id": 2340,
   "key": "item:400343F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Oracle Envoy Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

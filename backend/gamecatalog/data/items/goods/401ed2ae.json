@@ -2,14 +2,6 @@
   "id": 2653,
   "key": "item:401ED2AE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Deep-Purple Lily",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

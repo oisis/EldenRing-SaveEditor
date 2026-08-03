@@ -2,14 +2,6 @@
   "id": 24,
   "key": "item:001F47D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Weathered Straight Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1845,
   "key": "item:40001FD4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godrick's Great Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

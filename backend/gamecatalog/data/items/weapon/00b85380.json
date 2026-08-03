@@ -2,14 +2,6 @@
   "id": 166,
   "key": "item:00B85380",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Curved Great Club",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

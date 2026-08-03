@@ -2,14 +2,6 @@
   "id": 821,
   "key": "item:100A87B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Royal Remains Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

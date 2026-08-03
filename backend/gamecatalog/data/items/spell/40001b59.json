@@ -2,14 +2,6 @@
   "id": 1793,
   "key": "item:40001B59",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Agheel's Flame",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

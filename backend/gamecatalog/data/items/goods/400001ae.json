@@ -2,14 +2,6 @@
   "id": 1464,
   "key": "item:400001AE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Fetid Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

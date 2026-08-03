@@ -2,14 +2,6 @@
   "id": 2354,
   "key": "item:40037AA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blackflame Monk Amon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

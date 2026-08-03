@@ -2,14 +2,6 @@
   "id": 2615,
   "key": "item:401EA8F9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tibia's Cookbook",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

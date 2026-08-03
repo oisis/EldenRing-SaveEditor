@@ -2,14 +2,6 @@
   "id": 352,
   "key": "item:01DB9DD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shield of the Guilty",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

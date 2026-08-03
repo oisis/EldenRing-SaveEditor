@@ -2,14 +2,6 @@
   "id": 1398,
   "key": "item:20001BC6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Boltdrake Talisman +3",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

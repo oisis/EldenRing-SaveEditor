@@ -2,14 +2,6 @@
   "id": 2265,
   "key": "item:40003AE8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Four-Toed Fowl Foot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

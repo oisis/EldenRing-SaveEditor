@@ -2,14 +2,6 @@
   "id": 70,
   "key": "item:00362B30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greatsword of Solitude",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

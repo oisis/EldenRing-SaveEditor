@@ -2,14 +2,6 @@
   "id": 683,
   "key": "item:1004E32C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sanguine Noble Waistcloth",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

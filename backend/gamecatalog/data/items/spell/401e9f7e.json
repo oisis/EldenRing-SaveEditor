@@ -2,14 +2,6 @@
   "id": 2505,
   "key": "item:401E9F7E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonbolt of Florissax",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

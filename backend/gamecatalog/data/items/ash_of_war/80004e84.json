@@ -2,14 +2,6 @@
   "id": 2718,
   "key": "item:80004E84",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 28,
   "key": "item:001FE410",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Inseparable Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

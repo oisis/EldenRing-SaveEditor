@@ -2,14 +2,6 @@
   "id": 1564,
   "key": "item:400006D6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fan Daggers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

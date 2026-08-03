@@ -2,14 +2,6 @@
   "id": 1586,
   "key": "item:4000089A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prattling Pate \"Apologies\"",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

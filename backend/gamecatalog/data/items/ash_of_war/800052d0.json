@@ -2,14 +2,6 @@
   "id": 2727,
   "key": "item:800052D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Earthshaker",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

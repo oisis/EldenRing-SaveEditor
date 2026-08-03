@@ -2,14 +2,6 @@
   "id": 113,
   "key": "item:007270E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spirit Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

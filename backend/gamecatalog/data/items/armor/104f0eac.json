@@ -2,14 +2,6 @@
   "id": 1211,
   "key": "item:104F0EAC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

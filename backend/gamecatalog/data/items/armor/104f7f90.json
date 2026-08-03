@@ -2,14 +2,6 @@
   "id": 1225,
   "key": "item:104F7F90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Curseblade Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

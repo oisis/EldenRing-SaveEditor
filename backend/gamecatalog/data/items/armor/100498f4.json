@@ -2,14 +2,6 @@
   "id": 676,
   "key": "item:100498F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shaman Leggings",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1921,
   "key": "item:400021FD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Imp Shades",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

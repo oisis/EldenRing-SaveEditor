@@ -2,14 +2,6 @@
   "id": 1553,
   "key": "item:40000604",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Blood Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 544,
   "key": "item:0405F7E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Milady",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

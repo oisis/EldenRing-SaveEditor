@@ -2,14 +2,6 @@
   "id": 864,
   "key": "item:100C3500",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Festive Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

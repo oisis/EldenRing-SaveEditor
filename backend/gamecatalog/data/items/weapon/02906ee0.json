@@ -2,14 +2,6 @@
   "id": 449,
   "key": "item:02906EE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Light Crossbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

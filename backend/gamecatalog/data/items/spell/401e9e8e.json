@@ -2,14 +2,6 @@
   "id": 2498,
   "key": "item:401E9E8E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Minor Erdtree",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

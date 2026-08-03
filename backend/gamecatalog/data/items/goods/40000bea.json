@@ -2,14 +2,6 @@
   "id": 1633,
   "key": "item:40000BEA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintstone Scrap",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

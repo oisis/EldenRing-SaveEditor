@@ -2,14 +2,6 @@
   "id": 1570,
   "key": "item:400007E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rainbow Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

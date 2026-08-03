@@ -2,14 +2,6 @@
   "id": 1801,
   "key": "item:40001B81",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smarag's Glintstone Breath",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

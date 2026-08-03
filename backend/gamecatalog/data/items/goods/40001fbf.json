@@ -2,14 +2,6 @@
   "id": 1831,
   "key": "item:40001FBF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Letter from Volcano Manor (Istvan)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

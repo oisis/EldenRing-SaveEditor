@@ -2,14 +2,6 @@
   "id": 2039,
   "key": "item:40002340",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Spur Me",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

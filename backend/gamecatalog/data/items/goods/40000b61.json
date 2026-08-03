@@ -2,14 +2,6 @@
   "id": 1605,
   "key": "item:40000B61",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Numen's Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1129,
   "key": "item:102DC788",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dryleaf Arm Wraps",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

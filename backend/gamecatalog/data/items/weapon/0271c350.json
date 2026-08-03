@@ -2,14 +2,6 @@
   "id": 436,
   "key": "item:0271C350",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Albinauric Bow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 42,
   "key": "item:002673C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Star-Lined Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

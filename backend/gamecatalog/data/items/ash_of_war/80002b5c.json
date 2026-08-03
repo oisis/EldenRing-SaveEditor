@@ -2,14 +2,6 @@
   "id": 2705,
   "key": "item:80002B5C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spinning Strikes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1141,
   "key": "item:104C7250",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Verdigris Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

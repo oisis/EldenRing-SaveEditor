@@ -2,14 +2,6 @@
   "id": 2185,
   "key": "item:40002756",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lost Ashes of War",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

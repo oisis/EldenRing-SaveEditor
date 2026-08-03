@@ -2,14 +2,6 @@
   "id": 271,
   "key": "item:0131F050",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Petal Whip",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

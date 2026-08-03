@@ -2,14 +2,6 @@
   "id": 390,
   "key": "item:01EC3FA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Greatshield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1942,
   "key": "item:40002299",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godskin Prayerbook",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

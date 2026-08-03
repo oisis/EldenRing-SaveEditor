@@ -2,14 +2,6 @@
   "id": 2199,
   "key": "item:400027B3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Somber Smithing Stone [4]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

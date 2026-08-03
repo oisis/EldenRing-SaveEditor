@@ -2,14 +2,6 @@
   "id": 338,
   "key": "item:01D18BB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smithscript Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

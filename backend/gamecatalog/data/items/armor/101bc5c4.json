@@ -2,14 +2,6 @@
   "id": 1078,
   "key": "item:101BC5C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligtree Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

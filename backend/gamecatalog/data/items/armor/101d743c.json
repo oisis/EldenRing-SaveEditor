@@ -2,14 +2,6 @@
   "id": 1105,
   "key": "item:101D743C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Deathbed Smalls",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

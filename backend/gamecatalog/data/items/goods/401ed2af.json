@@ -2,14 +2,6 @@
   "id": 2654,
   "key": "item:401ED2AF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nectarblood Burgeon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

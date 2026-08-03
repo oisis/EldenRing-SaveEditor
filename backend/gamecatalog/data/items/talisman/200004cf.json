@@ -2,14 +2,6 @@
   "id": 1311,
   "key": "item:200004CF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shard of Alexander",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

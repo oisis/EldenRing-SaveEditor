@@ -2,14 +2,6 @@
   "id": 2450,
   "key": "item:401E8FD5",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Impaler",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

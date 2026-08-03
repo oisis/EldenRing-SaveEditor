@@ -2,14 +2,6 @@
   "id": 4,
   "key": "item:000F9060",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Parrying Dagger",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

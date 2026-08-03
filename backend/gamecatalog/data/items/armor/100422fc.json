@@ -2,14 +2,6 @@
   "id": 653,
   "key": "item:100422FC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree Sentinel Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

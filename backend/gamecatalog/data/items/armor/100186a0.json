@@ -2,14 +2,6 @@
   "id": 573,
   "key": "item:100186A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Traveler's Hat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

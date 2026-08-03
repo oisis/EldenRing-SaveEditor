@@ -2,14 +2,6 @@
   "id": 1244,
   "key": "item:10501C34",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Warrior Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

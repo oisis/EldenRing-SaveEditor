@@ -2,14 +2,6 @@
   "id": 894,
   "key": "item:100D4670",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Land of Reeds Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

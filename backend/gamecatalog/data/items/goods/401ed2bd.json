@@ -2,14 +2,6 @@
   "id": 2668,
   "key": "item:401ED2BD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rauh Burrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

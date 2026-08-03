@@ -2,14 +2,6 @@
   "id": 1030,
   "key": "item:101A1814",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cuckoo Surcoat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

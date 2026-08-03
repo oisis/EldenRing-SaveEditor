@@ -2,14 +2,6 @@
   "id": 116,
   "key": "item:0072E610",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Warrior's Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

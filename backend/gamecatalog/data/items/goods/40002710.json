@@ -2,14 +2,6 @@
   "id": 2179,
   "key": "item:40002710",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glass Shard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

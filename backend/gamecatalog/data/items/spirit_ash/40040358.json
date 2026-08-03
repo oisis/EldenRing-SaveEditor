@@ -2,14 +2,6 @@
   "id": 2389,
   "key": "item:40040358",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Jarwight Puppet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

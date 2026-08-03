@@ -2,14 +2,6 @@
   "id": 2747,
   "key": "item:800077EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Parry",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

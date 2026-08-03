@@ -2,14 +2,6 @@
   "id": 550,
   "key": "item:10009CA4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scale Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

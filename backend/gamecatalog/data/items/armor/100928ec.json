@@ -2,14 +2,6 @@
   "id": 777,
   "key": "item:100928EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinned Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

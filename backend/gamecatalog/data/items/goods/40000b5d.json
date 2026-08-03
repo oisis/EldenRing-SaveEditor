@@ -2,14 +2,6 @@
   "id": 1601,
   "key": "item:40000B5D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Rune [10]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

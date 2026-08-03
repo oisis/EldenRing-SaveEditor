@@ -2,14 +2,6 @@
   "id": 129,
   "key": "item:00895440",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Uchigatana",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1049,
   "key": "item:101ADB64",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gelmir Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

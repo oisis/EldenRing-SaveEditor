@@ -2,14 +2,6 @@
   "id": 980,
   "key": "item:100FB770",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Juvenile Scholar Cap",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

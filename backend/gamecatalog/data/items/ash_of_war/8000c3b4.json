@@ -2,14 +2,6 @@
   "id": 2757,
   "key": "item:8000C3B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoarfrost Stomp",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

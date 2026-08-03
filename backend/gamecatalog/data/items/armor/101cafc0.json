@@ -2,14 +2,6 @@
   "id": 1093,
   "key": "item:101CAFC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Crown Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

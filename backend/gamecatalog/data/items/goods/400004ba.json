@@ -2,14 +2,6 @@
   "id": 1529,
   "key": "item:400004BA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Exalted Flesh",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

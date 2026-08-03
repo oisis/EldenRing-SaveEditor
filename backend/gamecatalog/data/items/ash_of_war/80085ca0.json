@@ -2,14 +2,6 @@
   "id": 2809,
   "key": "item:80085CA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Igon's Drake Hunt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

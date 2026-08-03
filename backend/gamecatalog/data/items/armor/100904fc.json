@@ -2,14 +2,6 @@
   "id": 773,
   "key": "item:100904FC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "All-Knowing Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

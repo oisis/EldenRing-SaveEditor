@@ -2,14 +2,6 @@
   "id": 2651,
   "key": "item:401ED2AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sanguine Amaryllis",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

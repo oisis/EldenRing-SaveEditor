@@ -2,14 +2,6 @@
   "id": 1296,
   "key": "item:2000047E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Green Turtle Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 775,
   "key": "item:10092824",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinned Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

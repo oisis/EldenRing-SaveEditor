@@ -2,14 +2,6 @@
   "id": 1040,
   "key": "item:101A66FC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radahn Soldier Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

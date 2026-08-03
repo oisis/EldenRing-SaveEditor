@@ -2,14 +2,6 @@
   "id": 138,
   "key": "item:00989680",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

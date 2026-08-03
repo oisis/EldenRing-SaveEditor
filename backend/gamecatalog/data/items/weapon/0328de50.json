@@ -2,14 +2,6 @@
   "id": 524,
   "key": "item:0328DE50",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Greatbolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

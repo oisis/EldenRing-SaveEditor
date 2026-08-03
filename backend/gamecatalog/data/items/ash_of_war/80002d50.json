@@ -2,14 +2,6 @@
   "id": 2710,
   "key": "item:80002D50",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Giant Hunt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1210,
   "key": "item:104F0B8C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 566,
   "key": "item:100139AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scaled Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

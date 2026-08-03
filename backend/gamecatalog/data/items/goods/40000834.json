@@ -2,14 +2,6 @@
   "id": 1577,
   "key": "item:40000834",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Soft Cotton",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

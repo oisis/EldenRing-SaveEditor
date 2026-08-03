@@ -2,14 +2,6 @@
   "id": 2096,
   "key": "item:400023AB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Strengthening Armaments",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

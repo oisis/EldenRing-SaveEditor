@@ -2,14 +2,6 @@
   "id": 1851,
   "key": "item:40001FDB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lord of Blood's Favor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2630,
   "key": "item:401EAF96",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean-Sapping Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

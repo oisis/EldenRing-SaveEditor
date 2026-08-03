@@ -2,14 +2,6 @@
   "id": 2792,
   "key": "item:80062A20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wall of Sparks",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

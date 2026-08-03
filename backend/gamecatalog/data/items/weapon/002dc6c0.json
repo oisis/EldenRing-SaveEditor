@@ -2,14 +2,6 @@
   "id": 47,
   "key": "item:002DC6C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bastard Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

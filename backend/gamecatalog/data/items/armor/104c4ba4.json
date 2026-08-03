@@ -2,14 +2,6 @@
   "id": 1137,
   "key": "item:104C4BA4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leda's Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

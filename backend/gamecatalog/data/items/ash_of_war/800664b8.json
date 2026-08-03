@@ -2,14 +2,6 @@
   "id": 2806,
   "key": "item:800664B8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shriek of Sorrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

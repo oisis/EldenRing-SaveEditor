@@ -2,14 +2,6 @@
   "id": 559,
   "key": "item:1000EB28",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drake Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

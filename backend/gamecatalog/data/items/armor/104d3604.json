@@ -2,14 +2,6 @@
   "id": 1156,
   "key": "item:104D3604",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "High Priest Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

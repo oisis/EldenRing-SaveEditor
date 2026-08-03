@@ -2,14 +2,6 @@
   "id": 2697,
   "key": "item:800027D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Piercing Fang",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

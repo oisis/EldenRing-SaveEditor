@@ -2,14 +2,6 @@
   "id": 1200,
   "key": "item:104E9594",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

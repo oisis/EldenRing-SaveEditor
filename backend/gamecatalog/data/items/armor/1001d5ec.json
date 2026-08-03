@@ -2,14 +2,6 @@
   "id": 581,
   "key": "item:1001D5EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Alberich's Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

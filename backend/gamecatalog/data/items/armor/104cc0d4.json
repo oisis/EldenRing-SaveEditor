@@ -2,14 +2,6 @@
   "id": 1151,
   "key": "item:104CC0D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Thiollier's Garb",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

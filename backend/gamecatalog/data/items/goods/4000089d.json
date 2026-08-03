@@ -2,14 +2,6 @@
   "id": 1589,
   "key": "item:4000089D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prattling Pate \"My beloved\"",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

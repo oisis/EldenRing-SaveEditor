@@ -21,8 +21,8 @@ func TestPrototypeCatalogContainsTwoItems(t *testing.T) {
 	if !ok {
 		t.Fatal("Dagger not found")
 	}
-	if dagger.Label.Value != "Dagger" {
-		t.Errorf("Dagger label = %q", dagger.Label.Value)
+	if dagger.Item.Presentation.DisplayName.Value != "Dagger" {
+		t.Errorf("Dagger display name = %q", dagger.Item.Presentation.DisplayName.Value)
 	}
 	if dagger.Item.Family.Value != schema.ItemFamilyWeapon {
 		t.Errorf("Dagger family = %q", dagger.Item.Family.Value)

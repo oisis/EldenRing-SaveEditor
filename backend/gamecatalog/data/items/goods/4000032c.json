@@ -2,14 +2,6 @@
   "id": 1482,
   "key": "item:4000032C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Frozen Raisin",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

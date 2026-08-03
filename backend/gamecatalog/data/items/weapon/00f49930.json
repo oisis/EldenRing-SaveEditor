@@ -2,14 +2,6 @@
   "id": 219,
   "key": "item:00F49930",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Clayman's Harpoon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

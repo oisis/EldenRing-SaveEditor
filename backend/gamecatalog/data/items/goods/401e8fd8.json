@@ -2,14 +2,6 @@
   "id": 2453,
   "key": "item:401E8FD8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Saint of the Bud",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

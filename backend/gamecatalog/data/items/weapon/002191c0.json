@@ -2,14 +2,6 @@
   "id": 34,
   "key": "item:002191C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Miquellan Knight's Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1763,
   "key": "item:40001982",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Darkness",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

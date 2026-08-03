@@ -2,14 +2,6 @@
   "id": 1171,
   "key": "item:104DAB98",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gauntlets of Night",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

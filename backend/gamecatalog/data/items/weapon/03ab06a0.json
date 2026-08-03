@@ -2,14 +2,6 @@
   "id": 534,
   "key": "item:03AB06A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Deadly Poison Perfume Bottle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

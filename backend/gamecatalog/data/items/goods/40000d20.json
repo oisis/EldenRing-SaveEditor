@@ -2,14 +2,6 @@
   "id": 1643,
   "key": "item:40000D20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Baldachin's Blessing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 677,
   "key": "item:1004BAF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Duelist Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 9,
   "key": "item:001053B0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintstone Kris",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

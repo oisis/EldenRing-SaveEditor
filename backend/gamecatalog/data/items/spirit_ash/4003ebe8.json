@@ -2,14 +2,6 @@
   "id": 2383,
   "key": "item:4003EBE8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Redmane Knight Ogha",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

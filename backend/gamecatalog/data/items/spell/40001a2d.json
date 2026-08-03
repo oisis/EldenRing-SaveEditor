@@ -2,14 +2,6 @@
   "id": 1766,
   "key": "item:40001A2D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Triple Rings of Light",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

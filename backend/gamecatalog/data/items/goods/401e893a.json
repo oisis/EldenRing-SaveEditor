@@ -2,14 +2,6 @@
   "id": 2423,
   "key": "item:401E893A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Bloody Flesh",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

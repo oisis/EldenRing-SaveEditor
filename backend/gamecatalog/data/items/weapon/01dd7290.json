@@ -2,14 +2,6 @@
   "id": 360,
   "key": "item:01DD7290",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red Crest Heater Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 582,
   "key": "item:1001D8A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Alberich's Pointed Hat (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2078,
   "key": "item:40002398",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Guarding",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

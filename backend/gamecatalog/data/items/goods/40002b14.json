@@ -2,14 +2,6 @@
   "id": 2254,
   "key": "item:40002B14",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flame-Shrouding Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

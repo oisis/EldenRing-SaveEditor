@@ -2,14 +2,6 @@
   "id": 1619,
   "key": "item:40000B8D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of Hoarah Loux",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 247,
   "key": "item:0112F6A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lucerne",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

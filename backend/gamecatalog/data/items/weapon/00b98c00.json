@@ -2,14 +2,6 @@
   "id": 170,
   "key": "item:00B98C00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Envoy's Long Horn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2640,
   "key": "item:401ED2A1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rada Fruit",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

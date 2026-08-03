@@ -2,14 +2,6 @@
   "id": 893,
   "key": "item:100D23AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Raging Wolf Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

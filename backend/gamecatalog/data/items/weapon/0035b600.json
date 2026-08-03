@@ -2,14 +2,6 @@
   "id": 69,
   "key": "item:0035B600",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lizard Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

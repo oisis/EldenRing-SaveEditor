@@ -2,14 +2,6 @@
   "id": 8,
   "key": "item:00102CA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Celebrant's Sickle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

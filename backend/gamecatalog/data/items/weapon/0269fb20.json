@@ -2,14 +2,6 @@
   "id": 434,
   "key": "item:0269FB20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bone Bow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

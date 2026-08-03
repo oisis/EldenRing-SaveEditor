@@ -2,14 +2,6 @@
   "id": 1844,
   "key": "item:40001FD3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Asimi, Silver Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

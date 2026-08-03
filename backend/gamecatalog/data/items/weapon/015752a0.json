@@ -2,14 +2,6 @@
   "id": 294,
   "key": "item:015752A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Claws of Night",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

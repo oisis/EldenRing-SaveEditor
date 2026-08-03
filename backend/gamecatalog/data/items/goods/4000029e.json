@@ -2,14 +2,6 @@
   "id": 1479,
   "key": "item:4000029E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rot Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

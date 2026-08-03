@@ -2,14 +2,6 @@
   "id": 1113,
   "key": "item:101E1018",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Prosthetic",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

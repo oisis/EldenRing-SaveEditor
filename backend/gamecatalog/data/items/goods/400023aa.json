@@ -2,14 +2,6 @@
   "id": 2095,
   "key": "item:400023AA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Fast Travel to Sites of Grace",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

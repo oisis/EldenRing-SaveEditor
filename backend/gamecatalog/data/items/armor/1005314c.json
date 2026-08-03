@@ -2,14 +2,6 @@
   "id": 692,
   "key": "item:1005314C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

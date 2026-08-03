@@ -2,14 +2,6 @@
   "id": 519,
   "key": "item:031C0D10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rotbone Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

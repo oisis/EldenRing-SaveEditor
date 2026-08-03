@@ -2,14 +2,6 @@
   "id": 1290,
   "key": "item:2000042E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prosthesis-Wearer Heirloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

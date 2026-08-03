@@ -2,14 +2,6 @@
   "id": 2795,
   "key": "item:800635D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Savage Claws",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2662,
   "key": "item:401ED2B7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon's Calorbloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -591,7 +591,9 @@ func assertDataVersionCoversOutput(t *testing.T, catalog GeneratedCatalog) {
 	}
 	mutatedResources := append([]schema.Resource(nil), catalog.Resources...)
 	mutatedResources[0] = catalog.Resources[0]
-	mutatedResources[0].Label.Value += " changed"
+	mutatedItem := *catalog.Resources[0].Item
+	mutatedItem.Presentation.DisplayName.Value += " changed"
+	mutatedResources[0].Item = &mutatedItem
 	mutated, err := computeCatalogDataVersion(
 		catalog.Manifest,
 		mutatedResources,

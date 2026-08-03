@@ -2,14 +2,6 @@
   "id": 645,
   "key": "item:1003F7A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Malformed Dragon Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

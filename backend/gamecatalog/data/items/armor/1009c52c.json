@@ -2,14 +2,6 @@
   "id": 798,
   "key": "item:1009C52C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lionel's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

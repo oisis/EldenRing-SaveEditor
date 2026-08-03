@@ -2,14 +2,6 @@
   "id": 1824,
   "key": "item:40001FA9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dectus Medallion (Left)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2773,
   "key": "item:8000ED1C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cragblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

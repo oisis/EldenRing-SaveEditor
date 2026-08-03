@@ -2,14 +2,6 @@
   "id": 2532,
   "key": "item:401EA3CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cross-Marked Map",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

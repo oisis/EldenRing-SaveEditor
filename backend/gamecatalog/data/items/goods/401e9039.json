@@ -2,14 +2,6 @@
   "id": 2471,
   "key": "item:401E9039",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spritestone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

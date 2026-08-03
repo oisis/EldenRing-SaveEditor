@@ -2,14 +2,6 @@
   "id": 1698,
   "key": "item:40001220",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Retaliation",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

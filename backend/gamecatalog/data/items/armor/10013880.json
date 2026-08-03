@@ -2,14 +2,6 @@
   "id": 563,
   "key": "item:10013880",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scaled Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

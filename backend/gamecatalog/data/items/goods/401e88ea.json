@@ -2,14 +2,6 @@
   "id": 2416,
   "key": "item:401E88EA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fireproof Pickled Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

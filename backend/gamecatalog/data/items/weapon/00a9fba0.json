@@ -2,14 +2,6 @@
   "id": 159,
   "key": "item:00A9FBA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stone Club",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

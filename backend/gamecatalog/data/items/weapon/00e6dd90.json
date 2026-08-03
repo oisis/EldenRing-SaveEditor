@@ -2,14 +2,6 @@
   "id": 212,
   "key": "item:00E6DD90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gargoyle's Great Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

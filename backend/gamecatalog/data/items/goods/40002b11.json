@@ -2,14 +2,6 @@
   "id": 2251,
   "key": "item:40002B11",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cerulean Hidden Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

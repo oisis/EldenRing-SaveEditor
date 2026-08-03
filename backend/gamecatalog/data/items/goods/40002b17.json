@@ -2,14 +2,6 @@
   "id": 2257,
   "key": "item:40002B17",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Holy-Shrouding Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

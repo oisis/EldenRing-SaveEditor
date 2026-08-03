@@ -2,14 +2,6 @@
   "id": 583,
   "key": "item:1001D90C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Alberich's Robe (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

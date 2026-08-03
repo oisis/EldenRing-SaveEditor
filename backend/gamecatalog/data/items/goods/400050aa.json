@@ -2,14 +2,6 @@
   "id": 2280,
   "key": "item:400050AA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Poisonbloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

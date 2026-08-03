@@ -2,14 +2,6 @@
   "id": 1068,
   "key": "item:101B7740",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Redmane Knight Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

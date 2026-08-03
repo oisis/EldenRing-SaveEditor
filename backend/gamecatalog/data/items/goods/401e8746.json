@@ -2,14 +2,6 @@
   "id": 2406,
   "key": "item:401E8746",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Frenzied Flame Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

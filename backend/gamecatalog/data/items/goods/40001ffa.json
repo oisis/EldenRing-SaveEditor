@@ -2,14 +2,6 @@
   "id": 1873,
   "key": "item:40001FFA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Imbued Sword Key",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

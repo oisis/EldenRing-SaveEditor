@@ -2,14 +2,6 @@
   "id": 1203,
   "key": "item:104EBC40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rakshasa Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

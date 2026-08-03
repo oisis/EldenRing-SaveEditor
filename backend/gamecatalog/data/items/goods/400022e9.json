@@ -2,14 +2,6 @@
   "id": 1978,
   "key": "item:400022E9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Abandoned Merchant's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

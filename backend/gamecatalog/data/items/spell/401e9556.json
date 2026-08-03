@@ -2,14 +2,6 @@
   "id": 2483,
   "key": "item:401E9556",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintblade Trio",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

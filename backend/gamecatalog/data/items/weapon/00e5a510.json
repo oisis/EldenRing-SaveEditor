@@ -2,14 +2,6 @@
   "id": 207,
   "key": "item:00E5A510",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Longhaft Axe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

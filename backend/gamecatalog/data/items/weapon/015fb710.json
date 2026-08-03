@@ -2,14 +2,6 @@
   "id": 300,
   "key": "item:015FB710",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Axe of Godfrey",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

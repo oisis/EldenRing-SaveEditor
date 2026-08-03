@@ -2,14 +2,6 @@
   "id": 335,
   "key": "item:01CC0D70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Smoldering Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

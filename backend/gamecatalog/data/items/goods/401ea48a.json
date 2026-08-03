@@ -2,14 +2,6 @@
   "id": 2555,
   "key": "item:401EA48A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Domain of Dragons Painting",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

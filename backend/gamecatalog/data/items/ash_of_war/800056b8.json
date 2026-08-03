@@ -2,14 +2,6 @@
   "id": 2736,
   "key": "item:800056B8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Ring of Light",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

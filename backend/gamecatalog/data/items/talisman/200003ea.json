@@ -2,14 +2,6 @@
   "id": 1274,
   "key": "item:200003EA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Amber Medallion +2",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

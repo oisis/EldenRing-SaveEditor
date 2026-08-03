@@ -2,14 +2,6 @@
   "id": 1679,
   "key": "item:40001126",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Magic Glintblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

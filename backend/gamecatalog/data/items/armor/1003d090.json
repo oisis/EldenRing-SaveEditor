@@ -2,14 +2,6 @@
   "id": 641,
   "key": "item:1003D090",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nomadic Merchant's Chapeau",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

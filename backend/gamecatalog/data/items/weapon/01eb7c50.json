@@ -2,14 +2,6 @@
   "id": 385,
   "key": "item:01EB7C50",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Inverted Hawk Towershield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

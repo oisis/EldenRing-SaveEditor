@@ -2,14 +2,6 @@
   "id": 1820,
   "key": "item:40001EDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire's Deadly Sin",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

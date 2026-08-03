@@ -2,14 +2,6 @@
   "id": 1428,
   "key": "item:40000065",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Duelist's Furled Finger",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

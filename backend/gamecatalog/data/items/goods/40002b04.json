@@ -2,14 +2,6 @@
   "id": 2238,
   "key": "item:40002B04",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Winged Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

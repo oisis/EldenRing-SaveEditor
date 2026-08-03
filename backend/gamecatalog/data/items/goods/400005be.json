@@ -2,14 +2,6 @@
   "id": 1546,
   "key": "item:400005BE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Freezing Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

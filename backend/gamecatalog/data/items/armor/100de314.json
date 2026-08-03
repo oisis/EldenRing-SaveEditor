@@ -2,14 +2,6 @@
   "id": 923,
   "key": "item:100DE314",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Preceptor's Long Gown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2349,
   "key": "item:40036718",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Knight Finlay",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1712,
   "key": "item:4000132E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Briars of Punishment",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

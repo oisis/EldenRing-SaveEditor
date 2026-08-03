@@ -2,14 +2,6 @@
   "id": 1833,
   "key": "item:40001FC1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Serpent's Amnion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

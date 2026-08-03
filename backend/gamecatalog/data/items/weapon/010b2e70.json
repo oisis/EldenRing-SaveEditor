@@ -2,14 +2,6 @@
   "id": 243,
   "key": "item:010B2E70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier's Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

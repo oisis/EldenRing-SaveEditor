@@ -2,14 +2,6 @@
   "id": 341,
   "key": "item:01D953E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marred Wooden Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

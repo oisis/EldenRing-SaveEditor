@@ -2,14 +2,6 @@
   "id": 2131,
   "key": "item:4000246E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Armorer's Cookbook [4]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

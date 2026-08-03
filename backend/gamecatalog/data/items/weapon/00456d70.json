@@ -2,14 +2,6 @@
   "id": 86,
   "key": "item:00456D70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greatsword of Radahn (Light)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

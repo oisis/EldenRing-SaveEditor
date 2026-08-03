@@ -2,14 +2,6 @@
   "id": 465,
   "key": "item:02FBDAE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shattershard Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

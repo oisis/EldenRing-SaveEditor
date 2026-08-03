@@ -2,14 +2,6 @@
   "id": 441,
   "key": "item:0272ADB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Bow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

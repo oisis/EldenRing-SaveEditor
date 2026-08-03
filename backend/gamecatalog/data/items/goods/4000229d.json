@@ -2,14 +2,6 @@
   "id": 1946,
   "key": "item:4000229D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Erdtree Codex",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

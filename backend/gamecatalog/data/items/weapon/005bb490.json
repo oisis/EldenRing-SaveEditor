@@ -2,14 +2,6 @@
   "id": 95,
   "key": "item:005BB490",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godskin Stitcher",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

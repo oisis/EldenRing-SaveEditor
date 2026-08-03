@@ -2,14 +2,6 @@
   "id": 2324,
   "key": "item:40005177",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravel Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

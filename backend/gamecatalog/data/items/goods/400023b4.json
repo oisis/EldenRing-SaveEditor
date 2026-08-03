@@ -2,14 +2,6 @@
   "id": 2103,
   "key": "item:400023B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Wielding Armaments",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

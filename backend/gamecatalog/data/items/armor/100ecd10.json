@@ -2,14 +2,6 @@
   "id": 955,
   "key": "item:100ECD10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Omen Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

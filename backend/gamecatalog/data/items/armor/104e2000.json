@@ -2,14 +2,6 @@
   "id": 1184,
   "key": "item:104E2000",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Freyja's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

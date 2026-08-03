@@ -2,14 +2,6 @@
   "id": 693,
   "key": "item:10053408",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Helm (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 745,
   "key": "item:10081650",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godskin Noble Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

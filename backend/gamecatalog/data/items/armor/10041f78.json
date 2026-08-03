@@ -2,14 +2,6 @@
   "id": 651,
   "key": "item:10041F78",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree Sentinel Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

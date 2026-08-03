@@ -2,14 +2,6 @@
   "id": 549,
   "key": "item:10009C40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iron Helmet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

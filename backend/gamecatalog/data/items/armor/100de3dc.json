@@ -2,14 +2,6 @@
   "id": 925,
   "key": "item:100DE3DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Preceptor's Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

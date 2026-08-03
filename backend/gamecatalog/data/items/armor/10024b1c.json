@@ -2,14 +2,6 @@
   "id": 596,
   "key": "item:10024B1C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ronin's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

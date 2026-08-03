@@ -2,14 +2,6 @@
   "id": 2089,
   "key": "item:400023A4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Invasion Multiplayer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

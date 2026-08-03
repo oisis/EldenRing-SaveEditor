@@ -2,14 +2,6 @@
   "id": 315,
   "key": "item:016ED240",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "St. Trina's Torch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

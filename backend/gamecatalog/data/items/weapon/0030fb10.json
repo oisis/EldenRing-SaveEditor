@@ -2,14 +2,6 @@
   "id": 66,
   "key": "item:0030FB10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gargoyle's Blackblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

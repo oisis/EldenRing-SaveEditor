@@ -2,14 +2,6 @@
   "id": 1064,
   "key": "item:101B5094",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leyndell Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

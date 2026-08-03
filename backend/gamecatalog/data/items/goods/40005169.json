@@ -2,14 +2,6 @@
   "id": 2319,
   "key": "item:40005169",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Budding Cave Moss",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

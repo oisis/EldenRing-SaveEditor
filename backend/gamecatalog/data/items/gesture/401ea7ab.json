@@ -2,14 +2,6 @@
   "id": 2574,
   "key": "item:401EA7AB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Let Us Go Together",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

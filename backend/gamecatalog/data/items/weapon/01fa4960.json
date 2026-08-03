@@ -2,14 +2,6 @@
   "id": 405,
   "key": "item:01FA4960",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prince of Death's Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

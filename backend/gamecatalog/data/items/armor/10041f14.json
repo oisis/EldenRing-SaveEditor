@@ -2,14 +2,6 @@
   "id": 650,
   "key": "item:10041F14",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree Sentinel Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

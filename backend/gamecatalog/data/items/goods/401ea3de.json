@@ -2,14 +2,6 @@
   "id": 2546,
   "key": "item:401EA3DE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Storehouse Cross Message",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

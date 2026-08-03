@@ -2,14 +2,6 @@
   "id": 1961,
   "key": "item:400022D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Kalé's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

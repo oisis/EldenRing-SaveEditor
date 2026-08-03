@@ -2,14 +2,6 @@
   "id": 512,
   "key": "item:031AFBA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Firebone Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

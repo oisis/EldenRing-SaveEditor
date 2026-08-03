@@ -2,14 +2,6 @@
   "id": 242,
   "key": "item:010B0760",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spear of the Impaler",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

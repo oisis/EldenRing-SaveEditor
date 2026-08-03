@@ -2,14 +2,6 @@
   "id": 2113,
   "key": "item:40002456",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nomadic Warrior's Cookbook [6]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

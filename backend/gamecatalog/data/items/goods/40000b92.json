@@ -2,14 +2,6 @@
   "id": 1624,
   "key": "item:40000B92",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Regal Ancestor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

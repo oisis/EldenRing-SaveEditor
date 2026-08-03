@@ -2,14 +2,6 @@
   "id": 2534,
   "key": "item:401EA3CE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Secret Rite Scroll",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

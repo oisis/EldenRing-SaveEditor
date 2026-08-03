@@ -2,14 +2,6 @@
   "id": 503,
   "key": "item:03199C10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2359,
   "key": "item:40038E28",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Giant Rat Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

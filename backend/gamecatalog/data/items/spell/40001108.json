@@ -2,14 +2,6 @@
   "id": 1674,
   "key": "item:40001108",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rennala's Full Moon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

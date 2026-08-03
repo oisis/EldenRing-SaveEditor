@@ -2,14 +2,6 @@
   "id": 554,
   "key": "item:1000C3B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Kaiden Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

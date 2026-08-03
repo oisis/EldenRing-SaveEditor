@@ -2,14 +2,6 @@
   "id": 991,
   "key": "item:10105478",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Zamor Bracelets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

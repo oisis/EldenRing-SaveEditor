@@ -2,14 +2,6 @@
   "id": 2248,
   "key": "item:40002B0E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dexterity-knot Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

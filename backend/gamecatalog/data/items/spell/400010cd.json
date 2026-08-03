@@ -2,14 +2,6 @@
   "id": 1672,
   "key": "item:400010CD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Phalanx",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 546,
   "key": "item:04064600",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rellana's Twin Blades",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

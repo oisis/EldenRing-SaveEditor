@@ -2,14 +2,6 @@
   "id": 155,
   "key": "item:00A95F60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Envoy's Horn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

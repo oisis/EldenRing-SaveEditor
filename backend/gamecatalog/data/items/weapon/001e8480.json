@@ -2,14 +2,6 @@
   "id": 20,
   "key": "item:001E8480",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Longsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

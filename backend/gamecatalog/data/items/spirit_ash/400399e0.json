@@ -2,14 +2,6 @@
   "id": 2362,
   "key": "item:400399E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spirit Jellyfish Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

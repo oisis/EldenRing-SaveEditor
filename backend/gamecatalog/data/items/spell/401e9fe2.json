@@ -2,14 +2,6 @@
   "id": 2508,
   "key": "item:401E9FE2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bayle's Flame Lightning",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

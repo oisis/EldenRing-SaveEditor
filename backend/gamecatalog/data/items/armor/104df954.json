@@ -2,14 +2,6 @@
   "id": 1180,
   "key": "item:104DF954",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ansbach's Attire",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 611,
   "key": "item:1002E630",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Exile Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

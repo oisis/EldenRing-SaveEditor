@@ -2,14 +2,6 @@
   "id": 704,
   "key": "item:10057EA4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Prelate Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

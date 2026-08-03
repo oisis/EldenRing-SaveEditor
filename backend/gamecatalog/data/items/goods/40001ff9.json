@@ -2,14 +2,6 @@
   "id": 1872,
   "key": "item:40001FF9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Larval Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

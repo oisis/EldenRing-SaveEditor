@@ -2,14 +2,6 @@
   "id": 691,
   "key": "item:100530E8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1228,
   "key": "item:104F80BC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ascetic's Ankle Guards",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

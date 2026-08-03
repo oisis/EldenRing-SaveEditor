@@ -2,14 +2,6 @@
   "id": 1302,
   "key": "item:2000049D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Clarifying Horn Charm +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

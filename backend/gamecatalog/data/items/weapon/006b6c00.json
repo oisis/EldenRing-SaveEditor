@@ -2,14 +2,6 @@
   "id": 103,
   "key": "item:006B6C00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bandit's Curved Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

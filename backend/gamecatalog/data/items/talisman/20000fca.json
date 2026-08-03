@@ -2,14 +2,6 @@
   "id": 1360,
   "key": "item:20000FCA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligdrake Talisman +2",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

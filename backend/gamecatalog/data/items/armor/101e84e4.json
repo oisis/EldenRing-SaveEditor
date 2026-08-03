@@ -2,14 +2,6 @@
   "id": 1121,
   "key": "item:101E84E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rotten Gravekeeper Cloak",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -36,11 +36,6 @@ func (catalog *Catalog) ItemByGameID(gameID uint32) (schema.Resource, bool) {
 		}
 		materialized := schema.MaterializeVariant(*resource.Item, variant)
 		resource.Item = &materialized
-		if materialized.Presentation.DisplayName.Known {
-			resource.Label = materialized.Presentation.DisplayName
-		} else if materialized.Presentation.CanonicalName.Known {
-			resource.Label = materialized.Presentation.CanonicalName
-		}
 		return resource, true
 	}
 	for _, alias := range resource.Item.Aliases {

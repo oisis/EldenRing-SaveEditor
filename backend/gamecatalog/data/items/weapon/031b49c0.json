@@ -2,14 +2,6 @@
   "id": 514,
   "key": "item:031B49C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Magicbone Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

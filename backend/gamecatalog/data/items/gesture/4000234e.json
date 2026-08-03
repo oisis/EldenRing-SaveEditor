@@ -2,14 +2,6 @@
   "id": 2053,
   "key": "item:4000234E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fetal Position",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 430,
   "key": "item:02628110",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Misbegotten Shortbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

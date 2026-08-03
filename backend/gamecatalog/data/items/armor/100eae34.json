@@ -2,14 +2,6 @@
   "id": 949,
   "key": "item:100EAE34",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Upper-Class Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

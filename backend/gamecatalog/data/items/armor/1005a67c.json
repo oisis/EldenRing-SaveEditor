@@ -2,14 +2,6 @@
   "id": 710,
   "key": "item:1005A67C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Aristocrat Boots",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

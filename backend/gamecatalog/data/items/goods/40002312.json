@@ -2,14 +2,6 @@
   "id": 2012,
   "key": "item:40002312",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sellia's Secret",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

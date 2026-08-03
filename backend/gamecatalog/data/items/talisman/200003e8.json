@@ -2,14 +2,6 @@
   "id": 1272,
   "key": "item:200003E8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Amber Medallion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

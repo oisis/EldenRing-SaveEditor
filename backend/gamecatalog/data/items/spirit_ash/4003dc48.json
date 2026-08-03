@@ -2,14 +2,6 @@
   "id": 2379,
   "key": "item:4003DC48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radahn Soldier Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

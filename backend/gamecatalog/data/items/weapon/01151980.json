@@ -2,14 +2,6 @@
   "id": 260,
   "key": "item:01151980",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gargoyle's Black Halberd",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

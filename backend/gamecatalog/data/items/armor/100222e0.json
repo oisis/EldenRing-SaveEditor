@@ -2,14 +2,6 @@
   "id": 589,
   "key": "item:100222E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bull-Goat Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

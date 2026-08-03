@@ -2,14 +2,6 @@
   "id": 560,
   "key": "item:1000EB8C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drake Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

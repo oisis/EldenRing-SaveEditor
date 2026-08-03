@@ -2,14 +2,6 @@
   "id": 2571,
   "key": "item:401EA7A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ring of Miquella",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

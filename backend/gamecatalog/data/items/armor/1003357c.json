@@ -2,14 +2,6 @@
   "id": 624,
   "key": "item:1003357C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Briar Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

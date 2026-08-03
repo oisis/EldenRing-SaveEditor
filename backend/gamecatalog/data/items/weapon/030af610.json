@@ -2,14 +2,6 @@
   "id": 499,
   "key": "item:030AF610",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bone Great Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

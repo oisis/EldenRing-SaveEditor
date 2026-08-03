@@ -2,14 +2,6 @@
   "id": 802,
   "key": "item:1009EBD8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoslow's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

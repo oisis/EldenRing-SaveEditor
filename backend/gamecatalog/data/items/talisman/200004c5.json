@@ -2,14 +2,6 @@
   "id": 1309,
   "key": "item:200004C5",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marika's Soreseal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

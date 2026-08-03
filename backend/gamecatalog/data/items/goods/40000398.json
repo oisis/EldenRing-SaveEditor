@@ -2,14 +2,6 @@
   "id": 1487,
   "key": "item:40000398",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Thawfrost Boluses",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

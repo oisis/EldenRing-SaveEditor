@@ -2,14 +2,6 @@
   "id": 235,
   "key": "item:00FC8870",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodfiend's Sacred Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

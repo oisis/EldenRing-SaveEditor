@@ -2,14 +2,6 @@
   "id": 2297,
   "key": "item:400050F3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodrose",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

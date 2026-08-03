@@ -2,14 +2,6 @@
   "id": 548,
   "key": "item:04156130",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red Bear's Claw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

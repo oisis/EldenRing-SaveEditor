@@ -2,14 +2,6 @@
   "id": 1163,
   "key": "item:104D5DDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Soiled Loincloth",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

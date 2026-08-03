@@ -2,14 +2,6 @@
   "id": 379,
   "key": "item:01EA6AE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Icon Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

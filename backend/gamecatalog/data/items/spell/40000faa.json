@@ -2,14 +2,6 @@
   "id": 1653,
   "key": "item:40000FAA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Swift Glintstone Shard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

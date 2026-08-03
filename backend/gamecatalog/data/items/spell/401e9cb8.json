@@ -2,14 +2,6 @@
   "id": 2492,
   "key": "item:401E9CB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Vortex of Putrescence",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

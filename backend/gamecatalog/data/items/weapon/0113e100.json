@@ -2,14 +2,6 @@
   "id": 253,
   "key": "item:0113E100",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Halberd",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

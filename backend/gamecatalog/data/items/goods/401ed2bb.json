@@ -2,14 +2,6 @@
   "id": 2666,
   "key": "item:401ED2BB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roundrock",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

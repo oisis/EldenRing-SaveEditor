@@ -2,14 +2,6 @@
   "id": 202,
   "key": "item:00E4E1C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greataxe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

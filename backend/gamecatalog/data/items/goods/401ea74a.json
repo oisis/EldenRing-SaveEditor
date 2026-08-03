@@ -2,14 +2,6 @@
   "id": 2567,
   "key": "item:401EA74A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Moldmonger's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

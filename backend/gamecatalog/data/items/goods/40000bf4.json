@@ -2,14 +2,6 @@
   "id": 1635,
   "key": "item:40000BF4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravity Stone Fan",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

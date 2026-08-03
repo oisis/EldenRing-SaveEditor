@@ -2,14 +2,6 @@
   "id": 2343,
   "key": "item:40034FA8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Perfumer Tricia",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

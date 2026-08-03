@@ -2,14 +2,6 @@
   "id": 2337,
   "key": "item:40033838",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Albinauric Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

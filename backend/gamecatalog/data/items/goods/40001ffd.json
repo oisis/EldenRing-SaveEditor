@@ -2,14 +2,6 @@
   "id": 1876,
   "key": "item:40001FFD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iji's Confession",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

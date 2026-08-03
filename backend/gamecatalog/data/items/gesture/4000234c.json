@@ -2,14 +2,6 @@
   "id": 2051,
   "key": "item:4000234C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dozing Cross-Legged",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

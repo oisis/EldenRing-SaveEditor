@@ -2,14 +2,6 @@
   "id": 1607,
   "key": "item:40000B63",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hero's Rune [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

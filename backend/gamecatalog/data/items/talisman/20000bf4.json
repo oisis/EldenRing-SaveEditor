@@ -2,14 +2,6 @@
   "id": 1341,
   "key": "item:20000BF4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Old Lord's Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

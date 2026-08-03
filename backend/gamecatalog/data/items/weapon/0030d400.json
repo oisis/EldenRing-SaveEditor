@@ -2,14 +2,6 @@
   "id": 65,
   "key": "item:0030D400",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Death's Poker",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

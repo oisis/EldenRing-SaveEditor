@@ -2,14 +2,6 @@
   "id": 1791,
   "key": "item:40001B3B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonbolt Blessing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

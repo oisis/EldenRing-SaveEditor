@@ -2,14 +2,6 @@
   "id": 1779,
   "key": "item:40001AB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bestial Vitality",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

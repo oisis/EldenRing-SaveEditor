@@ -2,14 +2,6 @@
   "id": 2633,
   "key": "item:401EAFB4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glovewort Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

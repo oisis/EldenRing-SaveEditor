@@ -2,14 +2,6 @@
   "id": 438,
   "key": "item:02721170",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Erdtree Bow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

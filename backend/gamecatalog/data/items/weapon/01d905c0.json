@@ -2,14 +2,6 @@
   "id": 339,
   "key": "item:01D905C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Kite Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

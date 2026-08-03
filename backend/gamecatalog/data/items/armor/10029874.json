@@ -2,14 +2,6 @@
   "id": 602,
   "key": "item:10029874",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blaidd's Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

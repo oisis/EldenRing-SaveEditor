@@ -2,14 +2,6 @@
   "id": 369,
   "key": "item:01E11C10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Lion Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

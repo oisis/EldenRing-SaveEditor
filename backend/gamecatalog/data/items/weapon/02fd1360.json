@@ -2,14 +2,6 @@
   "id": 471,
   "key": "item:02FD1360",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Firebone Arrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

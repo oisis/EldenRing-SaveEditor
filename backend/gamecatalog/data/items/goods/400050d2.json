@@ -2,14 +2,6 @@
   "id": 2291,
   "key": "item:400050D2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Herba",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

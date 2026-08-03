@@ -2,14 +2,6 @@
   "id": 1985,
   "key": "item:400022F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gowry's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

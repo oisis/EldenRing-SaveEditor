@@ -2,14 +2,6 @@
   "id": 903,
   "key": "item:100D6D80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Confessor Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

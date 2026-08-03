@@ -2,14 +2,6 @@
   "id": 2351,
   "key": "item:40036EE8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marionette Soldier Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

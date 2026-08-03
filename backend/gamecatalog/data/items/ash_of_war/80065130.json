@@ -2,14 +2,6 @@
   "id": 2801,
   "key": "item:80065130",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flame Skewer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

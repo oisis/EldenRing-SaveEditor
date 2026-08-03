@@ -2,14 +2,6 @@
   "id": 73,
   "key": "item:003D5720",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Maliketh's Black Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

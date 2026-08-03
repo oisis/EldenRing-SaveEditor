@@ -2,14 +2,6 @@
   "id": 1836,
   "key": "item:40001FC5",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red Letter",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

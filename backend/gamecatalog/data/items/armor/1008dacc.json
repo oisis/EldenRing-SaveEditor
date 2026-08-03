@@ -2,14 +2,6 @@
   "id": 765,
   "key": "item:1008DACC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Old Sorcerer's Legwraps",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

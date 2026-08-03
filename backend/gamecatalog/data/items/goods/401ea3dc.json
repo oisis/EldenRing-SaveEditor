@@ -2,14 +2,6 @@
   "id": 2544,
   "key": "item:401EA3DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Ruins Cross Message",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

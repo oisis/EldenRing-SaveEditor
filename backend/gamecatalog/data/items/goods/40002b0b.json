@@ -2,14 +2,6 @@
   "id": 2245,
   "key": "item:40002B0B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twiggy Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

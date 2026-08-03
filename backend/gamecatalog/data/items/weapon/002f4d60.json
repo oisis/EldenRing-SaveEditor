@@ -2,14 +2,6 @@
   "id": 57,
   "key": "item:002F4D60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Relic Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

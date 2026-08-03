@@ -2,14 +2,6 @@
   "id": 626,
   "key": "item:10035B60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Page Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

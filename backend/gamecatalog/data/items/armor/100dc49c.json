@@ -2,14 +2,6 @@
   "id": 920,
   "key": "item:100DC49C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Finger Maiden Shoes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

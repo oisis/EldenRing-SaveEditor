@@ -2,14 +2,6 @@
   "id": 2691,
   "key": "item:4021D428",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fingercreeper Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

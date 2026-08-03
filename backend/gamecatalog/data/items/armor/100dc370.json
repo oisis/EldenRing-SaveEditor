@@ -2,14 +2,6 @@
   "id": 918,
   "key": "item:100DC370",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Finger Maiden Fillet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

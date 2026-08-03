@@ -2,14 +2,6 @@
   "id": 1420,
   "key": "item:20001FF4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Enraged Divine Beast",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

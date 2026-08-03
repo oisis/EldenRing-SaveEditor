@@ -2,14 +2,6 @@
   "id": 857,
   "key": "item:100BE80C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Veteran's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

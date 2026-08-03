@@ -2,14 +2,6 @@
   "id": 298,
   "key": "item:015F68F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Envoy's Greathorn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1673,
   "key": "item:400010CE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greatblade Phalanx",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 317,
   "key": "item:016F2060",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast-Repellent Torch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

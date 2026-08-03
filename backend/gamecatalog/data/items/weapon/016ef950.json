@@ -2,14 +2,6 @@
   "id": 316,
   "key": "item:016EF950",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ghostflame Torch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

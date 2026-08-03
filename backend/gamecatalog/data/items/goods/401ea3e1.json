@@ -2,14 +2,6 @@
   "id": 2549,
   "key": "item:401EA3E1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Larval Tear (DLC)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

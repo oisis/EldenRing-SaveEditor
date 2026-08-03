@@ -2,14 +2,6 @@
   "id": 1007,
   "key": "item:1010EFF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Octopus Head",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

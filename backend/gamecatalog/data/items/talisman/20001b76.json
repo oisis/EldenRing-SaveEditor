@@ -2,14 +2,6 @@
   "id": 1391,
   "key": "item:20001B76",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Two-Headed Turtle Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

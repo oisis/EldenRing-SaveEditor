@@ -2,14 +2,6 @@
   "id": 2519,
   "key": "item:401EA2B2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Divine Beast Tornado",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

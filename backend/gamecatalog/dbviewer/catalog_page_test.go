@@ -60,11 +60,13 @@ func TestCatalogPaginationPreservesQueryAndFamily(t *testing.T) {
 		server.data.Documents = append(server.data.Documents, loader.Document{
 			Path: "items/goods/page-item.json",
 			Resource: schema.Resource{
-				Key:   "page-item",
-				Label: schema.Fact[string]{Known: true, Value: "page-item"},
+				Key: "page-item",
 				Item: &schema.ItemDocument{
-					GameID:      schema.Fact[uint32]{Known: true, Value: 0x70000000 + uint32(index)},
-					Family:      schema.Fact[schema.ItemFamily]{Known: true, Value: schema.ItemFamilyGoods},
+					GameID: schema.Fact[uint32]{Known: true, Value: 0x70000000 + uint32(index)},
+					Family: schema.Fact[schema.ItemFamily]{Known: true, Value: schema.ItemFamilyGoods},
+					Presentation: schema.ItemPresentation{
+						DisplayName: schema.Fact[string]{Known: true, Value: "page-item"},
+					},
 					Subcategory: schema.Fact[string]{Known: true, Value: "page-test"},
 				},
 			},
@@ -202,11 +204,13 @@ func TestCatalogRowsAndFiltersCoverAllEightItemFamilies(t *testing.T) {
 		server.data.Documents = append(server.data.Documents, loader.Document{
 			Path: "items/" + string(family) + "/item.json",
 			Resource: schema.Resource{
-				Key:   "item:" + string(family),
-				Label: schema.Fact[string]{Known: true, Value: string(family)},
+				Key: "item:" + string(family),
 				Item: &schema.ItemDocument{
-					GameID:      schema.Fact[uint32]{Known: true, Value: uint32(index + 1)},
-					Family:      schema.Fact[schema.ItemFamily]{Known: true, Value: family},
+					GameID: schema.Fact[uint32]{Known: true, Value: uint32(index + 1)},
+					Family: schema.Fact[schema.ItemFamily]{Known: true, Value: family},
+					Presentation: schema.ItemPresentation{
+						DisplayName: schema.Fact[string]{Known: true, Value: string(family)},
+					},
 					Subcategory: schema.Fact[string]{Known: true, Value: "test"},
 				},
 			},

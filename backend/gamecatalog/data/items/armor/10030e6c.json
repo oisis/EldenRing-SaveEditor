@@ -2,14 +2,6 @@
   "id": 618,
   "key": "item:10030E6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

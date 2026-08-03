@@ -2,14 +2,6 @@
   "id": 1189,
   "key": "item:104E4710",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Helm of Solitude",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

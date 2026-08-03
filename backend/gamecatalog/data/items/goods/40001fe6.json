@@ -2,14 +2,6 @@
   "id": 1858,
   "key": "item:40001FE6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Amber Draught",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

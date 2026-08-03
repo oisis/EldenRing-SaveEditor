@@ -2,14 +2,6 @@
   "id": 652,
   "key": "item:10041FDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree Sentinel Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

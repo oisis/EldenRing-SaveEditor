@@ -2,14 +2,6 @@
   "id": 2419,
   "key": "item:401E8908",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Opaline Pickled Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1481,
   "key": "item:4000032B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sweet Raisin",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

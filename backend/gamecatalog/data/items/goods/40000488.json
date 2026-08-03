@@ -2,14 +2,6 @@
   "id": 1524,
   "key": "item:40000488",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fireproof Dried Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2683,
   "key": "item:4021B100",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knight Commander Andreas",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

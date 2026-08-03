@@ -2,14 +2,6 @@
   "id": 592,
   "key": "item:1002240C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bull-Goat Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

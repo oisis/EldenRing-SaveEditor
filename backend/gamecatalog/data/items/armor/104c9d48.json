@@ -2,14 +2,6 @@
   "id": 1149,
   "key": "item:104C9D48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fang Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1365,
   "key": "item:20000FE6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crucible Feather Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

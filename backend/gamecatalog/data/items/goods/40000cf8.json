@@ -2,14 +2,6 @@
   "id": 1641,
   "key": "item:40000CF8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Scriptstone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

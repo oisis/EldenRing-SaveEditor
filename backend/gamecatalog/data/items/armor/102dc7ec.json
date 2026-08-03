@@ -2,14 +2,6 @@
   "id": 1130,
   "key": "item:102DC7EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dryleaf Cuissardes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

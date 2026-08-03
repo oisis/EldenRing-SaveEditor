@@ -2,14 +2,6 @@
   "id": 314,
   "key": "item:016E8420",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Steel-Wire Torch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

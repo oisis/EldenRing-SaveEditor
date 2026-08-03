@@ -2,14 +2,6 @@
   "id": 164,
   "key": "item:00B76920",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Battle Hammer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 302,
   "key": "item:01600530",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Staff of the Avatar",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

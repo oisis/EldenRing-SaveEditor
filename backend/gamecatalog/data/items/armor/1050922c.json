@@ -2,14 +2,6 @@
   "id": 1266,
   "key": "item:1050922C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shadow Militiaman Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 141,
   "key": "item:009959D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Eleonora's Poleblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

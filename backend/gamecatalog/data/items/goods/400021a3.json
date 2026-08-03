@@ -2,14 +2,6 @@
   "id": 1911,
   "key": "item:400021A3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Mountaintops of the Giants, West",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

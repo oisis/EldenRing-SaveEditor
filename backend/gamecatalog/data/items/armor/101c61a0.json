@@ -2,14 +2,6 @@
   "id": 1090,
   "key": "item:101C61A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Foot Soldier Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

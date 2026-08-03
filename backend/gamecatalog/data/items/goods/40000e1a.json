@@ -2,14 +2,6 @@
   "id": 1650,
   "key": "item:40000E1A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Acid Spraymist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

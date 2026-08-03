@@ -2,14 +2,6 @@
   "id": 287,
   "key": "item:01488590",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Madding Hand",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

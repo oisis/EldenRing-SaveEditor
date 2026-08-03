@@ -2,14 +2,6 @@
   "id": 2457,
   "key": "item:401E8FDD",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Mother of Fingers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

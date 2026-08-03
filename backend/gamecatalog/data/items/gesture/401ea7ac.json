@@ -2,14 +2,6 @@
   "id": 2575,
   "key": "item:401EA7AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "O Mother",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

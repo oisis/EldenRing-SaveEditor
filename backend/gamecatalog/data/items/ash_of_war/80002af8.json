@@ -2,14 +2,6 @@
   "id": 2704,
   "key": "item:80002AF8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wild Strikes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

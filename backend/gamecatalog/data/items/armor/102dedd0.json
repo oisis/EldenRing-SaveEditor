@@ -2,14 +2,6 @@
   "id": 1132,
   "key": "item:102DEDD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gaius's Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

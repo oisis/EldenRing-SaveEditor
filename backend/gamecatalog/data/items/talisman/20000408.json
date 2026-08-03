@@ -2,14 +2,6 @@
   "id": 1283,
   "key": "item:20000408",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Great-Jar's Arsenal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

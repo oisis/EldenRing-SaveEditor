@@ -2,14 +2,6 @@
   "id": 180,
   "key": "item:00C65D40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nightrider Flail",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 899,
   "key": "item:100D4E40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Okina Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

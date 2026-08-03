@@ -2,14 +2,6 @@
   "id": 1850,
   "key": "item:40001FD9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Malenia's Great Rune",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

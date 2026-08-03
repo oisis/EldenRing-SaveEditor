@@ -2,14 +2,6 @@
   "id": 1397,
   "key": "item:20001BBC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flamedrake Talisman +3",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

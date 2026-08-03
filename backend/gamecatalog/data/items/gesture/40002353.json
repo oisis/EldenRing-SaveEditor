@@ -2,14 +2,6 @@
   "id": 2058,
   "key": "item:40002353",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rapture",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

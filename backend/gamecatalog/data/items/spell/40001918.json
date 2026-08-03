@@ -2,14 +2,6 @@
   "id": 1750,
   "key": "item:40001918",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Erdtree Heal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

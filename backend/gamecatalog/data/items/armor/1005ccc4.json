@@ -2,14 +2,6 @@
   "id": 713,
   "key": "item:1005CCC4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Aristocrat Coat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

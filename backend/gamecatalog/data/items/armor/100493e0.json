@@ -2,14 +2,6 @@
   "id": 671,
   "key": "item:100493E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Great Horned Headband",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

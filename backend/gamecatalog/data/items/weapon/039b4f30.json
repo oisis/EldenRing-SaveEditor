@@ -2,14 +2,6 @@
   "id": 529,
   "key": "item:039B4F30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dane's Footwork",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

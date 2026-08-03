@@ -2,14 +2,6 @@
   "id": 817,
   "key": "item:100A6108",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "War Surgeon Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

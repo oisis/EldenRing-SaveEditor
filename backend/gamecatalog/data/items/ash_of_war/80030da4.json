@@ -2,14 +2,6 @@
   "id": 2787,
   "key": "item:80030DA4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Aspects of the Crucible: Wings",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

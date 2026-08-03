@@ -2,14 +2,6 @@
   "id": 17,
   "key": "item:0011B340",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blade of Calling",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

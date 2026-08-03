@@ -2,14 +2,6 @@
   "id": 2320,
   "key": "item:4000516A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Cave Moss",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

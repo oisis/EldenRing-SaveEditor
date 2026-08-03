@@ -2,14 +2,6 @@
   "id": 1108,
   "key": "item:101D9E6C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fia's Robe (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

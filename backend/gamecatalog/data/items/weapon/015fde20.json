@@ -2,14 +2,6 @@
   "id": 301,
   "key": "item:015FDE20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon Greatclaw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

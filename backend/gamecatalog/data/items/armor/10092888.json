@@ -2,14 +2,6 @@
   "id": 776,
   "key": "item:10092888",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinned Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

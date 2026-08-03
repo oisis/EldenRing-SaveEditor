@@ -2,14 +2,6 @@
   "id": 2765,
   "key": "item:8000C6D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hoarah Loux's Earthshaker",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

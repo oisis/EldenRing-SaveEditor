@@ -2,14 +2,6 @@
   "id": 191,
   "key": "item:00D662D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ripple Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 507,
   "key": "item:031A3850",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Meteor Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

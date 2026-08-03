@@ -2,14 +2,6 @@
   "id": 756,
   "key": "item:1008B358",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crucible Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

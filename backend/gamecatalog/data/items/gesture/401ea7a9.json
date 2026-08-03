@@ -2,14 +2,6 @@
   "id": 2572,
   "key": "item:401EA7A9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "May the Best Win",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

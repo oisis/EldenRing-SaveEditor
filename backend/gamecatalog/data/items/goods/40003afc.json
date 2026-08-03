@@ -2,14 +2,6 @@
   "id": 2267,
   "key": "item:40003AFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Human Bone Shard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

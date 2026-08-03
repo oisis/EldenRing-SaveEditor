@@ -2,14 +2,6 @@
   "id": 2431,
   "key": "item:401E8A48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon Communion Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

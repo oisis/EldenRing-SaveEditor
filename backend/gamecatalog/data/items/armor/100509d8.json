@@ -2,14 +2,6 @@
   "id": 686,
   "key": "item:100509D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Guardian Bracers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

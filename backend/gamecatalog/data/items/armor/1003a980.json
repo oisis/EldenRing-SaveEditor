@@ -2,14 +2,6 @@
   "id": 636,
   "key": "item:1003A980",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blue Silver Mail Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

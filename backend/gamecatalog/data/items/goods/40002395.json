@@ -2,14 +2,6 @@
   "id": 2075,
   "key": "item:40002395",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Horseback Riding",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2731,
   "key": "item:800054C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Slash",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2262,
   "key": "item:40003AC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Old Fang",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2287,
   "key": "item:400050C9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Altus Bloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

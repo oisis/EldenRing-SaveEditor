@@ -2,14 +2,6 @@
   "id": 89,
   "key": "item:004C9960",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rapier",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

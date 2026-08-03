@@ -2,14 +2,6 @@
   "id": 2415,
   "key": "item:401E88E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spellproof Pickled Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

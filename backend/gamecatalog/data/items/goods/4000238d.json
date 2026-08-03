@@ -2,14 +2,6 @@
   "id": 2067,
   "key": "item:4000238D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Sorceries and Incantations",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

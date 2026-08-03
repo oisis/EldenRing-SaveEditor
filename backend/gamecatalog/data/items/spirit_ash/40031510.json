@@ -2,14 +2,6 @@
   "id": 2328,
   "key": "item:40031510",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight Engvall",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

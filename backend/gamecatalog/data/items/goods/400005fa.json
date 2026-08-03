@@ -2,14 +2,6 @@
   "id": 1552,
   "key": "item:400005FA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Holy Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

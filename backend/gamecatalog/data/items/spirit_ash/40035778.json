@@ -2,14 +2,6 @@
   "id": 2345,
   "key": "item:40035778",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Twinsage Sorcerer Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

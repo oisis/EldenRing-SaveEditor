@@ -2,14 +2,6 @@
   "id": 464,
   "key": "item:02FB8CC0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "St. Trina's Arrow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

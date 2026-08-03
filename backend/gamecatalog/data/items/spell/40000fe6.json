@@ -2,14 +2,6 @@
   "id": 1660,
   "key": "item:40000FE6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintstone Arc",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2229,
   "key": "item:40002AFB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

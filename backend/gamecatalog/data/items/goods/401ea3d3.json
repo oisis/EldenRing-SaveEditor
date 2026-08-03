@@ -2,14 +2,6 @@
   "id": 2539,
   "key": "item:401EA3D3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Syrup",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

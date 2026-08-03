@@ -2,14 +2,6 @@
   "id": 1237,
   "key": "item:104FCEDC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gravebird Anklets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

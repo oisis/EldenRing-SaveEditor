@@ -2,14 +2,6 @@
   "id": 771,
   "key": "item:10090178",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "All-Knowing Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

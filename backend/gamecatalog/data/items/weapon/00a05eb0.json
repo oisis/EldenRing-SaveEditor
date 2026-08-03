@@ -2,14 +2,6 @@
   "id": 145,
   "key": "item:00A05EB0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Steel Twinblade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

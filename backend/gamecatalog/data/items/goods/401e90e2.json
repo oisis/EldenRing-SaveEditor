@@ -2,14 +2,6 @@
   "id": 2476,
   "key": "item:401E90E2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Vow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

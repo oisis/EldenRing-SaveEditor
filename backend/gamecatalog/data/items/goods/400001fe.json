@@ -2,14 +2,6 @@
   "id": 1471,
   "key": "item:400001FE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Roped Holy Water Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1120,
   "key": "item:101E8480",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rotten Duelist Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 743,
   "key": "item:1007F008",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godskin Apostle Bracelets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

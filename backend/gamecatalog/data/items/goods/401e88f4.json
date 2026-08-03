@@ -2,14 +2,6 @@
   "id": 2417,
   "key": "item:401E88F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightningproof Pickled Liver",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

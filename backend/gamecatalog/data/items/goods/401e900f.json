@@ -2,14 +2,6 @@
   "id": 2468,
   "key": "item:401E900F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rune of an Unsung Hero",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

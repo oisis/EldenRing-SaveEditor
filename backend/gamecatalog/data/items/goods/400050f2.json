@@ -2,14 +2,6 @@
   "id": 2296,
   "key": "item:400050F2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rimed Rowa",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

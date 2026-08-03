@@ -2,14 +2,6 @@
   "id": 932,
   "key": "item:100E31FC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bandit Boots",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

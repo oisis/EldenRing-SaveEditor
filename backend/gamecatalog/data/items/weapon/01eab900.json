@@ -2,14 +2,6 @@
   "id": 381,
   "key": "item:01EAB900",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Visage Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2766,
   "key": "item:8000EA60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Determination",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1826,
   "key": "item:40001FAB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rold Medallion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

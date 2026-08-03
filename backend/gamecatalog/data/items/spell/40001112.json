@@ -2,14 +2,6 @@
   "id": 1676,
   "key": "item:40001112",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Magic Downpour",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 629,
   "key": "item:10035FAC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Page Garb (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

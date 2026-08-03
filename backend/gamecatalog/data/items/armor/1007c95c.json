@@ -2,14 +2,6 @@
   "id": 740,
   "key": "item:1007C95C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Queen's Leggings",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

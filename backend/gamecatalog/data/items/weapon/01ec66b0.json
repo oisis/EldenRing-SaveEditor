@@ -2,14 +2,6 @@
   "id": 391,
   "key": "item:01EC66B0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gilded Greatshield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

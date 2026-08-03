@@ -2,14 +2,6 @@
   "id": 614,
   "key": "item:1002E75C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Exile Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

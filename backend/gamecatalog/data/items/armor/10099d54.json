@@ -2,14 +2,6 @@
   "id": 791,
   "key": "item:10099D54",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Astrologer Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

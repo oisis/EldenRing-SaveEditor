@@ -98,16 +98,11 @@ func (context *generationContext) buildResource(
 		}
 	}
 	document.SourceRecords = enrichParameterRecordFields(document.SourceRecords, document)
-	label := document.Presentation.DisplayName
-	if !label.Known {
-		label = document.Presentation.CanonicalName
-	}
 	return schema.Resource{
-		ID:    resourceID,
-		Key:   fmt.Sprintf("item:%08X", item.ID),
-		Kind:  schema.ResourceKindItem,
-		Label: label,
-		Item:  &document,
+		ID:   resourceID,
+		Key:  fmt.Sprintf("item:%08X", item.ID),
+		Kind: schema.ResourceKindItem,
+		Item: &document,
 	}, nil
 }
 

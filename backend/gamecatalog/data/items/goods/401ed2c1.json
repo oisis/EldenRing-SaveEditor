@@ -2,14 +2,6 @@
   "id": 2672,
   "key": "item:401ED2C1",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nailstone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

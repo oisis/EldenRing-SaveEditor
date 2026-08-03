@@ -2,14 +2,6 @@
   "id": 1194,
   "key": "item:104E6E20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

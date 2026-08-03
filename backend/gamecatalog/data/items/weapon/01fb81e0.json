@@ -2,14 +2,6 @@
   "id": 412,
   "key": "item:01FB81E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Staff of the Guilty",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

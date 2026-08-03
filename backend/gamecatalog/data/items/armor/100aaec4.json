@@ -2,14 +2,6 @@
   "id": 825,
   "key": "item:100AAEC4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Brave's Battlewear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

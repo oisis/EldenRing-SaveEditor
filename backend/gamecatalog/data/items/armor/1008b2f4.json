@@ -2,14 +2,6 @@
   "id": 755,
   "key": "item:1008B2F4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crucible Axe Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

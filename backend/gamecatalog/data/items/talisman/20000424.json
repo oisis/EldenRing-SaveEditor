@@ -2,14 +2,6 @@
   "id": 1289,
   "key": "item:20000424",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Starscourge Heirloom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2037,
   "key": "item:4000233E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "By My Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

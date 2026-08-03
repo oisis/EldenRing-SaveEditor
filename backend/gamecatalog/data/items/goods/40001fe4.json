@@ -2,14 +2,6 @@
   "id": 1857,
   "key": "item:40001FE4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Seluvis's Potion",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

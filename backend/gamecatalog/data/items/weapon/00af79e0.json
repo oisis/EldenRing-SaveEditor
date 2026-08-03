@@ -2,14 +2,6 @@
   "id": 161,
   "key": "item:00AF79E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flowerstone Gavel",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

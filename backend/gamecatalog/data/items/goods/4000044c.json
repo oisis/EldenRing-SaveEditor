@@ -2,14 +2,6 @@
   "id": 1518,
   "key": "item:4000044C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pickled Turtle Neck",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

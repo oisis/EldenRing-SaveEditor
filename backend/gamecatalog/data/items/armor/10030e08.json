@@ -2,14 +2,6 @@
   "id": 617,
   "key": "item:10030E08",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

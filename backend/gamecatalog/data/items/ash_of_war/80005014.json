@@ -2,14 +2,6 @@
   "id": 2722,
   "key": "item:80005014",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lifesteal Fist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

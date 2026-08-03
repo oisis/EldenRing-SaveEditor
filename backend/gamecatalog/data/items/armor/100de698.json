@@ -2,14 +2,6 @@
   "id": 926,
   "key": "item:100DE698",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mask of Confidence",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

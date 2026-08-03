@@ -2,14 +2,6 @@
   "id": 661,
   "key": "item:10046D98",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nox Monk Bracelets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

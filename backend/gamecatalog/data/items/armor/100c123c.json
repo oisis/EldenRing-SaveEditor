@@ -2,14 +2,6 @@
   "id": 863,
   "key": "item:100C123C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

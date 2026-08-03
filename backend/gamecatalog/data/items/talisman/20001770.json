@@ -2,14 +2,6 @@
   "id": 1377,
   "key": "item:20001770",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crepus's Vial",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

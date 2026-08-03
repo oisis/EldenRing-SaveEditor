@@ -2,14 +2,6 @@
   "id": 794,
   "key": "item:1009A13C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Astrologer Robe (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

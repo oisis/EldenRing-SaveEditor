@@ -2,14 +2,6 @@
   "id": 1692,
   "key": "item:4000119E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crystal Release",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

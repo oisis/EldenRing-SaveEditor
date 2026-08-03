@@ -2,14 +2,6 @@
   "id": 2286,
   "key": "item:400050C8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Erdleaf Flower",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

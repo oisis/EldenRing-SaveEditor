@@ -2,14 +2,6 @@
   "id": 2010,
   "key": "item:40002310",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Unalloyed Gold Needle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

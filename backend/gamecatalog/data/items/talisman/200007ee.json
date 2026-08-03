@@ -2,14 +2,6 @@
   "id": 1316,
   "key": "item:200007EE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sacred Scorpion Charm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 831,
   "key": "item:100AFCE4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Champion Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1775,
   "key": "item:40001A90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bestial Sling",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

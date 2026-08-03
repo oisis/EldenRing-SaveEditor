@@ -2,14 +2,6 @@
   "id": 1797,
   "key": "item:40001B6D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Borealis's Mist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

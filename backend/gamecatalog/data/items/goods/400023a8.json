@@ -2,14 +2,6 @@
   "id": 2093,
   "key": "item:400023A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Requesting Help from Hunters",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

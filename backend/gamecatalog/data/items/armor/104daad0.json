@@ -2,14 +2,6 @@
   "id": 1169,
   "key": "item:104DAAD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Helm of Night",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

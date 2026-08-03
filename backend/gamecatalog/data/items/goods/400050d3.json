@@ -2,14 +2,6 @@
   "id": 2292,
   "key": "item:400050D3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Arteria Leaf",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

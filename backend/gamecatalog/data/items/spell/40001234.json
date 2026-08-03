@@ -2,14 +2,6 @@
   "id": 1700,
   "key": "item:40001234",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Unseen Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

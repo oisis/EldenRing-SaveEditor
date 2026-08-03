@@ -2,14 +2,6 @@
   "id": 1021,
   "key": "item:1016E3C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

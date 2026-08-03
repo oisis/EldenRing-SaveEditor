@@ -2,14 +2,6 @@
   "id": 999,
   "key": "item:1010A1D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Silver Tear Mask",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

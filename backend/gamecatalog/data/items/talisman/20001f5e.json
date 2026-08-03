@@ -2,14 +2,6 @@
   "id": 1406,
   "key": "item:20001F5E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shattered Stone Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

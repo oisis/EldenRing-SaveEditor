@@ -2,14 +2,6 @@
   "id": 1475,
   "key": "item:40000280",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sleep Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1298,
   "key": "item:20000489",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Stalwart Horn Charm +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

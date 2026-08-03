@@ -2,14 +2,6 @@
   "id": 1566,
   "key": "item:40000726",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Explosive Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

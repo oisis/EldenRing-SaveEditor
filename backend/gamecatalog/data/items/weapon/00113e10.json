@@ -2,14 +2,6 @@
   "id": 14,
   "key": "item:00113E10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ivory Sickle",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

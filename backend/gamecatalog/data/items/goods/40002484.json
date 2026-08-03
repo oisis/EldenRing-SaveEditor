@@ -2,14 +2,6 @@
   "id": 2145,
   "key": "item:40002484",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Glintstone Craftsman's Cookbook [3]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

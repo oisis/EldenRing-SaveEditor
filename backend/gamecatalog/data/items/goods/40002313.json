@@ -2,14 +2,6 @@
   "id": 2013,
   "key": "item:40002313",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Eye",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1551,
   "key": "item:400005F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Magic Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

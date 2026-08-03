@@ -2,14 +2,6 @@
   "id": 2427,
   "key": "item:401E8A02",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragonbolt Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

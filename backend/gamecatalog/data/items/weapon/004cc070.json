@@ -2,14 +2,6 @@
   "id": 90,
   "key": "item:004CC070",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rogier's Rapier",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

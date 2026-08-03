@@ -2,14 +2,6 @@
   "id": 2750,
   "key": "item:80007918",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Thops's Barrier",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

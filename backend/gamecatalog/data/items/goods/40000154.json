@@ -2,14 +2,6 @@
   "id": 1454,
   "key": "item:40000154",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Swarm Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

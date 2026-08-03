@@ -2,14 +2,6 @@
   "id": 1859,
   "key": "item:40001FE7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Letter to Patches",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

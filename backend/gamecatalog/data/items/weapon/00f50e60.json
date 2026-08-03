@@ -2,14 +2,6 @@
   "id": 222,
   "key": "item:00F50E60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Celebrant's Rib-Rake",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

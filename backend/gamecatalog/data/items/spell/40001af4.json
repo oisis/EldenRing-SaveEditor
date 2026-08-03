@@ -2,14 +2,6 @@
   "id": 1781,
   "key": "item:40001AF4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

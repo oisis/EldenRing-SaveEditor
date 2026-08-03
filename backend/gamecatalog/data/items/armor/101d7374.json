@@ -2,14 +2,6 @@
   "id": 1104,
   "key": "item:101D7374",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Deathbed Dress",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

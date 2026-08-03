@@ -2,14 +2,6 @@
   "id": 2687,
   "key": "item:4021C0A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Taylew the Golem Smith",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

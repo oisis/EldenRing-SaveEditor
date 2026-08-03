@@ -2,14 +2,6 @@
   "id": 234,
   "key": "item:00FC6160",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodfiend's Fork",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

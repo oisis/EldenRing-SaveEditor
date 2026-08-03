@@ -2,14 +2,6 @@
   "id": 978,
   "key": "item:100F9128",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Traveler's Manchettes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2076,
   "key": "item:40002396",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Death",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

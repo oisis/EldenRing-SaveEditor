@@ -2,14 +2,6 @@
   "id": 1799,
   "key": "item:40001B77",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ekzykes's Decay",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

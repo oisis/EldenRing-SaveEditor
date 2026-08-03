@@ -2,14 +2,6 @@
   "id": 1655,
   "key": "item:40000FB5",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Comet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

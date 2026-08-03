@@ -2,14 +2,6 @@
   "id": 2557,
   "key": "item:401EA619",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Scadu Altus",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

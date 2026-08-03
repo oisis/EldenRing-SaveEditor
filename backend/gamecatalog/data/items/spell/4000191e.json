@@ -2,14 +2,6 @@
   "id": 1751,
   "key": "item:4000191E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blessing's Boon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

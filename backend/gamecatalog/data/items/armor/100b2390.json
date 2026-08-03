@@ -2,14 +2,6 @@
   "id": 835,
   "key": "item:100B2390",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Champion Headband",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

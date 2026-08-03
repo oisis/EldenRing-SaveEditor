@@ -2,14 +2,6 @@
   "id": 1959,
   "key": "item:400022D6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gostoc's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

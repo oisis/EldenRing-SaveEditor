@@ -2,14 +2,6 @@
   "id": 364,
   "key": "item:01DE0ED0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Heater Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 870,
   "key": "item:100C5C10",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Commoner's Headband",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 963,
   "key": "item:100EF86C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Knight Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

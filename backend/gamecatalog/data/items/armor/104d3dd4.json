@@ -2,14 +2,6 @@
   "id": 1159,
   "key": "item:104D3DD4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Finger Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

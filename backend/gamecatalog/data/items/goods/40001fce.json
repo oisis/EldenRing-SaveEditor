@@ -2,14 +2,6 @@
   "id": 1840,
   "key": "item:40001FCE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Amber Starlight",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

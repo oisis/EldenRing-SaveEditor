@@ -2,14 +2,6 @@
   "id": 1874,
   "key": "item:40001FFB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Miniature Ranni",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

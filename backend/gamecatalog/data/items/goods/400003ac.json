@@ -2,14 +2,6 @@
   "id": 1489,
   "key": "item:400003AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Preserving Boluses",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

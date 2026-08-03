@@ -2,14 +2,6 @@
   "id": 1198,
   "key": "item:104E726C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Messmer Soldier Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

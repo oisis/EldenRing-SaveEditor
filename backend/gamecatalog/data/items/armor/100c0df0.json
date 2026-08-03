@@ -2,14 +2,6 @@
   "id": 859,
   "key": "item:100C0DF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound Knight Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

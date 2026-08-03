@@ -2,14 +2,6 @@
   "id": 824,
   "key": "item:100AAE60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Brave's Cord Circlet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2559,
   "key": "item:401EA61B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Rauh Ruins",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

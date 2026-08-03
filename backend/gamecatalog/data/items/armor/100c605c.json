@@ -2,14 +2,6 @@
   "id": 874,
   "key": "item:100C605C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Commoner's Garb (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

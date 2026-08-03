@@ -2,14 +2,6 @@
   "id": 2528,
   "key": "item:401EA3C6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gaol Lower Level Key",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2448,
   "key": "item:401E8CE6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prattling Pate \"Lamentation\"",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

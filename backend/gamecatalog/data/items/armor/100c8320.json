@@ -2,14 +2,6 @@
   "id": 877,
   "key": "item:100C8320",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Envoy Crown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

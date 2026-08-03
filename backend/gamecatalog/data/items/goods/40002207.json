@@ -2,14 +2,6 @@
   "id": 1931,
   "key": "item:40002207",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Note: Revenants",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

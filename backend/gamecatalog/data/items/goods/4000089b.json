@@ -2,14 +2,6 @@
   "id": 1587,
   "key": "item:4000089B",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prattling Pate \"Wonderful\"",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

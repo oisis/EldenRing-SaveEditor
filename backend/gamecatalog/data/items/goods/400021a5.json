@@ -2,14 +2,6 @@
   "id": 1913,
   "key": "item:400021A5",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Ainsel River",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

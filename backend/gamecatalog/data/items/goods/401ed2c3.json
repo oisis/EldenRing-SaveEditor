@@ -2,14 +2,6 @@
   "id": 2674,
   "key": "item:401ED2C3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Furnace Visage",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

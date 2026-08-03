@@ -2,14 +2,6 @@
   "id": 2723,
   "key": "item:800050DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Eruption",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

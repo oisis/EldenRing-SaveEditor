@@ -2,14 +2,6 @@
   "id": 1006,
   "key": "item:1010D114",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree Surcoat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

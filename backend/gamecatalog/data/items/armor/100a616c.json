@@ -2,14 +2,6 @@
   "id": 818,
   "key": "item:100A616C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "War Surgeon Trousers",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

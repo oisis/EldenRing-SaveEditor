@@ -2,14 +2,6 @@
   "id": 699,
   "key": "item:10055B18",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blackflame Monk Hood",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

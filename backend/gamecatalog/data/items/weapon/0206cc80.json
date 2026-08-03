@@ -2,14 +2,6 @@
   "id": 417,
   "key": "item:0206CC80",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Finger Seal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

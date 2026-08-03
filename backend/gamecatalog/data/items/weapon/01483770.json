@@ -2,14 +2,6 @@
   "id": 285,
   "key": "item:01483770",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pata",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

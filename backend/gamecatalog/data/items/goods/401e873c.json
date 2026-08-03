@@ -2,14 +2,6 @@
   "id": 2405,
   "key": "item:401E873C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Red Lightning Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

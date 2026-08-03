@@ -2,14 +2,6 @@
   "id": 662,
   "key": "item:10046DFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nox Monk Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

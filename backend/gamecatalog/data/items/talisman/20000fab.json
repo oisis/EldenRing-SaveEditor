@@ -2,14 +2,6 @@
   "id": 1350,
   "key": "item:20000FAB",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spelldrake Talisman +1",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

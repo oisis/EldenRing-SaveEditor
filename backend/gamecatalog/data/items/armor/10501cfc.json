@@ -2,14 +2,6 @@
   "id": 1246,
   "key": "item:10501CFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Horned Warrior Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

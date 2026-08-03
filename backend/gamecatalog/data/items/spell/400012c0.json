@@ -2,14 +2,6 @@
   "id": 1707,
   "key": "item:400012C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Magma Shot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

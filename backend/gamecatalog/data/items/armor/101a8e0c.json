@@ -2,14 +2,6 @@
   "id": 1043,
   "key": "item:101A8E0C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mausoleum Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

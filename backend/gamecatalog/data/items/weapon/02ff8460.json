@@ -2,14 +2,6 @@
   "id": 486,
   "key": "item:02FF8460",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodbone Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 267,
   "key": "item:01298BE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Obsidian Lamina",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

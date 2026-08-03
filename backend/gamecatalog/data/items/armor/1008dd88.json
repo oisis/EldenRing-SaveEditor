@@ -2,14 +2,6 @@
   "id": 766,
   "key": "item:1008DD88",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Azur's Glintstone Crown",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

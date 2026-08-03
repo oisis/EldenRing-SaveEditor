@@ -2,14 +2,6 @@
   "id": 610,
   "key": "item:1002C36C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knife Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

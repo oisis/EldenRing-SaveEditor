@@ -2,14 +2,6 @@
   "id": 656,
   "key": "item:10044688",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Royal Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

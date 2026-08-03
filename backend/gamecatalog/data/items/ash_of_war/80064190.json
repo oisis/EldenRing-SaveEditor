@@ -2,14 +2,6 @@
   "id": 2797,
   "key": "item:80064190",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Swift Slash",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

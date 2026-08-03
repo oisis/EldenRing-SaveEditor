@@ -2,14 +2,6 @@
   "id": 292,
   "key": "item:014FFFA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound Claws",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

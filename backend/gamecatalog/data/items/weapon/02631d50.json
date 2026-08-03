@@ -2,14 +2,6 @@
   "id": 433,
   "key": "item:02631D50",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Composite Bow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

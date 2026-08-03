@@ -2,14 +2,6 @@
   "id": 2762,
   "key": "item:8000C5A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ground Slam",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

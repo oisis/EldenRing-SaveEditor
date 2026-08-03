@@ -2,14 +2,6 @@
   "id": 2554,
   "key": "item:401EA489",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "The Sacred Tower Painting",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

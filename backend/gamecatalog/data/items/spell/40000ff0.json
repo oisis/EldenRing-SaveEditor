@@ -2,14 +2,6 @@
   "id": 1661,
   "key": "item:40000FF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cannon of Haima",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

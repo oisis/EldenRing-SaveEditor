@@ -2,14 +2,6 @@
   "id": 474,
   "key": "item:02FD8890",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Sleepbone Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

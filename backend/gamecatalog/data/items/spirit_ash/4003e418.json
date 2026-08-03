@@ -2,14 +2,6 @@
   "id": 2381,
   "key": "item:4003E418",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligtree Soldier Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

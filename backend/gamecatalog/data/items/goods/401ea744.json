@@ -2,14 +2,6 @@
   "id": 2561,
   "key": "item:401EA744",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Moore's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

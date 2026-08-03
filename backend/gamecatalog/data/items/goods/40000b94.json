@@ -2,14 +2,6 @@
   "id": 1626,
   "key": "item:40000B94",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Naturalborn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

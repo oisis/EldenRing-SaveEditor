@@ -2,14 +2,6 @@
   "id": 2551,
   "key": "item:401EA3E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Prayer Room Key",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

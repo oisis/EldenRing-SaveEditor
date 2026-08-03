@@ -2,14 +2,6 @@
   "id": 1649,
   "key": "item:40000DFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Poison Spraymist",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1816,
   "key": "item:40001D4C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Aspects of the Crucible: Tail",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

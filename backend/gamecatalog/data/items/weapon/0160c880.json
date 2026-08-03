@@ -2,14 +2,6 @@
   "id": 306,
   "key": "item:0160C880",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golem's Halberd",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

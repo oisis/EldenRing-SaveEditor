@@ -2,14 +2,6 @@
   "id": 201,
   "key": "item:00DDDCE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Forked-Tongue Hatchet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 819,
   "key": "item:100A648C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "War Surgeon Gown (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

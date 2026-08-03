@@ -2,14 +2,6 @@
   "id": 1757,
   "key": "item:40001946",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lightning Fortification",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

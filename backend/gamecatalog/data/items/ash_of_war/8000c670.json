@@ -2,14 +2,6 @@
   "id": 2764,
   "key": "item:8000C670",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Waves of Darkness",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 393,
   "key": "item:01ECB4D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wooden Greatshield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

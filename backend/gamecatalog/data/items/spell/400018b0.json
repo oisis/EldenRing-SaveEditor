@@ -2,14 +2,6 @@
   "id": 1741,
   "key": "item:400018B0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodflame Blade",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

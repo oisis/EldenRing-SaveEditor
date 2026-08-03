@@ -2,14 +2,6 @@
   "id": 1125,
   "key": "item:101ED2A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Dumpling",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

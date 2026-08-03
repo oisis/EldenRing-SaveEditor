@@ -2,14 +2,6 @@
   "id": 2777,
   "key": "item:8000FF14",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Troll's Roar",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

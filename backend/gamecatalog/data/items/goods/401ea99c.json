@@ -2,14 +2,6 @@
   "id": 2624,
   "key": "item:401EA99C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Cracked Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

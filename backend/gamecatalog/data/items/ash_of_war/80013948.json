@@ -2,14 +2,6 @@
   "id": 2784,
   "key": "item:80013948",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Raptor of the Mists",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

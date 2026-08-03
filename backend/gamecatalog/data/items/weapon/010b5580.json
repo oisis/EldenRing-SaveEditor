@@ -2,14 +2,6 @@
   "id": 244,
   "key": "item:010B5580",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Barbed Staff-Spear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 892,
   "key": "item:100D208C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Raging Wolf Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

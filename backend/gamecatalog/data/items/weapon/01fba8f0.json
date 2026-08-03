@@ -2,14 +2,6 @@
   "id": 413,
   "key": "item:01FBA8F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rotten Crystal Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

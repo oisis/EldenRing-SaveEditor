@@ -2,14 +2,6 @@
   "id": 1548,
   "key": "item:400005D2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rot Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

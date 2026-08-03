@@ -2,14 +2,6 @@
   "id": 361,
   "key": "item:01DD99A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blue Crest Heater Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

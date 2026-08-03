@@ -2,14 +2,6 @@
   "id": 2606,
   "key": "item:401EA8F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ancient Dragon Knight's Cookbook [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

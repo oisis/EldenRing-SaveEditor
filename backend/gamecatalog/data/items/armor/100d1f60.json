@@ -2,14 +2,6 @@
   "id": 889,
   "key": "item:100D1F60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Raging Wolf Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

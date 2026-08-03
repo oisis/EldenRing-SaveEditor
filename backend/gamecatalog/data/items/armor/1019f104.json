@@ -2,14 +2,6 @@
   "id": 1026,
   "key": "item:1019F104",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tree-and-Beast Surcoat",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

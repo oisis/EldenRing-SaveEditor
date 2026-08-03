@@ -2,14 +2,6 @@
   "id": 1856,
   "key": "item:40001FE3",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Tailoring Tools",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

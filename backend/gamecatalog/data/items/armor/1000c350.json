@@ -2,14 +2,6 @@
   "id": 553,
   "key": "item:1000C350",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Kaiden Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

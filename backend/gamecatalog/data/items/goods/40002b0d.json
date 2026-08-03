@@ -2,14 +2,6 @@
   "id": 2247,
   "key": "item:40002B0D",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Strength-knot Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

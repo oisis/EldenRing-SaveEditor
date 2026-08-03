@@ -2,14 +2,6 @@
   "id": 1892,
   "key": "item:4000200E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Redmane Painting",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

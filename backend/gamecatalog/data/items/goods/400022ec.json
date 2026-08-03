@@ -2,14 +2,6 @@
   "id": 1981,
   "key": "item:400022EC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Iji's Bell Bearing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

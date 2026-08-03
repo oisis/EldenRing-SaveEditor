@@ -2,14 +2,6 @@
   "id": 948,
   "key": "item:100EAA4C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ruler's Robe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

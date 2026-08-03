@@ -2,14 +2,6 @@
   "id": 1339,
   "key": "item:20000BE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Faithful's Canvas Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

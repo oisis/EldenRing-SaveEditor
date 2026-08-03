@@ -2,14 +2,6 @@
   "id": 72,
   "key": "item:003D3010",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Watchdog's Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 985,
   "key": "item:100FDFAC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gold Waistwrap",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

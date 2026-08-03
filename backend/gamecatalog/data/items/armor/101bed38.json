@@ -2,14 +2,6 @@
   "id": 1084,
   "key": "item:101BED38",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Foot Soldier Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

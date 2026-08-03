@@ -2,14 +2,6 @@
   "id": 2241,
   "key": "item:40002B07",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Windy Crystal Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

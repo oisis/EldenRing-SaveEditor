@@ -2,14 +2,6 @@
   "id": 2629,
   "key": "item:401EAF8C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crimson-Sapping Cracked Tear",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2449,
   "key": "item:401E8FD4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Wild Boar Rider",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

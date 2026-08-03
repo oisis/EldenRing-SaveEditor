@@ -2,14 +2,6 @@
   "id": 1425,
   "key": "item:20002026",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blade of Mercy",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

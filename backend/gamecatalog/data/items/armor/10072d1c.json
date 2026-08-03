@@ -2,14 +2,6 @@
   "id": 733,
   "key": "item:10072D1C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radahn's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

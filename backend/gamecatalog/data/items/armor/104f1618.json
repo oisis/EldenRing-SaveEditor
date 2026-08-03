@@ -2,14 +2,6 @@
   "id": 1213,
   "key": "item:104F1618",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Winged Serpent Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

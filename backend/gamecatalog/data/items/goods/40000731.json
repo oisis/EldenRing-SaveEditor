@@ -2,14 +2,6 @@
   "id": 1569,
   "key": "item:40000731",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Poisoned Stone Clump",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1794,
   "key": "item:40001B62",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Magma Breath",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2365,
   "key": "item:4003A598",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodhound Knight Floh",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

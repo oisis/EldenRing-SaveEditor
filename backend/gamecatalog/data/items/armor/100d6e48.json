@@ -2,14 +2,6 @@
   "id": 905,
   "key": "item:100D6E48",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Confessor Gloves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 187,
   "key": "item:00D5C690",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Forked Hatchet",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

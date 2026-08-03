@@ -2,14 +2,6 @@
   "id": 296,
   "key": "item:015F1AD0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Watchdog's Staff",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

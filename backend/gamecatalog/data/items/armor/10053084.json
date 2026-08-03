@@ -2,14 +2,6 @@
   "id": 690,
   "key": "item:10053084",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cleanrot Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

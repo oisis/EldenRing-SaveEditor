@@ -2,14 +2,6 @@
   "id": 1268,
   "key": "item:1050DF20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "St. Trina's Blossom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

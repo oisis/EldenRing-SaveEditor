@@ -2,14 +2,6 @@
   "id": 633,
   "key": "item:1003839C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Night's Cavalry Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

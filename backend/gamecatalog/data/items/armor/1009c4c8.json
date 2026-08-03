@@ -2,14 +2,6 @@
   "id": 797,
   "key": "item:1009C4C8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Lionel's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 210,
   "key": "item:00E68F70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Winged Greathorn",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

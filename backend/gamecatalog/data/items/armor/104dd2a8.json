@@ -2,14 +2,6 @@
   "id": 1175,
   "key": "item:104DD2A8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Igon's Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

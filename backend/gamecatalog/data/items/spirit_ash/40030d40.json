@@ -2,14 +2,6 @@
   "id": 2326,
   "key": "item:40030D40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knife Tiche",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

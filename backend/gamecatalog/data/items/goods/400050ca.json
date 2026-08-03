@@ -2,14 +2,6 @@
   "id": 2288,
   "key": "item:400050CA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fire Blossom",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

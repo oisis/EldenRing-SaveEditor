@@ -2,14 +2,6 @@
   "id": 448,
   "key": "item:029020C0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Soldier's Crossbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

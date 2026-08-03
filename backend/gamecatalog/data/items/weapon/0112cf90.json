@@ -2,14 +2,6 @@
   "id": 246,
   "key": "item:0112CF90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pest's Glaive",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

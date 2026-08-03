@@ -2,14 +2,6 @@
   "id": 1752,
   "key": "item:4000191F",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blessing of the Erdtree",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2398,
   "key": "item:401E86D8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Hefty Volcano Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

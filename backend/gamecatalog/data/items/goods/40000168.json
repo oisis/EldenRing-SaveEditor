@@ -2,14 +2,6 @@
   "id": 1457,
   "key": "item:40000168",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Freezing Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

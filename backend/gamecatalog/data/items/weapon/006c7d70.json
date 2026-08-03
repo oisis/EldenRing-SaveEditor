@@ -2,14 +2,6 @@
   "id": 109,
   "key": "item:006C7D70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Serpent-God's Curved Sword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

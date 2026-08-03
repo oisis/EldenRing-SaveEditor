@@ -2,14 +2,6 @@
   "id": 967,
   "key": "item:100F1C5C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Errant Sorcerer Boots",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

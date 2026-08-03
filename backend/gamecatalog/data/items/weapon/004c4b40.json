@@ -2,14 +2,6 @@
   "id": 87,
   "key": "item:004C4B40",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Estoc",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

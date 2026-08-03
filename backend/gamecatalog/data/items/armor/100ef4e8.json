@@ -2,14 +2,6 @@
   "id": 961,
   "key": "item:100EF4E8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Carian Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

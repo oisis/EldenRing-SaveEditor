@@ -2,14 +2,6 @@
   "id": 2065,
   "key": "item:4000235A",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "The Ring",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

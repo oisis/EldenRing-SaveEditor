@@ -2,14 +2,6 @@
   "id": 939,
   "key": "item:100E7EF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Fingerprint Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

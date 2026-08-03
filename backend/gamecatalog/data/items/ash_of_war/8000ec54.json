@@ -2,14 +2,6 @@
   "id": 2771,
   "key": "item:8000EC54",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Shared Order",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

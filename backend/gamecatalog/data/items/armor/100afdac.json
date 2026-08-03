@@ -2,14 +2,6 @@
   "id": 833,
   "key": "item:100AFDAC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beast Champion Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

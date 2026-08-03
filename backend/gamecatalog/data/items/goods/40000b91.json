@@ -2,14 +2,6 @@
   "id": 1623,
   "key": "item:40000B91",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Remembrance of the Fire Giant",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

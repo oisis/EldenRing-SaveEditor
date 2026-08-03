@@ -2,14 +2,6 @@
   "id": 2023,
   "key": "item:40002330",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Casual Greeting",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1875,
   "key": "item:40001FFC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Tailoring Tools",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

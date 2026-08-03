@@ -2,14 +2,6 @@
   "id": 490,
   "key": "item:030020A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Rotbone Arrow (Fletched)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

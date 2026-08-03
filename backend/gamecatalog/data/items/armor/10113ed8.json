@@ -2,14 +2,6 @@
   "id": 1011,
   "key": "item:10113ED8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Mushroom Arms",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

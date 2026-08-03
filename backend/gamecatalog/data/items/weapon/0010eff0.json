@@ -2,14 +2,6 @@
   "id": 13,
   "key": "item:0010EFF0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cinquedea",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

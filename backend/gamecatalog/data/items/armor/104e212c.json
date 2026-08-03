@@ -2,14 +2,6 @@
   "id": 1187,
   "key": "item:104E212C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Freyja's Greaves",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

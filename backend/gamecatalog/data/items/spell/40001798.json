@@ -2,14 +2,6 @@
   "id": 1726,
   "key": "item:40001798",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flame, Cleanse Me",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

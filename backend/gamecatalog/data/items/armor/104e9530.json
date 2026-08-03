@@ -2,14 +2,6 @@
   "id": 1199,
   "key": "item:104E9530",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Black Knight Helm",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 454,
   "key": "item:0291CE70",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Crepus's Black-Key Crossbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

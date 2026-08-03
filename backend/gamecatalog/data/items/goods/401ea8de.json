@@ -2,14 +2,6 @@
   "id": 2588,
   "key": "item:401EA8DE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Greater Potentate's Cookbook [4]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

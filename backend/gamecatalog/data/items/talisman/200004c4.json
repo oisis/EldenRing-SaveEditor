@@ -2,14 +2,6 @@
   "id": 1308,
   "key": "item:200004C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Marika's Scarseal",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

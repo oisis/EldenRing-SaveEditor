@@ -2,14 +2,6 @@
   "id": 2027,
   "key": "item:40002334",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Point Upwards",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

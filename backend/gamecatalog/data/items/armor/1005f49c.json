@@ -2,14 +2,6 @@
   "id": 716,
   "key": "item:1005F49C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Old Aristocrat Shoes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

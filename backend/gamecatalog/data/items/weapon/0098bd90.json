@@ -2,14 +2,6 @@
   "id": 139,
   "key": "item:0098BD90",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godskin Peeler",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

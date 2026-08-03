@@ -2,14 +2,6 @@
   "id": 2738,
   "key": "item:800057E4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Phantom Slash",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 258,
   "key": "item:0114CB60",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Dragon Halberd",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

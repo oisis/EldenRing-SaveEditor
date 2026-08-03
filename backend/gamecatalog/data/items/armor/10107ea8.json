@@ -2,14 +2,6 @@
   "id": 994,
   "key": "item:10107EA8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Imp Head (Fanged)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

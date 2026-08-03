@@ -2,14 +2,6 @@
   "id": 1575,
   "key": "item:40000820",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blasphemous Claw",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

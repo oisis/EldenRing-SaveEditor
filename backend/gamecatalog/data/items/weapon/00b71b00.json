@@ -2,14 +2,6 @@
   "id": 162,
   "key": "item:00B71B00",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Large Club",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

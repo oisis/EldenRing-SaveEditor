@@ -2,14 +2,6 @@
   "id": 2366,
   "key": "item:4003A980",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Wandering Noble Ashes",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

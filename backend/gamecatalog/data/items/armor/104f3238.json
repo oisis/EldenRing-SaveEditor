@@ -2,14 +2,6 @@
   "id": 1217,
   "key": "item:104F3238",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leather Arm Wraps",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

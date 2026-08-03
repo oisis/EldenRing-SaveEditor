@@ -2,14 +2,6 @@
   "id": 2763,
   "key": "item:8000C60C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Golden Slam",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

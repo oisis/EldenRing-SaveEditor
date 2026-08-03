@@ -2,14 +2,6 @@
   "id": 98,
   "key": "item:00632EA0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Queelign's Greatsword",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

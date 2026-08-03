@@ -2,14 +2,6 @@
   "id": 2772,
   "key": "item:8000ECB8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Seppuku",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

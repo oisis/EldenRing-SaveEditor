@@ -2,14 +2,6 @@
   "id": 2207,
   "key": "item:40002A95",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Grave Glovewort [2]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

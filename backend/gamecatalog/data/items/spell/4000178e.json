@@ -2,14 +2,6 @@
   "id": 1725,
   "key": "item:4000178E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Whirl, O Flame!",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

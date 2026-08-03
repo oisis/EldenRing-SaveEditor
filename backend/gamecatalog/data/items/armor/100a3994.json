@@ -2,14 +2,6 @@
   "id": 812,
   "key": "item:100A3994",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blue Cloth Vest",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

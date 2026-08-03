@@ -2,14 +2,6 @@
   "id": 2538,
   "key": "item:401EA3D2",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Ruins Map (3rd)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

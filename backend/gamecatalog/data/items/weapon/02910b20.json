@@ -2,14 +2,6 @@
   "id": 452,
   "key": "item:02910B20",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Full Moon Crossbow",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

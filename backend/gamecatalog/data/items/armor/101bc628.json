@@ -2,14 +2,6 @@
   "id": 1079,
   "key": "item:101BC628",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligtree Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

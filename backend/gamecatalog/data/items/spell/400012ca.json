@@ -2,14 +2,6 @@
   "id": 1708,
   "key": "item:400012CA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gelmir's Fury",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

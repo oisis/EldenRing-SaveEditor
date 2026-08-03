@@ -2,14 +2,6 @@
   "id": 1550,
   "key": "item:400005E6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Drawstring Lightning Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

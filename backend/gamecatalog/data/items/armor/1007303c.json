@@ -2,14 +2,6 @@
   "id": 734,
   "key": "item:1007303C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Radahn's Lion Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

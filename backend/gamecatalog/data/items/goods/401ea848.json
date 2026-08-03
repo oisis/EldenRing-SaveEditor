@@ -2,14 +2,6 @@
   "id": 2576,
   "key": "item:401EA848",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About the Scadutree Blessing",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2106,
   "key": "item:400023BE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Duels",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

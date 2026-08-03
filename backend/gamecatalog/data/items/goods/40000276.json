@@ -2,14 +2,6 @@
   "id": 1474,
   "key": "item:40000276",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cursed-Blood Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

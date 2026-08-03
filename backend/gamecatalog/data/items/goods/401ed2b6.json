@@ -2,14 +2,6 @@
   "id": 2661,
   "key": "item:401ED2B6",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Grave Cricket",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

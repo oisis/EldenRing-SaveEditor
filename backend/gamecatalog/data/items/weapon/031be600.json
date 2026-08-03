@@ -2,14 +2,6 @@
   "id": 518,
   "key": "item:031BE600",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Coldbone Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

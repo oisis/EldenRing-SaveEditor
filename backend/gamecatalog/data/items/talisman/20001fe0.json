@@ -2,14 +2,6 @@
   "id": 1418,
   "key": "item:20001FE0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "St. Trina's Smile",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

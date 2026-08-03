@@ -2,14 +2,6 @@
   "id": 1852,
   "key": "item:40001FDE",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spirit Calling Bell",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

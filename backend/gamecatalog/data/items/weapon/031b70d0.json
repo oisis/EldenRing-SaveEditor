@@ -2,14 +2,6 @@
   "id": 515,
   "key": "item:031B70D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Haligbone Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

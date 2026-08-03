@@ -2,14 +2,6 @@
   "id": 169,
   "key": "item:00B964F0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Beastclaw Greathammer",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

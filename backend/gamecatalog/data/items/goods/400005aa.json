@@ -2,14 +2,6 @@
   "id": 1544,
   "key": "item:400005AA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Soporific Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

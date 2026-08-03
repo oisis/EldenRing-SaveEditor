@@ -2,14 +2,6 @@
   "id": 1545,
   "key": "item:400005B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Poison Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

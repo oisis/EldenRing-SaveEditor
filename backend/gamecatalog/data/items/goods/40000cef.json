@@ -2,14 +2,6 @@
   "id": 1640,
   "key": "item:40000CEF",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Frenzyflame Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2659,
   "key": "item:401ED2B4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Gas Stone",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

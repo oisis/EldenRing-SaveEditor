@@ -2,14 +2,6 @@
   "id": 2174,
   "key": "item:400024E0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Frenzied's Cookbook [1]",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

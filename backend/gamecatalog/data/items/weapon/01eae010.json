@@ -2,14 +2,6 @@
   "id": 382,
   "key": "item:01EAE010",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Spiked Palisade Shield",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

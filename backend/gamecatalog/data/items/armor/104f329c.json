@@ -2,14 +2,6 @@
   "id": 1218,
   "key": "item:104F329C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Leather Leg Wraps",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

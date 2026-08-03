@@ -2,14 +2,6 @@
   "id": 1060,
   "key": "item:101B29E8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Cuckoo Knight Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

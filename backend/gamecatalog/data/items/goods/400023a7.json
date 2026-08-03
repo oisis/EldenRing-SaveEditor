@@ -2,14 +2,6 @@
   "id": 2092,
   "key": "item:400023A7",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "About Monument Icon",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

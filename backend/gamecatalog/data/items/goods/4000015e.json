@@ -2,14 +2,6 @@
   "id": 1455,
   "key": "item:4000015E",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Holy Water Pot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

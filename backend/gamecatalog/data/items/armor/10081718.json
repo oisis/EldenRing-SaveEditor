@@ -2,14 +2,6 @@
   "id": 747,
   "key": "item:10081718",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Godskin Noble Bracelets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

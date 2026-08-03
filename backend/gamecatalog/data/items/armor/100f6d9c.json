@@ -2,14 +2,6 @@
   "id": 976,
   "key": "item:100F6D9C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Snow Witch Robe (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

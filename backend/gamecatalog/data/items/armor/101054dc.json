@@ -2,14 +2,6 @@
   "id": 992,
   "key": "item:101054DC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Zamor Legwraps",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 1178,
   "key": "item:104DD62C",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Igon's Armor (Altered)",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

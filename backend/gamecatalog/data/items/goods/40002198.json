@@ -2,14 +2,6 @@
   "id": 1900,
   "key": "item:40002198",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Map: Limgrave, West",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

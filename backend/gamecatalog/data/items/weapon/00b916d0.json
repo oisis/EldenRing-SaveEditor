@@ -2,14 +2,6 @@
   "id": 167,
   "key": "item:00B916D0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Celebrant's Skull",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

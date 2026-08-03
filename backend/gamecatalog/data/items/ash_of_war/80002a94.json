@@ -2,14 +2,6 @@
   "id": 2703,
   "key": "item:80002A94",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Repeating Thrust",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

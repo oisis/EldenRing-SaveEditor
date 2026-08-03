@@ -2,14 +2,6 @@
   "id": 1400,
   "key": "item:20001BDA",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Pearldrake Talisman +3",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

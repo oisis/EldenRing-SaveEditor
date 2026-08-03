@@ -2,14 +2,6 @@
   "id": 1158,
   "key": "item:104D36CC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "High Priest Undergarments",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

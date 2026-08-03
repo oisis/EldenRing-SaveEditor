@@ -2,14 +2,6 @@
   "id": 319,
   "key": "item:0175D720",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nanaya's Torch",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

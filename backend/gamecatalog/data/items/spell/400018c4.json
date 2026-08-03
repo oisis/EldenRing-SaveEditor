@@ -2,14 +2,6 @@
   "id": 1743,
   "key": "item:400018C4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Protection of the Erdtree",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

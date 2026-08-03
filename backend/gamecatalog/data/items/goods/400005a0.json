@@ -2,14 +2,6 @@
   "id": 1543,
   "key": "item:400005A0",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blood Grease",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

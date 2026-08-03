@@ -2,14 +2,6 @@
   "id": 1338,
   "key": "item:20000BB9",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Graven-Mass Talisman",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

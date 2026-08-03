@@ -2,14 +2,6 @@
   "id": 555,
   "key": "item:1000C418",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Kaiden Gauntlets",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

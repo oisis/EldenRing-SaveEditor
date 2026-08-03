@@ -2,14 +2,6 @@
   "id": 1092,
   "key": "item:101C8914",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Bloodsoaked Tabard",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

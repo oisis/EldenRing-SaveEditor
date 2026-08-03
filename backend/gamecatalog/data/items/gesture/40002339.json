@@ -2,14 +2,6 @@
   "id": 2032,
   "key": "item:40002339",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Nod In Thought",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

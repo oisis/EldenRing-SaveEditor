@@ -2,14 +2,6 @@
   "id": 521,
   "key": "item:031C5B30",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Flaming Bolt",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

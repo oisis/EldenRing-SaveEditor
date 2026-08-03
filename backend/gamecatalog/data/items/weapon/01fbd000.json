@@ -2,14 +2,6 @@
   "id": 414,
   "key": "item:01FBD000",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Staff of Loss",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

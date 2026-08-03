@@ -2,14 +2,6 @@
   "id": 1382,
   "key": "item:200017AC",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Daedicar's Woe",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

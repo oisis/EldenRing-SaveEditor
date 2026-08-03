@@ -2,14 +2,6 @@
   "id": 895,
   "key": "item:100D46D4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Land of Reeds Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

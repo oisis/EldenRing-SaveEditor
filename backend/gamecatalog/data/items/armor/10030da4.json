@@ -2,14 +2,6 @@
   "id": 616,
   "key": "item:10030DA4",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Banished Knight Armor",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,

@@ -2,14 +2,6 @@
   "id": 2796,
   "key": "item:80063DA8",
   "kind": "item",
-  "label": {
-    "known": true,
-    "value": "Blind Spot",
-    "provenance": {
-      "source": "legacy_db_data",
-      "method": "copied from legacy item text"
-    }
-  },
   "item": {
     "gameID": {
       "known": true,
