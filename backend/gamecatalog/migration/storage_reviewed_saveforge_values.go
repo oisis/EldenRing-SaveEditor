@@ -7,6 +7,8 @@ import (
 )
 
 const waitGestureItemID uint32 = 0x40002337
+const deathrootItemID uint32 = 0x4000082A
+const lostAshesOfWarItemID uint32 = 0x40002756
 
 const bolsteringMaterialsCategory = "bolstering_materials"
 const incantationsCategory = "incantations"
@@ -19,6 +21,7 @@ const cookbooksSubcategory = "Cookbooks"
 const crystalTearsSubcategory = "Crystal Tears"
 const worldMapsSubcategory = "World Maps"
 const spellbooksSubcategory = "Sorcery Scrolls + Incantation Scrolls"
+const dlcKeysSubcategory = "DLC Keys"
 
 var safeModeNG0InventoryByKeyItemID = map[uint32]uint32{
 	0x40000852: 10, // Celestial Dew
@@ -138,6 +141,10 @@ func discardReviewedStorageSaveForgeValues(
 	}
 	if item.Category == "key_items" && item.Subcategory == spellbooksSubcategory {
 		storage.MaxInventorySFV = nil
+		storage.MaxStorageSFV = nil
+	}
+	if item.Category == "key_items" &&
+		(item.Subcategory == dlcKeysSubcategory || item.ID == deathrootItemID || item.ID == lostAshesOfWarItemID) {
 		storage.MaxStorageSFV = nil
 	}
 	if family != schema.ItemFamilyGesture {

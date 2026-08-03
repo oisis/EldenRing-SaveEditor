@@ -200,14 +200,6 @@
           "field": "maxRepositoryNum"
         }
       },
-      "maxStorage-sfv": {
-        "known": true,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "preserved conflicting legacy ItemData.MaxStorage"
-        }
-      },
       "gameMaxInventory": {
         "known": true,
         "value": 1,

@@ -130,6 +130,25 @@ func TestReviewedStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("Spellbook records = %d, want 15", spellbookCount)
 	}
 
+	dlcKeyCount := 0
+	for resourceIndex := range catalog.Resources {
+		item := catalog.Resources[resourceIndex].Item
+		if item == nil || item.Category.Value != "key_items" ||
+			item.Subcategory.Value != dlcKeysSubcategory {
+			continue
+		}
+		dlcKeyCount++
+		if item.Storage.MaxStorageSFV != nil {
+			t.Fatalf("DLC Key 0x%08X retains maxStorage-sfv: %+v", item.GameID.Value, item.Storage)
+		}
+		if item.Goods == nil || item.Goods.IsDepositable.Value {
+			t.Fatalf("DLC Key 0x%08X isDepositable = %+v, want false", item.GameID.Value, item.Goods)
+		}
+	}
+	if dlcKeyCount != 7 {
+		t.Fatalf("DLC Key records = %d, want 7", dlcKeyCount)
+	}
+
 	infoCount := 0
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
@@ -493,13 +512,13 @@ func TestKeyItemNG0InventoryLimitsAreSafeModeCaps(t *testing.T) {
 		depositable   bool
 	}{
 		0x40000852: {inventory: 10, maxStorageSFV: 0, depositable: true},   // Celestial Dew
-		0x4000082A: {inventory: 9, maxStorageSFV: 0, depositable: true},    // Deathroot
+		0x4000082A: {inventory: 9, maxStorageSFV: -1, depositable: true},   // Deathroot
 		0x4000274C: {inventory: 27, maxStorageSFV: 0, depositable: true},   // Dragon Heart
 		0x401EA3CB: {inventory: 1, maxStorageSFV: -1, depositable: true},   // Heart of Bayle
 		0x40001FFA: {inventory: 4, maxStorageSFV: -1, depositable: false},  // Imbued Sword Key
 		0x40001FF9: {inventory: 18, maxStorageSFV: -1, depositable: false}, // Larval Tear
 		0x401EA3E1: {inventory: 9, maxStorageSFV: -1, depositable: false},  // Larval Tear (DLC)
-		0x40002756: {inventory: 20, maxStorageSFV: 0, depositable: true},   // Lost Ashes of War
+		0x40002756: {inventory: 20, maxStorageSFV: -1, depositable: true},  // Lost Ashes of War
 		0x40000087: {inventory: 3, maxStorageSFV: -1, depositable: false},  // Phantom Great Rune
 		0x40002001: {inventory: 6, maxStorageSFV: -1, depositable: false},  // Seedbed Curse
 		0x400004D8: {inventory: 3, maxStorageSFV: -1, depositable: false},  // Shabriri Grape
