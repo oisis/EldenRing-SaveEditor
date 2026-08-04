@@ -305,6 +305,14 @@
           "source": "legacy_db_data",
           "method": "derived from legacy ItemData flags"
         }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
       }
     },
     "acquisition": {

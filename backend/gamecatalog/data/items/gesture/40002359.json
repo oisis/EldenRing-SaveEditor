@@ -44,8 +44,7 @@
     "flags": {
       "known": true,
       "value": [
-        "ban_risk",
-        "pre_order"
+        "ban_risk"
       ],
       "provenance": {
         "source": "legacy_db_data",
@@ -291,6 +290,14 @@
       "scalesWithNG": {
         "known": true,
         "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
+      },
+      "preOrder": {
+        "known": true,
+        "value": true,
         "provenance": {
           "source": "legacy_db_data",
           "method": "derived exclusively from legacy AllGestures flags"

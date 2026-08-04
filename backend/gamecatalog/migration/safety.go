@@ -31,6 +31,7 @@ func safetyFromFlagsWithMethod(flags []string, method string) schema.ItemSafety 
 		DLC:          knownLegacyFact(hasLegacyFlag(flags, "dlc"), method),
 		NoDatabase:   knownLegacyFact(hasLegacyFlag(flags, "no_database"), method),
 		ScalesWithNG: knownLegacyFact(hasLegacyFlag(flags, "scales_with_ng"), method),
+		PreOrder:     knownLegacyFact(hasLegacyFlag(flags, "pre_order"), method),
 	}
 }
 

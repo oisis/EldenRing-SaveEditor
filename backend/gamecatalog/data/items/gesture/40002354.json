@@ -283,6 +283,14 @@
           "source": "legacy_db_data",
           "method": "derived exclusively from legacy AllGestures flags"
         }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived exclusively from legacy AllGestures flags"
+        }
       }
     },
     "acquisition": {

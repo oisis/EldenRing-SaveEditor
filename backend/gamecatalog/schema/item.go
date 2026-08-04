@@ -88,6 +88,7 @@ type ItemSafety struct {
 	DLC          Fact[bool] `json:"dlc"`
 	NoDatabase   Fact[bool] `json:"noDatabase"`
 	ScalesWithNG Fact[bool] `json:"scalesWithNG"`
+	PreOrder     Fact[bool] `json:"preOrder"`
 }
 
 type ItemAlias struct {

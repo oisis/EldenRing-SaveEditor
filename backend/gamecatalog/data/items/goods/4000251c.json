@@ -44,8 +44,7 @@
     "flags": {
       "known": true,
       "value": [
-        "stackable",
-        "no_database"
+        "stackable"
       ],
       "provenance": {
         "source": "legacy_db_data",
@@ -312,6 +311,14 @@
         }
       },
       "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "preOrder": {
         "known": true,
         "value": false,
         "provenance": {

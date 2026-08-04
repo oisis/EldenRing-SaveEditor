@@ -168,6 +168,7 @@ func validateSafety(safety ItemSafety, sources map[SourceID]struct{}) error {
 		{"item.safety.dlc", safety.DLC},
 		{"item.safety.noDatabase", safety.NoDatabase},
 		{"item.safety.scalesWithNG", safety.ScalesWithNG},
+		{"item.safety.preOrder", safety.PreOrder},
 	}
 	for _, entry := range optional {
 		if err := validateOptionalFact(entry.name, entry.fact, sources); err != nil {

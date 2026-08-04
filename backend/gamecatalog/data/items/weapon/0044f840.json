@@ -43,9 +43,7 @@
     },
     "flags": {
       "known": true,
-      "value": [
-        "dlc"
-      ],
+      "value": [],
       "provenance": {
         "source": "legacy_db_data",
         "method": "copied from legacy ItemData.Flags"
@@ -361,6 +359,14 @@
           "source": "legacy_db_data",
           "method": "derived from legacy ItemData flags"
         }
+      },
+      "preOrder": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
       }
     },
     "acquisition": {
@@ -527,9 +533,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -839,6 +843,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -1724,9 +1736,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -2036,6 +2046,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -2921,9 +2939,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -3233,6 +3249,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -4118,9 +4142,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -4430,6 +4452,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -5315,9 +5345,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -5627,6 +5655,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -6512,9 +6548,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -6824,6 +6858,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -7709,9 +7751,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -8021,6 +8061,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -8906,9 +8954,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -9218,6 +9264,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -10103,9 +10157,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -10415,6 +10467,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -11388,9 +11448,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -11700,6 +11758,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -12673,9 +12739,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -12985,6 +13049,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {
@@ -13958,9 +14030,7 @@
           },
           "flags": {
             "known": true,
-            "value": [
-              "dlc"
-            ],
+            "value": [],
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
@@ -14270,6 +14340,14 @@
               }
             },
             "scalesWithNG": {
+              "known": true,
+              "value": false,
+              "provenance": {
+                "source": "legacy_db_data",
+                "method": "derived from the canonical legacy ItemData flags for a Regulation-only variant"
+              }
+            },
+            "preOrder": {
               "known": true,
               "value": false,
               "provenance": {

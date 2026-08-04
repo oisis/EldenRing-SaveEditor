@@ -43,9 +43,7 @@
     },
     "flags": {
       "known": true,
-      "value": [
-        "dlc"
-      ],
+      "value": [],
       "provenance": {
         "source": "legacy_db_data",
         "method": "copied from legacy ItemData.Flags"
@@ -299,6 +297,14 @@
       "scalesWithNG": {
         "known": true,
         "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "preOrder": {
+        "known": true,
+        "value": true,
         "provenance": {
           "source": "legacy_db_data",
           "method": "derived from legacy ItemData flags"

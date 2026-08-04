@@ -45,8 +45,7 @@
       "known": true,
       "value": [
         "cut_content",
-        "ban_risk",
-        "dlc"
+        "ban_risk"
       ],
       "provenance": {
         "source": "legacy_db_data",
@@ -302,6 +301,14 @@
         }
       },
       "scalesWithNG": {
+        "known": true,
+        "value": false,
+        "provenance": {
+          "source": "legacy_db_data",
+          "method": "derived from legacy ItemData flags"
+        }
+      },
+      "preOrder": {
         "known": true,
         "value": false,
         "provenance": {

@@ -174,17 +174,38 @@ func itemCategoryFact(item seed) schema.Fact[string] {
 	return knownLegacyFact(item.Category, "copied from legacy ItemData.Category")
 }
 
+// safetyDerivedFlags are legacy top-level flags that now live exclusively under
+// item.safety. buildSafety derives those facts from the full source flag set
+// before this filter runs, so stripping them here never loses safety data.
+var safetyDerivedFlags = map[string]struct{}{
+	"dlc":            {},
+	"no_database":    {},
+	"scales_with_ng": {},
+	"pre_order":      {},
+}
+
+func stripSafetyFlags(flags []string) []string {
+	result := make([]string, 0, len(flags))
+	for _, flag := range flags {
+		if _, isSafety := safetyDerivedFlags[flag]; isSafety {
+			continue
+		}
+		result = append(result, flag)
+	}
+	return result
+}
+
 func itemFlagsFact(item seed) schema.Fact[[]string] {
 	if item.RegulationOnlyVariant {
 		return knownLegacyFact(
-			cloneStrings(item.Flags),
+			stripSafetyFlags(cloneStrings(item.Flags)),
 			"copied from the canonical legacy ItemData flags for a Regulation-only variant",
 		)
 	}
 	if !item.HasLegacyItem {
-		return knownLegacyFact(cloneStrings(item.Flags), "copied from legacy AllGestures flags")
+		return knownLegacyFact(stripSafetyFlags(cloneStrings(item.Flags)), "copied from legacy AllGestures flags")
 	}
-	return knownLegacyFact(cloneStrings(item.Flags), "copied from legacy ItemData.Flags")
+	return knownLegacyFact(stripSafetyFlags(cloneStrings(item.Flags)), "copied from legacy ItemData.Flags")
 }
 
 func buildPresentation(item seed) schema.ItemPresentation {
