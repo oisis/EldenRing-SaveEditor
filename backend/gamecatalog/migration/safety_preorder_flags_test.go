@@ -1,6 +1,9 @@
 package migration
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 // TestPreOrderSafetyDerivedFromMergedGestureFlags proves the pre_order flag on a
 // slot-only gesture reaches safety.preOrder through the same ItemData/AllGestures
@@ -18,39 +21,57 @@ func TestPreOrderSafetyDerivedFromMergedGestureFlags(t *testing.T) {
 	}
 }
 
-// TestSafetyDerivedFlagsStrippedFromTopLevelFlags proves the four safety-derived
-// tokens no longer persist on any generated top-level item.flags, while the
-// safety facts still record them and unrelated flags survive. Piquebone Arrow
-// authors ["dlc", "stackable"]; only "stackable" may remain at top level.
-func TestSafetyDerivedFlagsStrippedFromTopLevelFlags(t *testing.T) {
+// TestFlagsFieldRemovedFromSerializedDocuments proves the retired top-level
+// item.flags and variants[].data.flags fields no longer serialize on any
+// generated document, while the raw gesture.slots[].flags field is preserved.
+func TestFlagsFieldRemovedFromSerializedDocuments(t *testing.T) {
 	catalog, err := Generate(localGenerateOptions(t))
 	if err != nil {
 		t.Fatalf("Generate: %v", err)
 	}
 
-	arrow := findGeneratedItem(t, catalog, 0x03032DE0)
-	if got := arrow.Flags.Value; len(got) != 1 || got[0] != "stackable" {
-		t.Fatalf("Piquebone Arrow flags = %#v, want [stackable]", got)
-	}
-	if !arrow.Safety.DLC.Known || !arrow.Safety.DLC.Value {
-		t.Fatalf("Piquebone Arrow safety.dlc = %#v, want known true", arrow.Safety.DLC)
+	hasFlagsKey := func(v any) bool {
+		raw, err := json.Marshal(v)
+		if err != nil {
+			t.Fatalf("marshal: %v", err)
+		}
+		var decoded map[string]json.RawMessage
+		if err := json.Unmarshal(raw, &decoded); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		_, present := decoded["flags"]
+		return present
 	}
 
-	stripped := map[string]struct{}{
-		"dlc":            {},
-		"no_database":    {},
-		"scales_with_ng": {},
-		"pre_order":      {},
-	}
+	variantsChecked := 0
+	gestureSlotFlagsSeen := false
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
 		if item == nil {
 			continue
 		}
-		for _, flag := range item.Flags.Value {
-			if _, forbidden := stripped[flag]; forbidden {
-				t.Fatalf("item 0x%08X top-level flags retain safety-derived token %q", item.GameID.Value, flag)
+		if hasFlagsKey(item) {
+			t.Fatalf("item 0x%08X serialized a top-level flags field", item.GameID.Value)
+		}
+		for variantIndex := range item.Variants {
+			variantsChecked++
+			if hasFlagsKey(item.Variants[variantIndex].Data) {
+				t.Fatalf("item 0x%08X variant %d serialized a data.flags field", item.GameID.Value, variantIndex)
 			}
 		}
+		if item.Gesture != nil {
+			for _, slot := range item.Gesture.Slots {
+				if hasFlagsKey(slot) {
+					gestureSlotFlagsSeen = true
+				}
+			}
+		}
+	}
+
+	if variantsChecked == 0 {
+		t.Fatal("no variant documents exercised; expected variant coverage")
+	}
+	if !gestureSlotFlagsSeen {
+		t.Fatal("gesture.slots[].flags field was not preserved on any gesture item")
 	}
 }

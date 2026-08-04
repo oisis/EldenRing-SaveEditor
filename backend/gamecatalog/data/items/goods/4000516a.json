@@ -41,16 +41,6 @@
         "method": "legacy field is empty"
       }
     },
-    "flags": {
-      "known": true,
-      "value": [
-        "stackable"
-      ],
-      "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.Flags"
-      }
-    },
     "presentation": {
       "displayName": {
         "known": true,

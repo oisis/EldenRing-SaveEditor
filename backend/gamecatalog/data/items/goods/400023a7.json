@@ -41,16 +41,6 @@
         "method": "copied from legacy ItemData.SubCategory"
       }
     },
-    "flags": {
-      "known": true,
-      "value": [
-        "ban_risk"
-      ],
-      "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.Flags"
-      }
-    },
     "presentation": {
       "displayName": {
         "known": true,

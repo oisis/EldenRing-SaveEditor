@@ -9,7 +9,6 @@ import (
 type builtDocumentData struct {
 	Category                schema.Fact[string]
 	Subcategory             schema.Fact[string]
-	Flags                   schema.Fact[[]string]
 	Presentation            schema.ItemPresentation
 	Storage                 schema.ItemStorage
 	Capabilities            schema.ItemCapabilities
@@ -79,7 +78,6 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 	data := builtDocumentData{
 		Category:                itemCategoryFact(item),
 		Subcategory:             itemSubcategoryFact(item),
-		Flags:                   itemFlagsFact(item),
 		Presentation:            buildPresentation(item),
 		Storage:                 storage,
 		Capabilities:            capabilities,

@@ -72,7 +72,6 @@ func (server *Server) buildItemPage(
 	gameIDProvenance := item.GameID.Provenance
 	categoryKnown, categoryValue, categoryProvenance := item.Category.Known, item.Category.Value, item.Category.Provenance
 	subcategoryKnown, subcategoryValue, subcategoryProvenance := item.Subcategory.Known, item.Subcategory.Value, item.Subcategory.Provenance
-	tagsKnown, tagsValue, tagsProvenance := item.Flags.Known, item.Flags.Value, item.Flags.Provenance
 	presentation := item.Presentation
 	storage := item.Storage
 	safety := item.Safety
@@ -93,7 +92,6 @@ func (server *Server) buildItemPage(
 		gameIDProvenance = variant.GameID.Provenance
 		categoryKnown, categoryValue, categoryProvenance = variant.Data.Category.Known, variant.Data.Category.Value, variant.Data.Category.Provenance
 		subcategoryKnown, subcategoryValue, subcategoryProvenance = variant.Data.Subcategory.Known, variant.Data.Subcategory.Value, variant.Data.Subcategory.Provenance
-		tagsKnown, tagsValue, tagsProvenance = variant.Data.Flags.Known, variant.Data.Flags.Value, variant.Data.Flags.Provenance
 		presentation = variant.Data.Presentation
 		storage = variant.Data.Storage
 		safety = variant.Data.Safety
@@ -124,7 +122,6 @@ func (server *Server) buildItemPage(
 			server.fact("Family", item.Family.Known, item.Family.Value, item.Family.Provenance),
 			server.fact("Category", categoryKnown, categoryValue, categoryProvenance),
 			server.fact("Subcategory", subcategoryKnown, subcategoryValue, subcategoryProvenance),
-			server.fact("Flags", tagsKnown, tagsValue, tagsProvenance),
 		},
 		Presentation: []factView{
 			server.fact("Display name", presentation.DisplayName.Known, presentation.DisplayName.Value, presentation.DisplayName.Provenance),

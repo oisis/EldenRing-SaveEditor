@@ -121,7 +121,6 @@ func fullVariantData(
 		Family:                  itemFamilyFact(family, primaryTableForFamily(family), variantPrimaryRowID(variant)),
 		Category:                variant.Category,
 		Subcategory:             variant.Subcategory,
-		Flags:                   variant.Flags,
 		Presentation:            variant.Presentation,
 		Storage:                 variant.Storage,
 		Capabilities:            variant.Capabilities,

@@ -22,7 +22,6 @@ type VariantDocumentData struct {
 	Family                  Fact[ItemFamily]         `json:"family"`
 	Category                Fact[string]             `json:"category"`
 	Subcategory             Fact[string]             `json:"subcategory"`
-	Flags                   Fact[[]string]           `json:"flags"`
 	Presentation            ItemPresentation         `json:"presentation"`
 	Storage                 ItemStorage              `json:"storage"`
 	Capabilities            ItemCapabilities         `json:"capabilities"`
@@ -42,7 +41,6 @@ func MaterializeVariant(canonical ItemDocument, variant ItemVariant) ItemDocumen
 	canonical.Family = data.Family
 	canonical.Category = data.Category
 	canonical.Subcategory = data.Subcategory
-	canonical.Flags = data.Flags
 	canonical.Presentation = data.Presentation
 	canonical.Storage = data.Storage
 	canonical.Capabilities = data.Capabilities

@@ -41,14 +41,6 @@
         "method": "legacy field is empty"
       }
     },
-    "flags": {
-      "known": true,
-      "value": [],
-      "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.Flags"
-      }
-    },
     "presentation": {
       "displayName": {
         "known": true,
@@ -651,14 +643,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "legacy field is empty"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
             }
           },
           "presentation": {
@@ -1809,14 +1793,6 @@
               "method": "legacy field is empty"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -2963,14 +2939,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "legacy field is empty"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
             }
           },
           "presentation": {
@@ -4121,14 +4089,6 @@
               "method": "legacy field is empty"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -5275,14 +5235,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "legacy field is empty"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
             }
           },
           "presentation": {
@@ -6433,14 +6385,6 @@
               "method": "legacy field is empty"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -7587,14 +7531,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "legacy field is empty"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
             }
           },
           "presentation": {
@@ -8745,14 +8681,6 @@
               "method": "legacy field is empty"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -9901,14 +9829,6 @@
               "method": "legacy field is empty"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -11055,14 +10975,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "legacy field is empty"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from legacy ItemData.Flags"
             }
           },
           "presentation": {

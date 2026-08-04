@@ -351,7 +351,6 @@ func builtDataFromDocument(document *schema.ItemDocument) builtDocumentData {
 	return builtDocumentData{
 		Category:                document.Category,
 		Subcategory:             document.Subcategory,
-		Flags:                   document.Flags,
 		Presentation:            document.Presentation,
 		Storage:                 document.Storage,
 		Capabilities:            document.Capabilities,

@@ -92,7 +92,6 @@ func validVariant(
 			Family:                  item.Family,
 			Category:                item.Category,
 			Subcategory:             item.Subcategory,
-			Flags:                   item.Flags,
 			Presentation:            item.Presentation,
 			Storage:                 item.Storage,
 			Capabilities:            item.Capabilities,

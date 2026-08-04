@@ -35,17 +35,6 @@
         "method": "legacy field is empty"
       }
     },
-    "flags": {
-      "known": true,
-      "value": [
-        "ban_risk",
-        "cut_content"
-      ],
-      "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy AllGestures flags"
-      }
-    },
     "presentation": {
       "displayName": {
         "known": true,

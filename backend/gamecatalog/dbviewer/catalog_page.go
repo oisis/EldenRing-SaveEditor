@@ -101,7 +101,6 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 			string(item.Family.Value),
 			item.Category.Value,
 			item.Subcategory.Value,
-			fmt.Sprint(item.Flags.Value),
 		}
 		for _, alias := range item.Aliases {
 			if alias.GameID.Known {
@@ -138,7 +137,6 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 				string(variant.Kind.Value),
 				item.Category.Value,
 				item.Subcategory.Value,
-				fmt.Sprint(item.Flags.Value),
 				string(variant.Affinity.Value),
 				fmt.Sprint(variant.UpgradeLevel.Value),
 			}

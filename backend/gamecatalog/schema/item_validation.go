@@ -27,9 +27,6 @@ func validateItemDocument(item ItemDocument, sources map[SourceID]struct{}) erro
 	if item.Subcategory.Known && item.Subcategory.Value == "" {
 		return fmt.Errorf("item.subcategory cannot be empty when known")
 	}
-	if err := validateOptionalStringList("item.flags", item.Flags, sources); err != nil {
-		return err
-	}
 	if err := validatePresentation(item.Presentation, sources); err != nil {
 		return err
 	}

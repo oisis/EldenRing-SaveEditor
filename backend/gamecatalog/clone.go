@@ -15,7 +15,6 @@ func cloneResource(resource schema.Resource) schema.Resource {
 	}
 
 	item := *resource.Item
-	item.Flags.Value = cloneStrings(resource.Item.Flags.Value)
 	item.Storage = cloneStorage(resource.Item.Storage)
 	item.Acquisition = cloneAcquisition(resource.Item.Acquisition)
 	item.Modifiers = cloneModifiers(resource.Item.Modifiers)
@@ -92,7 +91,6 @@ func cloneVariants(variants []schema.ItemVariant) []schema.ItemVariant {
 
 func cloneVariantDocumentData(data schema.VariantDocumentData) schema.VariantDocumentData {
 	cloned := data
-	cloned.Flags.Value = cloneStrings(data.Flags.Value)
 	cloned.Storage = cloneStorage(data.Storage)
 	cloned.Acquisition = cloneAcquisition(data.Acquisition)
 	cloned.Modifiers = cloneModifiers(data.Modifiers)

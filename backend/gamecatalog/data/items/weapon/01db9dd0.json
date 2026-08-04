@@ -41,14 +41,6 @@
         "method": "copied from legacy ItemData.SubCategory"
       }
     },
-    "flags": {
-      "known": true,
-      "value": [],
-      "provenance": {
-        "source": "legacy_db_data",
-        "method": "copied from legacy ItemData.Flags"
-      }
-    },
     "presentation": {
       "displayName": {
         "known": true,
@@ -529,14 +521,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
             }
           },
           "presentation": {
@@ -1900,14 +1884,6 @@
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -3267,14 +3243,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
             }
           },
           "presentation": {
@@ -4638,14 +4606,6 @@
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -6005,14 +5965,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
             }
           },
           "presentation": {
@@ -7376,14 +7328,6 @@
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -8743,14 +8687,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
             }
           },
           "presentation": {
@@ -10114,14 +10050,6 @@
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -11481,14 +11409,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
             }
           },
           "presentation": {
@@ -12939,14 +12859,6 @@
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -14395,14 +14307,6 @@
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
             }
           },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
-            }
-          },
           "presentation": {
             "displayName": {
               "known": true,
@@ -15762,14 +15666,6 @@
             "provenance": {
               "source": "legacy_db_data",
               "method": "copied from the canonical legacy ItemData subcategory for a Regulation-only variant"
-            }
-          },
-          "flags": {
-            "known": true,
-            "value": [],
-            "provenance": {
-              "source": "legacy_db_data",
-              "method": "copied from the canonical legacy ItemData flags for a Regulation-only variant"
             }
           },
           "presentation": {
