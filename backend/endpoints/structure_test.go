@@ -13,6 +13,13 @@ import (
 
 const expectedEndpointDefinitionCount = 100
 
+// implementedEndpointHandlers names the single runtime function each listed
+// endpoint file is allowed to implement. Every other file must stay a pure
+// contract file.
+var implementedEndpointHandlers = map[string]string{
+	filepath.Join("catalog", "get_catalog_info.go"): "GetCatalogInfo",
+}
+
 func TestEndpointFilesMatchTheirDefinitions(t *testing.T) {
 	t.Parallel()
 
@@ -74,7 +81,9 @@ func inspectEndpointFile(t *testing.T, path, packageName string) (string, string
 	var definitionName string
 	for _, declaration := range parsed.Decls {
 		if function, ok := declaration.(*ast.FuncDecl); ok {
-			t.Errorf("%s contains runtime function %s; contract files must not pretend to implement handlers", path, function.Name.Name)
+			if function.Recv != nil || implementedEndpointHandlers[path] != function.Name.Name {
+				t.Errorf("%s contains runtime function %s; contract files must not pretend to implement handlers", path, function.Name.Name)
+			}
 			continue
 		}
 
