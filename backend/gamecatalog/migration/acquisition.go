@@ -2,7 +2,7 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildAcquisition(item seed) schema.ItemAcquisition {
+func buildAcquisition(item seed, omitRequiredContainer bool) schema.ItemAcquisition {
 	acquisition := schema.ItemAcquisition{
 		IsContainer: knownLegacyFact(
 			item.Acquisition.IsContainer,
@@ -30,7 +30,7 @@ func buildAcquisition(item seed) schema.ItemAcquisition {
 			*item.Acquisition.RequiredContainerID,
 			"copied from legacy RequiredContainer",
 		)
-	} else {
+	} else if !omitRequiredContainer {
 		acquisition.RequiredContainerID = unknownCatalogFact[uint32](
 			"legacy RequiredContainer has no entry for this item",
 		)

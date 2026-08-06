@@ -67,7 +67,7 @@ func (server *Server) buildItemPage(
 	name := resource.Item.Presentation.DisplayName.Value
 	iconURL := itemIconURL(item)
 	entryType := "Canonical"
-	unknownCount := countUnknownFacts(resource)
+	unknownCount := countUnknownFactsForFamily(resource, item.Family.Value)
 	gameIDKnown := item.GameID.Known
 	gameIDProvenance := item.GameID.Provenance
 	categoryKnown, categoryValue, categoryProvenance := item.Category.Known, item.Category.Value, item.Category.Provenance
@@ -87,7 +87,7 @@ func (server *Server) buildItemPage(
 		name = variantDisplayName(resource.Item.Presentation.DisplayName.Value, variant)
 		iconURL = variantIconURL(item, variant)
 		entryType = "Variant"
-		unknownCount = countUnknownFacts(variant)
+		unknownCount = countUnknownFactsForFamily(variant, item.Family.Value)
 		gameIDKnown = variant.GameID.Known
 		gameIDProvenance = variant.GameID.Provenance
 		categoryKnown, categoryValue, categoryProvenance = variant.Data.Category.Known, variant.Data.Category.Value, variant.Data.Category.Provenance
@@ -140,9 +140,9 @@ func (server *Server) buildItemPage(
 			server.fact("Scales with NG", safety.ScalesWithNG.Known, safety.ScalesWithNG.Value, safety.ScalesWithNG.Provenance),
 		},
 		TextMetadata:   server.readableFacts(presentation.TextMetadata, ""),
-		Acquisition:    server.readableFacts(acquisition, ""),
+		Acquisition:    server.metadataFacts(acquisition, "", item.Family.Value),
 		Modifiers:      server.readableFacts(modifiers, ""),
-		Links:          server.readableFacts(links, ""),
+		Links:          server.metadataFacts(links, "", item.Family.Value),
 		Unlocks:        server.readableFacts(unlocks, "Unlock"),
 		TechnicalData:  server.readableFacts(technicalData, "Technical record"),
 		Capabilities:   server.capabilityViewsFor(capabilities),

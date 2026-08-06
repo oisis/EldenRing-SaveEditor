@@ -488,8 +488,8 @@
         "known": false,
         "value": 0,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy RequiredContainer has no entry for this item"
+          "source": "",
+          "method": ""
         }
       },
       "isContainer": {
@@ -557,8 +557,8 @@
         "known": false,
         "value": "",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy Whetblades has no entry for this item"
+          "source": "",
+          "method": ""
         }
       },
       "mapFragment": null
@@ -1092,8 +1092,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -1161,8 +1161,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -2240,8 +2240,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -2309,8 +2309,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -3388,8 +3388,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -3457,8 +3457,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -4536,8 +4536,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -4605,8 +4605,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -5684,8 +5684,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -5753,8 +5753,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -6832,8 +6832,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -6901,8 +6901,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -7980,8 +7980,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -8049,8 +8049,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -9128,8 +9128,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -9197,8 +9197,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -10276,8 +10276,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -10345,8 +10345,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null
@@ -11424,8 +11424,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy RequiredContainer has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "isContainer": {
@@ -11493,8 +11493,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
+                "source": "",
+                "method": ""
               }
             },
             "mapFragment": null

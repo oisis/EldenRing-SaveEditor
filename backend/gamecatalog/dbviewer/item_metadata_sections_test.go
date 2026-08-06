@@ -139,3 +139,19 @@ func TestItemTemplateShowsStructuredMetadataSections(t *testing.T) {
 		}
 	}
 }
+
+func TestOptionalMetadataFactsRenderNotApplicable(t *testing.T) {
+	server := &Server{}
+	acquisition := server.metadataFacts(
+		schema.ItemAcquisition{}, "", schema.ItemFamilySpiritAsh,
+	)
+	links := server.metadataFacts(
+		schema.ItemLinks{}, "", schema.ItemFamilySpiritAsh,
+	)
+	if !containsFact(acquisition, "Required container ID", "N/A") {
+		t.Fatalf("required container fact = %#v, want N/A", acquisition)
+	}
+	if !containsFact(links, "Whetblade name", "N/A") {
+		t.Fatalf("whetblade name fact = %#v, want N/A", links)
+	}
+}

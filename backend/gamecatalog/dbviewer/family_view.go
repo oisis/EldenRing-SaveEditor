@@ -53,10 +53,26 @@ func (server *Server) variantFamilyFacts(
 }
 
 func (server *Server) readableFacts(value any, prefix string) []factView {
-	return server.attachFactSources(server.factViews(reflect.ValueOf(value), prefix))
+	return server.attachFactSources(server.factViews(reflect.ValueOf(value), prefix, false))
 }
 
-func (server *Server) factViews(value reflect.Value, prefix string) []factView {
+func (server *Server) metadataFacts(
+	value any,
+	prefix string,
+	family schema.ItemFamily,
+) []factView {
+	return server.attachFactSources(server.factViews(
+		reflect.ValueOf(value),
+		prefix,
+		family == schema.ItemFamilySpiritAsh,
+	))
+}
+
+func (server *Server) factViews(
+	value reflect.Value,
+	prefix string,
+	allowNotApplicable bool,
+) []factView {
 	if !value.IsValid() {
 		return nil
 	}
@@ -67,7 +83,7 @@ func (server *Server) factViews(value reflect.Value, prefix string) []factView {
 		value = value.Elem()
 	}
 
-	if fact, ok := reflectedFact(value, prefix); ok {
+	if fact, ok := reflectedFact(value, prefix, allowNotApplicable); ok {
 		return []factView{fact}
 	}
 
@@ -80,18 +96,22 @@ func (server *Server) factViews(value reflect.Value, prefix string) []factView {
 				continue
 			}
 			label := joinFactLabel(prefix, fieldLabel(fieldType))
-			facts = append(facts, server.factViews(value.Field(index), label)...)
+			facts = append(facts, server.factViews(value.Field(index), label, allowNotApplicable)...)
 		}
 	case reflect.Array, reflect.Slice:
 		for index := 0; index < value.Len(); index++ {
 			label := fmt.Sprintf("%s %d", prefix, index+1)
-			facts = append(facts, server.factViews(value.Index(index), label)...)
+			facts = append(facts, server.factViews(value.Index(index), label, allowNotApplicable)...)
 		}
 	}
 	return facts
 }
 
-func reflectedFact(value reflect.Value, label string) (factView, bool) {
+func reflectedFact(
+	value reflect.Value,
+	label string,
+	allowNotApplicable bool,
+) (factView, bool) {
 	if value.Kind() != reflect.Struct {
 		return factView{}, false
 	}
@@ -112,22 +132,37 @@ func reflectedFact(value reflect.Value, label string) (factView, bool) {
 		displayValue = fmt.Sprintf("0x%X", rawValue.Uint())
 	}
 	return factView{
-		Label:  label,
-		Value:  displayValue,
-		Known:  known.Bool(),
-		Source: source.Source,
-		Method: source.Method,
+		Label:         label,
+		Value:         displayValue,
+		Known:         known.Bool(),
+		NotApplicable: allowNotApplicable && isNotApplicableMetadataFact(label, known.Bool(), source),
+		Source:        source.Source,
+		Method:        source.Method,
 	}, true
 }
 
 func (server *Server) attachFactSources(facts []factView) []factView {
 	for index := range facts {
 		facts[index].SourceLocation = server.sources[facts[index].Source].Location
-		if !facts[index].Known {
+		if facts[index].NotApplicable {
+			facts[index].Value = "N/A"
+		} else if !facts[index].Known {
 			facts[index].Value = "Unknown"
 		}
 	}
 	return facts
+}
+
+func isNotApplicableMetadataFact(
+	label string,
+	known bool,
+	provenance schema.Provenance,
+) bool {
+	if known || provenance.Source != "" || provenance.Method != "" ||
+		provenance.Table != "" || provenance.Row != "" || provenance.Field != "" {
+		return false
+	}
+	return label == "Required container ID" || label == "Whetblade name"
 }
 
 func fieldLabel(field reflect.StructField) string {
@@ -204,12 +239,20 @@ func (server *Server) variantViews(item *schema.ItemDocument) []variantView {
 			Name:         variantDisplayName(item.Presentation.CanonicalName.Value, variant),
 			IconURL:      variantIconURL(item, variant),
 			Kind:         knownText(variant.Kind.Known, string(variant.Kind.Value)),
-			Affinity:     knownText(variant.Affinity.Known, string(variant.Affinity.Value)),
+			Affinity:     variantAffinity(item.Family.Value, variant),
 			UpgradeLevel: knownUpgradeLevel(variant.UpgradeLevel),
 			SourceRowID:  knownNumber(variant.SourceRowID.Known, variant.SourceRowID.Value),
 		})
 	}
 	return variants
+}
+
+func variantAffinity(family schema.ItemFamily, variant schema.ItemVariant) string {
+	if family == schema.ItemFamilySpiritAsh &&
+		variant.Kind.Known && variant.Kind.Value == schema.ItemVariantUpgrade {
+		return "N/A"
+	}
+	return knownText(variant.Affinity.Known, string(variant.Affinity.Value))
 }
 
 func knownUpgradeLevel(level schema.Fact[uint8]) string {

@@ -10,6 +10,7 @@ type factView struct {
 	Label          string
 	Value          string
 	Known          bool
+	NotApplicable  bool
 	Source         schema.SourceID
 	Method         string
 	SourceLocation string

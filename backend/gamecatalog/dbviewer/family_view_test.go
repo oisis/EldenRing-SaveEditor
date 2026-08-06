@@ -66,3 +66,22 @@ func TestFamilyFactsFormatsCompatibilityMaskAsHexadecimal(t *testing.T) {
 	}
 	t.Fatal("compatibility mask fact is missing")
 }
+
+func TestVariantUpgradeDisplaysAffinityAsNotApplicable(t *testing.T) {
+	item := &schema.ItemDocument{
+		Family: schema.Fact[schema.ItemFamily]{Value: schema.ItemFamilySpiritAsh},
+		Presentation: schema.ItemPresentation{
+			CanonicalName: schema.Fact[string]{Known: true, Value: "Albinauric Ashes"},
+		},
+		Variants: []schema.ItemVariant{{
+			Kind: schema.Fact[schema.ItemVariantKind]{
+				Known: true,
+				Value: schema.ItemVariantUpgrade,
+			},
+		}},
+	}
+	views := (&Server{}).variantViews(item)
+	if len(views) != 1 || views[0].Affinity != "N/A" {
+		t.Fatalf("upgrade variant affinity = %#v, want N/A", views)
+	}
+}
