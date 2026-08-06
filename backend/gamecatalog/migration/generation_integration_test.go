@@ -209,7 +209,7 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 		)
 
 		if isVariant {
-			assertVariantIdentity(t, record.variant, expectedVariant)
+			assertVariantIdentity(t, record.variant, expectedVariant, family)
 			continue
 		}
 		if record.document == nil {
@@ -376,6 +376,7 @@ func assertVariantIdentity(
 	t *testing.T,
 	variant *schema.ItemVariant,
 	expected legacyVariantSeed,
+	family schema.ItemFamily,
 ) {
 	t.Helper()
 	if variant == nil {
@@ -405,7 +406,19 @@ func assertVariantIdentity(
 			variant.UpgradeLevel.Value != expected.UpgradeLevel {
 			t.Fatalf("variant 0x%08X upgrade = %#v", expected.Item.ID, variant.UpgradeLevel)
 		}
-		if !reflect.DeepEqual(variant.Affinity, schema.Fact[schema.Affinity]{}) {
+		if family == schema.ItemFamilySpiritAsh {
+			var zeroAffinity schema.Affinity
+			if variant.Affinity.Known ||
+				variant.Affinity.Value != zeroAffinity ||
+				variant.Affinity.Provenance.Source == "" ||
+				!variant.Affinity.Provenance.MarksNotApplicable() {
+				t.Fatalf(
+					"spirit ash upgrade variant 0x%08X affinity = %#v",
+					expected.Item.ID,
+					variant.Affinity,
+				)
+			}
+		} else if !reflect.DeepEqual(variant.Affinity, schema.Fact[schema.Affinity]{}) {
 			t.Fatalf("upgrade variant 0x%08X has affinity discriminator", expected.Item.ID)
 		}
 	}
