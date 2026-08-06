@@ -18,6 +18,7 @@ const expectedEndpointDefinitionCount = 100
 // contract file.
 var implementedEndpointHandlers = map[string]string{
 	filepath.Join("catalog", "get_catalog_info.go"): "GetCatalogInfo",
+	filepath.Join("catalog", "get_resource.go"):     "GetResource",
 }
 
 func TestEndpointFilesMatchTheirDefinitions(t *testing.T) {

@@ -9,6 +9,7 @@ import (
 type Catalog struct {
 	manifest     schema.Manifest
 	byID         map[schema.ResourceID]schema.Resource
+	byKey        map[string]schema.ResourceID
 	byItemGameID map[uint32]schema.ResourceID
 	outgoing     map[schema.ResourceID][]schema.Relation
 	incoming     map[schema.ResourceID][]schema.Relation
@@ -23,11 +24,11 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 	catalog := &Catalog{
 		manifest:     cloneManifest(manifest),
 		byID:         make(map[schema.ResourceID]schema.Resource, len(resources)),
+		byKey:        make(map[string]schema.ResourceID, len(resources)),
 		byItemGameID: make(map[uint32]schema.ResourceID, len(resources)),
 		outgoing:     make(map[schema.ResourceID][]schema.Relation),
 		incoming:     make(map[schema.ResourceID][]schema.Relation),
 	}
-	keys := make(map[string]struct{}, len(resources))
 	for index, resource := range resources {
 		if err := schema.ValidateResource(resource, sources); err != nil {
 			return nil, fmt.Errorf("resource %d: %w", index, err)
@@ -35,7 +36,7 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 		if _, exists := catalog.byID[resource.ID]; exists {
 			return nil, fmt.Errorf("resource %d: duplicate resource ID %d", index, resource.ID)
 		}
-		if _, exists := keys[resource.Key]; exists {
+		if _, exists := catalog.byKey[resource.Key]; exists {
 			return nil, fmt.Errorf("resource %d: duplicate resource key %q", index, resource.Key)
 		}
 		if existing, exists := catalog.byItemGameID[resource.Item.GameID.Value]; exists && existing != resource.ID {
@@ -44,6 +45,7 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 
 		cloned := cloneResource(resource)
 		catalog.byID[cloned.ID] = cloned
+		catalog.byKey[cloned.Key] = cloned.ID
 		catalog.byItemGameID[cloned.Item.GameID.Value] = cloned.ID
 		for _, variant := range cloned.Item.Variants {
 			if existing, exists := catalog.byItemGameID[variant.GameID.Value]; exists && existing != cloned.ID {
@@ -62,7 +64,6 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 			}
 			catalog.byItemGameID[alias.GameID.Value] = cloned.ID
 		}
-		keys[cloned.Key] = struct{}{}
 	}
 
 	if err := catalog.deriveRelations(sources); err != nil {

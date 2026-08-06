@@ -71,6 +71,7 @@ Transport status:
 | Name | EndpointID | Kind | Domain | Implementation status | Transport status | Document |
 |---|---|---|---|---|---|---|
 | `GetCatalogInfo` | `get_catalog_info` | Getter | `catalog` | implemented | not exposed through Wails/HTTP/CLI | [catalog/get_catalog_info.md](catalog/get_catalog_info.md) |
+| `GetResource` | `get_resource` | Getter | `catalog` | implemented | not exposed through Wails/HTTP/CLI | [catalog/get_resource.md](catalog/get_resource.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

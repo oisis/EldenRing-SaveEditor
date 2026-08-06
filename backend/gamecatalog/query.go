@@ -21,6 +21,17 @@ func (catalog *Catalog) ResourceByID(id schema.ResourceID) (schema.Resource, boo
 	return cloneResource(resource), true
 }
 
+// ResourceByKey resolves one resource by its stable schema.Resource.Key. The
+// key is matched exactly; the catalog never parses or normalises it. The
+// returned resource is an independent deep copy and carries no relations.
+func (catalog *Catalog) ResourceByKey(key string) (schema.Resource, bool) {
+	id, exists := catalog.byKey[key]
+	if !exists {
+		return schema.Resource{}, false
+	}
+	return catalog.ResourceByID(id)
+}
+
 func (catalog *Catalog) ItemByGameID(gameID uint32) (schema.Resource, bool) {
 	id, exists := catalog.byItemGameID[gameID]
 	if !exists {
