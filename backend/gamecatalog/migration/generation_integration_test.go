@@ -565,6 +565,8 @@ func assertRepresentativePayloads(
 	upgrade := records[0x40038A41].variant
 	if upgrade == nil ||
 		upgrade.Kind.Value != schema.ItemVariantUpgrade ||
+		upgrade.Affinity.Known ||
+		!upgrade.Affinity.Provenance.MarksNotApplicable() ||
 		upgrade.UpgradeLevel.Value != 1 ||
 		upgrade.Data.SpiritAsh == nil {
 		t.Fatalf("Lone Wolf Ashes +1 variant = %#v", upgrade)

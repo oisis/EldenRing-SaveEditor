@@ -78,6 +78,12 @@ func TestVariantUpgradeDisplaysAffinityAsNotApplicable(t *testing.T) {
 				Known: true,
 				Value: schema.ItemVariantUpgrade,
 			},
+			Affinity: schema.Fact[schema.Affinity]{
+				Provenance: schema.Provenance{
+					Source: schema.SourceSaveForgeLegacy,
+					Method: schema.NotApplicableMethodPrefix + ": spirit ash upgrade variants do not have an affinity",
+				},
+			},
 		}},
 	}
 	views := (&Server{}).variantViews(item)

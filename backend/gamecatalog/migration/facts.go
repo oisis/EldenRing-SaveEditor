@@ -90,6 +90,10 @@ func unknownLegacyFact[T any](method string) schema.Fact[T] {
 	}
 }
 
+func notApplicableCatalogFact[T any](reason string) schema.Fact[T] {
+	return unknownCatalogFact[T](schema.NotApplicableMethodPrefix + ": " + reason)
+}
+
 func unknownCatalogFact[T any](method string) schema.Fact[T] {
 	return schema.Fact[T]{
 		Provenance: schema.Provenance{

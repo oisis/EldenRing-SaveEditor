@@ -143,15 +143,46 @@ func TestItemTemplateShowsStructuredMetadataSections(t *testing.T) {
 func TestOptionalMetadataFactsRenderNotApplicable(t *testing.T) {
 	server := &Server{}
 	acquisition := server.metadataFacts(
-		schema.ItemAcquisition{}, "", schema.ItemFamilySpiritAsh,
+		schema.ItemAcquisition{
+			RequiredContainerID: schema.Fact[uint32]{
+				Provenance: notApplicableProvenance("never held in a legacy RequiredContainer"),
+			},
+		},
+		"",
+		schema.ItemFamilySpiritAsh,
 	)
 	links := server.metadataFacts(
-		schema.ItemLinks{}, "", schema.ItemFamilySpiritAsh,
+		schema.ItemLinks{
+			WhetbladeName: schema.Fact[string]{
+				Provenance: notApplicableProvenance("never sharpened with a whetblade"),
+			},
+		},
+		"",
+		schema.ItemFamilySpiritAsh,
 	)
 	if !containsFact(acquisition, "Required container ID", "N/A") {
 		t.Fatalf("required container fact = %#v, want N/A", acquisition)
 	}
 	if !containsFact(links, "Whetblade name", "N/A") {
 		t.Fatalf("whetblade name fact = %#v, want N/A", links)
+	}
+}
+
+func TestUnresolvedOptionalMetadataFactsRenderUnknown(t *testing.T) {
+	server := &Server{}
+	acquisition := server.metadataFacts(
+		schema.ItemAcquisition{
+			RequiredContainerID: schema.Fact[uint32]{
+				Provenance: schema.Provenance{
+					Source: schema.SourceSaveForgeLegacy,
+					Method: "legacy RequiredContainer has no entry for this item",
+				},
+			},
+		},
+		"",
+		schema.ItemFamilySpiritAsh,
+	)
+	if !containsFact(acquisition, "Required container ID", "Unknown") {
+		t.Fatalf("unresolved required container fact = %#v, want Unknown", acquisition)
 	}
 }

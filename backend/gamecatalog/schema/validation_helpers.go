@@ -26,6 +26,12 @@ func isOmittedFact[T any](fact Fact[T]) bool {
 		fact.Provenance.Method == ""
 }
 
+func isNotApplicableFact[T any](fact Fact[T]) bool {
+	return !fact.Known &&
+		reflect.ValueOf(fact.Value).IsZero() &&
+		fact.Provenance.MarksNotApplicable()
+}
+
 func validateProvenance(name string, provenance Provenance, sources map[SourceID]struct{}) error {
 	if provenance.Source == "" {
 		return fmt.Errorf("%s: provenance source is required", name)

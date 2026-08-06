@@ -61,10 +61,14 @@ func isNotApplicableUnknownField(
 ) bool {
 	switch field.Name {
 	case "RequiredContainerID", "WhetbladeName":
-		return isOmittedFact(value)
+		provenance, unknownFact := unknownFactProvenance(value)
+		return unknownFact && provenance.MarksNotApplicable()
 	case "Affinity":
-		return owner.Type() == reflect.TypeOf(schema.ItemVariant{}) &&
-			variantKindIsUpgrade(owner) && isOmittedFact(value)
+		if owner.Type() != reflect.TypeOf(schema.ItemVariant{}) || !variantKindIsUpgrade(owner) {
+			return false
+		}
+		provenance, unknownFact := unknownFactProvenance(value)
+		return unknownFact && provenance.MarksNotApplicable()
 	default:
 		return false
 	}
@@ -78,20 +82,25 @@ func variantKindIsUpgrade(variant reflect.Value) bool {
 		value.String() == string(schema.ItemVariantUpgrade)
 }
 
-func isOmittedFact(value reflect.Value) bool {
+// unknownFactProvenance returns the provenance of a fact that is unknown and
+// carries a zero value, so callers can tell a declared exception from a fact
+// that merely stayed unresolved.
+func unknownFactProvenance(value reflect.Value) (schema.Provenance, bool) {
 	for value.Kind() == reflect.Interface || value.Kind() == reflect.Pointer {
 		if value.IsNil() {
-			return false
+			return schema.Provenance{}, false
 		}
 		value = value.Elem()
 	}
-	if _, factLike := knownField(value); !factLike {
-		return false
+	if known, factLike := knownField(value); !factLike || known {
+		return schema.Provenance{}, false
 	}
-	known := value.FieldByName("Known")
 	rawValue := value.FieldByName("Value")
+	if !rawValue.IsValid() || !rawValue.IsZero() {
+		return schema.Provenance{}, false
+	}
 	provenance, ok := value.FieldByName("Provenance").Interface().(schema.Provenance)
-	return ok && !known.Bool() && rawValue.IsZero() && provenance == (schema.Provenance{})
+	return provenance, ok
 }
 
 func knownField(value reflect.Value) (bool, bool) {

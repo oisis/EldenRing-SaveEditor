@@ -26,7 +26,7 @@ func validateVariants(
 		if !variant.SourceRowID.Known || variant.SourceRowID.Value == 0 {
 			return fmt.Errorf("%s.sourceRowID must be known and greater than zero", name)
 		}
-		if err := validateVariantKind(name, variant, sources); err != nil {
+		if err := validateVariantKind(name, variant, item, sources); err != nil {
 			return err
 		}
 		if !isOmittedFact(variant.Kind) {
@@ -47,7 +47,12 @@ func validateVariants(
 	return nil
 }
 
-func validateVariantKind(name string, variant ItemVariant, sources map[SourceID]struct{}) error {
+func validateVariantKind(
+	name string,
+	variant ItemVariant,
+	item ItemDocument,
+	sources map[SourceID]struct{},
+) error {
 	if isOmittedFact(variant.Kind) {
 		if err := validateFact(name+".affinity", variant.Affinity, sources); err != nil {
 			return err
@@ -74,6 +79,12 @@ func validateVariantKind(name string, variant ItemVariant, sources map[SourceID]
 	case ItemVariantUpgrade:
 		if err := validateKnownUpgradeLevel(name, variant.UpgradeLevel, sources); err != nil {
 			return err
+		}
+		if item.Family.Value == ItemFamilySpiritAsh && isNotApplicableFact(variant.Affinity) {
+			if err := validateFact(name+".affinity", variant.Affinity, sources); err != nil {
+				return err
+			}
+			return nil
 		}
 		if !isOmittedFact(variant.Affinity) {
 			return fmt.Errorf("%s.affinity must be omitted for upgrade variant", name)

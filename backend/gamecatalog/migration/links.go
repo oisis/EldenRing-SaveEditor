@@ -2,8 +2,8 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildLinks(value linksSeed, omitWhetbladeName bool) schema.ItemLinks {
-	result := emptyItemLinks(omitWhetbladeName)
+func buildLinks(value linksSeed, whetbladeNameNotApplicable bool) schema.ItemLinks {
+	result := emptyItemLinks(whetbladeNameNotApplicable)
 	if value.AboutTutorialID != nil {
 		result.AboutTutorialID = knownLegacyFact(
 			*value.AboutTutorialID,
@@ -64,13 +64,17 @@ func buildLinks(value linksSeed, omitWhetbladeName bool) schema.ItemLinks {
 	return result
 }
 
-func emptyItemLinks(omitWhetbladeName bool) schema.ItemLinks {
+func emptyItemLinks(whetbladeNameNotApplicable bool) schema.ItemLinks {
 	result := schema.ItemLinks{
 		AboutTutorialID: unknownCatalogFact[uint32](
 			"legacy AboutTutorialID has no entry for this item",
 		),
 	}
-	if !omitWhetbladeName {
+	if whetbladeNameNotApplicable {
+		result.WhetbladeName = notApplicableCatalogFact[string](
+			"spirit ash items are never sharpened with a whetblade",
+		)
+	} else {
 		result.WhetbladeName = unknownCatalogFact[string](
 			"legacy Whetblades has no entry for this item",
 		)

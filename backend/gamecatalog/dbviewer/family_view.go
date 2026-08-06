@@ -135,7 +135,7 @@ func reflectedFact(
 		Label:         label,
 		Value:         displayValue,
 		Known:         known.Bool(),
-		NotApplicable: allowNotApplicable && isNotApplicableMetadataFact(label, known.Bool(), source),
+		NotApplicable: allowNotApplicable && !known.Bool() && source.MarksNotApplicable(),
 		Source:        source.Source,
 		Method:        source.Method,
 	}, true
@@ -151,18 +151,6 @@ func (server *Server) attachFactSources(facts []factView) []factView {
 		}
 	}
 	return facts
-}
-
-func isNotApplicableMetadataFact(
-	label string,
-	known bool,
-	provenance schema.Provenance,
-) bool {
-	if known || provenance.Source != "" || provenance.Method != "" ||
-		provenance.Table != "" || provenance.Row != "" || provenance.Field != "" {
-		return false
-	}
-	return label == "Required container ID" || label == "Whetblade name"
 }
 
 func fieldLabel(field reflect.StructField) string {
@@ -249,7 +237,7 @@ func (server *Server) variantViews(item *schema.ItemDocument) []variantView {
 
 func variantAffinity(family schema.ItemFamily, variant schema.ItemVariant) string {
 	if family == schema.ItemFamilySpiritAsh &&
-		variant.Kind.Known && variant.Kind.Value == schema.ItemVariantUpgrade {
+		!variant.Affinity.Known && variant.Affinity.Provenance.MarksNotApplicable() {
 		return "N/A"
 	}
 	return knownText(variant.Affinity.Known, string(variant.Affinity.Value))

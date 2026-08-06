@@ -2,7 +2,7 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildAcquisition(item seed, omitRequiredContainer bool) schema.ItemAcquisition {
+func buildAcquisition(item seed, requiredContainerNotApplicable bool) schema.ItemAcquisition {
 	acquisition := schema.ItemAcquisition{
 		IsContainer: knownLegacyFact(
 			item.Acquisition.IsContainer,
@@ -30,7 +30,11 @@ func buildAcquisition(item seed, omitRequiredContainer bool) schema.ItemAcquisit
 			*item.Acquisition.RequiredContainerID,
 			"copied from legacy RequiredContainer",
 		)
-	} else if !omitRequiredContainer {
+	} else if requiredContainerNotApplicable {
+		acquisition.RequiredContainerID = notApplicableCatalogFact[uint32](
+			"spirit ash items are never held in a legacy RequiredContainer",
+		)
+	} else {
 		acquisition.RequiredContainerID = unknownCatalogFact[uint32](
 			"legacy RequiredContainer has no entry for this item",
 		)

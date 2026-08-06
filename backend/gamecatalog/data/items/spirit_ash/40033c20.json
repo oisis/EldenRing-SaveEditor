@@ -488,8 +488,8 @@
         "known": false,
         "value": 0,
         "provenance": {
-          "source": "",
-          "method": ""
+          "source": "legacy_db_data",
+          "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
         }
       },
       "isContainer": {
@@ -557,8 +557,8 @@
         "known": false,
         "value": "",
         "provenance": {
-          "source": "",
-          "method": ""
+          "source": "legacy_db_data",
+          "method": "not applicable: spirit ash items are never sharpened with a whetblade"
         }
       },
       "mapFragment": null
@@ -591,8 +591,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -1092,8 +1092,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -1161,8 +1161,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -1739,8 +1739,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -2240,8 +2240,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -2309,8 +2309,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -2887,8 +2887,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -3388,8 +3388,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -3457,8 +3457,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -4035,8 +4035,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -4536,8 +4536,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -4605,8 +4605,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -5183,8 +5183,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -5684,8 +5684,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -5753,8 +5753,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -6331,8 +6331,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -6832,8 +6832,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -6901,8 +6901,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -7479,8 +7479,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -7980,8 +7980,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -8049,8 +8049,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -8627,8 +8627,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -9128,8 +9128,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -9197,8 +9197,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -9775,8 +9775,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -10276,8 +10276,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -10345,8 +10345,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null
@@ -10923,8 +10923,8 @@
           "known": false,
           "value": "",
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "legacy_db_data",
+            "method": "not applicable: spirit ash upgrade variants do not have an affinity"
           }
         },
         "upgradeLevel": {
@@ -11424,8 +11424,8 @@
               "known": false,
               "value": 0,
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never held in a legacy RequiredContainer"
               }
             },
             "isContainer": {
@@ -11493,8 +11493,8 @@
               "known": false,
               "value": "",
               "provenance": {
-                "source": "",
-                "method": ""
+                "source": "legacy_db_data",
+                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
               }
             },
             "mapFragment": null

@@ -1,5 +1,7 @@
 package schema
 
+import "strings"
+
 type SourceID string
 
 const SourceSaveForgeLegacy SourceID = "legacy_db_data"
@@ -41,6 +43,17 @@ type Provenance struct {
 	Table  string   `json:"table,omitempty"`
 	Row    string   `json:"row,omitempty"`
 	Field  string   `json:"field,omitempty"`
+}
+
+// NotApplicableMethodPrefix opens the Provenance method of a fact whose field
+// cannot apply to the item that carries it. Such a fact stays unknown with a
+// zero value and keeps complete provenance.
+const NotApplicableMethodPrefix = "not applicable"
+
+// MarksNotApplicable reports whether the provenance declares its fact as not
+// applicable instead of merely unresolved.
+func (provenance Provenance) MarksNotApplicable() bool {
+	return strings.HasPrefix(provenance.Method, NotApplicableMethodPrefix)
 }
 
 type Fact[T any] struct {
