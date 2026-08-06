@@ -1,4 +1,4 @@
-package endpoints_test
+package contract
 
 import (
 	"go/ast"
@@ -13,20 +13,24 @@ import (
 
 const expectedEndpointDefinitionCount = 100
 
-// implementedEndpointHandlers names the single runtime function each listed
-// endpoint file is allowed to implement. Every other file must stay a pure
-// contract file.
-var implementedEndpointHandlers = map[string]string{
-	filepath.Join("catalog", "get_catalog_info.go"): "GetCatalogInfo",
-	filepath.Join("catalog", "get_resource.go"):     "GetResource",
-}
+// endpointsDir is the parent directory of this package: the root that holds one
+// domain directory per endpoint group.
+const endpointsDir = ".."
+
+// Implementation statuses an endpoint contract comment may declare. The status
+// is read from the file itself, so implementing an endpoint never requires
+// registering it in this test.
+const (
+	statusContractOnly = "contract definition only"
+	statusImplemented  = "implemented"
+)
 
 func TestEndpointFilesMatchTheirDefinitions(t *testing.T) {
 	t.Parallel()
 
-	entries, err := os.ReadDir(".")
+	entries, err := os.ReadDir(endpointsDir)
 	if err != nil {
-		t.Fatalf("ReadDir: %v", err)
+		t.Fatalf("ReadDir(%s): %v", endpointsDir, err)
 	}
 
 	seenIDs := make(map[string]string, expectedEndpointDefinitionCount)
@@ -37,16 +41,17 @@ func TestEndpointFilesMatchTheirDefinitions(t *testing.T) {
 		}
 
 		packageName := entry.Name()
-		files, err := os.ReadDir(packageName)
+		packageDir := filepath.Join(endpointsDir, packageName)
+		files, err := os.ReadDir(packageDir)
 		if err != nil {
-			t.Fatalf("ReadDir(%s): %v", packageName, err)
+			t.Fatalf("ReadDir(%s): %v", packageDir, err)
 		}
 		for _, file := range files {
 			if file.IsDir() || filepath.Ext(file.Name()) != ".go" || strings.HasSuffix(file.Name(), "_test.go") {
 				continue
 			}
 
-			path := filepath.Join(packageName, file.Name())
+			path := filepath.Join(packageDir, file.Name())
 			name, endpointID := inspectEndpointFile(t, path, packageName)
 			definitionCount++
 
@@ -75,16 +80,15 @@ func inspectEndpointFile(t *testing.T, path, packageName string) (string, string
 	if parsed.Name.Name != packageName {
 		t.Errorf("%s package = %s, want %s", path, parsed.Name.Name, packageName)
 	}
-	validateEndpointHeader(t, path, parsed)
+	status := validateEndpointHeader(t, path, parsed)
 
 	var endpointName string
 	var endpointID string
 	var definitionName string
+	var functions []*ast.FuncDecl
 	for _, declaration := range parsed.Decls {
 		if function, ok := declaration.(*ast.FuncDecl); ok {
-			if function.Recv != nil || implementedEndpointHandlers[path] != function.Name.Name {
-				t.Errorf("%s contains runtime function %s; contract files must not pretend to implement handlers", path, function.Name.Name)
-			}
+			functions = append(functions, function)
 			continue
 		}
 
@@ -130,10 +134,40 @@ func inspectEndpointFile(t *testing.T, path, packageName string) (string, string
 	if endpointName != definitionName {
 		t.Fatalf("%s EndpointID belongs to %s but definition belongs to %s", path, endpointName, definitionName)
 	}
+	validateEndpointFunctions(t, path, status, endpointName, functions)
+
 	return endpointName, endpointID
 }
 
-func validateEndpointHeader(t *testing.T, path string, parsed *ast.File) {
+// validateEndpointFunctions enforces that a contract-only file stays free of
+// runtime code and that an implemented file carries exactly one plain function
+// named after its endpoint.
+func validateEndpointFunctions(t *testing.T, path, status, endpointName string, functions []*ast.FuncDecl) {
+	t.Helper()
+
+	if status == statusContractOnly {
+		for _, function := range functions {
+			t.Errorf("%s is a contract definition only but contains runtime function %s", path, function.Name.Name)
+		}
+		return
+	}
+
+	if len(functions) != 1 {
+		t.Fatalf("%s is implemented and must contain exactly one runtime function %s, found %d",
+			path, endpointName, len(functions))
+	}
+	function := functions[0]
+	if function.Recv != nil {
+		t.Errorf("%s runtime handler %s must not be a method", path, function.Name.Name)
+	}
+	if function.Name.Name != endpointName {
+		t.Errorf("%s contains runtime function %s, want %s", path, function.Name.Name, endpointName)
+	}
+}
+
+// validateEndpointHeader checks the mandatory endpoint contract comment and
+// returns the implementation status it declares.
+func validateEndpointHeader(t *testing.T, path string, parsed *ast.File) string {
 	t.Helper()
 
 	if len(parsed.Comments) == 0 || parsed.Comments[0].Pos() > parsed.Package {
@@ -158,5 +192,36 @@ func validateEndpointHeader(t *testing.T, path string, parsed *ast.File) {
 	}
 	if !strings.Contains(header, "Save variables read:") && !strings.Contains(header, "Save variables processed:") {
 		t.Errorf("%s endpoint contract comment must describe save variables read or processed", path)
+	}
+
+	return endpointImplementationStatus(t, path, header)
+}
+
+// endpointImplementationStatus reads the single "Implementation status:" line of
+// the contract comment. The status is the text before the first semicolon; the
+// remainder is human-readable justification. An unknown, missing or repeated
+// status fails instead of defaulting to either mode.
+func endpointImplementationStatus(t *testing.T, path, header string) string {
+	t.Helper()
+
+	var declared []string
+	for _, line := range strings.Split(header, "\n") {
+		remainder, found := strings.CutPrefix(strings.TrimSpace(line), "Implementation status:")
+		if !found {
+			continue
+		}
+		status, _, _ := strings.Cut(remainder, ";")
+		declared = append(declared, strings.TrimSpace(status))
+	}
+
+	if len(declared) != 1 {
+		t.Fatalf("%s must declare exactly one implementation status, found %d", path, len(declared))
+	}
+	switch declared[0] {
+	case statusContractOnly, statusImplemented:
+		return declared[0]
+	default:
+		t.Fatalf("%s declares unknown implementation status %q", path, declared[0])
+		return ""
 	}
 }
