@@ -64,8 +64,12 @@ func (server *Server) metadataFacts(
 	return server.attachFactSources(server.factViews(
 		reflect.ValueOf(value),
 		prefix,
-		family == schema.ItemFamilySpiritAsh,
+		supportsNotApplicableMetadata(family),
 	))
+}
+
+func supportsNotApplicableMetadata(family schema.ItemFamily) bool {
+	return family == schema.ItemFamilySpiritAsh || family == schema.ItemFamilyWeapon
 }
 
 func (server *Server) factViews(

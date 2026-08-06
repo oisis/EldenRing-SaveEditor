@@ -2,6 +2,13 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
+const fireKnightGreatswordName = "Fire Knight's Greatsword"
+
+func requiredContainerIsNotApplicable(item seed, family schema.ItemFamily) bool {
+	return family == schema.ItemFamilySpiritAsh ||
+		(family == schema.ItemFamilyWeapon && item.Name == fireKnightGreatswordName)
+}
+
 func buildAcquisition(item seed, requiredContainerNotApplicable bool) schema.ItemAcquisition {
 	acquisition := schema.ItemAcquisition{
 		IsContainer: knownLegacyFact(
@@ -31,8 +38,12 @@ func buildAcquisition(item seed, requiredContainerNotApplicable bool) schema.Ite
 			"copied from legacy RequiredContainer",
 		)
 	} else if requiredContainerNotApplicable {
+		reason := "spirit ash items are never held in a legacy RequiredContainer"
+		if item.Name == fireKnightGreatswordName {
+			reason = "Fire Knight's Greatsword is never held in a legacy RequiredContainer"
+		}
 		acquisition.RequiredContainerID = notApplicableCatalogFact[uint32](
-			"spirit ash items are never held in a legacy RequiredContainer",
+			reason,
 		)
 	} else {
 		acquisition.RequiredContainerID = unknownCatalogFact[uint32](

@@ -149,7 +149,7 @@ func TestOptionalMetadataFactsRenderNotApplicable(t *testing.T) {
 			},
 		},
 		"",
-		schema.ItemFamilySpiritAsh,
+		schema.ItemFamilyWeapon,
 	)
 	links := server.metadataFacts(
 		schema.ItemLinks{

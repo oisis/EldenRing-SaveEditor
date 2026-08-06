@@ -43,6 +43,9 @@ func TestUnknownCountSkipsNotApplicableMetadataAndUpgradeAffinity(t *testing.T) 
 	if got := countUnknownFactsForFamily(notApplicable, schema.ItemFamilySpiritAsh); got != 0 {
 		t.Fatalf("not-applicable metadata unknown count = %d, want 0", got)
 	}
+	if got := countUnknownFactsForFamily(notApplicable, schema.ItemFamilyWeapon); got != 0 {
+		t.Fatalf("weapon not-applicable metadata unknown count = %d, want 0", got)
+	}
 
 	unresolved := optionalMetadata{
 		RequiredContainerID: schema.Fact[uint32]{

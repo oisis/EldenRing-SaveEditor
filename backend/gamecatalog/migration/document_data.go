@@ -82,7 +82,7 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 		Storage:                 storage,
 		Capabilities:            capabilities,
 		Safety:                  context.buildSafety(item),
-		Acquisition:             buildAcquisition(item, family == schema.ItemFamilySpiritAsh),
+		Acquisition:             buildAcquisition(item, requiredContainerIsNotApplicable(item, family)),
 		Modifiers:               modifiers,
 		Links:                   buildLinks(item.Links, family == schema.ItemFamilySpiritAsh),
 		Unlocks:                 buildUnlocks(item.Unlocks),

@@ -46,6 +46,21 @@ func TestApplicableOptionalMetadataStaysUnresolved(t *testing.T) {
 	}
 }
 
+func TestRequiredContainerNotApplicableScope(t *testing.T) {
+	if !requiredContainerIsNotApplicable(
+		seed{Name: fireKnightGreatswordName},
+		schema.ItemFamilyWeapon,
+	) {
+		t.Fatal("Fire Knight's Greatsword must be not applicable")
+	}
+	if requiredContainerIsNotApplicable(
+		seed{Name: "Fire Knight's Shortsword"},
+		schema.ItemFamilyWeapon,
+	) {
+		t.Fatal("Fire Knight's Shortsword must remain unresolved")
+	}
+}
+
 func assertNotApplicableFact(
 	t *testing.T,
 	name string,

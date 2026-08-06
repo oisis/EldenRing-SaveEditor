@@ -13,7 +13,7 @@ func countUnknownFacts(value any) int {
 func countUnknownFactsForFamily(value any, family schema.ItemFamily) int {
 	return countUnknownValue(
 		reflect.ValueOf(value),
-		family == schema.ItemFamilySpiritAsh,
+		supportsNotApplicableMetadata(family),
 	)
 }
 
