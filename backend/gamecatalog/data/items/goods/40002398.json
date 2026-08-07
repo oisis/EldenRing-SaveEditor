@@ -155,28 +155,6 @@
           "row": "9112",
           "field": "maxRepositoryNum"
         }
-      },
-      "gameMaxInventory": {
-        "known": true,
-        "value": 1,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxNum from row 9112",
-          "table": "EquipParamGoods",
-          "row": "9112",
-          "field": "maxNum"
-        }
-      },
-      "gameMaxStorage": {
-        "known": true,
-        "value": 1,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxRepositoryNum from row 9112",
-          "table": "EquipParamGoods",
-          "row": "9112",
-          "field": "maxRepositoryNum"
-        }
       }
     },
     "capabilities": {

@@ -72,10 +72,6 @@ type ItemStorage struct {
 	MaxStorage           Fact[uint32]     `json:"maxStorage"`
 	SafeModeMaxStorage   *Fact[uint32]    `json:"safeModeMaxStorage,omitempty"`
 	MaxStorageSFV        *Fact[uint32]    `json:"maxStorage-sfv,omitempty"`
-	GameMaxInventory     Fact[uint32]     `json:"gameMaxInventory"`
-	GameMaxInventorySFV  *Fact[uint32]    `json:"gameMaxInventory-sfv,omitempty"`
-	GameMaxStorage       Fact[uint32]     `json:"gameMaxStorage"`
-	GameMaxStorageSFV    *Fact[uint32]    `json:"gameMaxStorage-sfv,omitempty"`
 }
 
 type ItemSafety struct {

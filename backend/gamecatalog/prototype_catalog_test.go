@@ -45,10 +45,6 @@ func TestPrototypeCatalogContainsTwoItems(t *testing.T) {
 		dagger.Item.Storage.MaxStorage.Value != 1 {
 		t.Errorf("Dagger effective storage limits = %+v", dagger.Item.Storage)
 	}
-	if dagger.Item.Storage.GameMaxInventory.Known ||
-		dagger.Item.Storage.GameMaxStorage.Known {
-		t.Error("Regulation zero sentinels must not become known game limits")
-	}
 
 	determination, ok := catalog.ItemByGameID(prototype.DeterminationGameID)
 	if !ok {

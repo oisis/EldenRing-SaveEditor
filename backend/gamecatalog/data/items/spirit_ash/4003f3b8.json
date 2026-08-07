@@ -163,28 +163,6 @@
           "source": "legacy_db_data",
           "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
         }
-      },
-      "gameMaxInventory": {
-        "known": true,
-        "value": 1,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxNum from row 259000",
-          "table": "EquipParamGoods",
-          "row": "259000",
-          "field": "maxNum"
-        }
-      },
-      "gameMaxStorage": {
-        "known": true,
-        "value": 600,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxRepositoryNum from row 259000",
-          "table": "EquipParamGoods",
-          "row": "259000",
-          "field": "maxRepositoryNum"
-        }
       }
     },
     "capabilities": {
@@ -734,28 +712,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
-              }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259001",
-                "table": "EquipParamGoods",
-                "row": "259001",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259001",
-                "table": "EquipParamGoods",
-                "row": "259001",
-                "field": "maxRepositoryNum"
               }
             }
           },
@@ -1851,28 +1807,6 @@
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259002",
-                "table": "EquipParamGoods",
-                "row": "259002",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259002",
-                "table": "EquipParamGoods",
-                "row": "259002",
-                "field": "maxRepositoryNum"
-              }
             }
           },
           "capabilities": {
@@ -2966,28 +2900,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
-              }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259003",
-                "table": "EquipParamGoods",
-                "row": "259003",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259003",
-                "table": "EquipParamGoods",
-                "row": "259003",
-                "field": "maxRepositoryNum"
               }
             }
           },
@@ -4083,28 +3995,6 @@
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259004",
-                "table": "EquipParamGoods",
-                "row": "259004",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259004",
-                "table": "EquipParamGoods",
-                "row": "259004",
-                "field": "maxRepositoryNum"
-              }
             }
           },
           "capabilities": {
@@ -5198,28 +5088,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
-              }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259005",
-                "table": "EquipParamGoods",
-                "row": "259005",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259005",
-                "table": "EquipParamGoods",
-                "row": "259005",
-                "field": "maxRepositoryNum"
               }
             }
           },
@@ -6315,28 +6183,6 @@
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259006",
-                "table": "EquipParamGoods",
-                "row": "259006",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259006",
-                "table": "EquipParamGoods",
-                "row": "259006",
-                "field": "maxRepositoryNum"
-              }
             }
           },
           "capabilities": {
@@ -7430,28 +7276,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
-              }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259007",
-                "table": "EquipParamGoods",
-                "row": "259007",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259007",
-                "table": "EquipParamGoods",
-                "row": "259007",
-                "field": "maxRepositoryNum"
               }
             }
           },
@@ -8547,28 +8371,6 @@
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259008",
-                "table": "EquipParamGoods",
-                "row": "259008",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259008",
-                "table": "EquipParamGoods",
-                "row": "259008",
-                "field": "maxRepositoryNum"
-              }
             }
           },
           "capabilities": {
@@ -9663,28 +9465,6 @@
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
               }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259009",
-                "table": "EquipParamGoods",
-                "row": "259009",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259009",
-                "table": "EquipParamGoods",
-                "row": "259009",
-                "field": "maxRepositoryNum"
-              }
             }
           },
           "capabilities": {
@@ -10778,28 +10558,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
-              }
-            },
-            "gameMaxInventory": {
-              "known": true,
-              "value": 1,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxNum from row 259010",
-                "table": "EquipParamGoods",
-                "row": "259010",
-                "field": "maxNum"
-              }
-            },
-            "gameMaxStorage": {
-              "known": true,
-              "value": 600,
-              "provenance": {
-                "source": "regulation_equip_param_goods",
-                "method": "parsed maxRepositoryNum from row 259010",
-                "table": "EquipParamGoods",
-                "row": "259010",
-                "field": "maxRepositoryNum"
               }
             }
           },

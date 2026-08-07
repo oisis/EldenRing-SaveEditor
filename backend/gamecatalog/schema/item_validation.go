@@ -139,10 +139,7 @@ func validateStorage(storage ItemStorage, sources map[SourceID]struct{}) error {
 			return err
 		}
 	}
-	if err := validateOptionalFact("item.storage.gameMaxInventory", storage.GameMaxInventory, sources); err != nil {
-		return err
-	}
-	return validateOptionalFact("item.storage.gameMaxStorage", storage.GameMaxStorage, sources)
+	return nil
 }
 
 func validateSafety(safety ItemSafety, sources map[SourceID]struct{}) error {

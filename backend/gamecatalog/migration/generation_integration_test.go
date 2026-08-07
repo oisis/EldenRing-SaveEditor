@@ -512,9 +512,7 @@ func assertSlotOnlyGestureContracts(
 	}
 	if unknown.Storage.RecordMode.Known ||
 		unknown.Storage.MaxInventory.Known ||
-		unknown.Storage.MaxStorage.Known ||
-		unknown.Storage.GameMaxInventory.Known ||
-		unknown.Storage.GameMaxStorage.Known {
+		unknown.Storage.MaxStorage.Known {
 		t.Fatalf("gesture 0x40002354 fabricated storage = %#v", unknown.Storage)
 	}
 	for _, capability := range []bool{
@@ -540,16 +538,22 @@ func assertSlotOnlyGestureContracts(
 	if withGoods == nil {
 		t.Fatal("gesture 0x40002359 is not canonical")
 	}
-	if withGoods.Storage.RecordMode.Known ||
-		withGoods.Storage.MaxInventory.Known ||
-		withGoods.Storage.MaxStorage.Known {
-		t.Fatalf("gesture 0x40002359 fabricated authored storage = %#v", withGoods.Storage)
+	if withGoods.Storage.RecordMode.Known {
+		t.Fatalf("gesture 0x40002359 fabricated authored record mode = %#v", withGoods.Storage)
 	}
-	if !withGoods.Storage.GameMaxInventory.Known ||
-		!withGoods.Storage.GameMaxStorage.Known ||
-		withGoods.Storage.GameMaxInventory.Provenance.Source !=
+	if !withGoods.Storage.MaxInventory.Known ||
+		withGoods.Storage.MaxInventory.Value != 1 ||
+		!withGoods.Storage.MaxStorage.Known ||
+		withGoods.Storage.MaxStorage.Value != 1 ||
+		withGoods.Storage.MaxInventory.Provenance.Source !=
+			sourceIDByRegulationTable[RegulationTableGoods] ||
+		withGoods.Storage.MaxStorage.Provenance.Source !=
 			sourceIDByRegulationTable[RegulationTableGoods] {
-		t.Fatalf("gesture 0x40002359 Regulation game limits = %#v", withGoods.Storage)
+		t.Fatalf("gesture 0x40002359 Regulation storage limits = %#v", withGoods.Storage)
+	}
+	if withGoods.Storage.MaxInventorySFV != nil ||
+		withGoods.Storage.MaxStorageSFV != nil {
+		t.Fatalf("gesture 0x40002359 fabricated SaveForge limits = %#v", withGoods.Storage)
 	}
 }
 

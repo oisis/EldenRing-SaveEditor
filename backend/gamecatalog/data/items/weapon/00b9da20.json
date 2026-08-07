@@ -149,22 +149,6 @@
           "source": "legacy_db_data",
           "method": "copied from legacy ItemData.MaxStorage"
         }
-      },
-      "gameMaxInventory": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy game inventory limit is unknown"
-        }
-      },
-      "gameMaxStorage": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy game storage limit is unknown"
-        }
       }
     },
     "capabilities": {
@@ -598,22 +582,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
-              }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
               }
             }
           },
@@ -1958,22 +1926,6 @@
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
               }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
-              }
             }
           },
           "capabilities": {
@@ -3316,22 +3268,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
-              }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
               }
             }
           },
@@ -4676,22 +4612,6 @@
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
               }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
-              }
             }
           },
           "capabilities": {
@@ -6034,22 +5954,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
-              }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
               }
             }
           },
@@ -7394,22 +7298,6 @@
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
               }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
-              }
             }
           },
           "capabilities": {
@@ -8752,22 +8640,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
-              }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
               }
             }
           },
@@ -10112,22 +9984,6 @@
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
               }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
-              }
             }
           },
           "capabilities": {
@@ -11470,22 +11326,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
-              }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
               }
             }
           },
@@ -12917,22 +12757,6 @@
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
               }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
-              }
             }
           },
           "capabilities": {
@@ -14363,22 +14187,6 @@
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
               }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
-              }
             }
           },
           "capabilities": {
@@ -15721,22 +15529,6 @@
               "provenance": {
                 "source": "legacy_db_data",
                 "method": "copied from the canonical legacy ItemData.MaxStorage for a Regulation-only variant"
-              }
-            },
-            "gameMaxInventory": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game inventory limit is unknown"
-              }
-            },
-            "gameMaxStorage": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy game storage limit is unknown"
               }
             }
           },

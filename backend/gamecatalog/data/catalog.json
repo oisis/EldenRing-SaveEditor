@@ -1,7 +1,7 @@
 {
   "manifest": {
-    "schemaVersion": 5,
-    "dataVersion": "6321623b03863a936082df96349b51fe168f6b6cc849e1f3b799e93d31e16d50",
+    "schemaVersion": 6,
+    "dataVersion": "b14cb48b95e19281d4d0e0e1bcd43cc38c0ce5f2fdc5652039601d95e6b0f0d3",
     "gameVersion": "1.16-class",
     "sources": [
       {

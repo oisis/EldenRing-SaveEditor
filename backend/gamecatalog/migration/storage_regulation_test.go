@@ -47,31 +47,18 @@ func TestGoodsStorageRegulationValuesDiscardReviewedSaveForgeValues(t *testing.T
 			storage.MaxStorage.Value,
 		)
 	}
-	if storage.GameMaxInventory.Value != 17 || storage.GameMaxStorage.Value != 18 {
-		t.Fatalf(
-			"game limits = %d/%d, want Regulation 17/18",
-			storage.GameMaxInventory.Value,
-			storage.GameMaxStorage.Value,
-		)
-	}
-	if storage.GameMaxInventory.Provenance.Source !=
+	if storage.MaxInventory.Provenance.Source !=
 		sourceIDByRegulationTable[RegulationTableGoods] ||
-		storage.GameMaxStorage.Provenance.Source !=
+		storage.MaxStorage.Provenance.Source !=
 			sourceIDByRegulationTable[RegulationTableGoods] {
 		t.Fatalf(
-			"game-limit sources = %q/%q",
-			storage.GameMaxInventory.Provenance.Source,
-			storage.GameMaxStorage.Provenance.Source,
+			"storage-limit sources = %q/%q",
+			storage.MaxInventory.Provenance.Source,
+			storage.MaxStorage.Provenance.Source,
 		)
 	}
 	if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
 		t.Fatalf("reviewed tool retains SaveForge storage values: %#v", storage)
-	}
-	if storage.GameMaxInventorySFV == nil ||
-		storage.GameMaxInventorySFV.Value != 99 ||
-		storage.GameMaxStorageSFV == nil ||
-		storage.GameMaxStorageSFV.Value != 100 {
-		t.Fatalf("SaveForge technical limits = %#v", storage)
 	}
 }
 
@@ -150,9 +137,7 @@ func TestCrystalTorrentStorageUsesRegulationAndDiscardsReviewedSaveForgeValues(t
 		t.Fatalf("buildStorage: %v", err)
 	}
 	if storage.MaxInventory.Value != 99 ||
-		storage.MaxStorage.Value != 600 ||
-		storage.GameMaxInventory.Value != 99 ||
-		storage.GameMaxStorage.Value != 600 {
+		storage.MaxStorage.Value != 600 {
 		t.Fatalf("Crystal Torrent Regulation limits = %#v", storage)
 	}
 	if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil {
@@ -187,10 +172,10 @@ func TestObservedCanonicalStorageOverrideRemains999(t *testing.T) {
 		if err != nil {
 			t.Fatalf("item 0x%08X buildStorage: %v", itemID, err)
 		}
-		if storage.GameMaxInventory.Value != 999 ||
-			storage.GameMaxStorage.Value != 999 ||
-			storage.GameMaxInventory.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] ||
-			storage.GameMaxStorage.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] {
+		if storage.MaxInventory.Value != 999 ||
+			storage.MaxStorage.Value != 999 ||
+			storage.MaxInventory.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] ||
+			storage.MaxStorage.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] {
 			t.Fatalf("item 0x%08X protected limits = %#v", itemID, storage)
 		}
 		rawStorage, err := regulationUint32(primary.Row, "maxRepositoryNum")
@@ -251,8 +236,8 @@ func TestSpellAndGoodsStorageGameLimitsMatchRegulation(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			if !storage.GameMaxInventory.Known || !storage.GameMaxStorage.Known {
-				t.Fatalf("game limits are unknown: %#v", storage)
+			if !storage.MaxInventory.Known || !storage.MaxStorage.Known {
+				t.Fatalf("storage limits are unknown: %#v", storage)
 			}
 			if wantInventory == 0 {
 				wantInventory = storage.MaxInventory.Value
@@ -264,20 +249,20 @@ func TestSpellAndGoodsStorageGameLimitsMatchRegulation(t *testing.T) {
 					wantStorage = item.GameLimits.MaxStorage
 				}
 			}
-			if storage.GameMaxInventory.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] ||
-				storage.GameMaxStorage.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] {
+			if storage.MaxInventory.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] ||
+				storage.MaxStorage.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] {
 				t.Fatalf(
-					"game-limit sources = %q/%q, want Regulation",
-					storage.GameMaxInventory.Provenance.Source,
-					storage.GameMaxStorage.Provenance.Source,
+					"storage-limit sources = %q/%q, want Regulation",
+					storage.MaxInventory.Provenance.Source,
+					storage.MaxStorage.Provenance.Source,
 				)
 			}
-			if storage.GameMaxInventory.Value != wantInventory ||
-				storage.GameMaxStorage.Value != wantStorage {
+			if storage.MaxInventory.Value != wantInventory ||
+				storage.MaxStorage.Value != wantStorage {
 				t.Fatalf(
-					"game limits = %d/%d, want %d/%d",
-					storage.GameMaxInventory.Value,
-					storage.GameMaxStorage.Value,
+					"storage limits = %d/%d, want %d/%d",
+					storage.MaxInventory.Value,
+					storage.MaxStorage.Value,
 					wantInventory,
 					wantStorage,
 				)

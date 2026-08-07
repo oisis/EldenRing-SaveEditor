@@ -135,22 +135,6 @@
         }
       },
       "maxInventory": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_unknown",
-          "method": "slot-only gesture has no legacy ItemData.MaxInventory"
-        }
-      },
-      "maxStorage": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_unknown",
-          "method": "slot-only gesture has no legacy ItemData.MaxStorage"
-        }
-      },
-      "gameMaxInventory": {
         "known": true,
         "value": 1,
         "provenance": {
@@ -161,7 +145,7 @@
           "field": "maxNum"
         }
       },
-      "gameMaxStorage": {
+      "maxStorage": {
         "known": true,
         "value": 1,
         "provenance": {

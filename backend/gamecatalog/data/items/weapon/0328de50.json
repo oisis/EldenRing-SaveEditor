@@ -149,22 +149,6 @@
           "source": "legacy_db_data",
           "method": "copied from legacy ItemData.MaxStorage"
         }
-      },
-      "gameMaxInventory": {
-        "known": true,
-        "value": 20,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy GameLimitsByItemID.MaxInventory"
-        }
-      },
-      "gameMaxStorage": {
-        "known": true,
-        "value": 600,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy GameLimitsByItemID.MaxStorage"
-        }
       }
     },
     "capabilities": {

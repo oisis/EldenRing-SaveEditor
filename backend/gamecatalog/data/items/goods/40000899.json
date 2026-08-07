@@ -163,28 +163,6 @@
           "source": "legacy_db_data",
           "method": "preserved legacy Safe Mode maximum storage for a single NG0 playthrough"
         }
-      },
-      "gameMaxInventory": {
-        "known": true,
-        "value": 1,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxNum from row 2201",
-          "table": "EquipParamGoods",
-          "row": "2201",
-          "field": "maxNum"
-        }
-      },
-      "gameMaxStorage": {
-        "known": true,
-        "value": 600,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxRepositoryNum from row 2201",
-          "table": "EquipParamGoods",
-          "row": "2201",
-          "field": "maxRepositoryNum"
-        }
       }
     },
     "capabilities": {

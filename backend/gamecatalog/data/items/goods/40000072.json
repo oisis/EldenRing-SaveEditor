@@ -155,28 +155,6 @@
           "row": "114",
           "field": "maxRepositoryNum"
         }
-      },
-      "gameMaxInventory": {
-        "known": true,
-        "value": 99,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxNum from row 114",
-          "table": "EquipParamGoods",
-          "row": "114",
-          "field": "maxNum"
-        }
-      },
-      "gameMaxStorage": {
-        "known": true,
-        "value": 0,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "maxRepositoryNum is the zero sentinel; retained the migrated effective limit",
-          "table": "EquipParamGoods",
-          "row": "114",
-          "field": "maxRepositoryNum"
-        }
       }
     },
     "capabilities": {

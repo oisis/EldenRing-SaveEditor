@@ -171,28 +171,6 @@
           "source": "legacy_db_data",
           "method": "preserved legacy Safe Mode maximum spell storage"
         }
-      },
-      "gameMaxInventory": {
-        "known": true,
-        "value": 99,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxNum from row 6330",
-          "table": "EquipParamGoods",
-          "row": "6330",
-          "field": "maxNum"
-        }
-      },
-      "gameMaxStorage": {
-        "known": true,
-        "value": 600,
-        "provenance": {
-          "source": "regulation_equip_param_goods",
-          "method": "parsed maxRepositoryNum from row 6330",
-          "table": "EquipParamGoods",
-          "row": "6330",
-          "field": "maxRepositoryNum"
-        }
       }
     },
     "capabilities": {

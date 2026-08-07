@@ -29,31 +29,11 @@ func (server *Server) storageFacts(storage schema.ItemStorage) []factView {
 		"Safe Mode maximum storage",
 		storage.SafeModeMaxStorage,
 	)
-	result = appendOptionalStorageFact(
+	return appendOptionalStorageFact(
 		server,
 		result,
 		"Maximum storage — SaveForge value",
 		storage.MaxStorageSFV,
-	)
-	result = append(
-		result,
-		server.fact("Game maximum inventory", storage.GameMaxInventory.Known, storage.GameMaxInventory.Value, storage.GameMaxInventory.Provenance),
-	)
-	result = appendOptionalStorageFact(
-		server,
-		result,
-		"Game maximum inventory — SaveForge value",
-		storage.GameMaxInventorySFV,
-	)
-	result = append(
-		result,
-		server.fact("Game maximum storage", storage.GameMaxStorage.Known, storage.GameMaxStorage.Value, storage.GameMaxStorage.Provenance),
-	)
-	return appendOptionalStorageFact(
-		server,
-		result,
-		"Game maximum storage — SaveForge value",
-		storage.GameMaxStorageSFV,
 	)
 }
 

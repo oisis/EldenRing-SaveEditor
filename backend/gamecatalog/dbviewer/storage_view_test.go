@@ -37,8 +37,6 @@ func TestStorageFactsShowsSaveForgeValueNextToRegulationValue(t *testing.T) {
 		MaxInventorySFV:      &saveForge,
 		MaxStorage:           schema.Fact[uint32]{Known: true, Value: 600, Provenance: regulation},
 		SafeModeMaxStorage:   &saveForge,
-		GameMaxInventory:     schema.Fact[uint32]{Known: true, Value: 99, Provenance: regulation},
-		GameMaxStorage:       schema.Fact[uint32]{Known: true, Value: 600, Provenance: regulation},
 	}
 
 	facts := server.storageFacts(storage)

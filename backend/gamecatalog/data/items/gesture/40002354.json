@@ -143,22 +143,6 @@
           "source": "legacy_unknown",
           "method": "slot-only gesture has no legacy ItemData.MaxStorage"
         }
-      },
-      "gameMaxInventory": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy game inventory limit is unknown"
-        }
-      },
-      "gameMaxStorage": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy game storage limit is unknown"
-        }
       }
     },
     "capabilities": {

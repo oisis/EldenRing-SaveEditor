@@ -297,7 +297,7 @@ func (context *generationContext) buildStorage(
 	hasPrimaryRow bool,
 ) (schema.ItemStorage, error) {
 	storage := authoredStorage(item)
-	applyLegacyGameLimitFallback(&storage, item)
+	legacyGameInventory, legacyGameStorage := legacyGameLimits(item)
 	goodsRow, goodsExists, err := context.goodsStorageRow(
 		item,
 		family,
@@ -318,48 +318,32 @@ func (context *generationContext) buildStorage(
 		}
 		authoritativeInventory := regulationGameLimitFact(
 			maxInventory,
-			storage.GameMaxInventory,
+			legacyGameInventory,
 			"maxNum",
 			goodsRow.RowID,
 		)
 		authoritativeStorage := regulationGameLimitFact(
 			maxStorage,
-			storage.GameMaxStorage,
+			legacyGameStorage,
 			"maxRepositoryNum",
 			goodsRow.RowID,
 		)
-		if item.HasLegacyItem || item.RegulationOnlyVariant {
-			storage.MaxInventorySFV = saveForgeValue(
-				item.HasLegacyItem,
-				storage.MaxInventory.Value,
-				authoritativeInventory.Value,
-				"preserved conflicting legacy ItemData.MaxInventory",
-			)
-			storage.MaxStorageSFV = saveForgeValue(
-				item.HasLegacyItem,
-				storage.MaxStorage.Value,
-				authoritativeStorage.Value,
-				"preserved conflicting legacy ItemData.MaxStorage",
-			)
-			storage.MaxInventory = authoritativeInventory
-			storage.MaxStorage = authoritativeStorage
-		}
+		storage.MaxInventorySFV = saveForgeValue(
+			item.HasLegacyItem,
+			storage.MaxInventory.Value,
+			authoritativeInventory.Value,
+			"preserved conflicting legacy ItemData.MaxInventory",
+		)
+		storage.MaxStorageSFV = saveForgeValue(
+			item.HasLegacyItem,
+			storage.MaxStorage.Value,
+			authoritativeStorage.Value,
+			"preserved conflicting legacy ItemData.MaxStorage",
+		)
+		storage.MaxInventory = authoritativeInventory
+		storage.MaxStorage = authoritativeStorage
 		promoteSafeModeStorageLimits(&storage, item)
 		promoteKeyItemNG0InventoryLimits(&storage, item)
-		storage.GameMaxInventorySFV = saveForgeValue(
-			item.HasLegacyItem && storage.GameMaxInventory.Known,
-			storage.GameMaxInventory.Value,
-			authoritativeInventory.Value,
-			"preserved conflicting legacy technical inventory limit",
-		)
-		storage.GameMaxStorageSFV = saveForgeValue(
-			item.HasLegacyItem && storage.GameMaxStorage.Known,
-			storage.GameMaxStorage.Value,
-			authoritativeStorage.Value,
-			"preserved conflicting legacy technical storage limit",
-		)
-		storage.GameMaxInventory = authoritativeInventory
-		storage.GameMaxStorage = authoritativeStorage
 		discardReviewedStorageSaveForgeValues(&storage, item, family)
 		return storage, nil
 	}
@@ -390,11 +374,9 @@ func regulationGameLimitFact(
 func authoredStorage(item seed) schema.ItemStorage {
 	if !item.HasLegacyItem && !item.RegulationOnlyVariant {
 		return schema.ItemStorage{
-			RecordMode:       unknownLegacyFact[schema.RecordMode]("slot-only gesture has no legacy ItemData record mode"),
-			MaxInventory:     unknownLegacyFact[uint32]("slot-only gesture has no legacy ItemData.MaxInventory"),
-			MaxStorage:       unknownLegacyFact[uint32]("slot-only gesture has no legacy ItemData.MaxStorage"),
-			GameMaxInventory: unknownLegacyFact[uint32]("slot-only gesture game inventory limit is unknown"),
-			GameMaxStorage:   unknownLegacyFact[uint32]("slot-only gesture game storage limit is unknown"),
+			RecordMode:   unknownLegacyFact[schema.RecordMode]("slot-only gesture has no legacy ItemData record mode"),
+			MaxInventory: unknownLegacyFact[uint32]("slot-only gesture has no legacy ItemData.MaxInventory"),
+			MaxStorage:   unknownLegacyFact[uint32]("slot-only gesture has no legacy ItemData.MaxStorage"),
 		}
 	}
 	recordModeMethod := "normalized from the verified item record family"
@@ -409,12 +391,6 @@ func authoredStorage(item seed) schema.ItemStorage {
 		RecordMode:   knownLegacyFact(recordMode(item), recordModeMethod),
 		MaxInventory: knownLegacyFact(item.MaxInventory, maxInventoryMethod),
 		MaxStorage:   knownLegacyFact(item.MaxStorage, maxStorageMethod),
-		GameMaxInventory: unknownCatalogFact[uint32](
-			"legacy game inventory limit is unknown",
-		),
-		GameMaxStorage: unknownCatalogFact[uint32](
-			"legacy game storage limit is unknown",
-		),
 	}
 }
 
@@ -445,33 +421,34 @@ func (context *generationContext) goodsStorageRow(
 	return ParameterRow{}, false, nil
 }
 
-func applyLegacyGameLimitFallback(storage *schema.ItemStorage, item seed) {
+// legacyGameLimits reports the migrated legacy technical limits that back the
+// Regulation zero-sentinel fallback in regulationGameLimitFact.
+func legacyGameLimits(item seed) (schema.Fact[uint32], schema.Fact[uint32]) {
+	inventory := unknownCatalogFact[uint32]("legacy game inventory limit is unknown")
+	storage := unknownCatalogFact[uint32]("legacy game storage limit is unknown")
 	if item.GameMaxInventoryKnown {
-		storage.GameMaxInventory = knownLegacyFact(
+		inventory = knownLegacyFact(
 			item.GameMaxInventory,
 			"copied from legacy ItemData.GameMaxInventory",
 		)
 	} else if item.GameLimits != nil && item.GameLimits.InventoryKnown {
-		storage.GameMaxInventory = knownLegacyFact(
+		inventory = knownLegacyFact(
 			item.GameLimits.MaxInventory,
 			"copied from legacy GameLimitsByItemID.MaxInventory",
 		)
-	} else {
-		storage.GameMaxInventory = unknownCatalogFact[uint32]("legacy game inventory limit is unknown")
 	}
 	if item.GameMaxStorageKnown {
-		storage.GameMaxStorage = knownLegacyFact(
+		storage = knownLegacyFact(
 			item.GameMaxStorage,
 			"copied from legacy ItemData.GameMaxStorage",
 		)
 	} else if item.GameLimits != nil && item.GameLimits.StorageKnown {
-		storage.GameMaxStorage = knownLegacyFact(
+		storage = knownLegacyFact(
 			item.GameLimits.MaxStorage,
 			"copied from legacy GameLimitsByItemID.MaxStorage",
 		)
-	} else {
-		storage.GameMaxStorage = unknownCatalogFact[uint32]("legacy game storage limit is unknown")
 	}
+	return inventory, storage
 }
 
 func recordMode(item seed) schema.RecordMode {
