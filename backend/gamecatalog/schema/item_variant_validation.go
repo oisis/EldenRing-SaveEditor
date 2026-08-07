@@ -73,8 +73,11 @@ func validateVariantKind(
 		if err := validateKnownAffinity(name, variant.Affinity, sources); err != nil {
 			return err
 		}
-		if !isOmittedFact(variant.UpgradeLevel) {
-			return fmt.Errorf("%s.upgradeLevel must be omitted for affinity variant", name)
+		if err := validateKnownUpgradeLevel(name, variant.UpgradeLevel, sources); err != nil {
+			return err
+		}
+		if variant.UpgradeLevel.Value != 0 {
+			return fmt.Errorf("%s.upgradeLevel must be zero for affinity variant", name)
 		}
 	case ItemVariantUpgrade:
 		if err := validateKnownUpgradeLevel(name, variant.UpgradeLevel, sources); err != nil {

@@ -394,11 +394,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130100",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -1422,11 +1425,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130200",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -2450,11 +2456,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130300",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -3478,11 +3487,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130400",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -4506,11 +4518,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130500",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -5534,11 +5549,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130600",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -6562,11 +6580,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130700",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -7590,11 +7611,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130800",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -8618,11 +8642,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23130900",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -9734,11 +9761,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23131000",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -10850,11 +10880,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23131100",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {
@@ -11966,11 +11999,14 @@
           }
         },
         "upgradeLevel": {
-          "known": false,
+          "known": true,
           "value": 0,
           "provenance": {
-            "source": "",
-            "method": ""
+            "source": "regulation_equip_param_weapon",
+            "method": "derived base upgrade level from the affinity variant relationship",
+            "table": "EquipParamWeapon",
+            "row": "23131200",
+            "field": "originEquipWep"
           }
         },
         "sourceRowID": {

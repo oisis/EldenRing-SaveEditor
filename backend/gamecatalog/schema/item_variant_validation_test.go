@@ -14,7 +14,7 @@ func TestValidateResourceAcceptsFullTypedVariantDocuments(t *testing.T) {
 	p := testProvenance(manifest)
 	resource := resources[0]
 	resource.Item.Variants = []schema.ItemVariant{
-		validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, false),
+		validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, true),
 		validVariant(p, resources[0].Item, schema.ItemVariantUpgrade, 101, false, true),
 		validVariant(p, resources[0].Item, schema.ItemVariantAffinityUpgrade, 102, true, true),
 	}
@@ -36,6 +36,21 @@ func TestValidateResourceRejectsVariantMissingKindField(t *testing.T) {
 	err := schema.ValidateResource(resource, sources)
 	if err == nil || !strings.Contains(err.Error(), "upgradeLevel") {
 		t.Fatalf("ValidateResource error = %v, want missing upgrade-level rejection", err)
+	}
+}
+
+func TestValidateResourceRejectsNonZeroAffinityVariantUpgradeLevel(t *testing.T) {
+	manifest, resources := prototype.Data()
+	sources := mustValidateManifest(t, manifest)
+	p := testProvenance(manifest)
+	resource := resources[0]
+	variant := validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, true)
+	variant.UpgradeLevel.Value = 1
+	resource.Item.Variants = []schema.ItemVariant{variant}
+
+	err := schema.ValidateResource(resource, sources)
+	if err == nil || !strings.Contains(err.Error(), "must be zero for affinity variant") {
+		t.Fatalf("ValidateResource error = %v, want non-zero affinity-upgrade rejection", err)
 	}
 }
 
@@ -119,7 +134,11 @@ func validVariant(
 		variant.Affinity = knownFact(p, schema.AffinityStandard)
 	}
 	if withUpgrade {
-		variant.UpgradeLevel = knownFact(p, uint8(1))
+		level := uint8(1)
+		if kind == schema.ItemVariantAffinity {
+			level = 0
+		}
+		variant.UpgradeLevel = knownFact(p, level)
 	}
 	return variant
 }

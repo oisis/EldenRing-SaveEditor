@@ -399,8 +399,8 @@ func assertVariantIdentity(
 			variant.Affinity.Value != schema.Affinity(expected.Affinity) {
 			t.Fatalf("variant 0x%08X affinity = %#v", expected.Item.ID, variant.Affinity)
 		}
-		if !reflect.DeepEqual(variant.UpgradeLevel, schema.Fact[uint8]{}) {
-			t.Fatalf("affinity variant 0x%08X has upgrade discriminator", expected.Item.ID)
+		if !variant.UpgradeLevel.Known || variant.UpgradeLevel.Value != 0 {
+			t.Fatalf("affinity variant 0x%08X upgrade = %#v, want +0", expected.Item.ID, variant.UpgradeLevel)
 		}
 	case legacyVariantUpgrade:
 		if !variant.UpgradeLevel.Known ||

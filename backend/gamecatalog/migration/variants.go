@@ -97,6 +97,13 @@ func (context *generationContext) buildVariants(
 				identity.RowID,
 				"originEquipWep",
 			)
+			variant.UpgradeLevel = knownRegulationDerivedFact(
+				uint8(0),
+				table,
+				"derived base upgrade level from the affinity variant relationship",
+				identity.RowID,
+				"originEquipWep",
+			)
 		case legacyVariantUpgrade:
 			if family == schema.ItemFamilySpiritAsh {
 				variant.Affinity = notApplicableCatalogFact[schema.Affinity](
