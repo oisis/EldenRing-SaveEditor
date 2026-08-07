@@ -36,7 +36,11 @@ func TestEndpointFilesMatchTheirDefinitions(t *testing.T) {
 	seenIDs := make(map[string]string, expectedEndpointDefinitionCount)
 	definitionCount := 0
 	for _, entry := range entries {
-		if !entry.IsDir() || entry.Name() == "contract" || entry.Name() == "itemrouting" {
+		// "swagger" is the standalone local OpenAPI explorer command, not an
+		// endpoint group: it holds no endpoint contract file and only calls the
+		// getters defined in the domain directories below.
+		if !entry.IsDir() || entry.Name() == "contract" || entry.Name() == "itemrouting" ||
+			entry.Name() == "swagger" {
 			continue
 		}
 

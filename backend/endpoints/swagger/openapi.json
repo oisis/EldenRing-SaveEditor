@@ -1,0 +1,298 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "SaveForge 2.0 GameCatalog getters",
+    "version": "1.0.0",
+    "description": "Local, read-only HTTP surface over the currently implemented GameCatalog getters. Every operation calls exactly one Go getter and serialises its typed result. Getters whose contract file declares 'contract definition only' (GetResources, GetResourceRelations) are not exposed."
+  },
+  "servers": [
+    {
+      "url": "/",
+      "description": "Local explorer"
+    }
+  ],
+  "paths": {
+    "/api/v1/catalog/info": {
+      "get": {
+        "operationId": "getCatalogInfo",
+        "summary": "GetCatalogInfo",
+        "description": "Returns the manifest of the loaded GameCatalog: schema version, data version, game version, validation status and the used sources.",
+        "responses": {
+          "200": {
+            "description": "Catalog manifest",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCatalogInfoResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The loaded catalog manifest is missing or invalid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/resource": {
+      "get": {
+        "operationId": "getResource",
+        "summary": "GetResource",
+        "description": "Returns one full catalog resource document. resourceID is the stable schema.Resource.Key and is matched exactly.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The resource document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetResourceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "resourceID is missing, malformed or unknown. The message is the one the getter returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/item-variants": {
+      "get": {
+        "operationId": "getItemVariants",
+        "summary": "GetItemVariants",
+        "description": "Returns the variants stored in one item document, in catalog order. An item without variants returns an empty list; the base item is never synthesised into a variant.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The item variants",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetItemVariantsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "resourceID is missing, malformed, unknown, or does not point at an item. The message is the one the getter returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "operationId": "healthz",
+        "summary": "Liveness probe",
+        "responses": {
+          "200": {
+            "description": "The explorer is running",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    }
+                  },
+                  "required": ["status"]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi.json": {
+      "get": {
+        "operationId": "openapiDocument",
+        "summary": "This OpenAPI document",
+        "responses": {
+          "200": {
+            "description": "OpenAPI 3.0 specification",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/docs": {
+      "get": {
+        "operationId": "docsUI",
+        "summary": "Local browser explorer",
+        "responses": {
+          "200": {
+            "description": "HTML explorer page",
+            "content": {
+              "text/html": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "ResourceID": {
+        "name": "resourceID",
+        "in": "query",
+        "required": true,
+        "description": "Stable schema.Resource.Key, for example \"item:000F4240\". Not a numeric resource ID, not an Item.GameID, not a variant ID and not a data file name.",
+        "schema": {
+          "type": "string"
+        },
+        "example": "item:000F4240"
+      }
+    },
+    "schemas": {
+      "Error": {
+        "type": "object",
+        "description": "Error envelope carrying the message returned by the getter.",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "required": ["error"]
+      },
+      "DataSource": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "evidence": {
+            "type": "string"
+          },
+          "reviewed": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "kind", "location", "version", "evidence", "reviewed"]
+      },
+      "GetCatalogInfoResult": {
+        "type": "object",
+        "properties": {
+          "schemaVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dataVersion": {
+            "type": "string"
+          },
+          "gameVersion": {
+            "type": "string"
+          },
+          "valid": {
+            "type": "boolean",
+            "description": "True only means schema.ValidateManifest accepted the manifest."
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DataSource"
+            }
+          }
+        },
+        "required": ["schemaVersion", "dataVersion", "gameVersion", "valid", "sources"]
+      },
+      "Resource": {
+        "type": "object",
+        "description": "schema.Resource. The item document is passed through as stored in the catalog; its full shape is owned by the catalog schema, not by this explorer.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string"
+          },
+          "item": {
+            "type": "object",
+            "nullable": true,
+            "additionalProperties": true
+          }
+        },
+        "required": ["id", "key", "kind", "item"]
+      },
+      "ItemVariant": {
+        "type": "object",
+        "description": "schema.ItemVariant as stored in the catalog, with full provenance.",
+        "additionalProperties": true
+      },
+      "GetResourceResult": {
+        "type": "object",
+        "properties": {
+          "resource": {
+            "$ref": "#/components/schemas/Resource"
+          }
+        },
+        "required": ["resource"]
+      },
+      "GetItemVariantsResult": {
+        "type": "object",
+        "properties": {
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ItemVariant"
+            }
+          }
+        },
+        "required": ["variants"]
+      }
+    }
+  }
+}

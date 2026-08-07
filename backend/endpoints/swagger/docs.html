@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SaveForge GameCatalog getters</title>
+<style>
+  :root { color-scheme: light dark; --line: #8884; }
+  body { margin: 0; padding: 1.5rem; font: 14px/1.5 ui-sans-serif, system-ui, sans-serif; max-width: 60rem; }
+  h1 { font-size: 1.25rem; margin: 0 0 .25rem; }
+  p.sub { margin: 0 0 1.5rem; opacity: .7; }
+  details { border: 1px solid var(--line); border-radius: 6px; margin-bottom: .75rem; }
+  summary { cursor: pointer; padding: .6rem .8rem; font-weight: 600; }
+  summary .method { font-family: ui-monospace, monospace; margin-right: .5rem; opacity: .75; }
+  summary .path { font-family: ui-monospace, monospace; font-weight: 400; }
+  .body { padding: 0 .8rem .8rem; }
+  .desc { opacity: .8; margin: 0 0 .8rem; }
+  label { display: block; margin-bottom: .6rem; }
+  label span { display: block; font-size: .85em; opacity: .8; margin-bottom: .2rem; }
+  input { width: 100%; box-sizing: border-box; padding: .4rem; font-family: ui-monospace, monospace;
+          border: 1px solid var(--line); border-radius: 4px; background: transparent; color: inherit; }
+  button { padding: .4rem 1rem; border: 1px solid var(--line); border-radius: 4px;
+           background: transparent; color: inherit; cursor: pointer; font: inherit; }
+  .status { margin: .8rem 0 .3rem; font-family: ui-monospace, monospace; font-weight: 600; }
+  .status.ok { color: #2a8; }
+  .status.err { color: #d55; }
+  pre { margin: 0; padding: .7rem; border: 1px solid var(--line); border-radius: 4px;
+        overflow: auto; max-height: 28rem; font-size: .85em; }
+</style>
+</head>
+<body>
+<h1>SaveForge 2.0 &mdash; GameCatalog getters</h1>
+<p class="sub">Local read-only explorer. Each operation calls one Go getter. <a href="/openapi.json">openapi.json</a></p>
+<div id="operations">Loading&hellip;</div>
+
+<script>
+const METHODS = ["get", "post", "put", "patch", "delete"];
+
+function element(tag, props, children) {
+  const node = Object.assign(document.createElement(tag), props || {});
+  for (const child of children || []) node.append(child);
+  return node;
+}
+
+function buildOperation(path, method, operation) {
+  const parameters = (operation.parameters || []).map(resolveParameter);
+  const inputs = new Map();
+
+  const fields = parameters.map(parameter => {
+    const input = element("input", {
+      value: parameter.example || "",
+      placeholder: parameter.required ? "required" : "optional",
+    });
+    inputs.set(parameter.name, input);
+    const caption = parameter.name + (parameter.required ? " *" : "") + " — " + (parameter.description || "");
+    return element("label", {}, [element("span", { textContent: caption }), input]);
+  });
+
+  const status = element("div", { className: "status" });
+  const output = element("pre", { hidden: true });
+  const button = element("button", { textContent: "Execute" });
+
+  button.addEventListener("click", async () => {
+    const url = new URL(path, window.location.origin);
+    for (const [name, input] of inputs) {
+      if (input.value !== "") url.searchParams.set(name, input.value);
+    }
+    status.textContent = "…";
+    status.className = "status";
+    try {
+      const response = await fetch(url, { method: method.toUpperCase() });
+      const text = await response.text();
+      status.textContent = response.status + " " + response.statusText + "  " + url.pathname + url.search;
+      status.className = "status " + (response.ok ? "ok" : "err");
+      output.textContent = format(text);
+      output.hidden = false;
+    } catch (error) {
+      status.textContent = "request failed";
+      status.className = "status err";
+      output.textContent = String(error);
+      output.hidden = false;
+    }
+  });
+
+  return element("details", {}, [
+    element("summary", {}, [
+      element("span", { className: "method", textContent: method.toUpperCase() }),
+      element("span", { className: "path", textContent: path }),
+    ]),
+    element("div", { className: "body" }, [
+      element("p", { className: "desc", textContent: operation.description || operation.summary || "" }),
+      ...fields,
+      button,
+      status,
+      output,
+    ]),
+  ]);
+}
+
+function format(text) {
+  try {
+    return JSON.stringify(JSON.parse(text), null, 2);
+  } catch {
+    return text;
+  }
+}
+
+let specification = null;
+
+function resolveParameter(parameter) {
+  if (!parameter.$ref) return parameter;
+  const segments = parameter.$ref.replace(/^#\//, "").split("/");
+  return segments.reduce((node, segment) => node[segment], specification);
+}
+
+async function render() {
+  const container = document.getElementById("operations");
+  try {
+    const response = await fetch("/openapi.json");
+    specification = await response.json();
+  } catch (error) {
+    container.textContent = "Could not load /openapi.json: " + error;
+    return;
+  }
+  container.textContent = "";
+  for (const [path, item] of Object.entries(specification.paths || {})) {
+    for (const method of METHODS) {
+      if (item[method]) container.append(buildOperation(path, method, item[method]));
+    }
+  }
+}
+
+render();
+</script>
+</body>
+</html>
