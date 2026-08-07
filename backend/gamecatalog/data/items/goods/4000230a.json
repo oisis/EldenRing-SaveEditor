@@ -431,14 +431,6 @@
         }
       ],
       "relatedItems": [],
-      "whetbladeName": {
-        "known": true,
-        "value": "Iron Whetblade",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy Whetblades.Name"
-        }
-      },
       "mapFragment": null
     },
     "variants": [],

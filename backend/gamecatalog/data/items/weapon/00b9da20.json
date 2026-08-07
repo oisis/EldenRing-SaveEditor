@@ -431,14 +431,6 @@
       },
       "relatedEventFlags": [],
       "relatedItems": [],
-      "whetbladeName": {
-        "known": false,
-        "value": "",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy Whetblades has no entry for this item"
-        }
-      },
       "mapFragment": null
     },
     "variants": [
@@ -913,14 +905,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -2352,14 +2336,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -3791,14 +3767,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -5230,14 +5198,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -6669,14 +6629,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -8108,14 +8060,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -9547,14 +9491,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -10986,14 +10922,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -12425,14 +12353,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -13951,14 +13871,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -15477,14 +15389,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -16916,14 +16820,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy Whetblades has no entry for this item"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],

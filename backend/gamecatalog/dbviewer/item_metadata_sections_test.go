@@ -71,11 +71,6 @@ func TestItemTemplateShowsStructuredMetadataSections(t *testing.T) {
 			Value:      2010,
 			Provenance: provenance,
 		},
-		WhetbladeName: schema.Fact[string]{
-			Known:      true,
-			Value:      "Whetstone Knife",
-			Provenance: provenance,
-		},
 	}
 	technical := []schema.RelatedTechnicalRecord{{
 		Kind: schema.Fact[schema.TechnicalRecordKind]{
@@ -124,7 +119,6 @@ func TestItemTemplateShowsStructuredMetadataSections(t *testing.T) {
 		"Equip load / Equip load rate",
 		"<h2>Related game data</h2>",
 		"About tutorial ID",
-		"Whetstone Knife",
 		"<h2>Unlocks</h2>",
 		"Unlock 1 / Kind",
 		"cookbook",
@@ -151,20 +145,8 @@ func TestOptionalMetadataFactsRenderNotApplicable(t *testing.T) {
 		"",
 		schema.ItemFamilyWeapon,
 	)
-	links := server.metadataFacts(
-		schema.ItemLinks{
-			WhetbladeName: schema.Fact[string]{
-				Provenance: notApplicableProvenance("never sharpened with a whetblade"),
-			},
-		},
-		"",
-		schema.ItemFamilySpiritAsh,
-	)
 	if !containsFact(acquisition, "Required container ID", "N/A") {
 		t.Fatalf("required container fact = %#v, want N/A", acquisition)
-	}
-	if !containsFact(links, "Whetblade name", "N/A") {
-		t.Fatalf("whetblade name fact = %#v, want N/A", links)
 	}
 }
 

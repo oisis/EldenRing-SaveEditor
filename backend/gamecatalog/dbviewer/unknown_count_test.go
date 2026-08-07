@@ -30,14 +30,10 @@ func TestUnknownCountTraversesNewTopLevelFamilyVariantAndAliasFacts(t *testing.T
 func TestUnknownCountSkipsNotApplicableMetadataAndUpgradeAffinity(t *testing.T) {
 	type optionalMetadata struct {
 		RequiredContainerID schema.Fact[uint32]
-		WhetbladeName       schema.Fact[string]
 	}
 	notApplicable := optionalMetadata{
 		RequiredContainerID: schema.Fact[uint32]{
 			Provenance: notApplicableProvenance("never held in a legacy RequiredContainer"),
-		},
-		WhetbladeName: schema.Fact[string]{
-			Provenance: notApplicableProvenance("never sharpened with a whetblade"),
 		},
 	}
 	if got := countUnknownFactsForFamily(notApplicable, schema.ItemFamilySpiritAsh); got != 0 {
@@ -54,15 +50,9 @@ func TestUnknownCountSkipsNotApplicableMetadataAndUpgradeAffinity(t *testing.T) 
 				Method: "legacy RequiredContainer has no entry for this item",
 			},
 		},
-		WhetbladeName: schema.Fact[string]{
-			Provenance: schema.Provenance{
-				Source: schema.SourceSaveForgeLegacy,
-				Method: "legacy Whetblades has no entry for this item",
-			},
-		},
 	}
-	if got := countUnknownFactsForFamily(unresolved, schema.ItemFamilySpiritAsh); got != 2 {
-		t.Fatalf("unresolved metadata unknown count = %d, want 2", got)
+	if got := countUnknownFactsForFamily(unresolved, schema.ItemFamilySpiritAsh); got != 1 {
+		t.Fatalf("unresolved metadata unknown count = %d, want 1", got)
 	}
 
 	variant := schema.ItemVariant{

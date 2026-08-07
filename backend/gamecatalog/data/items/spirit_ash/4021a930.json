@@ -553,14 +553,6 @@
       },
       "relatedEventFlags": [],
       "relatedItems": [],
-      "whetbladeName": {
-        "known": false,
-        "value": "",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-        }
-      },
       "mapFragment": null
     },
     "variants": [
@@ -1157,14 +1149,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -2305,14 +2289,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -3453,14 +3429,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -4601,14 +4569,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -5749,14 +5709,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -6897,14 +6849,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -8045,14 +7989,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -9193,14 +9129,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -10341,14 +10269,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],
@@ -11489,14 +11409,6 @@
             },
             "relatedEventFlags": [],
             "relatedItems": [],
-            "whetbladeName": {
-              "known": false,
-              "value": "",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "not applicable: spirit ash items are never sharpened with a whetblade"
-              }
-            },
             "mapFragment": null
           },
           "unlocks": [],

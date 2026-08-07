@@ -29,7 +29,6 @@ func TestValidateResourceAcceptsTypedLegacyLinks(t *testing.T) {
 			Kind:   knownFact(p, schema.RelatedItemBundledAcquisition),
 			GameID: knownFact(p, uint32(0x8000C418)),
 		}},
-		WhetbladeName: knownFact(p, "Whetstone Knife"),
 		MapFragment: &schema.MapFragmentMetadata{
 			Name:           knownFact(p, "Limgrave, West"),
 			Area:           knownFact(p, "Limgrave"),

@@ -15,10 +15,6 @@ func validateItemLinks(
 	if links.AboutTutorialID.Known && links.AboutTutorialID.Value == 0 {
 		return fmt.Errorf("%s.aboutTutorialID must be greater than zero when known", name)
 	}
-	if err := validateOptionalNonEmptyString(name+".whetbladeName", links.WhetbladeName, sources); err != nil {
-		return err
-	}
-
 	occupiedFlags := make(map[uint32]struct{}, len(unlocks)+len(links.RelatedEventFlags)+1)
 	for _, unlock := range unlocks {
 		if unlock.EventFlagID.Known {

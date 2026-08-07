@@ -165,7 +165,6 @@ type linksSeed struct {
 	AboutTutorialID   *uint32
 	RelatedEventFlags []relatedEventFlagSeed
 	RelatedItems      []relatedItemSeed
-	WhetbladeName     string
 	MapFragment       *mapFragmentSeed
 }
 

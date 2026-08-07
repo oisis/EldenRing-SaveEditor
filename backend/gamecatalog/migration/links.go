@@ -2,8 +2,8 @@ package migration
 
 import "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 
-func buildLinks(value linksSeed, whetbladeNameNotApplicable bool) schema.ItemLinks {
-	result := emptyItemLinks(whetbladeNameNotApplicable)
+func buildLinks(value linksSeed) schema.ItemLinks {
+	result := emptyItemLinks()
 	if value.AboutTutorialID != nil {
 		result.AboutTutorialID = knownLegacyFact(
 			*value.AboutTutorialID,
@@ -39,12 +39,6 @@ func buildLinks(value linksSeed, whetbladeNameNotApplicable bool) schema.ItemLin
 			),
 		}
 	}
-	if value.WhetbladeName != "" {
-		result.WhetbladeName = knownLegacyFact(
-			value.WhetbladeName,
-			"copied from legacy Whetblades.Name",
-		)
-	}
 	if value.MapFragment != nil {
 		result.MapFragment = &schema.MapFragmentMetadata{
 			Name: knownLegacyFact(
@@ -64,20 +58,10 @@ func buildLinks(value linksSeed, whetbladeNameNotApplicable bool) schema.ItemLin
 	return result
 }
 
-func emptyItemLinks(whetbladeNameNotApplicable bool) schema.ItemLinks {
-	result := schema.ItemLinks{
+func emptyItemLinks() schema.ItemLinks {
+	return schema.ItemLinks{
 		AboutTutorialID: unknownCatalogFact[uint32](
 			"legacy AboutTutorialID has no entry for this item",
 		),
 	}
-	if whetbladeNameNotApplicable {
-		result.WhetbladeName = notApplicableCatalogFact[string](
-			"spirit ash items are never sharpened with a whetblade",
-		)
-	} else {
-		result.WhetbladeName = unknownCatalogFact[string](
-			"legacy Whetblades has no entry for this item",
-		)
-	}
-	return result
 }

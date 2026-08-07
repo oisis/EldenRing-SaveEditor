@@ -43,9 +43,6 @@ func collectLegacyLinks(itemID uint32) linksSeed {
 
 func legacyWhetbladeLinks(flagID uint32) linksSeed {
 	result := linksSeed{}
-	if metadata, exists := data.Whetblades[flagID]; exists {
-		result.WhetbladeName = metadata.Name
-	}
 	for _, relatedFlagID := range data.WhetbladeRelatedFlags[flagID] {
 		result.RelatedEventFlags = append(
 			result.RelatedEventFlags,

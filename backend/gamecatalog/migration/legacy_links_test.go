@@ -31,7 +31,7 @@ func TestLegacyLinksExactCoverage(t *testing.T) {
 				)
 			}
 		}
-		if item.Links.WhetbladeName != "" {
+		if _, exists := data.WhetbladeItemToFlagID[itemID]; exists {
 			whetbladeCount++
 			assertLegacyWhetbladeLinks(t, item)
 		}
@@ -56,16 +56,6 @@ func assertLegacyWhetbladeLinks(t *testing.T, item seed) {
 	flagID, exists := data.WhetbladeItemToFlagID[item.ID]
 	if !exists {
 		t.Fatalf("item 0x%08X has fabricated whetblade links", item.ID)
-	}
-	metadata, exists := data.Whetblades[flagID]
-	if !exists || item.Links.WhetbladeName != metadata.Name {
-		t.Fatalf(
-			"item 0x%08X whetblade name = %q, want %q, %t",
-			item.ID,
-			item.Links.WhetbladeName,
-			metadata.Name,
-			exists,
-		)
 	}
 	wantFlags := make([]relatedEventFlagSeed, 0, len(data.WhetbladeRelatedFlags[flagID])+1)
 	for _, relatedFlagID := range data.WhetbladeRelatedFlags[flagID] {
@@ -104,6 +94,10 @@ func assertLegacyWhetbladeLinks(t *testing.T, item seed) {
 	}
 	for _, unlock := range item.Unlocks {
 		if unlock.Kind == "whetblade" && unlock.FlagID == flagID {
+			metadata, metadataExists := data.Whetblades[flagID]
+			if !metadataExists {
+				t.Fatalf("item 0x%08X whetblade metadata is missing", item.ID)
+			}
 			if unlock.Name != metadata.Name {
 				t.Fatalf(
 					"item 0x%08X unlock name = %q, want %q",

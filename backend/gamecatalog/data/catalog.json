@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 3,
-    "dataVersion": "0756ef3f5a1d047baeb6cdf4f8cb60a5d42aa6d599eb3789cfeaed38710aff6b",
+    "dataVersion": "cb25847d328da1918b7f5283b1afbd626dcba00618ed8c08395ed1df207dcb94",
     "gameVersion": "1.16-class",
     "sources": [
       {
@@ -136,7 +136,7 @@
         "id": "legacy_db_data",
         "kind": "legacy_item_catalog",
         "location": "backend/db/data",
-        "version": "de02053c7cb9c04777e3aafed541d342d88d73ee3ad3c836af669df535f6d92e",
+        "version": "dfdc63536f09792d88a8ffbc2802b6e51b18708461c6cff31cdda8837d876bba",
         "evidence": "curated",
         "reviewed": true
       },
@@ -152,7 +152,7 @@
         "id": "legacy_unknown",
         "kind": "legacy_unresolved_item",
         "location": "backend/db/data/gestures.go",
-        "version": "de02053c7cb9c04777e3aafed541d342d88d73ee3ad3c836af669df535f6d92e",
+        "version": "dfdc63536f09792d88a8ffbc2802b6e51b18708461c6cff31cdda8837d876bba",
         "evidence": "unknown",
         "reviewed": false
       }

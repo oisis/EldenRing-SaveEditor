@@ -6,7 +6,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
-func TestAbsentOptionalMetadataIsOmitted(t *testing.T) {
+func TestAbsentRequiredContainerIsNotApplicable(t *testing.T) {
 	acquisition := buildAcquisition(seed{}, true)
 	assertNotApplicableFact(
 		t,
@@ -16,33 +16,15 @@ func TestAbsentOptionalMetadataIsOmitted(t *testing.T) {
 		acquisition.RequiredContainerID.Provenance,
 	)
 
-	links := buildLinks(linksSeed{}, true)
-	assertNotApplicableFact(
-		t,
-		"whetblade name",
-		links.WhetbladeName.Known,
-		links.WhetbladeName.Value == "",
-		links.WhetbladeName.Provenance,
-	)
 }
 
 func TestApplicableOptionalMetadataStaysUnresolved(t *testing.T) {
 	acquisition := buildAcquisition(seed{}, false).RequiredContainerID
-	links := buildLinks(linksSeed{}, false).WhetbladeName
-	facts := []struct {
-		name       string
-		provenance schema.Provenance
-	}{
-		{"required container", acquisition.Provenance},
-		{"whetblade name", links.Provenance},
+	if acquisition.Provenance.Source == "" || acquisition.Provenance.Method == "" {
+		t.Fatalf("required container provenance = %#v, want non-empty source and method", acquisition.Provenance)
 	}
-	for _, fact := range facts {
-		if fact.provenance.Source == "" || fact.provenance.Method == "" {
-			t.Fatalf("%s provenance = %#v, want non-empty source and method", fact.name, fact.provenance)
-		}
-		if fact.provenance.MarksNotApplicable() {
-			t.Fatalf("%s provenance = %#v, want a plain unknown method", fact.name, fact.provenance)
-		}
+	if acquisition.Provenance.MarksNotApplicable() {
+		t.Fatalf("required container provenance = %#v, want a plain unknown method", acquisition.Provenance)
 	}
 }
 

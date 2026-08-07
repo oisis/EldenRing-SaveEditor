@@ -60,7 +60,7 @@ func isNotApplicableUnknownField(
 	value reflect.Value,
 ) bool {
 	switch field.Name {
-	case "RequiredContainerID", "WhetbladeName":
+	case "RequiredContainerID":
 		provenance, unknownFact := unknownFactProvenance(value)
 		return unknownFact && provenance.MarksNotApplicable()
 	case "Affinity":

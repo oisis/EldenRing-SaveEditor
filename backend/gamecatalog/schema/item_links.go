@@ -17,7 +17,6 @@ type ItemLinks struct {
 	AboutTutorialID   Fact[uint32]         `json:"aboutTutorialID"`
 	RelatedEventFlags []RelatedEventFlag   `json:"relatedEventFlags"`
 	RelatedItems      []RelatedItem        `json:"relatedItems"`
-	WhetbladeName     Fact[string]         `json:"whetbladeName"`
 	MapFragment       *MapFragmentMetadata `json:"mapFragment"`
 }
 

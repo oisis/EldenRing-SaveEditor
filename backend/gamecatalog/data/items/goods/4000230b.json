@@ -413,14 +413,6 @@
         }
       ],
       "relatedItems": [],
-      "whetbladeName": {
-        "known": true,
-        "value": "Red-Hot Whetblade",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy Whetblades.Name"
-        }
-      },
       "mapFragment": null
     },
     "variants": [],

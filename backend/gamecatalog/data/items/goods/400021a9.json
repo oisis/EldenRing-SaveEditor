@@ -376,14 +376,6 @@
       },
       "relatedEventFlags": [],
       "relatedItems": [],
-      "whetbladeName": {
-        "known": false,
-        "value": "",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy Whetblades has no entry for this item"
-        }
-      },
       "mapFragment": {
         "name": {
           "known": true,

@@ -450,14 +450,6 @@
           }
         }
       ],
-      "whetbladeName": {
-        "known": true,
-        "value": "Whetstone Knife",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy Whetblades.Name"
-        }
-      },
       "mapFragment": null
     },
     "variants": [],
