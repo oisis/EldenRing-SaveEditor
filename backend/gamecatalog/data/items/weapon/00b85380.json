@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Curved Great Club",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Curved Great Club",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_weapon_name_base",
+          "method": "resolved the official English WeaponName.fmg entry 12080000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -516,20 +492,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Heavy Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080100"
               }
             },
             "caption": {
@@ -565,22 +533,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1703,20 +1655,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Keen Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080200"
               }
             },
             "caption": {
@@ -1752,22 +1696,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -2890,20 +2818,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Quality Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080300"
               }
             },
             "caption": {
@@ -2939,22 +2859,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4077,20 +3981,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Fire Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080400"
               }
             },
             "caption": {
@@ -4126,22 +4022,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5264,20 +5144,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Flame Art Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080500"
               }
             },
             "caption": {
@@ -5313,22 +5185,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -6451,20 +6307,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Lightning Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080600"
               }
             },
             "caption": {
@@ -6500,22 +6348,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -7638,20 +7470,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Sacred Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080700"
               }
             },
             "caption": {
@@ -7687,22 +7511,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8825,20 +8633,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Magic Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080800"
               }
             },
             "caption": {
@@ -8874,22 +8674,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -10012,20 +9796,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Cold Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12080900"
               }
             },
             "caption": {
@@ -10061,22 +9837,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -11287,20 +11047,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Poison Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12081000"
               }
             },
             "caption": {
@@ -11336,22 +11088,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -12562,20 +12298,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Blood Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12081100"
               }
             },
             "caption": {
@@ -12611,22 +12339,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -13837,20 +13549,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Curved Great Club",
+              "value": "Occult Curved Great Club",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Curved Great Club",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12081200"
               }
             },
             "caption": {
@@ -13886,22 +13590,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

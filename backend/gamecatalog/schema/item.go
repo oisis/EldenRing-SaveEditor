@@ -41,18 +41,15 @@ type ItemDocument struct {
 }
 
 type ItemPresentation struct {
-	DisplayName   Fact[string]     `json:"displayName"`
-	CanonicalName Fact[string]     `json:"canonicalName"`
-	Caption       Fact[string]     `json:"caption"`
-	Description   Fact[string]     `json:"description"`
-	Location      Fact[string]     `json:"location"`
-	IconPath      Fact[string]     `json:"iconPath"`
-	TextMetadata  ItemTextMetadata `json:"textMetadata"`
+	Name         Fact[string]     `json:"name"`
+	Caption      Fact[string]     `json:"caption"`
+	Description  Fact[string]     `json:"description"`
+	Location     Fact[string]     `json:"location"`
+	IconPath     Fact[string]     `json:"iconPath"`
+	TextMetadata ItemTextMetadata `json:"textMetadata"`
 }
 
 type ItemTextMetadata struct {
-	DisplayNameSource Fact[string] `json:"displayNameSource"`
-	CanonicalSource   Fact[string] `json:"canonicalSource"`
 	CaptionSource     Fact[string] `json:"captionSource"`
 	DescriptionSource Fact[string] `json:"descriptionSource"`
 	LocationSource    Fact[string] `json:"locationSource"`

@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Great Turtle Shell",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Great Turtle Shell",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_weapon_name_base",
+          "method": "resolved the official English WeaponName.fmg entry 31140000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -516,20 +492,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Heavy Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140100"
               }
             },
             "caption": {
@@ -565,22 +533,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1782,20 +1734,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Keen Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140200"
               }
             },
             "caption": {
@@ -1831,22 +1775,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -3048,20 +2976,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Quality Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140300"
               }
             },
             "caption": {
@@ -3097,22 +3017,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4314,20 +4218,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Fire Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140400"
               }
             },
             "caption": {
@@ -4363,22 +4259,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5580,20 +5460,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Flame Art Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140500"
               }
             },
             "caption": {
@@ -5629,22 +5501,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -6846,20 +6702,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Lightning Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140600"
               }
             },
             "caption": {
@@ -6895,22 +6743,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8112,20 +7944,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Sacred Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140700"
               }
             },
             "caption": {
@@ -8161,22 +7985,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -9378,20 +9186,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Magic Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140800"
               }
             },
             "caption": {
@@ -9427,22 +9227,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -10644,20 +10428,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Cold Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31140900"
               }
             },
             "caption": {
@@ -10693,22 +10469,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -11997,20 +11757,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Poison Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31141000"
               }
             },
             "caption": {
@@ -12046,22 +11798,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -13350,20 +13086,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Blood Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31141100"
               }
             },
             "caption": {
@@ -13399,22 +13127,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -14703,20 +14415,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Great Turtle Shell",
+              "value": "Occult Great Turtle Shell",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Great Turtle Shell",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 31141200"
               }
             },
             "caption": {
@@ -14752,22 +14456,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

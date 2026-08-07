@@ -131,6 +131,7 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 			primary.Row,
 			primaryExists,
 			capabilitiesOverride,
+			isVariant,
 		)
 		if err != nil {
 			t.Fatalf("item 0x%08X expected data: %v", item.ID, err)
@@ -559,7 +560,7 @@ func assertRepresentativePayloads(
 	t.Helper()
 	canonical := records[0x03D85830].document
 	if canonical == nil ||
-		canonical.Presentation.DisplayName.Value != "Smithscript Cirque" ||
+		canonical.Presentation.Name.Value != "Smithscript Cirque" ||
 		canonical.Weapon == nil {
 		t.Fatalf("canonical Smithscript Cirque = %#v", canonical)
 	}
@@ -606,7 +607,7 @@ func assertDataVersionCoversOutput(t *testing.T, catalog GeneratedCatalog) {
 	mutatedResources := append([]schema.Resource(nil), catalog.Resources...)
 	mutatedResources[0] = catalog.Resources[0]
 	mutatedItem := *catalog.Resources[0].Item
-	mutatedItem.Presentation.DisplayName.Value += " changed"
+	mutatedItem.Presentation.Name.Value += " changed"
 	mutatedResources[0].Item = &mutatedItem
 	mutated, err := computeCatalogDataVersion(
 		catalog.Manifest,

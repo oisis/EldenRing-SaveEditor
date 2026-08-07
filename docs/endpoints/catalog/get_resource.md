@@ -272,7 +272,7 @@ catalog data and changes when that data is regenerated. The example below is
     "item": {
       "gameID": { "known": true, "value": 1000000, "provenance": { "source": "<source-id>", "method": "<method>" } },
       "family": { "known": true, "value": "weapon", "provenance": { "…": "…" } },
-      "presentation": { "displayName": { "known": true, "value": "Dagger", "provenance": { "…": "…" } }, "…": "…" },
+      "presentation": { "name": { "known": true, "value": "Dagger", "provenance": { "…": "…" } }, "…": "…" },
       "capabilities": { "upgrade": { "known": true, "enabled": true, "rules": { "maxLevel": 25, "…": "…" } }, "…": "…" },
       "variants": [ { "gameID": { "known": true, "value": 1000100, "…": "…" }, "…": "…" } ],
       "sourceRecords": [ { "table": "EquipParamWeapon", "rowID": 1000000, "…": "…" } ],

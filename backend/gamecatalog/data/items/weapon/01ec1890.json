@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Cuckoo Greatshield",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Cuckoo Greatshield",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_weapon_name_base",
+          "method": "resolved the official English WeaponName.fmg entry 32250000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -516,20 +492,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Heavy Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250100"
               }
             },
             "caption": {
@@ -565,22 +533,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1703,20 +1655,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Keen Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250200"
               }
             },
             "caption": {
@@ -1752,22 +1696,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -2890,20 +2818,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Quality Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250300"
               }
             },
             "caption": {
@@ -2939,22 +2859,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4077,20 +3981,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Fire Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250400"
               }
             },
             "caption": {
@@ -4126,22 +4022,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5264,20 +5144,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Flame Art Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250500"
               }
             },
             "caption": {
@@ -5313,22 +5185,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -6451,20 +6307,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Lightning Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250600"
               }
             },
             "caption": {
@@ -6500,22 +6348,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -7638,20 +7470,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Sacred Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250700"
               }
             },
             "caption": {
@@ -7687,22 +7511,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8825,20 +8633,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Magic Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250800"
               }
             },
             "caption": {
@@ -8874,22 +8674,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -10012,20 +9796,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Cold Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32250900"
               }
             },
             "caption": {
@@ -10061,22 +9837,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -11287,20 +11047,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Poison Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32251000"
               }
             },
             "caption": {
@@ -11336,22 +11088,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -12562,20 +12298,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Blood Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32251100"
               }
             },
             "caption": {
@@ -12611,22 +12339,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -13837,20 +13549,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Cuckoo Greatshield",
+              "value": "Occult Cuckoo Greatshield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cuckoo Greatshield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 32251200"
               }
             },
             "caption": {
@@ -13886,22 +13590,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

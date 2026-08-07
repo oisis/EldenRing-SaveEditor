@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Celebrant's Skull",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Celebrant's Skull",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_weapon_name_base",
+          "method": "resolved the official English WeaponName.fmg entry 12130000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -516,20 +492,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Heavy Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130100"
               }
             },
             "caption": {
@@ -565,22 +533,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1860,20 +1812,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Keen Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130200"
               }
             },
             "caption": {
@@ -1909,22 +1853,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -3204,20 +3132,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Quality Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130300"
               }
             },
             "caption": {
@@ -3253,22 +3173,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4548,20 +4452,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Fire Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130400"
               }
             },
             "caption": {
@@ -4597,22 +4493,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5892,20 +5772,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Flame Art Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130500"
               }
             },
             "caption": {
@@ -5941,22 +5813,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -7236,20 +7092,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Lightning Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130600"
               }
             },
             "caption": {
@@ -7285,22 +7133,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8580,20 +8412,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Sacred Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130700"
               }
             },
             "caption": {
@@ -8629,22 +8453,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -9924,20 +9732,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Magic Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130800"
               }
             },
             "caption": {
@@ -9973,22 +9773,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -11268,20 +11052,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Cold Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12130900"
               }
             },
             "caption": {
@@ -11317,22 +11093,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -12699,20 +12459,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Poison Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12131000"
               }
             },
             "caption": {
@@ -12748,22 +12500,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -14130,20 +13866,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Blood Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12131100"
               }
             },
             "caption": {
@@ -14179,22 +13907,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -15561,20 +15273,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
-              "value": "Celebrant's Skull",
+              "value": "Celebrant's Occult Skull",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Celebrant's Skull",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from the canonical legacy item text for a Regulation-only variant"
+                "source": "game_text_weapon_name_base",
+                "method": "resolved the official English WeaponName.fmg entry 12131200"
               }
             },
             "caption": {
@@ -15610,22 +15314,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

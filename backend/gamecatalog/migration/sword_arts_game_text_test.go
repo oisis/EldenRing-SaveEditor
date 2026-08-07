@@ -20,9 +20,11 @@ func TestBuildSwordArtsNameFactsPrefersGameTextAndAuditsLegacyConflict(t *testin
 			},
 		},
 	}}
-	gameText := &GameTextData{names: map[int32]gameTextName{
-		200: {text: "Official Name", source: sourceGameTextArtsNameBase},
-		300: {text: "Official Replacement", source: sourceGameTextArtsNameDLC},
+	gameText := &GameTextData{names: map[gameTextCatalog]map[int32]gameTextName{
+		gameTextCatalogArts: {
+			200: {text: "Official Name", source: sourceGameTextArtsNameBase},
+			300: {text: "Official Replacement", source: sourceGameTextArtsNameDLC},
+		},
 	}}
 	legacy := []swordArtsNameSeed{
 		{ID: 10, Name: "Legacy Fallback"},

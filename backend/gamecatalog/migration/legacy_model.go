@@ -41,13 +41,9 @@ type legacySnapshot struct {
 }
 
 type textSeed struct {
-	DisplayName       string
-	CanonicalName     string
 	Caption           string
 	Description       string
 	Location          string
-	DisplayNameSource string
-	CanonicalSource   string
 	CaptionSource     string
 	DescriptionSource string
 	LocationSource    string

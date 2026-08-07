@@ -88,7 +88,7 @@ func TestValidateResourceRejectsUnknownProvenanceSource(t *testing.T) {
 	manifest, resources := prototype.Data()
 	sources := mustValidateManifest(t, manifest)
 	dagger := resources[0]
-	dagger.Item.Presentation.DisplayName.Provenance.Source = "missing"
+	dagger.Item.Presentation.Name.Provenance.Source = "missing"
 
 	err := schema.ValidateResource(dagger, sources)
 	if err == nil || !strings.Contains(err.Error(), "unknown provenance source") {

@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
-        "known": true,
-        "value": "Brave's Battlewear (Altered)",
+      "name": {
+        "known": false,
+        "value": "",
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Brave's Battlewear (Altered)",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "method": "cut-content or ban-risk item has no usable official FMG name entry"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": false,
-          "value": "",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "legacy field is empty"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",

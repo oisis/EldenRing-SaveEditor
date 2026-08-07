@@ -71,7 +71,7 @@ func TestVariantUpgradeDisplaysAffinityAsNotApplicable(t *testing.T) {
 	item := &schema.ItemDocument{
 		Family: schema.Fact[schema.ItemFamily]{Value: schema.ItemFamilySpiritAsh},
 		Presentation: schema.ItemPresentation{
-			CanonicalName: schema.Fact[string]{Known: true, Value: "Albinauric Ashes"},
+			Name: schema.Fact[string]{Known: true, Value: "Albinauric Ashes"},
 		},
 		Variants: []schema.ItemVariant{{
 			Kind: schema.Fact[schema.ItemVariantKind]{
@@ -86,7 +86,7 @@ func TestVariantUpgradeDisplaysAffinityAsNotApplicable(t *testing.T) {
 			},
 		}},
 	}
-	views := (&Server{}).variantViews(item)
+	views := (&Server{}).variantViews(schema.Resource{Key: "item:4000A000", Item: item})
 	if len(views) != 1 || views[0].Affinity != "N/A" {
 		t.Fatalf("upgrade variant affinity = %#v, want N/A", views)
 	}

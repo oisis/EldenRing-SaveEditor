@@ -3,6 +3,7 @@ package gamecatalog_test
 import (
 	"encoding/json"
 	"fmt"
+	"html"
 	"io/fs"
 	"net/http"
 	"net/http/httptest"
@@ -15,11 +16,12 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 )
 
-// TestEmbeddedResourcesHaveKnownDisplayName protects the invariant that replaced
-// the removed top-level Resource.label: every catalog resource must carry a
-// known, non-empty item.presentation.displayName, which is now the single item
-// name source for both runtime and the DB Viewer.
-func TestEmbeddedResourcesHaveKnownDisplayName(t *testing.T) {
+// TestEmbeddedResourcesHaveOfficialName protects the invariant that replaced the
+// removed top-level Resource.label: every catalog resource carries a known,
+// non-empty item.presentation.name taken from the official FMG, and the name is
+// unknown only where the official FMG has no usable entry — Vision of Grace, or
+// a cut-content / ban-risk item.
+func TestEmbeddedResourcesHaveOfficialName(t *testing.T) {
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
 		t.Fatalf("LoadFS: %v", err)
@@ -32,14 +34,23 @@ func TestEmbeddedResourcesHaveKnownDisplayName(t *testing.T) {
 		if resource.Item == nil {
 			t.Fatalf("resource %q has no item document", resource.Key)
 		}
-		displayName := resource.Item.Presentation.DisplayName
-		if !displayName.Known || displayName.Value == "" {
-			t.Fatalf(
-				"resource %q display name = %#v, want known and non-empty",
-				resource.Key,
-				displayName,
-			)
+		name := resource.Item.Presentation.Name
+		if name.Known && name.Value != "" {
+			continue
 		}
+		if name.Known {
+			t.Fatalf("resource %q has a known but empty name", resource.Key)
+		}
+		safety := resource.Item.Safety
+		if resource.Item.GameID.Value == visionOfGraceGameID ||
+			safety.CutContent.Value || safety.BanRisk.Value {
+			continue
+		}
+		t.Fatalf(
+			"resource %q name = %#v, want known and non-empty",
+			resource.Key,
+			name,
+		)
 	}
 }
 
@@ -77,11 +88,15 @@ func TestEmbeddedDocumentsHaveNoTopLevelLabel(t *testing.T) {
 	}
 }
 
+// visionOfGraceGameID mirrors the migrator's single documented exception: the
+// item without any official FMG name entry.
+const visionOfGraceGameID uint32 = 0x400000A6
+
 // TestRuntimeAndViewerShareItemName drives the DB Viewer's public HTTP handler
-// and confirms the rendered item name is derived from item.presentation.displayName
-// and agrees with the runtime ItemByGameID lookup, for both a canonical item and a
-// materialized variant. It fails if the Viewer stops using presentation.displayName
-// or if the runtime and Viewer names diverge.
+// and confirms the rendered item name is derived from item.presentation.name and
+// agrees with the runtime ItemByGameID lookup, for both a canonical item and a
+// materialized variant. It fails if the Viewer stops using presentation.name or
+// if the runtime and Viewer names diverge.
 func TestRuntimeAndViewerShareItemName(t *testing.T) {
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
@@ -103,28 +118,29 @@ func TestRuntimeAndViewerShareItemName(t *testing.T) {
 		renderedName string // the exact <h1> text the Viewer must render
 	}{
 		{name: "canonical Dagger", gameID: 0x000F4240, renderedName: "Dagger"},
-		{name: "variant Dagger (quality)", gameID: 0x000F436C, renderedName: "Dagger (quality)"},
+		{name: "affinity variant Quality Dagger", gameID: 0x000F436C, renderedName: "Quality Dagger"},
+		{name: "upgrade variant Black Knife Tiche +1", gameID: 0x40030D41, renderedName: "Black Knife Tiche +1"},
 	}
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
-			// Source 1: item.presentation.displayName read straight from embedded data.
-			embeddedName, ok := embeddedDisplayName(data, testCase.gameID)
+			// Source 1: item.presentation.name read straight from embedded data.
+			embeddedName, ok := embeddedItemName(data, testCase.gameID)
 			if !ok {
 				t.Fatalf("game ID 0x%08X is absent from embedded documents", testCase.gameID)
 			}
 			if embeddedName == "" {
-				t.Fatalf("game ID 0x%08X has an empty presentation.displayName", testCase.gameID)
+				t.Fatalf("game ID 0x%08X has an empty presentation.name", testCase.gameID)
 			}
 
-			// Source 2: runtime lookup must resolve to the same displayName field.
+			// Source 2: runtime lookup must resolve to the same name field.
 			runtime, exists := catalog.ItemByGameID(testCase.gameID)
 			if !exists {
 				t.Fatalf("runtime lookup for 0x%08X failed", testCase.gameID)
 			}
-			runtimeName := runtime.Item.Presentation.DisplayName.Value
+			runtimeName := runtime.Item.Presentation.Name.Value
 			if runtimeName != embeddedName {
 				t.Fatalf(
-					"runtime displayName = %q, embedded displayName = %q",
+					"runtime name = %q, embedded name = %q",
 					runtimeName,
 					embeddedName,
 				)
@@ -139,16 +155,19 @@ func TestRuntimeAndViewerShareItemName(t *testing.T) {
 			}
 			body := response.Body.String()
 
-			// The Viewer must render exactly the expected heading, and that heading
-			// must be built from presentation.displayName (the runtime name).
-			wantHeading := "<h1>" + testCase.renderedName + "</h1>"
-			if !strings.Contains(body, wantHeading) {
-				t.Fatalf("Viewer response for %s does not contain heading %q", target, wantHeading)
+			// The Viewer heading must be presentation.name verbatim — never a second
+			// name rebuilt from the affinity or the upgrade level.
+			heading, ok := renderedHeading(body)
+			if !ok {
+				t.Fatalf("Viewer response for %s has no <h1> heading", target)
 			}
-			if !strings.Contains(testCase.renderedName, runtimeName) {
+			if heading != testCase.renderedName {
+				t.Fatalf("Viewer heading = %q, want %q", heading, testCase.renderedName)
+			}
+			if heading != runtimeName {
 				t.Fatalf(
-					"Viewer heading %q is not derived from presentation.displayName %q",
-					testCase.renderedName,
+					"Viewer heading %q is not exactly presentation.name %q",
+					heading,
 					runtimeName,
 				)
 			}
@@ -156,22 +175,37 @@ func TestRuntimeAndViewerShareItemName(t *testing.T) {
 	}
 }
 
-// embeddedDisplayName returns the item.presentation.displayName recorded in the
-// embedded catalog for the given game ID, resolving both canonical documents and
-// their variants without materializing through the runtime.
-func embeddedDisplayName(data loader.Data, gameID uint32) (string, bool) {
+// renderedHeading returns the decoded text of the Viewer's <h1> heading, so the
+// assertion compares the displayed name itself rather than its HTML escaping.
+func renderedHeading(body string) (string, bool) {
+	start := strings.Index(body, "<h1>")
+	if start < 0 {
+		return "", false
+	}
+	rest := body[start+len("<h1>"):]
+	end := strings.Index(rest, "</h1>")
+	if end < 0 {
+		return "", false
+	}
+	return html.UnescapeString(rest[:end]), true
+}
+
+// embeddedItemName returns the item.presentation.name recorded in the embedded
+// catalog for the given game ID, resolving both canonical documents and their
+// variants without materializing through the runtime.
+func embeddedItemName(data loader.Data, gameID uint32) (string, bool) {
 	for index := range data.Documents {
 		item := data.Documents[index].Resource.Item
 		if item == nil {
 			continue
 		}
 		if item.GameID.Value == gameID {
-			return item.Presentation.DisplayName.Value, true
+			return item.Presentation.Name.Value, true
 		}
 		for variantIndex := range item.Variants {
 			variant := item.Variants[variantIndex]
 			if variant.GameID.Value == gameID {
-				return variant.Data.Presentation.DisplayName.Value, true
+				return variant.Data.Presentation.Name.Value, true
 			}
 		}
 	}

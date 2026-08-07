@@ -15,7 +15,7 @@ func TestLegacySeedCopiesRepresentativeFields(t *testing.T) {
 	if dagger.IconPath != "items/melee_armaments/dagger.png" {
 		t.Fatalf("dagger icon = %q", dagger.IconPath)
 	}
-	if dagger.Text == nil || dagger.Text.CanonicalName != "Dagger" || dagger.Text.CanonicalSource != "fmg" {
+	if dagger.Text == nil || dagger.Text.Caption == "" || dagger.Text.CaptionSource != "fmg" {
 		t.Fatalf("dagger text = %#v", dagger.Text)
 	}
 	if dagger.Description == nil || dagger.Description.Weapon == nil || dagger.Description.Weapon.PhysDamage != 74 {

@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
-        "known": true,
-        "value": "Vision of Grace",
+      "name": {
+        "known": false,
+        "value": "",
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Vision of Grace",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "method": "no official FMG name entry exists for this item"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": false,
-          "value": "",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "legacy field is empty"
-          }
-        },
         "captionSource": {
           "known": false,
           "value": "",

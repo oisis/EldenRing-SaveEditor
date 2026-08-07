@@ -7,8 +7,6 @@ func validateTextMetadata(metadata ItemTextMetadata, sources map[SourceID]struct
 		name string
 		fact Fact[string]
 	}{
-		{"item.presentation.textMetadata.displayNameSource", metadata.DisplayNameSource},
-		{"item.presentation.textMetadata.canonicalSource", metadata.CanonicalSource},
 		{"item.presentation.textMetadata.captionSource", metadata.CaptionSource},
 		{"item.presentation.textMetadata.descriptionSource", metadata.DescriptionSource},
 		{"item.presentation.textMetadata.locationSource", metadata.LocationSource},

@@ -35,9 +35,9 @@ func (server *Server) rawItemHandler(response http.ResponseWriter, request *http
 		http.Error(response, "Raw catalog document is unavailable.", http.StatusInternalServerError)
 		return
 	}
-	name := resource.Item.Presentation.DisplayName.Value
+	name := itemName(resource)
 	if variant, variantExists := findVariant(resource.Item, gameID); variantExists {
-		name = variantDisplayName(resource.Item.Presentation.DisplayName.Value, variant)
+		name = variantName(resource, variant)
 	}
 	requestedGameID := formatGameID(gameID)
 	server.render(response, "raw", rawPage{

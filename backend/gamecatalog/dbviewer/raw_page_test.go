@@ -33,7 +33,7 @@ func TestRawPagePreservesRequestedVariantIdentity(t *testing.T) {
 	}
 	body := response.Body.String()
 	for _, expected := range []string{
-		"Dagger (quality) — raw document",
+		"Quality Dagger — raw document",
 		`href="/items/000F436C"`,
 		"items/weapon/000f4240.json",
 	} {

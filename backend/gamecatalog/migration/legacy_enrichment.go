@@ -89,13 +89,9 @@ func legacyAoWCompatibleClasses(mask uint64) []string {
 
 func copyLegacyText(value data.ItemTextData) *textSeed {
 	return &textSeed{
-		DisplayName:       value.DisplayName,
-		CanonicalName:     value.CanonicalName,
 		Caption:           value.Caption,
 		Description:       value.Description,
 		Location:          value.Location,
-		DisplayNameSource: string(value.DisplayNameSource),
-		CanonicalSource:   string(value.CanonicalSource),
 		CaptionSource:     string(value.CaptionSource),
 		DescriptionSource: string(value.DescriptionSource),
 		LocationSource:    string(value.LocationSource),

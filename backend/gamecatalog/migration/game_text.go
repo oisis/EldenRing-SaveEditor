@@ -18,13 +18,28 @@ import (
 
 const gameTextProvenanceRoot = "regulation.bin/msg/engus/"
 
+// gameTextErrorPrefix marks an FMG entry the game itself treats as a
+// placeholder rather than a shipped name.
+const gameTextErrorPrefix = "[ERROR]"
+
+// gameTextCatalog identifies one official English FMG name catalog. Each
+// catalog is loaded from its base file plus the DLC file that extends it; the
+// DLC entry wins whenever both files carry the same entry ID.
+type gameTextCatalog string
+
 const (
-	sourceGameTextArtsNameBase schema.SourceID = "game_text_arts_name_base"
-	sourceGameTextArtsNameDLC  schema.SourceID = "game_text_arts_name_dlc"
+	gameTextCatalogArts      gameTextCatalog = "ArtsName"
+	gameTextCatalogWeapon    gameTextCatalog = "WeaponName"
+	gameTextCatalogProtector gameTextCatalog = "ProtectorName"
+	gameTextCatalogAccessory gameTextCatalog = "AccessoryName"
+	gameTextCatalogGoods     gameTextCatalog = "GoodsName"
+	gameTextCatalogGem       gameTextCatalog = "GemName"
 )
 
 type gameTextSpec struct {
+	catalog      gameTextCatalog
 	sourceID     schema.SourceID
+	dlc          bool
 	directory    string
 	jsonFilename string
 	rawFilename  string
@@ -33,35 +48,69 @@ type gameTextSpec struct {
 	location     string
 }
 
-var gameTextSpecs = []gameTextSpec{
-	{
-		sourceID:     sourceGameTextArtsNameBase,
-		directory:    "item",
-		jsonFilename: "ArtsName.fmg.json",
-		rawFilename:  "ArtsName.fmg",
-		sourceMSGBND: "item.msgbnd",
-		sourceFMG:    "ArtsName.fmg",
-		location:     gameTextProvenanceRoot + "item.msgbnd/ArtsName.fmg",
-	},
-	{
-		sourceID:     sourceGameTextArtsNameDLC,
-		directory:    "item_dlc02",
-		jsonFilename: "ArtsName_dlc01.fmg.json",
-		rawFilename:  "ArtsName_dlc01.fmg",
-		sourceMSGBND: "item_dlc02.msgbnd",
-		sourceFMG:    "ArtsName_dlc01.fmg",
-		location:     gameTextProvenanceRoot + "item_dlc02.msgbnd/ArtsName_dlc01.fmg",
-	},
+// gameTextCatalogs lists every official FMG name catalog the migration reads,
+// in base-then-DLC order per catalog.
+var gameTextCatalogs = []struct {
+	catalog    gameTextCatalog
+	sourceStem string
+}{
+	{catalog: gameTextCatalogArts, sourceStem: "arts_name"},
+	{catalog: gameTextCatalogWeapon, sourceStem: "weapon_name"},
+	{catalog: gameTextCatalogProtector, sourceStem: "protector_name"},
+	{catalog: gameTextCatalogAccessory, sourceStem: "accessory_name"},
+	{catalog: gameTextCatalogGoods, sourceStem: "goods_name"},
+	{catalog: gameTextCatalogGem, sourceStem: "gem_name"},
+}
+
+const (
+	sourceGameTextArtsNameBase schema.SourceID = "game_text_arts_name_base"
+	sourceGameTextArtsNameDLC  schema.SourceID = "game_text_arts_name_dlc"
+)
+
+var gameTextSpecs = buildGameTextSpecs()
+
+func buildGameTextSpecs() []gameTextSpec {
+	specs := make([]gameTextSpec, 0, 2*len(gameTextCatalogs))
+	for _, entry := range gameTextCatalogs {
+		base := string(entry.catalog) + ".fmg"
+		dlc := string(entry.catalog) + "_dlc01.fmg"
+		specs = append(specs,
+			gameTextSpec{
+				catalog:      entry.catalog,
+				sourceID:     schema.SourceID("game_text_" + entry.sourceStem + "_base"),
+				directory:    "item",
+				jsonFilename: base + ".json",
+				rawFilename:  base,
+				sourceMSGBND: "item.msgbnd",
+				sourceFMG:    base,
+				location:     gameTextProvenanceRoot + "item.msgbnd/" + base,
+			},
+			gameTextSpec{
+				catalog:      entry.catalog,
+				sourceID:     schema.SourceID("game_text_" + entry.sourceStem + "_dlc"),
+				dlc:          true,
+				directory:    "item_dlc02",
+				jsonFilename: dlc + ".json",
+				rawFilename:  dlc,
+				sourceMSGBND: "item_dlc02.msgbnd",
+				sourceFMG:    dlc,
+				location:     gameTextProvenanceRoot + "item_dlc02.msgbnd/" + dlc,
+			},
+		)
+	}
+	return specs
 }
 
 type gameTextName struct {
-	text   string
-	source schema.SourceID
+	text    string
+	source  schema.SourceID
+	fmgFile string
+	entryID int32
 }
 
 // GameTextData contains the immutable English game text required by migration.
 type GameTextData struct {
-	names   map[int32]gameTextName
+	names   map[gameTextCatalog]map[int32]gameTextName
 	sources []schema.DataSource
 }
 
@@ -81,7 +130,7 @@ type extractedFMGEntry struct {
 	Note  string `json:"note"`
 }
 
-// ReadGameTextDirectory loads the two supported English ArtsName FMG extracts.
+// ReadGameTextDirectory loads every supported English FMG name extract.
 func ReadGameTextDirectory(root string) (*GameTextData, error) {
 	if strings.TrimSpace(root) == "" {
 		return nil, errors.New("game text directory is required")
@@ -95,7 +144,7 @@ func readGameTextFS(source fs.FS) (*GameTextData, error) {
 	}
 
 	data := &GameTextData{
-		names:   make(map[int32]gameTextName),
+		names:   make(map[gameTextCatalog]map[int32]gameTextName, len(gameTextCatalogs)),
 		sources: make([]schema.DataSource, 0, len(gameTextSpecs)),
 	}
 	for _, spec := range gameTextSpecs {
@@ -167,6 +216,11 @@ func (data *GameTextData) readSource(source fs.FS, spec gameTextSpec) error {
 		)
 	}
 
+	catalogNames, exists := data.names[spec.catalog]
+	if !exists {
+		catalogNames = make(map[int32]gameTextName, len(extracted.Entries))
+		data.names[spec.catalog] = catalogNames
+	}
 	localIDs := make(map[int32]struct{}, len(extracted.Entries))
 	for index, entry := range extracted.Entries {
 		if entry.ID < 0 || entry.ID > math.MaxInt32 {
@@ -187,7 +241,9 @@ func (data *GameTextData) readSource(source fs.FS, spec gameTextSpec) error {
 		if entry.Text == "" {
 			continue
 		}
-		if existing, duplicate := data.names[id]; duplicate {
+		// The DLC extract extends its base catalog and overrides colliding
+		// entry IDs; two base files may never collide.
+		if existing, duplicate := catalogNames[id]; duplicate && !spec.dlc {
 			return fmt.Errorf(
 				"%s entry ID %d duplicates game text source %q",
 				jsonPath,
@@ -195,7 +251,12 @@ func (data *GameTextData) readSource(source fs.FS, spec gameTextSpec) error {
 				existing.source,
 			)
 		}
-		data.names[id] = gameTextName{text: entry.Text, source: spec.sourceID}
+		catalogNames[id] = gameTextName{
+			text:    entry.Text,
+			source:  spec.sourceID,
+			fmgFile: spec.sourceFMG,
+			entryID: id,
+		}
 	}
 
 	data.sources = append(data.sources, schema.DataSource{
@@ -238,12 +299,50 @@ func requireJSONEOF(decoder *json.Decoder) error {
 	return errors.New("unexpected trailing JSON value")
 }
 
-func (data *GameTextData) lookupName(textID int32) (gameTextName, bool) {
+func (data *GameTextData) lookupName(
+	catalog gameTextCatalog,
+	textID int32,
+) (gameTextName, bool) {
 	if data == nil {
 		return gameTextName{}, false
 	}
-	name, exists := data.names[textID]
+	name, exists := data.names[catalog][textID]
 	return name, exists
+}
+
+// itemNameCatalogByFamily is the single mapping from item family to the
+// official FMG name catalog that owns its names.
+var itemNameCatalogByFamily = map[schema.ItemFamily]gameTextCatalog{
+	schema.ItemFamilyWeapon:    gameTextCatalogWeapon,
+	schema.ItemFamilyArmor:     gameTextCatalogProtector,
+	schema.ItemFamilyTalisman:  gameTextCatalogAccessory,
+	schema.ItemFamilyGoods:     gameTextCatalogGoods,
+	schema.ItemFamilyGesture:   gameTextCatalogGoods,
+	schema.ItemFamilySpell:     gameTextCatalogGoods,
+	schema.ItemFamilySpiritAsh: gameTextCatalogGoods,
+	schema.ItemFamilyAshOfWar:  gameTextCatalogGem,
+}
+
+// gameTextEntryID strips the item-family prefix nibble from a game ID, leaving
+// the parameter Row ID that doubles as the FMG entry ID.
+func gameTextEntryID(gameID uint32) int32 {
+	return int32(gameID & 0x0FFFFFFF)
+}
+
+// lookupItemName resolves the official FMG name entry for one game ID.
+func (data *GameTextData) lookupItemName(
+	family schema.ItemFamily,
+	gameID uint32,
+) (gameTextName, bool, error) {
+	catalog, supported := itemNameCatalogByFamily[family]
+	if !supported {
+		return gameTextName{}, false, fmt.Errorf(
+			"item family %q has no official FMG name catalog",
+			family,
+		)
+	}
+	name, exists := data.lookupName(catalog, gameTextEntryID(gameID))
+	return name, exists, nil
 }
 
 func (data *GameTextData) manifestSources() []schema.DataSource {

@@ -52,7 +52,7 @@ func buildSwordArtsNameData(
 			return nil, nil, err
 		}
 		legacyName := legacyByID[int32(row.RowID)]
-		gameName, hasGameName := gameText.lookupName(textID)
+		gameName, hasGameName := gameText.lookupName(gameTextCatalogArts, textID)
 		if hasGameName {
 			method := "resolved SwordArtsParam row " +
 				decimalRowID(row.RowID) +

@@ -41,7 +41,7 @@ func TestItemPageResolvesVariantToCanonicalDocument(t *testing.T) {
 	body := response.Body.String()
 	for _, expected := range []string{
 		"items/weapon/000f4240.json",
-		"Dagger (quality)",
+		"Quality Dagger",
 		"<code>0x000F436C</code>",
 		`href="/items/000F436C/raw"`,
 		">Variant</span>",
@@ -158,7 +158,7 @@ func TestVariantItemPageUsesFullVariantData(t *testing.T) {
 	document := server.documentsByID[view.Resource.ID]
 
 	page := server.buildItemPage(view, document, 1000300)
-	if page.Name != "Dagger (quality)" {
+	if page.Name != "Quality Dagger" {
 		t.Fatalf("variant name = %q", page.Name)
 	}
 	if !containsFact(page.Storage, "Maximum inventory", "2") {

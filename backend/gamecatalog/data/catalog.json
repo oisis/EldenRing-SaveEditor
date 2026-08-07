@@ -1,7 +1,7 @@
 {
   "manifest": {
-    "schemaVersion": 3,
-    "dataVersion": "cb25847d328da1918b7f5283b1afbd626dcba00618ed8c08395ed1df207dcb94",
+    "schemaVersion": 4,
+    "dataVersion": "44e3ab8664a54fdd29c2167f196c5ea16ea9f6481487bdaff2f16a4339ae7ede",
     "gameVersion": "1.16-class",
     "sources": [
       {
@@ -133,10 +133,90 @@
         "reviewed": true
       },
       {
+        "id": "game_text_weapon_name_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item.msgbnd/WeaponName.fmg",
+        "version": "619b64606c60f839507716e7d4057da6d838e2496e15090a082adbc9c3f022a0",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_weapon_name_dlc",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/WeaponName_dlc01.fmg",
+        "version": "cbb2b60f6357bedcaa3ea64550bfeea45aa2a348e705961673afe71c2e5a7989",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_protector_name_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item.msgbnd/ProtectorName.fmg",
+        "version": "6ddf8b6180feeb4ac88e3c64000beb5ece060fec63509a0523a7723723777dd4",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_protector_name_dlc",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/ProtectorName_dlc01.fmg",
+        "version": "4f6f7ca8444f05668652ef22ddb9e3a1f1667b6e34e312dc5d7035cfdd109fc7",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_accessory_name_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item.msgbnd/AccessoryName.fmg",
+        "version": "b6e11567fa94e85127883a68e7e03acdce704ba42bfe2eb623e4ad9c4287af89",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_accessory_name_dlc",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/AccessoryName_dlc01.fmg",
+        "version": "aaff7c8d1a386209d762c54fb3b772ed2cf5465d05f583d69a481614cff21571",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_goods_name_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item.msgbnd/GoodsName.fmg",
+        "version": "8c2bd2136d2d33b56afaeb008646ed8792f35db82640ee6119e405496a40f0bb",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_goods_name_dlc",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/GoodsName_dlc01.fmg",
+        "version": "10c2d403152374d4e5faf7da3749c1c9d3fe2fde8a4838e78c38ac3cb836a1ab",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_gem_name_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item.msgbnd/GemName.fmg",
+        "version": "dbbd7675f169b1d0576b0fd64b5e0f02696f6df5028e5cd045df0020ee77c8c3",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_gem_name_dlc",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/GemName_dlc01.fmg",
+        "version": "e59f368dfc54bdb67f564daf76c50388dfc8decffc063992eb190daaafd15d3e",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
         "id": "legacy_db_data",
         "kind": "legacy_item_catalog",
         "location": "backend/db/data",
-        "version": "dfdc63536f09792d88a8ffbc2802b6e51b18708461c6cff31cdda8837d876bba",
+        "version": "4bb251bb89c992ad5811825bd482fa82d0a04d3e1826e77f2e74810048c7b020",
         "evidence": "curated",
         "reviewed": true
       },
@@ -152,7 +232,7 @@
         "id": "legacy_unknown",
         "kind": "legacy_unresolved_item",
         "location": "backend/db/data/gestures.go",
-        "version": "dfdc63536f09792d88a8ffbc2802b6e51b18708461c6cff31cdda8837d876bba",
+        "version": "4bb251bb89c992ad5811825bd482fa82d0a04d3e1826e77f2e74810048c7b020",
         "evidence": "unknown",
         "reviewed": false
       }

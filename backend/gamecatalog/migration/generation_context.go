@@ -11,6 +11,7 @@ import (
 type generationContext struct {
 	regulation        *RegulationData
 	regulationParams  *RegulationParameterData
+	gameText          *GameTextData
 	manifest          schema.Manifest
 	aliasesByItem     map[uint32][]aliasSeed
 	gesturesByItem    map[uint32][]gestureSlotSeed
@@ -40,6 +41,7 @@ func newGenerationContext(
 	context := &generationContext{
 		regulation:        options.Regulation,
 		regulationParams:  options.RegulationParams,
+		gameText:          options.GameText,
 		manifest:          buildManifest(options, sourceVersions),
 		aliasesByItem:     make(map[uint32][]aliasSeed),
 		gesturesByItem:    make(map[uint32][]gestureSlotSeed),

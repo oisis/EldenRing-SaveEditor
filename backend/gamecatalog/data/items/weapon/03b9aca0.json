@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Dueling Shield",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Dueling Shield",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_weapon_name_dlc",
+          "method": "resolved the official English WeaponName_dlc01.fmg entry 62500000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -516,20 +492,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Heavy Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Heavy Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500100"
               }
             },
             "caption": {
@@ -565,22 +533,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1703,20 +1655,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Keen Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Keen Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500200"
               }
             },
             "caption": {
@@ -1752,22 +1696,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -2890,20 +2818,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Quality Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Quality Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500300"
               }
             },
             "caption": {
@@ -2939,22 +2859,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4077,20 +3981,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Fire Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Fire Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500400"
               }
             },
             "caption": {
@@ -4126,22 +4022,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5264,20 +5144,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Flame Art Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Flame Art Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500500"
               }
             },
             "caption": {
@@ -5313,22 +5185,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -6451,20 +6307,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Lightning Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Lightning Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500600"
               }
             },
             "caption": {
@@ -6500,22 +6348,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -7638,20 +7470,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Sacred Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Sacred Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500700"
               }
             },
             "caption": {
@@ -7687,22 +7511,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8825,20 +8633,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Magic Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Magic Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500800"
               }
             },
             "caption": {
@@ -8874,22 +8674,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -10012,20 +9796,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Cold Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Cold Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62500900"
               }
             },
             "caption": {
@@ -10061,22 +9837,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -11287,20 +11047,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Poison Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Poison Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62501000"
               }
             },
             "caption": {
@@ -11336,22 +11088,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -12562,20 +12298,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Blood Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Blood Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62501100"
               }
             },
             "caption": {
@@ -12611,22 +12339,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -13837,20 +13549,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Occult Dueling Shield",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Occult Dueling Shield",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 62501200"
               }
             },
             "caption": {
@@ -13886,22 +13590,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

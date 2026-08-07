@@ -36,20 +36,12 @@
       }
     },
     "presentation": {
-      "displayName": {
-        "known": true,
-        "value": "?GoodsName?",
+      "name": {
+        "known": false,
+        "value": "",
         "provenance": {
           "source": "legacy_db_data",
-          "method": "copied from legacy AllGestures"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "?GoodsName?",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy AllGestures"
+          "method": "cut-content or ban-risk item has no usable official FMG name entry"
         }
       },
       "caption": {
@@ -85,22 +77,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": false,
-          "value": "",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "legacy display-name source is unknown"
-          }
-        },
-        "canonicalSource": {
-          "known": false,
-          "value": "",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "legacy canonical-name source is unknown"
-          }
-        },
         "captionSource": {
           "known": false,
           "value": "",

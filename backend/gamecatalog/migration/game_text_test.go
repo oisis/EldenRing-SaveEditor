@@ -18,21 +18,31 @@ func TestGameTextReaderPreservesNamesAndLogicalProvenance(t *testing.T) {
 		t.Fatalf("readGameTextFS: %v", err)
 	}
 
-	base, exists := data.lookupName(10)
-	if !exists || base.text != "No Skill" || base.source != sourceGameTextArtsNameBase {
-		t.Fatalf("base name = %+v, %t", base, exists)
-	}
-	dlc, exists := data.lookupName(2000)
-	if !exists || dlc.text != "Dryleaf Whirlwind" || dlc.source != sourceGameTextArtsNameDLC {
-		t.Fatalf("DLC name = %+v, %t", dlc, exists)
-	}
-	if _, exists := data.lookupName(11); exists {
-		t.Fatal("blank FMG entry became a known name")
+	// Every catalog is loaded independently, so an entry ID resolves per
+	// catalog and never leaks across catalogs.
+	for _, entry := range gameTextCatalogs {
+		base, exists := data.lookupName(entry.catalog, 10)
+		wantBase := string(entry.catalog) + " base"
+		if !exists || base.text != wantBase ||
+			base.source != schema.SourceID("game_text_"+entry.sourceStem+"_base") ||
+			base.fmgFile != string(entry.catalog)+".fmg" || base.entryID != 10 {
+			t.Fatalf("%s base name = %+v, %t", entry.catalog, base, exists)
+		}
+		dlc, exists := data.lookupName(entry.catalog, 2000)
+		wantDLC := string(entry.catalog) + " dlc"
+		if !exists || dlc.text != wantDLC ||
+			dlc.source != schema.SourceID("game_text_"+entry.sourceStem+"_dlc") ||
+			dlc.fmgFile != string(entry.catalog)+"_dlc01.fmg" || dlc.entryID != 2000 {
+			t.Fatalf("%s DLC name = %+v, %t", entry.catalog, dlc, exists)
+		}
+		if _, exists := data.lookupName(entry.catalog, 11); exists {
+			t.Fatalf("%s blank FMG entry became a known name", entry.catalog)
+		}
 	}
 
 	sources := data.manifestSources()
-	if len(sources) != 2 {
-		t.Fatalf("manifest source count = %d, want 2", len(sources))
+	if len(sources) != 2*len(gameTextCatalogs) {
+		t.Fatalf("manifest source count = %d, want %d", len(sources), 2*len(gameTextCatalogs))
 	}
 	for index, spec := range gameTextSpecs {
 		got := sources[index]
@@ -79,8 +89,39 @@ func TestGameTextSourceVersionCoversUsedJSONExtract(t *testing.T) {
 	if after.manifestSources()[0].Version == beforeVersion {
 		t.Fatal("source version did not change with used JSON extract")
 	}
-	if name, exists := after.lookupName(10); !exists || name.text != "Changed Extracted Name" {
+	if name, exists := after.lookupName(gameTextSpecs[0].catalog, 10); !exists ||
+		name.text != "Changed Extracted Name" {
 		t.Fatalf("changed extracted name = %+v, %t", name, exists)
+	}
+}
+
+// TestGameTextDLCEntryOverridesBaseEntry proves the confirmed DLC-over-base
+// precedence: when the DLC extract carries the same entry ID as its base file,
+// the DLC text and DLC source win, and other catalogs are unaffected.
+func TestGameTextDLCEntryOverridesBaseEntry(t *testing.T) {
+	source := newGameTextMapFS(t)
+	dlcSpec := gameTextSpecs[1]
+	if !dlcSpec.dlc || dlcSpec.catalog != gameTextSpecs[0].catalog {
+		t.Fatalf("fixture spec order changed: %+v", dlcSpec)
+	}
+	document := readTestGameTextDocument(t, source, dlcSpec)
+	document.Entries[0].ID = 10
+	document.Entries[0].Text = "DLC Override"
+	writeTestGameTextDocument(t, source, dlcSpec, document)
+
+	data, err := readGameTextFS(source)
+	if err != nil {
+		t.Fatalf("readGameTextFS: %v", err)
+	}
+	overridden, exists := data.lookupName(dlcSpec.catalog, 10)
+	if !exists || overridden.text != "DLC Override" ||
+		overridden.source != dlcSpec.sourceID ||
+		overridden.fmgFile != dlcSpec.sourceFMG {
+		t.Fatalf("overridden name = %+v, %t", overridden, exists)
+	}
+	untouched, exists := data.lookupName(gameTextCatalogGoods, 10)
+	if !exists || untouched.text != string(gameTextCatalogGoods)+" base" {
+		t.Fatalf("unrelated catalog changed = %+v, %t", untouched, exists)
 	}
 }
 
@@ -150,15 +191,6 @@ func TestGameTextReaderRejectsMalformedInput(t *testing.T) {
 			},
 			want: "inconsistent blank marker",
 		},
-		{
-			name: "duplicate ID across sources",
-			mutate: func(t *testing.T, source fstest.MapFS) {
-				document := readTestGameTextDocument(t, source, gameTextSpecs[1])
-				document.Entries[0].ID = 10
-				writeTestGameTextDocument(t, source, gameTextSpecs[1], document)
-			},
-			want: "duplicates game text source",
-		},
 	}
 
 	for _, test := range tests {
@@ -193,16 +225,14 @@ func TestGenerateRequiresGameText(t *testing.T) {
 func newGameTextMapFS(t *testing.T) fstest.MapFS {
 	t.Helper()
 	source := make(fstest.MapFS, len(gameTextSpecs)*2)
-	entries := [][]extractedFMGEntry{
-		{
-			{ID: 10, Text: "No Skill"},
-			{ID: 11, Blank: true, Note: "null_offset"},
-		},
-		{
-			{ID: 2000, Text: "Dryleaf Whirlwind"},
-		},
-	}
 	for index, spec := range gameTextSpecs {
+		entries := []extractedFMGEntry{
+			{ID: 10, Text: string(spec.catalog) + " base"},
+			{ID: 11, Blank: true, Note: "null_offset"},
+		}
+		if spec.dlc {
+			entries = []extractedFMGEntry{{ID: 2000, Text: string(spec.catalog) + " dlc"}}
+		}
 		rawPath := spec.directory + "/" + spec.rawFilename
 		jsonPath := spec.directory + "/" + spec.jsonFilename
 		raw := []byte{byte(index), 1, 2, 3}
@@ -212,8 +242,8 @@ func newGameTextMapFS(t *testing.T) fstest.MapFS {
 			SourceFMG:    spec.sourceFMG,
 			FileSize:     int64(len(raw)),
 			GroupCount:   1,
-			StringCount:  len(entries[index]),
-			Entries:      entries[index],
+			StringCount:  len(entries),
+			Entries:      entries,
 		}
 		encoded, err := json.Marshal(document)
 		if err != nil {

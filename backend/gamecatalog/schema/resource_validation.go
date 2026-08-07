@@ -18,12 +18,5 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 	if err := validateItemDocument(*resource.Item, sources); err != nil {
 		return fmt.Errorf("resource %q: %w", resource.Key, err)
 	}
-	displayName := resource.Item.Presentation.DisplayName
-	if !displayName.Known || displayName.Value == "" {
-		return fmt.Errorf(
-			"resource %q: item.presentation.displayName must be known and non-empty",
-			resource.Key,
-		)
-	}
 	return nil
 }

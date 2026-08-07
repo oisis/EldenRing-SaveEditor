@@ -62,11 +62,11 @@ func TestGetResourceReturnsFullItemDocument(t *testing.T) {
 	item := result.Resource.Item
 
 	presentation := item.Presentation
-	if !presentation.DisplayName.Known || presentation.DisplayName.Value != "Dagger" {
-		t.Errorf("Presentation.DisplayName = %+v, want a known %q", presentation.DisplayName, "Dagger")
+	if !presentation.Name.Known || presentation.Name.Value != "Dagger" {
+		t.Errorf("Presentation.Name = %+v, want a known %q", presentation.Name, "Dagger")
 	}
-	if presentation.DisplayName.Provenance.Source == "" {
-		t.Error("Presentation.DisplayName provenance source is empty; provenance must survive the getter")
+	if presentation.Name.Provenance.Source == "" {
+		t.Error("Presentation.Name provenance source is empty; provenance must survive the getter")
 	}
 
 	if !item.Capabilities.Upgrade.Known || !item.Capabilities.Upgrade.Enabled {
@@ -196,13 +196,13 @@ func TestGetResourceDoesNotMutateCatalog(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetResource: %v", err)
 	}
-	originalDisplayName := before.Resource.Item.Presentation.DisplayName.Value
+	originalName := before.Resource.Item.Presentation.Name.Value
 	originalVariantGameID := before.Resource.Item.Variants[0].GameID.Value
 	originalAffinity := before.Resource.Item.Capabilities.Infusion.Rules.AllowedAffinities[0]
 	originalResourceCount := gameCatalog.ResourceCount()
 
 	before.Resource.Key = "mutated"
-	before.Resource.Item.Presentation.DisplayName.Value = "mutated"
+	before.Resource.Item.Presentation.Name.Value = "mutated"
 	before.Resource.Item.Variants[0].GameID.Value = 1
 	before.Resource.Item.Capabilities.Infusion.Rules.AllowedAffinities[0] = schema.AffinityOccult
 
@@ -213,8 +213,8 @@ func TestGetResourceDoesNotMutateCatalog(t *testing.T) {
 	if after.Resource.Key != daggerResourceKey {
 		t.Errorf("catalog resource key = %q, want %q", after.Resource.Key, daggerResourceKey)
 	}
-	if got := after.Resource.Item.Presentation.DisplayName.Value; got != originalDisplayName {
-		t.Errorf("catalog display name = %q, want %q", got, originalDisplayName)
+	if got := after.Resource.Item.Presentation.Name.Value; got != originalName {
+		t.Errorf("catalog item name = %q, want %q", got, originalName)
 	}
 	if got := after.Resource.Item.Variants[0].GameID.Value; got != originalVariantGameID {
 		t.Errorf("catalog variant game ID = 0x%08X, want 0x%08X", got, originalVariantGameID)

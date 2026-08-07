@@ -65,7 +65,7 @@ func TestCatalogPaginationPreservesQueryAndFamily(t *testing.T) {
 					GameID: schema.Fact[uint32]{Known: true, Value: 0x70000000 + uint32(index)},
 					Family: schema.Fact[schema.ItemFamily]{Known: true, Value: schema.ItemFamilyGoods},
 					Presentation: schema.ItemPresentation{
-						DisplayName: schema.Fact[string]{Known: true, Value: "page-item"},
+						Name: schema.Fact[string]{Known: true, Value: "page-item"},
 					},
 					Subcategory: schema.Fact[string]{Known: true, Value: "page-test"},
 				},
@@ -131,7 +131,7 @@ func TestCatalogPageFiltersBySubcategory(t *testing.T) {
 	for _, expected := range []string{
 		`<option value="Daggers" selected>Daggers</option>`,
 		`href="/items/000F4240">Dagger</a>`,
-		`href="/items/000F436C">Dagger (quality)</a>`,
+		`href="/items/000F436C">Quality Dagger</a>`,
 	} {
 		if !strings.Contains(body, expected) {
 			t.Errorf("subcategory-filtered catalog does not contain %q", expected)
@@ -175,7 +175,7 @@ func TestCatalogPageListsVariantsAsSearchableEntries(t *testing.T) {
 	body := response.Body.String()
 	for _, expected := range []string{
 		`href="/items/000F436C"`,
-		"Dagger (quality)",
+		"Quality Dagger",
 		"<code>0x000F436C</code>",
 		">Variant</span>",
 	} {
@@ -209,7 +209,7 @@ func TestCatalogRowsAndFiltersCoverAllEightItemFamilies(t *testing.T) {
 					GameID: schema.Fact[uint32]{Known: true, Value: uint32(index + 1)},
 					Family: schema.Fact[schema.ItemFamily]{Known: true, Value: family},
 					Presentation: schema.ItemPresentation{
-						DisplayName: schema.Fact[string]{Known: true, Value: string(family)},
+						Name: schema.Fact[string]{Known: true, Value: string(family)},
 					},
 					Subcategory: schema.Fact[string]{Known: true, Value: "test"},
 				},

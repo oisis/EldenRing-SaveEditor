@@ -221,14 +221,15 @@ type variantView struct {
 	SourceRowID  string
 }
 
-func (server *Server) variantViews(item *schema.ItemDocument) []variantView {
+func (server *Server) variantViews(resource schema.Resource) []variantView {
+	item := resource.Item
 	variants := make([]variantView, 0, len(item.Variants))
 	for _, variant := range item.Variants {
 		gameID := formatGameID(variant.GameID.Value)
 		variants = append(variants, variantView{
 			GameID:       gameID,
 			GameIDPath:   strings.TrimPrefix(gameID, "0x"),
-			Name:         variantDisplayName(item.Presentation.CanonicalName.Value, variant),
+			Name:         variantName(resource, variant),
 			IconURL:      variantIconURL(item, variant),
 			Kind:         knownText(variant.Kind.Known, string(variant.Kind.Value)),
 			Affinity:     variantAffinity(item.Family.Value, variant),

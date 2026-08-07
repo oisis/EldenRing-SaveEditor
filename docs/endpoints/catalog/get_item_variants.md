@@ -318,7 +318,7 @@ abbreviated**; `…` marks omitted fields and entries:
       "affinity": { "known": true, "value": "heavy", "provenance": { "…": "…" } },
       "upgradeLevel": { "known": false, "value": 0, "provenance": { "…": "…" } },
       "sourceRowID": { "known": true, "value": 1000100, "provenance": { "…": "…" } },
-      "data": { "presentation": { "displayName": { "known": true, "value": "Dagger", "…": "…" } }, "…": "…" },
+      "data": { "presentation": { "name": { "known": true, "value": "Heavy Dagger", "…": "…" } }, "…": "…" },
       "sourceRecords": [ { "table": "EquipParamWeapon", "rowID": 1000100, "…": "…" } ]
     },
     "…"

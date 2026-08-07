@@ -91,14 +91,8 @@ func validateItemDocument(item ItemDocument, sources map[SourceID]struct{}) erro
 }
 
 func validatePresentation(presentation ItemPresentation, sources map[SourceID]struct{}) error {
-	if err := validateOptionalNonEmptyString("item.presentation.displayName", presentation.DisplayName, sources); err != nil {
+	if err := validateOptionalNonEmptyString("item.presentation.name", presentation.Name, sources); err != nil {
 		return err
-	}
-	if err := validateFact("item.presentation.canonicalName", presentation.CanonicalName, sources); err != nil {
-		return err
-	}
-	if !presentation.CanonicalName.Known || presentation.CanonicalName.Value == "" {
-		return fmt.Errorf("item.presentation.canonicalName must be known and non-empty")
 	}
 	optional := []struct {
 		name string

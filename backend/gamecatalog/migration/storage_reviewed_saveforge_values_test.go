@@ -343,7 +343,7 @@ func TestPrattlingPateLegacyStorageLimitIsSafeModeCap(t *testing.T) {
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
 		if item == nil || item.Category.Value != toolsCategory ||
-			!strings.HasPrefix(item.Presentation.DisplayName.Value, "Prattling Pate") {
+			!strings.HasPrefix(item.Presentation.Name.Value, "Prattling Pate") {
 			continue
 		}
 		count++
@@ -374,8 +374,8 @@ func TestRemembranceLegacyLimitsAreSafeModeCaps(t *testing.T) {
 	for resourceIndex := range catalog.Resources {
 		item := catalog.Resources[resourceIndex].Item
 		if item == nil || item.Category.Value != toolsCategory ||
-			(item.Presentation.DisplayName.Value != "Elden Remembrance" &&
-				!strings.HasPrefix(item.Presentation.DisplayName.Value, "Remembrance")) {
+			(item.Presentation.Name.Value != "Elden Remembrance" &&
+				!strings.HasPrefix(item.Presentation.Name.Value, "Remembrance")) {
 			continue
 		}
 		count++
@@ -438,7 +438,7 @@ func TestTearsFlaskLegacyLimitsAreDiscarded(t *testing.T) {
 			continue
 		}
 
-		name := item.Presentation.DisplayName.Value
+		name := item.Presentation.Name.Value
 		family := ""
 		switch {
 		case strings.HasPrefix(name, "Flask of Crimson Tears"):
@@ -474,16 +474,18 @@ func TestCutContentToolStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("Generate: %v", err)
 	}
 
-	expectedLimits := map[string]struct {
+	// These cut-content tools have no usable official FMG name, so they are
+	// identified by their technical game ID rather than by a display name.
+	expectedLimits := map[uint32]struct {
 		inventory uint32
 		storage   uint32
 	}{
-		"?GoodsName? Holy Water Pot": {inventory: 999, storage: 600},
-		"Deathsbane Jerky":           {inventory: 10, storage: 999},
-		"Deathsbane White Jerky":     {inventory: 10, storage: 999},
-		"Drawstring Freezing Grease": {inventory: 30, storage: 600},
-		"Holy Water Grease":          {inventory: 5, storage: 600},
-		"Roped Freezing Pot":         {inventory: 10, storage: 600},
+		0x4000D17E: {inventory: 999, storage: 600}, // Holy Water Pot, unnamed
+		0x400004C4: {inventory: 10, storage: 999},
+		0x40000546: {inventory: 10, storage: 999},
+		0x40000622: {inventory: 30, storage: 600},
+		0x40000CE4: {inventory: 5, storage: 600},
+		0x400001E0: {inventory: 10, storage: 600},
 	}
 
 	for resourceIndex := range catalog.Resources {
@@ -492,23 +494,26 @@ func TestCutContentToolStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 			continue
 		}
 
-		name := item.Presentation.DisplayName.Value
-		limits, found := expectedLimits[name]
+		gameID := item.GameID.Value
+		limits, found := expectedLimits[gameID]
 		if !found {
 			continue
 		}
-		delete(expectedLimits, name)
+		delete(expectedLimits, gameID)
 
+		if item.Presentation.Name.Known || item.Presentation.Name.Value != "" {
+			t.Fatalf("0x%08X name = %+v, want unknown and empty", gameID, item.Presentation.Name)
+		}
 		if !item.Safety.CutContent.Known || !item.Safety.CutContent.Value {
-			t.Fatalf("%s cutContent = %+v, want known true", name, item.Safety.CutContent)
+			t.Fatalf("0x%08X cutContent = %+v, want known true", gameID, item.Safety.CutContent)
 		}
 		storage := item.Storage
 		if storage.MaxInventory.Value != limits.inventory || storage.MaxStorage.Value != limits.storage {
-			t.Fatalf("%s Regulation limits = %+v, want %d/%d", name, storage, limits.inventory, limits.storage)
+			t.Fatalf("0x%08X Regulation limits = %+v, want %d/%d", gameID, storage, limits.inventory, limits.storage)
 		}
 		if storage.MaxInventorySFV != nil || storage.MaxStorageSFV != nil ||
 			storage.SafeModeMaxInventory != nil || storage.SafeModeMaxStorage != nil {
-			t.Fatalf("%s retains reviewed storage values: %+v", name, storage)
+			t.Fatalf("0x%08X retains reviewed storage values: %+v", gameID, storage)
 		}
 	}
 

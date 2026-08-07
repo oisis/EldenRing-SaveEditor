@@ -95,7 +95,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 
 		canonicalID := formatGameID(item.GameID.Value)
 		canonicalSearch := []string{
-			resource.Item.Presentation.DisplayName.Value,
+			itemName(resource),
 			resource.Key,
 			canonicalID,
 			string(item.Family.Value),
@@ -108,7 +108,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 			}
 		}
 		canonical := catalogItemRow{
-			Name:         resource.Item.Presentation.DisplayName.Value,
+			Name:         itemName(resource),
 			IconURL:      itemIconURL(item),
 			GameID:       canonicalID,
 			GameIDPath:   strings.TrimPrefix(canonicalID, "0x"),
@@ -127,10 +127,10 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 				continue
 			}
 			variantID := formatGameID(variant.GameID.Value)
-			variantName := variantDisplayName(resource.Item.Presentation.DisplayName.Value, variant)
+			name := variantName(resource, variant)
 			variantSearch := []string{
-				variantName,
-				resource.Item.Presentation.DisplayName.Value,
+				name,
+				itemName(resource),
 				resource.Key,
 				variantID,
 				string(item.Family.Value),
@@ -144,7 +144,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 				continue
 			}
 			rows = append(rows, catalogItemRow{
-				Name:         variantName,
+				Name:         name,
 				IconURL:      variantIconURL(item, variant),
 				GameID:       variantID,
 				GameIDPath:   strings.TrimPrefix(variantID, "0x"),
@@ -179,17 +179,25 @@ func knownText(known bool, value string) string {
 	return value
 }
 
-func variantDisplayName(canonicalName string, variant schema.ItemVariant) string {
-	if variant.Affinity.Known && variant.Affinity.Value != "" && variant.UpgradeLevel.Known {
-		return fmt.Sprintf("%s (%s +%d)", canonicalName, variant.Affinity.Value, variant.UpgradeLevel.Value)
+// itemName is the Viewer's single item-name source: item.presentation.name,
+// falling back to the technical resource key when that name is unknown.
+func itemName(resource schema.Resource) string {
+	return presentationName(resource.Item.Presentation.Name, resource.Key)
+}
+
+func presentationName(name schema.Fact[string], key string) string {
+	if name.Known && name.Value != "" {
+		return name.Value
 	}
-	if variant.Affinity.Known && variant.Affinity.Value != "" {
-		return fmt.Sprintf("%s (%s)", canonicalName, variant.Affinity.Value)
-	}
-	if variant.UpgradeLevel.Known {
-		return fmt.Sprintf("%s (+%d)", canonicalName, variant.UpgradeLevel.Value)
-	}
-	return canonicalName + " (variant)"
+	return key
+}
+
+// variantName is the Viewer's single variant-name source: the variant's own
+// official FMG name in variant.data.presentation.name, falling back to the
+// technical resource key when that name is unknown. The name already carries
+// the affinity and upgrade level, so the Viewer must not decorate it again.
+func variantName(resource schema.Resource, variant schema.ItemVariant) string {
+	return presentationName(variant.Data.Presentation.Name, resource.Key)
 }
 
 func (server *Server) families() []string {

@@ -84,12 +84,12 @@ func TestGetItemVariantsPreservesVariantDataAndProvenance(t *testing.T) {
 		t.Error("Variants[0].Affinity provenance source is empty; provenance must survive the getter")
 	}
 
-	displayName := variant.Data.Presentation.DisplayName
-	if !displayName.Known || displayName.Value != "Dagger" {
-		t.Errorf("Variants[0].Data.Presentation.DisplayName = %+v, want a known %q", displayName, "Dagger")
+	name := variant.Data.Presentation.Name
+	if !name.Known || name.Value != "Heavy Dagger" {
+		t.Errorf("Variants[0].Data.Presentation.Name = %+v, want a known %q", name, "Heavy Dagger")
 	}
-	if displayName.Provenance.Source == "" {
-		t.Error("Variants[0].Data display name provenance source is empty; provenance must survive the getter")
+	if name.Provenance.Source == "" {
+		t.Error("Variants[0].Data name provenance source is empty; provenance must survive the getter")
 	}
 	if variant.Data.Weapon == nil {
 		t.Error("Variants[0].Data.Weapon = nil, want the weapon block of the variant")
@@ -238,11 +238,11 @@ func TestGetItemVariantsDoesNotMutateCatalog(t *testing.T) {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
 	originalGameID := before.Variants[0].GameID.Value
-	originalDisplayName := before.Variants[0].Data.Presentation.DisplayName.Value
+	originalName := before.Variants[0].Data.Presentation.Name.Value
 	originalCount := len(before.Variants)
 
 	before.Variants[0].GameID.Value = 1
-	before.Variants[0].Data.Presentation.DisplayName.Value = "mutated"
+	before.Variants[0].Data.Presentation.Name.Value = "mutated"
 	before.Variants[0].SourceRecords = nil
 
 	after, err := catalog.GetItemVariants(gameCatalog, itemVariantsDaggerResourceKey)
@@ -255,8 +255,8 @@ func TestGetItemVariantsDoesNotMutateCatalog(t *testing.T) {
 	if got := after.Variants[0].GameID.Value; got != originalGameID {
 		t.Errorf("catalog variant game ID = 0x%08X, want 0x%08X", got, originalGameID)
 	}
-	if got := after.Variants[0].Data.Presentation.DisplayName.Value; got != originalDisplayName {
-		t.Errorf("catalog variant display name = %q, want %q", got, originalDisplayName)
+	if got := after.Variants[0].Data.Presentation.Name.Value; got != originalName {
+		t.Errorf("catalog variant name = %q, want %q", got, originalName)
 	}
 	if len(after.Variants[0].SourceRecords) == 0 {
 		t.Error("catalog variant source records were cleared; the getter must hand out an independent copy")

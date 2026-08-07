@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Freyja's Greatsword",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Freyja's Greatsword",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_weapon_name_dlc",
+          "method": "resolved the official English WeaponName_dlc01.fmg entry 8510000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -516,20 +492,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Heavy Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Heavy Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510100"
               }
             },
             "caption": {
@@ -565,22 +533,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1782,20 +1734,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Keen Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Keen Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510200"
               }
             },
             "caption": {
@@ -1831,22 +1775,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -3048,20 +2976,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Quality Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Quality Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510300"
               }
             },
             "caption": {
@@ -3097,22 +3017,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4314,20 +4218,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Fire Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Fire Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510400"
               }
             },
             "caption": {
@@ -4363,22 +4259,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5580,20 +5460,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Flame Art Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Flame Art Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510500"
               }
             },
             "caption": {
@@ -5629,22 +5501,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -6846,20 +6702,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Lightning Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Lightning Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510600"
               }
             },
             "caption": {
@@ -6895,22 +6743,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8112,20 +7944,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Sacred Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Sacred Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510700"
               }
             },
             "caption": {
@@ -8161,22 +7985,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -9378,20 +9186,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Magic Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Magic Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510800"
               }
             },
             "caption": {
@@ -9427,22 +9227,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -10644,20 +10428,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Cold Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Cold Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8510900"
               }
             },
             "caption": {
@@ -10693,22 +10469,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -11997,20 +11757,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Poison Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Poison Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8511000"
               }
             },
             "caption": {
@@ -12046,22 +11798,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -13350,20 +13086,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Blood Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Blood Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8511100"
               }
             },
             "caption": {
@@ -13399,22 +13127,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -14703,20 +14415,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Freyja's Occult Greatsword",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Freyja's Occult Greatsword",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_weapon_name_dlc",
+                "method": "resolved the official English WeaponName_dlc01.fmg entry 8511200"
               }
             },
             "caption": {
@@ -14752,22 +14456,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

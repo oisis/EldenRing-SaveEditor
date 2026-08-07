@@ -173,23 +173,18 @@ func itemCategoryFact(item seed) schema.Fact[string] {
 	return knownLegacyFact(item.Category, "copied from legacy ItemData.Category")
 }
 
-func buildPresentation(item seed) schema.ItemPresentation {
-	displayName := item.Name
-	canonicalName := item.Name
+func (context *generationContext) buildPresentation(
+	item seed,
+	family schema.ItemFamily,
+	safety schema.ItemSafety,
+	isVariant bool,
+) (schema.ItemPresentation, error) {
 	result := emptyPresentation()
 	if item.Text != nil {
-		if item.Text.DisplayName != "" {
-			displayName = item.Text.DisplayName
-		}
-		if item.Text.CanonicalName != "" {
-			canonicalName = item.Text.CanonicalName
-		}
 		result.Caption = optionalLegacyString(item.Text.Caption, "copied from legacy ItemTexts.Caption")
 		result.Description = optionalLegacyString(item.Text.Description, "copied from legacy ItemTexts.Description")
 		result.Location = optionalLegacyString(item.Text.Location, "copied from legacy ItemTexts.Location")
 		result.TextMetadata = schema.ItemTextMetadata{
-			DisplayNameSource: optionalLegacyString(item.Text.DisplayNameSource, "copied from legacy ItemTexts.DisplayNameSource"),
-			CanonicalSource:   optionalLegacyString(item.Text.CanonicalSource, "copied from legacy ItemTexts.CanonicalSource"),
 			CaptionSource:     optionalLegacyString(item.Text.CaptionSource, "copied from legacy ItemTexts.CaptionSource"),
 			DescriptionSource: optionalLegacyString(item.Text.DescriptionSource, "copied from legacy ItemTexts.DescriptionSource"),
 			LocationSource:    optionalLegacyString(item.Text.LocationSource, "copied from legacy ItemTexts.LocationSource"),
@@ -200,33 +195,85 @@ func buildPresentation(item seed) schema.ItemPresentation {
 		result.Description = optionalLegacyString(item.Description.Description, "copied from legacy Descriptions.Description")
 		result.Location = optionalLegacyString(item.Description.Location, "copied from legacy Descriptions.Location")
 	}
-	nameMethod := "copied from legacy item text"
-	if item.RegulationOnlyVariant {
-		nameMethod = "copied from the canonical legacy item text for a Regulation-only variant"
-	} else if !item.HasLegacyItem {
-		nameMethod = "copied from legacy AllGestures"
+	name, err := context.itemNameFact(item.ID, family, safety, isVariant)
+	if err != nil {
+		return schema.ItemPresentation{}, err
 	}
-	result.DisplayName = knownLegacyFact(displayName, nameMethod)
-	result.CanonicalName = knownLegacyFact(canonicalName, nameMethod)
+	result.Name = name
 	if item.IconPath != "" {
 		result.IconPath = knownIconFact("assets/icons/" + path.Clean(item.IconPath))
 	} else {
 		result.IconPath = unknownCatalogFact[string]("legacy item has no icon path")
 	}
-	return result
+	return result, nil
+}
+
+// visionOfGraceGameID is the single base item the official FMG name catalogs do
+// not cover. It keeps its safety flags and carries an unknown name.
+const visionOfGraceGameID uint32 = 0x400000A6
+
+// itemNameFact resolves the one official FMG name for a game ID. The name is
+// unknown only for Vision of Grace, for cut-content or ban-risk items whose FMG
+// entry is empty, missing or an "[ERROR]" placeholder, and for variants whose
+// FMG entry is an "[ERROR]" placeholder. Anything else is a generation error.
+func (context *generationContext) itemNameFact(
+	gameID uint32,
+	family schema.ItemFamily,
+	safety schema.ItemSafety,
+	isVariant bool,
+) (schema.Fact[string], error) {
+	entry, exists, err := context.gameText.lookupItemName(family, gameID)
+	if err != nil {
+		return schema.Fact[string]{}, fmt.Errorf("item 0x%08X: %w", gameID, err)
+	}
+	placeholder := exists && strings.HasPrefix(entry.text, gameTextErrorPrefix)
+	if exists && !placeholder && entry.text != "" {
+		return schema.Fact[string]{
+			Known: true,
+			Value: entry.text,
+			Provenance: schema.Provenance{
+				Source: entry.source,
+				Method: fmt.Sprintf(
+					"resolved the official English %s entry %d",
+					entry.fmgFile,
+					entry.entryID,
+				),
+			},
+		}, nil
+	}
+	switch {
+	case gameID == visionOfGraceGameID:
+		return unknownCatalogFact[string](
+			"no official FMG name entry exists for this item",
+		), nil
+	case isVariant && placeholder:
+		return unknownCatalogFact[string](fmt.Sprintf(
+			"official %s entry %d is an %s placeholder",
+			entry.fmgFile,
+			entry.entryID,
+			gameTextErrorPrefix,
+		)), nil
+	case safety.CutContent.Value || safety.BanRisk.Value:
+		return unknownCatalogFact[string](
+			"cut-content or ban-risk item has no usable official FMG name entry",
+		), nil
+	}
+	return schema.Fact[string]{}, fmt.Errorf(
+		"item 0x%08X (family %q) has no usable official FMG name entry %d",
+		gameID,
+		family,
+		gameTextEntryID(gameID),
+	)
 }
 
 func emptyPresentation() schema.ItemPresentation {
 	return schema.ItemPresentation{
-		DisplayName:   unknownCatalogFact[string]("legacy display name is unknown"),
-		CanonicalName: unknownCatalogFact[string]("legacy canonical name is unknown"),
-		Caption:       unknownCatalogFact[string]("legacy caption is unknown"),
-		Description:   unknownCatalogFact[string]("legacy description is unknown"),
-		Location:      unknownCatalogFact[string]("legacy location is unknown"),
-		IconPath:      unknownCatalogFact[string]("legacy icon path is unknown"),
+		Name:        unknownCatalogFact[string]("official FMG name is unknown"),
+		Caption:     unknownCatalogFact[string]("legacy caption is unknown"),
+		Description: unknownCatalogFact[string]("legacy description is unknown"),
+		Location:    unknownCatalogFact[string]("legacy location is unknown"),
+		IconPath:    unknownCatalogFact[string]("legacy icon path is unknown"),
 		TextMetadata: schema.ItemTextMetadata{
-			DisplayNameSource: unknownCatalogFact[string]("legacy display-name source is unknown"),
-			CanonicalSource:   unknownCatalogFact[string]("legacy canonical-name source is unknown"),
 			CaptionSource:     unknownCatalogFact[string]("legacy caption source is unknown"),
 			DescriptionSource: unknownCatalogFact[string]("legacy description source is unknown"),
 			LocationSource:    unknownCatalogFact[string]("legacy location source is unknown"),

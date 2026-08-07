@@ -38,7 +38,7 @@ func TestCatalogQueriesReturnIndependentCopies(t *testing.T) {
 	if !ok {
 		t.Fatal("Dagger not found")
 	}
-	first.Item.Presentation.DisplayName.Value = "Mutated"
+	first.Item.Presentation.Name.Value = "Mutated"
 	first.Item.Capabilities.Infusion.Rules.AllowedAffinities[0] = schema.AffinityOccult
 	originalVariantID := first.Item.Variants[0].GameID.Value
 	first.Item.Variants[0].GameID.Value = 1
@@ -48,8 +48,8 @@ func TestCatalogQueriesReturnIndependentCopies(t *testing.T) {
 	if !ok {
 		t.Fatal("Dagger not found after mutation")
 	}
-	if second.Item.Presentation.DisplayName.Value != "Dagger" {
-		t.Errorf("catalog display name was mutated to %q", second.Item.Presentation.DisplayName.Value)
+	if second.Item.Presentation.Name.Value != "Dagger" {
+		t.Errorf("catalog display name was mutated to %q", second.Item.Presentation.Name.Value)
 	}
 	if second.Item.Capabilities.Infusion.Rules.AllowedAffinities[0] != schema.AffinityStandard {
 		t.Error("catalog affinity slice was mutated")

@@ -64,7 +64,7 @@ func (server *Server) buildItemPage(
 ) itemPage {
 	resource := view.Resource
 	item := resource.Item
-	name := resource.Item.Presentation.DisplayName.Value
+	name := itemName(resource)
 	iconURL := itemIconURL(item)
 	entryType := "Canonical"
 	unknownCount := countUnknownFactsForFamily(resource, item.Family.Value)
@@ -84,7 +84,7 @@ func (server *Server) buildItemPage(
 	familyData := server.familyFacts(item)
 	sourceRecords := server.parameterRecordViews(item)
 	if variant, exists := findVariant(item, requestedGameID); exists {
-		name = variantDisplayName(resource.Item.Presentation.DisplayName.Value, variant)
+		name = variantName(resource, variant)
 		iconURL = variantIconURL(item, variant)
 		entryType = "Variant"
 		unknownCount = countUnknownFactsForFamily(variant, item.Family.Value)
@@ -124,8 +124,7 @@ func (server *Server) buildItemPage(
 			server.fact("Subcategory", subcategoryKnown, subcategoryValue, subcategoryProvenance),
 		},
 		Presentation: []factView{
-			server.fact("Display name", presentation.DisplayName.Known, presentation.DisplayName.Value, presentation.DisplayName.Provenance),
-			server.fact("Canonical name", presentation.CanonicalName.Known, presentation.CanonicalName.Value, presentation.CanonicalName.Provenance),
+			server.fact("Name", presentation.Name.Known, presentation.Name.Value, presentation.Name.Provenance),
 			server.fact("Caption", presentation.Caption.Known, presentation.Caption.Value, presentation.Caption.Provenance),
 			server.fact("Description", presentation.Description.Known, presentation.Description.Value, presentation.Description.Provenance),
 			server.fact("Location", presentation.Location.Known, presentation.Location.Value, presentation.Location.Provenance),
@@ -147,7 +146,7 @@ func (server *Server) buildItemPage(
 		TechnicalData:  server.readableFacts(technicalData, "Technical record"),
 		Capabilities:   server.capabilityViewsFor(capabilities),
 		FamilyData:     familyData,
-		Variants:       server.variantViews(item),
+		Variants:       server.variantViews(resource),
 		Aliases:        server.aliasViews(item),
 		SourceRecords:  sourceRecords,
 		Relations:      server.relationViews(view),

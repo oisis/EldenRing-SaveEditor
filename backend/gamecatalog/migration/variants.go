@@ -72,6 +72,7 @@ func (context *generationContext) buildVariants(
 			lookup.Row,
 			true,
 			capabilitiesOverride,
+			true,
 		)
 		if err != nil {
 			return nil, err

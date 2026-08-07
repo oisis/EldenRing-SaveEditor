@@ -42,20 +42,12 @@
       }
     },
     "presentation": {
-      "displayName": {
+      "name": {
         "known": true,
         "value": "Albinauric Ashes",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
-        }
-      },
-      "canonicalName": {
-        "known": true,
-        "value": "Albinauric Ashes",
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "copied from legacy item text"
+          "source": "game_text_goods_name_base",
+          "method": "resolved the official English GoodsName.fmg entry 211000"
         }
       },
       "caption": {
@@ -91,22 +83,6 @@
         }
       },
       "textMetadata": {
-        "displayNameSource": {
-          "known": true,
-          "value": "app",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.DisplayNameSource"
-          }
-        },
-        "canonicalSource": {
-          "known": true,
-          "value": "fmg",
-          "provenance": {
-            "source": "legacy_db_data",
-            "method": "copied from legacy ItemTexts.CanonicalSource"
-          }
-        },
         "captionSource": {
           "known": true,
           "value": "fmg",
@@ -638,20 +614,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +1",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +1",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211001"
               }
             },
             "caption": {
@@ -687,22 +655,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -1778,20 +1730,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +2",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +2",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211002"
               }
             },
             "caption": {
@@ -1827,22 +1771,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -2918,20 +2846,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +3",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +3",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211003"
               }
             },
             "caption": {
@@ -2967,22 +2887,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -4058,20 +3962,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +4",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +4",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211004"
               }
             },
             "caption": {
@@ -4107,22 +4003,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -5198,20 +5078,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +5",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +5",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211005"
               }
             },
             "caption": {
@@ -5247,22 +5119,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -6338,20 +6194,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +6",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +6",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211006"
               }
             },
             "caption": {
@@ -6387,22 +6235,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -7478,20 +7310,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +7",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +7",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211007"
               }
             },
             "caption": {
@@ -7527,22 +7351,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -8618,20 +8426,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +8",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +8",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211008"
               }
             },
             "caption": {
@@ -8667,22 +8467,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -9758,20 +9542,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +9",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +9",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211009"
               }
             },
             "caption": {
@@ -9807,22 +9583,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",
@@ -10898,20 +10658,12 @@
             }
           },
           "presentation": {
-            "displayName": {
+            "name": {
               "known": true,
               "value": "Albinauric Ashes +10",
               "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
-              }
-            },
-            "canonicalName": {
-              "known": true,
-              "value": "Albinauric Ashes +10",
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "copied from legacy item text"
+                "source": "game_text_goods_name_base",
+                "method": "resolved the official English GoodsName.fmg entry 211010"
               }
             },
             "caption": {
@@ -10947,22 +10699,6 @@
               }
             },
             "textMetadata": {
-              "displayNameSource": {
-                "known": true,
-                "value": "app",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.DisplayNameSource"
-                }
-              },
-              "canonicalSource": {
-                "known": true,
-                "value": "fmg",
-                "provenance": {
-                  "source": "legacy_db_data",
-                  "method": "copied from legacy ItemTexts.CanonicalSource"
-                }
-              },
               "captionSource": {
                 "known": true,
                 "value": "fmg",

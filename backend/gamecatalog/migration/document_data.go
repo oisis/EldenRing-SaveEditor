@@ -34,6 +34,7 @@ func (context *generationContext) buildDocumentData(
 		row,
 		hasPrimaryRow,
 		nil,
+		false,
 	)
 }
 
@@ -43,6 +44,7 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 	row ParameterRow,
 	hasPrimaryRow bool,
 	capabilitiesOverride *schema.ItemCapabilities,
+	isVariant bool,
 ) (builtDocumentData, error) {
 	var capabilities schema.ItemCapabilities
 	var err error
@@ -75,13 +77,18 @@ func (context *generationContext) buildDocumentDataWithCapabilities(
 	if err != nil {
 		return builtDocumentData{}, err
 	}
+	safety := context.buildSafety(item)
+	presentation, err := context.buildPresentation(item, family, safety, isVariant)
+	if err != nil {
+		return builtDocumentData{}, err
+	}
 	data := builtDocumentData{
 		Category:                itemCategoryFact(item),
 		Subcategory:             itemSubcategoryFact(item),
-		Presentation:            buildPresentation(item),
+		Presentation:            presentation,
 		Storage:                 storage,
 		Capabilities:            capabilities,
-		Safety:                  context.buildSafety(item),
+		Safety:                  safety,
 		Acquisition:             buildAcquisition(item, requiredContainerIsNotApplicable(item, family)),
 		Modifiers:               modifiers,
 		Links:                   buildLinks(item.Links),

@@ -13,12 +13,14 @@ func TestLegacySnapshotCopiesMutableSourceData(t *testing.T) {
 
 	first := collectLegacySnapshot()
 	weapon := findSeed(t, first.Items, weaponID)
-	if len(weapon.Flags) == 0 || weapon.WeaponStats == nil || len(weapon.WeaponStats.Warnings) == 0 {
+	if len(weapon.Flags) == 0 || weapon.WeaponStats == nil || len(weapon.WeaponStats.Warnings) == 0 ||
+		weapon.Text == nil || weapon.Text.Caption == "" {
 		t.Fatalf("weapon copy fixture is incomplete: %#v", weapon)
 	}
+	originalCaption := weapon.Text.Caption
 	weapon.Flags[0] = "mutated"
 	weapon.WeaponStats.Warnings[0] = "mutated"
-	weapon.Text.DisplayName = "mutated"
+	weapon.Text.Caption = "mutated"
 	first.Aliases[0].CanonicalID = 0
 	container := findSeed(t, first.Items, containerID)
 	if len(container.Acquisition.ContainerPickupFlags) == 0 {
@@ -42,7 +44,7 @@ func TestLegacySnapshotCopiesMutableSourceData(t *testing.T) {
 	second := collectLegacySnapshot()
 	weapon = findSeed(t, second.Items, weaponID)
 	if weapon.Flags[0] != "dlc" || weapon.WeaponStats.Warnings[0] != "status-deferred" ||
-		weapon.Text.DisplayName != "Main-gauche" {
+		weapon.Text.Caption != originalCaption {
 		t.Fatalf("second snapshot retained mutations: %#v", weapon)
 	}
 	if second.Aliases[0].CanonicalID == 0 {
