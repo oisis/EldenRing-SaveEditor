@@ -83,6 +83,12 @@ func TestGetItemVariantsPreservesVariantDataAndProvenance(t *testing.T) {
 	if variant.Affinity.Provenance.Source == "" {
 		t.Error("Variants[0].Affinity provenance source is empty; provenance must survive the getter")
 	}
+	if !variant.UpgradeLevel.Known || variant.UpgradeLevel.Value != 0 {
+		t.Errorf("Variants[0].UpgradeLevel = %+v, want a known 0", variant.UpgradeLevel)
+	}
+	if variant.UpgradeLevel.Provenance.Source == "" {
+		t.Error("Variants[0].UpgradeLevel provenance source is empty; provenance must survive the getter")
+	}
 
 	name := variant.Data.Presentation.Name
 	if !name.Known || name.Value != "Heavy Dagger" {

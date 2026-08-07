@@ -100,7 +100,7 @@ Each entry is the complete `schema.ItemVariant`, not a reduced projection:
 | `gameID` | `Fact[uint32]` | The in-game item ID of this variant. |
 | `kind` | `Fact[ItemVariantKind]` | `affinity`, `upgrade`, or `affinity_upgrade`. |
 | `affinity` | `Fact[Affinity]` | The affinity of the variant, when it has one. |
-| `upgradeLevel` | `Fact[uint8]` | The upgrade level of the variant, when it has one. |
+| `upgradeLevel` | `Fact[uint8]` | The upgrade level of the variant. A base affinity variant carries a known level of `0` with its own provenance, not an unknown fact; `upgrade` and `affinity_upgrade` variants carry their actual level. |
 | `sourceRowID` | `Fact[uint32]` | The regulation row the variant was derived from. |
 | `data` | `VariantDocumentData` | The variant-specific document data (`presentation`, `storage`, `capabilities`, `safety`, `acquisition`, `modifiers`, `links`, `unlocks`, `relatedTechnicalRecords`, `weapon`, `spiritAsh`). |
 | `sourceRecords` | `[]ParameterRecord` | The parameter records backing the variant. |
@@ -316,7 +316,7 @@ abbreviated**; `…` marks omitted fields and entries:
       "gameID": { "known": true, "value": 1000100, "provenance": { "source": "regulation_equip_param_weapon", "…": "…" } },
       "kind": { "known": true, "value": "affinity", "provenance": { "…": "…" } },
       "affinity": { "known": true, "value": "heavy", "provenance": { "…": "…" } },
-      "upgradeLevel": { "known": false, "value": 0, "provenance": { "…": "…" } },
+      "upgradeLevel": { "known": true, "value": 0, "provenance": { "source": "regulation_equip_param_weapon", "…": "…" } },
       "sourceRowID": { "known": true, "value": 1000100, "provenance": { "…": "…" } },
       "data": { "presentation": { "name": { "known": true, "value": "Heavy Dagger", "…": "…" } }, "…": "…" },
       "sourceRecords": [ { "table": "EquipParamWeapon", "rowID": 1000100, "…": "…" } ]
