@@ -56,12 +56,6 @@ type WeaponData struct {
 	ScalingArcaneRaw        Fact[float64]             `json:"scalingArcaneRaw"`
 	Critical                Fact[int32]               `json:"critical"`
 	CriticalSFV             *Fact[int32]              `json:"critical-sfv,omitempty"`
-	StatusPoison            Fact[int32]               `json:"statusPoison"`
-	StatusBleed             Fact[int32]               `json:"statusBleed"`
-	StatusFrost             Fact[int32]               `json:"statusFrost"`
-	StatusSleep             Fact[int32]               `json:"statusSleep"`
-	StatusMadness           Fact[int32]               `json:"statusMadness"`
-	StatusScarletRot        Fact[int32]               `json:"statusScarletRot"`
 	PassiveEffects          []WeaponPassiveEffectData `json:"passiveEffects"`
 	DefaultAshOfWarID       Fact[int32]               `json:"defaultAshOfWarID"`
 	DefaultAshOfWarIDSFV    *Fact[int32]              `json:"defaultAshOfWarID-sfv,omitempty"`

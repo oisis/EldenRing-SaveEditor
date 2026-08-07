@@ -1203,54 +1203,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -2427,54 +2379,6 @@
                 "table": "EquipParamWeapon",
                 "row": "18050200",
                 "field": "throwAtkRate"
-              }
-            },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
               }
             },
             "passiveEffects": [
@@ -3655,54 +3559,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -4879,54 +4735,6 @@
                 "table": "EquipParamWeapon",
                 "row": "18050400",
                 "field": "throwAtkRate"
-              }
-            },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
               }
             },
             "passiveEffects": [
@@ -6107,54 +5915,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -7331,54 +7091,6 @@
                 "table": "EquipParamWeapon",
                 "row": "18050600",
                 "field": "throwAtkRate"
-              }
-            },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
               }
             },
             "passiveEffects": [
@@ -8559,54 +8271,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -9785,54 +9449,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -11009,54 +10625,6 @@
                 "table": "EquipParamWeapon",
                 "row": "18050900",
                 "field": "throwAtkRate"
-              }
-            },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
               }
             },
             "passiveEffects": [
@@ -12324,54 +11892,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -13635,54 +13155,6 @@
                 "table": "EquipParamWeapon",
                 "row": "18051100",
                 "field": "throwAtkRate"
-              }
-            },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
               }
             },
             "passiveEffects": [
@@ -14950,54 +14422,6 @@
                 "field": "throwAtkRate"
               }
             },
-            "statusPoison": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-              }
-            },
-            "statusBleed": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-              }
-            },
-            "statusFrost": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-              }
-            },
-            "statusSleep": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-              }
-            },
-            "statusMadness": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-              }
-            },
-            "statusScarletRot": {
-              "known": false,
-              "value": 0,
-              "provenance": {
-                "source": "legacy_db_data",
-                "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
-              }
-            },
             "passiveEffects": [
               {
                 "kind": {
@@ -15930,54 +15354,6 @@
           "table": "EquipParamWeapon",
           "row": "18050000",
           "field": "throwAtkRate"
-        }
-      },
-      "statusPoison": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy WeaponStatsV1.StatusPoison is zero because status derivation is deferred"
-        }
-      },
-      "statusBleed": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy WeaponStatsV1.StatusBleed is zero because status derivation is deferred"
-        }
-      },
-      "statusFrost": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy WeaponStatsV1.StatusFrost is zero because status derivation is deferred"
-        }
-      },
-      "statusSleep": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy WeaponStatsV1.StatusSleep is zero because status derivation is deferred"
-        }
-      },
-      "statusMadness": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy WeaponStatsV1.StatusMadness is zero because status derivation is deferred"
-        }
-      },
-      "statusScarletRot": {
-        "known": false,
-        "value": 0,
-        "provenance": {
-          "source": "legacy_db_data",
-          "method": "legacy WeaponStatsV1.StatusScarletRot is zero because status derivation is deferred"
         }
       },
       "passiveEffects": [

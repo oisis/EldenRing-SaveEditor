@@ -35,13 +35,6 @@ type weaponStatsSeed struct {
 	ScalingFaiRaw int32
 	ScalingArcRaw int32
 
-	StatusPoison     int32
-	StatusBleed      int32
-	StatusFrost      int32
-	StatusSleep      int32
-	StatusMadness    int32
-	StatusScarletRot int32
-
 	PassiveEffects []passiveEffectSeed
 	DefaultAoWID   int32
 	IsInfusable    bool
