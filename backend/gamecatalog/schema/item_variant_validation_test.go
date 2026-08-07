@@ -59,7 +59,7 @@ func TestValidateResourceRejectsVariantMissingFamilyData(t *testing.T) {
 	sources := mustValidateManifest(t, manifest)
 	p := testProvenance(manifest)
 	resource := resources[0]
-	variant := validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, false)
+	variant := validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, true)
 	variant.Data = schema.VariantDocumentData{}
 	resource.Item.Variants = []schema.ItemVariant{variant}
 
@@ -74,12 +74,14 @@ func TestValidateResourceRejectsRawRecordWithoutProvenance(t *testing.T) {
 	sources := mustValidateManifest(t, manifest)
 	p := testProvenance(manifest)
 	resource := resources[0]
-	variant := validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, false)
+	variant := validVariant(p, resources[0].Item, schema.ItemVariantAffinity, 100, true, true)
 	variant.SourceRecords[0].Provenance = schema.Provenance{}
 	resource.Item.Variants = []schema.ItemVariant{variant}
 
 	err := schema.ValidateResource(resource, sources)
-	if err == nil || !strings.Contains(err.Error(), "provenance source is required") {
+	if err == nil ||
+		!strings.Contains(err.Error(), "sourceRecords") ||
+		!strings.Contains(err.Error(), "provenance source is required") {
 		t.Fatalf("ValidateResource error = %v, want raw-record provenance rejection", err)
 	}
 }
