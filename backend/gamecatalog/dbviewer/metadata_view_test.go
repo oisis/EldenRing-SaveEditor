@@ -61,7 +61,7 @@ func TestFactsTemplateColoursSourceTextOnly(t *testing.T) {
 	}
 }
 
-func TestAliasesAndCanonicalAndVariantSourceRecordsRemainVisible(t *testing.T) {
+func TestCanonicalSourceRecordsExcludeVariantsAndAliases(t *testing.T) {
 	sourceID := schema.SourceID("regulation")
 	provenance := schema.Provenance{Source: sourceID, Method: "exact row"}
 	server := &Server{
@@ -112,16 +112,15 @@ func TestAliasesAndCanonicalAndVariantSourceRecordsRemainVisible(t *testing.T) {
 	}
 
 	records := server.parameterRecordViews(item)
-	if len(records) != 3 {
+	if len(records) != 1 {
 		t.Fatalf("source record views = %+v", records)
 	}
-	if records[0].Scope != "Item" || records[0].Fields[0].Name != "goodsType" {
+	if records[0].Scope != "Item" || records[0].RowID != 1 || records[0].Fields[0].Name != "goodsType" {
 		t.Fatalf("canonical source record = %+v", records[0])
 	}
-	if records[1].Scope != "Item / Variants 1" || records[1].Fields[0].Name != "goodsType" {
-		t.Fatalf("variant source record = %+v", records[1])
-	}
-	if records[2].Scope != "Item / Aliases 1" || records[2].Fields[0].Name != "refId" {
-		t.Fatalf("alias source record = %+v", records[2])
+	for _, record := range records {
+		if record.RowID == 2 || record.RowID == 3 {
+			t.Fatalf("canonical source records leak variant/alias record %+v", record)
+		}
 	}
 }

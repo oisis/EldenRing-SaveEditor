@@ -30,6 +30,11 @@ func (server *Server) parameterRecordViews(item *schema.ItemDocument) []paramete
 		if fieldType.PkgPath != "" || fieldType.Name == "SourceRecords" {
 			continue
 		}
+		// Variants and aliases own their source records and render them on their
+		// own pages. The canonical page must not absorb them.
+		if fieldType.Name == "Variants" || fieldType.Name == "Aliases" {
+			continue
+		}
 		scope := joinFactLabel("Item", fieldLabel(fieldType))
 		records = append(records, server.collectParameterRecords(value.Field(index), scope)...)
 	}

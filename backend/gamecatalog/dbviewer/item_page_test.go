@@ -171,6 +171,42 @@ func TestVariantItemPageShowsOnlyExactVariantSourceRecords(t *testing.T) {
 	}
 }
 
+func TestCanonicalItemPageHidesAffinityVariantSourceRecords(t *testing.T) {
+	data, err := loader.LoadFS(catalogdata.Files())
+	if err != nil {
+		t.Fatalf("LoadFS: %v", err)
+	}
+	server, err := New(data)
+	if err != nil {
+		t.Fatalf("New: %v", err)
+	}
+	handler := server.Handler()
+
+	canonical := request(t, handler, http.MethodGet, "/items/003085E0")
+	if canonical.Code != http.StatusOK {
+		t.Fatalf("canonical status = %d, want 200", canonical.Code)
+	}
+	canonicalBody := canonical.Body.String()
+	if !strings.Contains(canonicalBody, "row 3180000") {
+		t.Error("canonical Claymore page does not contain its own row 3180000")
+	}
+	if strings.Contains(canonicalBody, "row 3180100") {
+		t.Error("canonical Claymore page contains affinity variant row 3180100")
+	}
+
+	variant := request(t, handler, http.MethodGet, "/items/00308644")
+	if variant.Code != http.StatusOK {
+		t.Fatalf("variant status = %d, want 200", variant.Code)
+	}
+	variantBody := variant.Body.String()
+	if !strings.Contains(variantBody, "row 3180100") {
+		t.Error("Claymore variant page does not contain its own row 3180100")
+	}
+	if strings.Contains(variantBody, "row 3180000") {
+		t.Error("Claymore variant page contains canonical row 3180000")
+	}
+}
+
 func TestVariantItemPageUsesFullVariantData(t *testing.T) {
 	server := testServer(t)
 	view, exists := server.catalog.ItemViewByGameID(1000300)
