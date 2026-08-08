@@ -26,6 +26,8 @@ code {
 .catalog-meta div { min-width: 6rem; }
 .catalog-meta dt { color: #9fb2a7; font-size: 0.75rem; text-transform: uppercase; }
 .catalog-meta dd { margin: 0; font-weight: 650; }
+.catalog-meta code { color: #cad6ce; font-size: 0.78rem; }
+.catalog-meta .copy-button { vertical-align: middle; }
 
 main { max-width: 1280px; min-height: calc(100vh - 180px); margin: 0 auto; padding: 2rem; }
 footer { padding: 1.25rem; color: #69717d; text-align: center; border-top: 1px solid #dce0e5; }

@@ -22,6 +22,32 @@ func TestServerIsReadOnlyAndSetsSecurityHeaders(t *testing.T) {
 	}
 }
 
+func TestServerHeaderShowsHumanReadableCatalogSummaryAndCopyableFingerprint(t *testing.T) {
+	server := testServer(t)
+	response := request(t, server.Handler(), http.MethodGet, "/")
+	if response.Code != http.StatusOK {
+		t.Fatalf("GET / status = %d, want 200", response.Code)
+	}
+	body := response.Body.String()
+	for _, expected := range []string{
+		"<dt>Resources</dt>",
+		"<dd>2</dd>",
+		"<dt>Data fingerprint</dt>",
+		"<dt>Game version</dt>",
+		server.catalog.Manifest().GameVersion,
+		`id="catalog-fingerprint"`,
+		`data-copy-target="catalog-fingerprint"`,
+		server.catalog.Manifest().DataVersion[:6],
+	} {
+		if !strings.Contains(body, expected) {
+			t.Errorf("header does not contain %q", expected)
+		}
+	}
+	if strings.Contains(body, server.catalog.Manifest().DataVersion) {
+		t.Error("header exposes the full data fingerprint")
+	}
+}
+
 func TestServerServesEmbeddedAssetsAndHealth(t *testing.T) {
 	handler := testServer(t).Handler()
 	for _, target := range []string{"/assets/styles.css", "/assets/app.js", "/healthz"} {

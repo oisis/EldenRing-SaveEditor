@@ -15,9 +15,21 @@
       <p>Read-only view of validated game resource documents.</p>
     </div>
     <dl class="catalog-meta">
-      <div><dt>Resources</dt><dd>{{.Meta.ResourceCount}}</dd></div>
-      <div><dt>Data</dt><dd>{{.Meta.Manifest.DataVersion}}</dd></div>
-      <div><dt>Game</dt><dd>{{.Meta.Manifest.GameVersion}}</dd></div>
+      <div>
+        <dt>Resources</dt>
+        <dd>{{.Meta.ResourceCount}}</dd>
+      </div>
+      <div>
+        <dt>Data fingerprint</dt>
+        <dd>
+          <code id="catalog-fingerprint">{{printf "%.6s" .Meta.Manifest.DataVersion}}</code>
+          <button class="copy-button" type="button" data-copy-target="catalog-fingerprint">Copy</button>
+        </dd>
+      </div>
+      <div>
+        <dt>Game version</dt>
+        <dd>{{.Meta.Manifest.GameVersion}}</dd>
+      </div>
     </dl>
   </header>
   <main>
