@@ -29,6 +29,65 @@ func (catalog *Catalog) ResourceByKindAndKey(
 	return cloneResource(resource), nil
 }
 
+// CapabilitySummary carries the two flags a list needs to decide whether a
+// capability applies, without the rules and the provenance behind them.
+type CapabilitySummary struct {
+	Known   bool
+	Enabled bool
+}
+
+// ResourceSummary is the value-only view of one resource: the fields a list or a
+// picker reads, and nothing else. It holds no pointer, map or slice, so it copies
+// no mutable catalog state and cannot be used to reach a stored document.
+type ResourceSummary struct {
+	Kind          schema.ResourceKind
+	Key           string
+	FamilyKnown   bool
+	Family        schema.ItemFamily
+	NameKnown     bool
+	Name          string
+	Upgrade       CapabilitySummary
+	Infusion      CapabilitySummary
+	AshOfWarMount CapabilitySummary
+	Stack         CapabilitySummary
+	Equipment     CapabilitySummary
+}
+
+// ResourceSummaries returns one summary per stored resource, ordered by kind and
+// only then by key, which is the same deterministic order relation derivation
+// uses. It copies scalars only, so a caller that lists resources never pays for
+// deep-copying variants, provenance and capability rules it would discard. It
+// deliberately offers no filtering, search or paging: selecting and slicing
+// resources belongs to the endpoint that asks for them.
+func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
+	stored := catalog.sortedResources()
+	summaries := make([]ResourceSummary, 0, len(stored))
+	for _, resource := range stored {
+		summary := ResourceSummary{Kind: resource.Kind, Key: resource.Key}
+		if resource.Item != nil {
+			summary.FamilyKnown = resource.Item.Family.Known
+			summary.Family = resource.Item.Family.Value
+			summary.NameKnown = resource.Item.Presentation.Name.Known
+			summary.Name = resource.Item.Presentation.Name.Value
+
+			capabilities := resource.Item.Capabilities
+			summary.Upgrade = summariseCapability(capabilities.Upgrade)
+			summary.Infusion = summariseCapability(capabilities.Infusion)
+			summary.AshOfWarMount = summariseCapability(capabilities.AshOfWarMount)
+			summary.Stack = summariseCapability(capabilities.Stack)
+			summary.Equipment = summariseCapability(capabilities.Equipment)
+		}
+		summaries = append(summaries, summary)
+	}
+	return summaries
+}
+
+// summariseCapability drops the rules pointer and the provenance and keeps the
+// two flags. Deciding what a known-and-enabled pair means belongs to the caller.
+func summariseCapability[T any](capability schema.Capability[T]) CapabilitySummary {
+	return CapabilitySummary{Known: capability.Known, Enabled: capability.Enabled}
+}
+
 // RelationsByKindAndKey returns the relations of one resource resolved by the
 // exact (kind, key) pair. The kind is resolved first and the key is matched only
 // inside that kind, so an unknown kind and an unknown key stay the two distinct

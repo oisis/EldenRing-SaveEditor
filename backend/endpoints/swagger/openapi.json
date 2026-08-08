@@ -3,7 +3,7 @@
   "info": {
     "title": "SaveForge 2.0 GameCatalog getters",
     "version": "1.0.0",
-    "description": "Local, read-only HTTP surface over the currently implemented GameCatalog getters. Every operation calls exactly one Go getter and serialises its typed result. Getters whose contract file declares 'contract definition only' (GetResources) are not exposed."
+    "description": "Local, read-only HTTP surface over the currently implemented GameCatalog getters. Every operation calls exactly one Go getter and serialises its typed result. Getters whose contract file declares 'contract definition only' are not exposed."
   },
   "servers": [
     {
@@ -110,6 +110,58 @@
           },
           "400": {
             "description": "kind or key is missing, the pair is unknown, or relationType or direction is not supported. The message is the one the getter returned.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/catalog/resources": {
+      "get": {
+        "operationId": "getResources",
+        "summary": "GetResources",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ResourceTypeFilter"
+          },
+          {
+            "$ref": "#/components/parameters/ItemFamilyFilter"
+          },
+          {
+            "$ref": "#/components/parameters/CapabilityFilter"
+          },
+          {
+            "$ref": "#/components/parameters/EndpointIDFilter"
+          },
+          {
+            "$ref": "#/components/parameters/ResourceSearch"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of matching resources",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetResourcesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "page or pageSize is not an integer or is negative, resourceType, family or capability is unknown, or endpointId is set. The message is the one the getter returned, except for a non-integer page or pageSize, which the route rejects before the getter sees it.",
             "content": {
               "application/json": {
                 "schema": {
@@ -263,6 +315,91 @@
           "enum": ["", "outgoing", "incoming"]
         },
         "example": "outgoing"
+      },
+      "ResourceTypeFilter": {
+        "name": "resourceType",
+        "in": "query",
+        "required": false,
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind. Only 'item' exists today.",
+        "schema": {
+          "type": "string",
+          "enum": ["", "item"]
+        },
+        "example": "item"
+      },
+      "ItemFamilyFilter": {
+        "name": "family",
+        "in": "query",
+        "required": false,
+        "description": "schema.ItemFamily, matched exactly and case-sensitively. Omitted or empty means every family. A resource whose family is not known never matches.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "",
+            "weapon",
+            "armor",
+            "talisman",
+            "ash_of_war",
+            "spell",
+            "spirit_ash",
+            "goods",
+            "gesture"
+          ]
+        },
+        "example": "weapon"
+      },
+      "CapabilityFilter": {
+        "name": "capability",
+        "in": "query",
+        "required": false,
+        "description": "One field of schema.ItemCapabilities. A resource matches only when that capability is both known and enabled, so undecided data never widens the result. Omitted or empty means no capability filter.",
+        "schema": {
+          "type": "string",
+          "enum": ["", "upgrade", "infusion", "ashOfWarMount", "stack", "equipment"]
+        },
+        "example": "infusion"
+      },
+      "EndpointIDFilter": {
+        "name": "endpointId",
+        "in": "query",
+        "required": false,
+        "description": "Not supported. GameCatalog declares no resource-to-endpoint relation, so any non-empty value is rejected with 400 instead of being answered from a guessed mapping. Only the empty value is accepted.",
+        "schema": {
+          "type": "string",
+          "enum": [""]
+        }
+      },
+      "ResourceSearch": {
+        "name": "search",
+        "in": "query",
+        "required": false,
+        "description": "Case-insensitive substring matched against Resource.Key and the item name. An unknown name is an empty string and is never searched as a placeholder. Omitted or empty means no search.",
+        "schema": {
+          "type": "string"
+        },
+        "example": "dagger"
+      },
+      "Page": {
+        "name": "page",
+        "in": "query",
+        "required": false,
+        "description": "One-based page number. Omitted, empty or 0 means page 1. A negative value is rejected. A page beyond the last one returns an empty array with the real total.",
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "example": 1
+      },
+      "PageSize": {
+        "name": "pageSize",
+        "in": "query",
+        "required": false,
+        "description": "Number of entries per page. Omitted, empty or 0 means 50. A negative value is rejected. There is deliberately no maximum.",
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "example": 50
       }
     },
     "schemas": {
@@ -412,6 +549,56 @@
           }
         },
         "required": ["outgoing", "incoming"]
+      },
+      "ResourceListEntry": {
+        "type": "object",
+        "description": "Picker-sized projection of one resource. Relations, variants, provenance, capabilities and the full item document are deliberately absent; they belong to GetResource, GetResourceRelations and GetItemVariants.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "example": "item"
+          },
+          "key": {
+            "type": "string",
+            "example": "000F4240"
+          },
+          "family": {
+            "type": "string",
+            "description": "Empty when the resource carries no item document or its family is not known.",
+            "example": "weapon"
+          },
+          "name": {
+            "type": "string",
+            "description": "Empty when the item name is not known. There is no fallback to the key or to a placeholder.",
+            "example": "Dagger"
+          }
+        },
+        "required": ["kind", "key", "family", "name"]
+      },
+      "GetResourcesResult": {
+        "type": "object",
+        "properties": {
+          "resources": {
+            "type": "array",
+            "description": "The requested page in catalog order, kind first and only then key. Empty, never null, when the page lies beyond the last one.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceListEntry"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of resources that passed the filters, counted before paging."
+          },
+          "page": {
+            "type": "integer",
+            "description": "The effective one-based page, so a requested 0 is reported as 1."
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The effective page size, so a requested 0 is reported as 50."
+          }
+        },
+        "required": ["resources", "total", "page", "pageSize"]
       },
       "GetItemVariantsResult": {
         "type": "object",

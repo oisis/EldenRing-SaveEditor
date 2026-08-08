@@ -74,6 +74,7 @@ Transport status:
 | `GetResource` | `get_resource` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resource` of the local explorer | [catalog/get_resource.md](catalog/get_resource.md) |
 | `GetItemVariants` | `get_item_variants` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/item-variants` of the local explorer | [catalog/get_item_variants.md](catalog/get_item_variants.md) |
 | `GetResourceRelations` | `get_resource_relations` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resource-relations` of the local explorer | [catalog/get_resource_relations.md](catalog/get_resource_relations.md) |
+| `GetResources` | `get_resources` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resources` of the local explorer | [catalog/get_resources.md](catalog/get_resources.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
@@ -143,6 +144,35 @@ func newHandler(gameCatalog *gamecatalog.Catalog) http.Handler {
 		writeJSON(writer, http.StatusOK, result)
 	})
 
+	mux.HandleFunc("GET /api/v1/catalog/resources", func(writer http.ResponseWriter, request *http.Request) {
+		query := request.URL.Query()
+		page, err := parsePagingValue(query.Get("page"), "page")
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		pageSize, err := parsePagingValue(query.Get("pageSize"), "pageSize")
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		result, err := catalog.GetResources(
+			gameCatalog,
+			query.Get("resourceType"),
+			query.Get("family"),
+			query.Get("capability"),
+			query.Get("endpointId"),
+			query.Get("search"),
+			page,
+			pageSize,
+		)
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
 	mux.HandleFunc("GET /api/v1/catalog/item-variants", func(writer http.ResponseWriter, request *http.Request) {
 		query := request.URL.Query()
 		result, err := catalog.GetItemVariants(gameCatalog, query.Get("kind"), query.Get("key"))
@@ -154,6 +184,22 @@ func newHandler(gameCatalog *gamecatalog.Catalog) http.Handler {
 	})
 
 	return mux
+}
+
+// parsePagingValue turns a query string into the integer GetResources expects.
+// An absent parameter stays 0, which is the getter's "use the default" value, so
+// the HTTP layer never invents a page or a page size of its own. Anything that
+// is not an integer is rejected here, because the getter only sees numbers and
+// could not report the malformed text.
+func parsePagingValue(raw string, name string) (int, error) {
+	if raw == "" {
+		return 0, nil
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be an integer; got %q", name, raw)
+	}
+	return value, nil
 }
 
 func serveAsset(writer http.ResponseWriter, name string, contentType string) {

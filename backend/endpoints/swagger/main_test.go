@@ -317,15 +317,55 @@ func TestItemVariantsRouteReportsUnknownKindAndKey(t *testing.T) {
 	)
 }
 
-func TestUnimplementedGettersAreNotExposed(t *testing.T) {
+func TestResourcesRouteMatchesGetter(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 
-	// GetResources is contract definition only, so no route may answer for it.
-	for _, target := range []string{"/api/v1/catalog/resources"} {
-		if recorder := do(t, gameCatalog, target); recorder.Code != http.StatusNotFound {
-			t.Fatalf("%s: status = %d, want 404", target, recorder.Code)
+	want, err := catalog.GetResources(gameCatalog, resourceKindItem, "", "", "", "", 0, 0)
+	if err != nil {
+		t.Fatalf("catalog.GetResources: %v", err)
+	}
+
+	recorder := do(t, gameCatalog, "/api/v1/catalog/resources?resourceType="+resourceKindItem)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("resources route body differs from the GetResources result")
+	}
+}
+
+func TestResourcesRouteRejectsInvalidPaging(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+
+	// A non-integer page never reaches the getter, so the route owns the message.
+	for _, target := range []string{
+		"/api/v1/catalog/resources?page=first",
+		"/api/v1/catalog/resources?pageSize=all",
+	} {
+		if recorder := do(t, gameCatalog, target); recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", target, recorder.Code, recorder.Body.String())
 		}
 	}
+
+	// A negative page is a getter rule, so the route must carry its wording.
+	_, wantNegativePage := catalog.GetResources(gameCatalog, "", "", "", "", "", -1, 0)
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resources?page=-1"),
+		http.StatusBadRequest,
+		wantNegativePage,
+	)
+
+	_, wantEndpointID := catalog.GetResources(gameCatalog, "", "", "", "get_resource", "", 0, 0)
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resources?endpointId=get_resource"),
+		http.StatusBadRequest,
+		wantEndpointID,
+	)
 }
 
 func TestHealthz(t *testing.T) {
@@ -371,6 +411,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/catalog/resource",
 		"/api/v1/catalog/resource-relations",
 		"/api/v1/catalog/item-variants",
+		"/api/v1/catalog/resources",
 		"/healthz",
 		"/openapi.json",
 		"/docs",
@@ -381,11 +422,6 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		}
 		if _, hasGet := operation["get"]; !hasGet {
 			t.Fatalf("openapi.json describes %s without a GET operation", path)
-		}
-	}
-	for _, path := range []string{"/api/v1/catalog/resources"} {
-		if _, exists := document.Paths[path]; exists {
-			t.Fatalf("openapi.json describes %s, which has no runtime handler", path)
 		}
 	}
 	for _, name := range []string{"ResourceKind", "ResourceKey", "RelationType", "RelationDirection"} {
@@ -402,6 +438,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
+		"GetResourcesResult",
 		"Relation",
 		"ResourceRef",
 	} {
