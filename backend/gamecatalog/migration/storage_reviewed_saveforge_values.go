@@ -7,6 +7,7 @@ import (
 )
 
 const waitGestureItemID uint32 = 0x40002337
+const furlcallingFingerRemedyItemID uint32 = 0x40000096
 const deathrootItemID uint32 = 0x4000082A
 const lostAshesOfWarItemID uint32 = 0x40002756
 

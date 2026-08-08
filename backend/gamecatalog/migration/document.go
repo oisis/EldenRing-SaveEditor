@@ -326,6 +326,14 @@ func (context *generationContext) buildStorage(
 			"maxRepositoryNum",
 			goodsRow.RowID,
 		)
+		if item.ID == furlcallingFingerRemedyItemID {
+			authoritativeStorage = knownRegulationFact(
+				maxStorage,
+				RegulationTableGoods,
+				"maxRepositoryNum",
+				goodsRow.RowID,
+			)
+		}
 		storage.MaxInventorySFV = saveForgeValue(
 			item.HasLegacyItem,
 			storage.MaxInventory.Value,

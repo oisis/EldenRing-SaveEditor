@@ -145,7 +145,7 @@ func TestCrystalTorrentStorageUsesRegulationAndDiscardsReviewedSaveForgeValues(t
 	}
 }
 
-func TestObservedCanonicalStorageOverrideRemains999(t *testing.T) {
+func TestFurlcallingFingerRemedyStorageUsesRegulationZero(t *testing.T) {
 	regulation := readLocalRegulationFixture(t)
 	context := generationContext{regulation: regulation}
 	snapshot := collectLegacySnapshot()
@@ -173,7 +173,7 @@ func TestObservedCanonicalStorageOverrideRemains999(t *testing.T) {
 			t.Fatalf("item 0x%08X buildStorage: %v", itemID, err)
 		}
 		if storage.MaxInventory.Value != 999 ||
-			storage.MaxStorage.Value != 999 ||
+			storage.MaxStorage.Value != 0 ||
 			storage.MaxInventory.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] ||
 			storage.MaxStorage.Provenance.Source != sourceIDByRegulationTable[RegulationTableGoods] {
 			t.Fatalf("item 0x%08X protected limits = %#v", itemID, storage)
