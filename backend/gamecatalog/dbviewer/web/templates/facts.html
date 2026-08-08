@@ -7,8 +7,7 @@
       <span class="fact-value">{{.Value}}</span>
       {{if .Known}}<button class="copy-button" type="button" data-copy="{{.Value}}">Copy</button>{{end}}
       <small>
-        Source: <code>{{.Source}}</code>
-        {{if .SourceLocation}}· <code>{{.SourceLocation}}</code>{{end}}
+        Source: <span class="source-origin {{sourceOrigin .Source}}"><code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}</span>
         {{if .Method}}<br>{{.Method}}{{end}}
       </small>
     </dd>

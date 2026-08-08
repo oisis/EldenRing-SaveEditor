@@ -80,7 +80,7 @@
       <ul>{{range .Details}}<li>{{.}}</li>{{end}}</ul>
       {{end}}
       <small>
-        <code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}
+        <span class="source-origin {{sourceOrigin .Source}}"><code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}</span>
         {{if .Method}}<br>{{.Method}}{{end}}
       </small>
     </article>
@@ -133,7 +133,7 @@
       {{range .Aliases}}
         <tr>
           <td><code>{{.GameID}}</code></td>
-          <td><code>{{.Source}}</code>{{if .SourceLocation}}<br><code>{{.SourceLocation}}</code>{{end}}</td>
+          <td><span class="source-origin {{sourceOrigin .Source}}"><code>{{.Source}}</code>{{if .SourceLocation}}<br><code>{{.SourceLocation}}</code>{{end}}</span></td>
           <td>{{.Method}}</td>
         </tr>
       {{end}}
@@ -149,7 +149,7 @@
     {{range .SourceRecords}}
     <details class="source-record">
       <summary><span class="badge neutral">{{.Scope}}</span> <code>{{.Table}}</code> · row {{.RowID}}</summary>
-      <p><code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}{{if .Method}}<br>{{.Method}}{{end}}</p>
+      <p><span class="source-origin {{sourceOrigin .Source}}"><code>{{.Source}}</code>{{if .SourceLocation}} · <code>{{.SourceLocation}}</code>{{end}}</span>{{if .Method}}<br>{{.Method}}{{end}}</p>
       {{if .Fields}}<p>Used fields: {{range .Fields}}<code>{{.Name}}</code> {{end}}</p>{{end}}
     </details>
     {{end}}

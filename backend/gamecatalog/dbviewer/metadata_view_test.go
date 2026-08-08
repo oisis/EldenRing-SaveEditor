@@ -1,10 +1,65 @@
 package dbviewer
 
 import (
+	"bytes"
+	"strings"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
+
+func TestSourceOriginClass(t *testing.T) {
+	cases := map[schema.SourceID]string{
+		"legacy_db_data":                   "legacy",
+		"regulation_equip_param_weapon":    "regulation",
+		"regulation_equip_param_protector": "regulation",
+		"community_notes":                  "",
+		"legacy_db_data_extra":             "",
+		"":                                 "",
+	}
+	for source, want := range cases {
+		if got := sourceOriginClass(source); got != want {
+			t.Fatalf("source %q origin class = %q, want %q", source, got, want)
+		}
+	}
+}
+
+// Origin colouring belongs on the source text only. Field values keep their
+// plain appearance.
+func TestFactsTemplateColoursSourceTextOnly(t *testing.T) {
+	templates, err := parseTemplates()
+	if err != nil {
+		t.Fatalf("parse templates: %v", err)
+	}
+	facts := []factView{
+		{Label: "Legacy field", Value: "1", Known: true,
+			Source: "legacy_db_data", SourceLocation: "backend/db/data"},
+		{Label: "Regulation field", Value: "2", Known: true,
+			Source: "regulation_equip_param_protector", SourceLocation: "regulation.bin/csv/EquipParamProtector.csv"},
+		{Label: "Other field", Value: "3", Known: true,
+			Source: "community_notes", SourceLocation: "notes"},
+	}
+	var rendered bytes.Buffer
+	if err := templates.templates.ExecuteTemplate(&rendered, "facts", facts); err != nil {
+		t.Fatalf("render facts: %v", err)
+	}
+	html := rendered.String()
+	for _, want := range []string{
+		`<span class="source-origin legacy"><code>legacy_db_data</code> · <code>backend/db/data</code></span>`,
+		`<span class="source-origin regulation"><code>regulation_equip_param_protector</code> · <code>regulation.bin/csv/EquipParamProtector.csv</code></span>`,
+		`<span class="source-origin "><code>community_notes</code> · <code>notes</code></span>`,
+		`<span class="fact-value">1</span>`,
+		`<span class="fact-value">2</span>`,
+		`<span class="fact-value">3</span>`,
+	} {
+		if !strings.Contains(html, want) {
+			t.Fatalf("rendered facts missing %q in:\n%s", want, html)
+		}
+	}
+	if strings.Contains(html, `fact-value source-origin`) {
+		t.Fatalf("fact values must not carry the source-origin class:\n%s", html)
+	}
+}
 
 func TestAliasesAndCanonicalAndVariantSourceRecordsRemainVisible(t *testing.T) {
 	sourceID := schema.SourceID("regulation")

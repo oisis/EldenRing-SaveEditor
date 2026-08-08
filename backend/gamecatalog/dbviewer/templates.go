@@ -16,7 +16,9 @@ type templateSet struct {
 }
 
 func parseTemplates() (templateSet, error) {
-	templates, err := template.New("dbviewer").ParseFS(webFiles, "web/templates/*.html")
+	templates, err := template.New("dbviewer").
+		Funcs(template.FuncMap{"sourceOrigin": sourceOriginClass}).
+		ParseFS(webFiles, "web/templates/*.html")
 	if err != nil {
 		return templateSet{}, fmt.Errorf("parse viewer templates: %w", err)
 	}
