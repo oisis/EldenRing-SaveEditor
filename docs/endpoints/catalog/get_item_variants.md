@@ -13,7 +13,7 @@ document that holds them; the full document belongs to `GetResource`.
 | Kind | Getter |
 | Domain | `catalog` |
 | Implementation status | implemented |
-| Transport status | not exposed — no Wails binding, HTTP route, or permanent CLI command reaches it |
+| Transport status | transport-exposed — `GET /api/v1/catalog/item-variants` of the local OpenAPI explorer (`backend/endpoints/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/catalog/get_item_variants.go](../../../backend/endpoints/catalog/get_item_variants.go) |
 | Test source | [../../../backend/endpoints/catalog/get_item_variants_test.go](../../../backend/endpoints/catalog/get_item_variants_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -21,43 +21,48 @@ document that holds them; the full document belongs to `GetResource`.
 
 ## Input
 
-The public contract of this endpoint has exactly one input parameter,
-`resourceID`.
+The public contract of this endpoint has exactly two input parameters, `kind`
+and `key`.
 
 The Go signature is:
 
 ```go
-func GetItemVariants(gameCatalog *gamecatalog.Catalog, resourceID string) (GetItemVariantsResult, error)
+func GetItemVariants(gameCatalog *gamecatalog.Catalog, kind string, key string) (GetItemVariantsResult, error)
 ```
 
-### `resourceID` is the exact `Resource.Key`
+### The resource identity is the pair `(kind, key)`
 
-`resourceID` is the stable `schema.Resource.Key` of the resource whose variants
-are wanted, for example `item:000F4240`.
+A resource is identified by the exact pair `schema.Resource.Kind` plus
+`schema.Resource.Key`, for example `kind=item` and `key=000F4240`. There is no
+numeric resource identifier in the public contract; `schema.ResourceID` and the
+top-level `Resource.id` field no longer exist.
 
-It is **not**:
+The pair is **not**:
 
-- the numeric `schema.ResourceID` (`Resource.ID`);
 - the item's `Item.GameID`;
 - a variant ID;
 - the name of the JSON file the resource was loaded from.
 
-The lookup is an exact string match against `Resource.Key`, performed directly
-through `Catalog.ResourceByKey`:
+The lookup resolves the kind first and the key only inside that kind, performed
+directly through `Catalog.ResourceByKindAndKey`:
 
-- The endpoint declares no key format of its own, because `schema` declares none
-  either. `resource_validation.go` requires only that `Key` is non-empty.
-- The endpoint never parses the key, never splits it into a kind and an ID, and
-  never derives a `GameID` from it. The current data happens to use
-  `item:<uppercase-hex-game-id>`, but that shape is a property of the generated
-  data, not a contract this endpoint enforces or relies on.
-- The key is never normalised. Case is not folded and whitespace is not trimmed;
-  an input with surrounding whitespace is rejected rather than repaired.
+- `kind` must be `item`. Only item resources carry variants, so any other kind is
+  rejected before the key is looked at.
+- `key` is matched exactly against `Resource.Key` inside the item kind. The same
+  key may later exist under a different kind, so the key alone is not an
+  identity.
+- Neither value is trimmed, case-folded, parsed, or retried under another kind.
+  An input with surrounding whitespace is reported as unknown rather than
+  repaired.
+- The pre-migration key form `item:000F4240` carried the kind as a prefix. It is
+  now an unknown key and never an alias of `000F4240`.
 - A variant is never addressable as input. There is no lookup of a single variant
   by its `GameID`, its affinity, or its upgrade level.
 
-`Resource.Key` is the single source of truth for this lookup. `gamecatalog.New`
-already rejects a catalog with duplicate keys, so at most one resource can match.
+`schema.ValidateResource` requires an item key to be exactly eight uppercase
+hexadecimal characters (`0-9`, `A-F`), so `000F4240` is well formed and
+`000f4240` is not. `gamecatalog.New` rejects a catalog containing the same
+`(kind, key)` pair twice, so at most one resource can match.
 
 ### The catalog argument
 
@@ -135,7 +140,7 @@ getter returns a successful result whose `variants` is an empty array:
 The field is never `null`. The catalog's clone layer yields a `nil` slice for an
 item without variants, so the getter returns an explicitly empty
 `[]schema.ItemVariant` to keep the JSON array contract. In the current data the
-Determination Ash of War (`item:8000EA60`) is such an item.
+Determination Ash of War (`kind=item`, `key=8000EA60`) is such an item.
 
 ## Processing flow
 
@@ -145,15 +150,17 @@ a sequence the main application performs today.
 1. The caller loads the catalog data through `loader.LoadDir`, for example from
    `backend/gamecatalog/data`.
 2. The caller builds the catalog through `gamecatalog.New`, which validates the
-   manifest and the resources and indexes every resource by its `Resource.Key`. A
-   catalog that fails any of those checks is never constructed.
-3. The caller passes that catalog and a `resourceID` to `GetItemVariants`. The
+   manifest and the resources and indexes every resource by its kind and, inside
+   that kind, by its `Resource.Key`. A catalog that fails any of those checks is
+   never constructed.
+3. The caller passes that catalog, a `kind` and a `key` to `GetItemVariants`. The
    getter never loads, reloads, or rescans anything.
-4. The getter validates `gameCatalog` and `resourceID`.
-5. The getter resolves the key through `Catalog.ResourceByKey`, which reads the
-   key index built once during `gamecatalog.New`. There is no directory scan, no
-   JSON read, and no linear search per call. The getter calls no other endpoint;
-   in particular it does not call `GetResource`.
+4. The getter validates `gameCatalog`, `kind` and `key`.
+5. The getter resolves the pair through `Catalog.ResourceByKindAndKey`, which
+   selects the map of the item kind and then the key inside it, using the
+   two-level index built once during `gamecatalog.New`. There is no directory
+   scan, no JSON read, and no linear search per call. The getter calls no other
+   endpoint; in particular it does not call `GetResource`.
 6. The catalog returns that one resource as an independent deep copy.
 7. The getter takes `Item.Variants` of that copy, substitutes an empty slice for
    a missing one, puts it into `GetItemVariantsResult`, and returns it.
@@ -166,22 +173,25 @@ partial result is never returned alongside an error.
 | Condition | Error |
 |---|---|
 | `gameCatalog` is `nil` | `game catalog is not loaded` |
-| `resourceID` is empty | `resource ID is required` |
-| `resourceID` is whitespace only | `resource ID "…" must not contain leading or trailing whitespace` |
-| `resourceID` has leading or trailing whitespace | `resource ID "…" must not contain leading or trailing whitespace` |
-| `resourceID` matches no `Resource.Key` | `resource ID "…" was not found in the game catalog` |
-| the resolved resource carries no `ItemDocument` | `resource ID "…" is not an item and has no variants` |
+| `kind` is empty | `resource kind is required` |
+| `kind` is not `item` | `resource kind "…" has no item variants; only kind "item" is supported` |
+| `key` is empty | `resource key is required` |
+| `key` matches no `Resource.Key` inside the item kind | `unknown resource key "…" in kind "item"` |
+| the resolved resource carries no `ItemDocument` | `resource kind "…" key "…" is not an item and has no variants` |
 
 Notes:
 
-- The not-found error names the exact `resourceID` that was not found.
-- Whitespace is rejected, never trimmed. `" item:000F4240"` is an error, not a
-  silent lookup of `"item:000F4240"`.
+- A missing kind, a kind other than `item`, a missing key and a key that is
+  unknown inside the item kind are four distinguishable errors.
+- The unknown-key error names both the key and the kind it was searched in.
+- Whitespace is never trimmed. `" 000F4240"` is reported as an unknown key, not
+  as a silent lookup of `"000F4240"`.
+- The pre-migration key `"item:000F4240"` is reported as an unknown key under
+  `kind=item`. There is no backward compatibility with the prefixed form.
 - A numeric string such as `"1"` or `"1000000"` is not a `Resource.Key` and is
-  reported as not found. The numeric `ResourceID` and the `GameID` are not
-  accepted as input.
+  reported as unknown. The `GameID` is not accepted as input.
 - A zero-value `gamecatalog.Catalog` that never went through `gamecatalog.New`
-  has no key index, so every lookup against it is reported as not found.
+  has no kind index, so every lookup against it reports an unknown kind.
 - The missing-`ItemDocument` error is a defensive guard. `gamecatalog.New`
   rejects a resource without an item document, so a catalog built through the
   public constructor cannot produce it. Unknown data fails safely instead of
@@ -208,9 +218,10 @@ The endpoint never opens, reads, or writes a save, and it never uses
 
 ## Command-line verification
 
-`GetItemVariants` is not exposed through Wails, HTTP, or a permanent CLI command,
-so there is no `curl` call or application command that invokes it. It is
-currently reachable only as a Go function. There are two ways to verify it
+`GetItemVariants` is exposed over HTTP as `GET /api/v1/catalog/item-variants` by
+the local OpenAPI explorer in `backend/endpoints/swagger`, a developer tool the
+application neither imports nor starts. It is not exposed through Wails and there
+is no permanent CLI command that invokes it. There are two ways to verify it
 locally.
 
 ### Run tests
@@ -221,11 +232,13 @@ From the repository root:
 go test ./backend/endpoints/catalog -run '^TestGetItemVariants' -count=1 -v
 ```
 
-The suite covers a valid key returning every stored variant, full variant data
-and provenance, the catalog order, an item without variants returning an empty
-non-nil array, the JSON contract of the result, a `nil` catalog, an empty key, a
-whitespace-only key, keys with leading or trailing whitespace, an unknown key, a
-numeric `ResourceID` and a numeric `GameID` passed as strings, and the
+The suite covers a valid `(kind, key)` pair returning every stored variant, full
+variant data and provenance, the catalog order, an item without variants
+returning an empty non-nil array, the JSON contract of the result, a `nil`
+catalog, an empty kind, an empty key, a whitespace-only kind and key, values with
+leading or trailing whitespace, an unsupported kind, an unknown key, a lowercase
+key, the pre-migration prefixed key, a numeric string and a numeric `GameID`
+passed as a string, the four distinguishable kind and key failures, and the
 immutability of the catalog after the returned variants are mutated.
 
 ### Print the real getter output
@@ -239,7 +252,8 @@ repository root:
 (
     set -eu
 
-    resource_key="item:000F4240"
+    resource_kind="item"
+    resource_key="000F4240"
 
     variants_demo_dir=$(mktemp -d)
     trap 'rm -rf -- "$variants_demo_dir"' EXIT
@@ -258,8 +272,8 @@ import (
 )
 
 func main() {
-    if len(os.Args) != 2 {
-        log.Fatalf("usage: %s <resourceID>", os.Args[0])
+    if len(os.Args) != 3 {
+        log.Fatalf("usage: %s <kind> <key>", os.Args[0])
     }
 
     data, err := loader.LoadDir("backend/gamecatalog/data")
@@ -272,7 +286,7 @@ func main() {
         log.Fatalf("build catalog: %v", err)
     }
 
-    variants, err := catalog.GetItemVariants(gameCatalog, os.Args[1])
+    variants, err := catalog.GetItemVariants(gameCatalog, os.Args[1], os.Args[2])
     if err != nil {
         log.Fatalf("GetItemVariants: %v", err)
     }
@@ -285,15 +299,16 @@ func main() {
 }
 EOF
 
-    go run "$variants_demo_dir/main.go" "$resource_key"
+    go run "$variants_demo_dir/main.go" "$resource_kind" "$resource_key"
 )
 ```
 
-`resource_key` must be a real `Resource.Key` present in the catalog data.
-`item:000F4240` is the Dagger and exists in the current data; any other existing
-key works the same way. `item:8000EA60` is the Determination Ash of War and
-prints `{"variants": []}`. An unknown key makes the program exit with the
-not-found error of the getter.
+`resource_kind` and `resource_key` must be a real `(kind, key)` pair present in
+the catalog data. `kind=item` with `key=000F4240` is the Dagger and exists in the
+current data; any other existing pair works the same way. `kind=item` with
+`key=8000EA60` is the Determination Ash of War and prints `{"variants": []}`. An
+unknown kind or key makes the program exit with the corresponding error of the
+getter.
 
 The block runs in a subshell so `set -eu` does not leak into the calling shell. A
 failure of `mktemp`, of writing the program, or of `go run` aborts the block and
@@ -333,14 +348,16 @@ A successful run prints the variants and exits without an error.
 ## Current limitations
 
 - The endpoint is not exposed through Wails.
-- There is no HTTP endpoint for it.
+- The only HTTP route is `GET /api/v1/catalog/item-variants` of the local OpenAPI
+  explorer in `backend/endpoints/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - There is no caller in the runtime of the main application.
 - The getter does not load the catalog. It requires an already loaded
   `*gamecatalog.Catalog` supplied by the caller.
 - The getter never reads a save and never uses `SaveEngine`.
-- Lookup is by exact `Resource.Key` only. There is no lookup by `ResourceID`, by
-  `GameID`, by name, or by variant.
+- Lookup is by the exact `(kind, key)` pair only. There is no numeric resource
+  identifier any more, and there is no lookup by `GameID`, by name, or by
+  variant.
 - There is no filtering, sorting, searching, or pagination of the variants.
 - Variants are returned as stored. The endpoint does not materialise a variant
   into a standalone item document or resource.

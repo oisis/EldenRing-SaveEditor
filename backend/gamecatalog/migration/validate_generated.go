@@ -15,18 +15,16 @@ func validateGeneratedCatalog(catalog GeneratedCatalog) error {
 	if len(catalog.Resources) != 2810 {
 		return fmt.Errorf("resource count = %d, want 2810", len(catalog.Resources))
 	}
-	seenKeys := make(map[string]struct{}, len(catalog.Resources))
+	seenRefs := make(map[schema.ResourceRef]struct{}, len(catalog.Resources))
 	variantCount := 0
 	aliasCount := 0
 	gestureSlotCount := 0
-	for index, resource := range catalog.Resources {
-		if resource.ID != schema.ResourceID(index+1) {
-			return fmt.Errorf("resource %d ID = %d, want %d", index, resource.ID, index+1)
+	for _, resource := range catalog.Resources {
+		ref := resource.Ref()
+		if _, duplicate := seenRefs[ref]; duplicate {
+			return fmt.Errorf("duplicate resource kind %q key %q", ref.Kind, ref.Key)
 		}
-		if _, duplicate := seenKeys[resource.Key]; duplicate {
-			return fmt.Errorf("duplicate resource key %q", resource.Key)
-		}
-		seenKeys[resource.Key] = struct{}{}
+		seenRefs[ref] = struct{}{}
 		if err := schema.ValidateResource(resource, sources); err != nil {
 			return fmt.Errorf("validate %s: %w", resource.Key, err)
 		}

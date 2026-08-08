@@ -81,7 +81,7 @@ func TestNewRejectsDuplicateCatalogDocument(t *testing.T) {
 	data.Documents = append(data.Documents, data.Documents[0])
 
 	_, err = New(data)
-	if err == nil || !strings.Contains(err.Error(), "duplicate resource ID") {
+	if err == nil || !strings.Contains(err.Error(), "duplicate resource kind") {
 		t.Fatalf("New error = %v, want duplicate resource rejection", err)
 	}
 }

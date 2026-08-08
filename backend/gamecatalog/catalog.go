@@ -7,12 +7,13 @@ import (
 )
 
 type Catalog struct {
-	manifest     schema.Manifest
-	byID         map[schema.ResourceID]schema.Resource
-	byKey        map[string]schema.ResourceID
-	byItemGameID map[uint32]schema.ResourceID
-	outgoing     map[schema.ResourceID][]schema.Relation
-	incoming     map[schema.ResourceID][]schema.Relation
+	manifest schema.Manifest
+	// byKind resolves the resource kind first and only then the key inside that
+	// kind, so the same key may later exist under a different kind.
+	byKind       map[schema.ResourceKind]map[string]schema.Resource
+	byItemGameID map[uint32]schema.ResourceRef
+	outgoing     map[schema.ResourceRef][]schema.Relation
+	incoming     map[schema.ResourceRef][]schema.Relation
 }
 
 func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error) {
@@ -23,46 +24,54 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 
 	catalog := &Catalog{
 		manifest:     cloneManifest(manifest),
-		byID:         make(map[schema.ResourceID]schema.Resource, len(resources)),
-		byKey:        make(map[string]schema.ResourceID, len(resources)),
-		byItemGameID: make(map[uint32]schema.ResourceID, len(resources)),
-		outgoing:     make(map[schema.ResourceID][]schema.Relation),
-		incoming:     make(map[schema.ResourceID][]schema.Relation),
+		byKind:       make(map[schema.ResourceKind]map[string]schema.Resource),
+		byItemGameID: make(map[uint32]schema.ResourceRef, len(resources)),
+		outgoing:     make(map[schema.ResourceRef][]schema.Relation),
+		incoming:     make(map[schema.ResourceRef][]schema.Relation),
 	}
 	for index, resource := range resources {
 		if err := schema.ValidateResource(resource, sources); err != nil {
 			return nil, fmt.Errorf("resource %d: %w", index, err)
 		}
-		if _, exists := catalog.byID[resource.ID]; exists {
-			return nil, fmt.Errorf("resource %d: duplicate resource ID %d", index, resource.ID)
+		ref := resource.Ref()
+		byKey, exists := catalog.byKind[ref.Kind]
+		if !exists {
+			byKey = make(map[string]schema.Resource)
+			catalog.byKind[ref.Kind] = byKey
 		}
-		if _, exists := catalog.byKey[resource.Key]; exists {
-			return nil, fmt.Errorf("resource %d: duplicate resource key %q", index, resource.Key)
+		if _, duplicate := byKey[ref.Key]; duplicate {
+			return nil, fmt.Errorf("resource %d: duplicate resource kind %q key %q", index, ref.Kind, ref.Key)
 		}
-		if existing, exists := catalog.byItemGameID[resource.Item.GameID.Value]; exists && existing != resource.ID {
+		if existing, exists := catalog.byItemGameID[resource.Item.GameID.Value]; exists && existing != ref {
 			return nil, fmt.Errorf("resource %d: duplicate item game ID 0x%08X", index, resource.Item.GameID.Value)
 		}
 
 		cloned := cloneResource(resource)
-		catalog.byID[cloned.ID] = cloned
-		catalog.byKey[cloned.Key] = cloned.ID
-		catalog.byItemGameID[cloned.Item.GameID.Value] = cloned.ID
+		byKey[ref.Key] = cloned
+		catalog.byItemGameID[cloned.Item.GameID.Value] = ref
 		for _, variant := range cloned.Item.Variants {
-			if existing, exists := catalog.byItemGameID[variant.GameID.Value]; exists && existing != cloned.ID {
-				return nil, fmt.Errorf("resource %d: variant game ID 0x%08X belongs to resource %d", index, variant.GameID.Value, existing)
+			if existing, exists := catalog.byItemGameID[variant.GameID.Value]; exists && existing != ref {
+				return nil, fmt.Errorf(
+					"resource %d: variant game ID 0x%08X belongs to resource kind %q key %q",
+					index,
+					variant.GameID.Value,
+					existing.Kind,
+					existing.Key,
+				)
 			}
-			catalog.byItemGameID[variant.GameID.Value] = cloned.ID
+			catalog.byItemGameID[variant.GameID.Value] = ref
 		}
 		for _, alias := range cloned.Item.Aliases {
 			if existing, exists := catalog.byItemGameID[alias.GameID.Value]; exists {
 				return nil, fmt.Errorf(
-					"resource %d: alias game ID 0x%08X already belongs to resource %d",
+					"resource %d: alias game ID 0x%08X already belongs to resource kind %q key %q",
 					index,
 					alias.GameID.Value,
-					existing,
+					existing.Kind,
+					existing.Key,
 				)
 			}
-			catalog.byItemGameID[alias.GameID.Value] = cloned.ID
+			catalog.byItemGameID[alias.GameID.Value] = ref
 		}
 	}
 
@@ -77,5 +86,9 @@ func (catalog *Catalog) Manifest() schema.Manifest {
 }
 
 func (catalog *Catalog) ResourceCount() int {
-	return len(catalog.byID)
+	count := 0
+	for _, byKey := range catalog.byKind {
+		count += len(byKey)
+	}
+	return count
 }

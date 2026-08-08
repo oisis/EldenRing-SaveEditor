@@ -86,7 +86,7 @@ func TestVariantUpgradeDisplaysAffinityAsNotApplicable(t *testing.T) {
 			},
 		}},
 	}
-	views := (&Server{}).variantViews(schema.Resource{Key: "item:4000A000", Item: item})
+	views := (&Server{}).variantViews(schema.Resource{Key: "4000A000", Item: item})
 	if len(views) != 1 || views[0].Affinity != "N/A" {
 		t.Fatalf("upgrade variant affinity = %#v, want N/A", views)
 	}

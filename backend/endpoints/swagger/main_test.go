@@ -14,7 +14,10 @@ import (
 
 // The prototype catalog holds real, schema-valid resources, so every route is
 // exercised against the same data the getter tests use instead of a mock.
-const daggerResourceKey = "item:000F4240"
+const (
+	resourceKindItem  = "item"
+	daggerResourceKey = "000F4240"
+)
 
 func newPrototypeCatalog(t *testing.T) *gamecatalog.Catalog {
 	t.Helper()
@@ -109,12 +112,12 @@ func TestCatalogInfoRouteMatchesGetter(t *testing.T) {
 func TestResourceRouteMatchesGetter(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 
-	want, err := catalog.GetResource(gameCatalog, daggerResourceKey)
+	want, err := catalog.GetResource(gameCatalog, resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("catalog.GetResource: %v", err)
 	}
 
-	recorder := do(t, gameCatalog, "/api/v1/catalog/resource?resourceID="+daggerResourceKey)
+	recorder := do(t, gameCatalog, "/api/v1/catalog/resource?kind="+resourceKindItem+"&key="+daggerResourceKey)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
 	}
@@ -126,35 +129,147 @@ func TestResourceRouteMatchesGetter(t *testing.T) {
 	}
 }
 
-func TestResourceRouteRejectsMissingResourceID(t *testing.T) {
+func TestResourceRouteRejectsMissingKindAndKey(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 
-	_, wantErr := catalog.GetResource(gameCatalog, "")
-	assertErrorMessage(t, do(t, gameCatalog, "/api/v1/catalog/resource"), http.StatusBadRequest, wantErr)
-}
+	_, wantMissingKind := catalog.GetResource(gameCatalog, "", "")
+	assertErrorMessage(t, do(t, gameCatalog, "/api/v1/catalog/resource"), http.StatusBadRequest, wantMissingKind)
 
-func TestResourceRouteReportsUnknownResourceID(t *testing.T) {
-	gameCatalog := newPrototypeCatalog(t)
-
-	const unknownKey = "item:FFFFFFFF"
-	_, wantErr := catalog.GetResource(gameCatalog, unknownKey)
+	_, wantMissingKey := catalog.GetResource(gameCatalog, resourceKindItem, "")
 	assertErrorMessage(
 		t,
-		do(t, gameCatalog, "/api/v1/catalog/resource?resourceID="+unknownKey),
+		do(t, gameCatalog, "/api/v1/catalog/resource?kind="+resourceKindItem),
 		http.StatusBadRequest,
-		wantErr,
+		wantMissingKey,
+	)
+}
+
+func TestResourceRouteReportsUnknownKindAndKey(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+
+	const unknownKey = "FFFFFFFF"
+	_, wantUnknownKey := catalog.GetResource(gameCatalog, resourceKindItem, unknownKey)
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resource?kind="+resourceKindItem+"&key="+unknownKey),
+		http.StatusBadRequest,
+		wantUnknownKey,
+	)
+
+	_, wantUnknownKind := catalog.GetResource(gameCatalog, "gesture", daggerResourceKey)
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resource?kind=gesture&key="+daggerResourceKey),
+		http.StatusBadRequest,
+		wantUnknownKind,
+	)
+}
+
+func TestResourceRelationsRouteMatchesGetter(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+
+	want, err := catalog.GetResourceRelations(gameCatalog, resourceKindItem, daggerResourceKey, "", "")
+	if err != nil {
+		t.Fatalf("catalog.GetResourceRelations: %v", err)
+	}
+
+	recorder := do(t, gameCatalog, "/api/v1/catalog/resource-relations?kind="+resourceKindItem+"&key="+daggerResourceKey)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("resource relations route body differs from the GetResourceRelations result")
+	}
+}
+
+// The route owns no filtering of its own, so all four query parameters have to
+// reach the getter unchanged.
+func TestResourceRelationsRoutePassesEveryParameter(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+
+	want, err := catalog.GetResourceRelations(
+		gameCatalog,
+		resourceKindItem,
+		daggerResourceKey,
+		"compatible_with_aow",
+		"outgoing",
+	)
+	if err != nil {
+		t.Fatalf("catalog.GetResourceRelations: %v", err)
+	}
+	if len(want.Outgoing) == 0 {
+		t.Fatal("the filtered getter result is empty, so the route comparison would not prove anything")
+	}
+
+	recorder := do(
+		t,
+		gameCatalog,
+		"/api/v1/catalog/resource-relations?kind="+resourceKindItem+"&key="+daggerResourceKey+
+			"&relationType=compatible_with_aow&direction=outgoing",
+	)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("filtered resource relations route body differs from the GetResourceRelations result")
+	}
+}
+
+func TestResourceRelationsRouteRejectsInvalidInput(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+
+	_, wantMissingKind := catalog.GetResourceRelations(gameCatalog, "", "", "", "")
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resource-relations"),
+		http.StatusBadRequest,
+		wantMissingKind,
+	)
+
+	_, wantMissingKey := catalog.GetResourceRelations(gameCatalog, resourceKindItem, "", "", "")
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resource-relations?kind="+resourceKindItem),
+		http.StatusBadRequest,
+		wantMissingKey,
+	)
+
+	const unknownKey = "FFFFFFFF"
+	_, wantUnknownKey := catalog.GetResourceRelations(gameCatalog, resourceKindItem, unknownKey, "", "")
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/resource-relations?kind="+resourceKindItem+"&key="+unknownKey),
+		http.StatusBadRequest,
+		wantUnknownKey,
+	)
+
+	_, wantUnknownDirection := catalog.GetResourceRelations(gameCatalog, resourceKindItem, daggerResourceKey, "", "both")
+	assertErrorMessage(
+		t,
+		do(
+			t,
+			gameCatalog,
+			"/api/v1/catalog/resource-relations?kind="+resourceKindItem+"&key="+daggerResourceKey+"&direction=both",
+		),
+		http.StatusBadRequest,
+		wantUnknownDirection,
 	)
 }
 
 func TestItemVariantsRouteMatchesGetter(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 
-	want, err := catalog.GetItemVariants(gameCatalog, daggerResourceKey)
+	want, err := catalog.GetItemVariants(gameCatalog, resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("catalog.GetItemVariants: %v", err)
 	}
 
-	recorder := do(t, gameCatalog, "/api/v1/catalog/item-variants?resourceID="+daggerResourceKey)
+	recorder := do(t, gameCatalog, "/api/v1/catalog/item-variants?kind="+resourceKindItem+"&key="+daggerResourceKey)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
 	}
@@ -166,32 +281,47 @@ func TestItemVariantsRouteMatchesGetter(t *testing.T) {
 	}
 }
 
-func TestItemVariantsRouteRejectsMissingResourceID(t *testing.T) {
+func TestItemVariantsRouteRejectsMissingKindAndKey(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 
-	_, wantErr := catalog.GetItemVariants(gameCatalog, "")
-	assertErrorMessage(t, do(t, gameCatalog, "/api/v1/catalog/item-variants"), http.StatusBadRequest, wantErr)
-}
+	_, wantMissingKind := catalog.GetItemVariants(gameCatalog, "", "")
+	assertErrorMessage(t, do(t, gameCatalog, "/api/v1/catalog/item-variants"), http.StatusBadRequest, wantMissingKind)
 
-func TestItemVariantsRouteReportsUnknownResourceID(t *testing.T) {
-	gameCatalog := newPrototypeCatalog(t)
-
-	const unknownKey = "item:FFFFFFFF"
-	_, wantErr := catalog.GetItemVariants(gameCatalog, unknownKey)
+	_, wantMissingKey := catalog.GetItemVariants(gameCatalog, resourceKindItem, "")
 	assertErrorMessage(
 		t,
-		do(t, gameCatalog, "/api/v1/catalog/item-variants?resourceID="+unknownKey),
+		do(t, gameCatalog, "/api/v1/catalog/item-variants?kind="+resourceKindItem),
 		http.StatusBadRequest,
-		wantErr,
+		wantMissingKey,
+	)
+}
+
+func TestItemVariantsRouteReportsUnknownKindAndKey(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+
+	const unknownKey = "FFFFFFFF"
+	_, wantUnknownKey := catalog.GetItemVariants(gameCatalog, resourceKindItem, unknownKey)
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/item-variants?kind="+resourceKindItem+"&key="+unknownKey),
+		http.StatusBadRequest,
+		wantUnknownKey,
+	)
+
+	_, wantUnsupportedKind := catalog.GetItemVariants(gameCatalog, "gesture", daggerResourceKey)
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/catalog/item-variants?kind=gesture&key="+daggerResourceKey),
+		http.StatusBadRequest,
+		wantUnsupportedKind,
 	)
 }
 
 func TestUnimplementedGettersAreNotExposed(t *testing.T) {
 	gameCatalog := newPrototypeCatalog(t)
 
-	// GetResources and GetResourceRelations are contract definition only, so no
-	// route may answer for them.
-	for _, target := range []string{"/api/v1/catalog/resources", "/api/v1/catalog/resource-relations"} {
+	// GetResources is contract definition only, so no route may answer for it.
+	for _, target := range []string{"/api/v1/catalog/resources"} {
 		if recorder := do(t, gameCatalog, target); recorder.Code != http.StatusNotFound {
 			t.Fatalf("%s: status = %d, want 404", target, recorder.Code)
 		}
@@ -239,6 +369,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	for _, path := range []string{
 		"/api/v1/catalog/info",
 		"/api/v1/catalog/resource",
+		"/api/v1/catalog/resource-relations",
 		"/api/v1/catalog/item-variants",
 		"/healthz",
 		"/openapi.json",
@@ -252,17 +383,72 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 			t.Fatalf("openapi.json describes %s without a GET operation", path)
 		}
 	}
-	for _, path := range []string{"/api/v1/catalog/resources", "/api/v1/catalog/resource-relations"} {
+	for _, path := range []string{"/api/v1/catalog/resources"} {
 		if _, exists := document.Paths[path]; exists {
 			t.Fatalf("openapi.json describes %s, which has no runtime handler", path)
 		}
 	}
-	if _, exists := document.Comps.Parameters["ResourceID"]; !exists {
-		t.Fatal("openapi.json is missing the shared ResourceID parameter")
+	for _, name := range []string{"ResourceKind", "ResourceKey", "RelationType", "RelationDirection"} {
+		if _, exists := document.Comps.Parameters[name]; !exists {
+			t.Fatalf("openapi.json is missing the shared %s parameter", name)
+		}
 	}
-	for _, name := range []string{"Error", "GetCatalogInfoResult", "GetResourceResult", "GetItemVariantsResult"} {
+	if _, exists := document.Comps.Parameters["ResourceID"]; exists {
+		t.Fatal("openapi.json still declares the removed ResourceID parameter")
+	}
+	for _, name := range []string{
+		"Error",
+		"GetCatalogInfoResult",
+		"GetResourceResult",
+		"GetItemVariantsResult",
+		"GetResourceRelationsResult",
+		"Relation",
+		"ResourceRef",
+	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
+		}
+	}
+	if _, exists := document.Comps.Schemas["ResourceID"]; exists {
+		t.Fatal("openapi.json still declares the removed ResourceID schema")
+	}
+	assertRelationEndpointsAreResourceRefs(t, document.Comps.Schemas)
+}
+
+// The relation endpoints carry the migrated (kind, key) identity; a numeric
+// from/to would silently reintroduce the removed ResourceID contract.
+func assertRelationEndpointsAreResourceRefs(t *testing.T, schemas map[string]any) {
+	t.Helper()
+
+	ref, ok := schemas["ResourceRef"].(map[string]any)
+	if !ok {
+		t.Fatalf("ResourceRef schema = %#v, want an object", schemas["ResourceRef"])
+	}
+	properties, ok := ref["properties"].(map[string]any)
+	if !ok {
+		t.Fatalf("ResourceRef properties = %#v, want an object", ref["properties"])
+	}
+	for _, field := range []string{"kind", "key"} {
+		if _, exists := properties[field]; !exists {
+			t.Fatalf("ResourceRef is missing the %q property", field)
+		}
+	}
+
+	relation, ok := schemas["Relation"].(map[string]any)
+	if !ok {
+		t.Fatalf("Relation schema = %#v, want an object", schemas["Relation"])
+	}
+	relationProperties, ok := relation["properties"].(map[string]any)
+	if !ok {
+		t.Fatalf("Relation properties = %#v, want an object", relation["properties"])
+	}
+	for _, endpoint := range []string{"from", "to"} {
+		field, ok := relationProperties[endpoint].(map[string]any)
+		if !ok {
+			t.Fatalf("Relation.%s = %#v, want an object", endpoint, relationProperties[endpoint])
+		}
+		if field["$ref"] != "#/components/schemas/ResourceRef" {
+			t.Fatalf("Relation.%s = %#v, want a ResourceRef reference", endpoint, field)
 		}
 	}
 }

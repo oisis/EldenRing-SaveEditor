@@ -25,7 +25,7 @@ func (server *Server) rawItemHandler(response http.ResponseWriter, request *http
 		http.NotFound(response, request)
 		return
 	}
-	document, exists := server.documentsByID[resource.ID]
+	document, exists := server.documentsByRef[resource.Ref()]
 	if !exists {
 		http.Error(response, "Catalog document is unavailable.", http.StatusInternalServerError)
 		return

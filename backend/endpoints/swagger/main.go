@@ -118,7 +118,24 @@ func newHandler(gameCatalog *gamecatalog.Catalog) http.Handler {
 	})
 
 	mux.HandleFunc("GET /api/v1/catalog/resource", func(writer http.ResponseWriter, request *http.Request) {
-		result, err := catalog.GetResource(gameCatalog, request.URL.Query().Get("resourceID"))
+		query := request.URL.Query()
+		result, err := catalog.GetResource(gameCatalog, query.Get("kind"), query.Get("key"))
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
+	mux.HandleFunc("GET /api/v1/catalog/resource-relations", func(writer http.ResponseWriter, request *http.Request) {
+		query := request.URL.Query()
+		result, err := catalog.GetResourceRelations(
+			gameCatalog,
+			query.Get("kind"),
+			query.Get("key"),
+			query.Get("relationType"),
+			query.Get("direction"),
+		)
 		if err != nil {
 			writeError(writer, http.StatusBadRequest, err)
 			return
@@ -127,7 +144,8 @@ func newHandler(gameCatalog *gamecatalog.Catalog) http.Handler {
 	})
 
 	mux.HandleFunc("GET /api/v1/catalog/item-variants", func(writer http.ResponseWriter, request *http.Request) {
-		result, err := catalog.GetItemVariants(gameCatalog, request.URL.Query().Get("resourceID"))
+		query := request.URL.Query()
+		result, err := catalog.GetItemVariants(gameCatalog, query.Get("kind"), query.Get("key"))
 		if err != nil {
 			writeError(writer, http.StatusBadRequest, err)
 			return

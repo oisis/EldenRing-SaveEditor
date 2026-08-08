@@ -2,10 +2,10 @@
 Endpoint: GetResource
 EndpointID: get_resource
 Purpose: Zwraca pełny dokument jednego zasobu wraz z capabilities, wariantami, prezentacją i provenance.
-How it works: The runtime handler validates resourceID, resolves it against the already loaded GameCatalog as an exact schema.Resource.Key, and returns a typed result built from an independent deep copy without loading, reloading or modifying the catalog.
+How it works: The runtime handler validates kind and key, resolves the exact (kind, key) pair against the already loaded GameCatalog, and returns a typed result built from an independent deep copy without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
-Input variables: resourceID.
-GameCatalog variables read: the resource stored under the given Resource.Key including its full schema.ItemDocument (presentation, capabilities, safety, storage, acquisition, modifiers, links, variants, aliases, unlocks, related technical records, source records and family data).
+Input variables: kind, key.
+GameCatalog variables read: the resource stored under the given (Resource.Kind, Resource.Key) pair including its full schema.ItemDocument (presentation, capabilities, safety, storage, acquisition, modifiers, links, variants, aliases, unlocks, related technical records, source records and family data).
 Save variables read: none; the endpoint never opens or reads a save.
 Implementation status: implemented; GetResource is the runtime handler of this contract.
 */
@@ -13,8 +13,6 @@ package catalog
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -30,7 +28,7 @@ var GetResourceDefinition = contract.MustDefine(contract.Definition{
 	ID:                         GetResourceEndpointID,
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource",
-	SupportedResourceVariables: []string{"resourceID"},
+	SupportedResourceVariables: []string{"kind", "key"},
 	Description:                "Zwraca pełny dokument jednego zasobu wraz z capabilities, wariantami, prezentacją i provenance.",
 })
 
@@ -40,30 +38,28 @@ type GetResourceResult struct {
 }
 
 // GetResource returns one catalog resource in full. Relations are not part of
-// this result; they belong to GetResourceRelations. resourceID is the stable
-// schema.Resource.Key, for example "item:80085CA0". It is neither a numeric
-// schema.ResourceID, an Item.GameID, a variant ID, nor a data file name, and it
-// is matched exactly: the endpoint declares no key format of its own and never
-// parses, derives, or normalises the key, because schema declares no such
-// format either. The result is the deep copy the catalog already returns, so
-// mutating it never reaches the catalog.
-func GetResource(gameCatalog *gamecatalog.Catalog, resourceID string) (GetResourceResult, error) {
+// this result; they belong to GetResourceRelations. The resource identity is
+// the pair (kind, key), for example kind "item" and key "000F4240": the kind is
+// resolved first and the key is matched exactly inside that kind only. Neither
+// value is trimmed, normalised, parsed, or retried under another kind, so the
+// pre-migration key "item:000F4240" is an unknown key and never an alias. A
+// missing kind, an unknown kind, a missing key and a key that is unknown inside
+// an existing kind are four distinct errors. The result is the deep copy the
+// catalog already returns, so mutating it never reaches the catalog.
+func GetResource(gameCatalog *gamecatalog.Catalog, kind string, key string) (GetResourceResult, error) {
 	if gameCatalog == nil {
 		return GetResourceResult{}, errors.New("game catalog is not loaded")
 	}
-	if resourceID == "" {
-		return GetResourceResult{}, errors.New("resource ID is required")
+	if kind == "" {
+		return GetResourceResult{}, errors.New("resource kind is required")
 	}
-	if strings.TrimSpace(resourceID) != resourceID {
-		return GetResourceResult{}, fmt.Errorf(
-			"resource ID %q must not contain leading or trailing whitespace",
-			resourceID,
-		)
+	if key == "" {
+		return GetResourceResult{}, errors.New("resource key is required")
 	}
 
-	resource, exists := gameCatalog.ResourceByKey(resourceID)
-	if !exists {
-		return GetResourceResult{}, fmt.Errorf("resource ID %q was not found in the game catalog", resourceID)
+	resource, err := gameCatalog.ResourceByKindAndKey(schema.ResourceKind(kind), key)
+	if err != nil {
+		return GetResourceResult{}, err
 	}
 
 	return GetResourceResult{Resource: resource}, nil

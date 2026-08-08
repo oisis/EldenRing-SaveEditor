@@ -55,11 +55,8 @@ func Generate(options GenerateOptions) (GeneratedCatalog, error) {
 		return GeneratedCatalog{}, err
 	}
 	resources := make([]schema.Resource, 0, len(groups))
-	for index, group := range groups {
-		resource, buildErr := context.buildResource(
-			schema.ResourceID(index+1),
-			group,
-		)
+	for _, group := range groups {
+		resource, buildErr := context.buildResource(group)
 		if buildErr != nil {
 			return GeneratedCatalog{}, fmt.Errorf(
 				"build item 0x%08X: %w",

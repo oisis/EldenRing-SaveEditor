@@ -17,7 +17,8 @@ func TestRawPageShowsSourceDocument(t *testing.T) {
 	for _, expected := range []string{
 		"Dagger — raw document",
 		"items/weapon/000f4240.json",
-		"item:000F4240",
+		// html/template escapes the quotes of the embedded raw JSON document.
+		"&#34;key&#34;: &#34;000F4240&#34;",
 		"allowedAffinities",
 	} {
 		if !strings.Contains(body, expected) {

@@ -13,11 +13,11 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
-const itemVariantsDaggerResourceKey = "item:000F4240"
+const itemVariantsDaggerResourceKey = "000F4240"
 
 // The Determination Ash of War is a real prototype resource whose item document
 // stores no variants, so the empty case is covered by real data too.
-const determinationResourceKey = "item:8000EA60"
+const determinationResourceKey = "8000EA60"
 
 func newItemVariantsPrototypeCatalog(t *testing.T) *gamecatalog.Catalog {
 	t.Helper()
@@ -42,14 +42,14 @@ func TestGetItemVariantsReturnsEveryStoredVariant(t *testing.T) {
 	t.Parallel()
 
 	gameCatalog := newItemVariantsPrototypeCatalog(t)
-	result, err := catalog.GetItemVariants(gameCatalog, itemVariantsDaggerResourceKey)
+	result, err := catalog.GetItemVariants(gameCatalog, resourceKindItem, itemVariantsDaggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
 
-	resource, exists := gameCatalog.ResourceByKey(itemVariantsDaggerResourceKey)
-	if !exists {
-		t.Fatalf("ResourceByKey(%q) is missing from the prototype catalog", itemVariantsDaggerResourceKey)
+	resource, lookupErr := gameCatalog.ResourceByKindAndKey(schema.ResourceKindItem, itemVariantsDaggerResourceKey)
+	if lookupErr != nil {
+		t.Fatalf("ResourceByKindAndKey(item, %q): %v", itemVariantsDaggerResourceKey, lookupErr)
 	}
 	if len(result.Variants) != len(resource.Item.Variants) {
 		t.Fatalf("len(Variants) = %d, want %d", len(result.Variants), len(resource.Item.Variants))
@@ -62,7 +62,7 @@ func TestGetItemVariantsReturnsEveryStoredVariant(t *testing.T) {
 func TestGetItemVariantsPreservesVariantDataAndProvenance(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), itemVariantsDaggerResourceKey)
+	result, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), resourceKindItem, itemVariantsDaggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
@@ -110,14 +110,14 @@ func TestGetItemVariantsPreservesCatalogOrder(t *testing.T) {
 	t.Parallel()
 
 	gameCatalog := newItemVariantsPrototypeCatalog(t)
-	result, err := catalog.GetItemVariants(gameCatalog, itemVariantsDaggerResourceKey)
+	result, err := catalog.GetItemVariants(gameCatalog, resourceKindItem, itemVariantsDaggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
 
-	resource, exists := gameCatalog.ResourceByKey(itemVariantsDaggerResourceKey)
-	if !exists {
-		t.Fatalf("ResourceByKey(%q) is missing from the prototype catalog", itemVariantsDaggerResourceKey)
+	resource, lookupErr := gameCatalog.ResourceByKindAndKey(schema.ResourceKindItem, itemVariantsDaggerResourceKey)
+	if lookupErr != nil {
+		t.Fatalf("ResourceByKindAndKey(item, %q): %v", itemVariantsDaggerResourceKey, lookupErr)
 	}
 	for index, stored := range resource.Item.Variants {
 		if got := result.Variants[index].GameID.Value; got != stored.GameID.Value {
@@ -131,7 +131,7 @@ func TestGetItemVariantsPreservesCatalogOrder(t *testing.T) {
 func TestGetItemVariantsReturnsEmptyArrayForItemWithoutVariants(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), determinationResourceKey)
+	result, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), resourceKindItem, determinationResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
@@ -156,7 +156,7 @@ func TestGetItemVariantsReturnsEmptyArrayForItemWithoutVariants(t *testing.T) {
 func TestGetItemVariantsResultSerialisesOnlyTheVariants(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), itemVariantsDaggerResourceKey)
+	result, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), resourceKindItem, itemVariantsDaggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
@@ -184,54 +184,102 @@ func TestGetItemVariantsResultSerialisesOnlyTheVariants(t *testing.T) {
 func TestGetItemVariantsRejectsMissingCatalog(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetItemVariants(nil, itemVariantsDaggerResourceKey)
+	result, err := catalog.GetItemVariants(nil, resourceKindItem, itemVariantsDaggerResourceKey)
 	if err == nil {
-		t.Fatalf("GetItemVariants(nil, %q) = %+v, nil error; want error", itemVariantsDaggerResourceKey, result)
+		t.Fatalf("GetItemVariants(nil, %q, %q) = %+v, nil error; want error", resourceKindItem, itemVariantsDaggerResourceKey, result)
 	}
 	assertEmptyVariantsResult(t, result)
 }
 
-func TestGetItemVariantsRejectsInvalidResourceID(t *testing.T) {
+func TestGetItemVariantsRejectsInvalidKindOrKey(t *testing.T) {
 	t.Parallel()
 
-	cases := map[string]string{
-		"empty":               "",
-		"whitespace only":     "   ",
-		"tab only":            "\t",
-		"leading whitespace":  " " + itemVariantsDaggerResourceKey,
-		"trailing whitespace": itemVariantsDaggerResourceKey + " ",
-		"unknown key":         "item:DEADBEEF",
-		"unknown key kind":    "gesture:000F4240",
-		// The public parameter is Resource.Key, never the numeric ResourceID.
-		"numeric resource ID":  "1",
-		"numeric game ID":      strconv.FormatUint(uint64(prototype.DaggerGameID), 10),
-		"hex key without kind": "000F4240",
+	type identity struct {
+		kind string
+		key  string
+	}
+	cases := map[string]identity{
+		"empty kind":              {"", itemVariantsDaggerResourceKey},
+		"empty key":               {resourceKindItem, ""},
+		"whitespace only kind":    {"   ", itemVariantsDaggerResourceKey},
+		"whitespace only key":     {resourceKindItem, "   "},
+		"tab only key":            {resourceKindItem, "\t"},
+		"leading whitespace key":  {resourceKindItem, " " + itemVariantsDaggerResourceKey},
+		"trailing whitespace key": {resourceKindItem, itemVariantsDaggerResourceKey + " "},
+		"leading whitespace kind": {" " + resourceKindItem, itemVariantsDaggerResourceKey},
+		"unsupported kind":        {"gesture", itemVariantsDaggerResourceKey},
+		"unknown key":             {resourceKindItem, "DEADBEEF"},
+		"lowercase key":           {resourceKindItem, "000f4240"},
+		// The pre-migration key carried the kind as a prefix; it is now an
+		// unknown key and never an alias of the migrated one.
+		"legacy prefixed key": {resourceKindItem, "item:" + itemVariantsDaggerResourceKey},
+		"numeric resource ID": {resourceKindItem, "1"},
+		"numeric game ID":     {resourceKindItem, strconv.FormatUint(uint64(prototype.DaggerGameID), 10)},
 	}
 
 	gameCatalog := newItemVariantsPrototypeCatalog(t)
-	for name, resourceID := range cases {
+	for name, identity := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := catalog.GetItemVariants(gameCatalog, resourceID)
+			result, err := catalog.GetItemVariants(gameCatalog, identity.kind, identity.key)
 			if err == nil {
-				t.Fatalf("GetItemVariants(catalog, %q) = %+v, nil error; want error", resourceID, result)
+				t.Fatalf(
+					"GetItemVariants(catalog, %q, %q) = %+v, nil error; want error",
+					identity.kind,
+					identity.key,
+					result,
+				)
 			}
 			assertEmptyVariantsResult(t, result)
 		})
 	}
 }
 
-func TestGetItemVariantsReportsTheUnknownResourceID(t *testing.T) {
+// A missing kind, a kind other than item, a missing key and a key that is
+// unknown inside the item kind must stay four distinguishable failures.
+func TestGetItemVariantsDistinguishesKindAndKeyFailures(t *testing.T) {
 	t.Parallel()
 
-	const unknown = "item:DEADBEEF"
-	_, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), unknown)
-	if err == nil {
-		t.Fatalf("GetItemVariants(catalog, %q) = nil error, want error", unknown)
+	gameCatalog := newItemVariantsPrototypeCatalog(t)
+	cases := []struct {
+		name string
+		kind string
+		key  string
+		want string
+	}{
+		{"missing kind", "", itemVariantsDaggerResourceKey, "resource kind is required"},
+		{"unsupported kind", "gesture", itemVariantsDaggerResourceKey, "only kind \"item\" is supported"},
+		{"missing key", resourceKindItem, "", "resource key is required"},
+		{"unknown key", resourceKindItem, "DEADBEEF", "unknown resource key"},
 	}
-	if !strings.Contains(err.Error(), unknown) {
-		t.Errorf("error = %q, want it to name the missing resource ID %q", err, unknown)
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := catalog.GetItemVariants(gameCatalog, testCase.kind, testCase.key)
+			if err == nil {
+				t.Fatalf("GetItemVariants(catalog, %q, %q) = nil error, want error", testCase.kind, testCase.key)
+			}
+			if !strings.Contains(err.Error(), testCase.want) {
+				t.Fatalf("error = %q, want it to report %q", err, testCase.want)
+			}
+		})
+	}
+}
+
+func TestGetItemVariantsReportsTheUnknownResourceKey(t *testing.T) {
+	t.Parallel()
+
+	const unknown = "DEADBEEF"
+	_, err := catalog.GetItemVariants(newItemVariantsPrototypeCatalog(t), resourceKindItem, unknown)
+	if err == nil {
+		t.Fatalf("GetItemVariants(catalog, %q, %q) = nil error, want error", resourceKindItem, unknown)
+	}
+	for _, part := range []string{unknown, resourceKindItem} {
+		if !strings.Contains(err.Error(), part) {
+			t.Errorf("error = %q, want it to name the missing resource part %q", err, part)
+		}
 	}
 }
 
@@ -239,7 +287,7 @@ func TestGetItemVariantsDoesNotMutateCatalog(t *testing.T) {
 	t.Parallel()
 
 	gameCatalog := newItemVariantsPrototypeCatalog(t)
-	before, err := catalog.GetItemVariants(gameCatalog, itemVariantsDaggerResourceKey)
+	before, err := catalog.GetItemVariants(gameCatalog, resourceKindItem, itemVariantsDaggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants: %v", err)
 	}
@@ -251,7 +299,7 @@ func TestGetItemVariantsDoesNotMutateCatalog(t *testing.T) {
 	before.Variants[0].Data.Presentation.Name.Value = "mutated"
 	before.Variants[0].SourceRecords = nil
 
-	after, err := catalog.GetItemVariants(gameCatalog, itemVariantsDaggerResourceKey)
+	after, err := catalog.GetItemVariants(gameCatalog, resourceKindItem, itemVariantsDaggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetItemVariants after mutation: %v", err)
 	}

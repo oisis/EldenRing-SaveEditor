@@ -2,7 +2,6 @@ package gamecatalog
 
 import (
 	"fmt"
-	"sort"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
@@ -27,35 +26,28 @@ func (catalog *Catalog) deriveRelations(sources map[schema.SourceID]struct{}) er
 				continue
 			}
 			relation := schema.Relation{
-				From:       weapon.ID,
-				To:         ash.ID,
+				From:       weapon.Ref(),
+				To:         ash.Ref(),
 				Kind:       schema.RelationCompatibleWithAshOfWar,
 				Provenance: mask.Provenance,
 			}
 			if err := schema.ValidateRelation(relation, sources); err != nil {
 				return fmt.Errorf("derived relation %q -> %q: %w", weapon.Key, ash.Key, err)
 			}
-			catalog.outgoing[weapon.ID] = append(catalog.outgoing[weapon.ID], relation)
-			catalog.incoming[ash.ID] = append(catalog.incoming[ash.ID], relation)
+			catalog.outgoing[weapon.Ref()] = append(catalog.outgoing[weapon.Ref()], relation)
+			catalog.incoming[ash.Ref()] = append(catalog.incoming[ash.Ref()], relation)
 		}
 	}
 	return nil
 }
 
 func (catalog *Catalog) deriveRequiredContainerRelations(sources map[schema.SourceID]struct{}) error {
-	resources := make([]schema.Resource, 0, len(catalog.byID))
-	for _, resource := range catalog.byID {
-		resources = append(resources, resource)
-	}
-	sort.Slice(resources, func(i, j int) bool {
-		return resources[i].ID < resources[j].ID
-	})
-	for _, resource := range resources {
+	for _, resource := range catalog.sortedResources() {
 		required := resource.Item.Acquisition.RequiredContainerID
 		if !required.Known {
 			continue
 		}
-		targetID, exists := catalog.byItemGameID[required.Value]
+		target, exists := catalog.byItemGameID[required.Value]
 		if !exists {
 			return fmt.Errorf(
 				"resource %q: required container item 0x%08X is missing",
@@ -64,16 +56,16 @@ func (catalog *Catalog) deriveRequiredContainerRelations(sources map[schema.Sour
 			)
 		}
 		relation := schema.Relation{
-			From:       resource.ID,
-			To:         targetID,
+			From:       resource.Ref(),
+			To:         target,
 			Kind:       schema.RelationRequiresContainer,
 			Provenance: required.Provenance,
 		}
 		if err := schema.ValidateRelation(relation, sources); err != nil {
 			return fmt.Errorf("derived required-container relation for %q: %w", resource.Key, err)
 		}
-		catalog.outgoing[resource.ID] = append(catalog.outgoing[resource.ID], relation)
-		catalog.incoming[targetID] = append(catalog.incoming[targetID], relation)
+		catalog.outgoing[resource.Ref()] = append(catalog.outgoing[resource.Ref()], relation)
+		catalog.incoming[target] = append(catalog.incoming[target], relation)
 	}
 	return nil
 }
@@ -81,7 +73,7 @@ func (catalog *Catalog) deriveRequiredContainerRelations(sources map[schema.Sour
 func (catalog *Catalog) itemsForCompatibility() ([]schema.Resource, []schema.Resource) {
 	weapons := make([]schema.Resource, 0)
 	ashes := make([]schema.Resource, 0)
-	for _, resource := range catalog.byID {
+	for _, resource := range catalog.sortedResources() {
 		switch resource.Item.Family.Value {
 		case schema.ItemFamilyWeapon:
 			weapons = append(weapons, resource)
@@ -89,7 +81,23 @@ func (catalog *Catalog) itemsForCompatibility() ([]schema.Resource, []schema.Res
 			ashes = append(ashes, resource)
 		}
 	}
-	sort.Slice(weapons, func(i, j int) bool { return weapons[i].ID < weapons[j].ID })
-	sort.Slice(ashes, func(i, j int) bool { return ashes[i].ID < ashes[j].ID })
 	return weapons, ashes
+}
+
+// sortedResources returns every resource ordered by kind and only then by key,
+// so relation derivation never depends on Go map iteration order.
+func (catalog *Catalog) sortedResources() []schema.Resource {
+	refs := make([]schema.ResourceRef, 0, catalog.ResourceCount())
+	for kind, byKey := range catalog.byKind {
+		for key := range byKey {
+			refs = append(refs, schema.ResourceRef{Kind: kind, Key: key})
+		}
+	}
+	sortResourceRefs(refs)
+
+	resources := make([]schema.Resource, 0, len(refs))
+	for _, ref := range refs {
+		resources = append(resources, catalog.byKind[ref.Kind][ref.Key])
+	}
+	return resources
 }

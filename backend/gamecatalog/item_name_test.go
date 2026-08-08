@@ -274,7 +274,7 @@ func TestViewerFallsBackToResourceKeyForUnknownName(t *testing.T) {
 		t.Fatalf("status = %d, want 200", response.Code)
 	}
 	body := response.Body.String()
-	if !strings.Contains(body, "<h1>item:400000A6</h1>") {
+	if !strings.Contains(body, "<h1>400000A6</h1>") {
 		t.Fatal("Viewer does not render the technical resource key for an unknown name")
 	}
 	if strings.Contains(body, "Vision of Grace") || strings.Contains(body, "Memory of Grace") {
@@ -290,7 +290,7 @@ func TestViewerFallsBackToResourceKeyForUnknownName(t *testing.T) {
 		t.Fatalf("variant status = %d, want 200", response.Code)
 	}
 	body = response.Body.String()
-	if !strings.Contains(body, "<h1>item:008A8CC0</h1>") {
+	if !strings.Contains(body, "<h1>008A8CC0</h1>") {
 		t.Fatal("Viewer does not render the technical resource key for an unknown variant name")
 	}
 	if strings.Contains(body, "<h1>Serpentbone Blade") {

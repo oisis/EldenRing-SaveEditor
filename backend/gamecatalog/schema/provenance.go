@@ -8,7 +8,7 @@ const SourceSaveForgeLegacy SourceID = "legacy_db_data"
 
 const (
 	MinimumSchemaVersion uint32 = 1
-	CurrentSchemaVersion uint32 = 7
+	CurrentSchemaVersion uint32 = 8
 )
 
 type EvidenceLevel string

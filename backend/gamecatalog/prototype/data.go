@@ -34,7 +34,6 @@ func Load() (schema.Manifest, []schema.Resource, error) {
 			if resource.Item == nil || resource.Item.GameID.Value != gameID {
 				continue
 			}
-			resource.ID = schema.ResourceID(len(resources) + 1)
 			resources = append(resources, resource)
 			found = true
 			break

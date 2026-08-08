@@ -9,7 +9,6 @@ import (
 )
 
 func (context *generationContext) buildResource(
-	resourceID schema.ResourceID,
 	group legacyItemGroup,
 ) (schema.Resource, error) {
 	item := group.Canonical
@@ -98,8 +97,7 @@ func (context *generationContext) buildResource(
 	}
 	document.SourceRecords = enrichParameterRecordFields(document.SourceRecords, document)
 	return schema.Resource{
-		ID:   resourceID,
-		Key:  fmt.Sprintf("item:%08X", item.ID),
+		Key:  fmt.Sprintf("%08X", item.ID),
 		Kind: schema.ResourceKindItem,
 		Item: &document,
 	}, nil

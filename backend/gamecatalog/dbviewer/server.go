@@ -10,12 +10,12 @@ import (
 )
 
 type Server struct {
-	catalog       *gamecatalog.Catalog
-	data          loader.Data
-	documentsByID map[schema.ResourceID]loader.Document
-	sources       map[schema.SourceID]schema.DataSource
-	templates     templateSet
-	handler       http.Handler
+	catalog        *gamecatalog.Catalog
+	data           loader.Data
+	documentsByRef map[schema.ResourceRef]loader.Document
+	sources        map[schema.SourceID]schema.DataSource
+	templates      templateSet
+	handler        http.Handler
 }
 
 func New(data loader.Data) (*Server, error) {
@@ -29,14 +29,14 @@ func New(data loader.Data) (*Server, error) {
 	}
 
 	server := &Server{
-		catalog:       catalog,
-		data:          data,
-		documentsByID: make(map[schema.ResourceID]loader.Document, len(data.Documents)),
-		sources:       make(map[schema.SourceID]schema.DataSource, len(data.Manifest.Sources)),
-		templates:     templates,
+		catalog:        catalog,
+		data:           data,
+		documentsByRef: make(map[schema.ResourceRef]loader.Document, len(data.Documents)),
+		sources:        make(map[schema.SourceID]schema.DataSource, len(data.Manifest.Sources)),
+		templates:      templates,
 	}
 	for _, document := range data.Documents {
-		server.documentsByID[document.Resource.ID] = document
+		server.documentsByRef[document.Resource.Ref()] = document
 	}
 	for _, source := range data.Manifest.Sources {
 		server.sources[source.ID] = source

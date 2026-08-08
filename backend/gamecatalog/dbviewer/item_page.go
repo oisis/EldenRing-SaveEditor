@@ -49,7 +49,7 @@ func (server *Server) itemHandler(response http.ResponseWriter, request *http.Re
 		http.NotFound(response, request)
 		return
 	}
-	document, exists := server.documentsByID[view.Resource.ID]
+	document, exists := server.documentsByRef[view.Resource.Ref()]
 	if !exists {
 		http.Error(response, "Catalog document is unavailable.", http.StatusInternalServerError)
 		return

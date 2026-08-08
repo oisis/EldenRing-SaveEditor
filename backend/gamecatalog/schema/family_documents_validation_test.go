@@ -1,6 +1,7 @@
 package schema_test
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -107,9 +108,8 @@ func TestValidateGestureRejectsDuplicateSlotID(t *testing.T) {
 func familyResource(base schema.Resource, offset uint32, family schema.ItemFamily) schema.Resource {
 	resource := base
 	item := *base.Item
-	resource.ID += schema.ResourceID(offset)
-	resource.Key += "-" + string(family)
 	item.GameID.Value += offset
+	resource.Key = fmt.Sprintf("%08X", item.GameID.Value)
 	item.Family.Value = family
 	item.Variants = nil
 	item.Weapon = nil

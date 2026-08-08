@@ -74,7 +74,7 @@ func TestCatalogPaginationPreservesQueryAndFamily(t *testing.T) {
 		server.data.Documents = append(server.data.Documents, loader.Document{
 			Path: "items/goods/page-item.json",
 			Resource: schema.Resource{
-				Key: "page-item",
+				Key: fmt.Sprintf("%08X", 0x70000000+uint32(index)),
 				Item: &schema.ItemDocument{
 					GameID: schema.Fact[uint32]{Known: true, Value: 0x70000000 + uint32(index)},
 					Family: schema.Fact[schema.ItemFamily]{Known: true, Value: schema.ItemFamilyGoods},
@@ -279,7 +279,7 @@ func TestCatalogRowsAndFiltersCoverAllEightItemFamilies(t *testing.T) {
 		server.data.Documents = append(server.data.Documents, loader.Document{
 			Path: "items/" + string(family) + "/item.json",
 			Resource: schema.Resource{
-				Key: "item:" + string(family),
+				Key: fmt.Sprintf("%08X", uint32(index+1)),
 				Item: &schema.ItemDocument{
 					GameID: schema.Fact[uint32]{Known: true, Value: uint32(index + 1)},
 					Family: schema.Fact[schema.ItemFamily]{Known: true, Value: family},

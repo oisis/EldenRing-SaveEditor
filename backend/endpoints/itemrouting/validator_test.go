@@ -11,10 +11,10 @@ func TestValidateItemRouting(t *testing.T) {
 	t.Parallel()
 
 	const expectedEndpointID = "set_gesture_unlocked"
-	resourceID := schema.ResourceID(42)
+	resource := schema.ResourceRef{Kind: schema.ResourceKindItem, Key: "000F4240"}
 
 	t.Run("matching enabled capability is accepted", func(t *testing.T) {
-		err := ValidateItemRouting(resourceID, "grant", Capability{
+		err := ValidateItemRouting(resource, "grant", Capability{
 			Enabled:    true,
 			EndpointID: expectedEndpointID,
 		}, expectedEndpointID)
@@ -24,7 +24,7 @@ func TestValidateItemRouting(t *testing.T) {
 	})
 
 	t.Run("disabled capability returns description without checking endpoint", func(t *testing.T) {
-		err := ValidateItemRouting(resourceID, "grant", Capability{
+		err := ValidateItemRouting(resource, "grant", Capability{
 			EndpointID:  "wrong_endpoint",
 			Description: "gesture cannot be granted",
 		}, expectedEndpointID)
@@ -34,13 +34,14 @@ func TestValidateItemRouting(t *testing.T) {
 		if !strings.Contains(err.Error(), "gesture cannot be granted") {
 			t.Fatalf("error %q does not contain capability description", err)
 		}
+		assertNamesResource(t, err, resource)
 		if strings.Contains(err.Error(), "endpointId mismatch") {
 			t.Fatalf("disabled capability unexpectedly checked endpointId: %q", err)
 		}
 	})
 
 	t.Run("mismatched endpoint identifies expected and actual endpointId", func(t *testing.T) {
-		err := ValidateItemRouting(resourceID, "grant", Capability{
+		err := ValidateItemRouting(resource, "grant", Capability{
 			Enabled:    true,
 			EndpointID: "set_tutorial_unlocked",
 		}, expectedEndpointID)
@@ -52,5 +53,18 @@ func TestValidateItemRouting(t *testing.T) {
 				t.Fatalf("error %q does not contain %q", err, expected)
 			}
 		}
+		assertNamesResource(t, err, resource)
 	})
+}
+
+// The routing identity is the (kind, key) pair, so every rejection must name
+// both parts and never a numeric identifier.
+func assertNamesResource(t *testing.T, err error, resource schema.ResourceRef) {
+	t.Helper()
+
+	for _, expected := range []string{string(resource.Kind), resource.Key} {
+		if !strings.Contains(err.Error(), expected) {
+			t.Fatalf("error %q does not name %q", err, expected)
+		}
+	}
 }

@@ -9,13 +9,13 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
-func TestCatalogRejectsDuplicateResourceID(t *testing.T) {
+func TestCatalogRejectsDuplicateResourceRef(t *testing.T) {
 	manifest, resources := prototype.Data()
 	resources = append(resources, resources[0])
 
 	_, err := gamecatalog.New(manifest, resources)
-	if err == nil || !strings.Contains(err.Error(), "duplicate resource ID") {
-		t.Fatalf("New error = %v, want duplicate resource ID", err)
+	if err == nil || !strings.Contains(err.Error(), "duplicate resource") {
+		t.Fatalf("New error = %v, want duplicate (kind, key) rejection", err)
 	}
 }
 
@@ -23,8 +23,8 @@ func TestCatalogRejectsVariantOwnedByAnotherResource(t *testing.T) {
 	manifest, resources := prototype.Data()
 	duplicate := resources[1]
 	item := *duplicate.Item
-	duplicate.ID = 3
-	duplicate.Key = "item:variant-collision"
+	// The key must stay a well-formed item key and match the game ID below.
+	duplicate.Key = "000F42A4"
 	item.GameID.Value = prototype.DaggerGameID + 100
 	duplicate.Item = &item
 	resources = append(resources, duplicate)
@@ -60,8 +60,15 @@ func TestCatalogIndexesTechnicalAlias(t *testing.T) {
 		t.Fatalf("New: %v", err)
 	}
 	resource, ok := catalog.ItemByGameID(aliasID)
-	if !ok || resource.ID != resources[0].ID {
-		t.Fatalf("ItemByGameID(alias) = (%d, %t), want resource %d", resource.ID, ok, resources[0].ID)
+	if !ok || resource.Ref() != resources[0].Ref() {
+		t.Fatalf(
+			"ItemByGameID(alias) = (kind %q key %q, %t), want kind %q key %q",
+			resource.Kind,
+			resource.Key,
+			ok,
+			resources[0].Kind,
+			resources[0].Key,
+		)
 	}
 }
 

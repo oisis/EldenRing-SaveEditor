@@ -13,7 +13,7 @@ func TestDefinitionValidate(t *testing.T) {
 		ID:                         "set_gesture_unlocked",
 		Kind:                       Mutation,
 		SupportedResourceTypes:     "ItemDocument: Gesture",
-		SupportedResourceVariables: []string{"characterID", "gestureResourceID", "unlocked"},
+		SupportedResourceVariables: []string{"characterID", "gestureKind", "gestureKey", "unlocked"},
 		Description:                "Sets one gesture unlock state.",
 	}
 	if err := valid.Validate(); err != nil {

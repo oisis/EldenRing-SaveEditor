@@ -15,7 +15,10 @@ import (
 
 // The prototype catalog holds real, schema-valid resources, so the getter is
 // exercised against real data instead of a mock.
-const daggerResourceKey = "item:000F4240"
+const (
+	resourceKindItem  = "item"
+	daggerResourceKey = "000F4240"
+)
 
 func newPrototypeCatalog(t *testing.T) *gamecatalog.Catalog {
 	t.Helper()
@@ -30,7 +33,7 @@ func newPrototypeCatalog(t *testing.T) *gamecatalog.Catalog {
 func TestGetResourceReturnsResourceByKey(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetResource(newPrototypeCatalog(t), daggerResourceKey)
+	result, err := catalog.GetResource(newPrototypeCatalog(t), resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetResource: %v", err)
 	}
@@ -55,7 +58,7 @@ func TestGetResourceReturnsResourceByKey(t *testing.T) {
 func TestGetResourceReturnsFullItemDocument(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetResource(newPrototypeCatalog(t), daggerResourceKey)
+	result, err := catalog.GetResource(newPrototypeCatalog(t), resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetResource: %v", err)
 	}
@@ -98,7 +101,7 @@ func TestGetResourceReturnsFullItemDocument(t *testing.T) {
 func TestGetResourceResultSerialisesOnlyTheResource(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetResource(newPrototypeCatalog(t), daggerResourceKey)
+	result, err := catalog.GetResource(newPrototypeCatalog(t), resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetResource: %v", err)
 	}
@@ -137,54 +140,102 @@ func sortedKeys(fields map[string]json.RawMessage) []string {
 func TestGetResourceRejectsMissingCatalog(t *testing.T) {
 	t.Parallel()
 
-	result, err := catalog.GetResource(nil, daggerResourceKey)
+	result, err := catalog.GetResource(nil, resourceKindItem, daggerResourceKey)
 	if err == nil {
-		t.Fatalf("GetResource(nil, %q) = %+v, nil error; want error", daggerResourceKey, result)
+		t.Fatalf("GetResource(nil, %q, %q) = %+v, nil error; want error", resourceKindItem, daggerResourceKey, result)
 	}
 	assertEmptyResourceResult(t, result)
 }
 
-func TestGetResourceRejectsInvalidResourceID(t *testing.T) {
+func TestGetResourceRejectsInvalidKindOrKey(t *testing.T) {
 	t.Parallel()
 
-	cases := map[string]string{
-		"empty":               "",
-		"whitespace only":     "   ",
-		"tab only":            "\t",
-		"leading whitespace":  " " + daggerResourceKey,
-		"trailing whitespace": daggerResourceKey + " ",
-		"unknown key":         "item:DEADBEEF",
-		"unknown key kind":    "gesture:000F4240",
-		// The public parameter is Resource.Key, never the numeric ResourceID.
-		"numeric resource ID":  "1",
-		"numeric game ID":      strconv.FormatUint(uint64(prototype.DaggerGameID), 10),
-		"hex key without kind": "000F4240",
+	type identity struct {
+		kind string
+		key  string
+	}
+	cases := map[string]identity{
+		"empty kind":              {"", daggerResourceKey},
+		"empty key":               {resourceKindItem, ""},
+		"whitespace only kind":    {"   ", daggerResourceKey},
+		"whitespace only key":     {resourceKindItem, "   "},
+		"tab only key":            {resourceKindItem, "\t"},
+		"leading whitespace key":  {resourceKindItem, " " + daggerResourceKey},
+		"trailing whitespace key": {resourceKindItem, daggerResourceKey + " "},
+		"leading whitespace kind": {" " + resourceKindItem, daggerResourceKey},
+		"unknown kind":            {"gesture", daggerResourceKey},
+		"unknown key":             {resourceKindItem, "DEADBEEF"},
+		"lowercase key":           {resourceKindItem, "000f4240"},
+		// The pre-migration key carried the kind as a prefix; it is now an
+		// unknown key and never an alias of the migrated one.
+		"legacy prefixed key": {resourceKindItem, "item:" + daggerResourceKey},
+		"numeric resource ID": {resourceKindItem, "1"},
+		"numeric game ID":     {resourceKindItem, strconv.FormatUint(uint64(prototype.DaggerGameID), 10)},
 	}
 
 	gameCatalog := newPrototypeCatalog(t)
-	for name, resourceID := range cases {
+	for name, identity := range cases {
 		t.Run(name, func(t *testing.T) {
 			t.Parallel()
 
-			result, err := catalog.GetResource(gameCatalog, resourceID)
+			result, err := catalog.GetResource(gameCatalog, identity.kind, identity.key)
 			if err == nil {
-				t.Fatalf("GetResource(catalog, %q) = %+v, nil error; want error", resourceID, result)
+				t.Fatalf(
+					"GetResource(catalog, %q, %q) = %+v, nil error; want error",
+					identity.kind,
+					identity.key,
+					result,
+				)
 			}
 			assertEmptyResourceResult(t, result)
 		})
 	}
 }
 
-func TestGetResourceReportsTheUnknownResourceID(t *testing.T) {
+// A missing kind, an unknown kind, a missing key and a key that is unknown
+// inside an existing kind must stay four distinguishable failures.
+func TestGetResourceDistinguishesKindAndKeyFailures(t *testing.T) {
 	t.Parallel()
 
-	const unknown = "item:DEADBEEF"
-	_, err := catalog.GetResource(newPrototypeCatalog(t), unknown)
-	if err == nil {
-		t.Fatalf("GetResource(catalog, %q) = nil error, want error", unknown)
+	gameCatalog := newPrototypeCatalog(t)
+	cases := []struct {
+		name string
+		kind string
+		key  string
+		want string
+	}{
+		{"missing kind", "", daggerResourceKey, "resource kind is required"},
+		{"unknown kind", "gesture", daggerResourceKey, "unknown resource kind"},
+		{"missing key", resourceKindItem, "", "resource key is required"},
+		{"unknown key", resourceKindItem, "DEADBEEF", "unknown resource key"},
 	}
-	if !strings.Contains(err.Error(), unknown) {
-		t.Errorf("error = %q, want it to name the missing resource ID %q", err, unknown)
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			_, err := catalog.GetResource(gameCatalog, testCase.kind, testCase.key)
+			if err == nil {
+				t.Fatalf("GetResource(catalog, %q, %q) = nil error, want error", testCase.kind, testCase.key)
+			}
+			if !strings.Contains(err.Error(), testCase.want) {
+				t.Fatalf("error = %q, want it to report %q", err, testCase.want)
+			}
+		})
+	}
+}
+
+func TestGetResourceReportsTheUnknownResourceKey(t *testing.T) {
+	t.Parallel()
+
+	const unknown = "DEADBEEF"
+	_, err := catalog.GetResource(newPrototypeCatalog(t), resourceKindItem, unknown)
+	if err == nil {
+		t.Fatalf("GetResource(catalog, %q, %q) = nil error, want error", resourceKindItem, unknown)
+	}
+	for _, part := range []string{unknown, resourceKindItem} {
+		if !strings.Contains(err.Error(), part) {
+			t.Errorf("error = %q, want it to name the missing resource part %q", err, part)
+		}
 	}
 }
 
@@ -192,7 +243,7 @@ func TestGetResourceDoesNotMutateCatalog(t *testing.T) {
 	t.Parallel()
 
 	gameCatalog := newPrototypeCatalog(t)
-	before, err := catalog.GetResource(gameCatalog, daggerResourceKey)
+	before, err := catalog.GetResource(gameCatalog, resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetResource: %v", err)
 	}
@@ -206,7 +257,7 @@ func TestGetResourceDoesNotMutateCatalog(t *testing.T) {
 	before.Resource.Item.Variants[0].GameID.Value = 1
 	before.Resource.Item.Capabilities.Infusion.Rules.AllowedAffinities[0] = schema.AffinityOccult
 
-	after, err := catalog.GetResource(gameCatalog, daggerResourceKey)
+	after, err := catalog.GetResource(gameCatalog, resourceKindItem, daggerResourceKey)
 	if err != nil {
 		t.Fatalf("GetResource after mutation: %v", err)
 	}
@@ -230,8 +281,7 @@ func TestGetResourceDoesNotMutateCatalog(t *testing.T) {
 func assertEmptyResourceResult(t *testing.T, result catalog.GetResourceResult) {
 	t.Helper()
 
-	if result.Resource.ID != 0 || result.Resource.Key != "" ||
-		result.Resource.Kind != "" || result.Resource.Item != nil {
+	if result.Resource.Key != "" || result.Resource.Kind != "" || result.Resource.Item != nil {
 		t.Errorf("Resource = %+v, want an empty resource on failure", result.Resource)
 	}
 }

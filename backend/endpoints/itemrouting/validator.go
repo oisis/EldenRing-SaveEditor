@@ -17,23 +17,25 @@ type Capability struct {
 // ValidateItemRouting provides the single routing guard used by item-resource
 // mutation endpoints before any SaveEngine mutation.
 func ValidateItemRouting(
-	resourceID schema.ResourceID,
+	resource schema.ResourceRef,
 	capabilityName string,
 	capability Capability,
 	expectedEndpointID string,
 ) error {
 	if !capability.Enabled {
 		return fmt.Errorf(
-			"resource %d capability %s is disabled: %s",
-			resourceID,
+			"resource kind %q key %q capability %s is disabled: %s",
+			resource.Kind,
+			resource.Key,
 			capabilityName,
 			capability.Description,
 		)
 	}
 	if capability.EndpointID != expectedEndpointID {
 		return fmt.Errorf(
-			"resource %d capability %s endpointId mismatch: expected %q, got %q",
-			resourceID,
+			"resource kind %q key %q capability %s endpointId mismatch: expected %q, got %q",
+			resource.Kind,
+			resource.Key,
 			capabilityName,
 			expectedEndpointID,
 			capability.EndpointID,

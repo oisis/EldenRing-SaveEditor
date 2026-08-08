@@ -16,9 +16,9 @@ type relationView struct {
 }
 
 func (server *Server) relationViews(view gamecatalog.ItemView) []relationView {
-	resources := make(map[schema.ResourceID]schema.Resource, len(view.RelatedResources))
+	resources := make(map[schema.ResourceRef]schema.Resource, len(view.RelatedResources))
 	for _, resource := range view.RelatedResources {
-		resources[resource.ID] = resource
+		resources[resource.Ref()] = resource
 	}
 	relations := make([]relationView, 0, len(view.OutgoingRelations)+len(view.IncomingRelations))
 	for _, relation := range view.OutgoingRelations {

@@ -28,7 +28,7 @@ func TestCatalogDerivesRequiredContainerRelation(t *testing.T) {
 	found := false
 	for _, relation := range view.OutgoingRelations {
 		if relation.Kind == schema.RelationRequiresContainer &&
-			relation.To == resources[1].ID {
+			relation.To == resources[1].Ref() {
 			found = true
 		}
 	}
@@ -48,8 +48,7 @@ func TestRequiredContainerRelationsAreDeterministic(t *testing.T) {
 	)
 
 	second := first
-	second.ID = 3
-	second.Key = "item:000F4241"
+	second.Key = "000F4241"
 	secondItem := *first.Item
 	second.Item = &secondItem
 	second.Item.GameID.Value = 0x000F4241
@@ -62,7 +61,7 @@ func TestRequiredContainerRelationsAreDeterministic(t *testing.T) {
 		{second, first, target},
 		{target, second, first},
 	}
-	var expected []schema.ResourceID
+	var expected []schema.ResourceRef
 	for index, resources := range orders {
 		catalog, err := gamecatalog.New(manifest, resources)
 		if err != nil {
@@ -72,7 +71,7 @@ func TestRequiredContainerRelationsAreDeterministic(t *testing.T) {
 		if !ok {
 			t.Fatalf("order %d target not found", index)
 		}
-		var from []schema.ResourceID
+		var from []schema.ResourceRef
 		for _, relation := range view.IncomingRelations {
 			if relation.Kind == schema.RelationRequiresContainer {
 				from = append(from, relation.From)
@@ -91,8 +90,12 @@ func TestRequiredContainerRelationsAreDeterministic(t *testing.T) {
 			)
 		}
 	}
-	if !reflect.DeepEqual(expected, []schema.ResourceID{1, 3}) {
-		t.Fatalf("required-container sources = %v, want [1 3]", expected)
+	want := []schema.ResourceRef{
+		{Kind: schema.ResourceKindItem, Key: "000F4240"},
+		{Kind: schema.ResourceKindItem, Key: "000F4241"},
+	}
+	if !reflect.DeepEqual(expected, want) {
+		t.Fatalf("required-container sources = %v, want %v", expected, want)
 	}
 }
 

@@ -98,7 +98,7 @@ func TestVariantItemPageShowsOnlyExactVariantSourceRecords(t *testing.T) {
 	if !exists {
 		t.Fatal("quality Dagger view is missing")
 	}
-	document := server.documentsByID[view.Resource.ID]
+	document := server.documentsByRef[view.Resource.Ref()]
 	page := server.buildItemPage(view, document, 1000300)
 	if len(page.SourceRecords) != len(variant.SourceRecords) {
 		t.Fatalf("variant source records = %+v", page.SourceRecords)
@@ -156,7 +156,7 @@ func TestVariantItemPageUsesFullVariantData(t *testing.T) {
 	if !variantFound {
 		t.Fatal("quality Dagger variant is missing from resource")
 	}
-	document := server.documentsByID[view.Resource.ID]
+	document := server.documentsByRef[view.Resource.Ref()]
 
 	page := server.buildItemPage(view, document, 1000300)
 	if page.Name != "Quality Dagger" {
