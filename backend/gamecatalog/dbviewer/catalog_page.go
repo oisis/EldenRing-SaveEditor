@@ -116,7 +116,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 			Subcategory:  knownText(item.Subcategory.Known, item.Subcategory.Value),
 			EntryType:    "Canonical",
 			DocumentPath: document.Path,
-			UnknownCount: countUnknownFactsForFamily(resource, item.Family.Value),
+			UnknownCount: countUnknownFactsForCanonicalItem(item),
 		}
 		if matchesCatalogQuery(query, canonicalSearch...) {
 			rows = append(rows, canonical)

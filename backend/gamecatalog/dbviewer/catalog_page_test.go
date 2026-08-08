@@ -30,6 +30,19 @@ func TestCatalogPageListsBothDocuments(t *testing.T) {
 	}
 }
 
+func TestCatalogCanonicalUnknownCountExcludesVariants(t *testing.T) {
+	rows := testServer(t).catalogRows("Dagger", "weapon")
+	for _, row := range rows {
+		if row.EntryType == "Canonical" && row.GameID == "0x000F4240" {
+			if row.UnknownCount != 4 {
+				t.Fatalf("Dagger canonical unknown count = %d, want 4", row.UnknownCount)
+			}
+			return
+		}
+	}
+	t.Fatal("Dagger canonical catalog row is missing")
+}
+
 func TestCatalogPaginationBoundaries(t *testing.T) {
 	rows := make([]catalogItemRow, 205)
 	for index := range rows {

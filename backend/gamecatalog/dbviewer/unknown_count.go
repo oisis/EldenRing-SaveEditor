@@ -17,6 +17,15 @@ func countUnknownFactsForFamily(value any, family schema.ItemFamily) int {
 	)
 }
 
+func countUnknownFactsForCanonicalItem(item *schema.ItemDocument) int {
+	if item == nil {
+		return 0
+	}
+	canonical := *item
+	canonical.Variants = nil
+	return countUnknownFactsForFamily(canonical, item.Family.Value)
+}
+
 func countUnknownValue(value reflect.Value, allowNotApplicable bool) int {
 	if !value.IsValid() {
 		return 0

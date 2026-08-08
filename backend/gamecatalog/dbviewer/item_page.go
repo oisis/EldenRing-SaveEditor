@@ -67,7 +67,7 @@ func (server *Server) buildItemPage(
 	name := itemName(resource)
 	iconURL := itemIconURL(item)
 	entryType := "Canonical"
-	unknownCount := countUnknownFactsForFamily(resource, item.Family.Value)
+	unknownCount := countUnknownFactsForCanonicalItem(item)
 	gameIDKnown := item.GameID.Known
 	gameIDProvenance := item.GameID.Provenance
 	categoryKnown, categoryValue, categoryProvenance := item.Category.Known, item.Category.Value, item.Category.Provenance

@@ -26,6 +26,7 @@ func TestItemPageShowsHumanReadableDataAndRelations(t *testing.T) {
 		"regulation.bin/csv/EquipParamWeapon.csv",
 		`src="/catalog-assets/icons/items/melee_armaments/dagger.png"`,
 		`href="/items/000F4240/raw"`,
+		">4 unknown fields</span>",
 	} {
 		if !strings.Contains(body, expected) {
 			t.Errorf("item page does not contain %q", expected)

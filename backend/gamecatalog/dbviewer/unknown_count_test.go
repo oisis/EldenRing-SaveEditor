@@ -27,6 +27,23 @@ func TestUnknownCountTraversesNewTopLevelFamilyVariantAndAliasFacts(t *testing.T
 	}
 }
 
+func TestCanonicalItemUnknownCountExcludesVariants(t *testing.T) {
+	item := &schema.ItemDocument{
+		Family: schema.Fact[schema.ItemFamily]{
+			Known: true,
+			Value: schema.ItemFamilyWeapon,
+		},
+		Variants: []schema.ItemVariant{{}},
+	}
+
+	before := countUnknownFactsForCanonicalItem(item)
+	item.Variants[0].Affinity.Known = true
+	after := countUnknownFactsForCanonicalItem(item)
+	if after != before {
+		t.Fatalf("canonical unknown count changed from %d to %d after changing only a variant", before, after)
+	}
+}
+
 func TestUnknownCountSkipsNotApplicableMetadataAndUpgradeAffinity(t *testing.T) {
 	type optionalMetadata struct {
 		RequiredContainerID schema.Fact[uint32]
