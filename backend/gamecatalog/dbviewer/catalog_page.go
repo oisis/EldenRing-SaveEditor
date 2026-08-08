@@ -13,6 +13,23 @@ import (
 
 const catalogPageSize = 100
 
+const (
+	catalogSortName        = "name"
+	catalogSortGameID      = "gameID"
+	catalogSortEntry       = "entry"
+	catalogSortFamily      = "family"
+	catalogSortSubcategory = "subcategory"
+	catalogSortUnknown     = "unknown"
+	catalogSortDocument    = "document"
+)
+
+type catalogPaginationLink struct {
+	Number   int
+	URL      string
+	Current  bool
+	Ellipsis bool
+}
+
 type catalogPage struct {
 	Meta          pageMeta
 	Query         string
@@ -28,6 +45,10 @@ type catalogPage struct {
 	Pages         int
 	Previous      string
 	Next          string
+	Sort          string
+	Descending    bool
+	SortURLs      map[string]string
+	PageLinks     []catalogPaginationLink
 }
 
 type catalogItemRow struct {
@@ -46,8 +67,11 @@ func (server *Server) catalogHandler(response http.ResponseWriter, request *http
 	query := strings.TrimSpace(request.URL.Query().Get("q"))
 	family := strings.TrimSpace(request.URL.Query().Get("family"))
 	subcategory := strings.TrimSpace(request.URL.Query().Get("subcategory"))
+	sortField := catalogSortField(request.URL.Query().Get("sort"))
+	descending := request.URL.Query().Get("direction") == "desc"
 	requestedPage, _ := strconv.Atoi(request.URL.Query().Get("page"))
 	rows := server.catalogRowsFiltered(query, family, subcategory)
+	sortCatalogRows(rows, sortField, descending)
 	items, currentPage, pages, first, last := paginateCatalogRows(rows, requestedPage)
 	page := catalogPage{
 		Meta:          server.pageMeta("Catalog"),
@@ -62,12 +86,16 @@ func (server *Server) catalogHandler(response http.ResponseWriter, request *http
 		Last:          last,
 		Page:          currentPage,
 		Pages:         pages,
+		Sort:          sortField,
+		Descending:    descending,
+		SortURLs:      catalogSortURLs(query, family, subcategory, sortField, descending),
+		PageLinks:     catalogPaginationLinks(query, family, subcategory, sortField, descending, currentPage, pages),
 	}
 	if currentPage > 1 {
-		page.Previous = catalogPageURL(query, family, subcategory, currentPage-1)
+		page.Previous = catalogPageURL(query, family, subcategory, sortField, descending, currentPage-1)
 	}
 	if currentPage < pages {
-		page.Next = catalogPageURL(query, family, subcategory, currentPage+1)
+		page.Next = catalogPageURL(query, family, subcategory, sortField, descending, currentPage+1)
 	}
 	server.render(response, "catalog", page)
 }
@@ -156,13 +184,53 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 			})
 		}
 	}
-	sort.Slice(rows, func(left int, right int) bool {
-		if rows[left].Name != rows[right].Name {
-			return rows[left].Name < rows[right].Name
-		}
-		return rows[left].GameID < rows[right].GameID
-	})
+	sortCatalogRows(rows, catalogSortName, false)
 	return rows
+}
+
+func catalogSortField(value string) string {
+	switch value {
+	case catalogSortGameID, catalogSortEntry, catalogSortFamily,
+		catalogSortSubcategory, catalogSortUnknown, catalogSortDocument:
+		return value
+	default:
+		return catalogSortName
+	}
+}
+
+func sortCatalogRows(rows []catalogItemRow, sortField string, descending bool) {
+	sort.Slice(rows, func(left, right int) bool {
+		compare := compareCatalogRows(rows[left], rows[right], sortField)
+		if compare == 0 {
+			compare = strings.Compare(rows[left].Name, rows[right].Name)
+		}
+		if compare == 0 {
+			compare = strings.Compare(rows[left].GameID, rows[right].GameID)
+		}
+		if descending {
+			return compare > 0
+		}
+		return compare < 0
+	})
+}
+
+func compareCatalogRows(left, right catalogItemRow, sortField string) int {
+	switch sortField {
+	case catalogSortGameID:
+		return strings.Compare(left.GameID, right.GameID)
+	case catalogSortEntry:
+		return strings.Compare(left.EntryType, right.EntryType)
+	case catalogSortFamily:
+		return strings.Compare(left.Family, right.Family)
+	case catalogSortSubcategory:
+		return strings.Compare(left.Subcategory, right.Subcategory)
+	case catalogSortUnknown:
+		return left.UnknownCount - right.UnknownCount
+	case catalogSortDocument:
+		return strings.Compare(left.DocumentPath, right.DocumentPath)
+	default:
+		return strings.Compare(left.Name, right.Name)
+	}
 }
 
 func matchesCatalogQuery(query string, values ...string) bool {
@@ -254,7 +322,85 @@ func paginateCatalogRows(
 	return rows[start:end], page, pages, start + 1, end
 }
 
-func catalogPageURL(query string, family string, subcategory string, page int) string {
+func catalogSortURLs(
+	query string,
+	family string,
+	subcategory string,
+	currentSort string,
+	descending bool,
+) map[string]string {
+	fields := []string{
+		catalogSortName,
+		catalogSortGameID,
+		catalogSortEntry,
+		catalogSortFamily,
+		catalogSortSubcategory,
+		catalogSortUnknown,
+		catalogSortDocument,
+	}
+	urls := make(map[string]string, len(fields))
+	for _, sortField := range fields {
+		nextDescending := sortField == currentSort && !descending
+		urls[sortField] = catalogPageURL(
+			query,
+			family,
+			subcategory,
+			sortField,
+			nextDescending,
+			1,
+		)
+	}
+	return urls
+}
+
+func catalogPaginationLinks(
+	query string,
+	family string,
+	subcategory string,
+	sortField string,
+	descending bool,
+	currentPage int,
+	pages int,
+) []catalogPaginationLink {
+	numbers := []int{1, currentPage - 2, currentPage - 1, currentPage, currentPage + 1, currentPage + 2, pages}
+	seen := make(map[int]struct{}, len(numbers))
+	valid := make([]int, 0, len(numbers))
+	for _, number := range numbers {
+		if number < 1 || number > pages {
+			continue
+		}
+		if _, exists := seen[number]; exists {
+			continue
+		}
+		seen[number] = struct{}{}
+		valid = append(valid, number)
+	}
+	sort.Ints(valid)
+
+	links := make([]catalogPaginationLink, 0, len(valid)+2)
+	previous := 0
+	for _, number := range valid {
+		if previous != 0 && number > previous+1 {
+			links = append(links, catalogPaginationLink{Ellipsis: true})
+		}
+		links = append(links, catalogPaginationLink{
+			Number:  number,
+			URL:     catalogPageURL(query, family, subcategory, sortField, descending, number),
+			Current: number == currentPage,
+		})
+		previous = number
+	}
+	return links
+}
+
+func catalogPageURL(
+	query string,
+	family string,
+	subcategory string,
+	sortField string,
+	descending bool,
+	page int,
+) string {
 	values := make(url.Values)
 	if query != "" {
 		values.Set("q", query)
@@ -264,6 +410,12 @@ func catalogPageURL(query string, family string, subcategory string, page int) s
 	}
 	if subcategory != "" {
 		values.Set("subcategory", subcategory)
+	}
+	if sortField != catalogSortName || descending {
+		values.Set("sort", sortField)
+	}
+	if descending {
+		values.Set("direction", "desc")
 	}
 	if page > 1 {
 		values.Set("page", strconv.Itoa(page))

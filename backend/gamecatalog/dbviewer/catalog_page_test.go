@@ -1,6 +1,7 @@
 package dbviewer
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"testing"
@@ -156,10 +157,71 @@ func TestCatalogPageFiltersBySubcategory(t *testing.T) {
 }
 
 func TestCatalogSubcategoryFilterIsPreservedInPaginationURL(t *testing.T) {
-	got := catalogPageURL("needle", "weapon", "Daggers", 2)
+	got := catalogPageURL("needle", "weapon", "Daggers", catalogSortName, false, 2)
 	want := "/?family=weapon&page=2&q=needle&subcategory=Daggers"
 	if got != want {
 		t.Fatalf("catalog pagination URL = %q, want %q", got, want)
+	}
+}
+
+func TestCatalogSortAndPaginationURLsPreserveFilters(t *testing.T) {
+	urls := catalogSortURLs("needle", "weapon", "Daggers", catalogSortUnknown, true)
+	if got, want := urls[catalogSortUnknown], "/?family=weapon&q=needle&sort=unknown&subcategory=Daggers"; got != want {
+		t.Fatalf("active sort URL = %q, want %q", got, want)
+	}
+	if got, want := urls[catalogSortName], "/?family=weapon&q=needle&subcategory=Daggers"; got != want {
+		t.Fatalf("name sort URL = %q, want %q", got, want)
+	}
+
+	links := catalogPaginationLinks("needle", "weapon", "Daggers", catalogSortUnknown, true, 5, 10)
+	var numbers []int
+	for _, link := range links {
+		if link.Ellipsis {
+			numbers = append(numbers, 0)
+			continue
+		}
+		numbers = append(numbers, link.Number)
+	}
+	if got, want := fmt.Sprint(numbers), "[1 0 3 4 5 6 7 0 10]"; got != want {
+		t.Fatalf("pagination links = %s, want %s", got, want)
+	}
+	for _, link := range links {
+		if link.Number == 4 && link.URL != "/?direction=desc&family=weapon&page=4&q=needle&sort=unknown&subcategory=Daggers" {
+			t.Fatalf("page 4 URL = %q", link.URL)
+		}
+	}
+}
+
+func TestCatalogRowsSortByRequestedColumn(t *testing.T) {
+	rows := []catalogItemRow{
+		{Name: "Zulu", GameID: "0x00000003", EntryType: "Variant", Family: "goods", Subcategory: "Beta", UnknownCount: 2, DocumentPath: "items/c.json"},
+		{Name: "Alpha", GameID: "0x00000002", EntryType: "Canonical", Family: "weapon", Subcategory: "Gamma", UnknownCount: 3, DocumentPath: "items/a.json"},
+		{Name: "Bravo", GameID: "0x00000001", EntryType: "Upgrade", Family: "armor", Subcategory: "Alpha", UnknownCount: 1, DocumentPath: "items/b.json"},
+	}
+	tests := []struct {
+		sortField string
+		want      string
+	}{
+		{catalogSortName, "0x00000002,0x00000001,0x00000003"},
+		{catalogSortGameID, "0x00000001,0x00000002,0x00000003"},
+		{catalogSortEntry, "0x00000002,0x00000001,0x00000003"},
+		{catalogSortFamily, "0x00000001,0x00000003,0x00000002"},
+		{catalogSortSubcategory, "0x00000001,0x00000003,0x00000002"},
+		{catalogSortUnknown, "0x00000001,0x00000003,0x00000002"},
+		{catalogSortDocument, "0x00000002,0x00000001,0x00000003"},
+	}
+	for _, test := range tests {
+		t.Run(test.sortField, func(t *testing.T) {
+			copyRows := append([]catalogItemRow(nil), rows...)
+			sortCatalogRows(copyRows, test.sortField, false)
+			ids := make([]string, len(copyRows))
+			for index, row := range copyRows {
+				ids[index] = row.GameID
+			}
+			if got := strings.Join(ids, ","); got != test.want {
+				t.Fatalf("sorted IDs = %q, want %q", got, test.want)
+			}
+		})
 	}
 }
 

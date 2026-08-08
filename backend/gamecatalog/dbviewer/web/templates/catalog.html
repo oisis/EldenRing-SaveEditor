@@ -31,6 +31,8 @@
       {{end}}
     </select>
   </label>
+  {{if ne .Sort "name"}}<input type="hidden" name="sort" value="{{.Sort}}">{{end}}
+  {{if .Descending}}<input type="hidden" name="direction" value="desc">{{end}}
   <button type="submit">Apply filters</button>
   {{if or .Query .Family .Subcategory}}<a class="button secondary" href="/">Clear</a>{{end}}
 </form>
@@ -41,13 +43,13 @@
     <thead>
       <tr>
         <th>Icon</th>
-        <th>Name</th>
-        <th>Game ID</th>
-        <th>Entry</th>
-        <th>Family</th>
-        <th>Subcategory</th>
-        <th>Unknown</th>
-        <th>Document</th>
+        <th><a class="sort-link{{if eq $.Sort "name"}} active{{end}}" href="{{index $.SortURLs "name"}}">Name{{if eq $.Sort "name"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
+        <th><a class="sort-link{{if eq $.Sort "gameID"}} active{{end}}" href="{{index $.SortURLs "gameID"}}">Game ID{{if eq $.Sort "gameID"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
+        <th><a class="sort-link{{if eq $.Sort "entry"}} active{{end}}" href="{{index $.SortURLs "entry"}}">Entry{{if eq $.Sort "entry"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
+        <th><a class="sort-link{{if eq $.Sort "family"}} active{{end}}" href="{{index $.SortURLs "family"}}">Family{{if eq $.Sort "family"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
+        <th><a class="sort-link{{if eq $.Sort "subcategory"}} active{{end}}" href="{{index $.SortURLs "subcategory"}}">Subcategory{{if eq $.Sort "subcategory"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
+        <th><a class="sort-link{{if eq $.Sort "unknown"}} active{{end}}" href="{{index $.SortURLs "unknown"}}">Unknown{{if eq $.Sort "unknown"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
+        <th><a class="sort-link{{if eq $.Sort "document"}} active{{end}}" href="{{index $.SortURLs "document"}}">Document{{if eq $.Sort "document"}} {{if $.Descending}}↓{{else}}↑{{end}}{{end}}</a></th>
       </tr>
     </thead>
     <tbody>
@@ -74,7 +76,14 @@
 </div>
 <nav class="pagination" aria-label="Catalog pages">
   {{if .Previous}}<a class="button secondary" href="{{.Previous}}">Previous</a>{{else}}<span></span>{{end}}
-  <span>Page {{.Page}} of {{.Pages}}</span>
+  <div class="page-links">
+    {{range .PageLinks}}
+      {{if .Ellipsis}}<span class="page-ellipsis" aria-hidden="true">…</span>
+      {{else if .Current}}<span class="page-current" aria-current="page">{{.Number}}</span>
+      {{else}}<a class="page-link" href="{{.URL}}">{{.Number}}</a>{{end}}
+    {{end}}
+  </div>
+  <span class="page-summary">Page {{.Page}} of {{.Pages}}</span>
   {{if .Next}}<a class="button secondary" href="{{.Next}}">Next</a>{{else}}<span></span>{{end}}
 </nav>
 {{else}}
