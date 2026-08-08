@@ -48,7 +48,7 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 	if err != nil {
 		t.Fatalf("groupLegacyItems: %v", err)
 	}
-	expectedVariants := make(map[uint32]legacyVariantSeed, 3624)
+	expectedVariants := make(map[uint32]legacyVariantSeed, 3576)
 	for _, group := range groups {
 		for _, variant := range group.Variants {
 			expectedVariants[variant.Item.ID] = variant
@@ -88,8 +88,8 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 	if len(records) != 6434 {
 		t.Fatalf("canonical plus variant IDs = %d, want 6434", len(records))
 	}
-	if len(expectedVariants) != 3624 {
-		t.Fatalf("expected variants = %d, want 3624", len(expectedVariants))
+	if len(expectedVariants) != 3576 {
+		t.Fatalf("expected variants = %d, want 3576", len(expectedVariants))
 	}
 	if aliasCount != 37 {
 		t.Fatalf("aliases = %d, want 37", aliasCount)
@@ -131,7 +131,6 @@ func TestGenerateFullLegacyCatalogParity(t *testing.T) {
 			primary.Row,
 			primaryExists,
 			capabilitiesOverride,
-			isVariant,
 		)
 		if err != nil {
 			t.Fatalf("item 0x%08X expected data: %v", item.ID, err)

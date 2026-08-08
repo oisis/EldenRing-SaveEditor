@@ -42,11 +42,11 @@
     },
     "presentation": {
       "name": {
-        "known": false,
-        "value": "",
+        "known": true,
+        "value": "Vision of Grace",
         "provenance": {
           "source": "legacy_db_data",
-          "method": "no official FMG name entry exists for this item"
+          "method": "copied from legacy ItemData.Name because no usable official FMG name entry exists"
         }
       },
       "caption": {

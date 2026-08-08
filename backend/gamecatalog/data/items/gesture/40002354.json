@@ -36,11 +36,11 @@
     },
     "presentation": {
       "name": {
-        "known": false,
-        "value": "",
+        "known": true,
+        "value": "?GoodsName?",
         "provenance": {
           "source": "legacy_db_data",
-          "method": "cut-content or ban-risk item has no usable official FMG name entry"
+          "method": "copied from legacy AllGestures name because no usable official FMG name entry exists"
         }
       },
       "caption": {

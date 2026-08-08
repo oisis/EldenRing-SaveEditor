@@ -56,7 +56,7 @@
       {{range .Items}}
       <tr>
         <td>{{if .IconURL}}<img class="catalog-icon" src="{{.IconURL}}" alt="" loading="lazy">{{else}}—{{end}}</td>
-        <td><a class="item-link" href="/items/{{.GameIDPath}}">{{.Name}}</a></td>
+        <td><a class="item-link{{if .CutContent}} cut-content{{end}}" href="/items/{{.GameIDPath}}">{{.Name}}</a>{{if .CutContent}} <span class="cut-content-label">Cut content</span>{{end}}</td>
         <td><code>{{.GameID}}</code></td>
         <td><span class="badge neutral">{{.EntryType}}</span></td>
         <td><span class="badge neutral">{{.Family}}</span></td>

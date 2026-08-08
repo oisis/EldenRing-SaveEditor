@@ -38,14 +38,80 @@ func TestGroupLegacyItemsUsesExplicitRegulationRelationships(t *testing.T) {
 			}
 		}
 	}
-	if len(seen) != 6432 {
-		t.Fatalf("grouped catalog IDs = %d, want 6432", len(seen))
+	if len(seen) != 6384 {
+		t.Fatalf("grouped catalog IDs = %d, want 6384", len(seen))
 	}
-	if affinityCount != 2784 {
-		t.Fatalf("weapon affinity variants = %d, want 2784", affinityCount)
+	if affinityCount != 2736 {
+		t.Fatalf("weapon affinity variants = %d, want 2736", affinityCount)
 	}
 	if upgradeCount != 840 {
 		t.Fatalf("spirit-ash upgrade variants = %d, want 840", upgradeCount)
+	}
+}
+
+func TestGroupLegacyItemsExcludesAffinityRowsForFixedCanonicalWeapons(t *testing.T) {
+	regulation := readLocalRegulationFixture(t)
+	items := collectLegacySnapshot().Items
+	groups, err := groupLegacyItems(items, regulation)
+	if err != nil {
+		t.Fatalf("groupLegacyItems: %v", err)
+	}
+	grouped := make(map[uint32]struct{}, len(items))
+	for _, group := range groups {
+		grouped[group.Canonical.ID] = struct{}{}
+		for _, variant := range group.Variants {
+			grouped[variant.Item.ID] = struct{}{}
+		}
+	}
+
+	for _, item := range items {
+		if !legacyWeaponCategory(item.Category) {
+			continue
+		}
+		identity, err := primaryRegulationForLegacyItem(item)
+		if err != nil {
+			t.Fatalf("item 0x%08X identity: %v", item.ID, err)
+		}
+		lookup, exists, err := regulation.LookupFamilyRow(
+			RegulationFamilyWeapon,
+			RegulationTableRolePrimary,
+			identity.RowID,
+		)
+		if err != nil || !exists {
+			t.Fatalf("item 0x%08X row lookup = %+v, %t, %v", item.ID, lookup, exists, err)
+		}
+		originRaw, exists := lookup.Row.Field("originEquipWep")
+		if !exists {
+			t.Fatalf("item 0x%08X has no originEquipWep field", item.ID)
+		}
+		origin, err := parseRegulationUint32(originRaw)
+		if err != nil || origin >= identity.RowID {
+			continue
+		}
+		delta := identity.RowID - origin
+		if delta%100 != 0 {
+			continue
+		}
+		if _, affinity := affinityByRegulationOffset[delta/100]; !affinity {
+			continue
+		}
+		canonical, exists, err := regulation.LookupFamilyRow(
+			RegulationFamilyWeapon,
+			RegulationTableRolePrimary,
+			origin,
+		)
+		if err != nil || !exists {
+			t.Fatalf("item 0x%08X canonical row lookup = %+v, %t, %v", item.ID, canonical, exists, err)
+		}
+		allowed, err := canonicalAllowsAffinityVariants(canonical.Row)
+		if err != nil {
+			t.Fatalf("item 0x%08X canonical affinity capability: %v", item.ID, err)
+		}
+		if !allowed {
+			if _, exists := grouped[item.ID]; exists {
+				t.Fatalf("fixed weapon affinity row 0x%08X remains in the catalog", item.ID)
+			}
+		}
 	}
 }
 

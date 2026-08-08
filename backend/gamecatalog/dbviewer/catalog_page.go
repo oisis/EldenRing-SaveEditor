@@ -61,6 +61,7 @@ type catalogItemRow struct {
 	EntryType    string
 	DocumentPath string
 	UnknownCount int
+	CutContent   bool
 }
 
 func (server *Server) catalogHandler(response http.ResponseWriter, request *http.Request) {
@@ -145,6 +146,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 			EntryType:    "Canonical",
 			DocumentPath: document.Path,
 			UnknownCount: countUnknownFactsForCanonicalItem(item),
+			CutContent:   item.Safety.CutContent.Known && item.Safety.CutContent.Value,
 		}
 		if matchesCatalogQuery(query, canonicalSearch...) {
 			rows = append(rows, canonical)
@@ -181,6 +183,7 @@ func (server *Server) catalogRowsFiltered(query string, family string, subcatego
 				EntryType:    "Variant",
 				DocumentPath: document.Path,
 				UnknownCount: countUnknownFactsForFamily(variant, item.Family.Value),
+				CutContent:   variant.Data.Safety.CutContent.Known && variant.Data.Safety.CutContent.Value,
 			})
 		}
 	}

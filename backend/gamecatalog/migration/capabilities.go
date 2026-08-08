@@ -98,22 +98,10 @@ func (context *generationContext) buildCapabilities(
 		capabilities.Upgrade.RulesEvidence = spiritAshUpgradeEvidence(upgrade)
 	}
 	if family == schema.ItemFamilyWeapon {
-		gemMountType, err := regulationUint8(primaryRow, "gemMountType")
+		canChangeAffinity, err := weaponCanChangeAffinity(primaryRow)
 		if err != nil {
-			return schema.ItemCapabilities{}, err
+			return schema.ItemCapabilities{}, fmt.Errorf("weapon 0x%08X: %w", item.ID, err)
 		}
-		disableGemAffinity, err := regulationUint8(primaryRow, "disableGemAttr")
-		if err != nil {
-			return schema.ItemCapabilities{}, err
-		}
-		if disableGemAffinity > 1 {
-			return schema.ItemCapabilities{}, fmt.Errorf(
-				"weapon 0x%08X disableGemAttr=%d is not boolean",
-				item.ID,
-				disableGemAffinity,
-			)
-		}
-		canChangeAffinity := gemMountType == 2 && disableGemAffinity == 0
 		affinities, err := regulationAllowedAffinities(primaryRow)
 		if err != nil {
 			return schema.ItemCapabilities{}, err
@@ -194,6 +182,25 @@ func (context *generationContext) buildCapabilities(
 		return schema.ItemCapabilities{}, err
 	}
 	return capabilities, nil
+}
+
+func weaponCanChangeAffinity(row ParameterRow) (bool, error) {
+	gemMountType, err := regulationUint8(row, "gemMountType")
+	if err != nil {
+		return false, err
+	}
+	disableGemAffinity, err := regulationUint8(row, "disableGemAttr")
+	if err != nil {
+		return false, err
+	}
+	if disableGemAffinity > 1 {
+		return false, fmt.Errorf(
+			"EquipParamWeapon row %d disableGemAttr=%d is not boolean",
+			row.RowID,
+			disableGemAffinity,
+		)
+	}
+	return gemMountType == 2 && disableGemAffinity == 0, nil
 }
 
 func regulationAllowedAffinities(row ParameterRow) ([]schema.Affinity, error) {

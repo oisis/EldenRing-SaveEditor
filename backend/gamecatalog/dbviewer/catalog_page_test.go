@@ -44,6 +44,24 @@ func TestCatalogCanonicalUnknownCountExcludesVariants(t *testing.T) {
 	t.Fatal("Dagger canonical catalog row is missing")
 }
 
+func TestCatalogPageMarksCutContentWithoutAColoredBackground(t *testing.T) {
+	server := testServerWithCutContentDagger(t)
+
+	response := request(t, server.Handler(), http.MethodGet, "/")
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", response.Code)
+	}
+	body := response.Body.String()
+	for _, expected := range []string{
+		`class="item-link cut-content"`,
+		`<span class="cut-content-label">Cut content</span>`,
+	} {
+		if !strings.Contains(body, expected) {
+			t.Errorf("catalog cut-content row does not contain %q", expected)
+		}
+	}
+}
+
 func TestCatalogPaginationBoundaries(t *testing.T) {
 	rows := make([]catalogItemRow, 205)
 	for index := range rows {

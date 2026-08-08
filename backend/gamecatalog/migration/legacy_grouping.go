@@ -53,8 +53,9 @@ func groupLegacyItems(items []seed, regulation *RegulationData) ([]legacyItemGro
 		itemsByID[item.ID] = item
 	}
 
-	canonicalByVariant := make(map[uint32]legacyVariantSeed, 3624)
-	if err := collectWeaponAffinityVariants(items, itemsByID, regulation, canonicalByVariant); err != nil {
+	canonicalByVariant := make(map[uint32]legacyVariantSeed, 3576)
+	suppressedAffinityRows := make(map[uint32]struct{})
+	if err := collectWeaponAffinityVariants(items, itemsByID, regulation, canonicalByVariant, suppressedAffinityRows); err != nil {
 		return nil, err
 	}
 	if err := collectMissingWeaponAffinityVariants(itemsByID, regulation, canonicalByVariant); err != nil {
@@ -66,6 +67,9 @@ func groupLegacyItems(items []seed, regulation *RegulationData) ([]legacyItemGro
 
 	groupsByCanonical := make(map[uint32]*legacyItemGroup, len(items)-len(canonicalByVariant))
 	for _, item := range items {
+		if _, suppressed := suppressedAffinityRows[item.ID]; suppressed {
+			continue
+		}
 		if _, isVariant := canonicalByVariant[item.ID]; isVariant {
 			continue
 		}
@@ -102,6 +106,7 @@ func collectWeaponAffinityVariants(
 	itemsByID map[uint32]seed,
 	regulation *RegulationData,
 	variants map[uint32]legacyVariantSeed,
+	suppressed map[uint32]struct{},
 ) error {
 	for _, item := range items {
 		if !legacyWeaponCategory(item.Category) {
@@ -153,6 +158,25 @@ func collectWeaponAffinityVariants(
 				origin,
 			)
 		}
+		canonicalLookup, canonicalExists, err := regulation.LookupFamilyRow(
+			RegulationFamilyWeapon,
+			RegulationTableRolePrimary,
+			origin,
+		)
+		if err != nil {
+			return err
+		}
+		if !canonicalExists {
+			return fmt.Errorf("weapon affinity row %d references missing canonical regulation row %d", identity.RowID, origin)
+		}
+		permitted, err := canonicalAllowsAffinityVariants(canonicalLookup.Row)
+		if err != nil {
+			return err
+		}
+		if !permitted {
+			suppressed[item.ID] = struct{}{}
+			continue
+		}
 		variants[item.ID] = legacyVariantSeed{
 			Item:        item,
 			Kind:        legacyVariantAffinity,
@@ -202,6 +226,24 @@ func collectMissingWeaponAffinityVariants(
 		if !exists || !legacyWeaponCategory(canonical.Category) {
 			continue
 		}
+		canonicalLookup, canonicalExists, err := regulation.LookupFamilyRow(
+			RegulationFamilyWeapon,
+			RegulationTableRolePrimary,
+			origin,
+		)
+		if err != nil {
+			return err
+		}
+		if !canonicalExists {
+			return fmt.Errorf("weapon affinity row %d references missing canonical regulation row %d", row.RowID, origin)
+		}
+		permitted, err := canonicalAllowsAffinityVariants(canonicalLookup.Row)
+		if err != nil {
+			return err
+		}
+		if !permitted {
+			continue
+		}
 		variant := canonical
 		variant.ID = row.RowID
 		variant.HasLegacyItem = false
@@ -218,6 +260,10 @@ func collectMissingWeaponAffinityVariants(
 		}
 	}
 	return nil
+}
+
+func canonicalAllowsAffinityVariants(canonical ParameterRow) (bool, error) {
+	return weaponCanChangeAffinity(canonical)
 }
 
 func collectSpiritAshUpgradeVariants(

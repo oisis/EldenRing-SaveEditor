@@ -67,6 +67,72 @@ func TestGameTextReaderPreservesNamesAndLogicalProvenance(t *testing.T) {
 	}
 }
 
+func TestItemNameFactRemovesTechnicalErrorPrefix(t *testing.T) {
+	context := generationContext{gameText: &GameTextData{names: map[gameTextCatalog]map[int32]gameTextName{
+		gameTextCatalogWeapon: {
+			9080100: {
+				text:    "[ERROR]Heavy Serpentbone Blade",
+				source:  "game_text_weapon_name_base",
+				fmgFile: "WeaponName.fmg",
+				entryID: 9080100,
+			},
+		},
+	}}}
+
+	name, err := context.itemNameFact(seed{ID: 0x008A8D24}, schema.ItemFamilyWeapon, schema.ItemSafety{})
+	if err != nil {
+		t.Fatalf("itemNameFact: %v", err)
+	}
+	if !name.Known || name.Value != "Heavy Serpentbone Blade" {
+		t.Fatalf("name = %#v, want known Heavy Serpentbone Blade", name)
+	}
+	if name.Provenance.Source != "game_text_weapon_name_base" ||
+		!strings.Contains(name.Provenance.Method, "official English WeaponName.fmg entry 9080100") ||
+		!strings.Contains(name.Provenance.Method, "removed the technical [ERROR] prefix") {
+		t.Fatalf("name provenance = %#v", name.Provenance)
+	}
+}
+
+func TestItemNameFactFallsBackToEstablishedLegacyName(t *testing.T) {
+	context := generationContext{gameText: &GameTextData{names: map[gameTextCatalog]map[int32]gameTextName{}}}
+	tests := []struct {
+		name string
+		item seed
+		want string
+	}{
+		{
+			name: "ordinary item without FMG",
+			item: seed{ID: 0x400000A6, HasLegacyItem: true, Name: "Vision of Grace"},
+			want: "Vision of Grace",
+		},
+		{
+			name: "cut content item without FMG",
+			item: seed{ID: 0x4000D17E, HasLegacyItem: true, Name: "?GoodsName? Holy Water Pot"},
+			want: "?GoodsName? Holy Water Pot",
+		},
+		{
+			name: "slot-only cut content gesture without FMG",
+			item: seed{ID: 0x40002354, Name: "?GoodsName?"},
+			want: "?GoodsName?",
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			name, err := context.itemNameFact(test.item, schema.ItemFamilyGoods, schema.ItemSafety{})
+			if err != nil {
+				t.Fatalf("itemNameFact: %v", err)
+			}
+			if !name.Known || name.Value != test.want {
+				t.Fatalf("name = %#v, want known %q", name, test.want)
+			}
+			if name.Provenance.Source != sourceLegacyData ||
+				!strings.Contains(name.Provenance.Method, "no usable official FMG name entry exists") {
+				t.Fatalf("name provenance = %#v", name.Provenance)
+			}
+		})
+	}
+}
+
 func TestGameTextSourceVersionCoversUsedJSONExtract(t *testing.T) {
 	source := newGameTextMapFS(t)
 	before, err := readGameTextFS(source)

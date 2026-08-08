@@ -36,6 +36,7 @@ type itemPage struct {
 	Relations      []relationView
 	UnknownCount   int
 	HasDescription bool
+	CutContent     bool
 }
 
 func (server *Server) itemHandler(response http.ResponseWriter, request *http.Request) {
@@ -152,6 +153,7 @@ func (server *Server) buildItemPage(
 		Relations:      server.relationViews(view),
 		UnknownCount:   unknownCount,
 		HasDescription: presentation.Description.Known,
+		CutContent:     safety.CutContent.Known && safety.CutContent.Value,
 	}
 }
 

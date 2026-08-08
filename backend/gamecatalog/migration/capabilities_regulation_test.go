@@ -184,6 +184,7 @@ func TestWeaponInfusionGateRejectsFixedAffinityWeapons(t *testing.T) {
 		"Treespear":                0x010477B0,
 		"Ripple Crescent Halberd":  0x011392E0,
 		"Great Club":               0x015F41E0,
+		"Troll's Hammer":           0x0160EF90,
 	} {
 		t.Run(name, func(t *testing.T) {
 			item := resourcesByItemID[itemID]
@@ -205,6 +206,15 @@ func TestWeaponInfusionGateRejectsFixedAffinityWeapons(t *testing.T) {
 					"item 0x%08X family isInfusable = %#v, want known false",
 					itemID,
 					item.Weapon,
+				)
+			}
+			if !item.Capabilities.AshOfWarMount.Known ||
+				item.Capabilities.AshOfWarMount.Enabled ||
+				item.Capabilities.AshOfWarMount.Rules != nil {
+				t.Fatalf(
+					"item 0x%08X Ash of War mount = %#v, want known disabled",
+					itemID,
+					item.Capabilities.AshOfWarMount,
 				)
 			}
 		})

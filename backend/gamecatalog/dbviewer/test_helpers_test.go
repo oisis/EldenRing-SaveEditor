@@ -10,6 +10,7 @@ import (
 
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 )
 
 func testServer(t *testing.T) *Server {
@@ -23,6 +24,32 @@ func testServer(t *testing.T) *Server {
 		t.Fatalf("New: %v", err)
 	}
 	return server
+}
+
+func testServerWithCutContentDagger(t *testing.T) *Server {
+	t.Helper()
+	data, err := loader.LoadFS(embeddedCatalogMapFS(t))
+	if err != nil {
+		t.Fatalf("LoadFS: %v", err)
+	}
+	for index := range data.Documents {
+		item := data.Documents[index].Resource.Item
+		if item == nil || item.GameID.Value != 0x000F4240 {
+			continue
+		}
+		item.Safety.CutContent = schema.Fact[bool]{
+			Known:      true,
+			Value:      true,
+			Provenance: item.Safety.CutContent.Provenance,
+		}
+		server, err := New(data)
+		if err != nil {
+			t.Fatalf("New: %v", err)
+		}
+		return server
+	}
+	t.Fatal("Dagger document is missing")
+	return nil
 }
 
 func embeddedCatalogMapFS(t *testing.T) fstest.MapFS {

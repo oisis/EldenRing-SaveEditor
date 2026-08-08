@@ -474,18 +474,19 @@ func TestCutContentToolStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		t.Fatalf("Generate: %v", err)
 	}
 
-	// These cut-content tools have no usable official FMG name, so they are
-	// identified by their technical game ID rather than by a display name.
+	// These cut-content tools retain the name after the technical FMG [ERROR]
+	// prefix. Holy Water Pot is the sole record in this group with no FMG name.
 	expectedLimits := map[uint32]struct {
 		inventory uint32
 		storage   uint32
+		name      string
 	}{
-		0x4000D17E: {inventory: 999, storage: 600}, // Holy Water Pot, unnamed
-		0x400004C4: {inventory: 10, storage: 999},
-		0x40000546: {inventory: 10, storage: 999},
-		0x40000622: {inventory: 30, storage: 600},
-		0x40000CE4: {inventory: 5, storage: 600},
-		0x400001E0: {inventory: 10, storage: 600},
+		0x4000D17E: {inventory: 999, storage: 600},
+		0x400004C4: {inventory: 10, storage: 999, name: "Deathsbane Jerky"},
+		0x40000546: {inventory: 10, storage: 999, name: "Deathsbane White Jerky"},
+		0x40000622: {inventory: 30, storage: 600, name: "Drawstring Freezing Grease"},
+		0x40000CE4: {inventory: 5, storage: 600, name: "Holy Water Grease"},
+		0x400001E0: {inventory: 10, storage: 600, name: "Roped Freezing Pot"},
 	}
 
 	for resourceIndex := range catalog.Resources {
@@ -501,8 +502,9 @@ func TestCutContentToolStorageSaveForgeValuesAreDiscarded(t *testing.T) {
 		}
 		delete(expectedLimits, gameID)
 
-		if item.Presentation.Name.Known || item.Presentation.Name.Value != "" {
-			t.Fatalf("0x%08X name = %+v, want unknown and empty", gameID, item.Presentation.Name)
+		if item.Presentation.Name.Known != (limits.name != "") ||
+			item.Presentation.Name.Value != limits.name {
+			t.Fatalf("0x%08X name = %+v, want %q", gameID, item.Presentation.Name, limits.name)
 		}
 		if !item.Safety.CutContent.Known || !item.Safety.CutContent.Value {
 			t.Fatalf("0x%08X cutContent = %+v, want known true", gameID, item.Safety.CutContent)

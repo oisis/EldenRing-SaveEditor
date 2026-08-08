@@ -2,6 +2,7 @@ package gamecatalog_test
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/fs"
 	"net/http"
 	"net/http/httptest"
@@ -37,6 +38,12 @@ var wantNameSourceByFamily = map[schema.ItemFamily][]schema.SourceID{
 	schema.ItemFamilyAshOfWar:  {"game_text_gem_name_base", "game_text_gem_name_dlc"},
 }
 
+var wantLegacyNameFallbacks = map[uint32]string{
+	0x400000A6: "Vision of Grace",
+	0x4000D17E: "?GoodsName? Holy Water Pot",
+	0x40002354: "?GoodsName?",
+}
+
 // TestEmbeddedNamesComeFromTheOfficialFMGPerFamily proves every family resolves
 // its names from its own official FMG catalog, with provenance that names the
 // exact FMG file and entry ID, and that every family is actually represented.
@@ -50,7 +57,11 @@ func TestEmbeddedNamesComeFromTheOfficialFMGPerFamily(t *testing.T) {
 		if !supported {
 			t.Fatalf("resource %q has unsupported family %q", resource.Key, family)
 		}
-		assertNameProvenance(t, resource.Key, family, wantSources, item.Presentation.Name)
+		if want, legacyFallback := wantLegacyNameFallbacks[item.GameID.Value]; legacyFallback {
+			assertLegacyNameFallback(t, resource.Key, item.Presentation.Name, want)
+		} else {
+			assertNameProvenance(t, resource.Key, family, wantSources, item.Presentation.Name)
+		}
 		seenFamilies[family]++
 		for _, variant := range item.Variants {
 			assertNameProvenance(
@@ -66,6 +77,17 @@ func TestEmbeddedNamesComeFromTheOfficialFMGPerFamily(t *testing.T) {
 		if seenFamilies[family] == 0 {
 			t.Errorf("family %q is not represented in the embedded catalog", family)
 		}
+	}
+}
+
+func assertLegacyNameFallback(t *testing.T, label string, name schema.Fact[string], want string) {
+	t.Helper()
+	if !name.Known || name.Value != want {
+		t.Fatalf("%s fallback name = %#v, want known %q", label, name, want)
+	}
+	if name.Provenance.Source != schema.SourceSaveForgeLegacy ||
+		!strings.Contains(name.Provenance.Method, "no usable official FMG name entry exists") {
+		t.Fatalf("%s fallback name provenance = %#v", label, name.Provenance)
 	}
 }
 
@@ -128,53 +150,30 @@ func TestEmbeddedOrdinaryItemsUseTheOfficialFMGName(t *testing.T) {
 	}
 }
 
-// TestEmbeddedVisionOfGraceHasUnknownName pins the single base item without any
-// official FMG entry. It must stay in the catalog with an unknown name and must
-// never fall back to the old SaveForge text.
-func TestEmbeddedVisionOfGraceHasUnknownName(t *testing.T) {
-	for _, resource := range loadEmbeddedResources(t) {
-		if resource.Item.GameID.Value != visionOfGraceGameID {
-			continue
-		}
-		name := resource.Item.Presentation.Name
-		if name.Known || name.Value != "" {
-			t.Fatalf("Vision of Grace name = %+v, want unknown and empty", name)
-		}
-		return
+func TestEmbeddedLegacyNameFallbacksKeepSafetyMarkers(t *testing.T) {
+	remaining := make(map[uint32]string, len(wantLegacyNameFallbacks))
+	for gameID, name := range wantLegacyNameFallbacks {
+		remaining[gameID] = name
 	}
-	t.Fatalf("game ID 0x%08X is absent from the embedded catalog", visionOfGraceGameID)
-}
-
-// TestEmbeddedUnsafeItemsWithoutOfficialNameAreUnknown proves that cut-content
-// and ban-risk items whose FMG entry is missing or an "[ERROR]" placeholder keep
-// an unknown name instead of an old SaveForge fallback, and that they are still
-// present with their safety flags intact.
-func TestEmbeddedUnsafeItemsWithoutOfficialNameAreUnknown(t *testing.T) {
-	unknownUnsafe := 0
 	for _, resource := range loadEmbeddedResources(t) {
 		item := resource.Item
-		if item.Presentation.Name.Known {
+		want, expected := remaining[item.GameID.Value]
+		if !expected {
 			continue
 		}
-		if item.GameID.Value == visionOfGraceGameID {
-			continue
+		assertLegacyNameFallback(t, resource.Key, item.Presentation.Name, want)
+		if item.GameID.Value != 0x400000A6 && !item.Safety.CutContent.Value {
+			t.Fatalf("resource %q lost its cut-content marker", resource.Key)
 		}
-		if !item.Safety.CutContent.Value && !item.Safety.BanRisk.Value {
-			t.Fatalf("resource %q has an unknown name without a safety flag", resource.Key)
-		}
-		if item.Presentation.Name.Value != "" {
-			t.Fatalf("resource %q keeps a value on an unknown name", resource.Key)
-		}
-		unknownUnsafe++
+		delete(remaining, item.GameID.Value)
 	}
-	if unknownUnsafe == 0 {
-		t.Fatal("no cut-content or ban-risk item carries an unknown name")
+	if len(remaining) != 0 {
+		t.Fatalf("legacy name fallbacks are absent: %v", remaining)
 	}
 }
 
-// TestEmbeddedVariantsCarryTheirOwnOfficialName proves a variant stores the
-// official name of the variant itself, not the base item's name, and that an
-// "[ERROR]" variant is unknown rather than inheriting the base name.
+// TestEmbeddedVariantsCarryTheirOwnOfficialName proves a playable variant
+// stores its own official name rather than inheriting the base item's name.
 func TestEmbeddedVariantsCarryTheirOwnOfficialName(t *testing.T) {
 	byGameID := indexEmbeddedNames(t)
 
@@ -186,20 +185,23 @@ func TestEmbeddedVariantsCarryTheirOwnOfficialName(t *testing.T) {
 		t.Errorf("Heavy Dagger variant name = %+v, want a known %q", ordinary, "Heavy Dagger")
 	}
 
-	placeholder, exists := byGameID[0x008A8D24] // "[ERROR]Heavy Serpentbone Blade"
-	if !exists {
-		t.Fatal("Heavy Serpentbone Blade variant is absent from the embedded catalog")
-	}
-	if placeholder.Known || placeholder.Value != "" {
-		t.Errorf("[ERROR] variant name = %+v, want unknown and empty", placeholder)
-	}
-
 	base, exists := byGameID[0x008A8CC0] // Serpentbone Blade
 	if !exists {
 		t.Fatal("Serpentbone Blade base item is absent from the embedded catalog")
 	}
 	if !base.Known || base.Value != "Serpentbone Blade" {
 		t.Errorf("Serpentbone Blade base name = %+v, want a known name", base)
+	}
+}
+
+func TestEmbeddedCutContentRetainsOfficialFMGName(t *testing.T) {
+	byGameID := indexEmbeddedNames(t)
+	name, exists := byGameID[0x100AAE60] // "[ERROR]Brave's Cord Circlet"
+	if !exists {
+		t.Fatal("Brave's Cord Circlet is absent from the embedded catalog")
+	}
+	if !name.Known || name.Value != "Brave's Cord Circlet" {
+		t.Fatalf("Brave's Cord Circlet name = %+v", name)
 	}
 }
 
@@ -254,10 +256,10 @@ func assertNoRemovedNameKeys(t *testing.T, path string, value any) {
 	}
 }
 
-// TestViewerFallsBackToResourceKeyForUnknownName proves the Viewer renders the
-// technical resource key — never an old SaveForge name or a generated label —
-// when item.presentation.name is unknown.
-func TestViewerFallsBackToResourceKeyForUnknownName(t *testing.T) {
+// TestViewerRendersEstablishedLegacyNameFallbacks proves that exceptional
+// records missing usable FMG text retain their established names, and unsafe
+// ones remain visibly marked as cut content.
+func TestViewerRendersEstablishedLegacyNameFallbacks(t *testing.T) {
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
 		t.Fatalf("LoadFS: %v", err)
@@ -268,33 +270,47 @@ func TestViewerFallsBackToResourceKeyForUnknownName(t *testing.T) {
 	}
 	handler := server.Handler()
 
-	response := httptest.NewRecorder()
-	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/items/400000A6", nil))
-	if response.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200", response.Code)
-	}
-	body := response.Body.String()
-	if !strings.Contains(body, "<h1>400000A6</h1>") {
-		t.Fatal("Viewer does not render the technical resource key for an unknown name")
-	}
-	if strings.Contains(body, "Vision of Grace") || strings.Contains(body, "Memory of Grace") {
-		t.Fatal("Viewer rendered a legacy SaveForge name for an unknown name")
+	for _, test := range []struct {
+		gameID     uint32
+		name       string
+		cutContent bool
+	}{
+		{gameID: 0x400000A6, name: "Vision of Grace"},
+		{gameID: 0x4000D17E, name: "?GoodsName? Holy Water Pot", cutContent: true},
+		{gameID: 0x40002354, name: "?GoodsName?", cutContent: true},
+	} {
+		response := httptest.NewRecorder()
+		handler.ServeHTTP(response, httptest.NewRequest(
+			http.MethodGet,
+			fmt.Sprintf("/items/%08X", test.gameID),
+			nil,
+		))
+		if response.Code != http.StatusOK {
+			t.Fatalf("0x%08X status = %d, want 200", test.gameID, response.Code)
+		}
+		body := response.Body.String()
+		heading := "<h1>" + test.name + "</h1>"
+		if test.cutContent {
+			heading = `<h1 class="cut-content">` + test.name + "</h1>"
+		}
+		if !strings.Contains(body, heading) {
+			t.Fatalf("0x%08X does not render %q", test.gameID, heading)
+		}
+		if test.cutContent && !strings.Contains(body, `<p class="cut-content-label">Cut content</p>`) {
+			t.Fatalf("0x%08X lacks the cut-content marker", test.gameID)
+		}
 	}
 
-	// A variant whose own official name is an "[ERROR]" placeholder must fall
-	// back to the same technical resource key, never to the base item's name and
-	// never to a label rebuilt from the affinity.
-	response = httptest.NewRecorder()
-	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/items/008A8D24", nil))
+	// A playable variant renders its own official name rather than its base
+	// weapon's name.
+	response := httptest.NewRecorder()
+	handler.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/items/000F42A4", nil))
 	if response.Code != http.StatusOK {
 		t.Fatalf("variant status = %d, want 200", response.Code)
 	}
-	body = response.Body.String()
-	if !strings.Contains(body, "<h1>008A8CC0</h1>") {
-		t.Fatal("Viewer does not render the technical resource key for an unknown variant name")
-	}
-	if strings.Contains(body, "<h1>Serpentbone Blade") {
-		t.Fatal("Viewer rendered the base item name for an unknown variant name")
+	body := response.Body.String()
+	if !strings.Contains(body, "<h1>Heavy Dagger</h1>") {
+		t.Fatal("Viewer does not render the official variant name")
 	}
 }
 

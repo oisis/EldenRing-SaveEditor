@@ -98,6 +98,8 @@ th { color: #58616e; background: #f0f2f4; font-size: 0.78rem; text-transform: up
 .sort-link:hover, .sort-link.active { color: #17663a; }
 tr:last-child td { border-bottom: 0; }
 .item-link { font-weight: 700; }
+.cut-content { color: #b42318; }
+.cut-content-label { color: #b42318; font-size: 0.78rem; font-weight: 700; }
 .path { color: #59626d; }
 
 .section-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }

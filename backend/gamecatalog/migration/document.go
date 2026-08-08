@@ -175,7 +175,6 @@ func (context *generationContext) buildPresentation(
 	item seed,
 	family schema.ItemFamily,
 	safety schema.ItemSafety,
-	isVariant bool,
 ) (schema.ItemPresentation, error) {
 	result := emptyPresentation()
 	if item.Text != nil {
@@ -193,7 +192,7 @@ func (context *generationContext) buildPresentation(
 		result.Description = optionalLegacyString(item.Description.Description, "copied from legacy Descriptions.Description")
 		result.Location = optionalLegacyString(item.Description.Location, "copied from legacy Descriptions.Location")
 	}
-	name, err := context.itemNameFact(item.ID, family, safety, isVariant)
+	name, err := context.itemNameFact(item, family, safety)
 	if err != nil {
 		return schema.ItemPresentation{}, err
 	}
@@ -206,51 +205,47 @@ func (context *generationContext) buildPresentation(
 	return result, nil
 }
 
-// visionOfGraceGameID is the single base item the official FMG name catalogs do
-// not cover. It keeps its safety flags and carries an unknown name.
-const visionOfGraceGameID uint32 = 0x400000A6
-
-// itemNameFact resolves the one official FMG name for a game ID. The name is
-// unknown only for Vision of Grace, for cut-content or ban-risk items whose FMG
-// entry is empty, missing or an "[ERROR]" placeholder, and for variants whose
-// FMG entry is an "[ERROR]" placeholder. Anything else is a generation error.
+// itemNameFact resolves the one official FMG name for a game ID. "[ERROR]" is
+// a technical FMG prefix, not part of the name: the suffix remains official
+// game text for ordinary variants and cut-content records alike. When the FMG
+// entry is genuinely empty or absent, the established legacy item or gesture
+// name is retained as a documented fallback.
 func (context *generationContext) itemNameFact(
-	gameID uint32,
+	item seed,
 	family schema.ItemFamily,
 	safety schema.ItemSafety,
-	isVariant bool,
 ) (schema.Fact[string], error) {
-	entry, exists, err := context.gameText.lookupItemName(family, gameID)
+	entry, exists, err := context.gameText.lookupItemName(family, item.ID)
 	if err != nil {
-		return schema.Fact[string]{}, fmt.Errorf("item 0x%08X: %w", gameID, err)
+		return schema.Fact[string]{}, fmt.Errorf("item 0x%08X: %w", item.ID, err)
 	}
-	placeholder := exists && strings.HasPrefix(entry.text, gameTextErrorPrefix)
-	if exists && !placeholder && entry.text != "" {
+	name := strings.TrimPrefix(entry.text, gameTextErrorPrefix)
+	if exists && name != "" {
+		method := fmt.Sprintf(
+			"resolved the official English %s entry %d",
+			entry.fmgFile,
+			entry.entryID,
+		)
+		if name != entry.text {
+			method += "; removed the technical " + gameTextErrorPrefix + " prefix"
+		}
 		return schema.Fact[string]{
 			Known: true,
-			Value: entry.text,
+			Value: name,
 			Provenance: schema.Provenance{
 				Source: entry.source,
-				Method: fmt.Sprintf(
-					"resolved the official English %s entry %d",
-					entry.fmgFile,
-					entry.entryID,
-				),
+				Method: method,
 			},
 		}, nil
 	}
+	if item.Name != "" {
+		method := "copied from legacy ItemData.Name because no usable official FMG name entry exists"
+		if !item.HasLegacyItem {
+			method = "copied from legacy AllGestures name because no usable official FMG name entry exists"
+		}
+		return knownLegacyFact(item.Name, method), nil
+	}
 	switch {
-	case gameID == visionOfGraceGameID:
-		return unknownCatalogFact[string](
-			"no official FMG name entry exists for this item",
-		), nil
-	case isVariant && placeholder:
-		return unknownCatalogFact[string](fmt.Sprintf(
-			"official %s entry %d is an %s placeholder",
-			entry.fmgFile,
-			entry.entryID,
-			gameTextErrorPrefix,
-		)), nil
 	case safety.CutContent.Value || safety.BanRisk.Value:
 		return unknownCatalogFact[string](
 			"cut-content or ban-risk item has no usable official FMG name entry",
@@ -258,9 +253,9 @@ func (context *generationContext) itemNameFact(
 	}
 	return schema.Fact[string]{}, fmt.Errorf(
 		"item 0x%08X (family %q) has no usable official FMG name entry %d",
-		gameID,
+		item.ID,
 		family,
-		gameTextEntryID(gameID),
+		gameTextEntryID(item.ID),
 	)
 }
 

@@ -53,6 +53,48 @@ func TestItemPageResolvesVariantToCanonicalDocument(t *testing.T) {
 	}
 }
 
+func TestItemPageDoesNotExposeAffinityRowsForFixedWeapons(t *testing.T) {
+	server := testServer(t)
+	for _, test := range []struct {
+		name       string
+		baseGameID uint32
+	}{
+		{name: "Serpentbone Blade", baseGameID: 0x008A8CC0},
+		{name: "Treespear", baseGameID: 0x010477B0},
+		{name: "Great Club", baseGameID: 0x015F41E0},
+		{name: "Troll's Hammer", baseGameID: 0x0160EF90},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			affinityGameID := test.baseGameID + 100
+			if _, exists := server.catalog.ItemViewByGameID(affinityGameID); exists {
+				t.Fatalf("0x%08X is exposed as a playable variant", affinityGameID)
+			}
+			response := request(t, server.Handler(), http.MethodGet, fmt.Sprintf("/items/%08X", affinityGameID))
+			if response.Code != http.StatusNotFound {
+				t.Fatalf("0x%08X status = %d, want 404", affinityGameID, response.Code)
+			}
+		})
+	}
+}
+
+func TestItemPageMarksCutContentWithoutAColoredBackground(t *testing.T) {
+	server := testServerWithCutContentDagger(t)
+
+	response := request(t, server.Handler(), http.MethodGet, "/items/000F4240")
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", response.Code)
+	}
+	body := response.Body.String()
+	for _, expected := range []string{
+		`<h1 class="cut-content">Dagger</h1>`,
+		`<p class="cut-content-label">Cut content</p>`,
+	} {
+		if !strings.Contains(body, expected) {
+			t.Errorf("item cut-content page does not contain %q", expected)
+		}
+	}
+}
+
 func TestItemPageReturnsNotFoundForInvalidOrUnknownID(t *testing.T) {
 	handler := testServer(t).Handler()
 	for _, target := range []string{"/items/not-a-number", "/items/DEADBEEF"} {

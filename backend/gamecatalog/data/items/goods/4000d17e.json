@@ -42,11 +42,11 @@
     },
     "presentation": {
       "name": {
-        "known": false,
-        "value": "",
+        "known": true,
+        "value": "?GoodsName? Holy Water Pot",
         "provenance": {
           "source": "legacy_db_data",
-          "method": "cut-content or ban-risk item has no usable official FMG name entry"
+          "method": "copied from legacy ItemData.Name because no usable official FMG name entry exists"
         }
       },
       "caption": {

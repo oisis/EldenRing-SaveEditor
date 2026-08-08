@@ -42,11 +42,11 @@
     },
     "presentation": {
       "name": {
-        "known": false,
-        "value": "",
+        "known": true,
+        "value": "Deathbed Smalls",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "cut-content or ban-risk item has no usable official FMG name entry"
+          "source": "game_text_protector_name_base",
+          "method": "resolved the official English ProtectorName.fmg entry 1930300; removed the technical [ERROR] prefix"
         }
       },
       "caption": {

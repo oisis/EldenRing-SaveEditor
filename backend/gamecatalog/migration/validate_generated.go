@@ -34,8 +34,8 @@ func validateGeneratedCatalog(catalog GeneratedCatalog) error {
 			gestureSlotCount += len(resource.Item.Gesture.Slots)
 		}
 	}
-	if variantCount != 3624 {
-		return fmt.Errorf("variant count = %d, want 3624", variantCount)
+	if variantCount != 3576 {
+		return fmt.Errorf("variant count = %d, want 3576", variantCount)
 	}
 	if aliasCount != 37 {
 		return fmt.Errorf("alias count = %d, want 37", aliasCount)

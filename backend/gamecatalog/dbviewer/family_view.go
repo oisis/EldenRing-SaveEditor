@@ -219,6 +219,7 @@ type variantView struct {
 	Affinity     string
 	UpgradeLevel string
 	SourceRowID  string
+	CutContent   bool
 }
 
 func (server *Server) variantViews(resource schema.Resource) []variantView {
@@ -235,6 +236,7 @@ func (server *Server) variantViews(resource schema.Resource) []variantView {
 			Affinity:     variantAffinity(item.Family.Value, variant),
 			UpgradeLevel: knownUpgradeLevel(variant.UpgradeLevel),
 			SourceRowID:  knownNumber(variant.SourceRowID.Known, variant.SourceRowID.Value),
+			CutContent:   variant.Data.Safety.CutContent.Known && variant.Data.Safety.CutContent.Value,
 		})
 	}
 	return variants

@@ -42,11 +42,11 @@
     },
     "presentation": {
       "name": {
-        "known": false,
-        "value": "",
+        "known": true,
+        "value": "Roped Freezing Pot",
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "cut-content or ban-risk item has no usable official FMG name entry"
+          "source": "game_text_goods_name_base",
+          "method": "resolved the official English GoodsName.fmg entry 480; removed the technical [ERROR] prefix"
         }
       },
       "caption": {

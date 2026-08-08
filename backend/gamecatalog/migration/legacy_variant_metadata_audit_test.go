@@ -44,13 +44,13 @@ func TestAuditLegacyVariantMetadataCoverage(t *testing.T) {
 			}
 		}
 	}
-	assertCount(t, "variant text records", text, 3624)
-	assertCount(t, "variant description records", description, 3600)
+	assertCount(t, "variant text records", text, 3576)
+	assertCount(t, "variant description records", description, 3552)
 	assertCount(t, "variant game-limit records", limits, 840)
-	assertCount(t, "variant weapon-stat records", weaponStats, 2784)
-	assertCount(t, "variant item-weight records", weight, 2784)
-	assertCount(t, "variant weapon-edit records", weaponEdit, 2784)
-	assertCount(t, "variant sort-key records", sortKey, 2784)
+	assertCount(t, "variant weapon-stat records", weaponStats, 2736)
+	assertCount(t, "variant item-weight records", weight, 2736)
+	assertCount(t, "variant weapon-edit records", weaponEdit, 2736)
+	assertCount(t, "variant sort-key records", sortKey, 2736)
 	assertCount(t, "variant acquisition records", acquisition, 0)
 	assertCount(t, "variant unlock records", unlocks, 0)
 }

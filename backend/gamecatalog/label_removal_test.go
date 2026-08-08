@@ -18,9 +18,8 @@ import (
 
 // TestEmbeddedResourcesHaveOfficialName protects the invariant that replaced the
 // removed top-level Resource.label: every catalog resource carries a known,
-// non-empty item.presentation.name taken from the official FMG, and the name is
-// unknown only where the official FMG has no usable entry — Vision of Grace, or
-// a cut-content / ban-risk item.
+// non-empty item.presentation.name. Official FMG has priority; established
+// legacy names cover the few records without usable FMG text.
 func TestEmbeddedResourcesHaveOfficialName(t *testing.T) {
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
@@ -40,11 +39,6 @@ func TestEmbeddedResourcesHaveOfficialName(t *testing.T) {
 		}
 		if name.Known {
 			t.Fatalf("resource %q has a known but empty name", resource.Key)
-		}
-		safety := resource.Item.Safety
-		if resource.Item.GameID.Value == visionOfGraceGameID ||
-			safety.CutContent.Value || safety.BanRisk.Value {
-			continue
 		}
 		t.Fatalf(
 			"resource %q name = %#v, want known and non-empty",
@@ -87,10 +81,6 @@ func TestEmbeddedDocumentsHaveNoTopLevelLabel(t *testing.T) {
 		t.Fatal("no embedded item documents were scanned")
 	}
 }
-
-// visionOfGraceGameID mirrors the migrator's single documented exception: the
-// item without any official FMG name entry.
-const visionOfGraceGameID uint32 = 0x400000A6
 
 // TestRuntimeAndViewerShareItemName drives the DB Viewer's public HTTP handler
 // and confirms the rendered item name is derived from item.presentation.name and

@@ -7,7 +7,8 @@
     {{if .IconURL}}<img class="item-icon" src="{{.IconURL}}" alt="" loading="lazy">{{end}}
     <div>
       <p class="eyebrow">{{.Key}}</p>
-      <h1>{{.Name}}</h1>
+      <h1{{if .CutContent}} class="cut-content"{{end}}>{{.Name}}</h1>
+      {{if .CutContent}}<p class="cut-content-label">Cut content</p>{{end}}
       <p><span class="badge neutral">{{.EntryType}}</span> · <code>{{.GameID}}</code> · <code>{{.DocumentPath}}</code></p>
     </div>
   </div>
@@ -109,7 +110,7 @@
       {{range .Variants}}
         <tr>
           <td>{{if .IconURL}}<img class="catalog-icon" src="{{.IconURL}}" alt="" loading="lazy">{{else}}—{{end}}</td>
-          <td><a href="/items/{{.GameIDPath}}">{{.Name}}</a></td>
+          <td><a{{if .CutContent}} class="cut-content"{{end}} href="/items/{{.GameIDPath}}">{{.Name}}</a>{{if .CutContent}} <span class="cut-content-label">Cut content</span>{{end}}</td>
           <td><code>{{.GameID}}</code></td>
           <td>{{.Kind}}</td>
           <td>{{.Affinity}}</td>
