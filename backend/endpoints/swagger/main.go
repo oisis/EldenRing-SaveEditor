@@ -18,6 +18,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 )
@@ -191,6 +192,17 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string) htt
 	mux.HandleFunc("GET /api/v1/catalog/item-variants", func(writer http.ResponseWriter, request *http.Request) {
 		query := request.URL.Query()
 		result, err := catalog.GetItemVariants(gameCatalog, query.Get("kind"), query.Get("key"))
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
+	// The presets are backend constants: the route needs neither the catalog nor
+	// the application version.
+	mux.HandleFunc("GET /api/v1/network/presets", func(writer http.ResponseWriter, request *http.Request) {
+		result, err := network.GetNetworkPresets(request.URL.Query().Get("presetID"))
 		if err != nil {
 			writeError(writer, http.StatusBadRequest, err)
 			return

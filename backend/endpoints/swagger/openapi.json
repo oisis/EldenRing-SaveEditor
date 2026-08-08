@@ -239,6 +239,63 @@
         }
       }
     },
+    "/api/v1/network/presets": {
+      "get": {
+        "operationId": "getNetworkPresets",
+        "summary": "GetNetworkPresets",
+        "description": "Returns the network parameter presets the backend offers today. An omitted or empty presetID returns every preset in the backend order; a non-empty presetID returns exactly that preset. The values come from the preset functions of backend/core. The route reads no save and no GameCatalog.",
+        "parameters": [
+          {
+            "name": "presetID",
+            "in": "query",
+            "required": false,
+            "description": "Public preset identifier, matched exactly and case-sensitively. It is never trimmed, normalised or resolved through an alias. Omitted or empty means every preset. The legacy core presets (fast-invasions, light-invasions, fast-summons, fast-blue, aggressive-host) are not exposed and are rejected as unknown.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "",
+                "vanilla",
+                "faster-reds",
+                "aggressive-reds",
+                "faster-summons",
+                "aggressive-summons",
+                "faster-blue",
+                "aggressive-blue",
+                "faster-summon-host",
+                "aggressive-summon-host",
+                "faster-summon-guest",
+                "aggressive-summon-guest",
+                "faster-hunter",
+                "aggressive-hunter"
+              ]
+            },
+            "example": "faster-reds"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested presets with their full parameter values",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNetworkPresetsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Unknown presetID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthz",
@@ -680,6 +737,150 @@
           }
         },
         "required": ["variants"]
+      },
+      "NetworkParamValues": {
+        "type": "object",
+        "description": "core.NetworkParamValues: the tunable PvP/multiplayer parameters grouped by player role. The field set and the JSON names are owned by backend/core.",
+        "properties": {
+          "maxBreakInTargetListCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "breakInRequestIntervalTimeSec": {
+            "type": "number",
+            "format": "float"
+          },
+          "breakInRequestTimeOutSec": {
+            "type": "number",
+            "format": "float"
+          },
+          "breakInRequestAreaCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summonTimeoutTime": {
+            "type": "number",
+            "format": "float"
+          },
+          "reloadSignIntervalTime2": {
+            "type": "number",
+            "format": "float"
+          },
+          "reloadSignTotalCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reloadSignCellCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "updateSignIntervalTime": {
+            "type": "number",
+            "format": "float"
+          },
+          "singGetMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "signDownloadSpan": {
+            "type": "number",
+            "format": "float"
+          },
+          "signUpdateSpan": {
+            "type": "number",
+            "format": "float"
+          },
+          "reloadVisitListCoolTime": {
+            "type": "number",
+            "format": "float"
+          },
+          "maxCoopBlueSummonCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "maxVisitListCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "reloadSearchCoopBlueMin": {
+            "type": "number",
+            "format": "float"
+          },
+          "reloadSearchCoopBlueMax": {
+            "type": "number",
+            "format": "float"
+          },
+          "allAreaSearchRateCoopBlue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "allAreaSearchRateVsBlue": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "visitorListMax": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "visitorTimeOutTime": {
+            "type": "number",
+            "format": "float"
+          },
+          "visitorDownloadSpan": {
+            "type": "number",
+            "format": "float"
+          }
+        },
+        "required": [
+          "maxBreakInTargetListCount",
+          "breakInRequestIntervalTimeSec",
+          "breakInRequestTimeOutSec",
+          "breakInRequestAreaCount",
+          "summonTimeoutTime",
+          "reloadSignIntervalTime2",
+          "reloadSignTotalCount",
+          "reloadSignCellCount",
+          "updateSignIntervalTime",
+          "singGetMax",
+          "signDownloadSpan",
+          "signUpdateSpan",
+          "reloadVisitListCoolTime",
+          "maxCoopBlueSummonCount",
+          "maxVisitListCount",
+          "reloadSearchCoopBlueMin",
+          "reloadSearchCoopBlueMax",
+          "allAreaSearchRateCoopBlue",
+          "allAreaSearchRateVsBlue",
+          "visitorListMax",
+          "visitorTimeOutTime",
+          "visitorDownloadSpan"
+        ]
+      },
+      "NetworkPreset": {
+        "type": "object",
+        "description": "One backend preset: its stable identifier and the full parameter values it stands for.",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/NetworkParamValues"
+          }
+        },
+        "required": ["id", "parameters"]
+      },
+      "GetNetworkPresetsResult": {
+        "type": "object",
+        "properties": {
+          "presets": {
+            "type": "array",
+            "description": "Every backend preset in backend order, or exactly the one requested preset. Never null.",
+            "items": {
+              "$ref": "#/components/schemas/NetworkPreset"
+            }
+          }
+        },
+        "required": ["presets"]
       }
     }
   }

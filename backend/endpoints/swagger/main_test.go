@@ -10,6 +10,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 )
 
@@ -404,6 +405,53 @@ func TestResourcesRouteRejectsInvalidPaging(t *testing.T) {
 	)
 }
 
+func TestNetworkPresetsRouteMatchesGetter(t *testing.T) {
+	want, err := network.GetNetworkPresets("")
+	if err != nil {
+		t.Fatalf("network.GetNetworkPresets: %v", err)
+	}
+
+	// The route never touches the catalog, so building one would only slow the test.
+	recorder := do(t, nil, "/api/v1/network/presets")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("network presets route body differs from the GetNetworkPresets result")
+	}
+}
+
+func TestNetworkPresetsRouteFiltersByPresetID(t *testing.T) {
+	want, err := network.GetNetworkPresets("faster-reds")
+	if err != nil {
+		t.Fatalf("network.GetNetworkPresets: %v", err)
+	}
+
+	recorder := do(t, nil, "/api/v1/network/presets?presetID=faster-reds")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("filtered network presets route body differs from the GetNetworkPresets result")
+	}
+}
+
+// An unknown preset is a client error, so the route must carry the getter wording.
+func TestNetworkPresetsRouteReportsAnUnknownPresetID(t *testing.T) {
+	_, want := network.GetNetworkPresets("fast-invasions")
+	assertErrorMessage(
+		t,
+		do(t, nil, "/api/v1/network/presets?presetID=fast-invasions"),
+		http.StatusBadRequest,
+		want,
+	)
+}
+
 func TestHealthz(t *testing.T) {
 	recorder := do(t, newPrototypeCatalog(t), "/healthz")
 	if recorder.Code != http.StatusOK {
@@ -449,6 +497,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/catalog/resource-relations",
 		"/api/v1/catalog/item-variants",
 		"/api/v1/catalog/resources",
+		"/api/v1/network/presets",
 		"/healthz",
 		"/openapi.json",
 		"/docs",
@@ -480,6 +529,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetResourcesResult",
 		"Relation",
 		"ResourceRef",
+		"NetworkParamValues",
+		"NetworkPreset",
+		"GetNetworkPresetsResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
