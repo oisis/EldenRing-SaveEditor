@@ -5,27 +5,107 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SaveForge GameCatalog getters</title>
 <style>
-  :root { color-scheme: light dark; --line: #8884; }
-  body { margin: 0; padding: 1.5rem; font: 14px/1.5 ui-sans-serif, system-ui, sans-serif; max-width: 60rem; }
-  h1 { font-size: 1.25rem; margin: 0 0 .25rem; }
-  p.sub { margin: 0 0 1.5rem; opacity: .7; }
-  details { border: 1px solid var(--line); border-radius: 6px; margin-bottom: .75rem; }
-  summary { cursor: pointer; padding: .6rem .8rem; font-weight: 600; }
-  summary .method { font-family: ui-monospace, monospace; margin-right: .5rem; opacity: .75; }
-  summary .path { font-family: ui-monospace, monospace; font-weight: 400; }
-  .body { padding: 0 .8rem .8rem; }
-  .desc { opacity: .8; margin: 0 0 .8rem; }
+  :root {
+    color-scheme: dark;
+    --bg: #14161a;
+    --panel: #1b1e24;
+    --panel-2: #20242b;
+    --ink: #dfe3ea;
+    --ink-dim: #98a0ad;
+    --line: #333944;
+    --line-soft: #2a2f38;
+    --accent: #6aa6d9;
+    --ok: #6fbf9b;
+    --err: #e08585;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  * { scrollbar-color: var(--line) transparent; }
+  body { margin: 0 auto; padding: 2rem 1.25rem 4rem; max-width: 64rem;
+         font: 14px/1.55 ui-sans-serif, system-ui, sans-serif;
+         background: var(--bg); color: var(--ink); }
+  a { color: var(--accent); }
+  h1 { font-size: 1.3rem; letter-spacing: .01em; margin: 0 0 .3rem; font-weight: 600; }
+  p.sub { margin: 0 0 1.75rem; color: var(--ink-dim); padding-bottom: 1rem;
+          border-bottom: 1px solid var(--line-soft); }
+
+  /* endpoint cards */
+  #operations > details { background: var(--panel); border: 1px solid var(--line);
+                          border-radius: 8px; margin-bottom: .6rem; overflow: hidden; }
+  #operations > details[open] { border-color: #3c4452; }
+  summary { cursor: pointer; padding: .65rem .85rem; font-weight: 600;
+            list-style: none; user-select: none; }
+  summary::-webkit-details-marker { display: none; }
+  #operations > details > summary::before { content: "\203A"; display: inline-block;
+            width: 1em; color: var(--ink-dim); transition: transform .12s ease; }
+  #operations > details[open] > summary::before { transform: rotate(90deg); }
+  #operations > details > summary:hover { background: var(--panel-2); }
+  summary .method { font-family: var(--mono); font-size: .8em; letter-spacing: .06em;
+            margin-right: .55rem; padding: .1rem .4rem; border-radius: 4px;
+            border: 1px solid var(--line); color: var(--accent); background: #1a222c; }
+  summary .path { font-family: var(--mono); font-weight: 400; color: var(--ink); }
+  .body { padding: .2rem .85rem .9rem; border-top: 1px solid var(--line-soft); }
+  .desc { color: var(--ink-dim); margin: .7rem 0 .9rem; }
+
+  /* form controls */
   label { display: block; margin-bottom: .6rem; }
-  label span { display: block; font-size: .85em; opacity: .8; margin-bottom: .2rem; }
-  input { width: 100%; box-sizing: border-box; padding: .4rem; font-family: ui-monospace, monospace;
-          border: 1px solid var(--line); border-radius: 4px; background: transparent; color: inherit; }
-  button { padding: .4rem 1rem; border: 1px solid var(--line); border-radius: 4px;
-           background: transparent; color: inherit; cursor: pointer; font: inherit; }
-  .status { margin: .8rem 0 .3rem; font-family: ui-monospace, monospace; font-weight: 600; }
-  .status.ok { color: #2a8; }
-  .status.err { color: #d55; }
-  pre { margin: 0; padding: .7rem; border: 1px solid var(--line); border-radius: 4px;
+  label span { display: block; font-size: .85em; color: var(--ink-dim); margin-bottom: .25rem; }
+  input { width: 100%; box-sizing: border-box; padding: .45rem .55rem; font-family: var(--mono);
+          border: 1px solid var(--line); border-radius: 5px; background: #171a1f; color: var(--ink); }
+  input::placeholder { color: #6b7280; }
+  input:focus { outline: none; border-color: var(--accent); }
+  button { padding: .42rem 1rem; border: 1px solid var(--line); border-radius: 5px;
+           background: var(--panel-2); color: var(--ink); cursor: pointer; font: inherit; }
+  button:hover { border-color: #4a525f; background: #262b33; }
+  button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  /* status line */
+  .status { margin: .9rem 0 .4rem; font-family: var(--mono); font-size: .88em; font-weight: 600;
+            color: var(--ink-dim); }
+  .status.ok { color: var(--ok); }
+  .status.err { color: var(--err); }
+
+  /* response views */
+  .views { display: flex; gap: .35rem; margin-bottom: .55rem; }
+  .views button { font-size: .88em; padding: .28rem .8rem; color: var(--ink-dim); }
+  .views button.active { font-weight: 600; color: var(--ink);
+            border-color: var(--accent); background: #1d2732; }
+  pre { margin: 0; padding: .75rem; border: 1px solid var(--line); border-radius: 6px;
+        background: #121418; color: var(--ink); font-family: var(--mono);
         overflow: auto; max-height: 28rem; font-size: .85em; }
+  .result { overflow-x: auto; max-height: 28rem; border: 1px solid var(--line);
+            border-radius: 6px; background: #121418; }
+
+  /* result table */
+  table { border-collapse: collapse; width: 100%; min-width: 34rem; font-size: .9em; }
+  th, td { border-bottom: 1px solid var(--line-soft); padding: .35rem .55rem;
+           text-align: left; vertical-align: top; }
+  th { position: sticky; top: 0; z-index: 1; font-weight: 600; color: var(--ink-dim);
+       background: var(--panel-2); border-bottom: 1px solid var(--line);
+       font-size: .92em; letter-spacing: .03em; }
+  tbody tr:nth-child(even) { background: #16191e; }
+  tbody tr:hover { background: #1d222a; }
+  td.name { font-family: var(--mono); white-space: nowrap; color: var(--accent); }
+  td.state, td.source { white-space: nowrap; color: var(--ink-dim); font-size: .95em; }
+  td.state { color: var(--ok); }
+  td.source { font-family: var(--mono); white-space: normal; }
+  td.state.unknown { color: #b9975b; }
+
+  /* nested payload sections */
+  .result details { border: none; margin: 0; background: none; }
+  .result summary { padding: .1rem 0; font-weight: 400; font-family: var(--mono);
+                    color: var(--ink); }
+  .result summary:hover { color: var(--accent); }
+  .items > * { margin: .15rem 0 .15rem .9rem; font-family: var(--mono);
+               border-left: 1px solid var(--line-soft); padding-left: .6rem; }
+
+  @media (max-width: 40rem) {
+    body { padding: 1.25rem .75rem 3rem; }
+    .body { padding-left: .6rem; padding-right: .6rem; }
+    summary .path { word-break: break-all; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -58,7 +138,28 @@ function buildOperation(path, method, operation) {
 
   const status = element("div", { className: "status" });
   const output = element("pre", { hidden: true });
+  const table = element("div", { className: "result", hidden: true });
+  const tableButton = element("button", { textContent: "Tabela", className: "active" });
+  const rawButton = element("button", { textContent: "Raw JSON" });
+  const views = element("div", { className: "views", hidden: true }, [tableButton, rawButton]);
   const button = element("button", { textContent: "Execute" });
+
+  function show(tableView) {
+    table.hidden = !tableView;
+    output.hidden = tableView;
+    tableButton.className = tableView ? "active" : "";
+    rawButton.className = tableView ? "" : "active";
+  }
+  tableButton.addEventListener("click", () => show(true));
+  rawButton.addEventListener("click", () => show(false));
+
+  function present(text) {
+    output.textContent = format(text);
+    table.textContent = "";
+    table.append(resultNode(text));
+    views.hidden = false;
+    show(true);
+  }
 
   button.addEventListener("click", async () => {
     const url = new URL(path, window.location.origin);
@@ -72,13 +173,11 @@ function buildOperation(path, method, operation) {
       const text = await response.text();
       status.textContent = response.status + " " + response.statusText + "  " + url.pathname + url.search;
       status.className = "status " + (response.ok ? "ok" : "err");
-      output.textContent = format(text);
-      output.hidden = false;
+      present(text);
     } catch (error) {
       status.textContent = "request failed";
       status.className = "status err";
-      output.textContent = String(error);
-      output.hidden = false;
+      present(String(error));
     }
   });
 
@@ -92,9 +191,123 @@ function buildOperation(path, method, operation) {
       ...fields,
       button,
       status,
+      views,
+      table,
       output,
     ]),
   ]);
+}
+
+// --- table view -------------------------------------------------------------
+// Every cell is written through textContent, so response data is never parsed
+// as HTML. The raw view keeps the exact payload; nothing here changes the API.
+
+// factOf recognises a GameCatalog Fact[T] envelope: {known, value, provenance?}
+// and nothing else, so an ordinary object that merely has a "value" field is
+// still rendered as a normal object.
+function factOf(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  if (typeof value.known !== "boolean" || !("value" in value)) return null;
+  for (const key of Object.keys(value)) {
+    if (key !== "known" && key !== "value" && key !== "provenance") return null;
+  }
+  return value;
+}
+
+// scalarText returns the printable form of a leaf, or null when the value needs
+// its own collapsible section.
+function scalarText(value) {
+  if (value === null || value === undefined) return "null";
+  if (Array.isArray(value)) return value.length === 0 ? "[]" : null;
+  if (typeof value === "object") return Object.keys(value).length === 0 ? "{}" : null;
+  if (typeof value === "string") return value === "" ? '""' : value;
+  return String(value);
+}
+
+function provenanceText(provenance) {
+  if (!provenance || typeof provenance !== "object" || Array.isArray(provenance)) return "";
+  return Object.entries(provenance)
+    .filter(([, value]) => value !== "" && value !== null && value !== undefined)
+    .map(([key, value]) => key + "=" + value)
+    .join(" ");
+}
+
+// summarise builds the concise identifying line of an array entry, for example
+// a variant, from whichever identifying fields the entry actually carries.
+const SUMMARY_KEYS = ["gameID", "kind", "affinity", "upgradeLevel", "id", "key", "name", "source", "method"];
+
+function summarise(value) {
+  if (Array.isArray(value)) return value.length + " el.";
+  const parts = [];
+  for (const key of SUMMARY_KEYS) {
+    if (!(key in value)) continue;
+    const fact = factOf(value[key]);
+    const text = scalarText(fact ? fact.value : value[key]);
+    if (text !== null) parts.push(key + "=" + text);
+  }
+  return parts.length > 0 ? parts.join("  ") : Object.keys(value).length + " pól";
+}
+
+function collapsible(label, value) {
+  const size = Array.isArray(value) ? value.length + " el." : Object.keys(value).length + " pól";
+  return element("details", {}, [
+    element("summary", { textContent: label + " (" + size + ")" }),
+    Array.isArray(value) ? arrayNode(value) : tableNode(value),
+  ]);
+}
+
+function valueNode(label, value) {
+  const text = scalarText(value);
+  if (text !== null) return document.createTextNode(text);
+  return collapsible(label, value);
+}
+
+function arrayNode(values) {
+  const items = element("div", { className: "items" });
+  values.forEach((value, index) => {
+    const label = "[" + index + "]";
+    const text = scalarText(value);
+    if (text !== null) {
+      items.append(element("div", { textContent: label + " " + text }));
+      return;
+    }
+    items.append(element("details", {}, [
+      element("summary", { textContent: label + " " + summarise(value) }),
+      Array.isArray(value) ? arrayNode(value) : tableNode(value),
+    ]));
+  });
+  return items;
+}
+
+function tableNode(object) {
+  const head = element("tr", {}, ["Parametr", "Wartość", "Status", "Źródło"].map(
+    caption => element("th", { textContent: caption })
+  ));
+  const rows = Object.entries(object).map(([key, raw]) => {
+    const fact = factOf(raw);
+    const value = element("td", {}, [valueNode(key, fact ? fact.value : raw)]);
+    const status = element("td", { className: "state" });
+    const source = element("td", { className: "source" });
+    if (fact) {
+      status.textContent = fact.known ? "Known" : "Unknown";
+      if (!fact.known) status.classList.add("unknown");
+      source.textContent = provenanceText(fact.provenance);
+    }
+    return element("tr", {}, [element("td", { className: "name", textContent: key }), value, status, source]);
+  });
+  return element("table", {}, [element("thead", {}, [head]), element("tbody", {}, rows)]);
+}
+
+function resultNode(text) {
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    return element("pre", { textContent: text });
+  }
+  if (Array.isArray(payload)) return arrayNode(payload);
+  if (payload && typeof payload === "object") return tableNode(payload);
+  return element("pre", { textContent: scalarText(payload) });
 }
 
 function format(text) {
