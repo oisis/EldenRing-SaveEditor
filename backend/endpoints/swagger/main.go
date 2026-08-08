@@ -16,6 +16,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
@@ -34,6 +35,9 @@ func run() error {
 	address := flag.String("addr", "127.0.0.1:8788", "local address used by the explorer")
 	dataDirectory := flag.String("data", "./backend/gamecatalog/data", "catalog data directory")
 	allowExternal := flag.Bool("allow-external-bind", false, "allow binding a non-loopback address")
+	// The explorer is a developer tool with no build-time version of its own, so
+	// it supplies the application version GetApplicationInfo requires.
+	applicationVersion := flag.String("app-version", "dev", "application version reported by /api/v1/application/info")
 	flag.Parse()
 
 	if err := validateAddress(*address, *allowExternal); err != nil {
@@ -47,7 +51,7 @@ func run() error {
 
 	server := &http.Server{
 		Addr:              *address,
-		Handler:           newHandler(gameCatalog),
+		Handler:           newHandler(gameCatalog, *applicationVersion),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	log.Printf("SaveForge catalog getters explorer: http://%s/docs", *address)
@@ -93,7 +97,7 @@ func validateAddress(address string, allowExternal bool) error {
 	return nil
 }
 
-func newHandler(gameCatalog *gamecatalog.Catalog) http.Handler {
+func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", func(writer http.ResponseWriter, _ *http.Request) {
@@ -106,6 +110,17 @@ func newHandler(gameCatalog *gamecatalog.Catalog) http.Handler {
 
 	mux.HandleFunc("GET /docs", func(writer http.ResponseWriter, _ *http.Request) {
 		serveAsset(writer, "docs.html", "text/html; charset=utf-8")
+	})
+
+	mux.HandleFunc("GET /api/v1/application/info", func(writer http.ResponseWriter, _ *http.Request) {
+		result, err := application.GetApplicationInfo(applicationVersion)
+		if err != nil {
+			// The version comes from the backend, not from the client, so a
+			// rejected version is a server configuration error.
+			writeError(writer, http.StatusInternalServerError, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
 	})
 
 	mux.HandleFunc("GET /api/v1/catalog/info", func(writer http.ResponseWriter, _ *http.Request) {

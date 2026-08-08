@@ -12,6 +12,35 @@
     }
   ],
   "paths": {
+    "/api/v1/application/info": {
+      "get": {
+        "operationId": "getApplicationInfo",
+        "summary": "GetApplicationInfo",
+        "description": "Returns the application version supplied by the backend caller, the supported GameCatalog schema version range and the capabilities the backend currently declares. Takes no query parameters.",
+        "responses": {
+          "200": {
+            "description": "Application version, supported schemas and capabilities",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetApplicationInfoResult"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "The backend supplied no application version",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/catalog/info": {
       "get": {
         "operationId": "getCatalogInfo",
@@ -412,6 +441,46 @@
           }
         },
         "required": ["error"]
+      },
+      "SupportedSchema": {
+        "type": "object",
+        "description": "One schema the backend can read and the version range it accepts for it.",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "minimumVersion": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "currentVersion": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": ["name", "minimumVersion", "currentVersion"]
+      },
+      "GetApplicationInfoResult": {
+        "type": "object",
+        "properties": {
+          "applicationVersion": {
+            "type": "string",
+            "description": "Returned exactly as supplied by the backend caller."
+          },
+          "supportedSchemas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportedSchema"
+            }
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["applicationVersion", "supportedSchemas", "capabilities"]
       },
       "DataSource": {
         "type": "object",

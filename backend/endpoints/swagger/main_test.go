@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 )
@@ -18,6 +19,10 @@ const (
 	resourceKindItem  = "item"
 	daggerResourceKey = "000F4240"
 )
+
+// testApplicationVersion stands in for the -app-version flag the explorer passes
+// to newHandler.
+const testApplicationVersion = "test-version"
 
 func newPrototypeCatalog(t *testing.T) *gamecatalog.Catalog {
 	t.Helper()
@@ -33,7 +38,7 @@ func do(t *testing.T, gameCatalog *gamecatalog.Catalog, target string) *httptest
 	t.Helper()
 
 	recorder := httptest.NewRecorder()
-	newHandler(gameCatalog).ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	newHandler(gameCatalog, testApplicationVersion).ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
 	return recorder
 }
 
@@ -87,6 +92,37 @@ func assertErrorMessage(t *testing.T, recorder *httptest.ResponseRecorder, statu
 	if payload.Error != want.Error() {
 		t.Fatalf("error = %q, want the getter message %q", payload.Error, want.Error())
 	}
+}
+
+func TestApplicationInfoRouteMatchesGetter(t *testing.T) {
+	want, err := application.GetApplicationInfo(testApplicationVersion)
+	if err != nil {
+		t.Fatalf("application.GetApplicationInfo: %v", err)
+	}
+
+	// The route never touches the catalog, so building one would only slow the test.
+	recorder := do(t, nil, "/api/v1/application/info")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatalf("body = %#v, want the GetApplicationInfo result %#v", got, marshalled(t, want))
+	}
+}
+
+// An empty version is a backend configuration error, not a client error.
+func TestApplicationInfoRouteRejectsAnEmptyVersion(t *testing.T) {
+	recorder := httptest.NewRecorder()
+	newHandler(nil, "").ServeHTTP(
+		recorder,
+		httptest.NewRequest(http.MethodGet, "/api/v1/application/info", nil),
+	)
+
+	_, want := application.GetApplicationInfo("")
+	assertErrorMessage(t, recorder, http.StatusInternalServerError, want)
 }
 
 func TestCatalogInfoRouteMatchesGetter(t *testing.T) {
@@ -407,6 +443,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 
 	for _, path := range []string{
+		"/api/v1/application/info",
 		"/api/v1/catalog/info",
 		"/api/v1/catalog/resource",
 		"/api/v1/catalog/resource-relations",
@@ -434,6 +471,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 	for _, name := range []string{
 		"Error",
+		"SupportedSchema",
+		"GetApplicationInfoResult",
 		"GetCatalogInfoResult",
 		"GetResourceResult",
 		"GetItemVariantsResult",
