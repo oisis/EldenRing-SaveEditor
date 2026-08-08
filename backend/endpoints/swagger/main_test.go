@@ -595,7 +595,7 @@ func TestDocsServesTheEmbeddedExplorer(t *testing.T) {
 		t.Fatal("the explorer does not read /openapi.json")
 	}
 	// The response view must offer both the table and the untouched payload.
-	for _, marker := range []string{`textContent: "Tabela"`, `textContent: "Raw JSON"`, "function tableNode("} {
+	for _, marker := range []string{`textContent: "Table"`, `textContent: "Raw JSON"`, "function tableNode("} {
 		if !strings.Contains(body, marker) {
 			t.Fatalf("the explorer is missing the response view part %q", marker)
 		}

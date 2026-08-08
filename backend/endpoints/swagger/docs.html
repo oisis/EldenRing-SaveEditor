@@ -139,7 +139,7 @@ function buildOperation(path, method, operation) {
   const status = element("div", { className: "status" });
   const output = element("pre", { hidden: true });
   const table = element("div", { className: "result", hidden: true });
-  const tableButton = element("button", { textContent: "Tabela", className: "active" });
+  const tableButton = element("button", { textContent: "Table", className: "active" });
   const rawButton = element("button", { textContent: "Raw JSON" });
   const views = element("div", { className: "views", hidden: true }, [tableButton, rawButton]);
   const button = element("button", { textContent: "Execute" });
@@ -237,7 +237,7 @@ function provenanceText(provenance) {
 const SUMMARY_KEYS = ["gameID", "kind", "affinity", "upgradeLevel", "id", "key", "name", "source", "method"];
 
 function summarise(value) {
-  if (Array.isArray(value)) return value.length + " el.";
+  if (Array.isArray(value)) return value.length + " items";
   const parts = [];
   for (const key of SUMMARY_KEYS) {
     if (!(key in value)) continue;
@@ -245,11 +245,11 @@ function summarise(value) {
     const text = scalarText(fact ? fact.value : value[key]);
     if (text !== null) parts.push(key + "=" + text);
   }
-  return parts.length > 0 ? parts.join("  ") : Object.keys(value).length + " pól";
+  return parts.length > 0 ? parts.join("  ") : Object.keys(value).length + " fields";
 }
 
 function collapsible(label, value) {
-  const size = Array.isArray(value) ? value.length + " el." : Object.keys(value).length + " pól";
+  const size = Array.isArray(value) ? value.length + " items" : Object.keys(value).length + " fields";
   return element("details", {}, [
     element("summary", { textContent: label + " (" + size + ")" }),
     Array.isArray(value) ? arrayNode(value) : tableNode(value),
@@ -280,7 +280,7 @@ function arrayNode(values) {
 }
 
 function tableNode(object) {
-  const head = element("tr", {}, ["Parametr", "Wartość", "Status", "Źródło"].map(
+  const head = element("tr", {}, ["Parameter", "Value", "Status", "Source"].map(
     caption => element("th", { textContent: caption })
   ));
   const rows = Object.entries(object).map(([key, raw]) => {
