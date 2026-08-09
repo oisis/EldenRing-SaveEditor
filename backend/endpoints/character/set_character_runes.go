@@ -4,7 +4,7 @@ EndpointID: set_character_runes
 Purpose: Ustawia liczbę posiadanych run po walidacji zakresu.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
-Input variables: characterID, runes, expectedRevision.
+Input variables: saveSessionID, characterID, runes, expectedRevision.
 GameCatalog variables read: none required by the current contract.
 Save variables processed: the state required by the declared variables; the mutation must validate a complete plan and finish with full success or rollback.
 Implementation status: contract definition only; no runtime handler is implemented in this file yet.
@@ -22,6 +22,6 @@ var SetCharacterRunesDefinition = contract.MustDefine(contract.Definition{
 	ID:                         SetCharacterRunesEndpointID,
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
-	SupportedResourceVariables: []string{"characterID", "runes", "expectedRevision"},
+	SupportedResourceVariables: []string{"saveSessionID", "characterID", "runes", "expectedRevision"},
 	Description:                "Ustawia liczbę posiadanych run po walidacji zakresu.",
 })

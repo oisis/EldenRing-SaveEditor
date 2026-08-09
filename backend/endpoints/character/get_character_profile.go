@@ -4,7 +4,7 @@ EndpointID: get_character_profile
 Purpose: Zwraca profil jednej postaci: nazwę, klasę początkową, poziom, czas gry i inne dane identyfikacyjne.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: —.
-Input variables: characterID.
+Input variables: saveSessionID, characterID.
 GameCatalog variables read: none required by the current contract.
 Save variables read: the state required by the declared variables; the getter must remain non-mutating.
 Implementation status: contract definition only; no runtime handler is implemented in this file yet.
@@ -22,6 +22,6 @@ var GetCharacterProfileDefinition = contract.MustDefine(contract.Definition{
 	ID:                         GetCharacterProfileEndpointID,
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
-	SupportedResourceVariables: []string{"characterID"},
+	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
 	Description:                "Zwraca profil jednej postaci: nazwę, klasę początkową, poziom, czas gry i inne dane identyfikacyjne.",
 })
