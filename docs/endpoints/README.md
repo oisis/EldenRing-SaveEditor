@@ -80,6 +80,7 @@ Transport status:
 | `GetAppearancePresets` | `get_appearance_presets` | Getter | `appearance` | implemented | transport-exposed — `GET /api/v1/appearance/presets` of the local explorer | [appearance/get_appearance_presets.md](appearance/get_appearance_presets.md) |
 | `LoadSave` | `load_save` | Mutation | `savesession` | implemented | not exposed | [savesession/load_save.md](savesession/load_save.md) |
 | `GetLoadedSave` | `get_loaded_save` | Getter | `savesession` | implemented | not exposed | [savesession/get_loaded_save.md](savesession/get_loaded_save.md) |
+| `CloseSave` | `close_save` | Mutation | `savesession` | implemented | not exposed | [savesession/close_save.md](savesession/close_save.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

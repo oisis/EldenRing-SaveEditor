@@ -29,7 +29,7 @@ file belongs to SaveForge 2.0 and where it goes.
 | `backend/endpoints/appearance/` | Exists | Appearance endpoints, including `GetAppearancePresets`. | Presets are served from GameCatalog data. |
 | `backend/endpoints/application/` | Exists | Application metadata endpoints. | Application-level information only. |
 | `backend/endpoints/network/` | Exists | Network preset endpoints and future save network-state endpoints. | Presets come from GameCatalog regulation data. |
-| `backend/endpoints/savesession/` | Exists | Contracts and implementations of the save session lifecycle. `LoadSave` is implemented; `GetLoadedSave`, `WriteSave`, `CloseSave` and `SetSaveAccountID` are contracts only. | `LoadSave` delegates to SaveEngine and holds no format rule of its own. |
+| `backend/endpoints/savesession/` | Exists | Contracts and implementations of the save session lifecycle. `LoadSave`, `GetLoadedSave` and `CloseSave` are implemented; `WriteSave` and `SetSaveAccountID` are contracts only. | The implemented endpoints delegate to SaveEngine and hold no format or session rule of their own. |
 | `backend/endpoints/swagger/` | Exists | Local developer HTTP/OpenAPI explorer. | Not the application frontend and not part of the application runtime. |
 | `backend/endpoints/contract/` | Exists | Endpoint contract definitions and their structural validation. | Single source of truth for endpoint shape rules. |
 | `backend/endpoints/character/` | Contracts only | Existing character endpoint contracts. | Not implemented. Implementations will require SaveEngine and a save session. |

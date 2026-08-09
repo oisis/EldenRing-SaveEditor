@@ -407,3 +407,96 @@ func TestGetSessionInfoNeedsNoSourceFileAndExposesNoSnapshot(t *testing.T) {
 		t.Fatal("GetSessionInfo changed the session or its snapshot")
 	}
 }
+
+func TestCloseSessionRemovesTheSessionFromTheEngine(t *testing.T) {
+	path := writeFixture(t, "close.sl2", pcHeader(), pcFixtureSize)
+	engine := New()
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	if err := engine.CloseSession(loaded.SaveSessionID); err != nil {
+		t.Fatalf("CloseSession: %v", err)
+	}
+	// The map entry is gone, so the engine holds no reference to the session or
+	// to its private snapshot any more.
+	if _, exists := engine.sessions[loaded.SaveSessionID]; exists {
+		t.Fatal("CloseSession left the session in the engine")
+	}
+	if _, err := engine.GetSessionInfo(loaded.SaveSessionID); err == nil {
+		t.Fatal("GetSessionInfo resolved a closed session")
+	}
+}
+
+func TestCloseSessionKeepsOtherSessions(t *testing.T) {
+	engine := New()
+	first, err := engine.LoadSave(writeFixture(t, "first.sl2", pcHeader(), pcFixtureSize), "")
+	if err != nil {
+		t.Fatalf("LoadSave first: %v", err)
+	}
+	second, err := engine.LoadSave(writeFixture(t, "second.sl2", pcHeader(), pcFixtureSize), "")
+	if err != nil {
+		t.Fatalf("LoadSave second: %v", err)
+	}
+
+	if err := engine.CloseSession(first.SaveSessionID); err != nil {
+		t.Fatalf("CloseSession: %v", err)
+	}
+	info, err := engine.GetSessionInfo(second.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo of the untouched session: %v", err)
+	}
+	if info != second {
+		t.Errorf("GetSessionInfo = %+v, want %+v", info, second)
+	}
+}
+
+func TestCloseSessionRejectsEmptyIdentifier(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(writeFixture(t, "empty-id.sl2", pcHeader(), pcFixtureSize), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	if err := engine.CloseSession(""); err == nil {
+		t.Fatal("CloseSession accepted an empty identifier")
+	}
+	if _, exists := engine.sessions[loaded.SaveSessionID]; !exists {
+		t.Fatal("a rejected CloseSession removed a session")
+	}
+}
+
+func TestCloseSessionRejectsUnknownIdentifier(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(writeFixture(t, "unknown-id.sl2", pcHeader(), pcFixtureSize), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// A foreign identifier and a near miss of the real one are both unknown: the
+	// identifier is matched exactly, without trimming, normalising or guessing.
+	for _, saveSessionID := range []string{
+		"00000000000000000000000000000000",
+		loaded.SaveSessionID + " ",
+		" " + loaded.SaveSessionID,
+	} {
+		t.Run(saveSessionID, func(t *testing.T) {
+			if err := engine.CloseSession(saveSessionID); err == nil {
+				t.Fatalf("CloseSession accepted the unknown identifier %q", saveSessionID)
+			}
+			if _, exists := engine.sessions[loaded.SaveSessionID]; !exists {
+				t.Fatal("a rejected CloseSession removed the existing session")
+			}
+		})
+	}
+
+	// Closing twice is rejected the second time: a closed session is never
+	// resolved again.
+	if err := engine.CloseSession(loaded.SaveSessionID); err != nil {
+		t.Fatalf("CloseSession: %v", err)
+	}
+	if err := engine.CloseSession(loaded.SaveSessionID); err == nil {
+		t.Fatal("CloseSession accepted an already closed session")
+	}
+}

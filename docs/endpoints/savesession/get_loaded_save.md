@@ -125,5 +125,6 @@ reopens the save.
   world state, and slot content are not readable yet, because nothing exposes
   the snapshot.
 - `unsavedChanges` is a constant `false` until a mutating stage exists.
-- There is no way to list sessions and no way to release one: `CloseSave` is
-  still contract-only.
+- There is no way to list sessions. A loaded session is released with the
+  implemented [`CloseSave`](close_save.md), which removes it from SaveEngine;
+  afterwards `GetLoadedSave` no longer resolves it.

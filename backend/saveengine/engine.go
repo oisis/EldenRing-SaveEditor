@@ -125,6 +125,34 @@ func (engine *Engine) GetSessionInfo(saveSessionID string) (SessionInfo, error) 
 	return loaded.session.Info(), nil
 }
 
+// CloseSession removes the session registered under saveSessionID. It is the
+// only way a session is released: the entry is deleted from the session map, so
+// the engine drops its references to the session model and to the private
+// snapshot the session was created from. Nothing else changes, no other session
+// is touched, no snapshot byte is read, and no file is opened, written or
+// deleted.
+//
+// saveSessionID is matched exactly. It is never trimmed, normalised or guessed,
+// so an empty or unknown identifier is rejected instead of closing some other
+// session.
+//
+// Releasing the reference is all this call does. The snapshot memory becomes
+// eligible for the ordinary garbage collector; the engine never forces a
+// collection and gives no timing guarantee.
+func (engine *Engine) CloseSession(saveSessionID string) error {
+	if saveSessionID == "" {
+		return errors.New("saveSessionID is required")
+	}
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	if _, exists := engine.sessions[saveSessionID]; !exists {
+		return fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+	delete(engine.sessions, saveSessionID)
+	return nil
+}
+
 // errUnsupportedContainer rejects every input that is not an unambiguous native
 // PC or PS4 container. An encrypted or unknown container is never decrypted and
 // never guessed.
