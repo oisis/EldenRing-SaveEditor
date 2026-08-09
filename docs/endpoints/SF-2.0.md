@@ -7,6 +7,11 @@ monorepo. It states which directories and files already belong to SaveForge 2.0,
 which directories are planned for it, and which existing paths belong to the old
 application and must never become a dependency of the new architecture.
 
+It maps versioned repository paths only: the committed paths that belong to
+SaveForge 2.0, the paths planned for it, and the explicitly excluded legacy
+paths. Local, non-committed working locations are out of its scope and are never
+listed as SaveForge 2.0 paths.
+
 The goal is to keep the two architectures physically separated: SaveForge 2.0 is
 built greenfield, and the legacy application is research material only. Anyone
 adding a file should be able to answer, from this document alone, whether that
@@ -41,8 +46,6 @@ file belongs to SaveForge 2.0 and where it goes.
 | `backend/gamecatalog/data/regulation/` | Exists | Data derived from regulation, such as `network_params.json`. | Provenance must stay traceable to regulation. |
 | `backend/gamecatalog/data/presets/` | Exists | SaveForge 2.0 preset configuration, currently `appearance.json`. | Application-owned configuration, not game data. |
 | `backend/gamecatalog/data/assets/` | Exists | Assets owned by GameCatalog, currently item icons and appearance preset images. | Embedded GameCatalog assets. Endpoints may currently return their file names as metadata; no public HTTP route for fetching assets exists yet. |
-| `tmp/app-se/` | Exists | Project specifications and architectural decisions for SaveForge 2.0. | Developer material, not application runtime. |
-
 ## 3. Planned SaveForge 2.0 paths
 
 These paths do not exist yet. They are reserved locations, listed here so that
@@ -105,4 +108,8 @@ inventory of the whole repository.
 - The first SaveEngine stage supports PC and PS4 read-only.
 - Swagger is a developer tool; the application frontend does not exist yet and is
   outside the current scope.
+- Paths under `tmp/` may be used only for local, non-committed development
+  research and manual experiments. They must never be a dependency or a
+  documented source for committed SaveForge 2.0 application code, test code,
+  versioned data, documentation or CI pipelines.
 - Do not add new SaveForge 2.0 paths without a prior architectural decision.
