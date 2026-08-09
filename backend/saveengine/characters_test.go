@@ -5,24 +5,28 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 	"unicode/utf16"
 )
 
 // charactersFixture describes the synthetic UserData10 content one test save is
-// built from: which slots carry an activity flag and what raw name and level
-// their profile summary holds. A residual slot is expressed as a zero flag with
-// a name and a level still written into the summary.
+// built from: which slots carry an activity flag and what raw profile values
+// their summary holds. A residual slot is expressed as a zero flag with the
+// summary values still written into the file.
 type charactersFixture struct {
-	flags [characterSlotCount]byte
-	names [characterSlotCount]string
-	level [characterSlotCount]uint32
+	flags   [characterSlotCount]byte
+	names   [characterSlotCount]string
+	level   [characterSlotCount]uint32
+	class   [characterSlotCount]uint8
+	gender  [characterSlotCount]uint8
+	seconds [characterSlotCount]uint32
 }
 
 // writeCharactersFixture builds a synthetic save of platform and returns its
-// path inside t.TempDir(). Only the fields GetSaveCharacters reads are written;
-// the rest of the container stays zeroed.
+// path inside t.TempDir(). Only the confirmed profile fields are written; the
+// rest of the container stays zeroed.
 func writeCharactersFixture(t *testing.T, platform Platform, content charactersFixture) string {
 	t.Helper()
 
@@ -49,6 +53,9 @@ func writeCharactersFixture(t *testing.T, platform Platform, content charactersF
 			binary.LittleEndian.PutUint16(data[summary+summaryNameOffset+int64(index)*2:], unit)
 		}
 		binary.LittleEndian.PutUint32(data[summary+summaryLevelOffset:], content.level[slot])
+		binary.LittleEndian.PutUint32(data[summary+summarySecondsPlayedOffset:], content.seconds[slot])
+		data[summary+summaryGenderOffset] = content.gender[slot]
+		data[summary+summaryStartingClassOffset] = content.class[slot]
 	}
 
 	path := filepath.Join(t.TempDir(), "characters.sl2")
@@ -102,6 +109,94 @@ func TestGetSaveCharactersReadsTheTenSlotsOfBothPlatforms(t *testing.T) {
 			}
 			if !reflect.DeepEqual(result.Characters, want) {
 				t.Errorf("characters =\n%+v\nwant\n%+v", result.Characters, want)
+			}
+		})
+	}
+}
+
+func TestGetCharacterProfileReadsAConfirmedProfileOnBothPlatforms(t *testing.T) {
+	content := charactersFixture{}
+	// Slot 4: an active character with a non-zero play time, a starting class
+	// other than 0 and gender 1, the confirmed Type A value.
+	content.flags[4] = 1
+	content.names[4], content.level[4] = "Melina", 87
+	content.class[4], content.gender[4], content.seconds[4] = 5, 1, 36_061
+
+	want := CharacterProfile{
+		CharacterID:     4,
+		Active:          true,
+		Name:            "Melina",
+		Level:           87,
+		StartingClassID: 5,
+		Gender:          1,
+		SecondsPlayed:   36_061,
+	}
+
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			engine := New()
+			info, err := engine.LoadSave(writeCharactersFixture(t, platform, content), string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			profile, err := engine.GetCharacterProfile(info.SaveSessionID, 4)
+			if err != nil {
+				t.Fatalf("GetCharacterProfile: %v", err)
+			}
+
+			expected := want
+			expected.SaveSessionID = info.SaveSessionID
+			if !reflect.DeepEqual(profile, expected) {
+				t.Errorf("profile = %+v, want %+v", profile, expected)
+			}
+		})
+	}
+}
+
+func TestGetCharacterProfileReportsAResidualSlotAsInactiveAndZeroed(t *testing.T) {
+	content := charactersFixture{}
+	// A cleared flag with the deleted character's raw values still in the summary.
+	content.flags[7] = 0
+	content.names[7], content.level[7] = "Deleted", 200
+	content.class[7], content.gender[7], content.seconds[7] = 3, 1, 99_999
+
+	engine := New()
+	info, err := engine.LoadSave(writeCharactersFixture(t, PlatformPC, content), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	profile, err := engine.GetCharacterProfile(info.SaveSessionID, 7)
+	if err != nil {
+		t.Fatalf("GetCharacterProfile: %v", err)
+	}
+
+	want := CharacterProfile{SaveSessionID: info.SaveSessionID, CharacterID: 7}
+	if !reflect.DeepEqual(profile, want) {
+		t.Errorf("profile = %+v, want %+v", profile, want)
+	}
+}
+
+func TestGetCharacterProfileRejectsCharacterIDsOutsideTheSlotRange(t *testing.T) {
+	engine := New()
+	info, err := engine.LoadSave(writeCharactersFixture(t, PlatformPC, charactersFixture{}), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	for _, characterID := range []int{-1, 10, 11} {
+		t.Run(strconv.Itoa(characterID), func(t *testing.T) {
+			profile, err := engine.GetCharacterProfile(info.SaveSessionID, characterID)
+			if err == nil {
+				t.Fatal("GetCharacterProfile accepted a characterID outside 0..9")
+			}
+			want := "characterID " + strconv.Itoa(characterID) + " is outside the range 0..9"
+			if err.Error() != want {
+				t.Errorf("error = %q, want %q", err, want)
+			}
+			if !reflect.DeepEqual(profile, CharacterProfile{}) {
+				t.Errorf("profile = %+v, want the zero value", profile)
 			}
 		})
 	}

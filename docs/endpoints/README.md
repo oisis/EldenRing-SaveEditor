@@ -82,6 +82,7 @@ Transport status:
 | `GetLoadedSave` | `get_loaded_save` | Getter | `savesession` | implemented | not exposed | [savesession/get_loaded_save.md](savesession/get_loaded_save.md) |
 | `CloseSave` | `close_save` | Mutation | `savesession` | implemented | not exposed | [savesession/close_save.md](savesession/close_save.md) |
 | `GetSaveCharacters` | `get_save_characters` | Getter | `character` | implemented | not exposed | [character/get_save_characters.md](character/get_save_characters.md) |
+| `GetCharacterProfile` | `get_character_profile` | Getter | `character` | implemented | not exposed | [character/get_character_profile.md](character/get_character_profile.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

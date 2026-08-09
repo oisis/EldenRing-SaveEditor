@@ -8,9 +8,9 @@ import (
 )
 
 // UserData10 layout shared by PC and PS4, counted from the start of the
-// UserData10 data. Only the two confirmed fields of a profile summary are read:
-// the character name and the character level. Everything else in the summary is
-// left untouched.
+// UserData10 data. Only the confirmed fields of a profile summary are read: the
+// character name, level, play time, gender and starting class. Everything else
+// in the summary is left untouched.
 const (
 	characterSlotCount = 10
 
@@ -32,6 +32,19 @@ const (
 	// summaryLevelOffset holds the level as a little-endian uint32.
 	summaryLevelOffset = 0x22
 	summaryLevelSize   = 4
+
+	// summarySecondsPlayedOffset holds the raw play time in seconds as a
+	// little-endian uint32. It is never converted into a formatted duration here.
+	summarySecondsPlayedOffset = 0x26
+	summarySecondsPlayedSize   = 4
+
+	// summaryGenderOffset and summaryStartingClassOffset hold two adjacent raw
+	// identifiers. They are reported as stored: the confirmed gender values are
+	// 0 for Type B and 1 for Type A, and no identifier is mapped to a name or
+	// rejected for being unknown.
+	summaryGenderOffset        = 0x242
+	summaryStartingClassOffset = 0x243
+	summaryIdentifierSize      = 1
 )
 
 // CharacterSummary is the safe public summary of one physical save slot. Name
@@ -76,12 +89,7 @@ func (engine *Engine) GetSaveCharacters(saveSessionID string) (SaveCharacters, e
 		return SaveCharacters{}, fmt.Errorf("unknown save session %q", saveSessionID)
 	}
 
-	// The PC and PS4 layouts differ only in where the UserData10 data starts:
-	// the PC container puts an MD5 prefix in front of it.
-	base := int64(pcUserData10DataOffset)
-	if loaded.session.platform == PlatformPS4 {
-		base = ps4UserData10DataOffset
-	}
+	base := userData10Base(loaded.session.platform)
 
 	flags, err := loaded.snapshot.readAt(base+userData10ActiveFlagsOffset, characterSlotCount)
 	if err != nil {
@@ -111,6 +119,112 @@ func (engine *Engine) GetSaveCharacters(saveSessionID string) (SaveCharacters, e
 	}
 
 	return SaveCharacters{SaveSessionID: saveSessionID, Characters: characters}, nil
+}
+
+// userData10Base is the single source of truth for where the UserData10 data
+// starts. The PC and PS4 layouts of UserData10 itself are identical; they differ
+// only in this base, because the PC container puts an MD5 prefix in front of the
+// data and the PS4 container does not.
+func userData10Base(platform Platform) int64 {
+	if platform == PlatformPS4 {
+		return ps4UserData10DataOffset
+	}
+	return pcUserData10DataOffset
+}
+
+// CharacterProfile is the safe public profile of one physical save slot.
+//
+// StartingClassID and Gender are raw identifiers reported exactly as stored: the
+// confirmed gender values are 0 for Type B and 1 for Type A, and an unknown
+// identifier is passed through instead of being mapped to a name or rejected.
+// SecondsPlayed is the raw number of seconds.
+//
+// Every field except SaveSessionID and CharacterID describes an active slot
+// only. An inactive slot — including a residual one, whose deleted character's
+// values are still in the file — reports Active false and zero values, and its
+// summary is never read.
+type CharacterProfile struct {
+	SaveSessionID   string `json:"saveSessionID"`
+	CharacterID     int    `json:"characterID"`
+	Active          bool   `json:"active"`
+	Name            string `json:"name"`
+	Level           uint32 `json:"level"`
+	StartingClassID uint8  `json:"startingClassID"`
+	Gender          uint8  `json:"gender"`
+	SecondsPlayed   uint32 `json:"secondsPlayed"`
+}
+
+// GetCharacterProfile returns the confirmed profile of one physical character
+// slot of an existing session. Like GetSaveCharacters it reads the session's
+// private snapshot through the codec only: it opens no file, writes nothing,
+// changes no session and returns no snapshot byte.
+//
+// saveSessionID is matched exactly. It is never trimmed, normalised or guessed,
+// so an empty, unknown or already closed identifier is rejected instead of
+// resolving to a session.
+//
+// characterID is the slot index 0..9. An inactive or residual slot is a normal
+// result, not an error.
+func (engine *Engine) GetCharacterProfile(saveSessionID string, characterID int) (CharacterProfile, error) {
+	if saveSessionID == "" {
+		return CharacterProfile{}, errors.New("saveSessionID is required")
+	}
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	loaded, exists := engine.sessions[saveSessionID]
+	if !exists {
+		return CharacterProfile{}, fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+	if characterID < 0 || characterID >= characterSlotCount {
+		return CharacterProfile{}, fmt.Errorf("characterID %d is outside the range 0..%d",
+			characterID, characterSlotCount-1)
+	}
+
+	base := userData10Base(loaded.session.platform)
+
+	flag, err := loaded.snapshot.readAt(base+userData10ActiveFlagsOffset+int64(characterID), 1)
+	if err != nil {
+		return CharacterProfile{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
+	}
+
+	profile := CharacterProfile{SaveSessionID: saveSessionID, CharacterID: characterID}
+	if flag[0] != userData10ActiveFlagValue {
+		// An inactive slot is reported from its flag alone, so residual summary
+		// values of a deleted character are never decoded or returned.
+		return profile, nil
+	}
+
+	summary := base + userData10SummaryOffset + int64(characterID)*userData10SummaryStride
+
+	rawName, err := loaded.snapshot.readAt(summary+summaryNameOffset, summaryNameSize)
+	if err != nil {
+		return CharacterProfile{}, fmt.Errorf("cannot read name of character %d: %w", characterID, err)
+	}
+	rawLevel, err := loaded.snapshot.readAt(summary+summaryLevelOffset, summaryLevelSize)
+	if err != nil {
+		return CharacterProfile{}, fmt.Errorf("cannot read level of character %d: %w", characterID, err)
+	}
+	rawSeconds, err := loaded.snapshot.readAt(summary+summarySecondsPlayedOffset, summarySecondsPlayedSize)
+	if err != nil {
+		return CharacterProfile{}, fmt.Errorf("cannot read play time of character %d: %w", characterID, err)
+	}
+	rawGender, err := loaded.snapshot.readAt(summary+summaryGenderOffset, summaryIdentifierSize)
+	if err != nil {
+		return CharacterProfile{}, fmt.Errorf("cannot read gender of character %d: %w", characterID, err)
+	}
+	rawClass, err := loaded.snapshot.readAt(summary+summaryStartingClassOffset, summaryIdentifierSize)
+	if err != nil {
+		return CharacterProfile{}, fmt.Errorf("cannot read starting class of character %d: %w", characterID, err)
+	}
+
+	profile.Active = true
+	profile.Name = decodeCharacterName(rawName)
+	profile.Level = binary.LittleEndian.Uint32(rawLevel)
+	profile.SecondsPlayed = binary.LittleEndian.Uint32(rawSeconds)
+	profile.Gender = rawGender[0]
+	profile.StartingClassID = rawClass[0]
+	return profile, nil
 }
 
 // decodeCharacterName decodes the fixed-size UTF-16LE name field. The name ends
