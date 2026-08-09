@@ -14,5 +14,14 @@ func NewPrototype() (*Catalog, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewWithNetworkParams(manifest, resources, networkPresets)
+	appearancePresets, err := LoadAppearancePresets(catalogdata.Files())
+	if err != nil {
+		return nil, err
+	}
+	return NewWithData(CatalogData{
+		Manifest:          manifest,
+		Resources:         resources,
+		NetworkPresets:    networkPresets,
+		AppearancePresets: appearancePresets,
+	})
 }

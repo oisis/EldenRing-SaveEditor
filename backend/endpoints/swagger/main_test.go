@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
@@ -454,6 +455,85 @@ func TestNetworkPresetsRouteReportsAnUnknownPresetID(t *testing.T) {
 	)
 }
 
+func TestAppearancePresetsRouteMatchesGetter(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	want, err := appearance.GetAppearancePresets(gameCatalog, "", nil)
+	if err != nil {
+		t.Fatalf("appearance.GetAppearancePresets: %v", err)
+	}
+
+	recorder := do(t, gameCatalog, "/api/v1/appearance/presets")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("appearance presets route body differs from the GetAppearancePresets result")
+	}
+}
+
+func TestAppearancePresetsRouteFiltersBySearch(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	want, err := appearance.GetAppearancePresets(gameCatalog, "witcher", nil)
+	if err != nil {
+		t.Fatalf("appearance.GetAppearancePresets: %v", err)
+	}
+	if len(want.Presets) == 0 {
+		t.Fatal("the filtered getter result is empty, so the route comparison would not prove anything")
+	}
+
+	recorder := do(t, gameCatalog, "/api/v1/appearance/presets?search=witcher")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("searched appearance presets route body differs from the GetAppearancePresets result")
+	}
+}
+
+// The single tags parameter is comma separated, so both tags have to reach the
+// getter as separate values.
+func TestAppearancePresetsRouteSplitsCommaSeparatedTags(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	want, err := appearance.GetAppearancePresets(gameCatalog, "", []string{"witcher", "male"})
+	if err != nil {
+		t.Fatalf("appearance.GetAppearancePresets: %v", err)
+	}
+
+	recorder := do(t, gameCatalog, "/api/v1/appearance/presets?tags=witcher,male")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+
+	got := decode(t, recorder.Body.Bytes())
+	if !reflect.DeepEqual(got, marshalled(t, want)) {
+		t.Fatal("tagged appearance presets route body differs from the GetAppearancePresets result")
+	}
+	if !reflect.DeepEqual(parseTags("witcher,male"), []string{"witcher", "male"}) {
+		t.Fatalf("parseTags = %#v, want two separate tags", parseTags("witcher,male"))
+	}
+	if parseTags("") != nil {
+		t.Fatalf("parseTags(\"\") = %#v, want nil", parseTags(""))
+	}
+}
+
+// An empty element is client input, so the getter rejection must reach the
+// client as a 400 with the getter wording.
+func TestAppearancePresetsRouteRejectsAnEmptyTagElement(t *testing.T) {
+	gameCatalog := newPrototypeCatalog(t)
+	_, want := appearance.GetAppearancePresets(gameCatalog, "", []string{"foo", "", "bar"})
+	assertErrorMessage(
+		t,
+		do(t, gameCatalog, "/api/v1/appearance/presets?tags=foo,,bar"),
+		http.StatusBadRequest,
+		want,
+	)
+}
+
 func TestHealthz(t *testing.T) {
 	recorder := do(t, newPrototypeCatalog(t), "/healthz")
 	if recorder.Code != http.StatusOK {
@@ -500,6 +580,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/catalog/item-variants",
 		"/api/v1/catalog/resources",
 		"/api/v1/network/presets",
+		"/api/v1/appearance/presets",
 		"/healthz",
 		"/openapi.json",
 		"/docs",
@@ -534,6 +615,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"NetworkParamValues",
 		"NetworkPreset",
 		"GetNetworkPresetsResult",
+		"AppearancePresetSummary",
+		"GetAppearancePresetsResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)

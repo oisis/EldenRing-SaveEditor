@@ -77,6 +77,7 @@ Transport status:
 | `GetResourceRelations` | `get_resource_relations` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resource-relations` of the local explorer | [catalog/get_resource_relations.md](catalog/get_resource_relations.md) |
 | `GetResources` | `get_resources` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resources` of the local explorer | [catalog/get_resources.md](catalog/get_resources.md) |
 | `GetNetworkPresets` | `get_network_presets` | Getter | `network` | implemented | transport-exposed — `GET /api/v1/network/presets` of the local explorer | [network/get_network_presets.md](network/get_network_presets.md) |
+| `GetAppearancePresets` | `get_appearance_presets` | Getter | `appearance` | implemented | transport-exposed — `GET /api/v1/appearance/presets` of the local explorer | [appearance/get_appearance_presets.md](appearance/get_appearance_presets.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

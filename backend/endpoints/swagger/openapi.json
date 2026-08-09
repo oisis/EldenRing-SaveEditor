@@ -296,6 +296,56 @@
         }
       }
     },
+    "/api/v1/appearance/presets": {
+      "get": {
+        "operationId": "getAppearancePresets",
+        "summary": "GetAppearancePresets",
+        "description": "Returns the appearance presets the backend offers today, reduced to the metadata a list needs. The values come from backend/gamecatalog/data/presets/appearance.json, which GameCatalog loads and validates once together with the preview images under backend/gamecatalog/data/assets/appearance. The results keep the file order. The route reads no save and modifies nothing. It reports the asset file name only; no route serves the images yet.",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "description": "Case-insensitive substring matched against the preset id and name. Omitted or empty means no filtering. The value is never trimmed and never normalised.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "witcher"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "description": "Comma-separated tag list. Omitted or empty means no filtering. Every listed tag must be present on a preset, so the filter has AND semantics; tags are compared exactly and case-sensitively and no individual tag is trimmed. An empty element such as tags=foo,,bar is rejected. The stored presets carry no tags today, so any non-empty filter returns an empty list.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The matching preset summaries in catalog order",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetAppearancePresetsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty tag element in the tags parameter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthz",
@@ -877,6 +927,50 @@
             "description": "Every backend preset in backend order, or exactly the one requested preset. Never null.",
             "items": {
               "$ref": "#/components/schemas/NetworkPreset"
+            }
+          }
+        },
+        "required": ["presets"]
+      },
+      "AppearancePresetSummary": {
+        "type": "object",
+        "description": "List metadata of one appearance preset. The full appearance configuration (voice type, model identifiers, faceShape, body and skin) stays inside GameCatalog and is not returned by this getter.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Stable lowercase kebab-case identifier. It equals the image file name without the .jpg suffix."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the preset."
+          },
+          "image": {
+            "type": "string",
+            "description": "Asset file name inside backend/gamecatalog/data/assets/appearance. No route serves the image yet."
+          },
+          "bodyType": {
+            "type": "string",
+            "description": "Public label of the stored numeric body type: 1 is Type A, 0 is Type B.",
+            "enum": ["Type A", "Type B"]
+          },
+          "tags": {
+            "type": "array",
+            "description": "Tags of the preset. Never null; empty for every stored preset today.",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["id", "name", "image", "bodyType", "tags"]
+      },
+      "GetAppearancePresetsResult": {
+        "type": "object",
+        "properties": {
+          "presets": {
+            "type": "array",
+            "description": "The matching preset summaries in the order of presets/appearance.json. Never null; empty when nothing matches.",
+            "items": {
+              "$ref": "#/components/schemas/AppearancePresetSummary"
             }
           }
         },

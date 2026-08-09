@@ -15,8 +15,10 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
@@ -74,7 +76,17 @@ func loadCatalog(directory string) (*gamecatalog.Catalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load network parameters: %w", err)
 	}
-	gameCatalog, err := gamecatalog.NewWithNetworkParams(data.Manifest, data.Resources(), networkPresets)
+	// The same rule applies to the appearance presets and their assets.
+	appearancePresets, err := gamecatalog.LoadAppearancePresets(os.DirFS(directory))
+	if err != nil {
+		return nil, fmt.Errorf("load appearance presets: %w", err)
+	}
+	gameCatalog, err := gamecatalog.NewWithData(gamecatalog.CatalogData{
+		Manifest:          data.Manifest,
+		Resources:         data.Resources(),
+		NetworkPresets:    networkPresets,
+		AppearancePresets: appearancePresets,
+	})
 	if err != nil {
 		return nil, fmt.Errorf("build catalog: %w", err)
 	}
@@ -217,7 +229,31 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string) htt
 		writeJSON(writer, http.StatusOK, result)
 	})
 
+	// The presets and their assets live in the catalog data, so the route needs
+	// the catalog only. It serves preset metadata; the images themselves are not
+	// exposed by any route yet.
+	mux.HandleFunc("GET /api/v1/appearance/presets", func(writer http.ResponseWriter, request *http.Request) {
+		query := request.URL.Query()
+		result, err := appearance.GetAppearancePresets(gameCatalog, query.Get("search"), parseTags(query.Get("tags")))
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
 	return mux
+}
+
+// parseTags splits the single comma-separated tags parameter into the list the
+// getter expects. An absent or empty parameter means "do not filter" and becomes
+// nil; the individual tags are never trimmed, so an empty element stays empty
+// and the getter rejects it.
+func parseTags(raw string) []string {
+	if raw == "" {
+		return nil
+	}
+	return strings.Split(raw, ",")
 }
 
 // parsePagingValue turns a query string into the integer GetResources expects.

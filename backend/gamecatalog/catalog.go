@@ -17,12 +17,26 @@ type Catalog struct {
 	// networkPresets is read-only after construction and stays empty for a
 	// catalog built without network parameters.
 	networkPresets []NetworkPreset
+	// appearancePresets is read-only after construction and stays empty for a
+	// catalog built without appearance presets. It is a data set of its own, not
+	// a resource kind.
+	appearancePresets []AppearancePreset
+}
+
+// CatalogData is everything a catalog may be built from: the resource manifest
+// and resources, plus the optional data sets the runtimes serve. Each field may
+// stay empty, so a new data set never forces a new constructor.
+type CatalogData struct {
+	Manifest          schema.Manifest
+	Resources         []schema.Resource
+	NetworkPresets    []NetworkPreset
+	AppearancePresets []AppearancePreset
 }
 
 // New builds a catalog without network parameters, which every caller that only
 // reads resources needs.
 func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error) {
-	return NewWithNetworkParams(manifest, resources, nil)
+	return NewWithData(CatalogData{Manifest: manifest, Resources: resources})
 }
 
 // NewWithNetworkParams builds a catalog that additionally carries the network
@@ -32,9 +46,27 @@ func NewWithNetworkParams(
 	resources []schema.Resource,
 	networkPresets []NetworkPreset,
 ) (*Catalog, error) {
-	if len(networkPresets) > 0 {
-		if err := validateNetworkPresets(networkPresets); err != nil {
+	return NewWithData(CatalogData{
+		Manifest:       manifest,
+		Resources:      resources,
+		NetworkPresets: networkPresets,
+	})
+}
+
+// NewWithData builds a catalog from the complete data set. It is the single
+// constructor; New and NewWithNetworkParams delegate to it so existing callers
+// keep their signature.
+func NewWithData(data CatalogData) (*Catalog, error) {
+	manifest := data.Manifest
+	resources := data.Resources
+	if len(data.NetworkPresets) > 0 {
+		if err := validateNetworkPresets(data.NetworkPresets); err != nil {
 			return nil, fmt.Errorf("network parameters: %w", err)
+		}
+	}
+	if len(data.AppearancePresets) > 0 {
+		if err := validateAppearancePresets(data.AppearancePresets); err != nil {
+			return nil, fmt.Errorf("appearance presets: %w", err)
 		}
 	}
 	sources, err := schema.ValidateManifest(manifest)
@@ -48,8 +80,9 @@ func NewWithNetworkParams(
 		byItemGameID: make(map[uint32]schema.ResourceRef, len(resources)),
 		outgoing:     make(map[schema.ResourceRef][]schema.Relation),
 		incoming:     make(map[schema.ResourceRef][]schema.Relation),
-		// The stored copy keeps the caller's slice out of the catalog.
-		networkPresets: append([]NetworkPreset(nil), networkPresets...),
+		// The stored copies keep the caller's slices out of the catalog.
+		networkPresets:    append([]NetworkPreset(nil), data.NetworkPresets...),
+		appearancePresets: cloneAppearancePresets(data.AppearancePresets),
 	}
 	for index, resource := range resources {
 		if err := schema.ValidateResource(resource, sources); err != nil {
