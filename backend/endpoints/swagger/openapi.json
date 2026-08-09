@@ -346,6 +346,219 @@
         }
       }
     },
+    "/api/v1/save-sessions": {
+      "post": {
+        "operationId": "loadSave",
+        "summary": "LoadSave",
+        "description": "Creates a read-only save session for a local save file and returns its metadata. The source path and the expected platform are passed to the endpoint exactly as sent: they are never trimmed, normalised or defaulted, and the source file is never modified. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoadSaveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The created read-only session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed body, an unknown body field, or a source SaveEngine cannot open, recognise or validate",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}": {
+      "get": {
+        "operationId": "getLoadedSave",
+        "summary": "GetLoadedSave",
+        "description": "Returns the safe metadata of an existing save session: its identifier, platform, container format and unsaved-changes state. The identifier is matched exactly by SaveEngine. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The session metadata",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionInfo"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "closeSave",
+        "summary": "CloseSave",
+        "description": "Closes an existing save session and releases its private snapshot. Only the in-memory session is removed: the source save file is never written, moved or deleted. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The session was closed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CloseSaveResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/characters": {
+      "get": {
+        "operationId": "getSaveCharacters",
+        "summary": "GetSaveCharacters",
+        "description": "Returns one summary per physical character slot of an existing session, always ten of them in slot order. An inactive slot reports an empty name and level 0 even when residual data remains in the file. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The ten character slot summaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SaveCharacters"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
+      "get": {
+        "operationId": "getCharacterProfile",
+        "summary": "GetCharacterProfile",
+        "description": "Returns the confirmed profile of one character slot: name, level, raw startingClassID, raw gender and raw secondsPlayed. An inactive slot is a normal result with zeroed values. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The character profile",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterProfile"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, or an empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats": {
+      "get": {
+        "operationId": "getCharacterStats",
+        "summary": "GetCharacterStats",
+        "description": "Returns the raw statistics stored in one character slot: the eight attributes, the level and the stored HP, FP and SP values with their maximum and base maximum. Every value is the raw stored number; nothing is computed or normalised. An inactive slot is a normal result with zeroed values. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The raw character statistics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterStats"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, or an empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthz",
@@ -410,6 +623,26 @@
   },
   "components": {
     "parameters": {
+      "SaveSessionID": {
+        "name": "saveSessionID",
+        "in": "path",
+        "required": true,
+        "description": "Identifier of an existing save session, matched exactly by SaveEngine. It is never trimmed, normalised or guessed.",
+        "schema": {
+          "type": "string"
+        }
+      },
+      "CharacterID": {
+        "name": "characterID",
+        "in": "path",
+        "required": true,
+        "description": "Physical character slot index 0..9, parsed as a decimal integer. The allowed range is validated by SaveEngine.",
+        "schema": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "example": 0
+      },
       "ResourceKind": {
         "name": "kind",
         "in": "query",
@@ -539,6 +772,249 @@
       }
     },
     "schemas": {
+      "LoadSaveRequest": {
+        "type": "object",
+        "description": "Body of LoadSave. Both fields reach the endpoint exactly as sent; unknown fields are rejected.",
+        "properties": {
+          "source": {
+            "type": "string",
+            "description": "Path of a local save file. Never trimmed, normalised or defaulted."
+          },
+          "expectedPlatform": {
+            "type": "string",
+            "description": "Platform the caller expects. An empty value means the platform is recognised from the container.",
+            "enum": ["pc", "ps4", ""]
+          }
+        },
+        "required": ["source"]
+      },
+      "CloseSaveResult": {
+        "type": "object",
+        "description": "Confirmation that the named session was removed from memory. The source save file is untouched.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "closed": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "closed"]
+      },
+      "SessionInfo": {
+        "type": "object",
+        "description": "Safe public metadata of a read-only save session. It carries no path, SteamID, offset, handle or save byte.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "platform": {
+            "type": "string",
+            "enum": ["pc", "ps4"]
+          },
+          "format": {
+            "type": "string"
+          },
+          "unsavedChanges": {
+            "type": "boolean",
+            "description": "Always false at this stage: a read-only session cannot change anything."
+          }
+        },
+        "required": ["saveSessionID", "platform", "format", "unsavedChanges"]
+      },
+      "CharacterSummary": {
+        "type": "object",
+        "description": "Summary of one physical character slot. Name and level are reported for an active slot only.",
+        "properties": {
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": ["characterID", "active", "name", "level"]
+      },
+      "SaveCharacters": {
+        "type": "object",
+        "description": "The session that was read and one summary per physical slot, always ten of them in slot order.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characters": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CharacterSummary"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characters"]
+      },
+      "CharacterProfile": {
+        "type": "object",
+        "description": "Profile of one character slot. startingClassID and gender are raw identifiers and secondsPlayed is a raw second count: none is mapped, formatted or rejected for being unknown.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startingClassID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gender": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "secondsPlayed": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "name",
+          "level",
+          "startingClassID",
+          "gender",
+          "secondsPlayed"
+        ]
+      },
+      "CharacterStats": {
+        "type": "object",
+        "description": "Raw statistics stored in one character slot. Every number is the value stored in the save: nothing is validated, normalised, clamped or computed.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "vigor": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "mind": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "endurance": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "strength": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "dexterity": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "intelligence": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "faith": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "arcane": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "hp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxHP": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "baseMaxHP": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "fp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxFP": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "baseMaxFP": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "maxSP": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "baseMaxSP": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "vigor",
+          "mind",
+          "endurance",
+          "strength",
+          "dexterity",
+          "intelligence",
+          "faith",
+          "arcane",
+          "level",
+          "hp",
+          "maxHP",
+          "baseMaxHP",
+          "fp",
+          "maxFP",
+          "baseMaxFP",
+          "sp",
+          "maxSP",
+          "baseMaxSP"
+        ]
+      },
       "Error": {
         "type": "object",
         "description": "Error envelope carrying the message returned by the getter.",

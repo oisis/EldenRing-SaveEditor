@@ -20,7 +20,7 @@ is an error, not a silent success.
 | Kind | Mutation |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | not exposed — callable only as a Go function. No Wails binding, no HTTP route, no CLI command, and no frontend reaches it. |
+| Transport status | transport-exposed — `DELETE /api/v1/save-sessions/{saveSessionID}` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/savesession/close_save.go](../../../backend/endpoints/savesession/close_save.go) |
 | Test source | [../../../backend/endpoints/savesession/close_save_test.go](../../../backend/endpoints/savesession/close_save_test.go) |
 | Save access | none — no file is opened, and the session's private snapshot is not read |
@@ -94,8 +94,9 @@ Every failure leaves the session map unchanged.
 
 ## Command-line verification
 
-`CloseSave` has no transport, so it is verified through its tests. From the
-repository root:
+`CloseSave` is verified through its tests. Its only transport is the local
+OpenAPI explorer route `DELETE /api/v1/save-sessions/{saveSessionID}`, which exists solely
+when the explorer runs without `-allow-external-bind`. From the repository root:
 
 ```bash
 go test ./backend/saveengine -run '^TestCloseSession' -count=1 -v
@@ -108,8 +109,9 @@ process.
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails, HTTP, or a CLI, and there is no
-  frontend for it. The local OpenAPI explorer does not route to it.
+- The only transport is the local developer explorer route `DELETE /api/v1/save-sessions/{saveSessionID}`,
+  which is registered only without `-allow-external-bind`. There is no Wails
+  binding, no CLI command, and no frontend for the endpoint.
 - There is no unsaved-changes handling, no expected revision, and no write path,
   because the current stage is read-only: a session can hold no pending change.
   A later mutating stage will need its own explicit contract change.

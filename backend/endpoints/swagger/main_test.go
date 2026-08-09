@@ -1,18 +1,27 @@
 package main
 
 import (
+	"encoding/binary"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"os"
+	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"testing"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
 // The prototype catalog holds real, schema-valid resources, so every route is
@@ -40,7 +49,9 @@ func do(t *testing.T, gameCatalog *gamecatalog.Catalog, target string) *httptest
 	t.Helper()
 
 	recorder := httptest.NewRecorder()
-	newHandler(gameCatalog, testApplicationVersion).ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	// The catalog routes need no save engine, so they are served by a handler
+	// with the save-session routes disabled.
+	newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
 	return recorder
 }
 
@@ -118,7 +129,7 @@ func TestApplicationInfoRouteMatchesGetter(t *testing.T) {
 // An empty version is a backend configuration error, not a client error.
 func TestApplicationInfoRouteRejectsAnEmptyVersion(t *testing.T) {
 	recorder := httptest.NewRecorder()
-	newHandler(nil, "").ServeHTTP(
+	newHandler(nil, "", nil).ServeHTTP(
 		recorder,
 		httptest.NewRequest(http.MethodGet, "/api/v1/application/info", nil),
 	)
@@ -534,6 +545,195 @@ func TestAppearancePresetsRouteRejectsAnEmptyTagElement(t *testing.T) {
 	)
 }
 
+// Synthetic PC container layout. The explorer owns none of these values; they
+// are duplicated here only to build a local fixture SaveEngine accepts, so the
+// test needs no real save, no repository fixture and no endpoint test helper.
+const (
+	pcHeaderSize       = 0x300
+	pcEntryCountOffset = 0x0C
+	pcEntryCount       = 12
+	pcFixtureSize      = int64(pcHeaderSize) + 10*0x280010 + 0x60010
+)
+
+func writePCFixture(t *testing.T) string {
+	t.Helper()
+
+	header := make([]byte, pcHeaderSize)
+	copy(header, []byte("BND4"))
+	binary.LittleEndian.PutUint32(header[pcEntryCountOffset:], pcEntryCount)
+
+	path := filepath.Join(t.TempDir(), "save.sl2")
+	file, err := os.Create(path)
+	if err != nil {
+		t.Fatalf("create fixture: %v", err)
+	}
+	defer file.Close()
+	if _, err := file.Write(header); err != nil {
+		t.Fatalf("write fixture header: %v", err)
+	}
+	if err := file.Truncate(pcFixtureSize); err != nil {
+		t.Fatalf("size fixture: %v", err)
+	}
+	return path
+}
+
+// doSave serves one save-session request against a handler that shares the given
+// engine. A nil engine is the -allow-external-bind mode, in which no
+// save-session route is registered.
+func doSave(
+	t *testing.T,
+	saveEngine *saveengine.Engine,
+	method string,
+	target string,
+	body string,
+) *httptest.ResponseRecorder {
+	t.Helper()
+
+	var reader io.Reader
+	if body != "" {
+		reader = strings.NewReader(body)
+	}
+	recorder := httptest.NewRecorder()
+	newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(method, target, reader))
+	return recorder
+}
+
+func assertOK(t *testing.T, recorder *httptest.ResponseRecorder, target string) {
+	t.Helper()
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("%s: status = %d, want 200 (body %q)", target, recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+}
+
+// The full local lifecycle has to work through the routes alone: load a session,
+// read it back, list its characters, close it, and then fail to read the closed
+// session.
+func TestSaveSessionLifecycleRoutes(t *testing.T) {
+	saveEngine := saveengine.New()
+	source := writePCFixture(t)
+
+	created := doSave(t, saveEngine, http.MethodPost, "/api/v1/save-sessions",
+		`{"source":`+strconv.Quote(source)+`,"expectedPlatform":"pc"}`)
+	assertOK(t, created, "POST /api/v1/save-sessions")
+
+	var session saveengine.SessionInfo
+	if err := json.Unmarshal(created.Body.Bytes(), &session); err != nil {
+		t.Fatalf("decode LoadSave body %q: %v", created.Body.String(), err)
+	}
+	if session.SaveSessionID == "" {
+		t.Fatal("the route returned an empty saveSessionID")
+	}
+	if session.Platform != "pc" {
+		t.Fatalf("platform = %q, want pc", session.Platform)
+	}
+
+	loaded := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID, "")
+	assertOK(t, loaded, "GET /api/v1/save-sessions/{id}")
+	if !reflect.DeepEqual(decode(t, loaded.Body.Bytes()), marshalled(t, session)) {
+		t.Fatal("GetLoadedSave route body differs from the LoadSave result")
+	}
+
+	wantCharacters, err := character.GetSaveCharacters(saveEngine, session.SaveSessionID)
+	if err != nil {
+		t.Fatalf("character.GetSaveCharacters: %v", err)
+	}
+	characters := doSave(t, saveEngine, http.MethodGet,
+		"/api/v1/save-sessions/"+session.SaveSessionID+"/characters", "")
+	assertOK(t, characters, "GET /api/v1/save-sessions/{id}/characters")
+	if !reflect.DeepEqual(decode(t, characters.Body.Bytes()), marshalled(t, wantCharacters)) {
+		t.Fatal("characters route body differs from the GetSaveCharacters result")
+	}
+
+	closed := doSave(t, saveEngine, http.MethodDelete, "/api/v1/save-sessions/"+session.SaveSessionID, "")
+	assertOK(t, closed, "DELETE /api/v1/save-sessions/{id}")
+	var confirmation closeSaveResponse
+	if err := json.Unmarshal(closed.Body.Bytes(), &confirmation); err != nil {
+		t.Fatalf("decode CloseSave body %q: %v", closed.Body.String(), err)
+	}
+	if confirmation.SaveSessionID != session.SaveSessionID || !confirmation.Closed {
+		t.Fatalf("close confirmation = %#v, want the closed session", confirmation)
+	}
+	// The source file is evidence: closing a session must not touch it.
+	if _, err := os.Stat(source); err != nil {
+		t.Fatalf("the source save is gone after closing the session: %v", err)
+	}
+
+	_, wantUnknown := savesession.GetLoadedSave(saveEngine, session.SaveSessionID)
+	assertErrorMessage(
+		t,
+		doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID, ""),
+		http.StatusBadRequest,
+		wantUnknown,
+	)
+}
+
+func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0"
+
+	wantProfile, err := character.GetCharacterProfile(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("character.GetCharacterProfile: %v", err)
+	}
+	profile := doSave(t, saveEngine, http.MethodGet, base+"/profile", "")
+	assertOK(t, profile, base+"/profile")
+	if !reflect.DeepEqual(decode(t, profile.Body.Bytes()), marshalled(t, wantProfile)) {
+		t.Fatal("profile route body differs from the GetCharacterProfile result")
+	}
+
+	wantStats, err := character.GetCharacterStats(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("character.GetCharacterStats: %v", err)
+	}
+	stats := doSave(t, saveEngine, http.MethodGet, base+"/stats", "")
+	assertOK(t, stats, base+"/stats")
+	if !reflect.DeepEqual(decode(t, stats.Body.Bytes()), marshalled(t, wantStats)) {
+		t.Fatal("stats route body differs from the GetCharacterStats result")
+	}
+
+	// A non-decimal characterID never reaches the getter, so the route owns it.
+	for _, raw := range []string{"one", " 0", "0x1"} {
+		target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/" + url.PathEscape(raw) + "/profile"
+		if recorder := doSave(t, saveEngine, http.MethodGet, target, ""); recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", target, recorder.Code, recorder.Body.String())
+		}
+	}
+}
+
+// With -allow-external-bind the explorer withholds the engine, so no
+// save-session route exists while the catalog routes keep working.
+func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
+	for _, request := range []struct {
+		method string
+		target string
+		body   string
+	}{
+		{http.MethodPost, "/api/v1/save-sessions", `{"source":"unused-by-a-missing-route","expectedPlatform":""}`},
+		{http.MethodGet, "/api/v1/save-sessions/any-session", ""},
+		{http.MethodDelete, "/api/v1/save-sessions/any-session", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
+	} {
+		recorder := doSave(t, nil, request.method, request.target, request.body)
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("%s %s: status = %d, want 404 (body %q)",
+				request.method, request.target, recorder.Code, recorder.Body.String())
+		}
+	}
+
+	if recorder := do(t, newPrototypeCatalog(t), "/api/v1/catalog/info"); recorder.Code != http.StatusOK {
+		t.Fatalf("catalog route status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
 func TestHealthz(t *testing.T) {
 	recorder := do(t, newPrototypeCatalog(t), "/healthz")
 	if recorder.Code != http.StatusOK {
@@ -593,6 +793,28 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 			t.Fatalf("openapi.json describes %s without a GET operation", path)
 		}
 	}
+	// The save-session routes exist only in the local loopback mode, so the
+	// document has to describe them with their own methods.
+	for path, method := range map[string]string{
+		"/api/v1/save-sessions":                                                  "post",
+		"/api/v1/save-sessions/{saveSessionID}":                                  "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters":                       "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":   "get",
+	} {
+		operation, exists := document.Paths[path]
+		if !exists {
+			t.Fatalf("openapi.json does not describe %s", path)
+		}
+		if _, hasMethod := operation[method]; !hasMethod {
+			t.Fatalf("openapi.json describes %s without a %s operation", path, strings.ToUpper(method))
+		}
+	}
+	if _, hasDelete := document.Paths["/api/v1/save-sessions/{saveSessionID}"]["delete"]; !hasDelete {
+		t.Fatal("openapi.json describes no DELETE for /api/v1/save-sessions/{saveSessionID}")
+	}
+	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
+
 	for _, name := range []string{"ResourceKind", "ResourceKey", "RelationType", "RelationDirection"} {
 		if _, exists := document.Comps.Parameters[name]; !exists {
 			t.Fatalf("openapi.json is missing the shared %s parameter", name)
@@ -617,6 +839,12 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetNetworkPresetsResult",
 		"AppearancePresetSummary",
 		"GetAppearancePresetsResult",
+		"LoadSaveRequest",
+		"CloseSaveResult",
+		"SessionInfo",
+		"SaveCharacters",
+		"CharacterProfile",
+		"CharacterStats",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -626,6 +854,34 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		t.Fatal("openapi.json still declares the removed ResourceID schema")
 	}
 	assertRelationEndpointsAreResourceRefs(t, document.Comps.Schemas)
+}
+
+// A save-session route is registered only when the explorer runs without
+// -allow-external-bind, so its description must say so; otherwise the document
+// would advertise a route an externally bound explorer answers with 404.
+func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[string]any) {
+	t.Helper()
+
+	found := 0
+	for path, operations := range paths {
+		if !strings.HasPrefix(path, "/api/v1/save-sessions") {
+			continue
+		}
+		for method, raw := range operations {
+			operation, ok := raw.(map[string]any)
+			if !ok {
+				t.Fatalf("%s %s = %#v, want an operation object", method, path, raw)
+			}
+			description, _ := operation["description"].(string)
+			if !strings.Contains(description, "-allow-external-bind") {
+				t.Fatalf("%s %s does not state that it needs the local loopback mode", method, path)
+			}
+			found++
+		}
+	}
+	if found != 6 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 6", found)
+	}
 }
 
 // The relation endpoints carry the migrated (kind, key) identity; a numeric

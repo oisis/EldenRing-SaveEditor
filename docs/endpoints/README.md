@@ -78,12 +78,12 @@ Transport status:
 | `GetResources` | `get_resources` | Getter | `catalog` | implemented | transport-exposed — `GET /api/v1/catalog/resources` of the local explorer | [catalog/get_resources.md](catalog/get_resources.md) |
 | `GetNetworkPresets` | `get_network_presets` | Getter | `network` | implemented | transport-exposed — `GET /api/v1/network/presets` of the local explorer | [network/get_network_presets.md](network/get_network_presets.md) |
 | `GetAppearancePresets` | `get_appearance_presets` | Getter | `appearance` | implemented | transport-exposed — `GET /api/v1/appearance/presets` of the local explorer | [appearance/get_appearance_presets.md](appearance/get_appearance_presets.md) |
-| `LoadSave` | `load_save` | Mutation | `savesession` | implemented | not exposed | [savesession/load_save.md](savesession/load_save.md) |
-| `GetLoadedSave` | `get_loaded_save` | Getter | `savesession` | implemented | not exposed | [savesession/get_loaded_save.md](savesession/get_loaded_save.md) |
-| `CloseSave` | `close_save` | Mutation | `savesession` | implemented | not exposed | [savesession/close_save.md](savesession/close_save.md) |
-| `GetSaveCharacters` | `get_save_characters` | Getter | `character` | implemented | not exposed | [character/get_save_characters.md](character/get_save_characters.md) |
-| `GetCharacterProfile` | `get_character_profile` | Getter | `character` | implemented | not exposed | [character/get_character_profile.md](character/get_character_profile.md) |
-| `GetCharacterStats` | `get_character_stats` | Getter | `character` | implemented | not exposed | [character/get_character_stats.md](character/get_character_stats.md) |
+| `LoadSave` | `load_save` | Mutation | `savesession` | implemented | transport-exposed — `POST /api/v1/save-sessions` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [savesession/load_save.md](savesession/load_save.md) |
+| `GetLoadedSave` | `get_loaded_save` | Getter | `savesession` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [savesession/get_loaded_save.md](savesession/get_loaded_save.md) |
+| `CloseSave` | `close_save` | Mutation | `savesession` | implemented | transport-exposed — `DELETE /api/v1/save-sessions/{saveSessionID}` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [savesession/close_save.md](savesession/close_save.md) |
+| `GetSaveCharacters` | `get_save_characters` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_save_characters.md](character/get_save_characters.md) |
+| `GetCharacterProfile` | `get_character_profile` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_character_profile.md](character/get_character_profile.md) |
+| `GetCharacterStats` | `get_character_stats` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_character_stats.md](character/get_character_stats.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

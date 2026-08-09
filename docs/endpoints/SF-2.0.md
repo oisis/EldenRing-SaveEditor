@@ -30,7 +30,7 @@ file belongs to SaveForge 2.0 and where it goes.
 | `backend/endpoints/application/` | Exists | Application metadata endpoints. | Application-level information only. |
 | `backend/endpoints/network/` | Exists | Network preset endpoints and future save network-state endpoints. | Presets come from GameCatalog regulation data. |
 | `backend/endpoints/savesession/` | Exists | Contracts and implementations of the save session lifecycle. `LoadSave`, `GetLoadedSave` and `CloseSave` are implemented; `WriteSave` and `SetSaveAccountID` are contracts only. | The implemented endpoints delegate to SaveEngine and hold no format or session rule of their own. |
-| `backend/endpoints/swagger/` | Exists | Local developer HTTP/OpenAPI explorer. | Not the application frontend and not part of the application runtime. |
+| `backend/endpoints/swagger/` | Exists | Local developer HTTP/OpenAPI explorer over the implemented GameCatalog getters and, in loopback mode only, over the read-only save-session lifecycle and the implemented character getters. | Not the application frontend and not part of the application runtime. It creates one shared SaveEngine for its own process. The save-session and character routes are registered only when the explorer runs without `-allow-external-bind`; with an external bind they do not exist and answer 404. It exposes no save write, no setter and no mutation beyond `LoadSave` and `CloseSave`, which create and release an in-memory session without modifying the source file. |
 | `backend/endpoints/contract/` | Exists | Endpoint contract definitions and their structural validation. | Single source of truth for endpoint shape rules. |
 | `backend/endpoints/character/` | Exists | Character endpoint contracts and implementations. `GetSaveCharacters`, `GetCharacterProfile` and `GetCharacterStats` are implemented; the remaining character endpoints are contracts only. | The implemented endpoints delegate to SaveEngine and hold no format or session rule of their own. The contract-only endpoints will require SaveEngine and a save session. |
 | `backend/endpoints/diagnostics/` | Contracts only | Existing contracts for diagnostics and future non-mutating reports and repair plans. | Not implemented. Scans and previews must stay non-mutating. |
@@ -107,7 +107,8 @@ inventory of the whole repository.
 - `LoadSave` creates a session but never modifies the input file.
 - The first SaveEngine stage supports PC and PS4 read-only.
 - Swagger is a developer tool; the application frontend does not exist yet and is
-  outside the current scope.
+  outside the current scope. It may serve the read-only save session lifecycle in
+  its loopback mode only, and it never becomes an application runtime transport.
 - Paths under `tmp/` may be used only for local, non-committed development
   research and manual experiments. They must never be a dependency or a
   documented source for committed SaveForge 2.0 application code, test code,

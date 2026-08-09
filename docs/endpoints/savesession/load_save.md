@@ -18,7 +18,7 @@ equipment, world state, `SteamID`, `UserData11`, or any slot content.
 | Kind | Mutation |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | not exposed — callable only as a Go function. No Wails binding, no HTTP route, and no CLI command reaches it. |
+| Transport status | transport-exposed — `POST /api/v1/save-sessions` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/savesession/load_save.go](../../../backend/endpoints/savesession/load_save.go) |
 | Test source | [../../../backend/endpoints/savesession/load_save_test.go](../../../backend/endpoints/savesession/load_save_test.go) |
 | Save access | read-only — the file is opened for reading, and no byte of it is written |
@@ -171,8 +171,9 @@ reinterpreted as the other platform.
 
 ## Command-line verification
 
-`LoadSave` has no transport, so it is verified through its tests. From the
-repository root:
+`LoadSave` is verified through its tests. Its only transport is the local
+OpenAPI explorer route `POST /api/v1/save-sessions`, which exists solely
+when the explorer runs without `-allow-external-bind`. From the repository root:
 
 ```bash
 go test ./backend/saveengine -run '^Test' -count=1 -v
@@ -188,8 +189,9 @@ followed that change.
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails, HTTP, or a CLI, and there is no
-  frontend for it. The local OpenAPI explorer does not route to it.
+- The only transport is the local developer explorer route `POST /api/v1/save-sessions`,
+  which is registered only without `-allow-external-bind`. There is no Wails
+  binding, no CLI command, and no frontend for the endpoint.
 - Only native PC and PS4 containers are recognised. Encrypted containers are
   rejected, and no format conversion exists.
 - Structural recognition only: characters, inventory, storage, equipment, world

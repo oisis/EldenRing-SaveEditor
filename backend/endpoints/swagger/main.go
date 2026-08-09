@@ -1,7 +1,8 @@
 // Command swagger serves a local, read-only OpenAPI explorer for the currently
-// implemented GameCatalog getters. It is a standalone developer tool: the Wails
-// application neither imports nor starts it, and every route only calls an
-// existing getter and serialises its result.
+// implemented GameCatalog getters and, in loopback mode only, for the read-only
+// save-session lifecycle and the implemented character getters. It is a
+// standalone developer tool: the Wails application neither imports nor starts
+// it, and every route only calls an existing endpoint and serialises its result.
 package main
 
 import (
@@ -21,9 +22,12 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
 //go:embed openapi.json docs.html
@@ -53,9 +57,18 @@ func run() error {
 		return err
 	}
 
+	// The save-session routes read local save files and hold sessions in memory,
+	// so they exist only while the explorer is a loopback-only developer tool.
+	// An external bind withholds the engine, and every save-session route is then
+	// absent from the mux and answers 404.
+	var saveEngine *saveengine.Engine
+	if !*allowExternal {
+		saveEngine = saveengine.New()
+	}
+
 	server := &http.Server{
 		Addr:              *address,
-		Handler:           newHandler(gameCatalog, *applicationVersion),
+		Handler:           newHandler(gameCatalog, *applicationVersion, saveEngine),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	log.Printf("SaveForge catalog getters explorer: http://%s/docs", *address)
@@ -117,8 +130,15 @@ func validateAddress(address string, allowExternal bool) error {
 	return nil
 }
 
-func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string) http.Handler {
+// newHandler builds the explorer mux. A nil saveEngine registers no
+// save-session route at all, which is how the caller disables the read-only
+// save-session lifecycle for an external bind.
+func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, saveEngine *saveengine.Engine) http.Handler {
 	mux := http.NewServeMux()
+
+	if saveEngine != nil {
+		registerSaveSessionRoutes(mux, saveEngine)
+	}
 
 	mux.HandleFunc("GET /healthz", func(writer http.ResponseWriter, _ *http.Request) {
 		writeJSON(writer, http.StatusOK, map[string]string{"status": "ok"})
@@ -243,6 +263,117 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string) htt
 	})
 
 	return mux
+}
+
+// loadSaveRequest is the JSON body of POST /api/v1/save-sessions. Both fields
+// reach LoadSave exactly as sent: they are never trimmed, normalised or given a
+// default here.
+type loadSaveRequest struct {
+	Source           string `json:"source"`
+	ExpectedPlatform string `json:"expectedPlatform"`
+}
+
+// closeSaveResponse is the confirmation of DELETE /api/v1/save-sessions/{id}.
+// CloseSave returns no value, so the route states the closed session itself.
+type closeSaveResponse struct {
+	SaveSessionID string `json:"saveSessionID"`
+	Closed        bool   `json:"closed"`
+}
+
+// registerSaveSessionRoutes exposes the read-only save-session lifecycle and the
+// implemented character getters. Every route calls exactly one endpoint and
+// serialises its typed result; the source path, the save content and the
+// character data are never logged.
+func registerSaveSessionRoutes(mux *http.ServeMux, saveEngine *saveengine.Engine) {
+	mux.HandleFunc("POST /api/v1/save-sessions", func(writer http.ResponseWriter, request *http.Request) {
+		var body loadSaveRequest
+		decoder := json.NewDecoder(request.Body)
+		// An unknown field is a client mistake, not something to ignore silently.
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&body); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		result, err := savesession.LoadSave(saveEngine, body.Source, body.ExpectedPlatform)
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
+	mux.HandleFunc("GET /api/v1/save-sessions/{saveSessionID}", func(writer http.ResponseWriter, request *http.Request) {
+		result, err := savesession.GetLoadedSave(saveEngine, request.PathValue("saveSessionID"))
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
+	mux.HandleFunc("DELETE /api/v1/save-sessions/{saveSessionID}", func(writer http.ResponseWriter, request *http.Request) {
+		saveSessionID := request.PathValue("saveSessionID")
+		if err := savesession.CloseSave(saveEngine, saveSessionID); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, closeSaveResponse{SaveSessionID: saveSessionID, Closed: true})
+	})
+
+	mux.HandleFunc("GET /api/v1/save-sessions/{saveSessionID}/characters", func(writer http.ResponseWriter, request *http.Request) {
+		result, err := character.GetSaveCharacters(saveEngine, request.PathValue("saveSessionID"))
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.GetCharacterProfile(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.GetCharacterStats(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+}
+
+// parseCharacterID turns the path segment into the integer the character getters
+// expect. It is decimal only and is never trimmed or defaulted, so text the
+// getter could not report is rejected here; the allowed slot range stays a
+// SaveEngine rule.
+func parseCharacterID(raw string) (int, error) {
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("characterID must be an integer; got %q", raw)
+	}
+	return value, nil
 }
 
 // parseTags splits the single comma-separated tags parameter into the list the

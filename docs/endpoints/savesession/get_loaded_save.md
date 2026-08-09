@@ -16,7 +16,7 @@ before a successful `LoadSave` is an error, not an implicit load.
 | Kind | Getter |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | not exposed — callable only as a Go function. No Wails binding, no HTTP route, no CLI command, and no frontend reaches it. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/savesession/get_loaded_save.go](../../../backend/endpoints/savesession/get_loaded_save.go) |
 | Test source | [../../../backend/endpoints/savesession/get_loaded_save_test.go](../../../backend/endpoints/savesession/get_loaded_save_test.go) |
 | Save access | none — no file is opened, and the session's private snapshot is not read |
@@ -103,8 +103,9 @@ Every failure returns the zero result and changes nothing.
 
 ## Command-line verification
 
-`GetLoadedSave` has no transport, so it is verified through its tests. From the
-repository root:
+`GetLoadedSave` is verified through its tests. Its only transport is the local
+OpenAPI explorer route `GET /api/v1/save-sessions/{saveSessionID}`, which exists solely
+when the explorer runs without `-allow-external-bind`. From the repository root:
 
 ```bash
 go test ./backend/saveengine -run '^TestGetSessionInfo' -count=1 -v
@@ -119,8 +120,9 @@ reopens the save.
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails, HTTP, or a CLI, and there is no
-  frontend for it. The local OpenAPI explorer does not route to it.
+- The only transport is the local developer explorer route `GET /api/v1/save-sessions/{saveSessionID}`,
+  which is registered only without `-allow-external-bind`. There is no Wails
+  binding, no CLI command, and no frontend for the endpoint.
 - It reports session metadata only. Characters, inventory, storage, equipment,
   world state, and slot content are not readable yet, because nothing exposes
   the snapshot.

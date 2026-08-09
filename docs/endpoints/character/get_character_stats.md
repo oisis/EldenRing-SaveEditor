@@ -18,7 +18,7 @@ nothing: neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | not exposed — callable only as a Go function. No Wails binding, no HTTP route, no CLI command, and no frontend reaches it. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/character/get_character_stats.go](../../../backend/endpoints/character/get_character_stats.go) |
 | Test source | [../../../backend/endpoints/character/get_character_stats_test.go](../../../backend/endpoints/character/get_character_stats_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |
@@ -174,8 +174,9 @@ rejected for being out of range, inconsistent, or implausible.
 
 ## Command-line verification
 
-`GetCharacterStats` has no transport, so it is verified through its tests. From
-the repository root:
+`GetCharacterStats` is verified through its tests. Its only transport is the local
+OpenAPI explorer route `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats`, which exists solely
+when the explorer runs without `-allow-external-bind`. From the repository root:
 
 ```bash
 go test ./backend/saveengine -run '^TestGetCharacterStats' -count=1 -v
@@ -191,8 +192,9 @@ also cover a residual slot whose raw values survive a cleared flag, the rejected
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails, HTTP, or a CLI, and there is no
-  frontend for it. The local OpenAPI explorer does not route to it.
+- The only transport is the local developer explorer route `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats`,
+  which is registered only without `-allow-external-bind`. There is no Wails
+  binding, no CLI command, and no frontend for the endpoint.
 - It reports the raw stored statistics only. Runes, derived values, resistances,
   equip load, and spell slots are not readable, and nothing is computed here.
 - It is a getter. Changing an attribute, level, HP, FP, or SP is not possible:

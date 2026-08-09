@@ -18,7 +18,7 @@ nothing: neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | not exposed — callable only as a Go function. No Wails binding, no HTTP route, no CLI command, and no frontend reaches it. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/character/get_character_profile.go](../../../backend/endpoints/character/get_character_profile.go) |
 | Test source | [../../../backend/endpoints/character/get_character_profile_test.go](../../../backend/endpoints/character/get_character_profile_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |
@@ -150,8 +150,9 @@ An inactive or residual slot is not in this table: it is a successful result.
 
 ## Command-line verification
 
-`GetCharacterProfile` has no transport, so it is verified through its tests. From
-the repository root:
+`GetCharacterProfile` is verified through its tests. Its only transport is the local
+OpenAPI explorer route `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile`, which exists solely
+when the explorer runs without `-allow-external-bind`. From the repository root:
 
 ```bash
 go test ./backend/saveengine -run '^TestGetCharacterProfile' -count=1 -v
@@ -166,8 +167,9 @@ whose raw values survive a cleared flag, and the rejected `characterID` values
 
 ## Current limitations
 
-- The endpoint is not exposed through Wails, HTTP, or a CLI, and there is no
-  frontend for it. The local OpenAPI explorer does not route to it.
+- The only transport is the local developer explorer route `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile`,
+  which is registered only without `-allow-external-bind`. There is no Wails
+  binding, no CLI command, and no frontend for the endpoint.
 - It reports the confirmed profile fields only. Stats, appearance, inventory,
   storage, equipment, and world state are not readable yet.
 - It is a getter. Changing a name, class, gender, or play time is not possible:
