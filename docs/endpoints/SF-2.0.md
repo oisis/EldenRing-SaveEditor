@@ -29,7 +29,7 @@ file belongs to SaveForge 2.0 and where it goes.
 | `backend/endpoints/appearance/` | Exists | Appearance endpoints, including `GetAppearancePresets`. | Presets are served from GameCatalog data. |
 | `backend/endpoints/application/` | Exists | Application metadata endpoints. | Application-level information only. |
 | `backend/endpoints/network/` | Exists | Network preset endpoints and future save network-state endpoints. | Presets come from GameCatalog regulation data. |
-| `backend/endpoints/savesession/` | Exists | Contracts and future implementations of the save session lifecycle, including `LoadSave` and `GetLoadedSave`. | Implementations depend on the planned SaveEngine. |
+| `backend/endpoints/savesession/` | Exists | Contracts and implementations of the save session lifecycle. `LoadSave` is implemented; `GetLoadedSave`, `WriteSave`, `CloseSave` and `SetSaveAccountID` are contracts only. | `LoadSave` delegates to SaveEngine and holds no format rule of its own. |
 | `backend/endpoints/swagger/` | Exists | Local developer HTTP/OpenAPI explorer. | Not the application frontend and not part of the application runtime. |
 | `backend/endpoints/contract/` | Exists | Endpoint contract definitions and their structural validation. | Single source of truth for endpoint shape rules. |
 | `backend/endpoints/character/` | Contracts only | Existing character endpoint contracts. | Not implemented. Implementations will require SaveEngine and a save session. |
@@ -46,21 +46,19 @@ file belongs to SaveForge 2.0 and where it goes.
 | `backend/gamecatalog/data/regulation/` | Exists | Data derived from regulation, such as `network_params.json`. | Provenance must stay traceable to regulation. |
 | `backend/gamecatalog/data/presets/` | Exists | SaveForge 2.0 preset configuration, currently `appearance.json`. | Application-owned configuration, not game data. |
 | `backend/gamecatalog/data/assets/` | Exists | Assets owned by GameCatalog, currently item icons and appearance preset images. | Embedded GameCatalog assets. Endpoints may currently return their file names as metadata; no public HTTP route for fetching assets exists yet. |
+| `backend/saveengine/` | Exists | Independent owner of save reading and, later, save modification. Currently read-only: it recognises and validates a container and creates a session. | Does not import `backend/core` or any other legacy package. |
+| `backend/saveengine/engine.go` | Exists | SaveEngine facade that opens a local save read-only, recognises the platform, enforces the expected platform, delegates layout validation to the platform files and registers the session under its identifier. | Public entry point used by endpoints. Never modifies the opened file. |
+| `backend/saveengine/session.go` | Exists | Read-only session model and its safe public metadata: session identifier, platform, container format and unsaved-changes state. | Exposes no path, `SteamID`, offset, handle, raw bytes or character data. |
+| `backend/saveengine/pc.go` | Exists | PC container recognition by the `BND4` magic and validation of the header, the declared BND4 entry count and the bounds of the ten slots and UserData10. | PC-specific behavior stays PC-specific. No slot, `SteamID`, `UserData11` or MD5 parsing yet. |
+| `backend/saveengine/ps4.go` | Exists | PS4 container recognition by the `CB 01 9C 2C` magic and validation of the fixed header and the bounds of the ten slots and UserData10. | PS4-specific behavior stays PS4-specific. No slot, `SteamID`, `UserData11` or MD5 parsing yet. |
+| `backend/saveengine/codec.go` | Exists | Private component performing the only raw save data reading: a read-only file open and bounded reads for magic, length and range checks. | Not exported outside SaveEngine. Implements no write. |
 ## 3. Planned SaveForge 2.0 paths
 
-These paths do not exist yet. They are reserved locations, listed here so that
-implementation work lands in the agreed place.
+Reserved locations are listed here so that implementation work lands in the
+agreed place. No path is reserved at the moment: the SaveEngine paths that used
+to be listed here now exist and are described in section 2.
 
-| Path | Status | Responsibility | Notes |
-| --- | --- | --- | --- |
-| `backend/saveengine/` | Planned | Independent owner of save reading and, later, save modification. | Must not import or absorb implementations from `backend/core`. |
-| `backend/saveengine/engine.go` | Planned | SaveEngine facade that opens a save read-only and creates a session. | Public entry point used by endpoints. |
-| `backend/saveengine/session.go` | Planned | Save session model and safe session metadata. | Session state and its exposed metadata only. |
-| `backend/saveengine/pc.go` | Planned | PC format reading and recognition. | PC-specific behavior stays PC-specific. |
-| `backend/saveengine/ps4.go` | Planned | PS4 format reading and recognition. | PS4-specific behavior stays PS4-specific. |
-| `backend/saveengine/codec.go` | Planned | Private component performing raw save data reading. | Not exported outside SaveEngine. |
-
-The actual internal split may be refined once PC and PS4 format differences are
+The actual internal split of SaveEngine may be refined once PC and PS4 format differences are
 confirmed by evidence. That flexibility applies to SaveEngine internals only:
 endpoints must never take over SaveEngine logic, regardless of how SaveEngine is
 divided into files.
