@@ -278,3 +278,132 @@ func TestLoadSaveRejectsDirectorySource(t *testing.T) {
 		t.Fatal("LoadSave accepted a directory as a save source")
 	}
 }
+
+func TestGetSessionInfoReturnsTheMetadataOfALoadedSession(t *testing.T) {
+	path := writeFixture(t, "pc.sl2", pcHeader(), pcFixtureSize)
+	engine := New()
+
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	info, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	if info != loaded {
+		t.Errorf("GetSessionInfo = %+v, want the metadata LoadSave returned %+v", info, loaded)
+	}
+}
+
+func TestGetSessionInfoRejectsEmptyIdentifier(t *testing.T) {
+	path := writeFixture(t, "pc.sl2", pcHeader(), pcFixtureSize)
+	engine := New()
+
+	if _, err := engine.LoadSave(path, ""); err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	info, err := engine.GetSessionInfo("")
+	if err == nil {
+		t.Fatal("GetSessionInfo accepted an empty saveSessionID")
+	}
+	if info != (SessionInfo{}) {
+		t.Errorf("GetSessionInfo returned %+v for an empty identifier, want the zero value", info)
+	}
+}
+
+func TestGetSessionInfoRejectsUnknownIdentifier(t *testing.T) {
+	path := writeFixture(t, "pc.sl2", pcHeader(), pcFixtureSize)
+	engine := New()
+
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// Neither a foreign identifier nor a near miss of the real one resolves: the
+	// identifier is matched exactly and never trimmed or normalised.
+	unknown := []string{
+		"00000000000000000000000000000000",
+		" " + loaded.SaveSessionID,
+		loaded.SaveSessionID + " ",
+		strings.ToUpper(loaded.SaveSessionID),
+	}
+	for _, saveSessionID := range unknown {
+		t.Run(saveSessionID, func(t *testing.T) {
+			if _, err := engine.GetSessionInfo(saveSessionID); err == nil {
+				t.Fatalf("GetSessionInfo accepted the unknown identifier %q", saveSessionID)
+			}
+		})
+	}
+	if len(engine.sessions) != 1 {
+		t.Errorf("engine holds %d sessions after rejected lookups, want 1", len(engine.sessions))
+	}
+}
+
+func TestGetSessionInfoReturnsAnIndependentValue(t *testing.T) {
+	path := writeFixture(t, "pc.sl2", pcHeader(), pcFixtureSize)
+	engine := New()
+
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	mutated, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	mutated.SaveSessionID = "tampered"
+	mutated.Platform = "tampered"
+	mutated.Format = "tampered"
+	mutated.UnsavedChanges = true
+
+	again, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("second GetSessionInfo: %v", err)
+	}
+	if again != loaded {
+		t.Errorf("changing the returned value changed the stored metadata: %+v, want %+v", again, loaded)
+	}
+}
+
+func TestGetSessionInfoNeedsNoSourceFileAndExposesNoSnapshot(t *testing.T) {
+	path := writeFixture(t, "pc.sl2", pcHeader(), pcFixtureSize)
+	engine := New()
+
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	// The session exists, so the source is no longer needed: the metadata comes
+	// from the session, not from the file.
+	if err := os.Remove(path); err != nil {
+		t.Fatalf("remove source: %v", err)
+	}
+
+	info, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	if info != loaded {
+		t.Errorf("GetSessionInfo = %+v, want %+v", info, loaded)
+	}
+	if fields := reflect.TypeOf(info).NumField(); fields != 4 {
+		t.Errorf("SessionInfo has %d fields, want the 4 metadata fields", fields)
+	}
+	for name, value := range map[string]string{
+		"saveSessionID": info.SaveSessionID,
+		"platform":      info.Platform,
+		"format":        info.Format,
+	} {
+		if strings.Contains(value, path) || strings.Contains(value, string(pcMagic)) {
+			t.Errorf("%s = %q exposes the source path or the snapshot content", name, value)
+		}
+	}
+	// The snapshot stays private and untouched behind the session.
+	if stored := engine.sessions[loaded.SaveSessionID]; stored == nil || stored.snapshot == nil {
+		t.Fatal("GetSessionInfo changed the session or its snapshot")
+	}
+}

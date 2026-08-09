@@ -5,6 +5,7 @@
 package saveengine
 
 import (
+	"errors"
 	"fmt"
 	"sync"
 )
@@ -98,6 +99,30 @@ func (engine *Engine) LoadSave(path string, expectedPlatform string) (SessionInf
 	engine.sessions[session.id] = &loadedSave{session: session, snapshot: source}
 
 	return session.Info(), nil
+}
+
+// GetSessionInfo returns the safe metadata of the session registered under
+// saveSessionID. It is the only way an existing session is read back: the
+// session model, its private snapshot, the source path and the save bytes never
+// leave the package, and no file is opened.
+//
+// saveSessionID is matched exactly. It is never trimmed, normalised or guessed,
+// so an empty or unknown identifier is rejected instead of resolving to a
+// session. The call reads the session map and changes nothing.
+func (engine *Engine) GetSessionInfo(saveSessionID string) (SessionInfo, error) {
+	if saveSessionID == "" {
+		return SessionInfo{}, errors.New("saveSessionID is required")
+	}
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	loaded, exists := engine.sessions[saveSessionID]
+	if !exists {
+		return SessionInfo{}, fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+	// Info returns a value, so the caller receives an independent copy of the
+	// metadata and cannot reach the session behind it.
+	return loaded.session.Info(), nil
 }
 
 // errUnsupportedContainer rejects every input that is not an unambiguous native
