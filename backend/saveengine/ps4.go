@@ -30,6 +30,12 @@ const (
 	// container stores it without the MD5 prefix the PC container uses, so the
 	// data begins at the block offset.
 	ps4UserData10DataOffset = ps4UserData10Offset
+
+	// ps4SlotDataOffset is where the data of the first character slot starts. The
+	// PS4 container stores slots without the MD5 prefix the PC container uses, so
+	// the data begins at the block offset. The following slots repeat with
+	// ps4SlotSize.
+	ps4SlotDataOffset = ps4SlotsOffset
 )
 
 // ps4Magic marks a raw PS4 container.

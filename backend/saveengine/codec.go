@@ -1,6 +1,7 @@
 package saveengine
 
 import (
+	"bytes"
 	"encoding/binary"
 	"fmt"
 	"io"
@@ -66,6 +67,23 @@ func (source *codec) readAt(offset int64, length int) ([]byte, error) {
 	buffer := make([]byte, length)
 	copy(buffer, source.data[offset:])
 	return buffer, nil
+}
+
+// indexIn reports the absolute offset of the first occurrence of pattern inside
+// the window [offset, offset+length), or -1 when the window holds none. The
+// window is checked against the snapshot before anything is read, and the caller
+// receives a position only: no snapshot byte and no copy of the window leaves
+// the codec.
+func (source *codec) indexIn(offset, length int64, pattern []byte) (int64, error) {
+	if !source.covers(offset, length) {
+		return -1, fmt.Errorf("range [0x%X, 0x%X) is outside the file (0x%X bytes)",
+			offset, offset+length, source.length())
+	}
+	found := bytes.Index(source.data[offset:offset+length], pattern)
+	if found < 0 {
+		return -1, nil
+	}
+	return offset + int64(found), nil
 }
 
 // uint32At reads one little-endian uint32 from the given offset.

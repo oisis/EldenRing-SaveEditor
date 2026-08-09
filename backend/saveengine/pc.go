@@ -26,6 +26,11 @@ const (
 	// pcUserData10DataOffset is where the UserData10 data itself starts: the PC
 	// container stores it behind a 0x10-byte MD5 prefix, which is never parsed.
 	pcUserData10DataOffset = pcUserData10Offset + 0x10
+
+	// pcSlotDataOffset is where the data of the first character slot starts: like
+	// UserData10, every PC slot sits behind a 0x10-byte MD5 prefix, which is never
+	// parsed. The following slots repeat with pcSlotBlockSize.
+	pcSlotDataOffset = pcSlotsOffset + 0x10
 )
 
 // pcMagic marks a raw, unencrypted PC container. An AES-encrypted container
