@@ -406,13 +406,13 @@ func TestResourcesRouteRejectsInvalidPaging(t *testing.T) {
 }
 
 func TestNetworkPresetsRouteMatchesGetter(t *testing.T) {
-	want, err := network.GetNetworkPresets("")
+	gameCatalog := newPrototypeCatalog(t)
+	want, err := network.GetNetworkPresets(gameCatalog, "")
 	if err != nil {
 		t.Fatalf("network.GetNetworkPresets: %v", err)
 	}
 
-	// The route never touches the catalog, so building one would only slow the test.
-	recorder := do(t, nil, "/api/v1/network/presets")
+	recorder := do(t, gameCatalog, "/api/v1/network/presets")
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
 	}
@@ -425,12 +425,13 @@ func TestNetworkPresetsRouteMatchesGetter(t *testing.T) {
 }
 
 func TestNetworkPresetsRouteFiltersByPresetID(t *testing.T) {
-	want, err := network.GetNetworkPresets("faster-reds")
+	gameCatalog := newPrototypeCatalog(t)
+	want, err := network.GetNetworkPresets(gameCatalog, "faster-reds")
 	if err != nil {
 		t.Fatalf("network.GetNetworkPresets: %v", err)
 	}
 
-	recorder := do(t, nil, "/api/v1/network/presets?presetID=faster-reds")
+	recorder := do(t, gameCatalog, "/api/v1/network/presets?presetID=faster-reds")
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
 	}
@@ -443,10 +444,11 @@ func TestNetworkPresetsRouteFiltersByPresetID(t *testing.T) {
 
 // An unknown preset is a client error, so the route must carry the getter wording.
 func TestNetworkPresetsRouteReportsAnUnknownPresetID(t *testing.T) {
-	_, want := network.GetNetworkPresets("fast-invasions")
+	gameCatalog := newPrototypeCatalog(t)
+	_, want := network.GetNetworkPresets(gameCatalog, "fast-invasions")
 	assertErrorMessage(
 		t,
-		do(t, nil, "/api/v1/network/presets?presetID=fast-invasions"),
+		do(t, gameCatalog, "/api/v1/network/presets?presetID=fast-invasions"),
 		http.StatusBadRequest,
 		want,
 	)

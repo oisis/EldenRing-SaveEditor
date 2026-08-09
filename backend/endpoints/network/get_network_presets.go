@@ -2,20 +2,21 @@
 Endpoint: GetNetworkPresets
 EndpointID: get_network_presets
 Purpose: Zwraca backendowe presety parametrów sieciowych.
-How it works: The runtime handler builds the current backend presets directly from the preset functions of backend/core and returns them as a typed result. It reads no save, no GameCatalog and no application state, and it modifies nothing.
+How it works: The runtime handler reads the network presets of the already loaded GameCatalog, which owns and validates backend/gamecatalog/data/regulation/network_params.json, and returns them as a typed result. It reads no save and no file of its own, and it modifies nothing.
 Supported resource types: —.
 Input variables: presetID.
-GameCatalog variables read: none.
+GameCatalog variables read: network presets of regulation/network_params.json.
 Save variables read: none.
 Implementation status: implemented.
 */
 package network
 
 import (
+	"errors"
 	"fmt"
 
-	"github.com/oisis/EldenRing-SaveForge/backend/core"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 )
 
 // GetNetworkPresetsEndpointID is the stable backend identifier of GetNetworkPresets.
@@ -32,11 +33,9 @@ var GetNetworkPresetsDefinition = contract.MustDefine(contract.Definition{
 })
 
 // NetworkPreset is one backend preset: its stable identifier and the full
-// parameter set the preset stands for.
-type NetworkPreset struct {
-	ID         string                  `json:"id"`
-	Parameters core.NetworkParamValues `json:"parameters"`
-}
+// parameter set the preset stands for. The catalog owns the type, so the public
+// JSON shape stays identical to the stored data.
+type NetworkPreset = gamecatalog.NetworkPreset
 
 // GetNetworkPresetsResult is the typed result of GetNetworkPresets.
 type GetNetworkPresetsResult struct {
@@ -44,35 +43,30 @@ type GetNetworkPresetsResult struct {
 }
 
 // GetNetworkPresets reports the network parameter presets the backend offers
-// today.
+// today, read from the loaded GameCatalog.
 //
-// An empty presetID returns every preset in the order below. A non-empty
-// presetID returns exactly the named preset, matched exactly and
-// case-sensitively: the value is never trimmed, normalised or resolved through
-// an alias, so an unknown identifier is an error instead of a silent fallback.
+// An empty presetID returns every preset in catalog order, which starts with the
+// default preset vanilla. A non-empty presetID returns exactly the named preset,
+// matched exactly and case-sensitively: the value is never trimmed, normalised
+// or resolved through an alias, so an unknown identifier is an error instead of
+// a silent fallback.
 //
-// The parameter values always come from the preset functions of backend/core,
-// which own them; no value is copied here. The legacy presets of backend/core
-// (fast-invasions, light-invasions, fast-summons, fast-blue, aggressive-host
-// and NetworkParamFast) are deliberately not exposed.
-func GetNetworkPresets(presetID string) (GetNetworkPresetsResult, error) {
-	// Built per call, so a caller mutating one result cannot affect another.
-	// ponytail: a local literal, not a package-level table; the order is the
-	// contract and a shared slice would be mutable from outside.
-	presets := []NetworkPreset{
-		{ID: "vanilla", Parameters: core.NetworkParamDefaults()},
-		{ID: "faster-reds", Parameters: core.NetworkParamFasterReds()},
-		{ID: "aggressive-reds", Parameters: core.NetworkParamAggressiveReds()},
-		{ID: "faster-summons", Parameters: core.NetworkParamFasterSummons()},
-		{ID: "aggressive-summons", Parameters: core.NetworkParamAggressiveSummons()},
-		{ID: "faster-blue", Parameters: core.NetworkParamFasterBlue()},
-		{ID: "aggressive-blue", Parameters: core.NetworkParamAggressiveBlue()},
-		{ID: "faster-summon-host", Parameters: core.NetworkParamFasterSummonHost()},
-		{ID: "aggressive-summon-host", Parameters: core.NetworkParamAggressiveSummonHost()},
-		{ID: "faster-summon-guest", Parameters: core.NetworkParamFasterSummonGuest()},
-		{ID: "aggressive-summon-guest", Parameters: core.NetworkParamAggressiveSummonGuest()},
-		{ID: "faster-hunter", Parameters: core.NetworkParamFasterHunter()},
-		{ID: "aggressive-hunter", Parameters: core.NetworkParamAggressiveHunter()},
+// The parameter values come from regulation/network_params.json, which the
+// catalog loads and validates once; no value is copied here and no file is read
+// per call. The legacy presets of backend/core are deliberately not part of that
+// data and are therefore unknown identifiers.
+func GetNetworkPresets(
+	gameCatalog *gamecatalog.Catalog,
+	presetID string,
+) (GetNetworkPresetsResult, error) {
+	if gameCatalog == nil {
+		return GetNetworkPresetsResult{}, errors.New("game catalog is not loaded")
+	}
+	// The catalog returns an independent copy, so a caller mutating one result
+	// cannot affect another.
+	presets, err := gameCatalog.NetworkPresets()
+	if err != nil {
+		return GetNetworkPresetsResult{}, err
 	}
 
 	if presetID == "" {

@@ -14,9 +14,29 @@ type Catalog struct {
 	byItemGameID map[uint32]schema.ResourceRef
 	outgoing     map[schema.ResourceRef][]schema.Relation
 	incoming     map[schema.ResourceRef][]schema.Relation
+	// networkPresets is read-only after construction and stays empty for a
+	// catalog built without network parameters.
+	networkPresets []NetworkPreset
 }
 
+// New builds a catalog without network parameters, which every caller that only
+// reads resources needs.
 func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error) {
+	return NewWithNetworkParams(manifest, resources, nil)
+}
+
+// NewWithNetworkParams builds a catalog that additionally carries the network
+// presets of NetworkParamsPath, for the runtimes that serve them.
+func NewWithNetworkParams(
+	manifest schema.Manifest,
+	resources []schema.Resource,
+	networkPresets []NetworkPreset,
+) (*Catalog, error) {
+	if len(networkPresets) > 0 {
+		if err := validateNetworkPresets(networkPresets); err != nil {
+			return nil, fmt.Errorf("network parameters: %w", err)
+		}
+	}
 	sources, err := schema.ValidateManifest(manifest)
 	if err != nil {
 		return nil, fmt.Errorf("manifest: %w", err)
@@ -28,6 +48,8 @@ func New(manifest schema.Manifest, resources []schema.Resource) (*Catalog, error
 		byItemGameID: make(map[uint32]schema.ResourceRef, len(resources)),
 		outgoing:     make(map[schema.ResourceRef][]schema.Relation),
 		incoming:     make(map[schema.ResourceRef][]schema.Relation),
+		// The stored copy keeps the caller's slice out of the catalog.
+		networkPresets: append([]NetworkPreset(nil), networkPresets...),
 	}
 	for index, resource := range resources {
 		if err := schema.ValidateResource(resource, sources); err != nil {

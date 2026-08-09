@@ -13,6 +13,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
@@ -67,7 +68,13 @@ func loadCatalog(directory string) (*gamecatalog.Catalog, error) {
 	if err != nil {
 		return nil, fmt.Errorf("load catalog directory: %w", err)
 	}
-	gameCatalog, err := gamecatalog.New(data.Manifest, data.Resources())
+	// Missing or invalid network parameters stop the explorer here, instead of
+	// serving a catalog whose network route could not answer.
+	networkPresets, err := gamecatalog.LoadNetworkParams(os.DirFS(directory))
+	if err != nil {
+		return nil, fmt.Errorf("load network parameters: %w", err)
+	}
+	gameCatalog, err := gamecatalog.NewWithNetworkParams(data.Manifest, data.Resources(), networkPresets)
 	if err != nil {
 		return nil, fmt.Errorf("build catalog: %w", err)
 	}
@@ -199,10 +206,10 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string) htt
 		writeJSON(writer, http.StatusOK, result)
 	})
 
-	// The presets are backend constants: the route needs neither the catalog nor
+	// The presets live in the catalog data: the route needs the catalog, but not
 	// the application version.
 	mux.HandleFunc("GET /api/v1/network/presets", func(writer http.ResponseWriter, request *http.Request) {
-		result, err := network.GetNetworkPresets(request.URL.Query().Get("presetID"))
+		result, err := network.GetNetworkPresets(gameCatalog, request.URL.Query().Get("presetID"))
 		if err != nil {
 			writeError(writer, http.StatusBadRequest, err)
 			return
