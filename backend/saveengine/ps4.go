@@ -25,6 +25,11 @@ const (
 	ps4SlotsOffset      = int64(ps4HeaderSize)
 	ps4SlotsSize        = int64(ps4SlotCount) * ps4SlotSize
 	ps4UserData10Offset = ps4SlotsOffset + ps4SlotsSize
+
+	// ps4UserData10DataOffset is where the UserData10 data itself starts. The PS4
+	// container stores it without the MD5 prefix the PC container uses, so the
+	// data begins at the block offset.
+	ps4UserData10DataOffset = ps4UserData10Offset
 )
 
 // ps4Magic marks a raw PS4 container.

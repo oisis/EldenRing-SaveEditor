@@ -22,6 +22,10 @@ const (
 	pcSlotsOffset      = int64(pcHeaderSize)
 	pcSlotsSize        = int64(pcSlotCount) * pcSlotBlockSize
 	pcUserData10Offset = pcSlotsOffset + pcSlotsSize
+
+	// pcUserData10DataOffset is where the UserData10 data itself starts: the PC
+	// container stores it behind a 0x10-byte MD5 prefix, which is never parsed.
+	pcUserData10DataOffset = pcUserData10Offset + 0x10
 )
 
 // pcMagic marks a raw, unencrypted PC container. An AES-encrypted container
