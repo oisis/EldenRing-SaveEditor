@@ -512,6 +512,21 @@ func registerSaveSessionRoutes(
 			writeJSON(writer, http.StatusOK, result)
 		},
 	)
+
+	// The network settings belong to the session, not to a character slot: they
+	// are the regulation values stored once per save. The route passes the
+	// identifier on unchanged and reads no catalog.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/network-settings",
+		func(writer http.ResponseWriter, request *http.Request) {
+			result, err := network.GetNetworkSettings(saveEngine, request.PathValue("saveSessionID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
 }
 
 // parseCharacterID turns the path segment into the integer the character getters

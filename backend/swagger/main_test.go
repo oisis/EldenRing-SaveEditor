@@ -1,9 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"compress/flate"
+	"crypto/aes"
+	"crypto/cipher"
 	"encoding/binary"
 	"encoding/json"
 	"io"
+	"math"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -14,6 +19,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"unicode/utf16"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
@@ -949,8 +955,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 11 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 11", found)
+	if found != 13 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 13", found)
 	}
 }
 
@@ -1345,5 +1351,200 @@ func TestEquippedSpellsRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
 		}
+	}
+}
+
+// The network-settings route reads the regulation of one session, so it needs a
+// fixture that actually carries UserData11. It is built here from the documented
+// format rules and written into t.TempDir(); no real save is involved.
+const (
+	networkSettingsUserData11Offset = int64(pcHeaderSize) + 10*0x280010 + 0x60010
+	networkSettingsRowSize          = 0x24C
+)
+
+var networkSettingsRegulationKey = []byte{
+	0x99, 0xBF, 0xFC, 0x36, 0x6A, 0x6B, 0xC8, 0xC6,
+	0xF5, 0x82, 0x7D, 0x09, 0x36, 0x02, 0xD6, 0x76,
+	0xC4, 0x28, 0x92, 0xA0, 0x1C, 0x20, 0x7F, 0xB0,
+	0x24, 0xD3, 0xAF, 0x4E, 0x49, 0x3F, 0xEF, 0x99,
+}
+
+func writeNetworkSettingsFixture(t *testing.T) string {
+	t.Helper()
+
+	data := make([]byte, networkSettingsUserData11Offset)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+
+	userData11 := make([]byte, 0x20)
+	copy(userData11[0x10:], []byte{0x20, 0x47, 0x45, 0x52})
+	data = append(data, append(userData11, networkSettingsRegulation(t)...)...)
+
+	path := filepath.Join(t.TempDir(), "network-settings.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+// networkSettingsRegulation builds the encrypted DFLT regulation blob holding one
+// NetworkParam.param whose row 0 carries the values the route must report.
+func networkSettingsRegulation(t *testing.T) []byte {
+	t.Helper()
+
+	bnd4 := networkSettingsBND4(t)
+
+	var payload bytes.Buffer
+	payload.Write([]byte{0x78, 0x01})
+	writer, err := flate.NewWriter(&payload, flate.BestSpeed)
+	if err != nil {
+		t.Fatalf("flate.NewWriter: %v", err)
+	}
+	if _, err := writer.Write(bnd4); err != nil {
+		t.Fatalf("deflate: %v", err)
+	}
+	if err := writer.Close(); err != nil {
+		t.Fatalf("close deflate: %v", err)
+	}
+
+	archive := make([]byte, 76, 76+payload.Len())
+	copy(archive, []byte("DCX\x00"))
+	binary.BigEndian.PutUint32(archive[28:], uint32(len(bnd4)))
+	binary.BigEndian.PutUint32(archive[32:], uint32(payload.Len()))
+	copy(archive[40:], []byte("DFLT"))
+	archive = append(archive, payload.Bytes()...)
+
+	plaintext := make([]byte, (len(archive)+aes.BlockSize-1)/aes.BlockSize*aes.BlockSize)
+	copy(plaintext, archive)
+
+	iv := bytes.Repeat([]byte{0x5A}, aes.BlockSize)
+	block, err := aes.NewCipher(networkSettingsRegulationKey)
+	if err != nil {
+		t.Fatalf("aes.NewCipher: %v", err)
+	}
+	ciphertext := make([]byte, len(plaintext))
+	cipher.NewCBCEncrypter(block, iv).CryptBlocks(ciphertext, plaintext)
+	return append(append([]byte{}, iv...), ciphertext...)
+}
+
+func networkSettingsBND4(t *testing.T) []byte {
+	t.Helper()
+
+	param := networkSettingsParamFile()
+
+	units := utf16.Encode([]rune(`N:\GR\data\Param\param\GameParam\NetworkParam.param`))
+	name := make([]byte, len(units)*2)
+	for index, unit := range units {
+		binary.LittleEndian.PutUint16(name[index*2:], unit)
+	}
+
+	const nameAt = 0x64
+	dataAt := (nameAt + len(name) + 2 + 0x0F) &^ 0x0F
+
+	archive := make([]byte, dataAt+len(param))
+	copy(archive, []byte("BND4"))
+	binary.LittleEndian.PutUint32(archive[0x0C:], 1)
+	binary.LittleEndian.PutUint64(archive[0x40+8:], uint64(len(param)))
+	binary.LittleEndian.PutUint32(archive[0x40+24:], uint32(dataAt))
+	binary.LittleEndian.PutUint32(archive[0x40+32:], uint32(nameAt))
+	copy(archive[nameAt:], name)
+	copy(archive[dataAt:], param)
+	return archive
+}
+
+// networkSettingsParamFile writes all 22 distinct values at their confirmed row
+// offsets, so a shifted or defaulted parameter set cannot pass the route test.
+func networkSettingsParamFile() []byte {
+	const rowAt = 0x60
+	param := make([]byte, rowAt+networkSettingsRowSize)
+	param[0x2D] = 0x04
+	binary.LittleEndian.PutUint64(param[0x48:], rowAt)
+
+	row := param[rowAt:]
+	putInt := func(offset int, value int32) {
+		binary.LittleEndian.PutUint32(row[offset:], uint32(value))
+	}
+	putFloat := func(offset int, value float32) {
+		binary.LittleEndian.PutUint32(row[offset:], math.Float32bits(value))
+	}
+
+	putFloat(0x08, 15.75)
+	putFloat(0x1C, 16.5)
+	putInt(0x20, 17)
+	putInt(0x24, 18)
+	putFloat(0x28, 19.25)
+	putInt(0x60, 20)
+	putFloat(0x64, 21.5)
+	putFloat(0x68, 22.75)
+	putInt(0x70, 11)
+	putFloat(0x74, 12.5)
+	putFloat(0x78, 13.25)
+	putInt(0x7C, 14)
+	putFloat(0x180, 23.5)
+	putInt(0x184, 24)
+	putInt(0x18C, 25)
+	putFloat(0x190, 26.25)
+	putFloat(0x194, 27.75)
+	row[0x1D8] = 28
+	row[0x1D9] = 29
+	putInt(0x240, 30)
+	putFloat(0x244, 31.5)
+	putFloat(0x248, 32.25)
+	return param
+}
+
+// The route is the loopback-only transport of GetNetworkSettings: with an engine
+// it must answer 200 with exactly the stored values, and without one — the
+// -allow-external-bind mode — it must not exist at all.
+func TestNetworkSettingsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeNetworkSettingsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/network-settings"
+
+	want := network.GetNetworkSettingsResult{
+		SaveSessionID: session.SaveSessionID,
+		Parameters: gamecatalog.NetworkParamValues{
+			MaxBreakInTargetListCount:     11,
+			BreakInRequestIntervalTimeSec: 12.5,
+			BreakInRequestTimeOutSec:      13.25,
+			BreakInRequestAreaCount:       14,
+
+			SummonTimeoutTime: 15.75,
+
+			ReloadSignIntervalTime2: 16.5,
+			ReloadSignTotalCount:    17,
+			ReloadSignCellCount:     18,
+			UpdateSignIntervalTime:  19.25,
+			SingGetMax:              20,
+			SignDownloadSpan:        21.5,
+			SignUpdateSpan:          22.75,
+
+			ReloadVisitListCoolTime:   23.5,
+			MaxCoopBlueSummonCount:    24,
+			MaxVisitListCount:         25,
+			ReloadSearchCoopBlueMin:   26.25,
+			ReloadSearchCoopBlueMax:   27.75,
+			AllAreaSearchRateCoopBlue: 28,
+			AllAreaSearchRateVsBlue:   29,
+
+			VisitorListMax:      30,
+			VisitorTimeOutTime:  31.5,
+			VisitorDownloadSpan: 32.25,
+		},
+	}
+
+	recorder := doSave(t, saveEngine, http.MethodGet, target, "")
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatalf("network settings body %q differs from the expected values", recorder.Body.String())
+	}
+
+	absent := doSave(t, nil, http.MethodGet, target, "")
+	if absent.Code != http.StatusNotFound {
+		t.Fatalf("%s without an engine: status = %d, want 404 (body %q)",
+			target, absent.Code, absent.Body.String())
 	}
 }

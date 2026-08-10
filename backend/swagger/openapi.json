@@ -831,6 +831,41 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/network-settings": {
+      "get": {
+        "operationId": "getNetworkSettings",
+        "tags": ["Network"],
+        "summary": "GetNetworkSettings",
+        "description": "Returns the 22 network parameters stored in UserData11 of an existing PC or PS4 session. The values are reported exactly as the save stores them: none is validated against a preset range, normalised or replaced by a default, and a UserData11 that is missing, truncated, malformed or of an unsupported compression variant produces an error instead of a partial or fallback parameter set. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The network parameters stored in the save",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNetworkSettingsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty, unknown or already closed session identifier, or a save whose UserData11 cannot be decoded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthz",
@@ -1975,6 +2010,19 @@
           }
         },
         "required": ["presets"]
+      },
+      "GetNetworkSettingsResult": {
+        "type": "object",
+        "description": "The network parameters stored in one save session. The parameter model is the same NetworkParamValues the presets use, so a stored set and a preset set are directly comparable; the endpoint itself compares nothing.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "parameters": {
+            "$ref": "#/components/schemas/NetworkParamValues"
+          }
+        },
+        "required": ["saveSessionID", "parameters"]
       },
       "AppearancePresetSummary": {
         "type": "object",
