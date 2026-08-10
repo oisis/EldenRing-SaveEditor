@@ -717,6 +717,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells": {
+      "get": {
+        "operationId": "getEquippedSpells",
+        "tags": ["Equipment"],
+        "summary": "GetEquippedSpells",
+        "description": "Returns the fourteen physical EquippedSpells records of one character slot, in stored order, together with the Memory Slots the occupied records consume and the Memory Slots the character may fill. Every record keeps the raw MagicParam ID exactly as stored, including the native empty sentinel 0xFFFFFFFF, whose record exposes no resolved resource data. An occupied record is resolved through GameCatalog as an ItemDocument of the spell family; a raw identifier that resolves to no known spell with a known name and a known Memory Slots cost is an error, never an invented value. An inactive or residual slot is a normal result with active false, fourteen zero-value records and both counts zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The equipped spells of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterEquippedSpells"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, an active slot whose equipped spells or capacity data cannot be located inside its slot, a spell record the game never writes, or an occupied raw MagicParam ID that does not resolve to a known spell",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1474,6 +1512,75 @@
           "characterID",
           "active",
           "tears"
+        ]
+      },
+      "EquippedSpellSlot": {
+        "type": "object",
+        "description": "One physical EquippedSpells record: the raw MagicParam ID exactly as stored, and the GameCatalog resource key, name and Memory Slots cost of the spell it resolves to. The three resolved fields are empty or zero only for the native empty record, whose raw identifier is the sentinel 0xFFFFFFFF.",
+        "properties": {
+          "rawMagicParamID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "resourceKey": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "memorySlots": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "rawMagicParamID",
+          "resourceKey",
+          "name",
+          "memorySlots"
+        ]
+      },
+      "CharacterEquippedSpells": {
+        "type": "object",
+        "description": "Equipped spells of one character slot: the fourteen physical EquippedSpells records in stored order, the Memory Slots the occupied records consume, and the Memory Slots the character may fill. An inactive slot reports active false, fourteen zero-value records and both counts zero.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "spells": {
+            "type": "array",
+            "description": "The fourteen physical spell records, in stored order. The raw MagicParam identifier of every record is returned without any normalisation.",
+            "minItems": 14,
+            "maxItems": 14,
+            "items": {
+              "$ref": "#/components/schemas/EquippedSpellSlot"
+            }
+          },
+          "usedMemorySlots": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Sum of the Memory Slots costs GameCatalog states for the occupied records."
+          },
+          "availableMemorySlots": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Memory Slots the character may fill: the base capacity plus the effective Memory Stones, capped by the game maximum, plus the Moon of Nokstella bonus while that talisman sits in an unlocked talisman field."
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "spells",
+          "usedMemorySlots",
+          "availableMemorySlots"
         ]
       },
       "Error": {

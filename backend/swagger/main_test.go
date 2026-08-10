@@ -23,6 +23,8 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -1163,6 +1165,185 @@ func TestForeignOriginReceivesNoCORSPermission(t *testing.T) {
 		}
 		if got := preflight.Header().Get("Access-Control-Allow-Methods"); got != "" {
 			t.Fatalf("origin %q received Access-Control-Allow-Methods %q, want none", origin, got)
+		}
+	}
+}
+
+// The equipped-spells route is the one save-session route that also needs the
+// catalog, so it gets its own checks: the successful body, the characterID the
+// route itself rejects, and its absence without an engine.
+// Layout of the local active-slot fixture this one test needs. The generic
+// fixture leaves every slot inactive, which would prove nothing about the
+// catalog the route passes on, so slot 0 is filled in here instead.
+const (
+	equippedSpellsUserData10Offset = int64(pcHeaderSize) + 10*0x280010 + 0x10
+	equippedSpellsFlagsOffset      = 0x1954
+	equippedSpellsSlotDataBase     = int64(pcHeaderSize) + 0x10
+	equippedSpellsAnchorAt         = 0x0640
+	equippedSpellsSectionAt        = 0x9205
+	equippedSpellsRecordCount      = 14
+	equippedSpellsRecordSize       = 8
+	rawGlintstonePebble            = 0x0FA0
+)
+
+// equippedSpellsFixtureAnchor is the confirmed 65-byte SaveEngine anchor: one
+// leading 0x00 byte, then four full repetitions of a 16-byte block made of
+// 0xFF 0xFF 0xFF 0xFF followed by twelve 0x00 bytes.
+var equippedSpellsFixtureAnchor = []byte{
+	0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+}
+
+// writeActiveSpellsFixture writes a synthetic PC save into t.TempDir() whose
+// slot 0 is active and carries one occupied spell record followed by thirteen
+// native empty pairs.
+func writeActiveSpellsFixture(t *testing.T) string {
+	t.Helper()
+
+	data := make([]byte, pcFixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+
+	data[equippedSpellsUserData10Offset+equippedSpellsFlagsOffset] = 1
+
+	anchorBase := equippedSpellsSlotDataBase + equippedSpellsAnchorAt
+	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+	for index := 0; index < equippedSpellsRecordCount; index++ {
+		at := anchorBase + equippedSpellsSectionAt + int64(index)*equippedSpellsRecordSize
+		spellID, follower := uint32(0xFFFFFFFF), uint32(0x00000000)
+		if index == 0 {
+			spellID, follower = rawGlintstonePebble, 0xFFFFFFFF
+		}
+		binary.LittleEndian.PutUint32(data[at:], spellID)
+		binary.LittleEndian.PutUint32(data[at+4:], follower)
+	}
+
+	path := filepath.Join(t.TempDir(), "active-spells.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+// newFullCatalog builds a catalog from the embedded catalog data. The prototype
+// catalog carries no spell document, so it could not resolve the equipped spell.
+func newFullCatalog(t *testing.T) *gamecatalog.Catalog {
+	t.Helper()
+
+	data, err := loader.LoadFS(catalogdata.Files())
+	if err != nil {
+		t.Fatalf("loader.LoadFS: %v", err)
+	}
+	gameCatalog, err := gamecatalog.New(data.Manifest, data.Resources())
+	if err != nil {
+		t.Fatalf("gamecatalog.New: %v", err)
+	}
+	return gameCatalog
+}
+
+func TestEquippedSpellsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0"
+	gameCatalog := newFullCatalog(t)
+
+	want, err := equipment.GetEquippedSpells(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("equipment.GetEquippedSpells: %v", err)
+	}
+	if !want.Active {
+		t.Fatal("the fixture slot is inactive, so the route would prove no catalog resolution")
+	}
+	wantFirst := equipment.EquippedSpellSlot{
+		RawMagicParamID: rawGlintstonePebble,
+		ResourceKey:     "40000FA0",
+		Name:            "Glintstone Pebble",
+		MemorySlots:     1,
+	}
+	if want.Spells[0] != wantFirst {
+		t.Fatalf("first record = %+v, want %+v", want.Spells[0], wantFirst)
+	}
+
+	// The route has to run against the same catalog, so it is served by a
+	// handler built here instead of by the shared prototype-catalog helper.
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, base+"/equipped-spells", nil))
+	assertOK(t, recorder, base+"/equipped-spells")
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("equipped spells route body differs from the GetEquippedSpells result")
+	}
+}
+
+func TestEquippedSpellsRouteRejectsAMalformedCharacterID(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+
+	for _, raw := range []string{"one", " 0", "0x1"} {
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/" + url.PathEscape(raw) + "/equipped-spells"
+		if recorder := doSave(t, saveEngine, http.MethodGet, target, ""); recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", target, recorder.Code, recorder.Body.String())
+		}
+	}
+}
+
+func TestEquippedSpellsRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/equipped-spells"
+	recorder := doSave(t, nil, http.MethodGet, target, "")
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestEquippedSpellsRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Paths map[string]map[string]any `json:"paths"`
+		Comps struct {
+			Schemas map[string]any `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	const path = "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells"
+	operation, exists := document.Paths[path]
+	if !exists {
+		t.Fatalf("openapi.json does not describe %s", path)
+	}
+	if _, hasGet := operation["get"]; !hasGet {
+		t.Fatalf("openapi.json describes %s without a GET operation", path)
+	}
+	for _, name := range []string{"EquippedSpellSlot", "CharacterEquippedSpells"} {
+		if _, exists := document.Comps.Schemas[name]; !exists {
+			t.Fatalf("openapi.json is missing the %s schema", name)
 		}
 	}
 }

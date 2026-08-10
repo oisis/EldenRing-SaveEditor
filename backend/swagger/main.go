@@ -141,7 +141,7 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, sav
 	mux := http.NewServeMux()
 
 	if saveEngine != nil {
-		registerSaveSessionRoutes(mux, saveEngine)
+		registerSaveSessionRoutes(mux, saveEngine, gameCatalog)
 	}
 
 	mux.HandleFunc("GET /healthz", func(writer http.ResponseWriter, _ *http.Request) {
@@ -325,8 +325,13 @@ type closeSaveResponse struct {
 // registerSaveSessionRoutes exposes the read-only save-session lifecycle and the
 // implemented character getters. Every route calls exactly one endpoint and
 // serialises its typed result; the source path, the save content and the
-// character data are never logged.
-func registerSaveSessionRoutes(mux *http.ServeMux, saveEngine *saveengine.Engine) {
+// character data are never logged. The catalog is passed on to the one getter
+// that resolves save values into catalog documents.
+func registerSaveSessionRoutes(
+	mux *http.ServeMux,
+	saveEngine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+) {
 	mux.HandleFunc("POST /api/v1/save-sessions", func(writer http.ResponseWriter, request *http.Request) {
 		var body loadSaveRequest
 		decoder := json.NewDecoder(request.Body)
@@ -482,6 +487,24 @@ func registerSaveSessionRoutes(mux *http.ServeMux, saveEngine *saveengine.Engine
 				return
 			}
 			result, err := equipment.GetPhysickMixture(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := equipment.GetEquippedSpells(
+				saveEngine, gameCatalog, request.PathValue("saveSessionID"), characterID)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return
