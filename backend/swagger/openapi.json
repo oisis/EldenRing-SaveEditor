@@ -603,6 +603,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items": {
+      "get": {
+        "operationId": "getQuickItems",
+        "tags": ["Equipment"],
+        "summary": "GetQuickItems",
+        "description": "Returns the ten raw Quick Items records of one character slot and the raw active-slot value behind them. Every itemID, equipIndex and activeQuick is the value stored in the save: nothing is normalised, validated or resolved against GameCatalog, so 0, 0xFFFFFFFF and a negative activeQuick are reported as written. An inactive slot is a normal result whose ten records are zeroed and whose activeQuick is 0. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The raw character quick items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterQuickItems"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, or an active slot whose quick items cannot be located inside its slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1224,6 +1262,61 @@
           "characterID",
           "active",
           "slots"
+        ]
+      },
+      "QuickItemSlot": {
+        "type": "object",
+        "description": "One raw Quick Items record exactly as stored: the item field followed by the equip-index field, both little-endian uint32. Neither value is normalised, validated or resolved against GameCatalog.",
+        "properties": {
+          "itemID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "equipIndex": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "itemID",
+          "equipIndex"
+        ]
+      },
+      "CharacterQuickItems": {
+        "type": "object",
+        "description": "Raw Quick Items state of one character slot: the ten EquipItemData records in stored order and the raw active-slot value behind them. Nothing is normalised, validated or resolved against GameCatalog. An inactive slot reports active false, ten zeroed records and activeQuick 0.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "description": "The ten raw Quick Items records, in stored order. The values are returned without any normalisation.",
+            "minItems": 10,
+            "maxItems": 10,
+            "items": {
+              "$ref": "#/components/schemas/QuickItemSlot"
+            }
+          },
+          "activeQuick": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The raw active-slot value stored behind the ten records. It keeps its sign: a negative value is reported as written."
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "items",
+          "activeQuick"
         ]
       },
       "Error": {
