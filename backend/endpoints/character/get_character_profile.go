@@ -1,7 +1,7 @@
 /*
 Endpoint: GetCharacterProfile
 EndpointID: get_character_profile
-Purpose: Zwraca profil jednej postaci: nazwę, identyfikator klasy początkowej, poziom, czas gry i surowy identyfikator typu ciała.
+Purpose: Returns one character profile: name, starting class identifier, level, play time, and raw body type identifier.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetCharacterProfileDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca profil jednej postaci: nazwę, identyfikator klasy początkowej, poziom, czas gry i surowy identyfikator typu ciała.",
+	Description:                "Returns one character profile: name, starting class identifier, level, play time, and raw body type identifier.",
 })
 
 // GetCharacterProfileResult is the typed result of GetCharacterProfile. The

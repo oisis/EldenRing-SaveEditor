@@ -1,7 +1,7 @@
 /*
 Endpoint: GetPhysickMixture
 EndpointID: get_physick_mixture
-Purpose: Zwraca obie pozycje aktualnej mieszanki Flask of Wondrous Physick.
+Purpose: Returns both entries of the current Flask of Wondrous Physick mixture.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetPhysickMixtureDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca obie pozycje aktualnej mieszanki Flask of Wondrous Physick.",
+	Description:                "Returns both entries of the current Flask of Wondrous Physick mixture.",
 })
 
 // GetPhysickMixtureResult is the typed result of GetPhysickMixture. The shape is

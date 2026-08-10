@@ -1,7 +1,7 @@
 /*
 Endpoint: GetBuildTemplates
 EndpointID: get_build_templates
-Purpose: Zwraca bibliotekę Build Templates bez wczytywania pełnej zawartości każdego szablonu.
+Purpose: Returns the Build Templates library without loading the complete contents of every template.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: GameResource references.
 Input variables: search, tags, page, pageSize.
@@ -23,5 +23,5 @@ var GetBuildTemplatesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"search", "tags", "page", "pageSize"},
-	Description:                "Zwraca bibliotekę Build Templates bez wczytywania pełnej zawartości każdego szablonu.",
+	Description:                "Returns the Build Templates library without loading the complete contents of every template.",
 })

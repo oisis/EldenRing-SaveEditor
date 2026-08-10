@@ -1,7 +1,7 @@
 /*
 Endpoint: GetStorage
 EndpointID: get_storage
-Purpose: Zwraca pełny, uporządkowany widok Storage według tego samego kontraktu instancji co Inventory.
+Purpose: Returns the complete ordered Storage view under the same instance contract as Inventory.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument.
 Input variables: characterID, family, containerSection, page, pageSize.
@@ -23,5 +23,5 @@ var GetStorageDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"characterID", "family", "containerSection", "page", "pageSize"},
-	Description:                "Zwraca pełny, uporządkowany widok Storage według tego samego kontraktu instancji co Inventory.",
+	Description:                "Returns the complete ordered Storage view under the same instance contract as Inventory.",
 })

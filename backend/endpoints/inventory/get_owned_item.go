@@ -1,7 +1,7 @@
 /*
 Endpoint: GetOwnedItem
 EndpointID: get_owned_item
-Purpose: Zwraca szczegóły jednej posiadanej instancji itemu wskazanej przez stabilne OwnedItemID.
+Purpose: Returns details of one owned item instance identified by its stable OwnedItemID.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument.
 Input variables: characterID, ownedItemID.
@@ -23,5 +23,5 @@ var GetOwnedItemDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID"},
-	Description:                "Zwraca szczegóły jednej posiadanej instancji itemu wskazanej przez stabilne OwnedItemID.",
+	Description:                "Returns details of one owned item instance identified by its stable OwnedItemID.",
 })

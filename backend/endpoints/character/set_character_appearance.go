@@ -1,7 +1,7 @@
 /*
 Endpoint: SetCharacterAppearance
 EndpointID: set_character_appearance
-Purpose: Waliduje i atomowo zapisuje kompletny model wyglądu postaci.
+Purpose: Validates and atomically writes the complete character appearance model.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, characterID, appearance, expectedRevision.
@@ -23,5 +23,5 @@ var SetCharacterAppearanceDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "appearance", "expectedRevision"},
-	Description:                "Waliduje i atomowo zapisuje kompletny model wyglądu postaci.",
+	Description:                "Validates and atomically writes the complete character appearance model.",
 })

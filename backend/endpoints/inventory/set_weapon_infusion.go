@@ -1,7 +1,7 @@
 /*
 Endpoint: SetWeaponInfusion
 EndpointID: set_weapon_infusion
-Purpose: Ustawia infusion posiadanej broni po walidacji kompatybilności.
+Purpose: Sets the infusion of an owned weapon after validating compatibility.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Weapon z capability infusion.
 Input variables: characterID, ownedItemID, affinity, expectedRevision.
@@ -23,5 +23,5 @@ var SetWeaponInfusionDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Weapon z capability infusion",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID", "affinity", "expectedRevision"},
-	Description:                "Ustawia infusion posiadanej broni po walidacji kompatybilności.",
+	Description:                "Sets the infusion of an owned weapon after validating compatibility.",
 })

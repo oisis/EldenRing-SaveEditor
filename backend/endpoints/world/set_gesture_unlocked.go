@@ -1,7 +1,7 @@
 /*
 Endpoint: SetGestureUnlocked
 EndpointID: set_gesture_unlocked
-Purpose: Odblokowuje albo blokuje gest i zmienia wyłącznie należący do niego stan GestureGameData.
+Purpose: Unlocks or locks a gesture and changes only its associated GestureGameData state.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Gesture z grant.endpoint=set_gesture_unlocked.
 Input variables: characterID, gestureKind, gestureKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetGestureUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Gesture z grant.endpoint=set_gesture_unlocked",
 	SupportedResourceVariables: []string{"characterID", "gestureKind", "gestureKey", "unlocked", "expectedRevision"},
-	Description:                "Odblokowuje albo blokuje gest i zmienia wyłącznie należący do niego stan GestureGameData.",
+	Description:                "Unlocks or locks a gesture and changes only its associated GestureGameData state.",
 })

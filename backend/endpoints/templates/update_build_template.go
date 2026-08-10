@@ -1,7 +1,7 @@
 /*
 Endpoint: UpdateBuildTemplate
 EndpointID: update_build_template
-Purpose: Zmienia metadane albo zawartość istniejącego Build Template z kontrolą rewizji.
+Purpose: Changes the metadata or contents of an existing Build Template with revision control.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: templateID, templateRevision, metadata, content.
@@ -23,5 +23,5 @@ var UpdateBuildTemplateDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"templateID", "templateRevision", "metadata", "content"},
-	Description:                "Zmienia metadane albo zawartość istniejącego Build Template z kontrolą rewizji.",
+	Description:                "Changes the metadata or contents of an existing Build Template with revision control.",
 })

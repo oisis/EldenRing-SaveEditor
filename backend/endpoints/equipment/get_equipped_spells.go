@@ -1,7 +1,7 @@
 /*
 Endpoint: GetEquippedSpells
 EndpointID: get_equipped_spells
-Purpose: Zwraca zaklęcia w slotach pamięci oraz wykorzystaną i dostępną pojemność Memory Slots.
+Purpose: Returns spells in memory slots together with used and available Memory Slots capacity.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session, and resolves every occupied raw MagicParam ID through GameCatalog. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: ItemDocument: Spell.
 Input variables: saveSessionID, characterID.
@@ -31,7 +31,7 @@ var GetEquippedSpellsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument: Spell",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca zaklęcia w slotach pamięci oraz wykorzystaną i dostępną pojemność Memory Slots.",
+	Description:                "Returns spells in memory slots together with used and available Memory Slots capacity.",
 })
 
 // equippedSpellGameIDPrefix is the item-family prefix a raw MagicParam ID

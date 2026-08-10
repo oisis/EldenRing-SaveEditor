@@ -1,7 +1,7 @@
 /*
 Endpoint: GetBosses
 EndpointID: get_bosses
-Purpose: Zwraca bossów i informację o ich pokonaniu.
+Purpose: Returns bosses and whether they have been defeated.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: Boss.
 Input variables: characterID, regionKind, regionKey.
@@ -23,5 +23,5 @@ var GetBossesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "Boss",
 	SupportedResourceVariables: []string{"characterID", "regionKind", "regionKey"},
-	Description:                "Zwraca bossów i informację o ich pokonaniu.",
+	Description:                "Returns bosses and whether they have been defeated.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: SetMapRegionRevealed
 EndpointID: set_map_region_revealed
-Purpose: Ustawia widoczność wskazanego regionu mapy bez ogólnego dostępu do surowych flag.
+Purpose: Sets the visibility of the specified map region without providing general access to raw flags.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: MapRegion z grant.endpoint=set_map_region_revealed.
 Input variables: characterID, mapRegionKind, mapRegionKey, revealed, expectedRevision.
@@ -23,5 +23,5 @@ var SetMapRegionRevealedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "MapRegion z grant.endpoint=set_map_region_revealed",
 	SupportedResourceVariables: []string{"characterID", "mapRegionKind", "mapRegionKey", "revealed", "expectedRevision"},
-	Description:                "Ustawia widoczność wskazanego regionu mapy bez ogólnego dostępu do surowych flag.",
+	Description:                "Sets the visibility of the specified map region without providing general access to raw flags.",
 })

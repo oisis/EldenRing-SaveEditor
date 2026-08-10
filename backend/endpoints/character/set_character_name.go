@@ -1,7 +1,7 @@
 /*
 Endpoint: SetCharacterName
 EndpointID: set_character_name
-Purpose: Waliduje i ustawia nazwę postaci.
+Purpose: Validates and sets the character name.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, name, expectedRevision.
@@ -23,5 +23,5 @@ var SetCharacterNameDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "name", "expectedRevision"},
-	Description:                "Waliduje i ustawia nazwę postaci.",
+	Description:                "Validates and sets the character name.",
 })

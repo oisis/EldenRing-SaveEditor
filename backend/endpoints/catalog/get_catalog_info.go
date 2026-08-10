@@ -1,7 +1,7 @@
 /*
 Endpoint: GetCatalogInfo
 EndpointID: get_catalog_info
-Purpose: Zwraca wersję schematu i danych GameCatalog, wersję gry, status walidacji oraz manifest użytych źródeł.
+Purpose: Returns the GameCatalog schema and data versions, game version, validation status, and the manifest of sources used.
 How it works: The runtime handler reads the manifest of the already loaded GameCatalog, checks it with the existing schema.ValidateManifest validator and returns it as a typed result without loading, reloading or modifying the catalog.
 Supported resource types: —.
 Input variables: none.
@@ -30,7 +30,7 @@ var GetCatalogInfoDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: nil,
-	Description:                "Zwraca wersję schematu i danych GameCatalog, wersję gry, status walidacji oraz manifest użytych źródeł.",
+	Description:                "Returns the GameCatalog schema and data versions, game version, validation status, and the manifest of sources used.",
 })
 
 // GetCatalogInfoResult is the typed result of GetCatalogInfo.

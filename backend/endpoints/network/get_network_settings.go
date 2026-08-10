@@ -1,7 +1,7 @@
 /*
 Endpoint: GetNetworkSettings
 EndpointID: get_network_settings
-Purpose: Zwraca aktualne parametry sieciowe save.
+Purpose: Returns the current network parameters stored in the save.
 How it works: The runtime handler passes saveSessionID to SaveEngine, which reads the UserData11 regulation of an already loaded session and returns the 22 stored network parameters. The endpoint opens no file, reads no snapshot, parses no save data of its own, reads no GameCatalog and compares nothing against a preset.
 Supported resource types: —.
 Input variables: saveSessionID.
@@ -29,7 +29,7 @@ var GetNetworkSettingsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID"},
-	Description:                "Zwraca aktualne parametry sieciowe save.",
+	Description:                "Returns the current network parameters stored in the save.",
 })
 
 // GetNetworkSettingsResult is the typed result of GetNetworkSettings: the

@@ -1,7 +1,7 @@
 /*
 Endpoint: SetPouchItems
 EndpointID: set_pouch_items
-Purpose: Atomowo ustawia zawartość slotów Pouch.
+Purpose: Atomically sets the contents of Pouch slots.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument z capability equipment dopuszczającą slot pouch.
 Input variables: characterID, slotAssignments, expectedRevision.
@@ -23,5 +23,5 @@ var SetPouchItemsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument z capability equipment dopuszczającą slot pouch",
 	SupportedResourceVariables: []string{"characterID", "slotAssignments", "expectedRevision"},
-	Description:                "Atomowo ustawia zawartość slotów Pouch.",
+	Description:                "Atomically sets the contents of Pouch slots.",
 })

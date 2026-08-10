@@ -1,7 +1,7 @@
 /*
 Endpoint: CreateBuildTemplate
 EndpointID: create_build_template
-Purpose: Tworzy nowy Build Template ze zwalidowanego, jawnego wyboru danych.
+Purpose: Creates a new Build Template from an explicit validated data selection.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: sourceCharacterID, selection, name, description, tags.
@@ -23,5 +23,5 @@ var CreateBuildTemplateDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"sourceCharacterID", "selection", "name", "description", "tags"},
-	Description:                "Tworzy nowy Build Template ze zwalidowanego, jawnego wyboru danych.",
+	Description:                "Creates a new Build Template from an explicit validated data selection.",
 })

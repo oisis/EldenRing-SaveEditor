@@ -1,7 +1,7 @@
 /*
 Endpoint: GetItemCapacity
 EndpointID: get_item_capacity
-Purpose: Zwraca aktualną pojemność właściwych kontenerów i struktur pomocniczych oraz koszt planowanego dodania itemów. Getter niczego nie rezerwuje i nie mutuje.
+Purpose: Returns the current capacity of the relevant containers and supporting structures and the cost of the planned item addition. The getter reserves and mutates nothing.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument.
 Input variables: characterID, destination, kind, key, variantID, quantity.
@@ -23,5 +23,5 @@ var GetItemCapacityDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"characterID", "destination", "kind", "key", "variantID", "quantity"},
-	Description:                "Zwraca aktualną pojemność właściwych kontenerów i struktur pomocniczych oraz koszt planowanego dodania itemów. Getter niczego nie rezerwuje i nie mutuje.",
+	Description:                "Returns the current capacity of the relevant containers and supporting structures and the cost of the planned item addition. The getter reserves and mutates nothing.",
 })

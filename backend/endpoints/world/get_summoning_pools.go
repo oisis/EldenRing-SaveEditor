@@ -1,7 +1,7 @@
 /*
 Endpoint: GetSummoningPools
 EndpointID: get_summoning_pools
-Purpose: Zwraca Summoning Pools i stan ich aktywacji.
+Purpose: Returns Summoning Pools and their activation state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: SummoningPool.
 Input variables: characterID, regionKind, regionKey.
@@ -23,5 +23,5 @@ var GetSummoningPoolsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "SummoningPool",
 	SupportedResourceVariables: []string{"characterID", "regionKind", "regionKey"},
-	Description:                "Zwraca Summoning Pools i stan ich aktywacji.",
+	Description:                "Returns Summoning Pools and their activation state.",
 })

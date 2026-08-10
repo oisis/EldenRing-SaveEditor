@@ -1,7 +1,7 @@
 /*
 Endpoint: GetRepairPlan
 EndpointID: get_repair_plan
-Purpose: Buduje niemutujący, związany z aktualną wersją save plan wybranych napraw.
+Purpose: Builds a non-mutating plan of selected repairs bound to the current save version.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, saveRevision, issueIDs.
@@ -23,5 +23,5 @@ var GetRepairPlanDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "saveRevision", "issueIDs"},
-	Description:                "Buduje niemutujący, związany z aktualną wersją save plan wybranych napraw.",
+	Description:                "Builds a non-mutating plan of selected repairs bound to the current save version.",
 })

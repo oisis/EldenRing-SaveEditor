@@ -1,7 +1,7 @@
 /*
 Endpoint: SetSpiritAshUpgradeLevel
 EndpointID: set_spirit_ash_upgrade_level
-Purpose: Ustawia poziom ulepszenia Spirit Ash zgodnie z właściwym modelem i limitem.
+Purpose: Sets the Spirit Ash upgrade level according to its applicable model and limit.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: SpiritAsh z capability upgrade.
 Input variables: characterID, ownedItemID, upgradeLevel, expectedRevision.
@@ -23,5 +23,5 @@ var SetSpiritAshUpgradeLevelDefinition = contract.MustDefine(contract.Definition
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: SpiritAsh z capability upgrade",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID", "upgradeLevel", "expectedRevision"},
-	Description:                "Ustawia poziom ulepszenia Spirit Ash zgodnie z właściwym modelem i limitem.",
+	Description:                "Sets the Spirit Ash upgrade level according to its applicable model and limit.",
 })

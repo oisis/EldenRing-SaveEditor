@@ -1,7 +1,7 @@
 /*
 Endpoint: SetRegionUnlocked
 EndpointID: set_region_unlocked
-Purpose: Ustawia stan odblokowania regionu.
+Purpose: Sets the unlock state of a region.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: Region z grant.endpoint=set_region_unlocked.
 Input variables: characterID, regionKind, regionKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetRegionUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "Region z grant.endpoint=set_region_unlocked",
 	SupportedResourceVariables: []string{"characterID", "regionKind", "regionKey", "unlocked", "expectedRevision"},
-	Description:                "Ustawia stan odblokowania regionu.",
+	Description:                "Sets the unlock state of a region.",
 })

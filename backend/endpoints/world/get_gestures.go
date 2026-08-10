@@ -1,7 +1,7 @@
 /*
 Endpoint: GetGestures
 EndpointID: get_gestures
-Purpose: Zwraca gesty i informację, czy każdy z nich jest odblokowany.
+Purpose: Returns gestures and whether each one is unlocked.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument: Gesture.
 Input variables: characterID, availabilityFilter.
@@ -23,5 +23,5 @@ var GetGesturesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument: Gesture",
 	SupportedResourceVariables: []string{"characterID", "availabilityFilter"},
-	Description:                "Zwraca gesty i informację, czy każdy z nich jest odblokowany.",
+	Description:                "Returns gestures and whether each one is unlocked.",
 })

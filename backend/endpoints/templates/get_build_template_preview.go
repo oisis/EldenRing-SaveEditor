@@ -1,7 +1,7 @@
 /*
 Endpoint: GetBuildTemplatePreview
 EndpointID: get_build_template_preview
-Purpose: Buduje niemutujący podgląd zastosowania template do wskazanej postaci.
+Purpose: Builds a non-mutating preview of applying a template to the specified character.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: GameResource references.
 Input variables: characterID, templateID, selection, options.
@@ -23,5 +23,5 @@ var GetBuildTemplatePreviewDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"characterID", "templateID", "selection", "options"},
-	Description:                "Buduje niemutujący podgląd zastosowania template do wskazanej postaci.",
+	Description:                "Builds a non-mutating preview of applying a template to the specified character.",
 })

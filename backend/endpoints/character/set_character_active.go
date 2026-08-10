@@ -1,7 +1,7 @@
 /*
 Endpoint: SetCharacterActive
 EndpointID: set_character_active
-Purpose: Zmienia stan aktywności slotu postaci.
+Purpose: Changes the activity state of a character slot.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, active, expectedRevision.
@@ -23,5 +23,5 @@ var SetCharacterActiveDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "active", "expectedRevision"},
-	Description:                "Zmienia stan aktywności slotu postaci.",
+	Description:                "Changes the activity state of a character slot.",
 })

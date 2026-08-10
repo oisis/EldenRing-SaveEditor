@@ -1,7 +1,7 @@
 /*
 Endpoint: SetDiagnosticMode
 EndpointID: set_diagnostic_mode
-Purpose: Włącza albo wyłącza rozszerzoną diagnostykę bez zmiany zawartości save.
+Purpose: Enables or disables extended diagnostics without changing save contents.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: enabled.
@@ -23,5 +23,5 @@ var SetDiagnosticModeDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"enabled"},
-	Description:                "Włącza albo wyłącza rozszerzoną diagnostykę bez zmiany zawartości save.",
+	Description:                "Enables or disables extended diagnostics without changing save contents.",
 })

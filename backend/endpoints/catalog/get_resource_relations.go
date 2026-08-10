@@ -1,7 +1,7 @@
 /*
 Endpoint: GetResourceRelations
 EndpointID: get_resource_relations
-Purpose: Zwraca relacje wychodzące i przychodzące wskazanego zasobu.
+Purpose: Returns the outgoing and incoming relations of the specified resource.
 How it works: The runtime handler validates gameCatalog, kind, key, relationType and direction, resolves the exact (kind, key) pair against the already loaded GameCatalog, and returns the outgoing and incoming relations of that resource as stored, in catalog order, taken from the independent copies the catalog returns; it filters only by the exact relationType and direction it was given and never sorts, normalises, deduplicates, or synthesises a relation, never returns the documents of related resources, and never loads, reloads or modifies the catalog.
 Supported resource types: GameResource.
 Input variables: kind, key, relationType, direction.
@@ -37,7 +37,7 @@ var GetResourceRelationsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource",
 	SupportedResourceVariables: []string{"kind", "key", "relationType", "direction"},
-	Description:                "Zwraca relacje wychodzące i przychodzące wskazanego zasobu.",
+	Description:                "Returns the outgoing and incoming relations of the specified resource.",
 })
 
 // GetResourceRelationsResult is the typed result of GetResourceRelations.

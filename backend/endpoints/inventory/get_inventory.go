@@ -1,7 +1,7 @@
 /*
 Endpoint: GetInventory
 EndpointID: get_inventory
-Purpose: Zwraca surowe, natywne rekordy InventoryHeld jednego slotu postaci, bez rozwiązywania ich w GameCatalog.
+Purpose: Returns raw native InventoryHeld records from one character slot without resolving them through GameCatalog.
 How it works: The runtime handler passes saveSessionID, characterID, containerSection and the paging values to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, containerSection, page, pageSize.
@@ -30,7 +30,7 @@ var GetInventoryDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "containerSection", "page", "pageSize"},
-	Description:                "Zwraca surowe, natywne rekordy InventoryHeld jednego slotu postaci, bez rozwiązywania ich w GameCatalog.",
+	Description:                "Returns raw native InventoryHeld records from one character slot without resolving them through GameCatalog.",
 })
 
 // GetInventoryResult is the typed result of GetInventory. The shape is owned by

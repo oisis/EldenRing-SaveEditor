@@ -1,7 +1,7 @@
 /*
 Endpoint: GetColosseums
 EndpointID: get_colosseums
-Purpose: Zwraca kolosea i stan ich odblokowania.
+Purpose: Returns colosseums and their unlock state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: Colosseum.
 Input variables: characterID.
@@ -23,5 +23,5 @@ var GetColosseumsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "Colosseum",
 	SupportedResourceVariables: []string{"characterID"},
-	Description:                "Zwraca kolosea i stan ich odblokowania.",
+	Description:                "Returns colosseums and their unlock state.",
 })

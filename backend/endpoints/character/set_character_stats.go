@@ -1,7 +1,7 @@
 /*
 Endpoint: SetCharacterStats
 EndpointID: set_character_stats
-Purpose: Atomowo ustawia powiązany zestaw statystyk i przelicza wartości pochodne zgodnie z jednym kontraktem domenowym.
+Purpose: Atomically sets the related group of statistics and recalculates derived values under one domain contract.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, attributes, levelPolicy, expectedRevision.
@@ -23,5 +23,5 @@ var SetCharacterStatsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "attributes", "levelPolicy", "expectedRevision"},
-	Description:                "Atomowo ustawia powiązany zestaw statystyk i przelicza wartości pochodne zgodnie z jednym kontraktem domenowym.",
+	Description:                "Atomically sets the related group of statistics and recalculates derived values under one domain contract.",
 })

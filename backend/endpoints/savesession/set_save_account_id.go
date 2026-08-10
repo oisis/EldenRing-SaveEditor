@@ -1,7 +1,7 @@
 /*
 Endpoint: SetSaveAccountID
 EndpointID: set_save_account_id
-Purpose: Ustawia identyfikator właściciela save według reguł właściwych dla platformy.
+Purpose: Sets the save owner identifier according to platform-specific rules.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, accountID, expectedRevision.
@@ -23,5 +23,5 @@ var SetSaveAccountIDDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "accountID", "expectedRevision"},
-	Description:                "Ustawia identyfikator właściciela save według reguł właściwych dla platformy.",
+	Description:                "Sets the save owner identifier according to platform-specific rules.",
 })

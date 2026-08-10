@@ -1,7 +1,7 @@
 /*
 Endpoint: GetCharacterAppearance
 EndpointID: get_character_appearance
-Purpose: Zwraca kompletny, typowany model wyglądu postaci.
+Purpose: Returns the complete typed appearance model of one character.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetCharacterAppearanceDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca kompletny, typowany model wyglądu postaci.",
+	Description:                "Returns the complete typed appearance model of one character.",
 })
 
 // GetCharacterAppearanceResult is the typed result of GetCharacterAppearance.

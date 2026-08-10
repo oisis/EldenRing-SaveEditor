@@ -1,7 +1,7 @@
 /*
 Endpoint: GetTutorials
 EndpointID: get_tutorials
-Purpose: Zwraca tutoriale i stan ich odblokowania.
+Purpose: Returns tutorials and their unlock state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: Tutorial.
 Input variables: characterID, availabilityFilter.
@@ -23,5 +23,5 @@ var GetTutorialsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "Tutorial",
 	SupportedResourceVariables: []string{"characterID", "availabilityFilter"},
-	Description:                "Zwraca tutoriale i stan ich odblokowania.",
+	Description:                "Returns tutorials and their unlock state.",
 })

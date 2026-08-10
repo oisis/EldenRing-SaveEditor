@@ -1,7 +1,7 @@
 /*
 Endpoint: RemoveOwnedItem
 EndpointID: remove_owned_item
-Purpose: Usuwa konkretną instancję itemu po walidacji referencji oraz skutków dla Equipment i struktur pomocniczych.
+Purpose: Removes a specific item instance after validating references and effects on Equipment and supporting structures.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument.
 Input variables: characterID, ownedItemID, expectedRevision.
@@ -23,5 +23,5 @@ var RemoveOwnedItemDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID", "expectedRevision"},
-	Description:                "Usuwa konkretną instancję itemu po walidacji referencji oraz skutków dla Equipment i struktur pomocniczych.",
+	Description:                "Removes a specific item instance after validating references and effects on Equipment and supporting structures.",
 })

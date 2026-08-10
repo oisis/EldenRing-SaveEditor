@@ -1,7 +1,7 @@
 /*
 Endpoint: CloseSave
 EndpointID: close_save
-Purpose: Zamyka istniejącą sesję save i zwalnia jej prywatny snapshot.
+Purpose: Closes an existing save session and releases its private snapshot.
 How it works: The runtime handler passes saveSessionID to SaveEngine, which removes the session entry under its own lock. The endpoint opens no file, reads no snapshot and writes nothing; the source save is untouched. Validating and resolving the identifier belongs to SaveEngine alone.
 Supported resource types: —.
 Input variables: saveSessionID.
@@ -28,7 +28,7 @@ var CloseSaveDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID"},
-	Description:                "Zamyka istniejącą sesję save i zwalnia jej prywatny snapshot.",
+	Description:                "Closes an existing save session and releases its private snapshot.",
 })
 
 // CloseSave removes an existing save session from SaveEngine.

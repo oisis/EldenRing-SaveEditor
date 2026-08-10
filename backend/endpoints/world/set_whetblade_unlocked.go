@@ -1,7 +1,7 @@
 /*
 Endpoint: SetWhetbladeUnlocked
 EndpointID: set_whetblade_unlocked
-Purpose: Ustawia stan odblokowania Whetblade.
+Purpose: Sets the unlock state of a Whetblade.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Whetblade z grant.endpoint=set_whetblade_unlocked.
 Input variables: characterID, whetbladeKind, whetbladeKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetWhetbladeUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Whetblade z grant.endpoint=set_whetblade_unlocked",
 	SupportedResourceVariables: []string{"characterID", "whetbladeKind", "whetbladeKey", "unlocked", "expectedRevision"},
-	Description:                "Ustawia stan odblokowania Whetblade.",
+	Description:                "Sets the unlock state of a Whetblade.",
 })

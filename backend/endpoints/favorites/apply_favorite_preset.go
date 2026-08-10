@@ -1,7 +1,7 @@
 /*
 Endpoint: ApplyFavoritePreset
 EndpointID: apply_favorite_preset
-Purpose: Stosuje wskazany preset Favorites do postaci przez standardowe operacje domenowe.
+Purpose: Applies the specified Favorites preset to a character through standard domain operations.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: characterID, favoriteSlotID, selection, expectedRevision.
@@ -23,5 +23,5 @@ var ApplyFavoritePresetDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"characterID", "favoriteSlotID", "selection", "expectedRevision"},
-	Description:                "Stosuje wskazany preset Favorites do postaci przez standardowe operacje domenowe.",
+	Description:                "Applies the specified Favorites preset to a character through standard domain operations.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: GetSaveValidationReport
 EndpointID: get_save_validation_report
-Purpose: Uruchamia niemutującą walidację save i zwraca wykryte problemy bez proponowania niepotwierdzonych napraw.
+Purpose: Runs non-mutating save validation and returns detected problems without proposing unconfirmed repairs.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, characterID, scope.
@@ -23,5 +23,5 @@ var GetSaveValidationReportDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "scope"},
-	Description:                "Uruchamia niemutującą walidację save i zwraca wykryte problemy bez proponowania niepotwierdzonych napraw.",
+	Description:                "Runs non-mutating save validation and returns detected problems without proposing unconfirmed repairs.",
 })

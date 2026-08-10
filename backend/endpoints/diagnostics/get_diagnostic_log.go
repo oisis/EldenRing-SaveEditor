@@ -1,7 +1,7 @@
 /*
 Endpoint: GetDiagnosticLog
 EndpointID: get_diagnostic_log
-Purpose: Zwraca bezpieczny fragment strukturalnego logu diagnostycznego bieżącej sesji.
+Purpose: Returns a safe portion of the current session's structured diagnostic log.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: —.
 Input variables: saveSessionID, cursor, limit, severity, scope.
@@ -23,5 +23,5 @@ var GetDiagnosticLogDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "cursor", "limit", "severity", "scope"},
-	Description:                "Zwraca bezpieczny fragment strukturalnego logu diagnostycznego bieżącej sesji.",
+	Description:                "Returns a safe portion of the current session's structured diagnostic log.",
 })

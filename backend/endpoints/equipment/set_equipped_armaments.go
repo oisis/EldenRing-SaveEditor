@@ -1,7 +1,7 @@
 /*
 Endpoint: SetEquippedArmaments
 EndpointID: set_equipped_armaments
-Purpose: Atomowo ustawia armamenty we wszystkich slotach dłoni i waliduje typy slotów oraz istnienie posiadanych instancji.
+Purpose: Atomically sets armaments in every hand slot and validates slot types and the existence of owned instances.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Weapon z capability equipment.
 Input variables: characterID, slotAssignments, expectedRevision.
@@ -23,5 +23,5 @@ var SetEquippedArmamentsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Weapon z capability equipment",
 	SupportedResourceVariables: []string{"characterID", "slotAssignments", "expectedRevision"},
-	Description:                "Atomowo ustawia armamenty we wszystkich slotach dłoni i waliduje typy slotów oraz istnienie posiadanych instancji.",
+	Description:                "Atomically sets armaments in every hand slot and validates slot types and the existence of owned instances.",
 })

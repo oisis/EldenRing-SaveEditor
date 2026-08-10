@@ -1,7 +1,7 @@
 /*
 Endpoint: SetQuickItems
 EndpointID: set_quick_items
-Purpose: Atomowo ustawia zawartość slotów Quick Items.
+Purpose: Atomically sets the contents of Quick Items slots.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument z capability equipment dopuszczającą slot quick_item.
 Input variables: characterID, slotAssignments, expectedRevision.
@@ -23,5 +23,5 @@ var SetQuickItemsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument z capability equipment dopuszczającą slot quick_item",
 	SupportedResourceVariables: []string{"characterID", "slotAssignments", "expectedRevision"},
-	Description:                "Atomowo ustawia zawartość slotów Quick Items.",
+	Description:                "Atomically sets the contents of Quick Items slots.",
 })

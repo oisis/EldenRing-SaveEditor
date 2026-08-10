@@ -1,7 +1,7 @@
 /*
 Endpoint: GetRegions
 EndpointID: get_regions
-Purpose: Zwraca regiony i stan ich odblokowania.
+Purpose: Returns regions and their unlock state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: Region.
 Input variables: characterID.
@@ -23,5 +23,5 @@ var GetRegionsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "Region",
 	SupportedResourceVariables: []string{"characterID"},
-	Description:                "Zwraca regiony i stan ich odblokowania.",
+	Description:                "Returns regions and their unlock state.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: CloneCharacter
 EndpointID: clone_character
-Purpose: Atomowo klonuje postać do wskazanego wolnego slotu po pełnej walidacji zależności.
+Purpose: Atomically clones a character into the specified empty slot after fully validating its dependencies.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, sourceCharacterID, targetSlotID, expectedRevision.
@@ -23,5 +23,5 @@ var CloneCharacterDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "sourceCharacterID", "targetSlotID", "expectedRevision"},
-	Description:                "Atomowo klonuje postać do wskazanego wolnego slotu po pełnej walidacji zależności.",
+	Description:                "Atomically clones a character into the specified empty slot after fully validating its dependencies.",
 })

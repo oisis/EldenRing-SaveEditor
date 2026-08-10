@@ -1,7 +1,7 @@
 /*
 Endpoint: GetPouchItems
 EndpointID: get_pouch_items
-Purpose: Zwraca 6 surowych rekordów Pouch jednego slotu postaci, bez rozwiązywania ich w GameCatalog.
+Purpose: Returns the 6 raw Pouch records of one character slot without resolving them through GameCatalog.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetPouchItemsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca stan slotów Pouch.",
+	Description:                "Returns the state of Pouch slots.",
 })
 
 // GetPouchItemsResult is the typed result of GetPouchItems. The shape is owned

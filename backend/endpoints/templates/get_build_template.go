@@ -1,7 +1,7 @@
 /*
 Endpoint: GetBuildTemplate
 EndpointID: get_build_template
-Purpose: Zwraca jeden kompletny Build Template.
+Purpose: Returns one complete Build Template.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: GameResource references.
 Input variables: templateID.
@@ -23,5 +23,5 @@ var GetBuildTemplateDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"templateID"},
-	Description:                "Zwraca jeden kompletny Build Template.",
+	Description:                "Returns one complete Build Template.",
 })

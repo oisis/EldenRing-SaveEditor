@@ -1,7 +1,7 @@
 /*
 Endpoint: GetQuests
 EndpointID: get_quests
-Purpose: Zwraca questy, aktualne kroki i dozwolone przejścia wynikające z katalogu.
+Purpose: Returns quests, their current steps, and allowed transitions derived from the catalog.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: Quest.
 Input variables: characterID, questKind, questKey.
@@ -23,5 +23,5 @@ var GetQuestsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "Quest",
 	SupportedResourceVariables: []string{"characterID", "questKind", "questKey"},
-	Description:                "Zwraca questy, aktualne kroki i dozwolone przejścia wynikające z katalogu.",
+	Description:                "Returns quests, their current steps, and allowed transitions derived from the catalog.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: ApplyNetworkPreset
 EndpointID: apply_network_preset
-Purpose: Stosuje backendowy preset przez tę samą operację domenową co SetNetworkSettings.
+Purpose: Applies a backend preset through the same domain operation as SetNetworkSettings.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, presetID, expectedRevision.
@@ -23,5 +23,5 @@ var ApplyNetworkPresetDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "presetID", "expectedRevision"},
-	Description:                "Stosuje backendowy preset przez tę samą operację domenową co SetNetworkSettings.",
+	Description:                "Applies a backend preset through the same domain operation as SetNetworkSettings.",
 })

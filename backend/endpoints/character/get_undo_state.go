@@ -1,7 +1,7 @@
 /*
 Endpoint: GetUndoState
 EndpointID: get_undo_state
-Purpose: Zwraca informację, czy dla postaci istnieje bezpieczny punkt cofnięcia oraz jakiej operacji dotyczy.
+Purpose: Returns whether a safe undo point exists for the character and which operation it belongs to.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -23,5 +23,5 @@ var GetUndoStateDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca informację, czy dla postaci istnieje bezpieczny punkt cofnięcia oraz jakiej operacji dotyczy.",
+	Description:                "Returns whether a safe undo point exists for the character and which operation it belongs to.",
 })

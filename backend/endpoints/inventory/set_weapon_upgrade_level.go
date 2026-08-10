@@ -1,7 +1,7 @@
 /*
 Endpoint: SetWeaponUpgradeLevel
 EndpointID: set_weapon_upgrade_level
-Purpose: Ustawia poziom ulepszenia posiadanej broni zgodnie z jej modelem upgrade i limitem katalogowym.
+Purpose: Sets the upgrade level of an owned weapon according to its upgrade model and catalog limit.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Weapon z capability upgrade.
 Input variables: characterID, ownedItemID, upgradeLevel, expectedRevision.
@@ -23,5 +23,5 @@ var SetWeaponUpgradeLevelDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Weapon z capability upgrade",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID", "upgradeLevel", "expectedRevision"},
-	Description:                "Ustawia poziom ulepszenia posiadanej broni zgodnie z jej modelem upgrade i limitem katalogowym.",
+	Description:                "Sets the upgrade level of an owned weapon according to its upgrade model and catalog limit.",
 })

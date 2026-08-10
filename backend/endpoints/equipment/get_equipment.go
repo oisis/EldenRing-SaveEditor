@@ -1,7 +1,7 @@
 /*
 Endpoint: GetEquipment
 EndpointID: get_equipment
-Purpose: Zwraca 22 surowe pola ChrAsmEquipment jednego slotu postaci, bez rozwiązywania ich w GameCatalog.
+Purpose: Returns the 22 raw ChrAsmEquipment fields of one character slot without resolving them through GameCatalog.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetEquipmentDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca 22 surowe pola ChrAsmEquipment jednego slotu postaci, bez rozwiązywania ich w GameCatalog.",
+	Description:                "Returns the 22 raw ChrAsmEquipment fields of one character slot without resolving them through GameCatalog.",
 })
 
 // GetEquipmentResult is the typed result of GetEquipment. The shape is owned by

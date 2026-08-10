@@ -1,7 +1,7 @@
 /*
 Endpoint: GetNetworkPresets
 EndpointID: get_network_presets
-Purpose: Zwraca backendowe presety parametrów sieciowych.
+Purpose: Returns backend network parameter presets.
 How it works: The runtime handler reads the network presets of the already loaded GameCatalog, which owns and validates backend/gamecatalog/data/regulation/network_params.json, and returns them as a typed result. It reads no save and no file of its own, and it modifies nothing.
 Supported resource types: —.
 Input variables: presetID.
@@ -29,7 +29,7 @@ var GetNetworkPresetsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"presetID"},
-	Description:                "Zwraca backendowe presety parametrów sieciowych.",
+	Description:                "Returns backend network parameter presets.",
 })
 
 // NetworkPreset is one backend preset: its stable identifier and the full

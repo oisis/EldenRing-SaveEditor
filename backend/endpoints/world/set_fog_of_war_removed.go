@@ -1,7 +1,7 @@
 /*
 Endpoint: SetFogOfWarRemoved
 EndpointID: set_fog_of_war_removed
-Purpose: Ustawia stan odsłonięcia fog of war przez potwierdzoną operację domenową, bez ujawniania surowego układu mapy.
+Purpose: Sets the fog-of-war removal state through a confirmed domain operation without exposing the raw map layout.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: MapRegion.
 Input variables: characterID, removed, expectedRevision.
@@ -23,5 +23,5 @@ var SetFogOfWarRemovedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "MapRegion",
 	SupportedResourceVariables: []string{"characterID", "removed", "expectedRevision"},
-	Description:                "Ustawia stan odsłonięcia fog of war przez potwierdzoną operację domenową, bez ujawniania surowego układu mapy.",
+	Description:                "Sets the fog-of-war removal state through a confirmed domain operation without exposing the raw map layout.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: LoadSave
 EndpointID: load_save
-Purpose: Wczytuje save ze wskazanego źródła, identyfikuje platformę i format, waliduje strukturę oraz tworzy nową sesję bez modyfikowania pliku wejściowego.
+Purpose: Loads a save from the specified source, identifies its platform and format, validates its structure, and creates a new session without modifying the input file.
 How it works: The runtime handler passes the source path and the expected platform to SaveEngine, which opens the local file read-only, recognises the container, validates it and creates the session. LoadSave takes no expected revision and performs no atomic file mutation: it creates a new read-only session and leaves the input file untouched.
 Supported resource types: —.
 Input variables: source, expectedPlatform.
@@ -28,7 +28,7 @@ var LoadSaveDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"source", "expectedPlatform"},
-	Description:                "Wczytuje save ze wskazanego źródła, identyfikuje platformę i format, waliduje strukturę oraz tworzy nową sesję bez modyfikowania pliku wejściowego.",
+	Description:                "Loads a save from the specified source, identifies its platform and format, validates its structure, and creates a new session without modifying the input file.",
 })
 
 // LoadSaveResult is the typed result of LoadSave: the identifier of the created

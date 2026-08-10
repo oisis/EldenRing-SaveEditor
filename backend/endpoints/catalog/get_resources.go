@@ -1,7 +1,7 @@
 /*
 Endpoint: GetResources
 EndpointID: get_resources
-Purpose: Zwraca stronicowaną listę zasobów filtrowaną między innymi po typie, rodzinie, capability i endpoint; służy do budowania pickerów bez osobnych getterów dla każdej kategorii.
+Purpose: Returns a paginated resource list filtered by type, family, capability, endpoint, and other criteria, for building pickers without separate getters for every category.
 How it works: The runtime handler reads the already loaded GameCatalog through Catalog.ResourceSummaries, applies the declared filters in catalog order (kind, then key), counts the matches and returns one page of a light projection without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
 Input variables: resourceType, family, capability, endpointId, search, page, pageSize.
@@ -31,7 +31,7 @@ var GetResourcesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource",
 	SupportedResourceVariables: []string{"resourceType", "family", "capability", "endpointId", "search", "page", "pageSize"},
-	Description:                "Zwraca stronicowaną listę zasobów filtrowaną między innymi po typie, rodzinie, capability i endpoint; służy do budowania pickerów bez osobnych getterów dla każdej kategorii.",
+	Description:                "Returns a paginated resource list filtered by type, family, capability, endpoint, and other criteria, for building pickers without separate getters for every category.",
 })
 
 // GetResourcesDefaultPageSize is the page size used when the caller passes 0.

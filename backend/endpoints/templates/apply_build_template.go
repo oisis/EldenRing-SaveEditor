@@ -1,7 +1,7 @@
 /*
 Endpoint: ApplyBuildTemplate
 EndpointID: apply_build_template
-Purpose: Buduje pełny plan i atomowo stosuje template do postaci albo nie wykonuje żadnej zmiany.
+Purpose: Builds a complete plan and atomically applies the template to a character, or makes no change.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: characterID, templateID, selection, options, expectedRevision.
@@ -23,5 +23,5 @@ var ApplyBuildTemplateDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"characterID", "templateID", "selection", "options", "expectedRevision"},
-	Description:                "Buduje pełny plan i atomowo stosuje template do postaci albo nie wykonuje żadnej zmiany.",
+	Description:                "Builds a complete plan and atomically applies the template to a character, or makes no change.",
 })

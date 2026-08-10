@@ -1,7 +1,7 @@
 /*
 Endpoint: SetCharacterGender
 EndpointID: set_character_gender
-Purpose: Ustawia typ ciała/płeć oraz wszystkie wymagane, potwierdzone zależności tej zmiany.
+Purpose: Sets the body type or gender and every required confirmed dependency of that change.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, characterID, gender, expectedRevision.
@@ -23,5 +23,5 @@ var SetCharacterGenderDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "gender", "expectedRevision"},
-	Description:                "Ustawia typ ciała/płeć oraz wszystkie wymagane, potwierdzone zależności tej zmiany.",
+	Description:                "Sets the body type or gender and every required confirmed dependency of that change.",
 })

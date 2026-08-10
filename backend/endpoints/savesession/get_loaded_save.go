@@ -1,7 +1,7 @@
 /*
 Endpoint: GetLoadedSave
 EndpointID: get_loaded_save
-Purpose: Zwraca tożsamość załadowanego save, platformę, wersję formatu, stan zmian i bezpieczne metadane sesji.
+Purpose: Returns the identity, platform, format version, change state, and safe session metadata of a loaded save.
 How it works: The runtime handler passes saveSessionID to SaveEngine and returns the safe metadata of the session SaveEngine already holds. It opens no file, reads no snapshot and parses no save data. The session must have been created earlier by LoadSave; validating and resolving the identifier belongs to SaveEngine alone.
 Supported resource types: —.
 Input variables: saveSessionID.
@@ -28,7 +28,7 @@ var GetLoadedSaveDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID"},
-	Description:                "Zwraca tożsamość załadowanego save, platformę, wersję formatu, stan zmian i bezpieczne metadane sesji.",
+	Description:                "Returns the identity, platform, format version, change state, and safe session metadata of a loaded save.",
 })
 
 // GetLoadedSaveResult is the typed result of GetLoadedSave: the identifier of

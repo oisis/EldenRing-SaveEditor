@@ -1,7 +1,7 @@
 /*
 Endpoint: SetSummoningPoolActivated
 EndpointID: set_summoning_pool_activated
-Purpose: Ustawia stan aktywacji Summoning Pool.
+Purpose: Sets the activation state of a Summoning Pool.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: SummoningPool z grant.endpoint=set_summoning_pool_activated.
 Input variables: characterID, summoningPoolKind, summoningPoolKey, activated, expectedRevision.
@@ -23,5 +23,5 @@ var SetSummoningPoolActivatedDefinition = contract.MustDefine(contract.Definitio
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "SummoningPool z grant.endpoint=set_summoning_pool_activated",
 	SupportedResourceVariables: []string{"characterID", "summoningPoolKind", "summoningPoolKey", "activated", "expectedRevision"},
-	Description:                "Ustawia stan aktywacji Summoning Pool.",
+	Description:                "Sets the activation state of a Summoning Pool.",
 })

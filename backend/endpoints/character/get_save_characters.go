@@ -1,7 +1,7 @@
 /*
 Endpoint: GetSaveCharacters
 EndpointID: get_save_characters
-Purpose: Zwraca podsumowanie wszystkich slotów postaci wraz ze stabilnymi CharacterID, aktywnością i podstawowymi danymi prezentacyjnymi.
+Purpose: Returns a summary of every character slot, including stable CharacterIDs, activity state, and basic presentation data.
 How it works: The runtime handler passes saveSessionID to SaveEngine, which reads the ten slot summaries from the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID.
@@ -28,7 +28,7 @@ var GetSaveCharactersDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID"},
-	Description:                "Zwraca podsumowanie wszystkich slotów postaci wraz ze stabilnymi CharacterID, aktywnością i podstawowymi danymi prezentacyjnymi.",
+	Description:                "Returns a summary of every character slot, including stable CharacterIDs, activity state, and basic presentation data.",
 })
 
 // GetSaveCharactersResult is the typed result of GetSaveCharacters: the session

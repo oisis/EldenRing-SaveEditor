@@ -1,7 +1,7 @@
 /*
 Endpoint: SetEquippedArmor
 EndpointID: set_equipped_armor
-Purpose: Atomowo ustawia armor we wszystkich slotach pancerza.
+Purpose: Atomically sets armor in every armor slot.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Armor z capability equipment.
 Input variables: characterID, slotAssignments, expectedRevision.
@@ -23,5 +23,5 @@ var SetEquippedArmorDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Armor z capability equipment",
 	SupportedResourceVariables: []string{"characterID", "slotAssignments", "expectedRevision"},
-	Description:                "Atomowo ustawia armor we wszystkich slotach pancerza.",
+	Description:                "Atomically sets armor in every armor slot.",
 })

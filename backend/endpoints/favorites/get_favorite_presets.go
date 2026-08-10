@@ -1,7 +1,7 @@
 /*
 Endpoint: GetFavoritePresets
 EndpointID: get_favorite_presets
-Purpose: Zwraca zapisane presety Favorites i ich przypisania.
+Purpose: Returns saved Favorites presets and their assignments.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: —.
 Input variables: favoriteSlotID.
@@ -23,5 +23,5 @@ var GetFavoritePresetsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"favoriteSlotID"},
-	Description:                "Zwraca zapisane presety Favorites i ich przypisania.",
+	Description:                "Returns saved Favorites presets and their assignments.",
 })

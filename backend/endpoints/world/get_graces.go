@@ -1,7 +1,7 @@
 /*
 Endpoint: GetGraces
 EndpointID: get_graces
-Purpose: Zwraca Sites of Grace i informację, czy zostały odwiedzone.
+Purpose: Returns Sites of Grace and whether they have been visited.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: Grace.
 Input variables: characterID, regionKind, regionKey.
@@ -23,5 +23,5 @@ var GetGracesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "Grace",
 	SupportedResourceVariables: []string{"characterID", "regionKind", "regionKey"},
-	Description:                "Zwraca Sites of Grace i informację, czy zostały odwiedzone.",
+	Description:                "Returns Sites of Grace and whether they have been visited.",
 })

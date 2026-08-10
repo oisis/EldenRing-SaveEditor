@@ -1,7 +1,7 @@
 /*
 Endpoint: SetGraceVisited
 EndpointID: set_grace_visited
-Purpose: Ustawia stan odwiedzenia Site of Grace wraz z wymaganymi, potwierdzonymi zależnościami.
+Purpose: Sets the visited state of a Site of Grace together with its required confirmed dependencies.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: Grace z grant.endpoint=set_grace_visited.
 Input variables: characterID, graceKind, graceKey, visited, expectedRevision.
@@ -23,5 +23,5 @@ var SetGraceVisitedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "Grace z grant.endpoint=set_grace_visited",
 	SupportedResourceVariables: []string{"characterID", "graceKind", "graceKey", "visited", "expectedRevision"},
-	Description:                "Ustawia stan odwiedzenia Site of Grace wraz z wymaganymi, potwierdzonymi zależnościami.",
+	Description:                "Sets the visited state of a Site of Grace together with its required confirmed dependencies.",
 })

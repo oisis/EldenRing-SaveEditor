@@ -1,7 +1,7 @@
 /*
 Endpoint: DeleteBuildTemplate
 EndpointID: delete_build_template
-Purpose: Usuwa wskazany Build Template z biblioteki.
+Purpose: Deletes the specified Build Template from the library.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: templateID, templateRevision.
@@ -23,5 +23,5 @@ var DeleteBuildTemplateDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"templateID", "templateRevision"},
-	Description:                "Usuwa wskazany Build Template z biblioteki.",
+	Description:                "Deletes the specified Build Template from the library.",
 })

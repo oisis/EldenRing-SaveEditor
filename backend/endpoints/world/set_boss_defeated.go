@@ -1,7 +1,7 @@
 /*
 Endpoint: SetBossDefeated
 EndpointID: set_boss_defeated
-Purpose: Ustawia stan pokonania bossa wyłącznie według potwierdzonego kontraktu tego zasobu.
+Purpose: Sets a boss's defeated state only under that resource's confirmed contract.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: Boss z grant.endpoint=set_boss_defeated.
 Input variables: characterID, bossKind, bossKey, defeated, expectedRevision.
@@ -23,5 +23,5 @@ var SetBossDefeatedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "Boss z grant.endpoint=set_boss_defeated",
 	SupportedResourceVariables: []string{"characterID", "bossKind", "bossKey", "defeated", "expectedRevision"},
-	Description:                "Ustawia stan pokonania bossa wyłącznie według potwierdzonego kontraktu tego zasobu.",
+	Description:                "Sets a boss's defeated state only under that resource's confirmed contract.",
 })

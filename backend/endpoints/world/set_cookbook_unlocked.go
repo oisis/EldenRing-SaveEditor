@@ -1,7 +1,7 @@
 /*
 Endpoint: SetCookbookUnlocked
 EndpointID: set_cookbook_unlocked
-Purpose: Ustawia stan odblokowania cookbook i wszystkie należące do niego potwierdzone zależności.
+Purpose: Sets the unlock state of a cookbook and all confirmed dependencies owned by it.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Cookbook z grant.endpoint=set_cookbook_unlocked.
 Input variables: characterID, cookbookKind, cookbookKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetCookbookUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Cookbook z grant.endpoint=set_cookbook_unlocked",
 	SupportedResourceVariables: []string{"characterID", "cookbookKind", "cookbookKey", "unlocked", "expectedRevision"},
-	Description:                "Ustawia stan odblokowania cookbook i wszystkie należące do niego potwierdzone zależności.",
+	Description:                "Sets the unlock state of a cookbook and all confirmed dependencies owned by it.",
 })

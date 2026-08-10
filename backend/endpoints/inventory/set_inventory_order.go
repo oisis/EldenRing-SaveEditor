@@ -1,7 +1,7 @@
 /*
 Endpoint: SetInventoryOrder
 EndpointID: set_inventory_order
-Purpose: Ustawia pełną kolejność obsługiwanych instancji Inventory bez zmiany ich semantycznej zawartości.
+Purpose: Sets the complete order of supported Inventory instances without changing their semantic contents.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument.
 Input variables: characterID, orderedOwnedItemIDs, expectedRevision.
@@ -23,5 +23,5 @@ var SetInventoryOrderDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"characterID", "orderedOwnedItemIDs", "expectedRevision"},
-	Description:                "Ustawia pełną kolejność obsługiwanych instancji Inventory bez zmiany ich semantycznej zawartości.",
+	Description:                "Sets the complete order of supported Inventory instances without changing their semantic contents.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: SetEquippedSpells
 EndpointID: set_equipped_spells
-Purpose: Atomowo ustawia kolejność zaklęć i waliduje ich łączny koszt Memory Slots.
+Purpose: Atomically sets spell order and validates the total Memory Slots cost.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Spell z capability equipment.
 Input variables: characterID, orderedResources, expectedRevision.
@@ -23,5 +23,5 @@ var SetEquippedSpellsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Spell z capability equipment",
 	SupportedResourceVariables: []string{"characterID", "orderedResources", "expectedRevision"},
-	Description:                "Atomowo ustawia kolejność zaklęć i waliduje ich łączny koszt Memory Slots.",
+	Description:                "Atomically sets spell order and validates the total Memory Slots cost.",
 })

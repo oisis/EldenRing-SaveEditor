@@ -1,7 +1,7 @@
 /*
 Endpoint: AddItemToStorage
 EndpointID: add_item_to_storage
-Purpose: Dodaje wskazany zasób lub wariant do Storage po walidacji addToStorage, pojemności, relacji i pełnego planu mutacji.
+Purpose: Adds the specified resource or variant to Storage after validating addToStorage, capacity, relations, and the complete mutation plan.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument z addToStorage.enabled=true.
 Input variables: characterID, kind, key, variantID, quantity, expectedRevision.
@@ -23,5 +23,5 @@ var AddItemToStorageDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument z addToStorage.enabled=true",
 	SupportedResourceVariables: []string{"characterID", "kind", "key", "variantID", "quantity", "expectedRevision"},
-	Description:                "Dodaje wskazany zasób lub wariant do Storage po walidacji addToStorage, pojemności, relacji i pełnego planu mutacji.",
+	Description:                "Adds the specified resource or variant to Storage after validating addToStorage, capacity, relations, and the complete mutation plan.",
 })

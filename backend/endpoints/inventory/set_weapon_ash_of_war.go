@@ -1,7 +1,7 @@
 /*
 Endpoint: SetWeaponAshOfWar
 EndpointID: set_weapon_ash_of_war
-Purpose: Montuje, zmienia lub zdejmuje Ash of War po walidacji wszystkich relacji i skutków dla powiązanych instancji.
+Purpose: Mounts, changes, or removes an Ash of War after validating all relations and effects on related instances.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Weapon, AshOfWar.
 Input variables: characterID, weaponOwnedItemID, ashOfWarKind, ashOfWarKey, expectedRevision.
@@ -23,5 +23,5 @@ var SetWeaponAshOfWarDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Weapon, AshOfWar",
 	SupportedResourceVariables: []string{"characterID", "weaponOwnedItemID", "ashOfWarKind", "ashOfWarKey", "expectedRevision"},
-	Description:                "Montuje, zmienia lub zdejmuje Ash of War po walidacji wszystkich relacji i skutków dla powiązanych instancji.",
+	Description:                "Mounts, changes, or removes an Ash of War after validating all relations and effects on related instances.",
 })

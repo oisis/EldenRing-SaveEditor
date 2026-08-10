@@ -1,7 +1,7 @@
 /*
 Endpoint: GetCookbooks
 EndpointID: get_cookbooks
-Purpose: Zwraca cookbooks i stan ich odblokowania.
+Purpose: Returns cookbooks and their unlock state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument: Cookbook.
 Input variables: characterID, availabilityFilter.
@@ -23,5 +23,5 @@ var GetCookbooksDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument: Cookbook",
 	SupportedResourceVariables: []string{"characterID", "availabilityFilter"},
-	Description:                "Zwraca cookbooks i stan ich odblokowania.",
+	Description:                "Returns cookbooks and their unlock state.",
 })

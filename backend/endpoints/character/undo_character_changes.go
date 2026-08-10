@@ -1,7 +1,7 @@
 /*
 Endpoint: UndoCharacterChanges
 EndpointID: undo_character_changes
-Purpose: Cofa ostatnią zatwierdzoną mutację wskazanej postaci, jeżeli punkt cofnięcia nadal odpowiada aktualnej sesji i rewizji.
+Purpose: Reverts the last committed mutation of the specified character when the undo point still matches the current session and save revision.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, characterID, undoToken, expectedRevision.
@@ -23,5 +23,5 @@ var UndoCharacterChangesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "undoToken", "expectedRevision"},
-	Description:                "Cofa ostatnią zatwierdzoną mutację wskazanej postaci, jeżeli punkt cofnięcia nadal odpowiada aktualnej sesji i rewizji.",
+	Description:                "Reverts the last committed mutation of the specified character when the undo point still matches the current session and save revision.",
 })

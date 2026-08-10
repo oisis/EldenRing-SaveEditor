@@ -1,7 +1,7 @@
 /*
 Endpoint: AddItemToInventory
 EndpointID: add_item_to_inventory
-Purpose: Dodaje wskazany zasób lub wariant do Inventory po walidacji addToInventory, pojemności, relacji i pełnego planu mutacji.
+Purpose: Adds the specified resource or variant to Inventory after validating addToInventory, capacity, relations, and the complete mutation plan.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument z addToInventory.enabled=true.
 Input variables: characterID, kind, key, variantID, quantity, expectedRevision.
@@ -23,5 +23,5 @@ var AddItemToInventoryDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument z addToInventory.enabled=true",
 	SupportedResourceVariables: []string{"characterID", "kind", "key", "variantID", "quantity", "expectedRevision"},
-	Description:                "Dodaje wskazany zasób lub wariant do Inventory po walidacji addToInventory, pojemności, relacji i pełnego planu mutacji.",
+	Description:                "Adds the specified resource or variant to Inventory after validating addToInventory, capacity, relations, and the complete mutation plan.",
 })

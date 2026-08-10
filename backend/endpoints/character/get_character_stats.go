@@ -1,7 +1,7 @@
 /*
 Endpoint: GetCharacterStats
 EndpointID: get_character_stats
-Purpose: Zwraca surowe statystyki jednej postaci zapisane w save: osiem atrybutów, poziom oraz zapisane wartości HP, FP i SP wraz z ich wartościami maksymalnymi i bazowymi.
+Purpose: Returns the raw character statistics stored in the save: eight attributes, level, and stored HP, FP, and SP values with their maximum and base maximum values.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetCharacterStatsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca surowe statystyki jednej postaci zapisane w save: osiem atrybutów, poziom oraz zapisane wartości HP, FP i SP wraz z ich wartościami maksymalnymi i bazowymi.",
+	Description:                "Returns the raw character statistics stored in the save: eight attributes, level, and stored HP, FP, and SP values with their maximum and base maximum values.",
 })
 
 // GetCharacterStatsResult is the typed result of GetCharacterStats. The shape is

@@ -1,7 +1,7 @@
 /*
 Endpoint: DeleteFavoritePreset
 EndpointID: delete_favorite_preset
-Purpose: Usuwa wskazany preset Favorites bez zmiany innych slotów.
+Purpose: Deletes the specified Favorites preset without changing other slots.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: favoriteSlotID, expectedRevision.
@@ -23,5 +23,5 @@ var DeleteFavoritePresetDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"favoriteSlotID", "expectedRevision"},
-	Description:                "Usuwa wskazany preset Favorites bez zmiany innych slotów.",
+	Description:                "Deletes the specified Favorites preset without changing other slots.",
 })

@@ -1,7 +1,7 @@
 /*
 Endpoint: GetQuickItems
 EndpointID: get_quick_items
-Purpose: Zwraca 10 surowych rekordów Quick Items jednego slotu postaci wraz z surowym aktywnym slotem, bez rozwiązywania ich w GameCatalog.
+Purpose: Returns the 10 raw Quick Items records and the raw active slot of one character slot without resolving them through GameCatalog.
 How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
 Supported resource types: —.
 Input variables: saveSessionID, characterID.
@@ -28,7 +28,7 @@ var GetQuickItemsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
-	Description:                "Zwraca stan slotów Quick Items.",
+	Description:                "Returns the state of Quick Items slots.",
 })
 
 // GetQuickItemsResult is the typed result of GetQuickItems. The shape is owned

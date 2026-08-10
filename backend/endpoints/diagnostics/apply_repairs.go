@@ -1,7 +1,7 @@
 /*
 Endpoint: ApplyRepairs
 EndpointID: apply_repairs
-Purpose: Wykonuje dokładnie plan zwrócony przez GetRepairPlan, związany z konkretną sesją i rewizją save.
+Purpose: Executes exactly the plan returned by GetRepairPlan, bound to a specific session and save revision.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, characterID, planToken, expectedRevision.
@@ -23,5 +23,5 @@ var ApplyRepairsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "planToken", "expectedRevision"},
-	Description:                "Wykonuje dokładnie plan zwrócony przez GetRepairPlan, związany z konkretną sesją i rewizją save.",
+	Description:                "Executes exactly the plan returned by GetRepairPlan, bound to a specific session and save revision.",
 })

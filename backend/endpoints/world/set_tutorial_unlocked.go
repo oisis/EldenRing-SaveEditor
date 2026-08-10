@@ -1,7 +1,7 @@
 /*
 Endpoint: SetTutorialUnlocked
 EndpointID: set_tutorial_unlocked
-Purpose: Ustawia stan odblokowania tutorialu.
+Purpose: Sets the unlock state of a tutorial.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: Tutorial z grant.endpoint=set_tutorial_unlocked.
 Input variables: characterID, tutorialKind, tutorialKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetTutorialUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "Tutorial z grant.endpoint=set_tutorial_unlocked",
 	SupportedResourceVariables: []string{"characterID", "tutorialKind", "tutorialKey", "unlocked", "expectedRevision"},
-	Description:                "Ustawia stan odblokowania tutorialu.",
+	Description:                "Sets the unlock state of a tutorial.",
 })

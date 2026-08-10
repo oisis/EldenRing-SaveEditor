@@ -1,7 +1,7 @@
 /*
 Endpoint: SetEquippedTalismans
 EndpointID: set_equipped_talismans
-Purpose: Atomowo ustawia talismany z uwzględnieniem liczby odblokowanych slotów.
+Purpose: Atomically sets talismans while respecting the number of unlocked slots.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: Talisman z capability equipment.
 Input variables: characterID, orderedOwnedItemIDs, expectedRevision.
@@ -23,5 +23,5 @@ var SetEquippedTalismansDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: Talisman z capability equipment",
 	SupportedResourceVariables: []string{"characterID", "orderedOwnedItemIDs", "expectedRevision"},
-	Description:                "Atomowo ustawia talismany z uwzględnieniem liczby odblokowanych slotów.",
+	Description:                "Atomically sets talismans while respecting the number of unlocked slots.",
 })

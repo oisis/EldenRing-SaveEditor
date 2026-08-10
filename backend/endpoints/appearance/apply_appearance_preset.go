@@ -1,7 +1,7 @@
 /*
 Endpoint: ApplyAppearancePreset
 EndpointID: apply_appearance_preset
-Purpose: Stosuje zweryfikowany preset wyglądu przez tę samą operację domenową co SetCharacterAppearance.
+Purpose: Applies a verified appearance preset through the same domain operation as SetCharacterAppearance.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: characterID, presetID, expectedRevision.
@@ -23,5 +23,5 @@ var ApplyAppearancePresetDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"characterID", "presetID", "expectedRevision"},
-	Description:                "Stosuje zweryfikowany preset wyglądu przez tę samą operację domenową co SetCharacterAppearance.",
+	Description:                "Applies a verified appearance preset through the same domain operation as SetCharacterAppearance.",
 })

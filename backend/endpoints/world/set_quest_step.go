@@ -1,7 +1,7 @@
 /*
 Endpoint: SetQuestStep
 EndpointID: set_quest_step
-Purpose: Przenosi quest do jawnie wskazanego, dozwolonego kroku.
+Purpose: Moves a quest to an explicitly specified allowed step.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: Quest z grant.endpoint=set_quest_step.
 Input variables: characterID, questKind, questKey, stepKind, stepKey, expectedRevision.
@@ -23,5 +23,5 @@ var SetQuestStepDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "Quest z grant.endpoint=set_quest_step",
 	SupportedResourceVariables: []string{"characterID", "questKind", "questKey", "stepKind", "stepKey", "expectedRevision"},
-	Description:                "Przenosi quest do jawnie wskazanego, dozwolonego kroku.",
+	Description:                "Moves a quest to an explicitly specified allowed step.",
 })

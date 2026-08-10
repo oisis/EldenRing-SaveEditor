@@ -1,7 +1,7 @@
 /*
 Endpoint: SetOwnedItemQuantity
 EndpointID: set_owned_item_quantity
-Purpose: Ustawia ilość istniejącej instancji itemu, respektując limity stosu i kontenera.
+Purpose: Sets the quantity of an existing item instance while respecting stack and container limits.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument z capability stack.
 Input variables: characterID, ownedItemID, quantity, expectedRevision.
@@ -23,5 +23,5 @@ var SetOwnedItemQuantityDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument z capability stack",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID", "quantity", "expectedRevision"},
-	Description:                "Ustawia ilość istniejącej instancji itemu, respektując limity stosu i kontenera.",
+	Description:                "Sets the quantity of an existing item instance while respecting stack and container limits.",
 })

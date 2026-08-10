@@ -1,7 +1,7 @@
 /*
 Endpoint: SetColosseumUnlocked
 EndpointID: set_colosseum_unlocked
-Purpose: Ustawia stan odblokowania koloseum.
+Purpose: Sets the unlock state of a colosseum.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: Colosseum z grant.endpoint=set_colosseum_unlocked.
 Input variables: characterID, colosseumKind, colosseumKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetColosseumUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "Colosseum z grant.endpoint=set_colosseum_unlocked",
 	SupportedResourceVariables: []string{"characterID", "colosseumKind", "colosseumKey", "unlocked", "expectedRevision"},
-	Description:                "Ustawia stan odblokowania koloseum.",
+	Description:                "Sets the unlock state of a colosseum.",
 })

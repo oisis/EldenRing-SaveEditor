@@ -1,7 +1,7 @@
 /*
 Endpoint: SetBellBearingUnlocked
 EndpointID: set_bell_bearing_unlocked
-Purpose: Ustawia stan odblokowania Bell Bearing.
+Purpose: Sets the unlock state of a Bell Bearing.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: BellBearing z grant.endpoint=set_bell_bearing_unlocked.
 Input variables: characterID, bellBearingKind, bellBearingKey, unlocked, expectedRevision.
@@ -23,5 +23,5 @@ var SetBellBearingUnlockedDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: BellBearing z grant.endpoint=set_bell_bearing_unlocked",
 	SupportedResourceVariables: []string{"characterID", "bellBearingKind", "bellBearingKey", "unlocked", "expectedRevision"},
-	Description:                "Ustawia stan odblokowania Bell Bearing.",
+	Description:                "Sets the unlock state of a Bell Bearing.",
 })

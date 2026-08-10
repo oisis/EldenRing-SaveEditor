@@ -1,7 +1,7 @@
 /*
 Endpoint: GetAppearancePresets
 EndpointID: get_appearance_presets
-Purpose: Zwraca dostępne presety wyglądu wraz z ich metadanymi.
+Purpose: Returns available appearance presets with their metadata.
 How it works: The runtime handler reads the appearance presets of the already loaded GameCatalog, which owns and validates backend/gamecatalog/data/presets/appearance.json together with the assets under backend/gamecatalog/data/assets/appearance, filters them by search and tags, and returns list metadata only. It reads no save and no file of its own, and it modifies nothing.
 Supported resource types: —.
 Input variables: search, tags.
@@ -30,7 +30,7 @@ var GetAppearancePresetsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"search", "tags"},
-	Description:                "Zwraca dostępne presety wyglądu wraz z ich metadanymi.",
+	Description:                "Returns available appearance presets with their metadata.",
 })
 
 // AppearancePresetSummary is the list metadata of one preset. It deliberately

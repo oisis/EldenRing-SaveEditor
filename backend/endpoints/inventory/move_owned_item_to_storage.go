@@ -1,7 +1,7 @@
 /*
 Endpoint: MoveOwnedItemToStorage
 EndpointID: move_owned_item_to_storage
-Purpose: Atomowo przenosi konkretną instancję z Inventory do Storage.
+Purpose: Atomically moves a specific instance from Inventory to Storage.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument dozwolony w Storage.
 Input variables: characterID, ownedItemID, targetPosition, expectedRevision.
@@ -23,5 +23,5 @@ var MoveOwnedItemToStorageDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument dozwolony w Storage",
 	SupportedResourceVariables: []string{"characterID", "ownedItemID", "targetPosition", "expectedRevision"},
-	Description:                "Atomowo przenosi konkretną instancję z Inventory do Storage.",
+	Description:                "Atomically moves a specific instance from Inventory to Storage.",
 })

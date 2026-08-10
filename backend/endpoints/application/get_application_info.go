@@ -1,7 +1,7 @@
 /*
 Endpoint: GetApplicationInfo
 EndpointID: get_application_info
-Purpose: Zwraca wersję aplikacji, wersje obsługiwanych schematów oraz podstawowe informacje o możliwościach backendu.
+Purpose: Returns the application version, supported schema versions, and basic backend capability information.
 How it works: The runtime handler validates the application version supplied by its backend caller and returns it together with the compile-time GameCatalog schema version range and the capabilities the backend currently declares. It reads no catalog instance, no manifest and no save.
 Supported resource types: —.
 Input variables: none.
@@ -36,7 +36,7 @@ var GetApplicationInfoDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: nil,
-	Description:                "Zwraca wersję aplikacji, wersje obsługiwanych schematów oraz podstawowe informacje o możliwościach backendu.",
+	Description:                "Returns the application version, supported schema versions, and basic backend capability information.",
 })
 
 // SupportedSchema reports one schema the backend can read and the version range

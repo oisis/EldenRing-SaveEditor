@@ -1,7 +1,7 @@
 /*
 Endpoint: SetNetworkSettings
 EndpointID: set_network_settings
-Purpose: Atomowo ustawia kompletny, zwalidowany zestaw parametrów sieciowych.
+Purpose: Atomically sets a complete validated network parameter set.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, networkSettings, expectedRevision.
@@ -23,5 +23,5 @@ var SetNetworkSettingsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "—",
 	SupportedResourceVariables: []string{"saveSessionID", "networkSettings", "expectedRevision"},
-	Description:                "Atomowo ustawia kompletny, zwalidowany zestaw parametrów sieciowych.",
+	Description:                "Atomically sets a complete validated network parameter set.",
 })

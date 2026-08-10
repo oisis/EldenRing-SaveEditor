@@ -1,7 +1,7 @@
 /*
 Endpoint: SetFavoritePreset
 EndpointID: set_favorite_preset
-Purpose: Zapisuje albo zastępuje wskazany preset Favorites zwalidowanymi danymi postaci.
+Purpose: Saves or replaces the specified Favorites preset with validated character data.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: favoriteSlotID, sourceCharacterID, selection, expectedRevision.
@@ -23,5 +23,5 @@ var SetFavoritePresetDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"favoriteSlotID", "sourceCharacterID", "selection", "expectedRevision"},
-	Description:                "Zapisuje albo zastępuje wskazany preset Favorites zwalidowanymi danymi postaci.",
+	Description:                "Saves or replaces the specified Favorites preset with validated character data.",
 })

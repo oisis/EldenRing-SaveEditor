@@ -1,7 +1,7 @@
 /*
 Endpoint: WriteSave
 EndpointID: write_save
-Purpose: Serializuje, ponownie wczytuje i waliduje wynik, po czym atomowo zapisuje go do jawnie wskazanego celu.
+Purpose: Serializes, reloads, and validates the result, then atomically writes it to the explicitly specified destination.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, expectedRevision, target.
@@ -23,5 +23,5 @@ var WriteSaveDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "expectedRevision", "target"},
-	Description:                "Serializuje, ponownie wczytuje i waliduje wynik, po czym atomowo zapisuje go do jawnie wskazanego celu.",
+	Description:                "Serializes, reloads, and validates the result, then atomically writes it to the explicitly specified destination.",
 })

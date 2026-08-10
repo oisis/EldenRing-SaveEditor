@@ -1,7 +1,7 @@
 /*
 Endpoint: GetMapRegions
 EndpointID: get_map_regions
-Purpose: Zwraca regiony mapy, ich widoczność oraz stan eksploracji.
+Purpose: Returns map regions, their visibility, and exploration state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: MapRegion.
 Input variables: characterID, parentRegionKind, parentRegionKey.
@@ -23,5 +23,5 @@ var GetMapRegionsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "MapRegion",
 	SupportedResourceVariables: []string{"characterID", "parentRegionKind", "parentRegionKey"},
-	Description:                "Zwraca regiony mapy, ich widoczność oraz stan eksploracji.",
+	Description:                "Returns map regions, their visibility, and exploration state.",
 })

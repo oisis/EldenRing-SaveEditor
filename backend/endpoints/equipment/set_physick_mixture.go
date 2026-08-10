@@ -1,7 +1,7 @@
 /*
 Endpoint: SetPhysickMixture
 EndpointID: set_physick_mixture
-Purpose: Atomowo ustawia obie pozycje Flask of Wondrous Physick.
+Purpose: Atomically sets both entries of the Flask of Wondrous Physick mixture.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: ItemDocument: CrystalTear.
 Input variables: characterID, crystalTearResources, expectedRevision.
@@ -23,5 +23,5 @@ var SetPhysickMixtureDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "ItemDocument: CrystalTear",
 	SupportedResourceVariables: []string{"characterID", "crystalTearResources", "expectedRevision"},
-	Description:                "Atomowo ustawia obie pozycje Flask of Wondrous Physick.",
+	Description:                "Atomically sets both entries of the Flask of Wondrous Physick mixture.",
 })

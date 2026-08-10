@@ -1,7 +1,7 @@
 /*
 Endpoint: GetResource
 EndpointID: get_resource
-Purpose: Zwraca pełny dokument jednego zasobu wraz z capabilities, wariantami, prezentacją i provenance.
+Purpose: Returns the complete document of one resource, including capabilities, variants, presentation, and provenance.
 How it works: The runtime handler validates kind and key, resolves the exact (kind, key) pair against the already loaded GameCatalog, and returns a typed result built from an independent deep copy without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
 Input variables: kind, key.
@@ -29,7 +29,7 @@ var GetResourceDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "GameResource",
 	SupportedResourceVariables: []string{"kind", "key"},
-	Description:                "Zwraca pełny dokument jednego zasobu wraz z capabilities, wariantami, prezentacją i provenance.",
+	Description:                "Returns the complete document of one resource, including capabilities, variants, presentation, and provenance.",
 })
 
 // GetResourceResult is the typed result of GetResource.

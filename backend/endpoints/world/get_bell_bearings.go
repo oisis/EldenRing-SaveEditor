@@ -1,7 +1,7 @@
 /*
 Endpoint: GetBellBearings
 EndpointID: get_bell_bearings
-Purpose: Zwraca Bell Bearings i stan ich odblokowania.
+Purpose: Returns Bell Bearings and their unlock state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument: BellBearing.
 Input variables: characterID, availabilityFilter.
@@ -23,5 +23,5 @@ var GetBellBearingsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument: BellBearing",
 	SupportedResourceVariables: []string{"characterID", "availabilityFilter"},
-	Description:                "Zwraca Bell Bearings i stan ich odblokowania.",
+	Description:                "Returns Bell Bearings and their unlock state.",
 })

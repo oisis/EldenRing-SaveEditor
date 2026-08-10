@@ -1,7 +1,7 @@
 /*
 Endpoint: GetWhetblades
 EndpointID: get_whetblades
-Purpose: Zwraca Whetblades i stan ich odblokowania.
+Purpose: Returns Whetblades and their unlock state.
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument: Whetblade.
 Input variables: characterID, availabilityFilter.
@@ -23,5 +23,5 @@ var GetWhetbladesDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument: Whetblade",
 	SupportedResourceVariables: []string{"characterID", "availabilityFilter"},
-	Description:                "Zwraca Whetblades i stan ich odblokowania.",
+	Description:                "Returns Whetblades and their unlock state.",
 })

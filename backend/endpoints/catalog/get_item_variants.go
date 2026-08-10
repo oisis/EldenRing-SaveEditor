@@ -1,7 +1,7 @@
 /*
 Endpoint: GetItemVariants
 EndpointID: get_item_variants
-Purpose: Zwraca wszystkie dozwolone warianty itemu, w tym poziomy ulepszenia i infusion, bez wyliczania ich po stronie konsumenta.
+Purpose: Returns all allowed item variants, including upgrade levels and infusions, without requiring consumers to derive them.
 How it works: The runtime handler validates kind and key, resolves the exact (kind, key) pair against the already loaded GameCatalog, and returns the variants stored in that item document in catalog order, taken from the independent deep copy the catalog returns; it never materialises, filters, sorts, normalises, or synthesises a variant, and it never loads or modifies the catalog.
 Supported resource types: ItemDocument.
 Input variables: kind, key.
@@ -30,7 +30,7 @@ var GetItemVariantsDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"kind", "key"},
-	Description:                "Zwraca wszystkie dozwolone warianty itemu, w tym poziomy ulepszenia i infusion, bez wyliczania ich po stronie konsumenta.",
+	Description:                "Returns all allowed item variants, including upgrade levels and infusions, without requiring consumers to derive them.",
 })
 
 // GetItemVariantsResult is the typed result of GetItemVariants.

@@ -1,7 +1,7 @@
 /*
 Endpoint: DeleteCharacter
 EndpointID: delete_character
-Purpose: Atomowo usuwa postać ze wskazanego slotu i czyści wyłącznie dane należące do tego slotu.
+Purpose: Atomically deletes the character from the specified slot and clears only data owned by that slot.
 How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
 Supported resource types: GameResource references.
 Input variables: saveSessionID, characterID, expectedRevision.
@@ -23,5 +23,5 @@ var DeleteCharacterDefinition = contract.MustDefine(contract.Definition{
 	Kind:                       contract.Mutation,
 	SupportedResourceTypes:     "GameResource references",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "expectedRevision"},
-	Description:                "Atomowo usuwa postać ze wskazanego slotu i czyści wyłącznie dane należące do tego slotu.",
+	Description:                "Atomically deletes the character from the specified slot and clears only data owned by that slot.",
 })
