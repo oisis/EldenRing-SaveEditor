@@ -485,6 +485,43 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance": {
+      "get": {
+        "operationId": "getCharacterAppearance",
+        "summary": "GetCharacterAppearance",
+        "description": "Returns the raw appearance stored in one character slot: the raw gender and voice type, the eight model identifiers and the raw face shape, body and skin parameter blocks as number arrays. Every value is the raw stored number; nothing is validated, normalised, clamped, computed or resolved to a name. An inactive slot is a normal result whose values are all zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The raw character appearance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterAppearance"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, or an empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1013,6 +1050,81 @@
           "sp",
           "maxSP",
           "baseMaxSP"
+        ]
+      },
+      "CharacterAppearance": {
+        "type": "object",
+        "description": "Raw appearance stored in one character slot. Every number is the value stored in the save: nothing is validated, normalised, clamped, computed or resolved to a name. An inactive slot reports active false and zero values.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "gender": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "voiceType": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "modelIDs": {
+            "type": "array",
+            "description": "The eight raw model identifiers, in stored order.",
+            "minItems": 8,
+            "maxItems": 8,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          "faceShape": {
+            "type": "array",
+            "description": "The raw face shape parameter block, one number per stored byte.",
+            "minItems": 64,
+            "maxItems": 64,
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "body": {
+            "type": "array",
+            "description": "The raw body parameter block, one number per stored byte.",
+            "minItems": 7,
+            "maxItems": 7,
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "skin": {
+            "type": "array",
+            "description": "The raw skin parameter block, one number per stored byte.",
+            "minItems": 91,
+            "maxItems": 91,
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "gender",
+          "voiceType",
+          "modelIDs",
+          "faceShape",
+          "body",
+          "skin"
         ]
       },
       "Error": {

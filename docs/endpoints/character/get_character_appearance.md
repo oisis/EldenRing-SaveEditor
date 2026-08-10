@@ -18,7 +18,7 @@ nothing: neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | not exposed — there is no OpenAPI route in the local explorer (`backend/endpoints/swagger`), no Wails binding, no CLI command and no frontend. The endpoint is reachable from Go callers only. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance` of the local explorer (`backend/endpoints/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
 | Implementation source | [../../../backend/endpoints/character/get_character_appearance.go](../../../backend/endpoints/character/get_character_appearance.go) |
 | Test source | [../../../backend/endpoints/character/get_character_appearance_test.go](../../../backend/endpoints/character/get_character_appearance_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |
@@ -187,8 +187,7 @@ for being out of range, inconsistent, or implausible.
 
 ## Command-line verification
 
-`GetCharacterAppearance` is verified through its tests; it has no transport. From
-the repository root:
+`GetCharacterAppearance` is verified through its tests. From the repository root:
 
 ```bash
 go test ./backend/saveengine -run '^TestGetCharacterAppearance' -count=1 -v
@@ -209,8 +208,10 @@ inner size.
 
 ## Current limitations
 
-- There is no transport. No OpenAPI route, no Wails binding, no CLI command, and
-  no frontend reaches the endpoint.
+- The only transport is the local explorer route
+  `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance`,
+  and it exists only while the explorer runs without `-allow-external-bind`.
+  No Wails binding, no CLI command and no frontend reaches the endpoint.
 - It reports the raw stored appearance only. No preset name is matched, no
   identifier is resolved to an in-game part, and no colour is converted.
 - It is a getter. Changing the appearance is not possible: the session is

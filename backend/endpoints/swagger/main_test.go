@@ -698,6 +698,16 @@ func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
 		t.Fatal("stats route body differs from the GetCharacterStats result")
 	}
 
+	wantAppearance, err := character.GetCharacterAppearance(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("character.GetCharacterAppearance: %v", err)
+	}
+	appearanceResponse := doSave(t, saveEngine, http.MethodGet, base+"/appearance", "")
+	assertOK(t, appearanceResponse, base+"/appearance")
+	if !reflect.DeepEqual(decode(t, appearanceResponse.Body.Bytes()), marshalled(t, wantAppearance)) {
+		t.Fatal("appearance route body differs from the GetCharacterAppearance result")
+	}
+
 	// A non-decimal characterID never reaches the getter, so the route owns it.
 	for _, raw := range []string{"one", " 0", "0x1"} {
 		target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/" + url.PathEscape(raw) + "/profile"
@@ -721,6 +731,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -796,11 +807,12 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	// The save-session routes exist only in the local loopback mode, so the
 	// document has to describe them with their own methods.
 	for path, method := range map[string]string{
-		"/api/v1/save-sessions":                                                  "post",
-		"/api/v1/save-sessions/{saveSessionID}":                                  "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters":                       "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":   "get",
+		"/api/v1/save-sessions":                                                     "post",
+		"/api/v1/save-sessions/{saveSessionID}":                                     "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":    "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":      "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance": "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -845,6 +857,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SaveCharacters",
 		"CharacterProfile",
 		"CharacterStats",
+		"CharacterAppearance",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -879,8 +892,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 6 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 6", found)
+	if found != 7 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 7", found)
 	}
 }
 
