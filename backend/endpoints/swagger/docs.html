@@ -49,10 +49,11 @@
   /* form controls */
   label { display: block; margin-bottom: .6rem; }
   label span { display: block; font-size: .85em; color: var(--ink-dim); margin-bottom: .25rem; }
-  input { width: 100%; box-sizing: border-box; padding: .45rem .55rem; font-family: var(--mono);
+  input, textarea { width: 100%; box-sizing: border-box; padding: .45rem .55rem; font-family: var(--mono);
           border: 1px solid var(--line); border-radius: 5px; background: #171a1f; color: var(--ink); }
+  textarea { resize: vertical; font-size: inherit; line-height: 1.5; }
   input::placeholder { color: #6b7280; }
-  input:focus { outline: none; border-color: var(--accent); }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); }
   button { padding: .42rem 1rem; border: 1px solid var(--line); border-radius: 5px;
            background: var(--panel-2); color: var(--ink); cursor: pointer; font: inherit; }
   button:hover { border-color: #4a525f; background: #262b33; }
@@ -123,18 +124,25 @@ function element(tag, props, children) {
 }
 
 function buildOperation(path, method, operation) {
-  const parameters = (operation.parameters || []).map(resolveParameter);
-  const inputs = new Map();
+  const parameters = (operation.parameters || []).map(resolveNode);
+  const inputs = parameters.map(parameter => [parameter, element("input", {
+    value: parameter.example || "",
+    placeholder: parameter.required ? "required" : "optional",
+  })]);
 
-  const fields = parameters.map(parameter => {
-    const input = element("input", {
-      value: parameter.example || "",
-      placeholder: parameter.required ? "required" : "optional",
-    });
-    inputs.set(parameter.name, input);
+  const fields = inputs.map(([parameter, input]) => {
     const caption = parameter.name + (parameter.required ? " *" : "") + " — " + (parameter.description || "");
     return element("label", {}, [element("span", { textContent: caption }), input]);
   });
+
+  const jsonBody = ((operation.requestBody || {}).content || {})["application/json"];
+  const bodyInput = jsonBody ? element("textarea", { rows: 6, value: bodySkeleton(jsonBody.schema) }) : null;
+  if (bodyInput) {
+    fields.push(element("label", {}, [
+      element("span", { textContent: "Request body (JSON)" }),
+      bodyInput,
+    ]));
+  }
 
   const status = element("div", { className: "status" });
   const output = element("pre", { hidden: true });
@@ -162,14 +170,26 @@ function buildOperation(path, method, operation) {
   }
 
   button.addEventListener("click", async () => {
-    const url = new URL(path, window.location.origin);
-    for (const [name, input] of inputs) {
-      if (input.value !== "") url.searchParams.set(name, input.value);
+    let target = path;
+    for (const [parameter, input] of inputs) {
+      if (parameter.in !== "path") continue;
+      const encoded = encodeURIComponent(input.value);
+      target = target.replace("{" + parameter.name + "}", () => encoded);
+    }
+    const url = new URL(target, window.location.origin);
+    for (const [parameter, input] of inputs) {
+      if (parameter.in === "path") continue;
+      if (input.value !== "") url.searchParams.set(parameter.name, input.value);
+    }
+    const request = { method: method.toUpperCase() };
+    if (bodyInput) {
+      request.headers = { "Content-Type": "application/json" };
+      request.body = bodyInput.value;
     }
     status.textContent = "…";
     status.className = "status";
     try {
-      const response = await fetch(url, { method: method.toUpperCase() });
+      const response = await fetch(url, request);
       const text = await response.text();
       status.textContent = response.status + " " + response.statusText + "  " + url.pathname + url.search;
       status.className = "status " + (response.ok ? "ok" : "err");
@@ -320,10 +340,18 @@ function format(text) {
 
 let specification = null;
 
-function resolveParameter(parameter) {
-  if (!parameter.$ref) return parameter;
-  const segments = parameter.$ref.replace(/^#\//, "").split("/");
-  return segments.reduce((node, segment) => node[segment], specification);
+function resolveNode(node) {
+  if (!node || !node.$ref) return node;
+  const segments = node.$ref.replace(/^#\//, "").split("/");
+  return segments.reduce((current, segment) => current[segment], specification);
+}
+
+// bodySkeleton builds a plain JSON stub with an empty string for every declared
+// request-body property. It is not a JSON Schema form generator; the value is
+// only a starting point for manual editing and the backend remains the validator.
+function bodySkeleton(schema) {
+  const properties = (resolveNode(schema) || {}).properties || {};
+  return JSON.stringify(Object.fromEntries(Object.keys(properties).map(name => [name, ""])), null, 2);
 }
 
 async function render() {
