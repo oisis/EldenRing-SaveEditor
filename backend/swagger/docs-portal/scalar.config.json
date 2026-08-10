@@ -131,6 +131,37 @@
               }
             }
           },
+          "/equipment": {
+            "type": "group",
+            "title": "Equipment",
+            "children": {
+              "/get-equipment": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/get_equipment.md",
+                "title": "GetEquipment"
+              },
+              "/get-quick-items": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/get_quick_items.md",
+                "title": "GetQuickItems"
+              },
+              "/get-pouch-items": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/get_pouch_items.md",
+                "title": "GetPouchItems"
+              },
+              "/get-physick-mixture": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/get_physick_mixture.md",
+                "title": "GetPhysickMixture"
+              },
+              "/get-equipped-spells": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/get_equipped_spells.md",
+                "title": "GetEquippedSpells"
+              }
+            }
+          },
           "/network": {
             "type": "group",
             "title": "Network",
@@ -139,6 +170,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/network/get_network_presets.md",
                 "title": "GetNetworkPresets"
+              },
+              "/get-network-settings": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/network/get_network_settings.md",
+                "title": "GetNetworkSettings"
               }
             }
           }
