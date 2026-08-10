@@ -84,6 +84,7 @@ Transport status:
 | `GetSaveCharacters` | `get_save_characters` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_save_characters.md](character/get_save_characters.md) |
 | `GetCharacterProfile` | `get_character_profile` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_character_profile.md](character/get_character_profile.md) |
 | `GetCharacterStats` | `get_character_stats` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_character_stats.md](character/get_character_stats.md) |
+| `GetCharacterAppearance` | `get_character_appearance` | Getter | `character` | implemented | not exposed — no explorer route, no Wails binding, no CLI command and no frontend | [character/get_character_appearance.md](character/get_character_appearance.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.
