@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -794,7 +795,6 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/appearance/presets",
 		"/healthz",
 		"/openapi.json",
-		"/docs",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -935,30 +935,60 @@ func assertRelationEndpointsAreResourceRefs(t *testing.T, schemas map[string]any
 	}
 }
 
-func TestDocsServesTheEmbeddedExplorer(t *testing.T) {
-	recorder := do(t, newPrototypeCatalog(t), "/docs")
-	if recorder.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200", recorder.Code)
-	}
-	if contentType := recorder.Header().Get("Content-Type"); contentType != "text/html; charset=utf-8" {
-		t.Fatalf("Content-Type = %q, want text/html; charset=utf-8", contentType)
+// The built-in browser explorer was removed: Scalar Docs is the only browser UI
+// and this process is the API host it calls. The route must be gone rather than
+// answering an empty or broken page, and the document must not advertise it.
+func TestDocsRouteIsNoLongerServed(t *testing.T) {
+	for _, target := range []string{"/docs", "/docs/", "/docs.html"} {
+		recorder := do(t, newPrototypeCatalog(t), target)
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("GET %s status = %d, want %d", target, recorder.Code, http.StatusNotFound)
+		}
 	}
 
-	body := recorder.Body.String()
-	if !strings.Contains(body, "/openapi.json") {
-		t.Fatal("the explorer does not read /openapi.json")
+	// The asset itself is no longer embedded, so nothing can serve it again by
+	// name even if a route were reintroduced by mistake.
+	if _, err := assets.ReadFile("docs.html"); err == nil {
+		t.Fatal("docs.html is still embedded in the binary")
 	}
-	// The response view must offer both the table and the untouched payload.
-	for _, marker := range []string{`textContent: "Table"`, `textContent: "Raw JSON"`, "function tableNode("} {
-		if !strings.Contains(body, marker) {
-			t.Fatalf("the explorer is missing the response view part %q", marker)
-		}
+
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
 	}
-	// The UI must be fully local: no external script, style or font host.
-	for _, forbidden := range []string{"http://", "https://", "//cdn", "unpkg", "jsdelivr"} {
-		if strings.Contains(body, forbidden) {
-			t.Fatalf("the explorer references an external resource %q", forbidden)
-		}
+	var document struct {
+		Paths map[string]map[string]any `json:"paths"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+	if _, exists := document.Paths["/docs"]; exists {
+		t.Fatal("openapi.json still describes /docs")
+	}
+}
+
+// Scalar renders the API Reference from another origin, so a relative server
+// would make "Try it" call the documentation portal instead of this process.
+// The document therefore names exactly one absolute loopback server.
+func TestOpenAPIDocumentServesOneAbsoluteLoopbackServer(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+
+	var document struct {
+		Servers []struct {
+			URL string `json:"url"`
+		} `json:"servers"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+	if len(document.Servers) != 1 {
+		t.Fatalf("servers = %#v, want exactly one", document.Servers)
+	}
+	if document.Servers[0].URL != "http://127.0.0.1:8788" {
+		t.Fatalf("server url = %q, want http://127.0.0.1:8788", document.Servers[0].URL)
 	}
 }
 
@@ -978,5 +1008,106 @@ func TestValidateAddressRequiresLoopbackByDefault(t *testing.T) {
 	}
 	if err := validateAddress("127.0.0.1", false); err == nil {
 		t.Fatal("validateAddress accepted an address without a port")
+	}
+}
+
+// doCORS sends one request with the given method, Origin and preflight headers
+// through the full handler, so the CORS answer is observed at the HTTP layer the
+// browser sees rather than on the middleware in isolation.
+func doCORS(t *testing.T, method string, target string, header http.Header) *httptest.ResponseRecorder {
+	t.Helper()
+
+	request := httptest.NewRequest(method, target, nil)
+	for name, values := range header {
+		for _, value := range values {
+			request.Header.Add(name, value)
+		}
+	}
+	recorder := httptest.NewRecorder()
+	newHandler(newPrototypeCatalog(t), testApplicationVersion, nil).ServeHTTP(recorder, request)
+	return recorder
+}
+
+// The documentation portal is served from another origin than the explorer, so
+// a plain GET from it has to carry the permission header or the browser hides
+// the body the route already produced.
+func TestPortalOriginReceivesCORSPermission(t *testing.T) {
+	recorder := doCORS(t, http.MethodGet, "/api/v1/catalog/info", http.Header{"Origin": []string{portalOrigin}})
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want %d", recorder.Code, http.StatusOK)
+	}
+	if got := recorder.Header().Get("Access-Control-Allow-Origin"); got != portalOrigin {
+		t.Fatalf("Access-Control-Allow-Origin = %q, want %q", got, portalOrigin)
+	}
+	// The permission must never be the wildcard: it admits one fixed page only.
+	if recorder.Header().Get("Access-Control-Allow-Origin") == "*" {
+		t.Fatal("the explorer answers a wildcard CORS origin")
+	}
+	if recorder.Header().Get("Access-Control-Allow-Credentials") != "" {
+		t.Fatal("the explorer allows credentials over CORS")
+	}
+	if got := recorder.Header().Values("Vary"); !slices.Contains(got, "Origin") {
+		t.Fatalf("Vary = %v, want it to contain Origin", got)
+	}
+	// The route itself still answers: the middleware must not swallow the body.
+	if recorder.Body.Len() == 0 {
+		t.Fatal("the route returned no body")
+	}
+}
+
+// LoadSave is sent as JSON, which makes the browser preflight it. The mux routes
+// no OPTIONS, so the preflight has to be answered before it reaches a route.
+func TestPortalPreflightAllowsTheDocumentedMethodsAndHeaders(t *testing.T) {
+	recorder := doCORS(t, http.MethodOptions, "/api/v1/save-sessions", http.Header{
+		"Origin":                         []string{portalOrigin},
+		"Access-Control-Request-Method":  []string{http.MethodPost},
+		"Access-Control-Request-Headers": []string{"content-type"},
+	})
+
+	if recorder.Code != http.StatusNoContent {
+		t.Fatalf("preflight status = %d, want %d", recorder.Code, http.StatusNoContent)
+	}
+	if got := recorder.Header().Get("Access-Control-Allow-Origin"); got != portalOrigin {
+		t.Fatalf("Access-Control-Allow-Origin = %q, want %q", got, portalOrigin)
+	}
+	methods := recorder.Header().Get("Access-Control-Allow-Methods")
+	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodOptions} {
+		if !strings.Contains(methods, method) {
+			t.Fatalf("Access-Control-Allow-Methods = %q, want it to allow %s", methods, method)
+		}
+	}
+	// Content-Type is what turns the LoadSave body into a preflighted request.
+	if got := recorder.Header().Get("Access-Control-Allow-Headers"); !strings.Contains(got, "Content-Type") {
+		t.Fatalf("Access-Control-Allow-Headers = %q, want it to allow Content-Type", got)
+	}
+}
+
+// Any other origin gets no permission at all, for a simple request and for a
+// preflight alike, so the single allowed page stays the only browser caller.
+func TestForeignOriginReceivesNoCORSPermission(t *testing.T) {
+	foreignOrigins := []string{
+		"http://evil.example",
+		"https://localhost:7970", // the scheme is part of the origin
+		"http://localhost:7971",  // so is the port
+		"http://127.0.0.1:7970",  // and the host, even another loopback spelling
+		"http://localhost:7970.example",
+	}
+	for _, origin := range foreignOrigins {
+		simple := doCORS(t, http.MethodGet, "/api/v1/catalog/info", http.Header{"Origin": []string{origin}})
+		if got := simple.Header().Get("Access-Control-Allow-Origin"); got != "" {
+			t.Fatalf("origin %q received Access-Control-Allow-Origin %q, want none", origin, got)
+		}
+
+		preflight := doCORS(t, http.MethodOptions, "/api/v1/save-sessions", http.Header{
+			"Origin":                        []string{origin},
+			"Access-Control-Request-Method": []string{http.MethodPost},
+		})
+		if got := preflight.Header().Get("Access-Control-Allow-Origin"); got != "" {
+			t.Fatalf("origin %q received a preflight permission %q, want none", origin, got)
+		}
+		if got := preflight.Header().Get("Access-Control-Allow-Methods"); got != "" {
+			t.Fatalf("origin %q received Access-Control-Allow-Methods %q, want none", origin, got)
+		}
 	}
 }

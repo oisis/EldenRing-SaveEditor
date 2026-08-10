@@ -11,7 +11,7 @@ the backend supports, and the capabilities the backend currently declares.
 | Kind | Getter |
 | Domain | `application` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/application/info` of the local OpenAPI explorer (`backend/endpoints/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/application/info` of the local OpenAPI explorer (`backend/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/application/get_application_info.go](../../../backend/endpoints/application/get_application_info.go) |
 | Test source | [../../../backend/endpoints/application/get_application_info_test.go](../../../backend/endpoints/application/get_application_info_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -105,7 +105,7 @@ save reading, save writing, or any mutating capability through this endpoint.
 ## Command-line verification
 
 `GetApplicationInfo` is exposed over HTTP as `GET /api/v1/application/info` by
-the local OpenAPI explorer in `backend/endpoints/swagger`, a developer tool the
+the local OpenAPI explorer in `backend/swagger`, a developer tool the
 application neither imports nor starts. The explorer takes the version from its
 own `-app-version` flag, which defaults to `dev`. That flag belongs to the
 explorer only; it is not a source of the application version for the
@@ -124,7 +124,7 @@ go test ./backend/endpoints/application -run '^TestGetApplicationInfo' -count=1 
 Start the explorer:
 
 ```bash
-go run ./backend/endpoints/swagger -app-version dev
+go run ./backend/swagger -app-version dev
 ```
 
 Then call the route:
@@ -162,7 +162,7 @@ repository.
 
 - The endpoint is not exposed through Wails.
 - The only HTTP route is `GET /api/v1/application/info` of the local OpenAPI
-  explorer in `backend/endpoints/swagger`, a developer tool.
+  explorer in `backend/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - The getter does not determine the application version. It requires the version
   from its backend caller.

@@ -7,14 +7,45 @@
   },
   "servers": [
     {
-      "url": "/",
-      "description": "Local explorer"
+      "url": "http://127.0.0.1:8788",
+      "description": "Loopback address of the local API host. Every client, including the Scalar documentation portal on another origin, calls this absolute address; a relative server would resolve against the portal, which serves no API."
+    }
+  ],
+  "tags": [
+    {
+      "name": "Application",
+      "description": "Backend version, supported GameCatalog schemas and declared capabilities."
+    },
+    {
+      "name": "Catalog",
+      "description": "Read-only GameCatalog getters over resources, relations and item variants."
+    },
+    {
+      "name": "Network",
+      "description": "Network parameter presets stored in the catalog data."
+    },
+    {
+      "name": "Appearance",
+      "description": "Appearance preset metadata stored in the catalog data."
+    },
+    {
+      "name": "Save sessions",
+      "description": "Read-only save-session lifecycle. Registered only when the explorer binds a loopback address."
+    },
+    {
+      "name": "Character",
+      "description": "Read-only character getters over an open save session. Registered only when the explorer binds a loopback address."
+    },
+    {
+      "name": "Explorer",
+      "description": "Routes of the explorer process itself, not part of the endpoint surface."
     }
   ],
   "paths": {
     "/api/v1/application/info": {
       "get": {
         "operationId": "getApplicationInfo",
+        "tags": ["Application"],
         "summary": "GetApplicationInfo",
         "description": "Returns the application version supplied by the backend caller, the supported GameCatalog schema version range and the capabilities the backend currently declares. Takes no query parameters.",
         "responses": {
@@ -44,6 +75,7 @@
     "/api/v1/catalog/info": {
       "get": {
         "operationId": "getCatalogInfo",
+        "tags": ["Catalog"],
         "summary": "GetCatalogInfo",
         "description": "Returns the manifest of the loaded GameCatalog: schema version, data version, game version, validation status and the used sources.",
         "responses": {
@@ -73,6 +105,7 @@
     "/api/v1/catalog/resource": {
       "get": {
         "operationId": "getResource",
+        "tags": ["Catalog"],
         "summary": "GetResource",
         "description": "Returns one full catalog resource document. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
@@ -110,6 +143,7 @@
     "/api/v1/catalog/resource-relations": {
       "get": {
         "operationId": "getResourceRelations",
+        "tags": ["Catalog"],
         "summary": "GetResourceRelations",
         "description": "Returns the outgoing and incoming relations of one resource identified by the exact pair (kind, key), in catalog order. Relations only: the documents of the related resources belong to GetResource. A filtered-out direction stays an empty array, never null.",
         "parameters": [
@@ -153,6 +187,7 @@
     "/api/v1/catalog/resources": {
       "get": {
         "operationId": "getResources",
+        "tags": ["Catalog"],
         "summary": "GetResources",
         "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
@@ -205,6 +240,7 @@
     "/api/v1/catalog/item-variants": {
       "get": {
         "operationId": "getItemVariants",
+        "tags": ["Catalog"],
         "summary": "GetItemVariants",
         "description": "Returns the variants stored in one item document, in catalog order. An item without variants returns an empty list; the base item is never synthesised into a variant.",
         "parameters": [
@@ -242,6 +278,7 @@
     "/api/v1/network/presets": {
       "get": {
         "operationId": "getNetworkPresets",
+        "tags": ["Network"],
         "summary": "GetNetworkPresets",
         "description": "Returns the network parameter presets the backend offers today. An omitted or empty presetID returns every preset in the backend order; a non-empty presetID returns exactly that preset. The values come from the preset functions of backend/core. The route reads no save and no GameCatalog.",
         "parameters": [
@@ -299,6 +336,7 @@
     "/api/v1/appearance/presets": {
       "get": {
         "operationId": "getAppearancePresets",
+        "tags": ["Appearance"],
         "summary": "GetAppearancePresets",
         "description": "Returns the appearance presets the backend offers today, reduced to the metadata a list needs. The values come from backend/gamecatalog/data/presets/appearance.json, which GameCatalog loads and validates once together with the preview images under backend/gamecatalog/data/assets/appearance. The results keep the file order. The route reads no save and modifies nothing. It reports the asset file name only; no route serves the images yet.",
         "parameters": [
@@ -349,6 +387,7 @@
     "/api/v1/save-sessions": {
       "post": {
         "operationId": "loadSave",
+        "tags": ["Save sessions"],
         "summary": "LoadSave",
         "description": "Creates a read-only save session for a local save file and returns its metadata. The source path and the expected platform are passed to the endpoint exactly as sent: they are never trimmed, normalised or defaulted, and the source file is never modified. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "requestBody": {
@@ -388,6 +427,7 @@
     "/api/v1/save-sessions/{saveSessionID}": {
       "get": {
         "operationId": "getLoadedSave",
+        "tags": ["Save sessions"],
         "summary": "GetLoadedSave",
         "description": "Returns the safe metadata of an existing save session: its identifier, platform, container format and unsaved-changes state. The identifier is matched exactly by SaveEngine. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
@@ -420,6 +460,7 @@
       },
       "delete": {
         "operationId": "closeSave",
+        "tags": ["Save sessions"],
         "summary": "CloseSave",
         "description": "Closes an existing save session and releases its private snapshot. Only the in-memory session is removed: the source save file is never written, moved or deleted. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
@@ -454,6 +495,7 @@
     "/api/v1/save-sessions/{saveSessionID}/characters": {
       "get": {
         "operationId": "getSaveCharacters",
+        "tags": ["Character"],
         "summary": "GetSaveCharacters",
         "description": "Returns one summary per physical character slot of an existing session, always ten of them in slot order. An inactive slot reports an empty name and level 0 even when residual data remains in the file. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
@@ -488,6 +530,7 @@
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance": {
       "get": {
         "operationId": "getCharacterAppearance",
+        "tags": ["Character"],
         "summary": "GetCharacterAppearance",
         "description": "Returns the raw appearance stored in one character slot: the raw gender and voice type, the eight model identifiers and the raw face shape, body and skin parameter blocks as number arrays. Every value is the raw stored number; nothing is validated, normalised, clamped, computed or resolved to a name. An inactive slot is a normal result whose values are all zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
@@ -525,6 +568,7 @@
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
+        "tags": ["Character"],
         "summary": "GetCharacterProfile",
         "description": "Returns the confirmed profile of one character slot: name, level, raw startingClassID, raw gender and raw secondsPlayed. An inactive slot is a normal result with zeroed values. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
@@ -562,6 +606,7 @@
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats": {
       "get": {
         "operationId": "getCharacterStats",
+        "tags": ["Character"],
         "summary": "GetCharacterStats",
         "description": "Returns the raw statistics stored in one character slot: the eight attributes, the level and the stored HP, FP and SP values with their maximum and base maximum. Every value is the raw stored number; nothing is computed or normalised. An inactive slot is a normal result with zeroed values. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
@@ -599,6 +644,7 @@
     "/healthz": {
       "get": {
         "operationId": "healthz",
+        "tags": ["Explorer"],
         "summary": "Liveness probe",
         "responses": {
           "200": {
@@ -624,6 +670,7 @@
     "/openapi.json": {
       "get": {
         "operationId": "openapiDocument",
+        "tags": ["Explorer"],
         "summary": "This OpenAPI document",
         "responses": {
           "200": {
@@ -632,24 +679,6 @@
               "application/json": {
                 "schema": {
                   "type": "object"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/docs": {
-      "get": {
-        "operationId": "docsUI",
-        "summary": "Local browser explorer",
-        "responses": {
-          "200": {
-            "description": "HTML explorer page",
-            "content": {
-              "text/html": {
-                "schema": {
-                  "type": "string"
                 }
               }
             }

@@ -13,7 +13,7 @@ and provenance. It returns no relations; those belong to
 | Kind | Getter |
 | Domain | `catalog` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/catalog/resource` of the local OpenAPI explorer (`backend/endpoints/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/catalog/resource` of the local OpenAPI explorer (`backend/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/catalog/get_resource.go](../../../backend/endpoints/catalog/get_resource.go) |
 | Test source | [../../../backend/endpoints/catalog/get_resource_test.go](../../../backend/endpoints/catalog/get_resource_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -174,7 +174,7 @@ catalog data.
 ## Command-line verification
 
 `GetResource` is exposed over HTTP as `GET /api/v1/catalog/resource` by the local
-OpenAPI explorer in `backend/endpoints/swagger`, a developer tool the application
+OpenAPI explorer in `backend/swagger`, a developer tool the application
 neither imports nor starts. It is not exposed through Wails and there is no
 permanent CLI command that invokes it. There are two ways to verify it locally.
 
@@ -302,7 +302,7 @@ A successful run prints the resource and exits without an error.
 
 - The endpoint is not exposed through Wails.
 - The only HTTP route is `GET /api/v1/catalog/resource` of the local OpenAPI
-  explorer in `backend/endpoints/swagger`, a developer tool.
+  explorer in `backend/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - There is no caller in the runtime of the main application.
 - The getter does not load the catalog. It requires an already loaded

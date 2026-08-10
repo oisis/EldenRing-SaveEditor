@@ -18,7 +18,7 @@ nothing: neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `character` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats` of the local OpenAPI explorer (`backend/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/character/get_character_stats.go](../../../backend/endpoints/character/get_character_stats.go) |
 | Test source | [../../../backend/endpoints/character/get_character_stats_test.go](../../../backend/endpoints/character/get_character_stats_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |

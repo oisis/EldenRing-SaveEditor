@@ -30,7 +30,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
-//go:embed openapi.json docs.html
+//go:embed openapi.json
 var assets embed.FS
 
 func main() {
@@ -71,7 +71,10 @@ func run() error {
 		Handler:           newHandler(gameCatalog, *applicationVersion, saveEngine),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
-	log.Printf("SaveForge catalog getters explorer: http://%s/docs", *address)
+	// The browser UI is Scalar Docs, served by a separate process; this one is
+	// only the local API host it calls, so the log names the API surface rather
+	// than advertising a page this process no longer serves.
+	log.Printf("SaveForge local API host on http://%s (OpenAPI document at /openapi.json)", *address)
 	if err := server.ListenAndServe(); !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("serve explorer: %w", err)
 	}
@@ -146,10 +149,6 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, sav
 
 	mux.HandleFunc("GET /openapi.json", func(writer http.ResponseWriter, _ *http.Request) {
 		serveAsset(writer, "openapi.json", "application/json")
-	})
-
-	mux.HandleFunc("GET /docs", func(writer http.ResponseWriter, _ *http.Request) {
-		serveAsset(writer, "docs.html", "text/html; charset=utf-8")
 	})
 
 	mux.HandleFunc("GET /api/v1/application/info", func(writer http.ResponseWriter, _ *http.Request) {
@@ -262,7 +261,49 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, sav
 		writeJSON(writer, http.StatusOK, result)
 	})
 
-	return mux
+	return withPortalCORS(mux)
+}
+
+// portalOrigin is the single origin the Scalar documentation portal is served
+// from by `npx @scalar/cli project preview` in backend/swagger/docs-portal. The
+// portal reads openapi.json from disk, so this is the one browser context that
+// has to reach the explorer over the network to send a request.
+const portalOrigin = "http://localhost:7970"
+
+// withPortalCORS grants that one portal origin, and nothing else, permission to
+// read the explorer's responses from a browser. It never echoes an arbitrary
+// Origin, never answers "*" and never allows credentials, so the set of callers
+// it admits is a single fixed loopback page. The bind address stays the only
+// network contract: an explorer started with -allow-external-bind still serves
+// no save-session route, and this header grants no reader that could not already
+// call the explorer directly.
+func withPortalCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		// The answer differs per Origin even when permission is refused, so a
+		// cache must not reuse one origin's response for another.
+		writer.Header().Add("Vary", "Origin")
+		allowed := request.Header.Get("Origin") == portalOrigin
+		if allowed {
+			writer.Header().Set("Access-Control-Allow-Origin", portalOrigin)
+		}
+
+		// A preflight carries a method the mux does not route, so it is answered
+		// here; the mux only knows the real methods and would reject OPTIONS.
+		// A refused origin still gets 204, but without the permission headers,
+		// which is what makes the browser block the request it was asking about.
+		if request.Method == http.MethodOptions && request.Header.Get("Access-Control-Request-Method") != "" {
+			if allowed {
+				writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
+				// LoadSave is the only route with a body, and Scalar sends it as
+				// application/json; no other request header is needed.
+				writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			}
+			writer.WriteHeader(http.StatusNoContent)
+			return
+		}
+
+		next.ServeHTTP(writer, request)
+	})
 }
 
 // loadSaveRequest is the JSON body of POST /api/v1/save-sessions. Both fields

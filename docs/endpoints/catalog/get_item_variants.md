@@ -13,7 +13,7 @@ document that holds them; the full document belongs to `GetResource`.
 | Kind | Getter |
 | Domain | `catalog` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/catalog/item-variants` of the local OpenAPI explorer (`backend/endpoints/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/catalog/item-variants` of the local OpenAPI explorer (`backend/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/catalog/get_item_variants.go](../../../backend/endpoints/catalog/get_item_variants.go) |
 | Test source | [../../../backend/endpoints/catalog/get_item_variants_test.go](../../../backend/endpoints/catalog/get_item_variants_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -219,7 +219,7 @@ The endpoint never opens, reads, or writes a save, and it never uses
 ## Command-line verification
 
 `GetItemVariants` is exposed over HTTP as `GET /api/v1/catalog/item-variants` by
-the local OpenAPI explorer in `backend/endpoints/swagger`, a developer tool the
+the local OpenAPI explorer in `backend/swagger`, a developer tool the
 application neither imports nor starts. It is not exposed through Wails and there
 is no permanent CLI command that invokes it. There are two ways to verify it
 locally.
@@ -349,7 +349,7 @@ A successful run prints the variants and exits without an error.
 
 - The endpoint is not exposed through Wails.
 - The only HTTP route is `GET /api/v1/catalog/item-variants` of the local OpenAPI
-  explorer in `backend/endpoints/swagger`, a developer tool.
+  explorer in `backend/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - There is no caller in the runtime of the main application.
 - The getter does not load the catalog. It requires an already loaded

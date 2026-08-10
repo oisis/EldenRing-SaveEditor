@@ -20,7 +20,7 @@ is an error, not a silent success.
 | Kind | Mutation |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `DELETE /api/v1/save-sessions/{saveSessionID}` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
+| Transport status | transport-exposed — `DELETE /api/v1/save-sessions/{saveSessionID}` of the local OpenAPI explorer (`backend/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/savesession/close_save.go](../../../backend/endpoints/savesession/close_save.go) |
 | Test source | [../../../backend/endpoints/savesession/close_save_test.go](../../../backend/endpoints/savesession/close_save_test.go) |
 | Save access | none — no file is opened, and the session's private snapshot is not read |

@@ -1,0 +1,149 @@
+{
+  "$schema": "https://registry.scalar.com/@scalar/schemas/config",
+  "scalar": "2.0.0",
+  "info": {
+    "title": "SaveForge 2.0 API documentation",
+    "description": "Local documentation portal for the SaveForge 2.0 endpoint surface. Endpoint documentation is read directly from docs/endpoints; the API reference is read from backend/swagger/openapi.json. Nothing is copied into this directory."
+  },
+  "navigation": {
+    "routes": {
+      "/": {
+        "type": "group",
+        "title": "SaveForge 2.0",
+        "children": {
+          "/": {
+            "type": "page",
+            "filepath": "introduction.md",
+            "title": "Portal introduction"
+          },
+          "/endpoints": {
+            "type": "page",
+            "filepath": "../../../docs/endpoints/README.md",
+            "title": "Endpoint documentation"
+          },
+          "/architecture": {
+            "type": "page",
+            "filepath": "../../../docs/endpoints/SF-2.0.md",
+            "title": "Architecture boundaries"
+          },
+          "/api": {
+            "type": "openapi",
+            "filepath": "../openapi.json",
+            "title": "API Reference"
+          },
+          "/application": {
+            "type": "group",
+            "title": "Application",
+            "children": {
+              "/get-application-info": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/application/get_application_info.md",
+                "title": "GetApplicationInfo"
+              }
+            }
+          },
+          "/catalog": {
+            "type": "group",
+            "title": "Catalog",
+            "children": {
+              "/get-catalog-info": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/catalog/get_catalog_info.md",
+                "title": "GetCatalogInfo"
+              },
+              "/get-resource": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/catalog/get_resource.md",
+                "title": "GetResource"
+              },
+              "/get-resources": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/catalog/get_resources.md",
+                "title": "GetResources"
+              },
+              "/get-resource-relations": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/catalog/get_resource_relations.md",
+                "title": "GetResourceRelations"
+              },
+              "/get-item-variants": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/catalog/get_item_variants.md",
+                "title": "GetItemVariants"
+              }
+            }
+          },
+          "/save-sessions": {
+            "type": "group",
+            "title": "Save sessions",
+            "children": {
+              "/load-save": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/load_save.md",
+                "title": "LoadSave"
+              },
+              "/get-loaded-save": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/get_loaded_save.md",
+                "title": "GetLoadedSave"
+              },
+              "/close-save": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/close_save.md",
+                "title": "CloseSave"
+              }
+            }
+          },
+          "/character": {
+            "type": "group",
+            "title": "Character",
+            "children": {
+              "/get-save-characters": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/get_save_characters.md",
+                "title": "GetSaveCharacters"
+              },
+              "/get-character-profile": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/get_character_profile.md",
+                "title": "GetCharacterProfile"
+              },
+              "/get-character-stats": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/get_character_stats.md",
+                "title": "GetCharacterStats"
+              },
+              "/get-character-appearance": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/get_character_appearance.md",
+                "title": "GetCharacterAppearance"
+              }
+            }
+          },
+          "/appearance": {
+            "type": "group",
+            "title": "Appearance",
+            "children": {
+              "/get-appearance-presets": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/appearance/get_appearance_presets.md",
+                "title": "GetAppearancePresets"
+              }
+            }
+          },
+          "/network": {
+            "type": "group",
+            "title": "Network",
+            "children": {
+              "/get-network-presets": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/network/get_network_presets.md",
+                "title": "GetNetworkPresets"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

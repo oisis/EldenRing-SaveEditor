@@ -18,7 +18,7 @@ equipment, world state, `SteamID`, `UserData11`, or any slot content.
 | Kind | Mutation |
 | Domain | `savesession` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `POST /api/v1/save-sessions` of the local OpenAPI explorer (`backend/endpoints/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
+| Transport status | transport-exposed — `POST /api/v1/save-sessions` of the local OpenAPI explorer (`backend/swagger`). The route is registered only when the explorer runs without `-allow-external-bind`; with an external bind it does not exist and answers 404. No Wails binding, no CLI command, and no frontend reaches the endpoint. |
 | Implementation source | [../../../backend/endpoints/savesession/load_save.go](../../../backend/endpoints/savesession/load_save.go) |
 | Test source | [../../../backend/endpoints/savesession/load_save_test.go](../../../backend/endpoints/savesession/load_save_test.go) |
 | Save access | read-only — the file is opened for reading, and no byte of it is written |

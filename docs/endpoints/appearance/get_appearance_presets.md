@@ -20,7 +20,7 @@ the already loaded presets: it opens no file per call.
 | Kind | Getter |
 | Domain | `appearance` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/appearance/presets` of the local OpenAPI explorer (`backend/endpoints/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/appearance/presets` of the local OpenAPI explorer (`backend/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/appearance/get_appearance_presets.go](../../../backend/endpoints/appearance/get_appearance_presets.go) |
 | Test source | [../../../backend/endpoints/appearance/get_appearance_presets_test.go](../../../backend/endpoints/appearance/get_appearance_presets_test.go) |
 | Data source | [`backend/gamecatalog/data/presets/appearance.json`](../../../backend/gamecatalog/data/presets/appearance.json), loaded and validated by `GameCatalog` |
@@ -194,7 +194,7 @@ the old application, in a separate, later task.
 ## Command-line verification
 
 `GetAppearancePresets` is exposed over HTTP as `GET /api/v1/appearance/presets`
-by the local OpenAPI explorer in `backend/endpoints/swagger`, a developer tool
+by the local OpenAPI explorer in `backend/swagger`, a developer tool
 the application neither imports nor starts. The route passes the catalog the
 explorer loaded at start-up. A missing or invalid `presets/appearance.json`, or a
 missing asset, stops the explorer while it loads its data, instead of leaving the
@@ -216,7 +216,7 @@ go test ./backend/endpoints/appearance -run '^TestGetAppearancePresets' -count=1
 Start the explorer:
 
 ```bash
-go run ./backend/endpoints/swagger
+go run ./backend/swagger
 ```
 
 Then request every preset:
@@ -280,7 +280,7 @@ repository.
 
 - The endpoint is not exposed through Wails.
 - The only HTTP route is `GET /api/v1/appearance/presets` of the local OpenAPI
-  explorer in `backend/endpoints/swagger`, a developer tool.
+  explorer in `backend/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - No route serves the preset images. The result carries the asset file name and
   a consumer cannot yet fetch the file over HTTP.
