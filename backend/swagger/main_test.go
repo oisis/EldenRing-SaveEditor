@@ -730,6 +730,16 @@ func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
 		t.Fatal("quick items route body differs from the GetQuickItems result")
 	}
 
+	wantPouchItems, err := equipment.GetPouchItems(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("equipment.GetPouchItems: %v", err)
+	}
+	pouchItemsResponse := doSave(t, saveEngine, http.MethodGet, base+"/pouch-items", "")
+	assertOK(t, pouchItemsResponse, base+"/pouch-items")
+	if !reflect.DeepEqual(decode(t, pouchItemsResponse.Body.Bytes()), marshalled(t, wantPouchItems)) {
+		t.Fatal("pouch items route body differs from the GetPouchItems result")
+	}
+
 	// A non-decimal characterID never reaches the getter, so the route owns it.
 	for _, raw := range []string{"one", " 0", "0x1"} {
 		target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/" + url.PathEscape(raw) + "/profile"
@@ -756,6 +766,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -838,6 +849,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":   "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items": "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items": "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -886,6 +898,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterEquipment",
 		"QuickItemSlot",
 		"CharacterQuickItems",
+		"PouchItemSlot",
+		"CharacterPouchItems",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -920,8 +934,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 9 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 9", found)
+	if found != 10 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 10", found)
 	}
 }
 

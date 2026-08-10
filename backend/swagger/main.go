@@ -455,6 +455,23 @@ func registerSaveSessionRoutes(mux *http.ServeMux, saveEngine *saveengine.Engine
 			writeJSON(writer, http.StatusOK, result)
 		},
 	)
+
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := equipment.GetPouchItems(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
 }
 
 // parseCharacterID turns the path segment into the integer the character getters

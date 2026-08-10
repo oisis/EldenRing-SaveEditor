@@ -87,6 +87,7 @@ Transport status:
 | `GetCharacterAppearance` | `get_character_appearance` | Getter | `character` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [character/get_character_appearance.md](character/get_character_appearance.md) |
 | `GetEquipment` | `get_equipment` | Getter | `equipment` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [equipment/get_equipment.md](equipment/get_equipment.md) |
 | `GetQuickItems` | `get_quick_items` | Getter | `equipment` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [equipment/get_quick_items.md](equipment/get_quick_items.md) |
+| `GetPouchItems` | `get_pouch_items` | Getter | `equipment` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [equipment/get_pouch_items.md](equipment/get_pouch_items.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

@@ -641,6 +641,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items": {
+      "get": {
+        "operationId": "getPouchItems",
+        "tags": ["Equipment"],
+        "summary": "GetPouchItems",
+        "description": "Returns the six raw Pouch records of one character slot. Every itemID and equipIndex is the value stored in the save: nothing is normalised, validated or resolved against GameCatalog, so 0, 0xFFFFFFFF and values with the high bit set are reported as written. An inactive slot is a normal result whose six records are zeroed. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The raw character pouch items",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterPouchItems"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, or an active slot whose pouch items cannot be located inside its slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1317,6 +1355,55 @@
           "active",
           "items",
           "activeQuick"
+        ]
+      },
+      "PouchItemSlot": {
+        "type": "object",
+        "description": "One raw Pouch record exactly as stored: the item field followed by the equip-index field, both little-endian uint32. Neither value is normalised, validated or resolved against GameCatalog.",
+        "properties": {
+          "itemID": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "equipIndex": {
+            "type": "integer",
+            "format": "int64"
+          }
+        },
+        "required": [
+          "itemID",
+          "equipIndex"
+        ]
+      },
+      "CharacterPouchItems": {
+        "type": "object",
+        "description": "Raw Pouch state of one character slot: the six EquipItemData records that follow the ten Quick Items records and the active-slot value, in stored order. Nothing is normalised, validated or resolved against GameCatalog. An inactive slot reports active false and six zeroed records.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "items": {
+            "type": "array",
+            "description": "The six raw Pouch records, in stored order. The values are returned without any normalisation.",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {
+              "$ref": "#/components/schemas/PouchItemSlot"
+            }
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "items"
         ]
       },
       "Error": {
