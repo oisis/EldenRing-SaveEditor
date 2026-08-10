@@ -26,6 +26,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -870,6 +871,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":     "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":     "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":       "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -921,6 +923,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"PouchItemSlot",
 		"CharacterPouchItems",
 		"CharacterPhysickMixture",
+		"InventoryRecord",
+		"CharacterInventory",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -955,8 +959,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 13 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 13", found)
+	if found != 14 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 14", found)
 	}
 }
 
@@ -1546,5 +1550,97 @@ func TestNetworkSettingsRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("%s without an engine: status = %d, want 404 (body %q)",
 			target, absent.Code, absent.Body.String())
+	}
+}
+
+// The inventory route is the one save-session route with a section filter and
+// paging, so its fixture carries real records: two common and one key. The
+// offsets are restated here instead of reused from SaveEngine.
+const (
+	inventoryRouteSlotDataBase = int64(pcHeaderSize) + 0x10
+	inventoryRouteUserData10   = int64(pcHeaderSize) + 10*0x280010 + 0x10
+	inventoryRouteFlagsOffset  = 0x1954
+	inventoryRouteAnchorAt     = 0x0640
+	inventoryRouteCommonAt     = 505
+	inventoryRouteKeyAt        = inventoryRouteCommonAt + 0xA80*12 + 4
+)
+
+// writeInventoryFixture writes a synthetic PC save into t.TempDir() whose slot 0
+// is active and holds three non-empty InventoryHeld records.
+func writeInventoryFixture(t *testing.T) string {
+	t.Helper()
+
+	data := make([]byte, pcFixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+	data[inventoryRouteUserData10+inventoryRouteFlagsOffset] = 1
+
+	anchorBase := inventoryRouteSlotDataBase + inventoryRouteAnchorAt
+	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+
+	record := func(at int64, handle, quantity, acquisition uint32) {
+		binary.LittleEndian.PutUint32(data[anchorBase+at:], handle)
+		binary.LittleEndian.PutUint32(data[anchorBase+at+4:], quantity)
+		binary.LittleEndian.PutUint32(data[anchorBase+at+8:], acquisition)
+	}
+	record(inventoryRouteCommonAt, 0xB000272E, 0x80000003, 7)
+	record(inventoryRouteCommonAt+5*12, 0x90001111, 1, 9)
+	record(inventoryRouteKeyAt+2*12, 0xC0000001, 0x80000001, 12)
+
+	path := filepath.Join(t.TempDir(), "inventory.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestInventoryRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/inventory"
+
+	want, err := inventory.GetInventory(saveEngine, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory: %v", err)
+	}
+	if !want.Active || want.Total != 3 {
+		t.Fatalf("fixture result = %+v, want an active slot with three records", want)
+	}
+	recorder := doSave(t, saveEngine, http.MethodGet, base, "")
+	assertOK(t, recorder, base)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("inventory route body differs from the GetInventory result")
+	}
+
+	// The section filter and both paging values have to reach the getter.
+	target := base + "?containerSection=key&page=1&pageSize=1"
+	wantKey, err := inventory.GetInventory(saveEngine, session.SaveSessionID, 0, "key", 1, 1)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory(key): %v", err)
+	}
+	if len(wantKey.Records) != 1 || wantKey.Records[0].ContainerSection != "key" {
+		t.Fatalf("key page = %+v, want the single key record", wantKey)
+	}
+	filtered := doSave(t, saveEngine, http.MethodGet, target, "")
+	assertOK(t, filtered, target)
+	if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantKey)) {
+		t.Fatal("filtered inventory route body differs from the GetInventory result")
+	}
+
+	for _, query := range []string{"?containerSection=Common", "?containerSection=%20key", "?page=-1", "?page=x"} {
+		rejected := doSave(t, saveEngine, http.MethodGet, base+query, "")
+		if rejected.Code != http.StatusBadRequest {
+			t.Fatalf("%s%s: status = %d, want 400 (body %q)", base, query, rejected.Code, rejected.Body.String())
+		}
+	}
+
+	absent := doSave(t, nil, http.MethodGet,
+		"/api/v1/save-sessions/any-session/characters/0/inventory", "")
+	if absent.Code != http.StatusNotFound {
+		t.Fatalf("inventory route without an engine: status = %d, want 404 (body %q)",
+			absent.Code, absent.Body.String())
 	}
 }

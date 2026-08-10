@@ -162,6 +162,17 @@
               }
             }
           },
+          "/inventory": {
+            "type": "group",
+            "title": "Inventory",
+            "children": {
+              "/get-inventory": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/get_inventory.md",
+                "title": "GetInventory"
+              }
+            }
+          },
           "/network": {
             "type": "group",
             "title": "Network",

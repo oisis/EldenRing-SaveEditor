@@ -24,6 +24,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -505,6 +506,44 @@ func registerSaveSessionRoutes(
 			}
 			result, err := equipment.GetEquippedSpells(
 				saveEngine, gameCatalog, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	// The inventory route is the one save-session route with paging, so it uses
+	// the same query parsing as the catalog list routes. It reads no catalog:
+	// this phase returns raw native records only.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			query := request.URL.Query()
+			page, err := parsePagingValue(query.Get("page"), "page")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			pageSize, err := parsePagingValue(query.Get("pageSize"), "pageSize")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.GetInventory(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				query.Get("containerSection"),
+				page,
+				pageSize,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return
