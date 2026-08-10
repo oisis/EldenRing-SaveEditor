@@ -1,17 +1,22 @@
 /*
 Endpoint: GetEquipment
 EndpointID: get_equipment
-Purpose: Zwraca wyposażone armamenty, armor i talismany wraz z ograniczeniami slotów wynikającymi z GameCatalog.
-How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
-Supported resource types: ItemDocument: Weapon, Armor, Talisman.
-Input variables: characterID.
-GameCatalog variables read: the fields required to resolve and validate the declared resource types; the exact projection belongs to the endpoint runtime specification.
-Save variables read: the state required by the declared variables; the getter must remain non-mutating.
-Implementation status: contract definition only; no runtime handler is implemented in this file yet.
+Purpose: Zwraca 22 surowe pola ChrAsmEquipment jednego slotu postaci, bez rozwiązywania ich w GameCatalog.
+How it works: The runtime handler passes saveSessionID and characterID to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot and parses no save data of its own.
+Supported resource types: —.
+Input variables: saveSessionID, characterID.
+GameCatalog variables read: none; this stage returns raw state and resolves no ItemDocument.
+Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the 22 raw equipped-armaments fields of its slot data; the getter is non-mutating and computes no value.
+Implementation status: implemented.
 */
 package equipment
 
-import "github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+import (
+	"errors"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
 
 // GetEquipmentEndpointID is the stable backend identifier of GetEquipment.
 const GetEquipmentEndpointID = "get_equipment"
@@ -21,7 +26,28 @@ var GetEquipmentDefinition = contract.MustDefine(contract.Definition{
 	Name:                       "GetEquipment",
 	ID:                         GetEquipmentEndpointID,
 	Kind:                       contract.Getter,
-	SupportedResourceTypes:     "ItemDocument: Weapon, Armor, Talisman",
-	SupportedResourceVariables: []string{"characterID"},
-	Description:                "Zwraca wyposażone armamenty, armor i talismany wraz z ograniczeniami slotów wynikającymi z GameCatalog.",
+	SupportedResourceTypes:     "—",
+	SupportedResourceVariables: []string{"saveSessionID", "characterID"},
+	Description:                "Zwraca 22 surowe pola ChrAsmEquipment jednego slotu postaci, bez rozwiązywania ich w GameCatalog.",
 })
+
+// GetEquipmentResult is the typed result of GetEquipment. The shape is owned by
+// SaveEngine, so the endpoint neither reshapes nor duplicates it. Every value
+// stays exactly as stored in the save.
+type GetEquipmentResult = saveengine.CharacterEquipment
+
+// GetEquipment returns the raw equipped state stored in one character slot of an
+// existing save session.
+//
+// The endpoint is thin: it rejects a missing engine and delegates everything
+// else. Validating saveSessionID and characterID, reading the snapshot and
+// deciding what an active, inactive or residual slot exposes belong to
+// SaveEngine. The session must already exist; this endpoint never creates one,
+// so it calls neither LoadSave nor any other endpoint, opens no file, reads no
+// GameCatalog and returns no raw save byte.
+func GetEquipment(engine *saveengine.Engine, saveSessionID string, characterID int) (GetEquipmentResult, error) {
+	if engine == nil {
+		return GetEquipmentResult{}, errors.New("save engine is not available")
+	}
+	return engine.GetEquipment(saveSessionID, characterID)
+}

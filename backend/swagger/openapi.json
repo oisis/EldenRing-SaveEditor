@@ -565,6 +565,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment": {
+      "get": {
+        "operationId": "getEquipment",
+        "tags": ["Equipment"],
+        "summary": "GetEquipment",
+        "description": "Returns the raw 22-slot ChrAsmEquipment state of one character slot. Every element of slots is the uint32 stored in the save: nothing is normalised, masked, turned into a handle, stripped of its type bits or resolved against GameCatalog. The meaning of each index is documented in docs/endpoints/equipment/get_equipment.md. An inactive slot is a normal result whose slots are all zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The raw character equipment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterEquipment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, or an active slot whose equipment block cannot be located inside its slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1154,6 +1192,38 @@
           "faceShape",
           "body",
           "skin"
+        ]
+      },
+      "CharacterEquipment": {
+        "type": "object",
+        "description": "Raw 22-slot ChrAsmEquipment state of one character slot. Every number is the value stored in the save: nothing is normalised, masked, turned into a handle, stripped of its type bits or resolved against GameCatalog. An inactive slot reports active false and an all-zero slots array.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "slots": {
+            "type": "array",
+            "description": "The 22 raw equipment fields, in stored order. The meaning of each index is documented in docs/endpoints/equipment/get_equipment.md; the values are returned without any normalisation.",
+            "minItems": 22,
+            "maxItems": 22,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "slots"
         ]
       },
       "Error": {
