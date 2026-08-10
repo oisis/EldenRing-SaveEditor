@@ -740,6 +740,16 @@ func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
 		t.Fatal("pouch items route body differs from the GetPouchItems result")
 	}
 
+	wantPhysickMixture, err := equipment.GetPhysickMixture(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("equipment.GetPhysickMixture: %v", err)
+	}
+	physickMixtureResponse := doSave(t, saveEngine, http.MethodGet, base+"/physick-mixture", "")
+	assertOK(t, physickMixtureResponse, base+"/physick-mixture")
+	if !reflect.DeepEqual(decode(t, physickMixtureResponse.Body.Bytes()), marshalled(t, wantPhysickMixture)) {
+		t.Fatal("physick mixture route body differs from the GetPhysickMixture result")
+	}
+
 	// A non-decimal characterID never reaches the getter, so the route owns it.
 	for _, raw := range []string{"one", " 0", "0x1"} {
 		target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/" + url.PathEscape(raw) + "/profile"
@@ -767,6 +777,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -841,15 +852,16 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	// The save-session routes exist only in the local loopback mode, so the
 	// document has to describe them with their own methods.
 	for path, method := range map[string]string{
-		"/api/v1/save-sessions":                                                      "post",
-		"/api/v1/save-sessions/{saveSessionID}":                                      "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters":                           "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":     "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":       "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":  "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":   "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items": "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items": "get",
+		"/api/v1/save-sessions":                                                          "post",
+		"/api/v1/save-sessions/{saveSessionID}":                                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters":                               "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":           "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":      "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":       "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":     "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":     "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -900,6 +912,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterQuickItems",
 		"PouchItemSlot",
 		"CharacterPouchItems",
+		"CharacterPhysickMixture",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -934,8 +947,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 10 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 10", found)
+	if found != 11 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 11", found)
 	}
 }
 

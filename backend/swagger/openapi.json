@@ -679,6 +679,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": {
+      "get": {
+        "operationId": "getPhysickMixture",
+        "tags": ["Equipment"],
+        "summary": "GetPhysickMixture",
+        "description": "Returns the two raw Crystal Tear identifiers of the current Flask of Wondrous Physick mixture of one character slot, in stored order. Both values are the values stored in the save: nothing is normalised, validated or resolved against GameCatalog, so 0, 0xFFFFFFFF and values with the high bit set are reported as written. An inactive slot is a normal result whose two identifiers are zeroed. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The raw character physick mixture",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterPhysickMixture"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, or an active slot whose physick mixture cannot be located inside its slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1404,6 +1442,38 @@
           "characterID",
           "active",
           "items"
+        ]
+      },
+      "CharacterPhysickMixture": {
+        "type": "object",
+        "description": "Raw Flask of Wondrous Physick mixture of one character slot: the two Crystal Tear identifiers at the start of EquipPhysicsData, in stored order. Nothing is normalised, validated or resolved against GameCatalog. An inactive slot reports active false and two zeros.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "tears": {
+            "type": "array",
+            "description": "The two raw Crystal Tear identifiers, in stored order. The values are returned without any normalisation.",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "active",
+          "tears"
         ]
       },
       "Error": {
