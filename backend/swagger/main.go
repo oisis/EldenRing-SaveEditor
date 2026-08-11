@@ -552,6 +552,45 @@ func registerSaveSessionRoutes(
 		},
 	)
 
+	// The storage route mirrors the inventory route: it is the second
+	// save-session route with paging and reads no catalog either, because this
+	// phase returns raw native records only. It calls GetStorage and nothing
+	// else, so the two containers stay independent.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			query := request.URL.Query()
+			page, err := parsePagingValue(query.Get("page"), "page")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			pageSize, err := parsePagingValue(query.Get("pageSize"), "pageSize")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.GetStorage(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				query.Get("containerSection"),
+				page,
+				pageSize,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
 	// The network settings belong to the session, not to a character slot: they
 	// are the regulation values stored once per save. The route passes the
 	// identifier on unchanged and reads no catalog.

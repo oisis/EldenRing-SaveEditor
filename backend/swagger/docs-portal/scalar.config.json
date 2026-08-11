@@ -170,6 +170,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/get_inventory.md",
                 "title": "GetInventory"
+              },
+              "/get-storage": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/get_storage.md",
+                "title": "GetStorage"
               }
             }
           },

@@ -787,6 +787,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -872,6 +873,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":     "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":       "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":         "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -925,6 +927,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterPhysickMixture",
 		"InventoryRecord",
 		"CharacterInventory",
+		"StorageRecord",
+		"CharacterStorage",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -959,8 +963,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 14 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 14", found)
+	if found != 15 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 15", found)
 	}
 }
 
@@ -1641,6 +1645,113 @@ func TestInventoryRoute(t *testing.T) {
 		"/api/v1/save-sessions/any-session/characters/0/inventory", "")
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("inventory route without an engine: status = %d, want 404 (body %q)",
+			absent.Code, absent.Body.String())
+	}
+}
+
+// The storage route is the second save-session route with a section filter and
+// paging, so its fixture carries real records too: two common and one key. The
+// offsets are restated here instead of reused from SaveEngine, including the
+// acquired-projectile count the section sits behind.
+const (
+	storageRouteSlotDataBase = int64(pcHeaderSize) + 0x10
+	storageRouteUserData10   = int64(pcHeaderSize) + 10*0x280010 + 0x10
+	storageRouteFlagsOffset  = 0x1954
+	storageRouteAnchorAt     = 0x0640
+	storageRouteProjCountAt  = 0xD0 + 0x58 + 0x1C + 0x58 + 0x58 + 0x9011 + 0x74 + 0x8C + 0x18
+	storageRouteProjectiles  = 4
+	storageRouteBlocksBefore = 0x9C + 0x0C + 0x12F
+	storageRouteSectionAt    = storageRouteProjCountAt + 4 +
+		storageRouteProjectiles*8 + storageRouteBlocksBefore
+	storageRouteCommonAt = storageRouteSectionAt + 4
+	storageRouteKeyAt    = storageRouteCommonAt + 0x780*12 + 4
+)
+
+// writeStorageFixture writes a synthetic PC save into t.TempDir() whose slot 0
+// is active and holds three non-empty Storage Box records.
+func writeStorageFixture(t *testing.T) string {
+	t.Helper()
+
+	data := make([]byte, pcFixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+	data[storageRouteUserData10+storageRouteFlagsOffset] = 1
+
+	anchorBase := storageRouteSlotDataBase + storageRouteAnchorAt
+	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+	binary.LittleEndian.PutUint32(data[anchorBase+storageRouteProjCountAt:], storageRouteProjectiles)
+
+	record := func(at int64, handle, quantity, acquisition uint32) {
+		binary.LittleEndian.PutUint32(data[anchorBase+at:], handle)
+		binary.LittleEndian.PutUint32(data[anchorBase+at+4:], quantity)
+		binary.LittleEndian.PutUint32(data[anchorBase+at+8:], acquisition)
+	}
+	record(storageRouteCommonAt, 0xB000272E, 0x80000003, 7)
+	record(storageRouteCommonAt+5*12, 0x90001111, 1, 9)
+	record(storageRouteKeyAt+2*12, 0xC0000001, 0x80000001, 12)
+
+	path := filepath.Join(t.TempDir(), "storage.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestStorageRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeStorageFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/storage"
+
+	want, err := inventory.GetStorage(saveEngine, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetStorage: %v", err)
+	}
+	if !want.Active || want.Total != 3 {
+		t.Fatalf("fixture result = %+v, want an active slot with three records", want)
+	}
+	recorder := doSave(t, saveEngine, http.MethodGet, base, "")
+	assertOK(t, recorder, base)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("storage route body differs from the GetStorage result")
+	}
+
+	// The section filter and both paging values have to reach the getter.
+	target := base + "?containerSection=key&page=1&pageSize=1"
+	wantKey, err := inventory.GetStorage(saveEngine, session.SaveSessionID, 0, "key", 1, 1)
+	if err != nil {
+		t.Fatalf("inventory.GetStorage(key): %v", err)
+	}
+	if len(wantKey.Records) != 1 || wantKey.Records[0].ContainerSection != "key" {
+		t.Fatalf("key page = %+v, want the single key record", wantKey)
+	}
+	filtered := doSave(t, saveEngine, http.MethodGet, target, "")
+	assertOK(t, filtered, target)
+	if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantKey)) {
+		t.Fatal("filtered storage route body differs from the GetStorage result")
+	}
+
+	for _, query := range []string{"?containerSection=Common", "?containerSection=%20key", "?page=-1", "?page=x"} {
+		rejected := doSave(t, saveEngine, http.MethodGet, base+query, "")
+		if rejected.Code != http.StatusBadRequest {
+			t.Fatalf("%s%s: status = %d, want 400 (body %q)", base, query, rejected.Code, rejected.Body.String())
+		}
+	}
+
+	// The route must not answer for a malformed characterID either.
+	malformed := doSave(t, saveEngine, http.MethodGet,
+		"/api/v1/save-sessions/"+session.SaveSessionID+"/characters/one/storage", "")
+	if malformed.Code != http.StatusBadRequest {
+		t.Fatalf("malformed characterID: status = %d, want 400 (body %q)",
+			malformed.Code, malformed.Body.String())
+	}
+
+	absent := doSave(t, nil, http.MethodGet,
+		"/api/v1/save-sessions/any-session/characters/0/storage", "")
+	if absent.Code != http.StatusNotFound {
+		t.Fatalf("storage route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
 	}
 }

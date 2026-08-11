@@ -806,6 +806,53 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage": {
+      "get": {
+        "operationId": "getStorage",
+        "tags": ["Inventory"],
+        "summary": "GetStorage",
+        "description": "Returns one page of the raw native Storage Box records of one character slot. This is phase 1: the records carry no name, no GameCatalog identity, no family, no variant, no stable OwnedItemID, no capacity and no Inventory record. Only non-empty records are returned; the two native absent sentinels 0x00000000 and 0xFFFFFFFF are skipped. The order is the physical native order, the common section first and then the key section, and physicalIndex is the position of the row inside its own section. gaItemHandle and acquisitionIndex are returned exactly as stored, and quantity is the stored value with the high bit masked off, because the Storage record is the same 12-byte record InventoryHeld uses and the bit carries the same meaning. An inactive or residual slot is a normal result with active false, total 0 and an empty array. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/StorageContainerSection"
+          },
+          {
+            "$ref": "#/components/parameters/Page"
+          },
+          {
+            "$ref": "#/components/parameters/PageSize"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "One page of raw storage records of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterStorage"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, a containerSection other than common, key or the empty string, a non-integer or negative page or pageSize, an active slot that carries no storage anchor, an acquired-projectile count above the accepted maximum, or an active slot whose storage cannot be located inside its slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1095,6 +1142,17 @@
         "in": "query",
         "required": false,
         "description": "Physical InventoryHeld section. Omitted or empty means both sections, common means the 0xA80 common records and key means the 0x180 key records. The value is matched exactly and case-sensitively; it is never trimmed and has no alias.",
+        "schema": {
+          "type": "string",
+          "enum": ["", "common", "key"]
+        },
+        "example": "common"
+      },
+      "StorageContainerSection": {
+        "name": "containerSection",
+        "in": "query",
+        "required": false,
+        "description": "Physical Storage Box section. Omitted or empty means both sections, common means the 0x780 common records and key means the 0x80 key records. The value is matched exactly and case-sensitively; it is never trimmed and has no alias. The two sections are smaller than the InventoryHeld ones, so this parameter is deliberately not the shared containerSection of GetInventory.",
         "schema": {
           "type": "string",
           "enum": ["", "common", "key"]
@@ -1731,6 +1789,74 @@
             "description": "The requested page in physical native order, the common section first and then the key section. Empty, never null, when the slot is inactive or the page lies beyond the last one.",
             "items": {
               "$ref": "#/components/schemas/InventoryRecord"
+            }
+          },
+          "total": {
+            "type": "integer",
+            "description": "Number of non-empty records that passed the section filter, counted before paging."
+          },
+          "page": {
+            "type": "integer",
+            "description": "The effective one-based page, so a requested 0 is reported as 1."
+          },
+          "pageSize": {
+            "type": "integer",
+            "description": "The effective page size, so a requested 0 is reported as 50."
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "records", "total", "page", "pageSize"]
+      },
+      "StorageRecord": {
+        "type": "object",
+        "description": "One non-empty physical Storage Box record, plus the identity of the row it was read from. containerSection and physicalIndex identify that physical row; they are deliberately not a stable item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
+        "properties": {
+          "containerSection": {
+            "type": "string",
+            "enum": ["common", "key"],
+            "description": "The physical section the record was read from."
+          },
+          "physicalIndex": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Position of the record inside its own section, counted from 0."
+          },
+          "gaItemHandle": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The raw stored GaItem handle. It is not normalised, validated or resolved against GameCatalog."
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The stored quantity with the high bit masked off, because that bit is not part of the count."
+          },
+          "acquisitionIndex": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The raw stored acquisition index."
+          }
+        },
+        "required": ["containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+      },
+      "CharacterStorage": {
+        "type": "object",
+        "description": "One page of the raw native Storage Box records of one character slot. Phase 1 of the Storage surface: no name, no GameCatalog identity, no family, no variant, no stable OwnedItemID, no capacity and no Inventory record. An inactive or residual slot reports active false, total 0 and an empty array.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "records": {
+            "type": "array",
+            "description": "The requested page in physical native order, the common section first and then the key section. Empty, never null, when the slot is inactive or the page lies beyond the last one.",
+            "items": {
+              "$ref": "#/components/schemas/StorageRecord"
             }
           },
           "total": {
