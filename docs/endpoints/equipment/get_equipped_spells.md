@@ -20,7 +20,7 @@ state.
 | Kind | Getter |
 | Domain | `equipment` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells` of the local explorer (`backend/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells` of the local explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
 | Implementation source | [../../../backend/endpoints/equipment/get_equipped_spells.go](../../../backend/endpoints/equipment/get_equipped_spells.go) |
 | Test source | [../../../backend/endpoints/equipment/get_equipped_spells_test.go](../../../backend/endpoints/equipment/get_equipped_spells_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |
@@ -328,7 +328,7 @@ setter.
 ```bash
 go test ./backend/saveengine -run '^TestGetEquippedSpells' -count=1 -v
 go test ./backend/endpoints/equipment -run '^TestGetEquippedSpells' -count=1 -v
-go test ./backend/swagger -run '^TestEquippedSpellsRoute' -count=1 -v
+go test ./tools/swagger -run '^TestEquippedSpellsRoute' -count=1 -v
 ```
 
 The tests build synthetic PC and PS4 containers inside `t.TempDir()`. They use no

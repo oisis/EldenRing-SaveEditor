@@ -18,7 +18,7 @@ set have exactly the same 22 fields and JSON names.
 | Kind | Getter |
 | Domain | `network` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/network-settings` of the local OpenAPI explorer (`backend/swagger`), registered only when the explorer runs without `-allow-external-bind`. No Wails binding, no frontend view and no CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/network-settings` of the local OpenAPI explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`. No Wails binding, no frontend view and no CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/network/get_network_settings.go](../../../backend/endpoints/network/get_network_settings.go) |
 | Test source | [../../../backend/endpoints/network/get_network_settings_test.go](../../../backend/endpoints/network/get_network_settings_test.go) |
 | Data source | the `UserData11` regulation of the loaded save session, read by SaveEngine |
@@ -127,7 +127,7 @@ and no guessed value is ever returned.
 GET /api/v1/save-sessions/{saveSessionID}/network-settings
 ```
 
-The route belongs to the local developer explorer in `backend/swagger`. It is
+The route belongs to the local developer explorer in `tools/swagger`. It is
 registered in `registerSaveSessionRoutes` only, so it exists exclusively in the
 local loopback mode: an explorer started with `-allow-external-bind` does not
 register it and answers `404`. The path segment is passed to
@@ -142,7 +142,7 @@ write path for this endpoint.
 ```
 go test ./backend/saveengine -run '^TestGetNetworkSettings' -count=1
 go test ./backend/endpoints/network -run '^TestGetNetworkSettings' -count=1
-go test ./backend/swagger -run '^TestNetworkSettingsRoute' -count=1
+go test ./tools/swagger -run '^TestNetworkSettingsRoute' -count=1
 ```
 
 The tests build synthetic PC and PS4 containers in `t.TempDir()` from the format

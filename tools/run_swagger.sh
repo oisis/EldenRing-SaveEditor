@@ -4,9 +4,9 @@
 #
 # Two processes are managed together:
 #
-#   * Scalar Docs, served from backend/swagger/docs-portal on localhost:7970.
+#   * Scalar Docs, served from tools/swagger/docs-portal on localhost:7970.
 #     This is the documentation portal and the interface a user opens.
-#   * backend/swagger on 127.0.0.1:8788. This is not a user interface; it exists
+#   * tools/swagger on 127.0.0.1:8788. This is not a user interface; it exists
 #     only so the "Try it" button in the Scalar API Reference has a local API
 #     host to call, and it stays bound to loopback.
 #
@@ -16,20 +16,20 @@
 # or Scalar process started by any other means is invisible to it and is left
 # untouched.
 #
-#   scripts/run_swagger.sh start [swagger flags...]
-#   scripts/run_swagger.sh stop
-#   scripts/run_swagger.sh restart [swagger flags...]
+#   tools/run_swagger.sh start [swagger flags...]
+#   tools/run_swagger.sh stop
+#   tools/run_swagger.sh restart [swagger flags...]
 set -euo pipefail
 
 # The repository root comes from the script's own location, so Go module
 # resolution and the catalog data path never depend on $PWD. pwd -P resolves a
-# symlinked scripts/ directory to the real one.
+# symlinked tools/ directory to the real one.
 script_directory="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repository_root="$(cd -- "${script_directory}/.." && pwd -P)"
 
 readonly default_address="127.0.0.1:8788"
 readonly catalog_data_directory="${repository_root}/backend/gamecatalog/data"
-readonly portal_directory="${repository_root}/backend/swagger/docs-portal"
+readonly portal_directory="${repository_root}/tools/swagger/docs-portal"
 readonly portal_configuration="scalar.config.json"
 readonly portal_port="7970"
 # The Scalar preview server binds the loopback name, and on this platform that
@@ -223,7 +223,7 @@ start_api_host() {
 	# `go run` would put its own supervising process there, and stopping that
 	# leaves the real server orphaned.
 	printf 'Building the local API host ...\n'
-	(cd -- "${repository_root}" && go build -o "${binary_file}" ./backend/swagger) ||
+	(cd -- "${repository_root}" && go build -o "${binary_file}" ./tools/swagger) ||
 		fail "go build failed"
 
 	# Recorded only once the start is actually attempted, so a refused start

@@ -27,11 +27,12 @@ metadata, not filesystem dependencies.
 ```text
 backend/
 ├── endpoints/    # Public SaveForge 2.0 endpoint contracts
-├── gamecatalog/  # Catalog schema, loader, data, and read-only viewer
-├── saveengine/   # Save formats, codecs, sessions, and operations
-└── swagger/      # Local API host, OpenAPI document, and Scalar portal
+├── gamecatalog/  # Catalog schema, loader, and data
+└── saveengine/   # Save formats, codecs, sessions, and operations
 docs/endpoints/   # Endpoint documentation
-scripts/          # Local Scalar and GameCatalog Viewer lifecycle scripts
+tools/            # Local developer tools and their lifecycle scripts
+├── swagger/      # Local API host, OpenAPI document, and Scalar portal
+└── viewer/       # Read-only GameCatalog DB Viewer
 ```
 
 ## Development

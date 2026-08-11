@@ -17,7 +17,7 @@ typed filters, instead of one dedicated getter per category.
 | Kind | Getter |
 | Domain | `catalog` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/catalog/resources` of the local OpenAPI explorer (`backend/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/catalog/resources` of the local OpenAPI explorer (`tools/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/catalog/get_resources.go](../../../backend/endpoints/catalog/get_resources.go) |
 | Test source | [../../../backend/endpoints/catalog/get_resources_test.go](../../../backend/endpoints/catalog/get_resources_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -254,12 +254,12 @@ The endpoint is exposed by the local, read-only OpenAPI explorer. Start it from
 the repository root; it binds loopback only:
 
 ```bash
-go run ./backend/swagger -addr 127.0.0.1:8788 -data ./backend/gamecatalog/data
+go run ./tools/swagger -addr 127.0.0.1:8788 -data ./backend/gamecatalog/data
 ```
 
 It serves the OpenAPI document at `http://127.0.0.1:8788/openapi.json` and no
 page of its own; the browser interface is the Scalar portal started by
-`scripts/run_swagger.sh start`.
+`tools/run_swagger.sh start`.
 
 ```bash
 curl -s "http://127.0.0.1:8788/api/v1/catalog/resources"
@@ -337,7 +337,7 @@ From the repository root:
 
 ```bash
 go test ./backend/endpoints/catalog -run '^TestGetResources' -count=1 -v
-go test ./backend/swagger -run '^TestResourcesRoute' -count=1 -v
+go test ./tools/swagger -run '^TestResourcesRoute' -count=1 -v
 ```
 
 The getter suite covers the unfiltered catalog order, the four-field projection,

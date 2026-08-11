@@ -6,7 +6,7 @@ exists in the repository; it stores none of its own.
 | Section | Source |
 | --- | --- |
 | Endpoint pages | `docs/endpoints/**/*.md`, read in place through relative paths |
-| API Reference | `backend/swagger/openapi.json`, read as a local file |
+| API Reference | `tools/swagger/openapi.json`, read as a local file |
 
 Nothing under `docs/endpoints` is copied, generated or symlinked into this
 directory. `docs/endpoints` stays the only source of endpoint documentation,
@@ -14,7 +14,7 @@ and `openapi.json` stays the only machine-readable contract.
 
 ## Running the portal
 
-This portal is the only browser interface. The Go process in `backend/swagger`
+This portal is the only browser interface. The Go process in `tools/swagger`
 is not a user interface: it is the local API host that serves the endpoints the
 API Reference calls, and it has no page of its own.
 
@@ -22,9 +22,9 @@ Both processes are started together by the helper script, from any working
 directory:
 
 ```bash
-scripts/run_swagger.sh start
-scripts/run_swagger.sh stop
-scripts/run_swagger.sh restart
+tools/run_swagger.sh start
+tools/run_swagger.sh stop
+tools/run_swagger.sh restart
 ```
 
 `start` runs both in the background and prints the portal URLs once they
@@ -42,9 +42,9 @@ directory, and the API host defaults to `127.0.0.1:8788` — the address
 `openapi.json` names. Every argument is forwarded to that command:
 
 ```bash
-scripts/run_swagger.sh start -addr 127.0.0.1:9000 -app-version dev
-scripts/run_swagger.sh restart          # reuses those arguments
-scripts/run_swagger.sh restart -addr 127.0.0.1:8788   # replaces them
+tools/run_swagger.sh start -addr 127.0.0.1:9000 -app-version dev
+tools/run_swagger.sh restart          # reuses those arguments
+tools/run_swagger.sh restart -addr 127.0.0.1:8788   # replaces them
 ```
 
 The script only ever stops the processes it started itself. A Swagger or Scalar
@@ -55,11 +55,11 @@ The equivalent direct invocations run one process each. The API host requires
 the repository root as the working directory; the portal requires this one:
 
 ```bash
-go run ./backend/swagger -addr 127.0.0.1:8788 -data ./backend/gamecatalog/data
+go run ./tools/swagger -addr 127.0.0.1:8788 -data ./backend/gamecatalog/data
 ```
 
 ```bash
-cd backend/swagger/docs-portal
+cd tools/swagger/docs-portal
 npx @scalar/cli@2.0.1 project preview
 ```
 
@@ -91,8 +91,8 @@ preflight, and only for the `Content-Type` request header. It sends no
 wildcard `Access-Control-Allow-Origin`, allows no credentials and runs no
 proxy. Serving either side on a different port or host breaks the request
 client until the corresponding address is updated: the origin in
-`portalOrigin` in `backend/swagger/main.go`, the server entry in
-`backend/swagger/openapi.json`, or both.
+`portalOrigin` in `tools/swagger/main.go`, the server entry in
+`tools/swagger/openapi.json`, or both.
 
 ## Scope
 

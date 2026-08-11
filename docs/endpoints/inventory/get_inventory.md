@@ -36,7 +36,7 @@ neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `inventory` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory` of the local explorer (`backend/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory` of the local explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
 | Implementation source | [../../../backend/endpoints/inventory/get_inventory.go](../../../backend/endpoints/inventory/get_inventory.go) |
 | Test source | [../../../backend/endpoints/inventory/get_inventory_test.go](../../../backend/endpoints/inventory/get_inventory_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |
@@ -320,7 +320,7 @@ parser, so a non-integer value is rejected by the route and an absent value stay
 ```bash
 go test ./backend/saveengine -run '^TestGetInventory' -count=1 -v
 go test ./backend/endpoints/inventory -run '^TestGetInventory' -count=1 -v
-go test ./backend/swagger -run '^TestInventoryRoute$' -count=1 -v
+go test ./tools/swagger -run '^TestInventoryRoute$' -count=1 -v
 ```
 
 The tests build synthetic PC and PS4 containers inside `t.TempDir()`. They use no

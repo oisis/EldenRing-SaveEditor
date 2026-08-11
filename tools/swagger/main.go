@@ -268,7 +268,7 @@ func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, sav
 }
 
 // portalOrigin is the single origin the Scalar documentation portal is served
-// from by `npx @scalar/cli project preview` in backend/swagger/docs-portal. The
+// from by `npx @scalar/cli project preview` in tools/swagger/docs-portal. The
 // portal reads openapi.json from disk, so this is the one browser context that
 // has to reach the explorer over the network to send a request.
 const portalOrigin = "http://localhost:7970"

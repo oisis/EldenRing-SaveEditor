@@ -19,7 +19,7 @@ nothing: neither the save, nor the session, nor any application state.
 | Kind | Getter |
 | Domain | `equipment` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture` of the local explorer (`backend/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
+| Transport status | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture` of the local explorer (`tools/swagger`), registered only when the explorer runs without `-allow-external-bind`; with an external bind the route does not exist and answers 404. There is no Wails binding, no CLI command and no frontend. |
 | Implementation source | [../../../backend/endpoints/equipment/get_physick_mixture.go](../../../backend/endpoints/equipment/get_physick_mixture.go) |
 | Test source | [../../../backend/endpoints/equipment/get_physick_mixture_test.go](../../../backend/endpoints/equipment/get_physick_mixture_test.go) |
 | Save access | read-only — the session's private in-memory snapshot; no file is opened |

@@ -3,7 +3,7 @@
   "scalar": "2.0.0",
   "info": {
     "title": "SaveForge 2.0 API documentation",
-    "description": "Local documentation portal for the SaveForge 2.0 endpoint surface. Endpoint documentation is read directly from docs/endpoints; the API reference is read from backend/swagger/openapi.json. Nothing is copied into this directory."
+    "description": "Local documentation portal for the SaveForge 2.0 endpoint surface. Endpoint documentation is read directly from docs/endpoints; the API reference is read from tools/swagger/openapi.json. Nothing is copied into this directory."
   },
   "navigation": {
     "routes": {

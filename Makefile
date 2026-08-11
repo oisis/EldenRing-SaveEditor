@@ -4,7 +4,6 @@ GO_PACKAGES := \
 	./backend/gamecatalog/... \
 	./backend/saveengine/... \
 	./backend/endpoints/... \
-	./backend/swagger \
 	./tools/...
 
 .PHONY: all deps test test-race vet swagger-start swagger-stop swagger-restart viewer-start viewer-stop viewer-restart help
@@ -24,13 +23,13 @@ vet:
 	go vet $(GO_PACKAGES)
 
 swagger-start:
-	./scripts/run_swagger.sh start -app-version "$(VERSION)"
+	./tools/run_swagger.sh start -app-version "$(VERSION)"
 
 swagger-stop:
-	./scripts/run_swagger.sh stop
+	./tools/run_swagger.sh stop
 
 swagger-restart:
-	./scripts/run_swagger.sh restart -app-version "$(VERSION)"
+	./tools/run_swagger.sh restart -app-version "$(VERSION)"
 
 viewer-start:
 	./tools/run_viewer.sh start

@@ -12,7 +12,7 @@ valid, and the list of data sources the catalog was built from.
 | Kind | Getter |
 | Domain | `catalog` |
 | Implementation status | implemented |
-| Transport status | transport-exposed — `GET /api/v1/catalog/info` of the local OpenAPI explorer (`backend/swagger`). No Wails binding and no permanent CLI command reach it. |
+| Transport status | transport-exposed — `GET /api/v1/catalog/info` of the local OpenAPI explorer (`tools/swagger`). No Wails binding and no permanent CLI command reach it. |
 | Implementation source | [../../../backend/endpoints/catalog/get_catalog_info.go](../../../backend/endpoints/catalog/get_catalog_info.go) |
 | Test source | [../../../backend/endpoints/catalog/get_catalog_info_test.go](../../../backend/endpoints/catalog/get_catalog_info_test.go) |
 | Save access | none — the endpoint never opens, reads, or writes a save |
@@ -119,7 +119,7 @@ a sequence the main application performs at startup today.
 ## Command-line verification
 
 `GetCatalogInfo` is exposed over HTTP as `GET /api/v1/catalog/info` by the local
-OpenAPI explorer in `backend/swagger`, a developer tool the application
+OpenAPI explorer in `tools/swagger`, a developer tool the application
 neither imports nor starts. It is not exposed through Wails and there is no
 permanent CLI command that invokes it. There are two ways to verify it
 locally.
@@ -231,7 +231,7 @@ A successful run reports `"valid": true` and exits without an error.
 
 - The endpoint is not exposed through Wails.
 - The only HTTP route is `GET /api/v1/catalog/info` of the local OpenAPI explorer
-  in `backend/swagger`, a developer tool.
+  in `tools/swagger`, a developer tool.
 - There is no permanent CLI command for it.
 - The getter does not load the catalog. It requires an already loaded
   `*gamecatalog.Catalog` supplied by the caller.
