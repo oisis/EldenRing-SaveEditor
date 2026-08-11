@@ -4,7 +4,8 @@ GO_PACKAGES := \
 	./backend/gamecatalog/... \
 	./backend/saveengine/... \
 	./backend/endpoints/... \
-	./backend/swagger
+	./backend/swagger \
+	./tools/...
 
 .PHONY: all deps test test-race vet swagger-start swagger-stop swagger-restart viewer-start viewer-stop viewer-restart help
 
@@ -32,13 +33,13 @@ swagger-restart:
 	./scripts/run_swagger.sh restart -app-version "$(VERSION)"
 
 viewer-start:
-	./scripts/run_viewer.sh start
+	./tools/run_viewer.sh start
 
 viewer-stop:
-	./scripts/run_viewer.sh stop
+	./tools/run_viewer.sh stop
 
 viewer-restart:
-	./scripts/run_viewer.sh restart
+	./tools/run_viewer.sh restart
 
 help:
 	@echo "SaveForge 2.0 development commands:"

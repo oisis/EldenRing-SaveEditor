@@ -12,8 +12,8 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
-	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/dbviewer"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	dbviewer "github.com/oisis/EldenRing-SaveForge/tools/viewer"
 )
 
 // TestEmbeddedResourcesHaveOfficialName protects the invariant that replaced the

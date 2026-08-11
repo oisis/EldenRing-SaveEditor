@@ -10,9 +10,9 @@ import (
 	"testing"
 
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
-	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/dbviewer"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	dbviewer "github.com/oisis/EldenRing-SaveForge/tools/viewer"
 )
 
 // removedNameFields are the historical SaveForge name fields that the official

@@ -10,14 +10,14 @@
 # never signals anything it has not first verified as its own, so a viewer
 # started by any other means is invisible to it and is left untouched.
 #
-#   scripts/run_viewer.sh start [viewer flags...]
-#   scripts/run_viewer.sh stop
-#   scripts/run_viewer.sh restart [viewer flags...]
+#   tools/run_viewer.sh start [viewer flags...]
+#   tools/run_viewer.sh stop
+#   tools/run_viewer.sh restart [viewer flags...]
 set -euo pipefail
 
 # The repository root comes from the script's own location, so Go module
 # resolution and the catalog data path never depend on $PWD. pwd -P resolves a
-# symlinked scripts/ directory to the real one.
+# symlinked tools/ directory to the real one.
 script_directory="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 repository_root="$(cd -- "${script_directory}/.." && pwd -P)"
 
@@ -157,7 +157,7 @@ start_viewer() {
 	# `go run` would put its own supervising process there, and stopping that
 	# leaves the real viewer orphaned.
 	printf 'Building the GameCatalog DB Viewer ...\n'
-	(cd -- "${repository_root}" && go build -o "${binary_file}" ./backend/gamecatalog/dbviewer/cmd/gamecatalog-viewer) ||
+	(cd -- "${repository_root}" && go build -o "${binary_file}" ./tools/viewer/cmd/gamecatalog-viewer) ||
 		fail "go build failed"
 
 	# Recorded only once the start is actually attempted, so a refused start

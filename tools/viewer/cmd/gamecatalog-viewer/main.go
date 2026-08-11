@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/dbviewer"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	dbviewer "github.com/oisis/EldenRing-SaveForge/tools/viewer"
 )
 
 func main() {
