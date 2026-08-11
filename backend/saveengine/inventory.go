@@ -86,6 +86,11 @@ var inventoryHeldAnchor = []byte{
 // InventoryRecord is one non-empty physical InventoryHeld record exactly as
 // stored, plus the identity of the row it was read from.
 //
+// OwnedItemID is the opaque identity of this physical record, valid for the
+// SaveRevision it was minted under and for nothing else. It is compared byte for
+// byte and never parsed: it carries no handle, no acquisition index, no physical
+// index and no slot address.
+//
 // ContainerSection is the physical section the record lives in and PhysicalIndex
 // is its position inside that section, counted from 0. The pair identifies the
 // row that was read; it is deliberately not a stable item identity, because a
@@ -96,6 +101,7 @@ var inventoryHeldAnchor = []byte{
 // stored value with the high bit masked off, because that bit is not part of the
 // count.
 type InventoryRecord struct {
+	OwnedItemID      string `json:"ownedItemID"`
 	ContainerSection string `json:"containerSection"`
 	PhysicalIndex    int    `json:"physicalIndex"`
 	GaItemHandle     uint32 `json:"gaItemHandle"`
@@ -106,21 +112,26 @@ type InventoryRecord struct {
 // CharacterInventory is one page of the raw InventoryHeld records of one
 // physical save slot. This is the first stage of the Inventory surface: it
 // carries no name, no kind, no key, no family, no variant, no equipped state, no
-// owned-item identity, no capacity and no Storage record, and it reads no
-// GameCatalog at all.
+// capacity and no Storage record, and it reads no GameCatalog at all. The only
+// resolved value is the owned-item identity of each returned record.
+//
+// SaveRevision is the revision the result was read under, and the one every
+// OwnedItemID in it was minted under. It is a decimal string compared exactly.
 //
 // Records keeps the physical native order: the common section first, then the
 // key section, and inside each section the stored order of its rows. Only
 // non-empty records are reported, so the two native absent sentinels never
-// appear. Total counts every non-empty record that passed the section filter,
-// before paging.
+// appear and never receive an identity. Total counts every non-empty record that
+// passed the section filter, before paging.
 //
-// Every field except SaveSessionID, CharacterID, Page and PageSize describes an
-// active slot only. An inactive slot — including a residual one, whose deleted
-// character's inventory is still in the file — reports Active false, an empty
-// list and a zero total, and its slot data is never searched or read.
+// Every field except SaveSessionID, SaveRevision, CharacterID, Page and PageSize
+// describes an active slot only. An inactive slot — including a residual one,
+// whose deleted character's inventory is still in the file — reports Active
+// false, an empty list and a zero total, mints no identity, and its slot data is
+// never searched or read; it still reports the current SaveRevision.
 type CharacterInventory struct {
 	SaveSessionID string            `json:"saveSessionID"`
+	SaveRevision  string            `json:"saveRevision"`
 	CharacterID   int               `json:"characterID"`
 	Active        bool              `json:"active"`
 	Records       []InventoryRecord `json:"records"`
@@ -205,6 +216,7 @@ func (engine *Engine) GetInventory(
 
 	inventory := CharacterInventory{
 		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
 		CharacterID:   characterID,
 		Records:       []InventoryRecord{},
 		Page:          page,
@@ -237,13 +249,30 @@ func (engine *Engine) GetInventory(
 		return CharacterInventory{}, fmt.Errorf("cannot read inventory of character %d: %w", characterID, err)
 	}
 
-	matches := make([]InventoryRecord, 0)
-	if containerSection == "" || containerSection == InventorySectionCommon {
-		matches = appendInventoryRecords(matches, section[:inventoryHeldCommonSize], InventorySectionCommon)
+	// Both physical sections are decoded and identified before anything is
+	// filtered or paged, so containerSection, page and pageSize decide only which
+	// records are returned and never which identity a record gets.
+	keyEnd := inventoryHeldSectionSize - inventoryHeldTrailingCounters
+	records := appendInventoryRecords(
+		make([]InventoryRecord, 0), section[:inventoryHeldCommonSize], InventorySectionCommon)
+	records = appendInventoryRecords(records, section[inventoryHeldKeyAt:keyEnd], InventorySectionKey)
+	for index := range records {
+		records[index].OwnedItemID = loaded.session.mintOwnedItemID(ownedItemLocator{
+			characterID:      characterID,
+			container:        ownedContainerInventory,
+			containerSection: records[index].ContainerSection,
+			physicalIndex:    records[index].PhysicalIndex,
+		})
 	}
-	if containerSection == "" || containerSection == InventorySectionKey {
-		keyEnd := inventoryHeldSectionSize - inventoryHeldTrailingCounters
-		matches = appendInventoryRecords(matches, section[inventoryHeldKeyAt:keyEnd], InventorySectionKey)
+
+	matches := records
+	if containerSection != "" {
+		matches = make([]InventoryRecord, 0, len(records))
+		for _, record := range records {
+			if record.ContainerSection == containerSection {
+				matches = append(matches, record)
+			}
+		}
 	}
 
 	inventory.Active = true

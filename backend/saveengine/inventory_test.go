@@ -178,6 +178,53 @@ func inventoryTestWantKey() []InventoryRecord {
 	}
 }
 
+// inventoryTestWithIDs fills in the opaque identifier every expected record has
+// to carry. The token is never spelled out, because it is opaque by contract; it
+// is looked up through the locator the getter must have minted it for, so a
+// record identified by the wrong character, container, section or physical index
+// fails here. Minting is idempotent, so this reuses the token an earlier read
+// already issued instead of inventing one.
+func inventoryTestWithIDs(
+	t *testing.T, engine *Engine, saveSessionID string, characterID int, want []InventoryRecord,
+) []InventoryRecord {
+	t.Helper()
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	session := engine.sessions[saveSessionID].session
+	for index := range want {
+		want[index].OwnedItemID = session.mintOwnedItemID(ownedItemLocator{
+			characterID:      characterID,
+			container:        ownedContainerInventory,
+			containerSection: want[index].ContainerSection,
+			physicalIndex:    want[index].PhysicalIndex,
+		})
+	}
+	return want
+}
+
+// inventoryTestIdentitiesByRow keys the identifier of every returned record by
+// its physical coordinates, and proves on the way that each one is present and
+// unique. Two records of one read may never share a token.
+func inventoryTestIdentitiesByRow(t *testing.T, records []InventoryRecord) map[string]string {
+	t.Helper()
+
+	byRow := make(map[string]string, len(records))
+	owners := make(map[string]string, len(records))
+	for _, record := range records {
+		row := record.ContainerSection + "#" + strconv.Itoa(record.PhysicalIndex)
+		if record.OwnedItemID == "" {
+			t.Fatalf("record %s carries no ownedItemID", row)
+		}
+		if owner, taken := owners[record.OwnedItemID]; taken {
+			t.Fatalf("record %s reuses the ownedItemID of %s", row, owner)
+		}
+		owners[record.OwnedItemID] = row
+		byRow[row] = record.OwnedItemID
+	}
+	return byRow
+}
+
 func inventoryTestActiveFixture(platform Platform, slot int, anchorAt int64) inventoryTestFixture {
 	return inventoryTestFixture{
 		platform: platform, slot: slot, flag: 1, anchorAt: anchorAt,
@@ -209,12 +256,14 @@ func TestGetInventoryReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterInventory{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   content.slot,
 				Active:        true,
-				Records:       append(inventoryTestWantCommon(), inventoryTestWantKey()...),
-				Total:         5,
-				Page:          1,
-				PageSize:      50,
+				Records: inventoryTestWithIDs(t, engine, loaded.SaveSessionID, content.slot,
+					append(inventoryTestWantCommon(), inventoryTestWantKey()...)),
+				Total:    5,
+				Page:     1,
+				PageSize: 50,
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
@@ -229,6 +278,12 @@ func TestGetInventoryFiltersBySection(t *testing.T) {
 		writeInventoryFixture(t, inventoryTestActiveFixture(PlatformPC, 3, 0x0640)), "")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// The canonical unfiltered read pins the identity of every physical record
+	// first, so a filtered read that minted a different token cannot pass.
+	if _, err := engine.GetInventory(loaded.SaveSessionID, 3, "", 0, 0); err != nil {
+		t.Fatalf("canonical GetInventory: %v", err)
 	}
 
 	cases := map[string]struct {
@@ -247,8 +302,9 @@ func TestGetInventoryFiltersBySection(t *testing.T) {
 			if result.Total != len(testCase.want) {
 				t.Fatalf("total = %d, want %d", result.Total, len(testCase.want))
 			}
-			if !reflect.DeepEqual(result.Records, testCase.want) {
-				t.Errorf("records = %+v, want %+v", result.Records, testCase.want)
+			want := inventoryTestWithIDs(t, engine, loaded.SaveSessionID, 3, testCase.want)
+			if !reflect.DeepEqual(result.Records, want) {
+				t.Errorf("records = %+v, want %+v", result.Records, want)
 			}
 		})
 	}
@@ -261,7 +317,13 @@ func TestGetInventoryPagesWithoutLosingTheNativeOrder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
-	all := append(inventoryTestWantCommon(), inventoryTestWantKey()...)
+	// The canonical unpaged read pins the identity of every physical record
+	// first, so a page that minted a different token cannot pass.
+	if _, err := engine.GetInventory(loaded.SaveSessionID, 1, "", 0, 0); err != nil {
+		t.Fatalf("canonical GetInventory: %v", err)
+	}
+	all := inventoryTestWithIDs(t, engine, loaded.SaveSessionID, 1,
+		append(inventoryTestWantCommon(), inventoryTestWantKey()...))
 
 	cases := map[string]struct {
 		page, pageSize int
@@ -315,6 +377,7 @@ func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 
 	want := CharacterInventory{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   content.slot,
 		Records:       []InventoryRecord{},
 		Page:          1,
@@ -322,6 +385,90 @@ func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
+	}
+	// The residual records are still in the file, so the read must have minted
+	// nothing at all rather than identifying data it is not allowed to expose.
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	if minted := len(engine.sessions[loaded.SaveSessionID].session.ownedByID); minted != 0 {
+		t.Errorf("a residual slot minted %d identities, want 0", minted)
+	}
+}
+
+func TestGetInventoryMintsOneIdentityPerPhysicalRecord(t *testing.T) {
+	cases := []inventoryTestFixture{
+		inventoryTestActiveFixture(PlatformPC, 0, 0x01A7),
+		inventoryTestActiveFixture(PlatformPS4, 7, 0x1F4C2),
+	}
+
+	for _, content := range cases {
+		t.Run(string(content.platform), func(t *testing.T) {
+			engine := New()
+			loaded, err := engine.LoadSave(
+				writeInventoryFixture(t, content), string(content.platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			full, err := engine.GetInventory(loaded.SaveSessionID, content.slot, "", 0, 0)
+			if err != nil {
+				t.Fatalf("GetInventory: %v", err)
+			}
+			// The fixture carries five occupied rows plus three absent sentinels.
+			// Every occupied row is identified, including the ones whose handle
+			// this phase can neither resolve nor explain.
+			identities := inventoryTestIdentitiesByRow(t, full.Records)
+			if len(identities) != 5 {
+				t.Fatalf("identified %d records, want 5", len(identities))
+			}
+			if full.SaveRevision != "0" {
+				t.Errorf("saveRevision = %q, want %q", full.SaveRevision, "0")
+			}
+
+			// The two absent sentinels of each section are not records, so the
+			// registry may hold nothing beyond the five occupied rows.
+			engine.mutex.Lock()
+			minted := len(engine.sessions[loaded.SaveSessionID].session.ownedByID)
+			engine.mutex.Unlock()
+			if minted != len(identities) {
+				t.Errorf("registry holds %d identities, want %d", minted, len(identities))
+			}
+
+			// Re-reading, filtering and paging inside one revision may change which
+			// records come back, never which identity they carry.
+			reads := map[string]CharacterInventory{}
+			for name, request := range map[string]struct {
+				section        string
+				page, pageSize int
+			}{
+				"repeated full read": {"", 0, 0},
+				"common only":        {InventorySectionCommon, 0, 0},
+				"key only":           {InventorySectionKey, 0, 0},
+				"first page of two":  {"", 1, 2},
+				"last page of two":   {"", 3, 2},
+			} {
+				read, err := engine.GetInventory(
+					loaded.SaveSessionID, content.slot, request.section, request.page, request.pageSize)
+				if err != nil {
+					t.Fatalf("GetInventory(%s): %v", name, err)
+				}
+				reads[name] = read
+			}
+			for name, read := range reads {
+				if read.SaveRevision != full.SaveRevision {
+					t.Errorf("%s reported revision %q, want %q",
+						name, read.SaveRevision, full.SaveRevision)
+				}
+				for row, id := range inventoryTestIdentitiesByRow(t, read.Records) {
+					if id != identities[row] {
+						t.Errorf("%s identified %s as %q, want %q", name, row, id, identities[row])
+					}
+				}
+			}
+			if repeated := reads["repeated full read"]; !reflect.DeepEqual(repeated, full) {
+				t.Errorf("a repeated read = %+v, want the identical first result %+v", repeated, full)
+			}
+		})
 	}
 }
 

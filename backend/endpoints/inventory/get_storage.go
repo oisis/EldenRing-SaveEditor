@@ -37,16 +37,19 @@ var GetStorageDefinition = contract.MustDefine(contract.Definition{
 // SaveEngine, so the endpoint neither reshapes nor duplicates it. GaItemHandle
 // and AcquisitionIndex are returned exactly as stored, Quantity is returned with
 // the high bit removed by the 0x7FFFFFFF mask, and no other value is normalised
-// or resolved against GameCatalog.
+// or resolved against GameCatalog. OwnedItemID and SaveRevision are minted and
+// rendered by SaveEngine; the endpoint passes both through untouched and parses
+// neither.
 type GetStorageResult = saveengine.CharacterStorage
 
 // GetStorage returns one page of the raw Storage Box records stored in one
 // character slot of an existing save session.
 //
-// This is the first phase of the Storage surface. The result carries no name, no
-// kind, no key, no family, no variant, no stable owned-item identity, no
-// capacity and no Inventory record: those need a verified GaItem parser and
-// belong to a later phase.
+// This is the first phase of the Storage surface. Apart from the owned-item
+// identity of each record and the revision it was minted under, the result
+// carries no name, no kind, no key, no family, no variant, no capacity and no
+// Inventory record: those need a verified GaItem parser and belong to a later
+// phase.
 //
 // The endpoint is thin: it rejects a missing engine and delegates everything
 // else. Validating saveSessionID, characterID, containerSection and the paging

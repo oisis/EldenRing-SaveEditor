@@ -125,6 +125,12 @@ var storageAnchor = []byte{
 // StorageRecord is one non-empty physical Storage Box record, plus the identity
 // of the row it was read from.
 //
+// OwnedItemID is the opaque identity of this physical record, valid for the
+// SaveRevision it was minted under and for nothing else. It is compared byte for
+// byte and never parsed: it carries no handle, no acquisition index, no physical
+// index and no slot address. A Storage record and an Inventory record at the
+// same coordinates are two physical records and never share an identity.
+//
 // ContainerSection is the physical section the record lives in and PhysicalIndex
 // is its position inside that section, counted from 0. The pair identifies the
 // row that was read; it is deliberately not a stable item identity, because a
@@ -135,6 +141,7 @@ var storageAnchor = []byte{
 // stored value with the high bit masked off, because that bit is not part of the
 // count.
 type StorageRecord struct {
+	OwnedItemID      string `json:"ownedItemID"`
 	ContainerSection string `json:"containerSection"`
 	PhysicalIndex    int    `json:"physicalIndex"`
 	GaItemHandle     uint32 `json:"gaItemHandle"`
@@ -144,21 +151,27 @@ type StorageRecord struct {
 
 // CharacterStorage is one page of the raw Storage Box records of one physical
 // save slot. This is the first stage of the Storage surface: it carries no name,
-// no kind, no key, no family, no variant, no owned-item identity, no capacity
-// and no Inventory record, and it reads no GameCatalog at all.
+// no kind, no key, no family, no variant, no capacity and no Inventory record,
+// and it reads no GameCatalog at all. The only resolved value is the owned-item
+// identity of each returned record.
+//
+// SaveRevision is the revision the result was read under, and the one every
+// OwnedItemID in it was minted under. It is a decimal string compared exactly.
 //
 // Records keeps the physical native order: the common section first, then the
 // key section, and inside each section the stored order of its rows. Only
 // non-empty records are reported, so the two native absent sentinels never
-// appear. Total counts every non-empty record that passed the section filter,
-// before paging.
+// appear and never receive an identity. Total counts every non-empty record that
+// passed the section filter, before paging.
 //
-// Every field except SaveSessionID, CharacterID, Page and PageSize describes an
-// active slot only. An inactive slot — including a residual one, whose deleted
-// character's storage is still in the file — reports Active false, an empty list
-// and a zero total, and its slot data is never searched or read.
+// Every field except SaveSessionID, SaveRevision, CharacterID, Page and PageSize
+// describes an active slot only. An inactive slot — including a residual one,
+// whose deleted character's storage is still in the file — reports Active false,
+// an empty list and a zero total, mints no identity, and its slot data is never
+// searched or read; it still reports the current SaveRevision.
 type CharacterStorage struct {
 	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
 	CharacterID   int             `json:"characterID"`
 	Active        bool            `json:"active"`
 	Records       []StorageRecord `json:"records"`
@@ -246,6 +259,7 @@ func (engine *Engine) GetStorage(
 
 	storage := CharacterStorage{
 		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.revisionString(),
 		CharacterID:   characterID,
 		Records:       []StorageRecord{},
 		Page:          page,
@@ -297,14 +311,30 @@ func (engine *Engine) GetStorage(
 		return CharacterStorage{}, fmt.Errorf("cannot read storage of character %d: %w", characterID, err)
 	}
 
-	matches := make([]StorageRecord, 0)
-	if containerSection == "" || containerSection == StorageSectionCommon {
-		matches = appendStorageRecords(
-			matches, section[storageCommonAt:storageCommonAt+storageCommonSize], StorageSectionCommon)
+	// Both physical sections are decoded and identified before anything is
+	// filtered or paged, so containerSection, page and pageSize decide only which
+	// records are returned and never which identity a record gets.
+	records := appendStorageRecords(make([]StorageRecord, 0),
+		section[storageCommonAt:storageCommonAt+storageCommonSize], StorageSectionCommon)
+	records = appendStorageRecords(records,
+		section[storageKeyAt:storageKeyAt+storageKeySize], StorageSectionKey)
+	for index := range records {
+		records[index].OwnedItemID = loaded.session.mintOwnedItemID(ownedItemLocator{
+			characterID:      characterID,
+			container:        ownedContainerStorage,
+			containerSection: records[index].ContainerSection,
+			physicalIndex:    records[index].PhysicalIndex,
+		})
 	}
-	if containerSection == "" || containerSection == StorageSectionKey {
-		matches = appendStorageRecords(
-			matches, section[storageKeyAt:storageKeyAt+storageKeySize], StorageSectionKey)
+
+	matches := records
+	if containerSection != "" {
+		matches = make([]StorageRecord, 0, len(records))
+		for _, record := range records {
+			if record.ContainerSection == containerSection {
+				matches = append(matches, record)
+			}
+		}
 	}
 
 	storage.Active = true

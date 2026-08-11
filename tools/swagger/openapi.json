@@ -1796,8 +1796,13 @@
       },
       "InventoryRecord": {
         "type": "object",
-        "description": "One non-empty physical InventoryHeld record, plus the identity of the row it was read from. containerSection and physicalIndex identify that physical row; they are deliberately not a stable item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
+        "description": "One non-empty physical InventoryHeld record, plus the identity of the row it was read from. ownedItemID is the opaque identity of the record itself; containerSection and physicalIndex identify the physical row it currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
         "properties": {
+          "ownedItemID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Opaque identity of this physical record, valid only for the saveRevision of the enclosing result and only inside the save session that produced it. Compare it byte for byte; never parse, trim, normalise or persist it. It encodes no handle, no index and no slot address, and an Inventory record never shares it with a Storage record at the same coordinates."
+          },
           "containerSection": {
             "type": "string",
             "enum": ["common", "key"],
@@ -1824,14 +1829,20 @@
             "description": "The raw stored acquisition index."
           }
         },
-        "required": ["containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+        "required": ["ownedItemID", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
       },
       "CharacterInventory": {
         "type": "object",
-        "description": "One page of the raw native InventoryHeld records of one character slot. Phase 1 of the Inventory surface: no name, no GameCatalog identity, no family, no variant, no equipped state, no stable OwnedItemID, no capacity and no Storage record. An inactive or residual slot reports active false, total 0 and an empty array.",
+        "description": "One page of the raw native InventoryHeld records of one character slot. Phase 1 of the Inventory surface: apart from the owned-item identity of each record there is no name, no GameCatalog identity, no family, no variant, no equipped state, no capacity and no Storage record. An inactive or residual slot reports active false, total 0 and an empty array, mints no identity, and still reports the current saveRevision.",
         "properties": {
           "saveSessionID": {
             "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The revision this result was read under, and the one every ownedItemID in it was minted under. A non-empty decimal string with no sign, prefix, padding or separator. It is deliberately not a JSON number, because a uint64 above 2^53-1 would round in a JavaScript client. Carry it back unchanged as expectedRevision and compare it byte for byte; never parse, increment or order it."
           },
           "characterID": {
             "type": "integer",
@@ -1860,7 +1871,7 @@
             "description": "The effective page size, so a requested 0 is reported as 50."
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "records", "total", "page", "pageSize"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "records", "total", "page", "pageSize"]
       },
       "GestureEntry": {
         "type": "object",
@@ -1921,8 +1932,13 @@
       },
       "StorageRecord": {
         "type": "object",
-        "description": "One non-empty physical Storage Box record, plus the identity of the row it was read from. containerSection and physicalIndex identify that physical row; they are deliberately not a stable item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
+        "description": "One non-empty physical Storage Box record, plus the identity of the row it was read from. ownedItemID is the opaque identity of the record itself; containerSection and physicalIndex identify the physical row it currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
         "properties": {
+          "ownedItemID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Opaque identity of this physical record, valid only for the saveRevision of the enclosing result and only inside the save session that produced it. Compare it byte for byte; never parse, trim, normalise or persist it. It encodes no handle, no index and no slot address, and a Storage record never shares it with an Inventory record at the same coordinates."
+          },
           "containerSection": {
             "type": "string",
             "enum": ["common", "key"],
@@ -1949,14 +1965,20 @@
             "description": "The raw stored acquisition index."
           }
         },
-        "required": ["containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+        "required": ["ownedItemID", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
       },
       "CharacterStorage": {
         "type": "object",
-        "description": "One page of the raw native Storage Box records of one character slot. Phase 1 of the Storage surface: no name, no GameCatalog identity, no family, no variant, no stable OwnedItemID, no capacity and no Inventory record. An inactive or residual slot reports active false, total 0 and an empty array.",
+        "description": "One page of the raw native Storage Box records of one character slot. Phase 1 of the Storage surface: apart from the owned-item identity of each record there is no name, no GameCatalog identity, no family, no variant, no capacity and no Inventory record. An inactive or residual slot reports active false, total 0 and an empty array, mints no identity, and still reports the current saveRevision.",
         "properties": {
           "saveSessionID": {
             "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The revision this result was read under, and the one every ownedItemID in it was minted under. A non-empty decimal string with no sign, prefix, padding or separator. It is deliberately not a JSON number, because a uint64 above 2^53-1 would round in a JavaScript client. Carry it back unchanged as expectedRevision and compare it byte for byte; never parse, increment or order it."
           },
           "characterID": {
             "type": "integer",
@@ -1985,7 +2007,7 @@
             "description": "The effective page size, so a requested 0 is reported as 50."
           }
         },
-        "required": ["saveSessionID", "characterID", "active", "records", "total", "page", "pageSize"]
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "records", "total", "page", "pageSize"]
       },
       "Error": {
         "type": "object",

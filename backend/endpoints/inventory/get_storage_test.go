@@ -124,6 +124,49 @@ func getStorageWantAll() []saveengine.StorageRecord {
 	return append(getStorageWantCommon(), getStorageWantKey()...)
 }
 
+// getStorageIdentities keys the opaque identifier of every returned record by
+// its physical coordinates, and proves on the way that each one is present and
+// unique. A token is opaque by contract, so a test outside SaveEngine may not
+// spell it out or parse it; the coordinates are the only handle it has on one.
+func getStorageIdentities(t *testing.T, records []saveengine.StorageRecord) map[string]string {
+	t.Helper()
+
+	byRow := make(map[string]string, len(records))
+	owners := make(map[string]string, len(records))
+	for _, record := range records {
+		row := record.ContainerSection + "#" + strconv.Itoa(record.PhysicalIndex)
+		if record.OwnedItemID == "" {
+			t.Fatalf("record %s carries no ownedItemID", row)
+		}
+		if owner, taken := owners[record.OwnedItemID]; taken {
+			t.Fatalf("record %s reuses the ownedItemID of %s", row, owner)
+		}
+		owners[record.OwnedItemID] = row
+		byRow[row] = record.OwnedItemID
+	}
+	return byRow
+}
+
+// getStorageWithIDs stamps identifiers taken from one canonical read onto the
+// records another read is expected to return. Everything else in the expected
+// value stays exact, so a filtered or paged read that reordered, re-numbered or
+// re-identified a record still fails.
+func getStorageWithIDs(
+	t *testing.T, want []saveengine.StorageRecord, identities map[string]string,
+) []saveengine.StorageRecord {
+	t.Helper()
+
+	for index := range want {
+		row := want[index].ContainerSection + "#" + strconv.Itoa(want[index].PhysicalIndex)
+		id, known := identities[row]
+		if !known {
+			t.Fatalf("the canonical read never identified %s", row)
+		}
+		want[index].OwnedItemID = id
+	}
+	return want
+}
+
 // writeGetStorageFixture writes a minimal synthetic save of the given platform
 // into t.TempDir() with one active character carrying the raw records above, and
 // returns its path. anchorAt places the anchor inside the slot data, so a
@@ -213,15 +256,27 @@ func TestGetStorageReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 			want := GetStorageResult{
 				SaveSessionID: sessionID,
+				SaveRevision:  "0",
 				CharacterID:   getStorageSlot,
 				Active:        true,
-				Records:       getStorageWantAll(),
-				Total:         3,
-				Page:          1,
-				PageSize:      50,
+				Records: getStorageWithIDs(
+					t, getStorageWantAll(), getStorageIdentities(t, result.Records)),
+				Total:    3,
+				Page:     1,
+				PageSize: 50,
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
+			}
+
+			// Nothing was committed in between, so the second read of the same
+			// revision has to be identical down to every identifier.
+			again, err := GetStorage(engine, sessionID, getStorageSlot, "", 0, 0)
+			if err != nil {
+				t.Fatalf("second GetStorage: %v", err)
+			}
+			if !reflect.DeepEqual(again, result) {
+				t.Errorf("a repeated read = %+v, want the identical first result %+v", again, result)
 			}
 		})
 	}
@@ -247,7 +302,15 @@ func TestGetStorageDelegatesToSaveEngine(t *testing.T) {
 
 func TestGetStorageFiltersAndPages(t *testing.T) {
 	engine, sessionID := loadGetStorageSession(t, "pc", true, getStorageAnchorAt)
-	all := getStorageWantAll()
+
+	// The canonical unfiltered, unpaged read is what every case below is compared
+	// against, so a section filter or a page that changed an identifier fails.
+	canonical, err := GetStorage(engine, sessionID, getStorageSlot, "", 0, 0)
+	if err != nil {
+		t.Fatalf("canonical GetStorage: %v", err)
+	}
+	identities := getStorageIdentities(t, canonical.Records)
+	all := getStorageWithIDs(t, getStorageWantAll(), identities)
 
 	cases := map[string]struct {
 		section        string
@@ -257,8 +320,8 @@ func TestGetStorageFiltersAndPages(t *testing.T) {
 		wantPageSize   int
 		want           []saveengine.StorageRecord
 	}{
-		"common only":  {"common", 0, 0, 2, 1, 50, getStorageWantCommon()},
-		"key only":     {"key", 0, 0, 1, 1, 50, getStorageWantKey()},
+		"common only":  {"common", 0, 0, 2, 1, 50, getStorageWithIDs(t, getStorageWantCommon(), identities)},
+		"key only":     {"key", 0, 0, 1, 1, 50, getStorageWithIDs(t, getStorageWantKey(), identities)},
 		"both":         {"", 0, 0, 3, 1, 50, all},
 		"first page":   {"", 1, 2, 3, 1, 2, all[:2]},
 		"last page":    {"", 2, 2, 3, 2, 2, all[2:]},
@@ -277,6 +340,9 @@ func TestGetStorageFiltersAndPages(t *testing.T) {
 			if result.Page != testCase.wantPage || result.PageSize != testCase.wantPageSize {
 				t.Errorf("page/pageSize = %d/%d, want %d/%d",
 					result.Page, result.PageSize, testCase.wantPage, testCase.wantPageSize)
+			}
+			if result.SaveRevision != canonical.SaveRevision {
+				t.Errorf("saveRevision = %q, want %q", result.SaveRevision, canonical.SaveRevision)
 			}
 			if result.Records == nil {
 				t.Fatal("records is nil, want an empty list")
@@ -298,6 +364,7 @@ func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 
 	want := GetStorageResult{
 		SaveSessionID: sessionID,
+		SaveRevision:  "0",
 		CharacterID:   getStorageSlot,
 		Records:       []saveengine.StorageRecord{},
 		Page:          1,

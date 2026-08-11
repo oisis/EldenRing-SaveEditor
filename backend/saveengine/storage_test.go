@@ -201,6 +201,53 @@ func storageTestWantKey() []StorageRecord {
 	}
 }
 
+// storageTestWithIDs fills in the opaque identifier every expected record has to
+// carry. The token is never spelled out, because it is opaque by contract; it is
+// looked up through the locator the getter must have minted it for, so a record
+// identified by the wrong character, container, section or physical index fails
+// here. Minting is idempotent, so this reuses the token an earlier read already
+// issued instead of inventing one.
+func storageTestWithIDs(
+	t *testing.T, engine *Engine, saveSessionID string, characterID int, want []StorageRecord,
+) []StorageRecord {
+	t.Helper()
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	session := engine.sessions[saveSessionID].session
+	for index := range want {
+		want[index].OwnedItemID = session.mintOwnedItemID(ownedItemLocator{
+			characterID:      characterID,
+			container:        ownedContainerStorage,
+			containerSection: want[index].ContainerSection,
+			physicalIndex:    want[index].PhysicalIndex,
+		})
+	}
+	return want
+}
+
+// storageTestIdentitiesByRow keys the identifier of every returned record by its
+// physical coordinates, and proves on the way that each one is present and
+// unique. Two records of one read may never share a token.
+func storageTestIdentitiesByRow(t *testing.T, records []StorageRecord) map[string]string {
+	t.Helper()
+
+	byRow := make(map[string]string, len(records))
+	owners := make(map[string]string, len(records))
+	for _, record := range records {
+		row := record.ContainerSection + "#" + strconv.Itoa(record.PhysicalIndex)
+		if record.OwnedItemID == "" {
+			t.Fatalf("record %s carries no ownedItemID", row)
+		}
+		if owner, taken := owners[record.OwnedItemID]; taken {
+			t.Fatalf("record %s reuses the ownedItemID of %s", row, owner)
+		}
+		owners[record.OwnedItemID] = row
+		byRow[row] = record.OwnedItemID
+	}
+	return byRow
+}
+
 func storageTestActiveFixture(
 	platform Platform, slot int, anchorAt int64, projectiles uint32,
 ) storageTestFixture {
@@ -236,12 +283,14 @@ func TestGetStorageReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 			want := CharacterStorage{
 				SaveSessionID: loaded.SaveSessionID,
+				SaveRevision:  "0",
 				CharacterID:   content.slot,
 				Active:        true,
-				Records:       append(storageTestWantCommon(), storageTestWantKey()...),
-				Total:         5,
-				Page:          1,
-				PageSize:      50,
+				Records: storageTestWithIDs(t, engine, loaded.SaveSessionID, content.slot,
+					append(storageTestWantCommon(), storageTestWantKey()...)),
+				Total:    5,
+				Page:     1,
+				PageSize: 50,
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
@@ -256,6 +305,12 @@ func TestGetStorageFiltersBySection(t *testing.T) {
 		writeStorageFixture(t, storageTestActiveFixture(PlatformPC, 3, 0x0640, 5)), "")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// The canonical unfiltered read pins the identity of every physical record
+	// first, so a filtered read that minted a different token cannot pass.
+	if _, err := engine.GetStorage(loaded.SaveSessionID, 3, "", 0, 0); err != nil {
+		t.Fatalf("canonical GetStorage: %v", err)
 	}
 
 	cases := map[string]struct {
@@ -275,8 +330,9 @@ func TestGetStorageFiltersBySection(t *testing.T) {
 			if result.Total != len(testCase.want) {
 				t.Fatalf("total = %d, want %d", result.Total, len(testCase.want))
 			}
-			if !reflect.DeepEqual(result.Records, testCase.want) {
-				t.Errorf("records = %+v, want %+v", result.Records, testCase.want)
+			want := storageTestWithIDs(t, engine, loaded.SaveSessionID, 3, testCase.want)
+			if !reflect.DeepEqual(result.Records, want) {
+				t.Errorf("records = %+v, want %+v", result.Records, want)
 			}
 		})
 	}
@@ -289,7 +345,13 @@ func TestGetStoragePagesWithoutLosingTheNativeOrder(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}
-	all := append(storageTestWantCommon(), storageTestWantKey()...)
+	// The canonical unpaged read pins the identity of every physical record
+	// first, so a page that minted a different token cannot pass.
+	if _, err := engine.GetStorage(loaded.SaveSessionID, 1, "", 0, 0); err != nil {
+		t.Fatalf("canonical GetStorage: %v", err)
+	}
+	all := storageTestWithIDs(t, engine, loaded.SaveSessionID, 1,
+		append(storageTestWantCommon(), storageTestWantKey()...))
 
 	cases := map[string]struct {
 		page, pageSize int
@@ -343,6 +405,7 @@ func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 
 	want := CharacterStorage{
 		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "0",
 		CharacterID:   content.slot,
 		Records:       []StorageRecord{},
 		Page:          1,
@@ -350,6 +413,90 @@ func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 	}
 	if !reflect.DeepEqual(result, want) {
 		t.Errorf("result = %+v, want %+v", result, want)
+	}
+	// The residual records are still in the file, so the read must have minted
+	// nothing at all rather than identifying data it is not allowed to expose.
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	if minted := len(engine.sessions[loaded.SaveSessionID].session.ownedByID); minted != 0 {
+		t.Errorf("a residual slot minted %d identities, want 0", minted)
+	}
+}
+
+func TestGetStorageMintsOneIdentityPerPhysicalRecord(t *testing.T) {
+	cases := []storageTestFixture{
+		storageTestActiveFixture(PlatformPC, 0, 0x01A7, 0),
+		storageTestActiveFixture(PlatformPS4, 7, 0x1F4C2, 37),
+	}
+
+	for _, content := range cases {
+		t.Run(string(content.platform), func(t *testing.T) {
+			engine := New()
+			loaded, err := engine.LoadSave(
+				writeStorageFixture(t, content), string(content.platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			full, err := engine.GetStorage(loaded.SaveSessionID, content.slot, "", 0, 0)
+			if err != nil {
+				t.Fatalf("GetStorage: %v", err)
+			}
+			// The fixture carries five occupied rows plus three absent sentinels.
+			// Every occupied row is identified, including the ones whose handle
+			// this phase can neither resolve nor explain.
+			identities := storageTestIdentitiesByRow(t, full.Records)
+			if len(identities) != 5 {
+				t.Fatalf("identified %d records, want 5", len(identities))
+			}
+			if full.SaveRevision != "0" {
+				t.Errorf("saveRevision = %q, want %q", full.SaveRevision, "0")
+			}
+
+			// The two absent sentinels of each section are not records, so the
+			// registry may hold nothing beyond the five occupied rows.
+			engine.mutex.Lock()
+			minted := len(engine.sessions[loaded.SaveSessionID].session.ownedByID)
+			engine.mutex.Unlock()
+			if minted != len(identities) {
+				t.Errorf("registry holds %d identities, want %d", minted, len(identities))
+			}
+
+			// Re-reading, filtering and paging inside one revision may change which
+			// records come back, never which identity they carry.
+			reads := map[string]CharacterStorage{}
+			for name, request := range map[string]struct {
+				section        string
+				page, pageSize int
+			}{
+				"repeated full read": {"", 0, 0},
+				"common only":        {StorageSectionCommon, 0, 0},
+				"key only":           {StorageSectionKey, 0, 0},
+				"first page of two":  {"", 1, 2},
+				"last page of two":   {"", 3, 2},
+			} {
+				read, err := engine.GetStorage(
+					loaded.SaveSessionID, content.slot, request.section, request.page, request.pageSize)
+				if err != nil {
+					t.Fatalf("GetStorage(%s): %v", name, err)
+				}
+				reads[name] = read
+			}
+			for name, read := range reads {
+				if read.SaveRevision != full.SaveRevision {
+					t.Errorf("%s reported revision %q, want %q",
+						name, read.SaveRevision, full.SaveRevision)
+				}
+				for row, id := range storageTestIdentitiesByRow(t, read.Records) {
+					if id != identities[row] {
+						t.Errorf("%s identified %s as %q, want %q", name, row, id, identities[row])
+					}
+				}
+			}
+			if repeated := reads["repeated full read"]; !reflect.DeepEqual(repeated, full) {
+				t.Errorf("a repeated read = %+v, want the identical first result %+v", repeated, full)
+			}
+		})
 	}
 }
 

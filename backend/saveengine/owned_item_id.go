@@ -69,7 +69,7 @@ func (session *Session) mintOwnedItemID(locator ownedItemLocator) string {
 	// ponytail: session + revision + sequence is unique by construction, so no
 	// randomness is needed. The revision in the token is what lets resolve tell
 	// stale from unknown without keeping every retired token forever.
-	token := fmt.Sprintf("%s%d-%d", session.ownedItemIDPrefix(), session.revision, session.ownedSeq)
+	token := fmt.Sprintf("%s%d", session.currentOwnedItemIDPrefix(), session.ownedSeq)
 	session.ownedByLocator[locator] = token
 	session.ownedByID[token] = locator
 	return token
@@ -113,7 +113,17 @@ func (session *Session) ownedItemIDPrefix() string {
 }
 
 func (session *Session) currentOwnedItemIDPrefix() string {
-	return session.ownedItemIDPrefix() + strconv.FormatUint(session.revision, 10) + "-"
+	return session.ownedItemIDPrefix() + session.revisionString() + "-"
+}
+
+// revisionString is the public rendering of the internal uint64 revision: a
+// non-empty decimal string with no sign, no prefix, no padding and no separator.
+// It is the only way the revision leaves the package, so a getter never exposes
+// a JSON number that a frontend could round, increment or reorder.
+//
+// The caller must already hold Engine.mutex, like every other session helper.
+func (session *Session) revisionString() string {
+	return strconv.FormatUint(session.revision, 10)
 }
 
 // commitRevision runs commit as the mutating step of the session registered

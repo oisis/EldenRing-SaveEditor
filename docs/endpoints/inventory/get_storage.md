@@ -9,20 +9,22 @@ with `gaItemHandle` and `acquisitionIndex` unchanged, while `quantity` has its
 confirmed high bit removed.
 
 **This is phase 1 of the Storage surface: raw native storage reading.** The
-result deliberately contains nothing that a raw record cannot prove. It does
-**not** return:
+result deliberately contains nothing that a raw record cannot prove. Apart from
+the `ownedItemID` of each record and the `saveRevision` it was minted under, it
+does **not** return:
 
 - item names or any other presentation data;
 - GameCatalog identity — no `kind`, no `key`, no resource reference;
 - `family`;
 - variants, infusion, upgrade level or Ash of War;
-- a stable `OwnedItemID`;
 - capacity;
 - Inventory (`InventoryHeld`) records.
 
 All of those require a verified `GaItem` parser and belong to a later phase. A
 raw handle is not an item identity, so nothing here is resolved, named or
-classified.
+classified. The `ownedItemID` is an *instance* identity minted by SaveEngine, not
+an item identity: it says which physical record was read, never what that record
+holds.
 
 The session must have been created earlier by
 [`LoadSave`](../savesession/load_save.md). `GetStorage` never creates one, so
@@ -115,6 +117,7 @@ and [`GetResources`](../catalog/get_resources.md):
 type GetStorageResult = saveengine.CharacterStorage
 
 type StorageRecord struct {
+	OwnedItemID      string `json:"ownedItemID"`
 	ContainerSection string `json:"containerSection"`
 	PhysicalIndex    int    `json:"physicalIndex"`
 	GaItemHandle     uint32 `json:"gaItemHandle"`
@@ -124,6 +127,7 @@ type StorageRecord struct {
 
 type CharacterStorage struct {
 	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
 	CharacterID   int             `json:"characterID"`
 	Active        bool            `json:"active"`
 	Records       []StorageRecord `json:"records"`
@@ -140,6 +144,7 @@ type, no constant and no parser.
 | Field | Type | Meaning |
 |---|---|---|
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
+| `saveRevision` | `string` | The revision the result was read under, and the one every `ownedItemID` in it was minted under. A non-empty decimal string. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
 | `records` | `[]StorageRecord` | The requested page, in physical native order. Empty, never `null`. |
@@ -149,6 +154,7 @@ type, no constant and no parser.
 
 | Record field | Type | Meaning |
 |---|---|---|
+| `ownedItemID` | `string` | Opaque identity of this physical record under `saveRevision`. Non-empty, unique inside one result. |
 | `containerSection` | `string` | The physical section the record was read from: `"common"` or `"key"`. |
 | `physicalIndex` | `int` | The position of the record inside its own section, counted from `0`. |
 | `gaItemHandle` | `uint32` | The raw stored `GaItem` handle. |
@@ -159,9 +165,48 @@ type, no constant and no parser.
 
 `containerSection` together with `physicalIndex` identifies the physical row the
 record was read from, so the original row identity stays visible even after empty
-rows have been filtered out. It is **not** a stable `OwnedItemID`: the game moves
+rows have been filtered out. It is **not** the record's identity: the game moves
 a physical row when it rewrites the section, so the pair identifies a position in
-the current save state and nothing more. Do not persist it as an item reference.
+the current save state and nothing more. Do not persist it as an item reference —
+use `ownedItemID` to refer to a record.
+
+### `ownedItemID` and `saveRevision`
+
+`ownedItemID` is the opaque identity SaveEngine mints for one physical record,
+and `saveRevision` is the revision every identifier in the result was minted
+under. The full contract lives in
+[`docs/owned-item-identity.md`](../../owned-item-identity.md); what a caller of
+this endpoint has to know:
+
+- **Opaque.** Compare it byte for byte. Never parse, split, trim, normalise or
+  reconstruct it. It encodes no handle, no acquisition index, no `physicalIndex`
+  and no slot address, and its internal shape may change without notice.
+- **Session-scoped and revision-scoped.** It is valid only inside the session
+  that produced it and only while `saveRevision` is unchanged. Closing the
+  session, reloading the file or restarting the application invalidates it. It is
+  never persisted in a template, a favorite or any other stored document.
+- **Per physical record.** Two rows of the same item get two identifiers, and a
+  Storage record never shares its identifier with an Inventory record at the same
+  `containerSection`/`physicalIndex`. The identity registry covers both
+  containers, so an identifier from this endpoint is resolvable without the
+  caller declaring which container it came from.
+- **Independent of the request.** `containerSection`, `page` and `pageSize`
+  select *which* records come back; they never change *which* identifier a record
+  gets. Within one revision, a filtered read, a paged read and a repeated read
+  all report the same identifier for the same physical record.
+- **Lazy per container.** The first Storage read of a revision mints the Storage
+  identities of that character; it neither requires nor triggers an Inventory
+  read, and an earlier Inventory read leaves them to be minted here.
+- **Only for real records.** The two native absent sentinels are not records, so
+  they are neither listed nor identified. A record whose handle this phase cannot
+  explain is still listed and still identified.
+- **`saveRevision` is a string.** It is the decimal rendering of an internal
+  `uint64`, deliberately not a JSON number, because a value above 2^53−1 would
+  round in a JavaScript client. Carry it back unchanged where a later mutation
+  endpoint asks for `expectedRevision`; never parse, increment or order it.
+
+An inactive or residual slot mints nothing but still reports the current
+`saveRevision`.
 
 ### Record order and layout
 
@@ -249,9 +294,11 @@ still present in the file — is a successful result, not an error:
 - `total` is `0`;
 - `records` is an empty, non-`nil` list;
 - `page` and `pageSize` report the effective values;
+- `saveRevision` reports the current revision, because an empty container is not
+  a reason to omit it;
 - **the slot data is never searched or read.** The result comes from the
-  UserData10 activity flag alone, so residual storage is never located, decoded
-  or exposed.
+  UserData10 activity flag alone, so residual storage is never located, decoded,
+  identified or exposed.
 
 ## PC and PS4
 
@@ -291,7 +338,10 @@ split exists from the start; it is not deferred to a later refactor.
    into a small, seemingly valid offset.
 6. The whole Storage Box section is read behind the projectile records and the
    three fixed blocks, and decoded in place.
-7. Non-empty records of the requested sections are collected in physical order,
+7. **Both** physical sections are decoded and every non-empty record of the
+   container is identified, before any filter or page applies. That is what makes
+   `ownedItemID` independent of `containerSection`, `page` and `pageSize`.
+8. Records of the requested sections are then collected in physical order,
    counted into `total` and cut into the requested page.
 
 ## Validation and errors
@@ -406,16 +456,30 @@ rejected `characterID` values `-1` and `10`, a rejected and a case-shifted
 declared projectile count, a section pushed past the slot boundary, a truncated
 section and a `nil` engine.
 
+The identity contract is covered as well: every returned record carries a
+non-empty `ownedItemID`, two records of one read never share one, a repeated,
+filtered or paged read of the same revision reports the same identifier for the
+same physical record, a residual slot mints none, the absent sentinels receive
+none, and a record whose handle cannot be explained still gets one. That the two
+containers never share an identity, and that reading one of them mints nothing
+for the other, is proved in
+`backend/saveengine/owned_item_containers_test.go`, on the one fixture that
+carries an `InventoryHeld` section and a Storage Box in the same slot.
+
 ## Current limitations
 
-- This is phase 1. The result is raw: no names, no GameCatalog identity, no
-  `family`, no variants, no stable `OwnedItemID`, no capacity and no Inventory
-  records. Those need a separate, verified `GaItem` parser.
+- This is phase 1. Apart from the owned-item identity the result is raw: no
+  names, no GameCatalog identity, no `family`, no variants, no capacity and no
+  Inventory records. Those need a separate, verified `GaItem` parser.
 - Nothing resolves a record to an `ItemDocument`, so a handle whose meaning is
   unknown is reported as stored rather than explained.
+- `ownedItemID` does not survive a reload or a restart. It is minted per session
+  and per revision, and there is deliberately no persistent instance key,
+  because no native evidence for one has been established.
 - The relationship between a Storage record and an Inventory record — including a
-  handle legitimately shared by both containers — is not modelled here. Transfers
-  between the two containers are a later phase.
+  handle legitimately shared by both containers — is not modelled here. The two
+  containers are guaranteed to hold *distinct* identities; nothing claims what a
+  shared handle means. Transfers between the two containers are a later phase.
 - The only transport is the local explorer route
   `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage`,
   and it exists only while the explorer runs without `-allow-external-bind`.

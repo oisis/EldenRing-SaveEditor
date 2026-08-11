@@ -109,6 +109,49 @@ func getInventoryWantAll() []saveengine.InventoryRecord {
 	return append(getInventoryWantCommon(), getInventoryWantKey()...)
 }
 
+// getInventoryIdentities keys the opaque identifier of every returned record by
+// its physical coordinates, and proves on the way that each one is present and
+// unique. A token is opaque by contract, so a test outside SaveEngine may not
+// spell it out or parse it; the coordinates are the only handle it has on one.
+func getInventoryIdentities(t *testing.T, records []saveengine.InventoryRecord) map[string]string {
+	t.Helper()
+
+	byRow := make(map[string]string, len(records))
+	owners := make(map[string]string, len(records))
+	for _, record := range records {
+		row := record.ContainerSection + "#" + strconv.Itoa(record.PhysicalIndex)
+		if record.OwnedItemID == "" {
+			t.Fatalf("record %s carries no ownedItemID", row)
+		}
+		if owner, taken := owners[record.OwnedItemID]; taken {
+			t.Fatalf("record %s reuses the ownedItemID of %s", row, owner)
+		}
+		owners[record.OwnedItemID] = row
+		byRow[row] = record.OwnedItemID
+	}
+	return byRow
+}
+
+// getInventoryWithIDs stamps identifiers taken from one canonical read onto the
+// records another read is expected to return. Everything else in the expected
+// value stays exact, so a filtered or paged read that reordered, re-numbered or
+// re-identified a record still fails.
+func getInventoryWithIDs(
+	t *testing.T, want []saveengine.InventoryRecord, identities map[string]string,
+) []saveengine.InventoryRecord {
+	t.Helper()
+
+	for index := range want {
+		row := want[index].ContainerSection + "#" + strconv.Itoa(want[index].PhysicalIndex)
+		id, known := identities[row]
+		if !known {
+			t.Fatalf("the canonical read never identified %s", row)
+		}
+		want[index].OwnedItemID = id
+	}
+	return want
+}
+
 // writeGetInventoryFixture writes a minimal synthetic save of the given platform
 // into t.TempDir() with one active character carrying the raw records above, and
 // returns its path. anchorAt places the anchor inside the slot data, so a
@@ -192,15 +235,27 @@ func TestGetInventoryReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 			want := GetInventoryResult{
 				SaveSessionID: sessionID,
+				SaveRevision:  "0",
 				CharacterID:   getInventorySlot,
 				Active:        true,
-				Records:       getInventoryWantAll(),
-				Total:         3,
-				Page:          1,
-				PageSize:      50,
+				Records: getInventoryWithIDs(
+					t, getInventoryWantAll(), getInventoryIdentities(t, result.Records)),
+				Total:    3,
+				Page:     1,
+				PageSize: 50,
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
+			}
+
+			// Nothing was committed in between, so the second read of the same
+			// revision has to be identical down to every identifier.
+			again, err := GetInventory(engine, sessionID, getInventorySlot, "", 0, 0)
+			if err != nil {
+				t.Fatalf("second GetInventory: %v", err)
+			}
+			if !reflect.DeepEqual(again, result) {
+				t.Errorf("a repeated read = %+v, want the identical first result %+v", again, result)
 			}
 		})
 	}
@@ -208,7 +263,15 @@ func TestGetInventoryReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 func TestGetInventoryFiltersAndPages(t *testing.T) {
 	engine, sessionID := loadGetInventorySession(t, "pc", true, getInventoryAnchorAt)
-	all := getInventoryWantAll()
+
+	// The canonical unfiltered, unpaged read is what every case below is compared
+	// against, so a section filter or a page that changed an identifier fails.
+	canonical, err := GetInventory(engine, sessionID, getInventorySlot, "", 0, 0)
+	if err != nil {
+		t.Fatalf("canonical GetInventory: %v", err)
+	}
+	identities := getInventoryIdentities(t, canonical.Records)
+	all := getInventoryWithIDs(t, getInventoryWantAll(), identities)
 
 	cases := map[string]struct {
 		section        string
@@ -218,8 +281,8 @@ func TestGetInventoryFiltersAndPages(t *testing.T) {
 		wantPageSize   int
 		want           []saveengine.InventoryRecord
 	}{
-		"common only":  {"common", 0, 0, 2, 1, 50, getInventoryWantCommon()},
-		"key only":     {"key", 0, 0, 1, 1, 50, getInventoryWantKey()},
+		"common only":  {"common", 0, 0, 2, 1, 50, getInventoryWithIDs(t, getInventoryWantCommon(), identities)},
+		"key only":     {"key", 0, 0, 1, 1, 50, getInventoryWithIDs(t, getInventoryWantKey(), identities)},
 		"first page":   {"", 1, 2, 3, 1, 2, all[:2]},
 		"last page":    {"", 2, 2, 3, 2, 2, all[2:]},
 		"beyond total": {"", 7, 2, 3, 7, 2, []saveengine.InventoryRecord{}},
@@ -237,6 +300,9 @@ func TestGetInventoryFiltersAndPages(t *testing.T) {
 			if result.Page != testCase.wantPage || result.PageSize != testCase.wantPageSize {
 				t.Errorf("page/pageSize = %d/%d, want %d/%d",
 					result.Page, result.PageSize, testCase.wantPage, testCase.wantPageSize)
+			}
+			if result.SaveRevision != canonical.SaveRevision {
+				t.Errorf("saveRevision = %q, want %q", result.SaveRevision, canonical.SaveRevision)
 			}
 			if result.Records == nil {
 				t.Fatal("records is nil, want an empty list")
@@ -258,6 +324,7 @@ func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 
 	want := GetInventoryResult{
 		SaveSessionID: sessionID,
+		SaveRevision:  "0",
 		CharacterID:   getInventorySlot,
 		Records:       []saveengine.InventoryRecord{},
 		Page:          1,

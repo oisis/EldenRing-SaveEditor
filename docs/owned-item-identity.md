@@ -652,34 +652,50 @@ compare the full value exactly, over a larger value. It is not a weakening, not
 a relaxation, not a switch to partial matching, and no case, boundary or fixture
 is removed.
 
-The exact assertions that need explicit user approval before Task 2a starts:
+The exact assertions that need explicit user approval before Task 2a starts are
+these **15 full-result assertions**:
 
 | File | Line | Assertion |
 |---|---|---|
 | `backend/endpoints/inventory/get_inventory_test.go` | 202 | full `GetInventoryResult` |
 | `backend/endpoints/inventory/get_inventory_test.go` | 244 | full `result.Records` |
-| `backend/endpoints/inventory/get_inventory_test.go` | 266 | full `GetInventoryResult` |
-| `backend/endpoints/inventory/get_inventory_test.go` | 319 | inactive slot vs `GetInventoryResult{}` |
+| `backend/endpoints/inventory/get_inventory_test.go` | 266 | residual slot vs a full `GetInventoryResult` |
 | `backend/endpoints/inventory/get_storage_test.go` | 223 | full `GetStorageResult` |
 | `backend/endpoints/inventory/get_storage_test.go` | 243 | full `GetStorageResult` |
 | `backend/endpoints/inventory/get_storage_test.go` | 284 | full `result.Records` |
-| `backend/endpoints/inventory/get_storage_test.go` | 306 | full `GetStorageResult` |
-| `backend/endpoints/inventory/get_storage_test.go` | 361 | inactive slot vs `GetStorageResult{}` |
+| `backend/endpoints/inventory/get_storage_test.go` | 306 | residual slot vs a full `GetStorageResult` |
 | `backend/saveengine/inventory_test.go` | 219 | full `CharacterInventory` |
 | `backend/saveengine/inventory_test.go` | 250 | full `result.Records` |
 | `backend/saveengine/inventory_test.go` | 291 | full `result.Records` |
-| `backend/saveengine/inventory_test.go` | 323 | full `CharacterInventory` |
-| `backend/saveengine/inventory_test.go` | 390 | inactive slot vs `CharacterInventory{}` |
+| `backend/saveengine/inventory_test.go` | 323 | residual slot vs a full `CharacterInventory` |
 | `backend/saveengine/storage_test.go` | 246 | full `CharacterStorage` |
 | `backend/saveengine/storage_test.go` | 278 | full `result.Records` |
 | `backend/saveengine/storage_test.go` | 319 | full `result.Records` |
-| `backend/saveengine/storage_test.go` | 351 | full `CharacterStorage` |
-| `backend/saveengine/storage_test.go` | 435 | inactive slot vs `CharacterStorage{}` |
+| `backend/saveengine/storage_test.go` | 351 | residual slot vs a full `CharacterStorage` |
 
-The four inactive-slot assertions are on the list because §4.2 requires an
-inactive or residual slot to return the current `saveRevision` while minting no
-IDs, so its result is no longer the zero value. They must become an explicit
-expected value carrying the revision, not a looser check.
+The four residual-slot assertions in that table — the ones at
+`get_inventory_test.go:266`, `get_storage_test.go:306`,
+`inventory_test.go:323` and `storage_test.go:351` — are on the list because §4.2
+requires an inactive or residual slot to return the current `saveRevision` while
+minting no IDs, so its result is no longer the zero value. They must become an
+explicit expected value carrying the revision, not a looser check.
+
+**Four further assertions are *not* on the list and must not be touched:**
+
+| File | Line | Assertion |
+|---|---|---|
+| `backend/endpoints/inventory/get_inventory_test.go` | 319 | rejected request vs `GetInventoryResult{}` |
+| `backend/endpoints/inventory/get_storage_test.go` | 361 | rejected request vs `GetStorageResult{}` |
+| `backend/saveengine/inventory_test.go` | 390 | rejected request vs `CharacterInventory{}` |
+| `backend/saveengine/storage_test.go` | 435 | rejected request vs `CharacterStorage{}` |
+
+These four sit inside the `RejectsInvalidRequests` tests, not inside the
+residual-slot tests. They assert the **fail-closed error path**: a rejected
+request returns the zero value and nothing else. A rejected request has no
+result to identify and no revision to report, so the zero value stays the zero
+value — widening the result shape does not change them, and they must keep
+passing untouched. An earlier revision of this document mistook them for the
+inactive-slot assertions and counted 19; the approved count is 15.
 
 None of these assertions is weakened, removed, skipped or altered by *this*
 documentation task.
@@ -834,7 +850,7 @@ Every task above must cover, at the layer where the behaviour is observable:
    explicitly approved task.
 6. Approve the task sequence in §6 — Task 1, Task 2a, the §6.3 native-save
    research gate, Task 2b, then Task 3 — acknowledging that Task 2a needs
-   approval to extend the 19 listed full-result assertions, that Task 2b — not
+   approval to extend the 15 listed full-result assertions, that Task 2b — not
    Task 2a — is the one that changes the two phase-1 contract tests, and that
    `GetOwnedItem` waits for Task 2b rather than shipping a raw interim variant
    (§6.5).
