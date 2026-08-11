@@ -144,8 +144,9 @@ func inspectEndpointFile(t *testing.T, path, packageName string) (string, string
 }
 
 // validateEndpointFunctions enforces that a contract-only file stays free of
-// runtime code and that an implemented file carries exactly one plain function
-// named after its endpoint.
+// runtime code and that an implemented file exports exactly one plain function
+// named after its endpoint. Unexported functions without a receiver are allowed
+// in an implemented file as local helpers of that single endpoint.
 func validateEndpointFunctions(t *testing.T, path, status, endpointName string, functions []*ast.FuncDecl) {
 	t.Helper()
 
@@ -156,16 +157,23 @@ func validateEndpointFunctions(t *testing.T, path, status, endpointName string, 
 		return
 	}
 
-	if len(functions) != 1 {
-		t.Fatalf("%s is implemented and must contain exactly one runtime function %s, found %d",
-			path, endpointName, len(functions))
+	var exported []string
+	for _, function := range functions {
+		if function.Recv != nil {
+			t.Errorf("%s runtime function %s must not be a method", path, function.Name.Name)
+			continue
+		}
+		if function.Name.IsExported() {
+			exported = append(exported, function.Name.Name)
+		}
 	}
-	function := functions[0]
-	if function.Recv != nil {
-		t.Errorf("%s runtime handler %s must not be a method", path, function.Name.Name)
+
+	if len(exported) != 1 {
+		t.Fatalf("%s is implemented and must export exactly one runtime function %s, found %d: %v",
+			path, endpointName, len(exported), exported)
 	}
-	if function.Name.Name != endpointName {
-		t.Errorf("%s contains runtime function %s, want %s", path, function.Name.Name, endpointName)
+	if exported[0] != endpointName {
+		t.Errorf("%s exports runtime function %s, want %s", path, exported[0], endpointName)
 	}
 }
 
