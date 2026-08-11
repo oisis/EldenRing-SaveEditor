@@ -59,3 +59,28 @@ func TestLoadFSReadsCatalogDocumentsAndRawJSON(t *testing.T) {
 		t.Fatalf("Dagger icon media type = %q, %t", mediaType, exists)
 	}
 }
+
+func TestEmbeddedCatalogUsesArchivedLegacySourceLocations(t *testing.T) {
+	data, err := loader.LoadFS(embeddedCatalogFS(t))
+	if err != nil {
+		t.Fatalf("LoadFS: %v", err)
+	}
+	expected := map[schema.SourceID]string{
+		schema.SourceSaveForgeLegacy: "archive/saveforge-1.6.8/backend/db/data",
+		"legacy_item_icons":          "archive/saveforge-1.6.8/frontend/public/items",
+		"legacy_unknown":             "archive/saveforge-1.6.8/backend/db/data/gestures.go",
+	}
+	for _, source := range data.Manifest.Sources {
+		want, exists := expected[source.ID]
+		if !exists {
+			continue
+		}
+		if source.Location != want {
+			t.Errorf("source %q location = %q, want %q", source.ID, source.Location, want)
+		}
+		delete(expected, source.ID)
+	}
+	for sourceID := range expected {
+		t.Errorf("manifest is missing source %q", sourceID)
+	}
+}

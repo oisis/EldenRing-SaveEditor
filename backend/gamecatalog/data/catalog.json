@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 8,
-    "dataVersion": "f76433a4ae522587a031bd871aab42771c97167dbb10f3bf6ab45c6a5190f45a",
+    "dataVersion": "d914450487d5e5e6c53b857bb6cdff5642237b03ac297a21ba6563b56111d69b",
     "gameVersion": "1.16-class",
     "sources": [
       {
@@ -215,7 +215,7 @@
       {
         "id": "legacy_db_data",
         "kind": "legacy_item_catalog",
-        "location": "backend/db/data",
+        "location": "archive/saveforge-1.6.8/backend/db/data",
         "version": "52edfb01c6deeee7601ce51527082602b8b9f719d05118cec2afa9ae71b3fbf3",
         "evidence": "curated",
         "reviewed": true
@@ -223,7 +223,7 @@
       {
         "id": "legacy_item_icons",
         "kind": "legacy_item_assets",
-        "location": "frontend/public/items",
+        "location": "archive/saveforge-1.6.8/frontend/public/items",
         "version": "406f7bedcac1c7d3017d217ab81ef2f9d9529bf953f5bba1e4ce9ade9198263d",
         "evidence": "curated",
         "reviewed": true
@@ -231,7 +231,7 @@
       {
         "id": "legacy_unknown",
         "kind": "legacy_unresolved_item",
-        "location": "backend/db/data/gestures.go",
+        "location": "archive/saveforge-1.6.8/backend/db/data/gestures.go",
         "version": "52edfb01c6deeee7601ce51527082602b8b9f719d05118cec2afa9ae71b3fbf3",
         "evidence": "unknown",
         "reviewed": false
