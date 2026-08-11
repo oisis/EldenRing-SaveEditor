@@ -29,6 +29,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
@@ -788,6 +789,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -874,6 +876,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":       "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":        "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -888,7 +891,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
-	for _, name := range []string{"ResourceKind", "ResourceKey", "RelationType", "RelationDirection"} {
+	for _, name := range []string{
+		"ResourceKind", "ResourceKey", "RelationType", "RelationDirection", "AvailabilityFilter",
+	} {
 		if _, exists := document.Comps.Parameters[name]; !exists {
 			t.Fatalf("openapi.json is missing the shared %s parameter", name)
 		}
@@ -929,6 +934,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterInventory",
 		"StorageRecord",
 		"CharacterStorage",
+		"GestureEntry",
+		"GetGesturesResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -963,8 +970,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 15 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 15", found)
+	if found != 16 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 16", found)
 	}
 }
 
@@ -1753,5 +1760,151 @@ func TestStorageRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("storage route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
+	}
+}
+
+// The gestures route is the one save-session route that joins the raw slot data
+// with the catalog gesture definitions, so its fixture unlocks real canonical
+// slot IDs. The offsets are restated here instead of reused from SaveEngine,
+// including the acquired-projectile count and the Storage Box the block sits
+// behind.
+const (
+	gesturesRouteSlotDataBase = int64(pcHeaderSize) + 0x10
+	gesturesRouteUserData10   = int64(pcHeaderSize) + 10*0x280010 + 0x10
+	gesturesRouteFlagsOffset  = 0x1954
+	gesturesRouteAnchorAt     = 0x0640
+	gesturesRouteProjCountAt  = 0xD0 + 0x58 + 0x1C + 0x58 + 0x58 + 0x9011 + 0x74 + 0x8C + 0x18
+	gesturesRouteProjectiles  = 4
+	gesturesRouteBlocksBefore = 0x9C + 0x0C + 0x12F
+	gesturesRouteStorageBox   = 0x6010
+	gesturesRouteSectionAt    = gesturesRouteProjCountAt + 4 +
+		gesturesRouteProjectiles*8 + gesturesRouteBlocksBefore + gesturesRouteStorageBox
+	gesturesRouteSlotCount = 64
+
+	// One canonical slot ID the fixture unlocks, and the native empty sentinel
+	// every other record carries.
+	gesturesRouteUnlockedSlotID = uint32(1)
+	gesturesRouteEmptySentinel  = uint32(0xFFFFFFFE)
+)
+
+// writeGesturesFixture writes a synthetic PC save into t.TempDir() whose slot 0
+// is active and whose GestureGameData unlocks exactly one canonical gesture.
+func writeGesturesFixture(t *testing.T) string {
+	t.Helper()
+
+	data := make([]byte, pcFixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+	data[gesturesRouteUserData10+gesturesRouteFlagsOffset] = 1
+
+	anchorBase := gesturesRouteSlotDataBase + gesturesRouteAnchorAt
+	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+	binary.LittleEndian.PutUint32(data[anchorBase+gesturesRouteProjCountAt:], gesturesRouteProjectiles)
+
+	for index := 0; index < gesturesRouteSlotCount; index++ {
+		record := gesturesRouteEmptySentinel
+		if index == 0 {
+			record = gesturesRouteUnlockedSlotID
+		}
+		binary.LittleEndian.PutUint32(
+			data[anchorBase+gesturesRouteSectionAt+int64(index)*4:], record)
+	}
+
+	path := filepath.Join(t.TempDir(), "gestures.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestGesturesRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/gestures"
+	// The prototype catalog carries no gesture document, so it could not prove
+	// that the route passes the catalog on.
+	gameCatalog := newFullCatalog(t)
+
+	serve := func(target string) *httptest.ResponseRecorder {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+		return recorder
+	}
+
+	want, err := world.GetGestures(saveEngine, gameCatalog, session.SaveSessionID, 0, "")
+	if err != nil {
+		t.Fatalf("world.GetGestures: %v", err)
+	}
+	if !want.Active || len(want.Gestures) == 0 {
+		t.Fatalf("fixture result = active %t with %d gestures, want an active slot with gestures",
+			want.Active, len(want.Gestures))
+	}
+	unlocked := 0
+	for _, entry := range want.Gestures {
+		if entry.Unlocked {
+			unlocked++
+		}
+	}
+	if unlocked != 1 {
+		t.Fatalf("fixture unlocked %d gestures, want exactly 1", unlocked)
+	}
+
+	recorder := serve(base)
+	assertOK(t, recorder, base)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("gestures route body differs from the GetGestures result")
+	}
+
+	// Both accepted filter values have to reach the getter unchanged.
+	for _, filter := range []string{"unlocked", "locked"} {
+		target := base + "?availabilityFilter=" + filter
+		wantFiltered, err := world.GetGestures(saveEngine, gameCatalog, session.SaveSessionID, 0, filter)
+		if err != nil {
+			t.Fatalf("world.GetGestures(%q): %v", filter, err)
+		}
+		if len(wantFiltered.Gestures) == 0 || len(wantFiltered.Gestures) == len(want.Gestures) {
+			t.Fatalf("filter %q kept %d of %d gestures, want a real subset",
+				filter, len(wantFiltered.Gestures), len(want.Gestures))
+		}
+		filtered := serve(target)
+		assertOK(t, filtered, target)
+		if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantFiltered)) {
+			t.Fatalf("filtered gestures route body differs from the GetGestures(%q) result", filter)
+		}
+	}
+
+	// The value is never trimmed, normalised or aliased on the way through, so a
+	// padded or case-shifted filter is rejected by the getter with a 400.
+	for _, query := range []string{
+		"?availabilityFilter=Unlocked",
+		"?availabilityFilter=%20unlocked",
+		"?availabilityFilter=unlocked%20",
+		"?availabilityFilter=all",
+	} {
+		rejected := serve(base + query)
+		if rejected.Code != http.StatusBadRequest {
+			t.Fatalf("%s%s: status = %d, want 400 (body %q)",
+				base, query, rejected.Code, rejected.Body.String())
+		}
+	}
+
+	// The route must not answer for a malformed characterID either.
+	malformed := serve("/api/v1/save-sessions/" + session.SaveSessionID + "/characters/one/gestures")
+	if malformed.Code != http.StatusBadRequest {
+		t.Fatalf("malformed characterID: status = %d, want 400 (body %q)",
+			malformed.Code, malformed.Body.String())
+	}
+}
+
+func TestGesturesRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/gestures"
+	recorder := doSave(t, nil, http.MethodGet, target, "")
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())
 	}
 }

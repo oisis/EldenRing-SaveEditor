@@ -27,6 +27,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
@@ -582,6 +583,33 @@ func registerSaveSessionRoutes(
 				query.Get("containerSection"),
 				page,
 				pageSize,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	// The gestures route is the one save-session route that joins two sources:
+	// the raw GestureGameData block of the slot and the gesture definitions of
+	// the catalog. availabilityFilter is handed over exactly as it arrived,
+	// because the getter owns the rule and the wording of its own rejection.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.GetGestures(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.URL.Query().Get("availabilityFilter"),
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

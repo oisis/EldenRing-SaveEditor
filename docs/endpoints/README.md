@@ -93,6 +93,7 @@ Transport status:
 | `GetEquippedSpells` | `get_equipped_spells` | Getter | `equipment` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [equipment/get_equipped_spells.md](equipment/get_equipped_spells.md) |
 | `GetInventory` | `get_inventory` | Getter | `inventory` | implemented (phase 1, raw native records) | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [inventory/get_inventory.md](inventory/get_inventory.md) |
 | `GetStorage` | `get_storage` | Getter | `inventory` | implemented (phase 1, raw native records) | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [inventory/get_storage.md](inventory/get_storage.md) |
+| `GetGestures` | `get_gestures` | Getter | `world` | implemented | transport-exposed — `GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures` of the local explorer, registered only when the explorer runs without `-allow-external-bind` | [world/get_gestures.md](world/get_gestures.md) |
 
 Only implemented endpoints are documented. The remaining contract-only endpoints
 defined in `backend/endpoints` get a document when their runtime handler lands.

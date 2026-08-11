@@ -193,6 +193,17 @@
                 "title": "GetNetworkSettings"
               }
             }
+          },
+          "/world": {
+            "type": "group",
+            "title": "World",
+            "children": {
+              "/get-gestures": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_gestures.md",
+                "title": "GetGestures"
+              }
+            }
           }
         }
       }

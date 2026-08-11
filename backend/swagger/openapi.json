@@ -41,6 +41,10 @@
       "description": "Read-only Inventory getters over an open save session. Registered only when the explorer binds a loopback address."
     },
     {
+      "name": "World",
+      "description": "Read-only world and progression getters over an open save session. Registered only when the explorer binds a loopback address."
+    },
+    {
       "name": "Explorer",
       "description": "Routes of the explorer process itself, not part of the endpoint surface."
     }
@@ -853,6 +857,47 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures": {
+      "get": {
+        "operationId": "getGestures",
+        "tags": ["World"],
+        "summary": "GetGestures",
+        "description": "Returns every gesture GameCatalog knows, each one marked with whether the character slot has unlocked it. The unlock state comes from the raw 64-record GestureGameData block of that slot and from nothing else: a gesture is unlocked when its canonical slotID from GameCatalog is present in the block as an exact uint32 match. No event flag is read, no even value is converted into an odd one and the save is never sanitised, repaired or normalised. The 0xFFFFFFFE empty sentinel, a plain 0 and any value that matches no canonical slotID unlock nothing, and the same slotID stored twice still marks its one entry unlocked once. One catalog resource may declare more than one gesture slot, so kind and key can repeat and slotID distinguishes the entries. The order is category, then name, then slotID, and it does not depend on the unlock state. An inactive or residual slot is a normal result with active false and every gesture locked; its GestureGameData is never read. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/AvailabilityFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The gestures of the character slot that passed availabilityFilter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGesturesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, an availabilityFilter other than unlocked, locked or the empty string, an active slot that carries no gesture anchor, an acquired-projectile count above the accepted maximum, an active slot whose GestureGameData cannot be located inside its slot, or a gesture resource whose required catalog data is missing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -1158,6 +1203,17 @@
           "enum": ["", "common", "key"]
         },
         "example": "common"
+      },
+      "AvailabilityFilter": {
+        "name": "availabilityFilter",
+        "in": "query",
+        "required": false,
+        "description": "Unlock-state filter. Omitted or empty means every gesture, unlocked means the unlocked ones only and locked means the rest. The value is matched exactly and case-sensitively; it is never trimmed and has no alias. It can only remove entries and never changes their order.",
+        "schema": {
+          "type": "string",
+          "enum": ["", "unlocked", "locked"]
+        },
+        "example": "unlocked"
       },
       "Page": {
         "name": "page",
@@ -1805,6 +1861,63 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "records", "total", "page", "pageSize"]
+      },
+      "GestureEntry": {
+        "type": "object",
+        "description": "One gesture GameCatalog knows, together with whether the character has it. kind and key are the public GameCatalog identity of the resource and slotID is the canonical save slot ID of this one gesture, because a resource may declare more than one gesture slot. No provenance, no source record, no icon and no raw save byte is exposed.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "The GameCatalog resource kind. Always item for a gesture."
+          },
+          "key": {
+            "type": "string",
+            "description": "The GameCatalog resource key. It repeats when one resource declares more than one gesture slot."
+          },
+          "slotID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The canonical save slot ID written into GestureGameData. It is the value the unlock decision matches exactly."
+          },
+          "name": {
+            "type": "string",
+            "description": "The gesture name stored in GameCatalog. Never empty; a missing name is a fail-closed error."
+          },
+          "category": {
+            "type": "string",
+            "description": "The gesture category stored in GameCatalog. Never empty; a missing category is a fail-closed error."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when this canonical slotID is present in the raw 64-record GestureGameData block of the requested slot."
+          }
+        },
+        "required": ["kind", "key", "slotID", "name", "category", "unlocked"]
+      },
+      "GetGesturesResult": {
+        "type": "object",
+        "description": "The gestures of one character slot that passed availabilityFilter, ordered by category, then name, then slotID. The order never depends on the unlock state. An inactive or residual slot reports active false and every gesture locked, and its GestureGameData is never read.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "True only when the slot's activity flag is exactly 1."
+          },
+          "gestures": {
+            "type": "array",
+            "description": "The gestures that passed availabilityFilter, in the deterministic order. Empty, never null.",
+            "items": {
+              "$ref": "#/components/schemas/GestureEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "gestures"]
       },
       "StorageRecord": {
         "type": "object",
