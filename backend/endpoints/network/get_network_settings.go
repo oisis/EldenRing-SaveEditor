@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: saveSessionID.
 GameCatalog variables read: none; gamecatalog.NetworkParamValues is used as the shared typed model only.
 Save variables read: the 22 NetworkParam values stored in UserData11 of the session; the getter is non-mutating and normalises no value.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package network
 

@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: source, expectedPlatform.
 GameCatalog variables read: none required by the current contract.
 Save variables read: the container recognition and structure validation performed by SaveEngine; no character, inventory or slot data is read at this stage.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package savesession
 

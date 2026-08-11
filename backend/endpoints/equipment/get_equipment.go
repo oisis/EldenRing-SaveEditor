@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: saveSessionID, characterID.
 GameCatalog variables read: none; this stage returns raw state and resolves no ItemDocument.
 Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the 22 raw equipped-armaments fields of its slot data; the getter is non-mutating and computes no value.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package equipment
 

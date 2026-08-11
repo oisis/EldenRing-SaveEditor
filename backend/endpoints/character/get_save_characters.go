@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: saveSessionID.
 GameCatalog variables read: none required by the current contract.
 Save variables read: the UserData10 slot activity flags and, for an active slot, the confirmed character name and level; the getter is non-mutating.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package character
 

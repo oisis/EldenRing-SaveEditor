@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: saveSessionID.
 GameCatalog variables read: none required by the current contract.
 Save variables read: none; only the session metadata SaveEngine exposes, and the call is non-mutating.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package savesession
 

@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: presetID.
 GameCatalog variables read: network presets of regulation/network_params.json.
 Save variables read: none.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package network
 

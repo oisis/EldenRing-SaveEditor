@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: saveSessionID, characterID, containerSection, page, pageSize.
 GameCatalog variables read: none; this phase returns raw state and resolves no ItemDocument.
 Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the physical Storage Box records of the requested section; the getter is non-mutating, keeps gaItemHandle and acquisitionIndex raw, masks only the documented high bit of quantity and applies paging.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package inventory
 

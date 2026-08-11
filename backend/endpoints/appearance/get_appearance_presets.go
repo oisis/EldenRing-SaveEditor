@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: search, tags.
 GameCatalog variables read: appearance presets of presets/appearance.json — id, name, image, bodyType and tags of each preset.
 Save variables read: none.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package appearance
 

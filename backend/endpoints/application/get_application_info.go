@@ -7,7 +7,7 @@ Supported resource types: —.
 Input variables: none.
 GameCatalog variables read: only the MinimumSchemaVersion and CurrentSchemaVersion constants.
 Save variables read: none.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package application
 
