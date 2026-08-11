@@ -23,12 +23,12 @@
         <dt>Data fingerprint</dt>
         <dd>
           <code id="catalog-fingerprint">{{printf "%.6s" .Meta.Manifest.DataVersion}}</code>
-          <button class="copy-button" type="button" data-copy-target="catalog-fingerprint">Copy</button>
+          <button class="copy-button" type="button" data-copy="{{.Meta.Manifest.DataVersion}}">Copy</button>
         </dd>
       </div>
       <div>
         <dt>Game version</dt>
-        <dd>{{.Meta.Manifest.GameVersion}}</dd>
+        <dd>{{.Meta.DisplayGameVersion}}</dd>
       </div>
     </dl>
   </header>

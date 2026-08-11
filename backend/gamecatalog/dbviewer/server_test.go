@@ -29,22 +29,42 @@ func TestServerHeaderShowsHumanReadableCatalogSummaryAndCopyableFingerprint(t *t
 		t.Fatalf("GET / status = %d, want 200", response.Code)
 	}
 	body := response.Body.String()
+	manifest := server.catalog.Manifest()
 	for _, expected := range []string{
 		"<dt>Resources</dt>",
 		"<dd>2</dd>",
 		"<dt>Data fingerprint</dt>",
 		"<dt>Game version</dt>",
-		server.catalog.Manifest().GameVersion,
-		`id="catalog-fingerprint"`,
-		`data-copy-target="catalog-fingerprint"`,
-		server.catalog.Manifest().DataVersion[:6],
+		"<dd>1.16</dd>",
+		`<code id="catalog-fingerprint">` + manifest.DataVersion[:6] + `</code>`,
+		`<button class="copy-button" type="button" data-copy="` + manifest.DataVersion + `">Copy</button>`,
 	} {
 		if !strings.Contains(body, expected) {
 			t.Errorf("header does not contain %q", expected)
 		}
 	}
-	if strings.Contains(body, server.catalog.Manifest().DataVersion) {
-		t.Error("header exposes the full data fingerprint")
+	if strings.Contains(body, `<code id="catalog-fingerprint">`+manifest.DataVersion+`</code>`) {
+		t.Error("header visibly exposes the full data fingerprint")
+	}
+}
+
+func TestDisplayGameVersion(t *testing.T) {
+	tests := []struct {
+		name    string
+		version string
+		want    string
+	}{
+		{name: "catalog class suffix", version: "1.16-class", want: "1.16"},
+		{name: "plain version", version: "1.16", want: "1.16"},
+		{name: "patch version", version: "1.16.1", want: "1.16.1"},
+		{name: "unrelated suffix", version: "1.16-preview", want: "1.16-preview"},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := displayGameVersion(test.version); got != test.want {
+				t.Errorf("displayGameVersion(%q) = %q, want %q", test.version, got, test.want)
+			}
+		})
 	}
 }
 
