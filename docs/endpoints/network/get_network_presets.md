@@ -10,13 +10,12 @@ The values live in
 That file is the authoritative source of the preset values for SaveForge 2.0 and
 for this endpoint. `GameCatalog` loads and validates it once, when it is built,
 and the endpoint only reads the already loaded presets: it opens no file per call
-and it no longer calls the `backend/core` preset functions. The public contract
-and the list of thirteen presets are unchanged.
+and it does not contain a second preset implementation. The public contract and
+the list of thirteen presets are unchanged.
 
-`backend/core` still holds the older preset functions, but only temporarily and
-only for its remaining legacy callers. It is no longer a data source for
-SaveForge 2.0. Those functions will be removed together with `backend/core` in a
-separate, later task.
+The older preset functions from SaveForge 1.x were removed from the active tree
+during the 2.0 cutover. They remain available only through Git history and the
+`v1.6.8` tag and are not a data source for SaveForge 2.0.
 
 | | |
 |---|---|
@@ -111,9 +110,9 @@ first, then the `presets` array in file order.
 
 ### Presets that are deliberately not exposed
 
-`backend/core` still holds legacy preset functions kept for older callers. They
-are not stored in `network_params.json`, they are not part of this endpoint's
-contract, and their identifiers are rejected as unknown:
+SaveForge 1.x offered additional preset functions. They are not stored in
+`network_params.json`, they are not part of this endpoint's contract, and their
+historical identifiers are rejected as unknown:
 
 - `fast-invasions` (`core.NetworkParamFastInvasions`)
 - `light-invasions` (`core.NetworkParamLightInvasions`)
@@ -160,13 +159,9 @@ contract, and their identifiers are rejected as unknown:
   loaded `GameCatalog`. It reads no manifest, no resource, and no other catalog
   data, and it never loads or reloads the catalog itself.
 - The endpoint calls no other endpoint.
-- The endpoint no longer imports `backend/core` and calls none of its
-  `NetworkParam*` functions. Those functions stay in `backend/core` only for its
-  remaining legacy callers, and they are removed together with `backend/core` in
-  a separate, later task.
-- The endpoint does not depend on the legacy `internal/application` package and
-  does not import it. The `GetNetworkPreset` implementation that lives there is
-  not reused.
+- The endpoint does not import or call any SaveForge 1.x preset implementation.
+  The legacy `backend/core` and `internal/application` packages are not present
+  in the active SaveForge 2.0 tree.
 - All parameter values come from
   `backend/gamecatalog/data/regulation/network_params.json`, which is their
   single source of truth. `GameCatalog` loads it once, validates it, and stores

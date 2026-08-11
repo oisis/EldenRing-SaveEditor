@@ -76,24 +76,25 @@ confirmed by evidence. That flexibility applies to SaveEngine internals only:
 endpoints must never take over SaveEngine logic, regardless of how SaveEngine is
 divided into files.
 
-## 4. Explicitly excluded legacy paths
+## 4. Removed legacy paths
 
-The following existing paths belong to the old application. They are not a
-source of implementation for SaveForge 2.0.
+The following paths belonged to the old application and were removed from the
+active tree during the SaveForge 2.0 cutover. They remain available only through
+Git history and the `v1.6.8` tag and are not a source of implementation for 2.0.
 
 | Path | Status | Relation to SaveForge 2.0 |
 | --- | --- | --- |
-| `backend/core/` | Legacy | Research material only. Not importable by SaveForge 2.0. |
-| `backend/db/` | Legacy | Research material only. Not importable by SaveForge 2.0. |
-| `backend/editor/` | Legacy | Research material only. Not importable by SaveForge 2.0. |
-| `backend/templates/` | Legacy | Research material only. Not importable by SaveForge 2.0. |
-| `backend/vm/` | Legacy | Research material only. Not importable by SaveForge 2.0. |
-| `internal/` | Legacy | Research material only. Not importable by SaveForge 2.0. |
-| `frontend/` | Legacy | Old application UI. The SaveForge 2.0 frontend does not exist yet. |
+| `backend/core/` | Removed | Research material available in Git history only. Not importable by SaveForge 2.0. |
+| `backend/db/` | Removed | Research material available in Git history only. Not importable by SaveForge 2.0. |
+| `backend/editor/` | Removed | Research material available in Git history only. Not importable by SaveForge 2.0. |
+| `backend/templates/` | Removed | Research material available in Git history only. Not importable by SaveForge 2.0. |
+| `backend/vm/` | Removed | Research material available in Git history only. Not importable by SaveForge 2.0. |
+| `internal/` | Removed | Research material available in Git history only. Not importable by SaveForge 2.0. |
+| `frontend/` | Removed | The old application UI was removed. The SaveForge 2.0 frontend does not exist yet. |
 
 Rules for these paths:
 
-- Legacy code may be used only as research material and as a source of confirmed
+- Legacy code from Git history may be used only as research material and as a source of confirmed
   data and confirmed findings.
 - Its structures, helpers and interfaces must not be copied, and its packages
   must not be imported into SaveForge 2.0.
@@ -102,7 +103,7 @@ Rules for these paths:
 - Data may be migrated into GameCatalog only after validation, and only with its
   own recorded provenance.
 
-Not every directory under `backend/` is legacy — `backend/endpoints/` and
+Not every historical directory under `backend/` was legacy — `backend/endpoints/` and
 `backend/gamecatalog/` are SaveForge 2.0, and only the directories listed in the
 table above are excluded. This document maps the established SaveForge 2.0
 boundaries and the explicitly excluded legacy paths; it is not a complete

@@ -53,8 +53,8 @@ type GetNetworkPresetsResult struct {
 //
 // The parameter values come from regulation/network_params.json, which the
 // catalog loads and validates once; no value is copied here and no file is read
-// per call. The legacy presets of backend/core are deliberately not part of that
-// data and are therefore unknown identifiers.
+// per call. Presets that existed only in SaveForge 1.x are deliberately not
+// part of that data and are therefore unknown identifiers.
 func GetNetworkPresets(
 	gameCatalog *gamecatalog.Catalog,
 	presetID string,

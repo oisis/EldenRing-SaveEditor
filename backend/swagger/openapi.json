@@ -288,7 +288,7 @@
         "operationId": "getNetworkPresets",
         "tags": ["Network"],
         "summary": "GetNetworkPresets",
-        "description": "Returns the network parameter presets the backend offers today. An omitted or empty presetID returns every preset in the backend order; a non-empty presetID returns exactly that preset. The values come from the preset functions of backend/core. The route reads no save and no GameCatalog.",
+        "description": "Returns the network parameter presets the backend offers today. An omitted or empty presetID returns every preset in the backend order; a non-empty presetID returns exactly that preset. The values come from regulation/network_params.json loaded and validated by GameCatalog. The route reads no save.",
         "parameters": [
           {
             "name": "presetID",
@@ -2238,7 +2238,7 @@
       },
       "NetworkParamValues": {
         "type": "object",
-        "description": "core.NetworkParamValues: the tunable PvP/multiplayer parameters grouped by player role. The field set and the JSON names are owned by backend/core.",
+        "description": "The tunable PvP/multiplayer parameters grouped by player role. The field set and JSON names are owned by GameCatalog.",
         "properties": {
           "maxBreakInTargetListCount": {
             "type": "integer",

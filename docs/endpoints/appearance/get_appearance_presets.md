@@ -181,15 +181,13 @@ list today.
 - The endpoint does not import `backend/db`, `backend/db/data`, `backend/core`,
   or `internal/application`.
 
-### Transitional state of the legacy data
+### Legacy source status
 
-`backend/db/data/presets_generated.go` and the images in
-`frontend/public/presets` still exist, unchanged, because the old application
-still reads them. They are no longer a data source for SaveForge 2.0: the values
-and the images were migrated once into `presets/appearance.json` and
-`assets/appearance`, and `GetAppearancePresets` reads only the migrated data.
-The legacy package and the legacy assets are removed or rewired together with
-the old application, in a separate, later task.
+The legacy `backend/db/data/presets_generated.go` file and
+`frontend/public/presets` assets were removed from the active tree during the
+2.0 cutover. They remain available through Git history and the `v1.6.8` tag.
+The values and images migrated into `presets/appearance.json` and
+`assets/appearance` are the only data read by `GetAppearancePresets`.
 
 ## Command-line verification
 
