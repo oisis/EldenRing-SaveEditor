@@ -64,7 +64,7 @@ type GetCatalogInfoResult struct {
 |---|---|---|
 | `schemaVersion` | `uint32` | Version of the GameCatalog schema the loaded data conforms to. Accepted only inside the range supported by `schema.ValidateManifest` (`schema.MinimumSchemaVersion` to `schema.CurrentSchemaVersion`). |
 | `dataVersion` | `string` | Version identifier of the generated catalog data. In the shipped catalog this is a content hash produced by the data generator, not a human-readable release number. |
-| `gameVersion` | `string` | The version label passed to the catalog generator for the supplied regulation dump (the `-game-version` flag of `gamecatalog-migrate`). It may be a game version, a version class, or any other dataset identifier — it is not guaranteed to be an official Elden Ring release number. The endpoint returns the stored label verbatim, without interpreting, parsing, or modifying it. |
+| `gameVersion` | `string` | The version label recorded by the catalog generator for the supplied regulation dump. It may be a game version, a version class, or any other dataset identifier — it is not guaranteed to be an official Elden Ring release number. The endpoint returns the stored label verbatim, without interpreting, parsing, or modifying it. |
 | `valid` | `boolean` | `true` only when `schema.ValidateManifest` accepted the manifest. It is never returned as `false`: a rejected manifest produces an error and an empty result instead. |
 | `sources` | array of `DataSource` | The manifest of every data source the catalog was built from, in manifest order. |
 
