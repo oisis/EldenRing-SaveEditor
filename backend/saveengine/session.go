@@ -18,10 +18,24 @@ const (
 // Session is the read-only model of one loaded save. It deliberately holds no
 // file path, no handle, no offsets, no raw bytes and no character data: the
 // current stage only recognises and validates a container.
+//
+// revision, ownedByLocator, ownedByID and ownedSeq are the private owned-item
+// identity state described in owned_item_id.go. None of them is part of
+// SessionInfo, so none of them leaves the package.
 type Session struct {
 	id       string
 	platform Platform
 	format   string
+
+	// revision is the private saveRevision of this session. It starts at 0 and
+	// only commitRevision advances it.
+	revision uint64
+	// ownedByLocator and ownedByID are the two directions of one identity
+	// registry, valid for the current revision only.
+	ownedByLocator map[ownedItemLocator]string
+	ownedByID      map[string]ownedItemLocator
+	// ownedSeq numbers the tokens minted by this session.
+	ownedSeq uint64
 }
 
 // SessionInfo is the safe, public metadata of a session. It is the only session
@@ -41,7 +55,13 @@ func newSession(platform Platform, format string) (*Session, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Session{id: id, platform: platform, format: format}, nil
+	return &Session{
+		id:             id,
+		platform:       platform,
+		format:         format,
+		ownedByLocator: make(map[ownedItemLocator]string),
+		ownedByID:      make(map[string]ownedItemLocator),
+	}, nil
 }
 
 func newSessionID() (string, error) {
