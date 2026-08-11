@@ -7,7 +7,7 @@ Supported resource types: ItemDocument: Spell.
 Input variables: saveSessionID, characterID.
 GameCatalog variables read: for every occupied spell the resource key, the item family, the presentation name and the spell Memory Slots cost of the ItemDocument whose game ID is the raw MagicParam ID with the spell item-family prefix.
 Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the fourteen EquippedSpells records of its slot data plus the Memory Stone stack and the unlocked talisman fields the active capacity is derived from; the getter is non-mutating and writes nothing.
-Implementation status: implemented.
+Implementation status: implemented
 */
 package equipment
 
