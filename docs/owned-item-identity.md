@@ -1,9 +1,9 @@
 # OwnedItemID and saveRevision — shared Inventory contract
 
 > **Status: approved. The identity tasks, the first mutation, and `WriteSave`
-> are implemented. `WriteSave` is exposed by the local explorer;
-> `inventory.SetOwnedItemQuantity` remains Go-only pending its own transport
-> task. Every other public setter endpoint is still contract-only.**
+> are implemented. `WriteSave` and `inventory.SetOwnedItemQuantity` are exposed
+> by the local explorer. Every other public setter endpoint is still
+> contract-only.**
 >
 > This document is the design record of the contract, not endpoint
 > documentation. The implemented endpoints are described in
@@ -25,7 +25,7 @@
 | Proposed owner | `backend/saveengine` (one component), never an endpoint |
 | Affected contracts today | originally 12 contract-only endpoint files declaring `ownedItemID`, `weaponOwnedItemID` or `orderedOwnedItemIDs`; `get_owned_item.go` is implemented since Task 3 and `set_owned_item_quantity.go` since Task 5, so 10 remain contract-only |
 | Affects implemented code | yes since Tasks 1, 2a, 2b, 3, 4 and 5 — `GetInventory`, `GetStorage` and `GetOwnedItem` are implemented, `saveengine.Engine.SetOwnedItemQuantity` is the first implemented mutation, and `inventory.SetOwnedItemQuantity` is the first implemented mutation *endpoint*; every other setter endpoint is still a separate later task |
-| Transport | `GetOwnedItem` and `WriteSave` are transport-exposed by the local explorer; `SetOwnedItemQuantity` is implemented but remains unexposed pending a separate transport task |
+| Transport | `GetOwnedItem`, `SetOwnedItemQuantity` and `WriteSave` are transport-exposed by the local explorer |
 
 ---
 
@@ -885,10 +885,9 @@ What it establishes, and what it deliberately does not:
 ### 6.8 Task 5 — the first public mutation endpoint
 
 Implemented: `inventory.SetOwnedItemQuantity`. It is the endpoint task §6.7 left
-open, and it is the first public mutation of SaveForge 2.0. It is **session-only
-and not exposed**: no HTTP route, no `openapi.json` operation, no Scalar
-navigation entry, no Wails binding, no CLI command and no frontend. `WriteSave`
-now exists; exposing this setter remains a separate endpoint transport task. The
+open, and it is the first public mutation of SaveForge 2.0. The local explorer
+exposes it through its loopback-only HTTP route, OpenAPI operation and Scalar
+entry; there is still no Wails binding, CLI command or frontend. The
 documented contract lives in
 [`docs/endpoints/inventory/set_owned_item_quantity.md`](endpoints/inventory/set_owned_item_quantity.md).
 
@@ -994,5 +993,4 @@ The identity, the registry and the three getters are implemented, and so are the
 revision increment together with the first mutation that drives it (§6.7) and the
 first public mutation endpoint, `SetOwnedItemQuantity` (§6.8). `WriteSave` now
 implements the §5.3 rule and is exposed by the local explorer. What remains
-unimplemented is every other public setter endpoint and every other mutation;
-transport exposure of `SetOwnedItemQuantity` is also still a separate task.
+unimplemented is every other public setter endpoint and every other mutation.

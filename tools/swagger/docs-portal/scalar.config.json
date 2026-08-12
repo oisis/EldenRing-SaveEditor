@@ -185,6 +185,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/get_owned_item.md",
                 "title": "GetOwnedItem"
+              },
+              "/set-owned-item-quantity": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/set_owned_item_quantity.md",
+                "title": "SetOwnedItemQuantity"
               }
             }
           },

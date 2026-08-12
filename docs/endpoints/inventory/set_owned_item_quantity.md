@@ -34,7 +34,7 @@ no other endpoint.
 | Kind | Mutation |
 | Domain | `inventory` |
 | Implementation status | implemented |
-| Transport status | not exposed — no HTTP route, OpenAPI operation, Scalar navigation entry, Wails binding, CLI command or frontend. It remains callable only as a Go function; transport exposure is a separate task now that `WriteSave` exists. |
+| Transport status | transport-exposed — `PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity` of the local explorer. The route exists only without `-allow-external-bind`; no Wails binding, CLI command or frontend reaches it. |
 | Implementation source | [../../../backend/endpoints/inventory/set_owned_item_quantity.go](../../../backend/endpoints/inventory/set_owned_item_quantity.go) |
 | Test source | [../../../backend/endpoints/inventory/set_owned_item_quantity_test.go](../../../backend/endpoints/inventory/set_owned_item_quantity_test.go) |
 | Save access | read-write on the session's private in-memory snapshot; no file is opened |
@@ -53,6 +53,26 @@ func SetOwnedItemQuantity(
 	expectedRevision string,
 ) (SetOwnedItemQuantityResult, error)
 ```
+
+The local HTTP request places the three identities in the path and the two
+mutation values in a strict JSON body:
+
+```http
+PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity
+Content-Type: application/json
+```
+
+```json
+{
+  "quantity": 10,
+  "expectedRevision": "1"
+}
+```
+
+Both body fields are required and unknown fields are rejected. The transport
+parses only the typed envelope: it does not trim or normalise strings, clamp the
+quantity, resolve the identifier, read GameCatalog fields or own a mutation
+rule.
 
 | Parameter | Type | Meaning |
 |---|---|---|
@@ -235,6 +255,7 @@ go test ./backend/endpoints/inventory -run '^TestSetOwnedItemQuantity' -count=1 
 go test ./backend/endpoints/inventory -run '^TestSetOwnedItemQuantity' -race -count=1
 go test ./backend/saveengine -run '^TestSetOwnedItemQuantity' -count=1 -v
 go test ./backend/saveengine -run '^TestSetOwnedItemQuantity' -race -count=1
+go test ./tools/swagger -run '^TestSetOwnedItemQuantityRoute$' -count=1
 ```
 
 The endpoint tests build the synthetic Inventory and Storage containers of this
@@ -259,9 +280,9 @@ access under `-race`.
 
 ## Current limitations
 
-- **No transport.** The endpoint is a Go function. It is deliberately absent from
-  the local explorer routes, `tools/swagger/openapi.json` and the Scalar
-  navigation until its own transport contract is implemented.
+- **Local transport only.** The HTTP route is available only in the loopback
+  explorer. It is absent under `-allow-external-bind`, and there is no Wails
+  binding, CLI command or frontend.
 - **Separate persistence.** The change remains in the session's private snapshot
   until `WriteSave` succeeds. Closing the session first discards it.
 - The endpoint sets a quantity. It does not add, remove, move, merge, split or

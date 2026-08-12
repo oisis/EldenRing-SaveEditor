@@ -1,6 +1,6 @@
-// Command swagger serves a local, read-only OpenAPI explorer for the currently
-// implemented GameCatalog getters and, in loopback mode only, for the read-only
-// save-session lifecycle and the implemented character getters. It is a
+// Command swagger serves a local OpenAPI explorer for the currently implemented
+// GameCatalog getters and, in loopback mode only, for the save-session lifecycle,
+// character getters and explicitly exposed mutations. It is a
 // standalone developer tool: the Wails application neither imports nor starts
 // it, and every route only calls an existing endpoint and serialises its result.
 package main
@@ -137,7 +137,7 @@ func validateAddress(address string, allowExternal bool) error {
 }
 
 // newHandler builds the explorer mux. A nil saveEngine registers no
-// save-session route at all, which is how the caller disables the read-only
+// save-session route at all, which is how the caller disables the
 // save-session lifecycle for an external bind.
 func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, saveEngine *saveengine.Engine) http.Handler {
 	mux := http.NewServeMux()
@@ -296,9 +296,9 @@ func withPortalCORS(next http.Handler) http.Handler {
 		// which is what makes the browser block the request it was asking about.
 		if request.Method == http.MethodOptions && request.Header.Get("Access-Control-Request-Method") != "" {
 			if allowed {
-				writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS")
-				// LoadSave is the only route with a body, and Scalar sends it as
-				// application/json; no other request header is needed.
+				writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+				// The documented request bodies are application/json; no other
+				// request header is needed.
 				writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 			}
 			writer.WriteHeader(http.StatusNoContent)
@@ -323,6 +323,14 @@ type loadSaveRequest struct {
 type writeSaveRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 	Target           string `json:"target"`
+}
+
+// setOwnedItemQuantityRequest is the strict JSON body of the quantity route.
+// The transport owns no quantity or revision rule; both values reach the
+// endpoint unchanged.
+type setOwnedItemQuantityRequest struct {
+	Quantity         uint32 `json:"quantity"`
+	ExpectedRevision string `json:"expectedRevision"`
 }
 
 // closeSaveResponse is the confirmation of DELETE /api/v1/save-sessions/{id}.
@@ -641,6 +649,41 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				request.PathValue("ownedItemID"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	// Quantity is the only owned-item mutation currently exposed. The route
+	// parses only the typed path/body envelope and delegates every identity,
+	// catalog-limit, revision and mutation rule to SetOwnedItemQuantity.
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setOwnedItemQuantityRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.SetOwnedItemQuantity(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				body.Quantity,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

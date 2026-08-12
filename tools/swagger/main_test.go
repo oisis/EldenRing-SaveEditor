@@ -807,6 +807,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -882,21 +883,22 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	// The save-session routes exist only in the local loopback mode, so the
 	// document has to describe them with their own methods.
 	for path, method := range map[string]string{
-		"/api/v1/save-sessions":                                                                    "post",
-		"/api/v1/save-sessions/{saveSessionID}":                                                    "get",
-		"/api/v1/save-sessions/{saveSessionID}/write":                                              "post",
-		"/api/v1/save-sessions/{saveSessionID}/characters":                                         "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                   "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                     "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                 "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":               "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":               "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture":           "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":                 "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                   "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}": "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                  "get",
+		"/api/v1/save-sessions":                                                                             "post",
+		"/api/v1/save-sessions/{saveSessionID}":                                                             "get",
+		"/api/v1/save-sessions/{saveSessionID}/write":                                                       "post",
+		"/api/v1/save-sessions/{saveSessionID}/characters":                                                  "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                              "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":                        "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":                        "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture":                    "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}":          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": "patch",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                           "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -957,6 +959,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"StorageRecord",
 		"CharacterStorage",
 		"OwnedItem",
+		"SetOwnedItemQuantityRequest",
+		"SetOwnedItemQuantityResult",
 		"GestureEntry",
 		"GetGesturesResult",
 	} {
@@ -993,8 +997,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 18 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 18", found)
+	if found != 19 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 19", found)
 	}
 }
 
@@ -1157,7 +1161,7 @@ func TestPortalOriginReceivesCORSPermission(t *testing.T) {
 	}
 }
 
-// LoadSave is sent as JSON, which makes the browser preflight it. The mux routes
+// JSON requests make the browser preflight the mutation routes. The mux routes
 // no OPTIONS, so the preflight has to be answered before it reaches a route.
 func TestPortalPreflightAllowsTheDocumentedMethodsAndHeaders(t *testing.T) {
 	recorder := doCORS(t, http.MethodOptions, "/api/v1/save-sessions", http.Header{
@@ -1173,12 +1177,14 @@ func TestPortalPreflightAllowsTheDocumentedMethodsAndHeaders(t *testing.T) {
 		t.Fatalf("Access-Control-Allow-Origin = %q, want %q", got, portalOrigin)
 	}
 	methods := recorder.Header().Get("Access-Control-Allow-Methods")
-	for _, method := range []string{http.MethodGet, http.MethodPost, http.MethodDelete, http.MethodOptions} {
+	for _, method := range []string{
+		http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete, http.MethodOptions,
+	} {
 		if !strings.Contains(methods, method) {
 			t.Fatalf("Access-Control-Allow-Methods = %q, want it to allow %s", methods, method)
 		}
 	}
-	// Content-Type is what turns the LoadSave body into a preflighted request.
+	// Content-Type is what turns the JSON body into a preflighted request.
 	if got := recorder.Header().Get("Access-Control-Allow-Headers"); !strings.Contains(got, "Content-Type") {
 		t.Fatalf("Access-Control-Allow-Headers = %q, want it to allow Content-Type", got)
 	}
@@ -1743,6 +1749,90 @@ func TestOwnedItemRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("owned-item route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
+	}
+}
+
+func TestSetOwnedItemQuantityRoute(t *testing.T) {
+	fixture := writeInventoryFixture(t)
+	data, err := os.ReadFile(fixture)
+	if err != nil {
+		t.Fatalf("read quantity fixture: %v", err)
+	}
+	// This route needs one stackable catalog item. Keep the shared fixture
+	// unchanged: in this private copy, remove the instance mappings and the two
+	// unrelated rows. The remaining goods handle then resolves by its documented
+	// type prefix to the stackable Memory Stone 0x4000272E.
+	clear(data[inventoryRouteSlotDataBase+0x20 : inventoryRouteSlotDataBase+inventoryRouteAnchorAt])
+	clear(data[inventoryRouteSlotDataBase+inventoryRouteAnchorAt+inventoryRouteCommonAt+5*12 : inventoryRouteSlotDataBase+inventoryRouteAnchorAt+inventoryRouteCommonAt+6*12])
+	clear(data[inventoryRouteSlotDataBase+inventoryRouteAnchorAt+inventoryRouteKeyAt+2*12 : inventoryRouteSlotDataBase+inventoryRouteAnchorAt+inventoryRouteKeyAt+3*12])
+	if err := os.WriteFile(fixture, data, 0o600); err != nil {
+		t.Fatalf("write quantity fixture: %v", err)
+	}
+
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	listed, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory: %v", err)
+	}
+	if len(listed.Records) == 0 {
+		t.Fatal("fixture returned no owned item")
+	}
+	ownedItemID := listed.Records[0].OwnedItemID
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID) + "/quantity"
+	serve := func(method, target, body string) *httptest.ResponseRecorder {
+		var reader io.Reader
+		if body != "" {
+			reader = strings.NewReader(body)
+		}
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, httptest.NewRequest(method, target, reader))
+		return recorder
+	}
+
+	malformed := serve(http.MethodPatch, target,
+		`{"quantity":4,"expectedRevision":"0","unknown":true}`)
+	if malformed.Code != http.StatusBadRequest {
+		t.Fatalf("strict body: status = %d, want 400 (body %q)", malformed.Code, malformed.Body.String())
+	}
+	info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo after malformed body: %v", err)
+	}
+	if info.UnsavedChanges {
+		t.Fatal("malformed body changed the session")
+	}
+
+	recorder := serve(http.MethodPatch, target,
+		`{"quantity":4,"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.SetOwnedItemQuantityResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetOwnedItemQuantity body %q: %v", recorder.Body.String(), err)
+	}
+	want := inventory.SetOwnedItemQuantityResult{
+		SaveSessionID: session.SaveSessionID,
+		SaveRevision:  "1",
+		OwnedItemID:   ownedItemID,
+		CharacterID:   0,
+		Quantity:      4,
+	}
+	if !reflect.DeepEqual(result, want) {
+		t.Fatalf("SetOwnedItemQuantity result = %+v, want %+v", result, want)
+	}
+
+	updated, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory after mutation: %v", err)
+	}
+	if updated.SaveRevision != "1" || updated.Records[0].Quantity != 4 {
+		t.Fatalf("updated inventory = %+v, want quantity 4 at revision 1", updated)
 	}
 }
 
