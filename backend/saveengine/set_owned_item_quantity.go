@@ -313,39 +313,20 @@ func readOwnedRecords(loaded *loadedSave, characterID int, container string) ([]
 }
 
 // ownedItemQuantityOffset reports where the four quantity bytes of one record
-// live. The start of the container comes from the same helper its reader uses,
-// so the two can never disagree, and the row is addressed with the container's
-// own record size and section distance.
+// live. The record itself is addressed by ownedItemRowAndCountAt, so every
+// mutation of a row derives its position from one place, and the quantity is
+// simply the second field of that row.
 //
 // The offset stays inside this package: it is not a field of InventoryRecord, of
 // StorageRecord, of OwnedItem or of any result.
 //
 // The caller must already hold Engine.mutex.
 func ownedItemQuantityOffset(loaded *loadedSave, locator ownedItemLocator) (int64, error) {
-	switch locator.container {
-	case ownedContainerInventory:
-		sectionAt, err := inventoryHeldSectionAt(loaded, locator.characterID)
-		if err != nil {
-			return 0, err
-		}
-		row := int64(0)
-		if locator.containerSection == InventorySectionKey {
-			row = inventoryHeldKeyAt
-		}
-		return sectionAt + row + int64(locator.physicalIndex)*inventoryHeldRecordSize + 4, nil
-	case ownedContainerStorage:
-		sectionAt, err := storageBoxSectionAt(loaded, locator.characterID)
-		if err != nil {
-			return 0, err
-		}
-		row := int64(storageCommonAt)
-		if locator.containerSection == StorageSectionKey {
-			row = storageKeyAt
-		}
-		return sectionAt + row + int64(locator.physicalIndex)*storageRecordSize + 4, nil
-	default:
-		return 0, fmt.Errorf("unknown container %q", locator.container)
+	recordAt, _, _, err := ownedItemRowAndCountAt(loaded, locator)
+	if err != nil {
+		return 0, err
 	}
+	return recordAt + 4, nil
 }
 
 // littleEndianUint32 renders one value the way every record field is stored.

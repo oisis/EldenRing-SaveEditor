@@ -887,6 +887,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
+		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
@@ -993,6 +994,12 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths["/api/v1/save-sessions/{saveSessionID}"]["delete"]; !hasDelete {
 		t.Fatal("openapi.json describes no DELETE for /api/v1/save-sessions/{saveSessionID}")
 	}
+	// The owned-item path carries two operations: reading one instance and
+	// removing it, so the map above can only state one of them.
+	ownedItem := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}"
+	if _, hasDelete := document.Paths[ownedItem]["delete"]; !hasDelete {
+		t.Fatalf("openapi.json describes no DELETE for %s", ownedItem)
+	}
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
 	for _, name := range []string{
@@ -1098,8 +1105,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 20 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 20", found)
+	if found != 21 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 21", found)
 	}
 }
 
@@ -1850,6 +1857,87 @@ func TestOwnedItemRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("owned-item route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
+	}
+}
+
+// The removal route shares its path with the owned-item getter, so the method
+// is what separates reading an instance from deleting it. The route owns the
+// typed envelope only: the identity, the revision and the plan belong to the
+// endpoint below it.
+func TestRemoveOwnedItemRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newPrototypeCatalog(t)
+
+	listed, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory: %v", err)
+	}
+	if len(listed.Records) != 3 {
+		t.Fatalf("fixture listed %d records, want 3", len(listed.Records))
+	}
+	ownedItemID := listed.Records[0].OwnedItemID
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID)
+
+	// A body with an unknown field, a non-decimal characterID and a stale
+	// revision are all refused before anything changes.
+	for _, rejected := range []struct {
+		target string
+		body   string
+	}{
+		{target, `{"expectedRevision":"0","unknown":true}`},
+		{target, `{"expectedRevision":"7"}`},
+		{"/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/one/owned-items/" + url.PathEscape(ownedItemID), `{"expectedRevision":"0"}`},
+	} {
+		recorder := doSave(t, saveEngine, http.MethodDelete, rejected.target, rejected.body)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s %q: status = %d, want 400 (body %q)",
+				rejected.target, rejected.body, recorder.Code, recorder.Body.String())
+		}
+	}
+	info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo after the rejected requests: %v", err)
+	}
+	if info.UnsavedChanges {
+		t.Fatal("a rejected request changed the session")
+	}
+
+	recorder := doSave(t, saveEngine, http.MethodDelete, target, `{"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.RemoveOwnedItemResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode RemoveOwnedItem body %q: %v", recorder.Body.String(), err)
+	}
+	want := inventory.RemoveOwnedItemResult{
+		SaveSessionID: session.SaveSessionID,
+		SaveRevision:  "1",
+		OwnedItemID:   ownedItemID,
+		CharacterID:   0,
+		GameID:        listed.Records[0].GameID,
+	}
+	if !reflect.DeepEqual(result, want) {
+		t.Fatalf("RemoveOwnedItem result = %+v, want %+v", result, want)
+	}
+
+	updated, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory after the removal: %v", err)
+	}
+	if updated.SaveRevision != "1" || len(updated.Records) != 2 {
+		t.Fatalf("updated inventory = %+v, want two records at revision 1", updated)
+	}
+	// The identity is retired with the revision, so repeating the same request
+	// removes nothing a second time.
+	repeated := doSave(t, saveEngine, http.MethodDelete, target, `{"expectedRevision":"1"}`)
+	if repeated.Code != http.StatusBadRequest {
+		t.Fatalf("repeated removal: status = %d, want 400 (body %q)",
+			repeated.Code, repeated.Body.String())
 	}
 }
 

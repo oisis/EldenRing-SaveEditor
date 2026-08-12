@@ -1,9 +1,9 @@
 # OwnedItemID and saveRevision — shared Inventory contract
 
-> **Status: approved. The identity tasks, the first mutation, and `WriteSave`
-> are implemented. `WriteSave` and `inventory.SetOwnedItemQuantity` are exposed
-> by the local explorer. Every other public setter endpoint is still
-> contract-only.**
+> **Status: approved. The identity tasks, the first two content mutations, and
+> `WriteSave` are implemented. `WriteSave`, `inventory.SetOwnedItemQuantity` and
+> `inventory.RemoveOwnedItem` are exposed by the local explorer. Every other
+> public setter endpoint is still contract-only.**
 >
 > This document is the design record of the contract, not endpoint
 > documentation. The implemented endpoints are described in
@@ -13,19 +13,19 @@
 > rule that depends on a mutation SaveEngine does not yet perform — is not a
 > runtime fact until a separate, explicitly approved task implements it.
 >
-> **What the first mutation does and does not mean.** It changes the four
-> quantity bytes of one record inside the session's private in-memory snapshot
-> and opens no file itself. A separate successful `WriteSave` persists that
-> snapshot, advances the revision again, retires previous identities, and clears
+> **What the implemented mutations do and do not mean.** Each of them changes
+> bytes of one record inside the session's private in-memory snapshot and opens
+> no file itself. A separate successful `WriteSave` persists that snapshot,
+> advances the revision again, retires previous identities, and clears
 > `SessionInfo.UnsavedChanges`.
 
 | | |
 |---|---|
 | Scope | `OwnedItemID` and `saveRevision`, shared by the Inventory and Equipment surfaces |
 | Proposed owner | `backend/saveengine` (one component), never an endpoint |
-| Affected contracts today | originally 12 contract-only endpoint files declaring `ownedItemID`, `weaponOwnedItemID` or `orderedOwnedItemIDs`; `get_owned_item.go` is implemented since Task 3 and `set_owned_item_quantity.go` since Task 5, so 10 remain contract-only |
-| Affects implemented code | yes since Tasks 1, 2a, 2b, 3, 4 and 5 — `GetInventory`, `GetStorage` and `GetOwnedItem` are implemented, `saveengine.Engine.SetOwnedItemQuantity` is the first implemented mutation, and `inventory.SetOwnedItemQuantity` is the first implemented mutation *endpoint*; every other setter endpoint is still a separate later task |
-| Transport | `GetOwnedItem`, `SetOwnedItemQuantity` and `WriteSave` are transport-exposed by the local explorer |
+| Affected contracts today | originally 12 contract-only endpoint files declaring `ownedItemID`, `weaponOwnedItemID` or `orderedOwnedItemIDs`; `get_owned_item.go` is implemented since Task 3, `set_owned_item_quantity.go` since Task 5 and `remove_owned_item.go` since Task 6, so 9 remain contract-only |
+| Affects implemented code | yes since Tasks 1, 2a, 2b, 3, 4, 5 and 6 — `GetInventory`, `GetStorage` and `GetOwnedItem` are implemented, `saveengine.Engine.SetOwnedItemQuantity` and `saveengine.Engine.RemoveOwnedItem` are the two implemented content mutations, and `inventory.SetOwnedItemQuantity` and `inventory.RemoveOwnedItem` are the two implemented mutation *endpoints*; every other setter endpoint is still a separate later task |
+| Transport | `GetOwnedItem`, `SetOwnedItemQuantity`, `RemoveOwnedItem` and `WriteSave` are transport-exposed by the local explorer |
 
 ---
 
@@ -73,8 +73,8 @@ on one instance, not on an item type.
 `GetOwnedItem` is a consumer of the identity, not its producer. If it defined
 the rule locally:
 
-- the two producers (`GetInventory`, `GetStorage`) and the nine mutations would
-  each need their own copy of the same decoding rule, which is exactly the
+- the two producers (`GetInventory`, `GetStorage`) and the eleven mutations
+  would each need their own copy of the same decoding rule, which is exactly the
   parallel-implementation pattern `AGENTS.md` forbids;
 - `SetInventoryOrder` and `SetStorageOrder` accept a *complete ordered list* of
   IDs produced by a getter, so producer and consumer must agree byte for byte;
@@ -115,7 +115,8 @@ endpoint that touches save state; no endpoint outside this list is in scope.
 | `GetInventory`, `GetStorage` | already declare `saveSessionID` — the producers need no change |
 | `GetOwnedItem` | satisfied since Task 3: declares `saveSessionID`, `characterID`, `ownedItemID`, in that exact order (`backend/endpoints/inventory/get_owned_item.go:33`) |
 | `SetOwnedItemQuantity` | satisfied since Task 5: declares `saveSessionID`, `characterID`, `ownedItemID`, `quantity`, `expectedRevision`, in that exact order (`backend/endpoints/inventory/set_owned_item_quantity.go:33`) |
-| `RemoveOwnedItem`, `MoveOwnedItemToInventory`, `MoveOwnedItemToStorage`, `SetWeaponUpgradeLevel`, `SetWeaponInfusion`, `SetSpiritAshUpgradeLevel` | declare `ownedItemID` without `saveSessionID` — must gain it |
+| `RemoveOwnedItem` | satisfied: declares `saveSessionID`, `characterID`, `ownedItemID`, `expectedRevision`, in that exact order (`backend/endpoints/inventory/remove_owned_item.go:30`) |
+| `MoveOwnedItemToInventory`, `MoveOwnedItemToStorage`, `SetWeaponUpgradeLevel`, `SetWeaponInfusion`, `SetSpiritAshUpgradeLevel` | declare `ownedItemID` without `saveSessionID` — must gain it |
 | `SetWeaponAshOfWar` | declares `weaponOwnedItemID` without `saveSessionID` — must gain it |
 | `SetInventoryOrder`, `SetStorageOrder` | declare `orderedOwnedItemIDs` without `saveSessionID` — must gain it |
 | `SetEquippedTalismans` | declares `characterID`, `orderedOwnedItemIDs`, `expectedRevision` without `saveSessionID` — must gain it |
@@ -156,9 +157,11 @@ the source.
 documentation task that produced this document changed no Go contract file; that
 boundary applied to it alone and is recorded here as history. Task 3 has since
 amended `get_owned_item.go`, which now declares `saveSessionID`, `characterID`,
-`ownedItemID` and is implemented, and Task 5 has amended
+`ownedItemID` and is implemented, Task 5 has amended
 `set_owned_item_quantity.go`, which now declares `saveSessionID`, `characterID`,
-`ownedItemID`, `quantity`, `expectedRevision` and is implemented. The ten
+`ownedItemID`, `quantity`, `expectedRevision` and is implemented, and Task 6 has
+amended `remove_owned_item.go`, which now declares `saveSessionID`,
+`characterID`, `ownedItemID`, `expectedRevision` and is implemented. The nine
 remaining contract-only files keep
 their current `SupportedResourceVariables` until their own separate, explicitly
 approved tasks amend them. Each such task also updates its contract header, the
@@ -192,12 +195,12 @@ only records the decision those changes must follow.
 | C2 | Both getters return an `OwnedItemID` per record and a `saveRevision` per result, minted by the session registry. | `backend/saveengine/inventory.go:103-112`, `backend/saveengine/storage.go:143-150`, `docs/endpoints/inventory/get_inventory.md` |
 | C3 | The public getter contract is locked by an assertion on the exact `SupportedResourceTypes` value (`ItemDocument`) and the exact ordered variable list. Changing either is a protected-test change. The raw phase-one contract tests were replaced under Task 2b by `TestGetInventoryContractResolvesItemDocuments` and `TestGetStorageContractResolvesItemDocuments`. | `backend/endpoints/inventory/get_inventory_test.go:453`, `get_storage_test.go:487`, `get_owned_item_test.go:238` |
 | C4 | `saveengine.Session` holds `id`, `platform`, `format`, the private `revision` counter, the private `dirty` flag, the two-directional identity registry `ownedByLocator` / `ownedByID` and the mint counter `ownedSeq`. None of them is part of `SessionInfo` except through `SessionInfo.UnsavedChanges`, which reports `dirty`. There is still no per-character state. | `backend/saveengine/session.go` |
-| C5 | The engine implements one content mutation, `SetOwnedItemQuantity`, plus `WriteSave`. The setter changes only the private snapshot and marks it dirty; `WriteSave` serializes, reload-validates and atomically persists that snapshot, then advances the revision and clears the dirty state. `UndoCharacterChanges` remains unimplemented. | `backend/saveengine/set_owned_item_quantity.go`, `backend/saveengine/write_save.go`, `backend/saveengine/owned_item_id.go` |
+| C5 | The engine implements two content mutations, `SetOwnedItemQuantity` and `RemoveOwnedItem`, plus `WriteSave`. Both content mutations change only the private snapshot and mark it dirty; `WriteSave` serializes, reload-validates and atomically persists that snapshot, then advances the revision and clears the dirty state. `UndoCharacterChanges` remains unimplemented. | `backend/saveengine/set_owned_item_quantity.go`, `backend/saveengine/remove_owned_item.go`, `backend/saveengine/write_save.go`, `backend/saveengine/owned_item_id.go` |
 | C6 | Two native sentinels mark an absent record: handle `0x00000000` and `0xFFFFFFFF`. Both getters skip them; every other handle is reported as stored. | `backend/saveengine/inventory.go:54-58, 312` |
 | C7 | The stored quantity carries a high bit that is not part of the count. Each container reader states and applies that mask once for its own section — `inventoryHeldQuantityMask` for InventoryHeld, `storageQuantityMask` for the Storage Box — and no other reader masks a quantity. The writer never uses a masked value: it reads the raw four bytes, keeps their high bit exactly as the game left it, and replaces only the 31-bit count (`newRaw = (oldRaw & 0x80000000) \| quantity`). | `backend/saveengine/inventory.go`, `backend/saveengine/storage.go`, `backend/saveengine/set_owned_item_quantity.go` |
 | C8 | The 2.0 API spec forbids public setters that take raw bytes, offsets, handles, indices or event flags, and forbids accepting GaItem handles as a public identity. | `tmp/app-se/endpoints-2.0.md` lines 9 and 200 |
 | C9 | Almost every 2.0 mutation contract declares `expectedRevision`; `GetRepairPlan` declares `saveRevision` as an input. The two names differ by direction of use, not by rule (§5.6). | `tmp/app-se/endpoints-2.0.md` lines 87, 97–178 |
-| C10 | `GetInventory`, `GetStorage`, `GetOwnedItem` and `SetOwnedItemQuantity` all declare `saveSessionID`. The gap is now limited to the still contract-only files: every remaining inventory mutation contract and `SetEquippedTalismans` declare `characterID` but **not** `saveSessionID`. | `backend/endpoints/inventory/get_owned_item.go:33`, `get_inventory.go:33`, `set_owned_item_quantity.go:33` vs `backend/endpoints/equipment/set_equipped_talismans.go:25` and the remaining `backend/endpoints/inventory/set_*.go` |
+| C10 | `GetInventory`, `GetStorage`, `GetOwnedItem`, `SetOwnedItemQuantity` and `RemoveOwnedItem` all declare `saveSessionID`. The gap is now limited to the still contract-only files: every remaining inventory mutation contract and `SetEquippedTalismans` declare `characterID` but **not** `saveSessionID`. | `backend/endpoints/inventory/get_owned_item.go:33`, `get_inventory.go:33`, `set_owned_item_quantity.go:33`, `remove_owned_item.go:30` vs `backend/endpoints/equipment/set_equipped_talismans.go:25` and the remaining `backend/endpoints/inventory/set_*.go` |
 | C11 | `containerSection` is an input *filter* on both implemented getters: the empty string means both physical sections, `"common"` and `"key"` select one. It is not part of any record identity. | `backend/saveengine/inventory.go:15-19, 191-196` |
 | C12 | The engine serialises every session operation on one process-wide `Engine.mutex`. There is no per-session lock. | `backend/saveengine/engine.go:20-21, 97, 117, 147` |
 
@@ -781,10 +784,11 @@ anchors, bounds, section sizes, sentinels, quantity mask, physical indexes and
 minting still have exactly one owner each. The documented contract lives in
 [`docs/endpoints/inventory/get_owned_item.md`](endpoints/inventory/get_owned_item.md).
 
-**The setter endpoints remain unimplemented, except the first one.** They are
+**The setter endpoints remain unimplemented, except the first two.** They are
 separate later tasks. The `saveSessionID` amendment of the remaining contract
-files (§1.4) travels with them, one endpoint at a time. The SaveEngine side of
-the first of them exists since §6.7, and the endpoint itself since §6.8.
+files (§1.4) travels with them, one endpoint at a time. `SetOwnedItemQuantity`
+exists in SaveEngine since §6.7 and as an endpoint since §6.8;
+`RemoveOwnedItem` exists since §6.9.
 
 **Why it came last of the getters, not first (historical ordering).** The
 sequence it had to follow was Task 1, Task 2a, the §6.3 research gate and Task
@@ -820,7 +824,7 @@ meet in a single-instance result. It went before the mutations, because it is a
 getter and could be verified without any mutation path existing. The mutations
 follow, each in its own task, each depending additionally on the
 mutation/rollback machinery that this document does not design. The
-`saveSessionID` amendment of the ten remaining contract files (§1.4) is part
+`saveSessionID` amendment of the nine remaining contract files (§1.4) is part
 of that stage, one endpoint at a time.
 
 ### 6.6 Required test coverage
@@ -873,9 +877,10 @@ What it establishes, and what it deliberately does not:
   resolve the item outside the lock in order to read those limits; the engine
   re-resolves the addressed record's handle under the lock and refuses unless it
   is still the same game ID.
-- **It never removes anything.** `quantity` of `0` is an error; removal belongs
-  to a later `RemoveOwnedItem`. No record is created, merged, moved or reordered,
-  and no handle or acquisition index changes.
+- **It never removes anything.** `quantity` of `0` is an error; removal was left
+  to a separate `RemoveOwnedItem`, implemented later (§6.9). No record is
+  created, merged, moved or reordered, and no handle or acquisition index
+  changes.
 - **The identity contract is unchanged.** A commit advances the revision by
   exactly 1 and clears the registry with no eager rebuild (§4.2), so the
   `ownedItemID` the mutation was performed with is stale as soon as it returns.
@@ -923,6 +928,21 @@ identity contract of §6.7 is unchanged: a successful call increments
 `saveRevision`, invalidates every outstanding `ownedItemID` of the session, sets
 `UnsavedChanges`, and writes no file. The `ownedItemID` in its result is already
 stale and identifies the performed operation only.
+
+### 6.9 Task 6 — `RemoveOwnedItem`
+
+Implemented, engine and endpoint in one task: `saveengine.Engine.RemoveOwnedItem`
+and `inventory.RemoveOwnedItem`, transport-exposed by the local explorer. The
+documented contract lives in
+[`docs/endpoints/inventory/remove_owned_item.md`](endpoints/inventory/remove_owned_item.md)
+and is not repeated here.
+
+It leaves the identity contract unchanged: it removes exactly one owned instance,
+addressed by the revision-scoped `ownedItemID` and by nothing else — never by
+game ID, never by a search in the other container — it validates
+`expectedRevision` and the identity before the first byte changes, and on success
+it increments `saveRevision`, so every `ownedItemID` outstanding in the session,
+including the one it was called with, is stale when it returns.
 
 ---
 
@@ -990,7 +1010,8 @@ bound by them.
    variant (§6.5).
 
 The identity, the registry and the three getters are implemented, and so are the
-revision increment together with the first mutation that drives it (§6.7) and the
-first public mutation endpoint, `SetOwnedItemQuantity` (§6.8). `WriteSave` now
-implements the §5.3 rule and is exposed by the local explorer. What remains
-unimplemented is every other public setter endpoint and every other mutation.
+revision increment together with the two content mutations that drive it —
+`SetOwnedItemQuantity` (§6.7, §6.8) and `RemoveOwnedItem` (§6.9) — both exposed
+as public endpoints by the local explorer. `WriteSave` now implements the §5.3
+rule and is exposed too. What remains unimplemented is the nine contract-only
+setter endpoints and `UndoCharacterChanges`.

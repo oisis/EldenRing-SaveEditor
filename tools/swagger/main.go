@@ -358,6 +358,13 @@ type setOwnedItemQuantityRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// removeOwnedItemRequest is the strict JSON body of the removal route. The
+// revision travels in the body like it does for every other mutation, so the
+// transport keeps one convention; it reaches the endpoint unchanged.
+type removeOwnedItemRequest struct {
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // closeSaveResponse is the confirmation of DELETE /api/v1/save-sessions/{id}.
 // CloseSave returns no value, so the route states the closed session itself.
 type closeSaveResponse struct {
@@ -691,7 +698,41 @@ func registerSaveSessionRoutes(
 		},
 	)
 
-	// Quantity is the only owned-item mutation currently exposed. The route
+	// Removing one instance addresses the same path as reading it, with the
+	// method carrying the intent. The route parses only the typed path/body
+	// envelope and delegates every identity, revision and mutation rule to
+	// RemoveOwnedItem, which needs no catalog.
+	mux.HandleFunc(
+		"DELETE /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body removeOwnedItemRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.RemoveOwnedItem(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	// Quantity is the only owned-item field mutation currently exposed. The route
 	// parses only the typed path/body envelope and delegates every identity,
 	// catalog-limit, revision and mutation rule to SetOwnedItemQuantity.
 	mux.HandleFunc(

@@ -941,6 +941,55 @@
             }
           }
         }
+      },
+      "delete": {
+        "operationId": "removeOwnedItem",
+        "tags": ["Inventory"],
+        "summary": "RemoveOwnedItem",
+        "description": "Removes one existing owned item instance from the session snapshot. The opaque ownedItemID selects the single physical record it was minted for, in the character and the physical container that minted it; it is compared byte for byte and is never parsed, there is no lookup by game ID and no fallback into the other container. Each physical section is cleared its own confirmed way: an InventoryHeld record keeps its physical row number in the third field and only the common count of that container is lowered, while the InventoryHeld key_count header stays untouched; a Storage common record is zeroed whole and the Storage common count is lowered. Storage key records are refused as unsupported, because this project has no confirmed native write contract for that section. A removal is also refused when an InventoryHeld common record's physical row is still named by one of the 22 Equipment, 10 Quick Item or 6 Pouch {GaItem handle, 0x180 + row} reference pairs of the character; the physical row identifies the instance, because one GaItem handle is legitimately shared by several records, so a shared handle at another row never blocks a removal, while a pair naming the addressed row with a different handle is refused fail-closed. Inventory key records and both Storage sections are never checked, because no row field can name one. Nothing is ever unequipped or cascaded. The GaItem table and the trailing NextEquipIndex and NextAcquisitionSortId counters are left untouched, and nothing is merged, moved, reindexed or repacked. An empty, unknown, retired, foreign or wrong-character ownedItemID, a record that no longer exists, an unresolvable GaItem handle and a malformed or stale expectedRevision each reject the whole request before any byte changes; a write that cannot be verified restores every byte the removal had already changed. A successful removal advances saveRevision by exactly one, marks the session dirty and retires every ownedItemID of the previous revision; WriteSave remains a separate operation. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/OwnedItemID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveOwnedItemRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed removal and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveOwnedItemResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, an invalid characterID or expectedRevision, an unknown or stale session or ownedItemID, an ownedItemID belonging to another character, an ownedItemID whose physical record no longer exists, an ownedItemID addressing the unsupported Storage key section, an InventoryHeld common record whose physical row an Equipment, Quick Item or Pouch reference pair still names, an unresolvable GaItem handle, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": {
@@ -2383,6 +2432,54 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "kind", "key", "gameID", "container", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+      },
+      "RemoveOwnedItemRequest": {
+        "type": "object",
+        "description": "Body of RemoveOwnedItem. The single value reaches the endpoint unchanged; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["expectedRevision"]
+      },
+      "RemoveOwnedItemResult": {
+        "type": "object",
+        "description": "Receipt for one committed removal. The echoed ownedItemID is already stale: the successful mutation advanced saveRevision, and the record it addressed no longer exists.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "ownedItemID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The identifier the removal was performed with, echoed unchanged and already stale."
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "The save-side game ID the removed record's GaItem handle resolved to under the mutation lock."
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "gameID"]
       },
       "SetOwnedItemQuantityRequest": {
         "type": "object",
