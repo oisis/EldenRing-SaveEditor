@@ -1035,6 +1035,47 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks": {
+      "get": {
+        "operationId": "getCookbooks",
+        "tags": ["World"],
+        "summary": "GetCookbooks",
+        "description": "Returns every cookbook GameCatalog declares, each one marked with whether the character slot has unlocked it. GameCatalog is the only source of a cookbook's identity, name, category and event flag: a cookbook is an ItemDocument of family goods that carries exactly one item.unlocks entry of kind cookbook, and the eventFlagID of that entry is the only state the unlock is read from. One declaring resource yields exactly one entry, so the kind and key identity is unique across a result; another family or a second cookbook unlock in one resource is a fail-closed error naming the resource key and the reason. The identifier itself stays internal and is never part of the response; acquisition.worldPickupFlagID is not consulted and neither is the inventory, so an owned but unregistered cookbook item is not an unlock. The order is category, then name, then the key of the declaring resource, and it does not depend on the unlock state. An inactive or residual slot is a normal result with active false and every cookbook locked; its event flags are never read. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/AvailabilityFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The cookbooks of the character slot that passed availabilityFilter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetCookbooksResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, an availabilityFilter other than unlocked, locked or the empty string, an active slot that carries no event flag anchor, a declared record count or payload size above the accepted maximum, an active slot whose event flag section does not fit into its slot or into the save file, or a cookbook whose required catalog data is missing, whose declaring resource is not a single-unlock goods item, or which conflicts with another cookbook",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -2069,6 +2110,58 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "active", "records", "total", "page", "pageSize"]
+      },
+      "CookbookEntry": {
+        "type": "object",
+        "description": "One cookbook GameCatalog declares, together with whether the character has unlocked it. kind and key are the public GameCatalog identity of the goods ItemDocument that declares the single item.unlocks entry of kind cookbook; that identity is unique across a result. The event flag identifier behind the state stays internal, and no provenance, source record, offset or raw save byte is exposed.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "description": "The GameCatalog resource kind. Always item for a cookbook."
+          },
+          "key": {
+            "type": "string",
+            "description": "The GameCatalog resource key of the declaring ItemDocument. One resource declares exactly one cookbook, so the key never repeats in a result."
+          },
+          "name": {
+            "type": "string",
+            "description": "The cookbook name stored in the unlock entry. Never empty; a missing name is a fail-closed error."
+          },
+          "category": {
+            "type": "string",
+            "description": "The cookbook series stored in the unlock entry. Never empty; a missing category is a fail-closed error."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when the event flag of this cookbook is set in the requested slot."
+          }
+        },
+        "required": ["kind", "key", "name", "category", "unlocked"]
+      },
+      "GetCookbooksResult": {
+        "type": "object",
+        "description": "The cookbooks of one character slot that passed availabilityFilter, ordered by category, then name, then the key of the declaring resource. The order never depends on the unlock state. An inactive or residual slot reports active false and every cookbook locked, and its event flags are never read.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "True only when the slot's activity flag is exactly 1."
+          },
+          "cookbooks": {
+            "type": "array",
+            "description": "The cookbooks that passed availabilityFilter, in the deterministic order. Empty, never null.",
+            "items": {
+              "$ref": "#/components/schemas/CookbookEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "cookbooks"]
       },
       "GestureEntry": {
         "type": "object",

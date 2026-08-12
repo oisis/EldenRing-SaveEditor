@@ -217,6 +217,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_gestures.md",
                 "title": "GetGestures"
+              },
+              "/get-cookbooks": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_cookbooks.md",
+                "title": "GetCookbooks"
               }
             }
           }

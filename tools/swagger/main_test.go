@@ -889,6 +889,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -979,6 +980,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}":          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                           "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1043,6 +1045,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetOwnedItemQuantityResult",
 		"GestureEntry",
 		"GetGesturesResult",
+		"CookbookEntry",
+		"GetCookbooksResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1094,8 +1098,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 19 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 19", found)
+	if found != 20 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 20", found)
 	}
 }
 
@@ -2188,6 +2192,161 @@ func TestGesturesRouteMatchesTheGetter(t *testing.T) {
 
 func TestGesturesRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	target := "/api/v1/save-sessions/any-session/characters/0/gestures"
+	recorder := doSave(t, nil, http.MethodGet, target, "")
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())
+	}
+}
+
+// The cookbooks route joins the catalog cookbook definitions with the event flag
+// bitfield of the slot, so its fixture walks the whole confirmed chain from the
+// anchor to that bitfield and sets one real cookbook flag. The distances are
+// restated here instead of reused from SaveEngine.
+const (
+	cookbooksRouteProjectiles    = 4
+	cookbooksRouteBlocksBefore   = 0x9C + 0x0C + 0x12F
+	cookbooksRouteStorageBox     = 0x6010
+	cookbooksRouteGestureSection = 64 * 4
+	cookbooksRouteHorseSize      = 0x28 + 1
+	cookbooksRouteBloodStainSize = 0x44 + 8
+	cookbooksRouteDynamicHeader  = 2 + 2 + 4
+	cookbooksRouteTrophySize     = 0x34
+	cookbooksRouteGaItemSize     = 8 + 7000*16
+	cookbooksRouteScalarsSize    = 3 + 4 + 4 + 1 + 4 + 4 + 1 + 4 + 4
+	cookbooksRouteEventFlagBlock = 125
+	cookbooksRouteRegions        = 0
+	cookbooksRouteMenuSize       = 0
+	cookbooksRouteTutorialSize   = 0
+
+	// Distance from the anchor to the first byte of the event flag bitfield, for
+	// the lengths this fixture declares.
+	cookbooksRouteSectionAt = gesturesRouteProjCountAt + 4 +
+		cookbooksRouteProjectiles*8 +
+		cookbooksRouteBlocksBefore + cookbooksRouteStorageBox +
+		cookbooksRouteGestureSection + 4 +
+		cookbooksRouteRegions*4 + cookbooksRouteHorseSize + cookbooksRouteBloodStainSize +
+		cookbooksRouteDynamicHeader + cookbooksRouteMenuSize +
+		cookbooksRouteTrophySize + cookbooksRouteGaItemSize +
+		cookbooksRouteDynamicHeader + cookbooksRouteTutorialSize +
+		cookbooksRouteScalarsSize
+
+	// The one cookbook event flag the fixture sets. The stored catalog maps it to
+	// Nomadic Warrior's Cookbook [1].
+	cookbooksRouteSetFlag = uint32(67000)
+)
+
+// writeCookbooksFixture writes a synthetic PC save into t.TempDir() whose slot 0
+// is active and whose event flag bitfield carries exactly one cookbook flag.
+func writeCookbooksFixture(t *testing.T) string {
+	t.Helper()
+
+	data := make([]byte, pcFixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+	data[gesturesRouteUserData10+gesturesRouteFlagsOffset] = 1
+
+	anchorBase := gesturesRouteSlotDataBase + gesturesRouteAnchorAt
+	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+	binary.LittleEndian.PutUint32(
+		data[anchorBase+gesturesRouteProjCountAt:], cookbooksRouteProjectiles)
+
+	index := int64(cookbooksRouteSetFlag % 1000)
+	offset := 17*cookbooksRouteEventFlagBlock + index/8
+	data[anchorBase+cookbooksRouteSectionAt+offset] |= 1 << uint8(7-index%8)
+
+	path := filepath.Join(t.TempDir(), "cookbooks.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestCookbooksRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/cookbooks"
+	// The prototype catalog declares no cookbook unlock, so it could not prove
+	// that the route passes the catalog on.
+	gameCatalog := newFullCatalog(t)
+
+	serve := func(target string) *httptest.ResponseRecorder {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+		return recorder
+	}
+
+	want, err := world.GetCookbooks(saveEngine, gameCatalog, session.SaveSessionID, 0, "")
+	if err != nil {
+		t.Fatalf("world.GetCookbooks: %v", err)
+	}
+	if !want.Active || len(want.Cookbooks) == 0 {
+		t.Fatalf("fixture result = active %t with %d cookbooks, want an active slot with cookbooks",
+			want.Active, len(want.Cookbooks))
+	}
+	unlocked := 0
+	for _, entry := range want.Cookbooks {
+		if entry.Unlocked {
+			unlocked++
+		}
+	}
+	if unlocked != 1 {
+		t.Fatalf("fixture unlocked %d cookbooks, want exactly 1", unlocked)
+	}
+
+	recorder := serve(base)
+	assertOK(t, recorder, base)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("cookbooks route body differs from the GetCookbooks result")
+	}
+
+	// Both accepted filter values have to reach the getter unchanged.
+	for _, filter := range []string{"unlocked", "locked"} {
+		target := base + "?availabilityFilter=" + filter
+		wantFiltered, err := world.GetCookbooks(saveEngine, gameCatalog, session.SaveSessionID, 0, filter)
+		if err != nil {
+			t.Fatalf("world.GetCookbooks(%q): %v", filter, err)
+		}
+		if len(wantFiltered.Cookbooks) == 0 || len(wantFiltered.Cookbooks) == len(want.Cookbooks) {
+			t.Fatalf("filter %q kept %d of %d cookbooks, want a real subset",
+				filter, len(wantFiltered.Cookbooks), len(want.Cookbooks))
+		}
+		filtered := serve(target)
+		assertOK(t, filtered, target)
+		if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantFiltered)) {
+			t.Fatalf("filtered cookbooks route body differs from the GetCookbooks(%q) result", filter)
+		}
+	}
+
+	// The value is never trimmed, normalised or aliased on the way through, so a
+	// padded or case-shifted filter is rejected by the getter with a 400.
+	for _, query := range []string{
+		"?availabilityFilter=Unlocked",
+		"?availabilityFilter=%20unlocked",
+		"?availabilityFilter=unlocked%20",
+		"?availabilityFilter=all",
+	} {
+		rejected := serve(base + query)
+		if rejected.Code != http.StatusBadRequest {
+			t.Fatalf("%s%s: status = %d, want 400 (body %q)",
+				base, query, rejected.Code, rejected.Body.String())
+		}
+	}
+
+	// The route must not answer for a malformed characterID either.
+	malformed := serve("/api/v1/save-sessions/" + session.SaveSessionID + "/characters/one/cookbooks")
+	if malformed.Code != http.StatusBadRequest {
+		t.Fatalf("malformed characterID: status = %d, want 400 (body %q)",
+			malformed.Code, malformed.Body.String())
+	}
+}
+
+func TestCookbooksRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/cookbooks"
 	recorder := doSave(t, nil, http.MethodGet, target, "")
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())

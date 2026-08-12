@@ -753,6 +753,33 @@ func registerSaveSessionRoutes(
 		},
 	)
 
+	// The cookbooks route joins the cookbook definitions of the catalog with the
+	// event flags of the slot. availabilityFilter is handed over exactly as it
+	// arrived, because the getter owns the rule and the wording of its own
+	// rejection.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.GetCookbooks(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.URL.Query().Get("availabilityFilter"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
 	// The network settings belong to the session, not to a character slot: they
 	// are the regulation values stored once per save. The route passes the
 	// identifier on unchanged and reads no catalog.
