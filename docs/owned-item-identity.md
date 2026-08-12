@@ -1,13 +1,15 @@
 # OwnedItemID and saveRevision — shared Inventory contract
 
-> **Status: Proposal — requires explicit approval before implementation.**
+> **Status: approved. Tasks 1, 2a, 2b and 3 are implemented; the setter
+> contracts and the whole mutation/revision-increment path remain proposals.**
 >
-> This document designs a contract that does not exist in the code yet. It is
-> not a description of implemented behaviour, so it lives outside
-> [`docs/endpoints/`](endpoints/README.md), which documents implemented
-> endpoints only, and outside `tools/swagger/openapi.json` and the Scalar
-> portal. Nothing here is a runtime fact until a separate, explicitly approved
-> task implements it.
+> This document is the design record of the contract, not endpoint
+> documentation. The implemented endpoints are described in
+> [`docs/endpoints/`](endpoints/README.md), `tools/swagger/openapi.json` and the
+> Scalar portal, which stay the single sources of truth for them. Everything
+> still marked here as proposed — the setters, and every rule that depends on a
+> committed mutation — is not a runtime fact until a separate, explicitly
+> approved task implements it.
 
 | | |
 |---|---|
@@ -103,7 +105,7 @@ endpoint that touches save state; no endpoint outside this list is in scope.
 | Contract | Today |
 |---|---|
 | `GetInventory`, `GetStorage` | already declare `saveSessionID` — the producers need no change |
-| `GetOwnedItem` | declares `characterID`, `ownedItemID` — must gain `saveSessionID` |
+| `GetOwnedItem` | satisfied since Task 3: declares `saveSessionID`, `characterID`, `ownedItemID`, in that exact order (`backend/endpoints/inventory/get_owned_item.go:33`) |
 | `SetOwnedItemQuantity`, `RemoveOwnedItem`, `MoveOwnedItemToInventory`, `MoveOwnedItemToStorage`, `SetWeaponUpgradeLevel`, `SetWeaponInfusion`, `SetSpiritAshUpgradeLevel` | declare `ownedItemID` without `saveSessionID` — must gain it |
 | `SetWeaponAshOfWar` | declares `weaponOwnedItemID` without `saveSessionID` — must gain it |
 | `SetInventoryOrder`, `SetStorageOrder` | declare `orderedOwnedItemIDs` without `saveSessionID` — must gain it |
@@ -121,7 +123,7 @@ Two reasons, both already established rather than assumed:
 2. **It is the pattern the implemented getters already use.** `GetInventory`
    and `GetStorage` take `saveSessionID` explicitly and match it exactly,
    without trimming, normalisation or fallback
-   (`backend/saveengine/inventory.go:138-140`). The engine holds sessions in a
+   (`backend/saveengine/inventory.go:177-186`). The engine holds sessions in a
    map keyed by that identifier and has no concept of a current or default
    session. A contract without `saveSessionID` would require inventing one.
 
@@ -141,10 +143,14 @@ not support any persistence claim. The `tmp/` files are research material and ar
 not edited by this document; the conflict is recorded, not resolved by rewriting
 the source.
 
-**No Go contract file changes in this task.** The twelve contract-only files
-keep their current `SupportedResourceVariables` until a separate, explicitly
-approved task amends the public contracts. That task also updates their contract
-headers, the endpoint-structure expectations, and — for any endpoint that is
+**Amendment of the Go contract files, one task at a time.** The original
+documentation task that produced this document changed no Go contract file; that
+boundary applied to it alone and is recorded here as history. Task 3 has since
+amended `get_owned_item.go`, which now declares `saveSessionID`, `characterID`,
+`ownedItemID` and is implemented. The eleven remaining contract-only files keep
+their current `SupportedResourceVariables` until their own separate, explicitly
+approved tasks amend them. Each such task also updates its contract header, the
+endpoint-structure expectations, and — for any endpoint that is
 transport-exposed by then — the route, `openapi.json`, the document and the
 Scalar navigation, per the synchronisation rules in `AGENTS.md`. This document
 only records the decision those changes must follow.
@@ -154,10 +160,10 @@ only records the decision those changes must follow.
 - No general `EndpointError` model. `tmp/app-se/endpoints-2.0.md` line 21
   defers that deliberately; this document only names the *information* an error
   must carry.
-- No GaItem parser design. That is separate work and is a prerequisite for
-  phase 2, not part of this contract.
-- No change to the implemented phase-1 contract of `GetInventory` and
-  `GetStorage` (see §3 of this document and §6.2).
+- No GaItem parser design. That was separate work and a prerequisite for
+  catalog resolution, not part of this contract.
+- No further change to the contract of `GetInventory` and `GetStorage` beyond
+  the one Task 2b already made with explicit approval (see §3 and §6.4).
 - No persistence of identities across application restarts.
 - No global registry of open save paths, no per-file lock and no new
   infrastructure of any kind (see the multi-session row of §7).
@@ -170,17 +176,17 @@ only records the decision those changes must follow.
 
 | # | Fact | Source |
 |---|---|---|
-| C1 | `GetInventory` and `GetStorage` are implemented and return raw records with `containerSection` and `physicalIndex`, and both explicitly document that this pair is **not** a stable item identity. | `backend/saveengine/inventory.go:86-104`, `backend/saveengine/storage.go:125-140` |
-| C2 | Neither getter returns an `OwnedItemID`. Both state so in the type comment and in their documents. | `backend/saveengine/inventory.go:106-121`, `docs/endpoints/inventory/get_inventory.md` |
-| C3 | The phase-1 contract is locked by an assertion on the exact `SupportedResourceTypes` value and the exact ordered variable list. Changing either is a protected-test change. | `backend/endpoints/inventory/get_inventory_test.go:326`, `get_storage_test.go:395` |
-| C4 | `saveengine.Session` holds only `id`, `platform`, `format`. There is no revision, no dirty flag, no per-character state. `SessionInfo.UnsavedChanges` is hard-coded `false`. | `backend/saveengine/session.go:21-63` |
-| C5 | The engine is read-only today: `LoadSave`, `GetSessionInfo`, `CloseSession` and the getters. There is no mutation path, no rollback, no `WriteSave`, no `UndoCharacterChanges`. | `backend/saveengine/engine.go` |
-| C6 | Two native sentinels mark an absent record: handle `0x00000000` and `0xFFFFFFFF`. Both getters skip them; every other handle is reported as stored. | `backend/saveengine/inventory.go:56-58` |
+| C1 | SaveEngine's `GetInventory` and `GetStorage` return the raw physical fields — `gaItemHandle`, `quantity`, `acquisitionIndex`, `containerSection`, `physicalIndex` — together with the record's `OwnedItemID` and the result's `saveRevision`, and both explicitly document that `containerSection` + `physicalIndex` is **not** a stable item identity. The public endpoints of the same names additionally resolve each record to an `ItemDocument` (`kind`, `key`, `gameID`) through GameCatalog. | `backend/saveengine/inventory.go:86-112`, `backend/saveengine/storage.go:125-150`, `backend/endpoints/inventory/get_inventory.go:28-35` |
+| C2 | Both getters return an `OwnedItemID` per record and a `saveRevision` per result, minted by the session registry. | `backend/saveengine/inventory.go:103-112`, `backend/saveengine/storage.go:143-150`, `docs/endpoints/inventory/get_inventory.md` |
+| C3 | The public getter contract is locked by an assertion on the exact `SupportedResourceTypes` value (`ItemDocument`) and the exact ordered variable list. Changing either is a protected-test change. The raw phase-one contract tests were replaced under Task 2b by `TestGetInventoryContractResolvesItemDocuments` and `TestGetStorageContractResolvesItemDocuments`. | `backend/endpoints/inventory/get_inventory_test.go:453`, `get_storage_test.go:487`, `get_owned_item_test.go:238` |
+| C4 | `saveengine.Session` holds `id`, `platform`, `format`, the private `revision` counter, the two-directional identity registry `ownedByLocator` / `ownedByID` and the mint counter `ownedSeq`. None of them is part of `SessionInfo`, so none leaves the package; there is still no dirty flag and no per-character state, and `SessionInfo.UnsavedChanges` is still hard-coded `false`. | `backend/saveengine/session.go:18-50, 76-83` |
+| C5 | The engine still has no public mutation and no write path: no `WriteSave`, no rollback, no `UndoCharacterChanges`. Its implemented surface includes `LoadSave`, `GetSessionInfo`, `CloseSession`, the character readers, `GetInventory`, `GetStorage`, `ResolveGaItemIDs` and `GetOwnedItem`. The revision-increment path exists as the unexported `commitRevision` and has no caller. | `backend/saveengine/engine.go`, `backend/saveengine/owned_item.go:63`, `backend/saveengine/owned_item_id.go:145` |
+| C6 | Two native sentinels mark an absent record: handle `0x00000000` and `0xFFFFFFFF`. Both getters skip them; every other handle is reported as stored. | `backend/saveengine/inventory.go:54-58, 312` |
 | C7 | The stored quantity carries a high bit that is not part of the count; it is masked with `0x7FFFFFFF` in exactly one place. | `backend/saveengine/inventory.go:52` |
 | C8 | The 2.0 API spec forbids public setters that take raw bytes, offsets, handles, indices or event flags, and forbids accepting GaItem handles as a public identity. | `tmp/app-se/endpoints-2.0.md` lines 9 and 200 |
 | C9 | Almost every 2.0 mutation contract declares `expectedRevision`; `GetRepairPlan` declares `saveRevision` as an input. The two names differ by direction of use, not by rule (§5.6). | `tmp/app-se/endpoints-2.0.md` lines 87, 97–178 |
-| C10 | `GetOwnedItem`, every inventory mutation contract and `SetEquippedTalismans` declare `characterID` but **not** `saveSessionID`, while the implemented `GetInventory`/`GetStorage` require `saveSessionID`. | `backend/endpoints/inventory/*.go`, `backend/endpoints/equipment/set_equipped_talismans.go:25` vs `get_inventory.go:32` |
-| C11 | `containerSection` is an input *filter* on both implemented getters: the empty string means both physical sections, `"common"` and `"key"` select one. It is not part of any record identity. | `backend/saveengine/inventory.go:14-19, 145-148` |
+| C10 | `GetInventory`, `GetStorage` and `GetOwnedItem` all declare `saveSessionID`. The gap is now limited to the still contract-only files: every inventory mutation contract and `SetEquippedTalismans` declare `characterID` but **not** `saveSessionID`. | `backend/endpoints/inventory/get_owned_item.go:33`, `get_inventory.go:33` vs `backend/endpoints/equipment/set_equipped_talismans.go:25` and the remaining `backend/endpoints/inventory/set_*.go` |
+| C11 | `containerSection` is an input *filter* on both implemented getters: the empty string means both physical sections, `"common"` and `"key"` select one. It is not part of any record identity. | `backend/saveengine/inventory.go:15-19, 191-196` |
 | C12 | The engine serialises every session operation on one process-wide `Engine.mutex`. There is no per-session lock. | `backend/saveengine/engine.go:20-21, 97, 117, 147` |
 
 ### 2.2 Confirmed facts (legacy 1.5.8 / 1.6.8, behaviour evidence only)
@@ -231,7 +237,8 @@ is preferred it is because it carries the test, not because it is newer.
 - **H1.** Whether a quantity-stacked goods row (`recordMode = quantity_stack`,
   see `tmp/app-se/stackable_items.md`) can legitimately appear as two separate
   rows of the same item in the same container. Legacy tolerated duplicates
-  (L3) but that is tolerance, not proof. **Open — decide before phase 2.**
+  (L3) but that is tolerance, not proof. **Open — decide before the first
+  setter task.**
 - **H2.** Whether the same instance can be present in Inventory and Storage at
   the same time, or whether the containers are strictly disjoint. L1 says a
   *handle* can appear in both; it does not say whether that is one instance or
@@ -283,9 +290,10 @@ The tests `TestGetInventoryContractResolvesItemDocuments` and
 `TestGetStorageContractResolvesItemDocuments` assert the exact
 `SupportedResourceTypes` value and the exact ordered variable list.
 
-Phase 2b (§6.4) changes that contract and therefore requires explicit user
-approval under the regression-test rules of `AGENTS.md`, with replacement
-coverage at least as strong. Until then:
+Task 2b (§6.4) changed that contract, which required explicit user approval
+under the regression-test rules of `AGENTS.md` and shipped replacement coverage
+at least as strong. No further change to it is in scope, and these invariants
+hold:
 
 - no field may be removed from `InventoryRecord` / `StorageRecord`;
 - `gaItemHandle` and `acquisitionIndex` stay raw and unmasked;
@@ -303,7 +311,7 @@ behaviour after a mutation, and SSOT / fail-closed compliance.
 
 ### Variant A — `containerSection` + `physicalIndex`
 
-The pair already returned by the phase-1 getters.
+The pair the implemented getters already return alongside the identity.
 
 | Dimension | Assessment |
 |---|---|
@@ -417,7 +425,7 @@ the application restarts. It never expires on a read.
 | Wrong character | Reject. Never resolve into the correct character's slot. |
 | Duplicate — the same physical record reachable by two IDs | Must be impossible by construction: one registry entry per physical record per revision (§4.2). If the mint step ever detects it, that is a hard internal error, not a tolerated warning. This is the explicit point where 2.0 departs from legacy `CodeDuplicateUID` (L3). |
 | Ambiguous — the ID resolves but the record no longer matches what was registered | Reject and do not mutate. Fail-closed. |
-| Unknown / malformed record data | The record still gets an ID and is still listed, exactly as phase 1 lists an unresolvable handle (C6). What must never happen is an unknown record being dropped, silently repaired, or turned into a different valid item. |
+| Unknown / malformed record data | Two layers, deliberately different. SaveEngine mints an identity for **every** non-sentinel physical record (C6) and never drops one, so nothing becomes unaddressable. The public endpoints `GetInventory`, `GetStorage` and `GetOwnedItem` resolve each record against GameCatalog and **reject the whole request** when a handle or a save-side game ID does not yield a valid `ItemDocument` (`backend/endpoints/inventory/get_inventory.go:115`). What must never happen at either layer is an unknown record being silently dropped, repaired, or turned into a different valid item. |
 
 **What the ID never carries:** no offset, no `physicalIndex`, no `GaItemHandle`,
 no `acquisitionIndex`, no slot address. Those stay inside `saveengine`, as they
@@ -468,9 +476,9 @@ alive at any moment.
 
 **Inactive and residual slots mint nothing.** An inactive slot — including a
 residual one, whose deleted character's data is still in the file — mints no
-IDs and its slot data is never searched, exactly as phase 1 already behaves. The
-read is still a valid, non-error result and still returns the current
-`saveRevision`; an empty container is not an excuse to omit the revision.
+IDs and its slot data is never searched, exactly as the implemented getters
+already behave. The read is still a valid, non-error result and still returns the
+current `saveRevision`; an empty container is not an excuse to omit the revision.
 
 ---
 
@@ -634,33 +642,33 @@ public mutation.
 
 ### 6.2 Task 2a — `GetInventory` and `GetStorage` return the identity
 
-The two getters mint and return `OwnedItemID` per record and `saveRevision` per
-result. **Nothing else changes:** no catalog resolution, no `kind`, no `key`, no
-name, no family, no variant — those stay in Task 2b.
+Completed. The two getters mint and return `OwnedItemID` per record and
+`saveRevision` per result. **Nothing else changed in this task:** no catalog
+resolution, no `kind`, no `key`, no name, no family, no variant — those were
+left to Task 2b.
 
-**What this task does to the contract definitions: nothing.** It does not change
-`SupportedResourceTypes` and does not change the input-variable lists of either
-endpoint. Therefore `TestGetInventoryContractIsRawPhaseOne`
-(`backend/endpoints/inventory/get_inventory_test.go:326`) and
-`TestGetStorageContractIsRawPhaseOne`
-(`backend/endpoints/inventory/get_storage_test.go:395`) stay exactly as they are
-and must keep passing untouched.
+**What this task did to the contract definitions: nothing.** It changed neither
+`SupportedResourceTypes` nor the input-variable lists of either endpoint, so the
+raw-phase contract tests that existed at the time,
+`TestGetInventoryContractIsRawPhaseOne` and
+`TestGetStorageContractIsRawPhaseOne`, stayed untouched and kept passing.
 
 That statement applied to Task 2a only. Task 2b subsequently replaced those
-raw-phase contract tests with the ItemDocument contract tests recorded in §6.4.
+raw-phase contract tests with the ItemDocument contract tests recorded in §6.4,
+so neither name exists in the tree any more (C3).
 
-**What this task does require approval for: the result shape.** Adding two
-fields to the public result widens what the getters return, so every test that
-asserts a *complete* result or a *complete* record list with
-`reflect.DeepEqual` will fail until its expected value gains the new fields.
-Naming this change plainly: it is **an extension of the public result plus
-correspondingly stronger assertions** — each listed assertion continues to
-compare the full value exactly, over a larger value. It is not a weakening, not
-a relaxation, not a switch to partial matching, and no case, boundary or fixture
-is removed.
+**What this task required approval for: the result shape.** Adding two fields to
+the public result widened what the getters return, so every test that asserted a
+*complete* result or a *complete* record list with `reflect.DeepEqual` failed
+until its expected value gained the new fields. Naming that change plainly: it
+was **an extension of the public result plus correspondingly stronger
+assertions** — each listed assertion kept comparing the full value exactly, over
+a larger value. It was not a weakening, not a relaxation, not a switch to
+partial matching, and no case, boundary or fixture was removed.
 
-The exact assertions that need explicit user approval before Task 2a starts are
-these **15 full-result assertions**:
+The assertions approved before Task 2a started were these **15 full-result
+assertions**. The line numbers are the historical record of the pre-Task-2a
+tree; the files have moved on since Task 2a and Task 2b:
 
 | File | Line | Assertion |
 |---|---|---|
@@ -684,10 +692,10 @@ The four residual-slot assertions in that table — the ones at
 `get_inventory_test.go:266`, `get_storage_test.go:306`,
 `inventory_test.go:323` and `storage_test.go:351` — are on the list because §4.2
 requires an inactive or residual slot to return the current `saveRevision` while
-minting no IDs, so its result is no longer the zero value. They must become an
+minting no IDs, so its result is no longer the zero value. They became an
 explicit expected value carrying the revision, not a looser check.
 
-**Four further assertions are *not* on the list and must not be touched:**
+**Four further assertions were *not* on the list and were not touched:**
 
 | File | Line | Assertion |
 |---|---|---|
@@ -700,18 +708,18 @@ These four sit inside the `RejectsInvalidRequests` tests, not inside the
 residual-slot tests. They assert the **fail-closed error path**: a rejected
 request returns the zero value and nothing else. A rejected request has no
 result to identify and no revision to report, so the zero value stays the zero
-value — widening the result shape does not change them, and they must keep
-passing untouched. An earlier revision of this document mistook them for the
+value — widening the result shape did not change them, and they kept passing
+untouched. An earlier revision of this document mistook them for the
 inactive-slot assertions and counted 19; the approved count is 15.
 
-None of these assertions is weakened, removed, skipped or altered by *this*
-documentation task.
+None of these assertions was weakened, removed, skipped or altered by the
+documentation task that recorded this plan.
 
-This task also updates `docs/endpoints/inventory/get_inventory.md`,
+Task 2a also updated `docs/endpoints/inventory/get_inventory.md`,
 `docs/endpoints/inventory/get_storage.md`, `tools/swagger/openapi.json` and
 `tools/swagger/main_test.go` for the widened result, per the synchronisation
-rules in `AGENTS.md`. The route, the endpoint index and the Scalar navigation do
-not change, because no endpoint is added or removed.
+rules in `AGENTS.md`. The route, the endpoint index and the Scalar navigation did
+not change, because no endpoint was added or removed.
 
 ### 6.3 Gate — GaItem parser evidence
 
@@ -727,14 +735,14 @@ reopened for that narrower operation.
 
 ### 6.4 Task 2b — catalog resolution in the two getters
 
-Completed after Task 2a and the §6.3 gate. This task resolves records against
-GameCatalog and ends the raw phase-1 contract. It changes
+Completed after Task 2a and the §6.3 gate. This task resolved records against
+GameCatalog and ended the raw phase-one contract. It changed
 `SupportedResourceTypes` and the documented contract; the approved replacement
 tests are `TestGetInventoryContractResolvesItemDocuments` and
-`TestGetStorageContractResolvesItemDocuments`, preserving the exact ordered
+`TestGetStorageContractResolvesItemDocuments`, which preserve the exact ordered
 variable-list assertions while requiring `ItemDocument`.
 
-It carries the full synchronisation set in the same task:
+It carried the full synchronisation set in the same task:
 `docs/endpoints/inventory/*.md`, `docs/endpoints/README.md`,
 `tools/swagger/main.go`, `tools/swagger/openapi.json`,
 `tools/swagger/docs-portal/scalar.config.json` and `tools/swagger/main_test.go`.
@@ -758,20 +766,22 @@ additionally depending on the mutation and rollback machinery this document does
 not design. The `saveSessionID` amendment of the remaining contract files (§1.4)
 travels with them, one endpoint at a time.
 
-**`GetOwnedItem` comes last of the getters, not first.** It may only start after
-Task 1, Task 2a, the §6.3 research gate and Task 2b, in that order.
+**Why it came last of the getters, not first (historical ordering).** The
+sequence it had to follow was Task 1, Task 2a, the §6.3 research gate and Task
+2b, in that order; it was implemented only once all four were done.
 
-The reason is its own contract, not a scheduling preference.
-`backend/endpoints/inventory/get_owned_item.go:24` declares
+The reason was its own contract, not a scheduling preference.
+`backend/endpoints/inventory/get_owned_item.go:32` declares
 `SupportedResourceTypes: "ItemDocument"`, so its result must resolve one owned
-instance to `kind`, `key` and its variant. Task 2a deliberately produces none of
-those: it returns raw records carrying an `OwnedItemID` and a `saveRevision`,
+instance to `kind`, `key` and its variant. Task 2a deliberately produced none of
+those: it returned raw records carrying an `OwnedItemID` and a `saveRevision`,
 with no GaItem parser, no GameCatalog read and no catalog identity (§6.2).
-Task 2b is where records become semantically resolved, and it in turn waits on
-the §6.3 gate. `GetOwnedItem` therefore needs both, and an ordering that put it
-after Task 2a alone would ask it to answer a question its inputs cannot answer.
+Task 2b is where records became semantically resolved, and it in turn waited on
+the §6.3 gate. `GetOwnedItem` therefore needed both, and an ordering that put it
+after Task 2a alone would have asked it to answer a question its inputs could
+not answer.
 
-Three things this explicitly rules out:
+Three things that ordering explicitly ruled out, and the implementation honours:
 
 - **No temporary "raw `GetOwnedItem`".** An interim handler returning a record
   without `kind`/`key` is not this endpoint; it is a different one wearing its
@@ -786,12 +796,12 @@ Three things this explicitly rules out:
 
 `GetOwnedItem` is the first consumer of the finished, semantically resolved
 identity — it is where the producers of Task 2a and the resolution of Task 2b
-first meet in a single-instance result. It still goes before the mutations,
-because it is a getter and can be verified without any mutation path existing.
-The mutations follow, each in its own task, each depending additionally on the
+meet in a single-instance result. It went before the mutations, because it is a
+getter and could be verified without any mutation path existing. The mutations
+follow, each in its own task, each depending additionally on the
 mutation/rollback machinery that this document does not design. The
-`saveSessionID` amendment of the twelve contract files (§1.4) is part of this
-stage, one endpoint at a time.
+`saveSessionID` amendment of the eleven remaining contract files (§1.4) is part
+of that stage, one endpoint at a time.
 
 ### 6.6 Required test coverage
 
@@ -847,7 +857,12 @@ Every task above must cover, at the layer where the behaviour is observable:
 
 ---
 
-## 8. Decisions requested
+## 8. Decisions requested — all recorded as approved
+
+These six decisions were requested by this document and have since been
+approved. They are kept verbatim as the record of what was approved; Tasks 1,
+2a, 2b and 3 were implemented under them, and the setter tasks that remain are
+bound by them.
 
 1. Approve **Variant D** as the `OwnedItemID` contract, with the format
    deliberately deferred (§4.1).
@@ -865,11 +880,12 @@ Every task above must cover, at the layer where the behaviour is observable:
    of scope, and that amending the contract-only Go files is a separate,
    explicitly approved task.
 6. Approve the task sequence in §6 — Task 1, Task 2a, the §6.3 native-save
-   research gate, Task 2b, then Task 3 — acknowledging that Task 2a needs
+   research gate, Task 2b, then Task 3 — acknowledging that Task 2a needed
    approval to extend the 15 listed full-result assertions, that Task 2b — not
-   Task 2a — is the one that changes the two phase-1 contract tests, and that
-   `GetOwnedItem` waits for Task 2b rather than shipping a raw interim variant
-   (§6.5).
+   Task 2a — was the one that changed the two raw phase-one contract tests, and
+   that `GetOwnedItem` waited for Task 2b rather than shipping a raw interim
+   variant (§6.5).
 
-Nothing in this document is implemented, and nothing may be implemented until
-these decisions are recorded.
+The identity, the registry and the three getters are implemented. The setters,
+the revision increment and every mutation rule in §5 remain unimplemented, and
+each needs its own explicitly approved task.
