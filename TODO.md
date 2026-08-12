@@ -25,3 +25,5 @@ decisions are deliberately deferred and do not block that implementation:
 - Test atomic replacement of an existing target on Windows.
 - Test two sessions writing to the same target.
 - Test detection of an externally changed target if that protection is added.
+- Validate the cookbook event flags semantically on PS4, on a controlled
+  before/after save pair, when console testing is resumed.
