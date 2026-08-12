@@ -6,8 +6,12 @@ import (
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"sync"
 	"testing"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -34,11 +38,32 @@ const (
 	getInventoryPS4EntryMarker     = 0x7F7F7F7F
 
 	getInventorySlot       = 3
-	getInventoryAnchorAt   = 0x0640
+	getInventoryAnchorAt   = 0xA028
 	getInventoryRecordSize = 12
 	getInventoryCommonAt   = 505
 	getInventoryKeyAt      = getInventoryCommonAt + 0xA80*getInventoryRecordSize + 4
 	getInventorySectionEnd = getInventoryKeyAt + 0x180*getInventoryRecordSize + 8
+)
+
+func inventoryCatalog(t *testing.T) *gamecatalog.Catalog {
+	t.Helper()
+	inventoryCatalogOnce.Do(func() {
+		inventoryCatalogData, inventoryCatalogErr = loader.LoadFS(catalogdata.Files())
+	})
+	if inventoryCatalogErr != nil {
+		t.Fatalf("loader.LoadFS: %v", inventoryCatalogErr)
+	}
+	catalog, err := gamecatalog.New(inventoryCatalogData.Manifest, inventoryCatalogData.Resources())
+	if err != nil {
+		t.Fatalf("gamecatalog.New: %v", err)
+	}
+	return catalog
+}
+
+var (
+	inventoryCatalogOnce sync.Once
+	inventoryCatalogData loader.Data
+	inventoryCatalogErr  error
 )
 
 // getInventoryAnchor is the 65-byte anchor the inventory section is measured
@@ -92,20 +117,20 @@ func getInventoryKeyRows() []getInventoryRow {
 	}
 }
 
-func getInventoryWantCommon() []saveengine.InventoryRecord {
-	return []saveengine.InventoryRecord{
-		{ContainerSection: "common", PhysicalIndex: 1, GaItemHandle: 0xB000272E, Quantity: 3, AcquisitionIndex: 7},
-		{ContainerSection: "common", PhysicalIndex: 6, GaItemHandle: 0x90001111, Quantity: 1, AcquisitionIndex: 9},
+func getInventoryWantCommon() []InventoryRecord {
+	return []InventoryRecord{
+		{Kind: "item", Key: "4000272E", GameID: 0x4000272E, ContainerSection: "common", PhysicalIndex: 1, GaItemHandle: 0xB000272E, Quantity: 3, AcquisitionIndex: 7},
+		{Kind: "item", Key: "100704E0", GameID: 0x100704E0, ContainerSection: "common", PhysicalIndex: 6, GaItemHandle: 0x90001111, Quantity: 1, AcquisitionIndex: 9},
 	}
 }
 
-func getInventoryWantKey() []saveengine.InventoryRecord {
-	return []saveengine.InventoryRecord{
-		{ContainerSection: "key", PhysicalIndex: 1, GaItemHandle: 0xC0000001, Quantity: 1, AcquisitionIndex: 12},
+func getInventoryWantKey() []InventoryRecord {
+	return []InventoryRecord{
+		{Kind: "item", Key: "8000EA60", GameID: 0x8000EA60, ContainerSection: "key", PhysicalIndex: 1, GaItemHandle: 0xC0000001, Quantity: 1, AcquisitionIndex: 12},
 	}
 }
 
-func getInventoryWantAll() []saveengine.InventoryRecord {
+func getInventoryWantAll() []InventoryRecord {
 	return append(getInventoryWantCommon(), getInventoryWantKey()...)
 }
 
@@ -113,7 +138,7 @@ func getInventoryWantAll() []saveengine.InventoryRecord {
 // its physical coordinates, and proves on the way that each one is present and
 // unique. A token is opaque by contract, so a test outside SaveEngine may not
 // spell it out or parse it; the coordinates are the only handle it has on one.
-func getInventoryIdentities(t *testing.T, records []saveengine.InventoryRecord) map[string]string {
+func getInventoryIdentities(t *testing.T, records []InventoryRecord) map[string]string {
 	t.Helper()
 
 	byRow := make(map[string]string, len(records))
@@ -137,8 +162,8 @@ func getInventoryIdentities(t *testing.T, records []saveengine.InventoryRecord) 
 // value stays exact, so a filtered or paged read that reordered, re-numbered or
 // re-identified a record still fails.
 func getInventoryWithIDs(
-	t *testing.T, want []saveengine.InventoryRecord, identities map[string]string,
-) []saveengine.InventoryRecord {
+	t *testing.T, want []InventoryRecord, identities map[string]string,
+) []InventoryRecord {
 	t.Helper()
 
 	for index := range want {
@@ -186,6 +211,13 @@ func writeGetInventoryFixture(t *testing.T, platform string, active bool, anchor
 	}
 
 	copy(data[slotBase+anchorAt:], getInventoryAnchor)
+	if anchorAt == getInventoryAnchorAt {
+		binary.LittleEndian.PutUint32(data[slotBase:], 82)
+		binary.LittleEndian.PutUint32(data[slotBase+0x20:], 0x90001111)
+		binary.LittleEndian.PutUint32(data[slotBase+0x24:], 0x100704E0)
+		binary.LittleEndian.PutUint32(data[slotBase+0x30:], 0xC0000001)
+		binary.LittleEndian.PutUint32(data[slotBase+0x34:], 0x8000EA60)
+	}
 
 	putRow := func(sectionAt int64, row getInventoryRow) {
 		at := anchorAt + sectionAt + int64(row.index)*getInventoryRecordSize
@@ -227,8 +259,9 @@ func TestGetInventoryReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 	for _, platform := range []string{"pc", "ps4"} {
 		t.Run(platform, func(t *testing.T) {
 			engine, sessionID := loadGetInventorySession(t, platform, true, getInventoryAnchorAt)
+			gameCatalog := inventoryCatalog(t)
 
-			result, err := GetInventory(engine, sessionID, getInventorySlot, "", 0, 0)
+			result, err := GetInventory(engine, gameCatalog, sessionID, getInventorySlot, "", 0, 0)
 			if err != nil {
 				t.Fatalf("GetInventory: %v", err)
 			}
@@ -250,7 +283,7 @@ func TestGetInventoryReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 			// Nothing was committed in between, so the second read of the same
 			// revision has to be identical down to every identifier.
-			again, err := GetInventory(engine, sessionID, getInventorySlot, "", 0, 0)
+			again, err := GetInventory(engine, gameCatalog, sessionID, getInventorySlot, "", 0, 0)
 			if err != nil {
 				t.Fatalf("second GetInventory: %v", err)
 			}
@@ -263,10 +296,11 @@ func TestGetInventoryReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 func TestGetInventoryFiltersAndPages(t *testing.T) {
 	engine, sessionID := loadGetInventorySession(t, "pc", true, getInventoryAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 
 	// The canonical unfiltered, unpaged read is what every case below is compared
 	// against, so a section filter or a page that changed an identifier fails.
-	canonical, err := GetInventory(engine, sessionID, getInventorySlot, "", 0, 0)
+	canonical, err := GetInventory(engine, gameCatalog, sessionID, getInventorySlot, "", 0, 0)
 	if err != nil {
 		t.Fatalf("canonical GetInventory: %v", err)
 	}
@@ -279,18 +313,18 @@ func TestGetInventoryFiltersAndPages(t *testing.T) {
 		wantTotal      int
 		wantPage       int
 		wantPageSize   int
-		want           []saveengine.InventoryRecord
+		want           []InventoryRecord
 	}{
 		"common only":  {"common", 0, 0, 2, 1, 50, getInventoryWithIDs(t, getInventoryWantCommon(), identities)},
 		"key only":     {"key", 0, 0, 1, 1, 50, getInventoryWithIDs(t, getInventoryWantKey(), identities)},
 		"first page":   {"", 1, 2, 3, 1, 2, all[:2]},
 		"last page":    {"", 2, 2, 3, 2, 2, all[2:]},
-		"beyond total": {"", 7, 2, 3, 7, 2, []saveengine.InventoryRecord{}},
+		"beyond total": {"", 7, 2, 3, 7, 2, []InventoryRecord{}},
 	}
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
 			result, err := GetInventory(
-				engine, sessionID, getInventorySlot, testCase.section, testCase.page, testCase.pageSize)
+				engine, gameCatalog, sessionID, getInventorySlot, testCase.section, testCase.page, testCase.pageSize)
 			if err != nil {
 				t.Fatalf("GetInventory: %v", err)
 			}
@@ -316,8 +350,9 @@ func TestGetInventoryFiltersAndPages(t *testing.T) {
 
 func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 	engine, sessionID := loadGetInventorySession(t, "pc", false, getInventoryAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 
-	result, err := GetInventory(engine, sessionID, getInventorySlot, "", 0, 0)
+	result, err := GetInventory(engine, gameCatalog, sessionID, getInventorySlot, "", 0, 0)
 	if err != nil {
 		t.Fatalf("GetInventory: %v", err)
 	}
@@ -326,7 +361,7 @@ func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 		SaveSessionID: sessionID,
 		SaveRevision:  "0",
 		CharacterID:   getInventorySlot,
-		Records:       []saveengine.InventoryRecord{},
+		Records:       []InventoryRecord{},
 		Page:          1,
 		PageSize:      50,
 	}
@@ -337,6 +372,7 @@ func TestGetInventoryReportsAResidualSlotAsInactive(t *testing.T) {
 
 func TestGetInventoryRejectsInvalidRequests(t *testing.T) {
 	engine, sessionID := loadGetInventorySession(t, "pc", true, getInventoryAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 	// The anchor sits so close to the end of the slot that the section no longer
 	// fits inside the slot data.
 	truncatedEngine, truncatedID := loadGetInventorySession(
@@ -375,7 +411,7 @@ func TestGetInventoryRejectsInvalidRequests(t *testing.T) {
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
 			result, err := GetInventory(
-				testCase.engine, testCase.saveSessionID, testCase.characterID,
+				testCase.engine, gameCatalog, testCase.saveSessionID, testCase.characterID,
 				testCase.section, testCase.page, testCase.pageSize)
 			if err == nil {
 				t.Fatalf("GetInventory accepted %s", strconv.Quote(name))
@@ -390,9 +426,33 @@ func TestGetInventoryRejectsInvalidRequests(t *testing.T) {
 	}
 }
 
-func TestGetInventoryContractIsRawPhaseOne(t *testing.T) {
-	if GetInventoryDefinition.SupportedResourceTypes != "—" {
-		t.Errorf("supported resource types = %q, want the raw phase-1 contract without a resource type",
+func TestGetInventoryRejectsAnUnknownCatalogItem(t *testing.T) {
+	engine, sessionID := loadGetInventorySession(t, "pc", true, getInventoryAnchorAt)
+	prototype, err := gamecatalog.NewPrototype()
+	if err != nil {
+		t.Fatalf("gamecatalog.NewPrototype: %v", err)
+	}
+
+	result, err := GetInventory(engine, prototype, sessionID, getInventorySlot, "", 0, 0)
+	if err == nil {
+		t.Fatalf("GetInventory accepted an item absent from the prototype catalog: %+v", result)
+	}
+	if !reflect.DeepEqual(result, GetInventoryResult{}) {
+		t.Errorf("result = %+v, want the zero value", result)
+	}
+
+	result, err = GetInventory(engine, nil, sessionID, getInventorySlot, "", 0, 0)
+	if err == nil || err.Error() != "game catalog is not available" {
+		t.Errorf("nil catalog error = %v, want game catalog is not available", err)
+	}
+	if !reflect.DeepEqual(result, GetInventoryResult{}) {
+		t.Errorf("nil catalog result = %+v, want the zero value", result)
+	}
+}
+
+func TestGetInventoryContractResolvesItemDocuments(t *testing.T) {
+	if GetInventoryDefinition.SupportedResourceTypes != "ItemDocument" {
+		t.Errorf("supported resource types = %q, want ItemDocument",
 			GetInventoryDefinition.SupportedResourceTypes)
 	}
 	want := []string{"saveSessionID", "characterID", "containerSection", "page", "pageSize"}

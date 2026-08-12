@@ -1,0 +1,184 @@
+package saveengine
+
+import (
+	"encoding/binary"
+	"errors"
+	"fmt"
+)
+
+// The GaItem table is the private save-side lookup from an InventoryHeld or
+// Storage handle to the catalog game ID. It is shared by both containers, but
+// is deliberately separate from their readers: it owns no container layout and
+// returns no raw slot data.
+const (
+	gaItemTableOffset        = 0x20
+	gaItemRecordSize         = 8
+	gaItemWeaponRecordSize   = 21
+	gaItemArmorRecordSize    = 16
+	gaItemOldRecordCount     = 5118
+	gaItemCurrentRecordCount = 5120
+	gaItemVersionBreak       = 81
+
+	gaItemHandleTypeMask  uint32 = 0xF0000000
+	gaItemWeaponHandle    uint32 = 0x80000000
+	gaItemArmorHandle     uint32 = 0x90000000
+	gaItemAccessoryHandle uint32 = 0xA0000000
+	gaItemGoodsHandle     uint32 = 0xB0000000
+	gaItemAshOfWarHandle  uint32 = 0xC0000000
+)
+
+// gaItemAnchor is the confirmed PlayerGameData marker. The table starts at
+// offset 0x20 of the slot and ends immediately before this marker.
+var gaItemAnchor = []byte{
+	0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+	0xFF, 0xFF, 0xFF, 0xFF,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+}
+
+// ResolveGaItemIDs resolves each supplied raw InventoryHeld/Storage handle to
+// the catalog game ID of the item it denotes. It reads only the private session
+// snapshot and is intended for endpoint joins with GameCatalog; it never makes
+// a handle part of a public endpoint contract.
+func (engine *Engine) ResolveGaItemIDs(
+	saveSessionID string,
+	characterID int,
+	handles []uint32,
+) ([]uint32, error) {
+	if saveSessionID == "" {
+		return nil, errors.New("saveSessionID is required")
+	}
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	loaded, exists := engine.sessions[saveSessionID]
+	if !exists {
+		return nil, fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+	if characterID < 0 || characterID >= characterSlotCount {
+		return nil, fmt.Errorf("characterID %d is outside the range 0..%d",
+			characterID, characterSlotCount-1)
+	}
+	if len(handles) == 0 {
+		return []uint32{}, nil
+	}
+
+	byHandle, err := readGaItemMap(loaded.snapshot, loaded.session.platform, characterID)
+	if err != nil {
+		return nil, fmt.Errorf("cannot resolve items of character %d: %w", characterID, err)
+	}
+
+	resolved := make([]uint32, len(handles))
+	for index, handle := range handles {
+		gameID, err := resolveGaItemHandle(byHandle, handle)
+		if err != nil {
+			return nil, fmt.Errorf("item %d: %w", index, err)
+		}
+		resolved[index] = gameID
+	}
+	return resolved, nil
+}
+
+func readGaItemMap(source *codec, platform Platform, characterID int) (map[uint32]uint32, error) {
+	base, slotEnd := inventorySlotBounds(platform, characterID)
+	version, err := source.uint32At(base)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read slot version: %w", err)
+	}
+	if version == 0 {
+		return nil, errors.New("slot has no GaItem table")
+	}
+
+	anchor, err := source.indexIn(base, slotEnd-base, gaItemAnchor)
+	if err != nil {
+		return nil, fmt.Errorf("cannot search GaItem marker: %w", err)
+	}
+	if anchor < 0 {
+		return nil, errors.New("slot carries no GaItem marker")
+	}
+	start := base + gaItemTableOffset
+	if anchor < start {
+		return nil, errors.New("GaItem marker precedes the GaItem table")
+	}
+
+	table, err := source.readAt(start, int(anchor-start))
+	if err != nil {
+		return nil, fmt.Errorf("cannot read GaItem table: %w", err)
+	}
+	count := gaItemCurrentRecordCount
+	if version <= gaItemVersionBreak {
+		count = gaItemOldRecordCount
+	}
+
+	byHandle := make(map[uint32]uint32)
+	position := 0
+	for index := 0; index < count; index++ {
+		if position+gaItemRecordSize > len(table) {
+			return nil, fmt.Errorf("GaItem record %d does not fit before the marker", index)
+		}
+		handle := binary.LittleEndian.Uint32(table[position:])
+		gameID := binary.LittleEndian.Uint32(table[position+4:])
+		recordSize := gaItemSize(gameID)
+		if position+recordSize > len(table) {
+			return nil, fmt.Errorf("GaItem record %d exceeds the marker", index)
+		}
+		position += recordSize
+
+		if handle == 0 || gameID == 0 || gameID == 0xFFFFFFFF {
+			continue
+		}
+		switch handle & gaItemHandleTypeMask {
+		case gaItemWeaponHandle, gaItemArmorHandle, gaItemAccessoryHandle, gaItemGoodsHandle, gaItemAshOfWarHandle:
+			if previous, duplicate := byHandle[handle]; duplicate && previous != gameID {
+				return nil, fmt.Errorf("GaItem handle 0x%08X maps to both 0x%08X and 0x%08X", handle, previous, gameID)
+			}
+			byHandle[handle] = gameID
+		}
+	}
+	return byHandle, nil
+}
+
+func gaItemSize(gameID uint32) int {
+	if gameID == 0 || gameID == 0xFFFFFFFF {
+		return gaItemRecordSize
+	}
+	switch gameID & gaItemHandleTypeMask {
+	case 0x00000000:
+		return gaItemWeaponRecordSize
+	case 0x10000000:
+		return gaItemArmorRecordSize
+	default:
+		return gaItemRecordSize
+	}
+}
+
+func resolveGaItemHandle(byHandle map[uint32]uint32, handle uint32) (uint32, error) {
+	if gameID, exists := byHandle[handle]; exists {
+		return gameID, nil
+	}
+
+	lower := handle & 0x0FFFFFFF
+	switch handle & gaItemHandleTypeMask {
+	case gaItemAccessoryHandle:
+		return 0x20000000 | lower, nil
+	case gaItemGoodsHandle:
+		return 0x40000000 | lower, nil
+	case gaItemWeaponHandle, gaItemArmorHandle, gaItemAshOfWarHandle:
+		return 0, fmt.Errorf("GaItem handle 0x%08X has no record", handle)
+	default:
+		return 0, fmt.Errorf("GaItem handle 0x%08X has an unknown type", handle)
+	}
+}

@@ -539,6 +539,7 @@ func registerSaveSessionRoutes(
 			}
 			result, err := inventory.GetInventory(
 				saveEngine,
+				gameCatalog,
 				request.PathValue("saveSessionID"),
 				characterID,
 				query.Get("containerSection"),
@@ -578,6 +579,7 @@ func registerSaveSessionRoutes(
 			}
 			result, err := inventory.GetStorage(
 				saveEngine,
+				gameCatalog,
 				request.PathValue("saveSessionID"),
 				characterID,
 				query.Get("containerSection"),

@@ -768,7 +768,7 @@
         "operationId": "getInventory",
         "tags": ["Inventory"],
         "summary": "GetInventory",
-        "description": "Returns one page of the raw native InventoryHeld records of one character slot. This is phase 1: the records carry no name, no GameCatalog identity, no family, no variant, no equipped state, no stable OwnedItemID and no Storage record. Only non-empty records are returned; the two native absent sentinels 0x00000000 and 0xFFFFFFFF are skipped. The order is the physical native order, the common section first and then the key section, and physicalIndex is the position of the row inside its own section. gaItemHandle and acquisitionIndex are returned exactly as stored, and quantity is the stored value with the high bit masked off. An inactive or residual slot is a normal result with active false, total 0 and an empty array. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Returns one page of InventoryHeld records of one character slot, each resolved to an ItemDocument identity. kind and key are the canonical GameCatalog resource reference, while gameID is the exact catalog game ID resolved from the save and therefore selects an item variant where applicable. The physical native order, raw gaItemHandle and acquisitionIndex, quantity mask, ownedItemID and paging rules are preserved. Only non-empty records are returned; the two native absent sentinels 0x00000000 and 0xFFFFFFFF are skipped. An unresolved GaItem handle or unknown catalog item rejects the whole request without a partial result. An inactive or residual slot is a normal result with active false, total 0 and an empty array. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SaveSessionID"
@@ -788,7 +788,7 @@
         ],
         "responses": {
           "200": {
-            "description": "One page of raw inventory records of the character slot",
+            "description": "One page of resolved inventory records of the character slot",
             "content": {
               "application/json": {
                 "schema": {
@@ -815,7 +815,7 @@
         "operationId": "getStorage",
         "tags": ["Inventory"],
         "summary": "GetStorage",
-        "description": "Returns one page of the raw native Storage Box records of one character slot. This is phase 1: the records carry no name, no GameCatalog identity, no family, no variant, no stable OwnedItemID, no capacity and no Inventory record. Only non-empty records are returned; the two native absent sentinels 0x00000000 and 0xFFFFFFFF are skipped. The order is the physical native order, the common section first and then the key section, and physicalIndex is the position of the row inside its own section. gaItemHandle and acquisitionIndex are returned exactly as stored, and quantity is the stored value with the high bit masked off, because the Storage record is the same 12-byte record InventoryHeld uses and the bit carries the same meaning. An inactive or residual slot is a normal result with active false, total 0 and an empty array. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Returns one page of Storage Box records of one character slot, each resolved to an ItemDocument identity. kind and key are the canonical GameCatalog resource reference, while gameID is the exact catalog game ID resolved from the save and therefore selects an item variant where applicable. The physical native order, raw gaItemHandle and acquisitionIndex, quantity mask, ownedItemID and paging rules are preserved. Only non-empty records are returned; the two native absent sentinels 0x00000000 and 0xFFFFFFFF are skipped. An unresolved GaItem handle or unknown catalog item rejects the whole request without a partial result. An inactive or residual slot is a normal result with active false, total 0 and an empty array. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SaveSessionID"
@@ -835,7 +835,7 @@
         ],
         "responses": {
           "200": {
-            "description": "One page of raw storage records of the character slot",
+            "description": "One page of resolved storage records of the character slot",
             "content": {
               "application/json": {
                 "schema": {
@@ -1796,12 +1796,27 @@
       },
       "InventoryRecord": {
         "type": "object",
-        "description": "One non-empty physical InventoryHeld record, plus the identity of the row it was read from. ownedItemID is the opaque identity of the record itself; containerSection and physicalIndex identify the physical row it currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
+        "description": "One non-empty physical InventoryHeld record, its opaque owned-item identity and its resolved ItemDocument identity. kind and key are the canonical catalog resource reference; gameID is the exact catalog game ID resolved from the save and selects a materialised variant where applicable. containerSection and physicalIndex identify the physical row it currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
         "properties": {
           "ownedItemID": {
             "type": "string",
             "minLength": 1,
             "description": "Opaque identity of this physical record, valid only for the saveRevision of the enclosing result and only inside the save session that produced it. Compare it byte for byte; never parse, trim, normalise or persist it. It encodes no handle, no index and no slot address, and an Inventory record never shares it with a Storage record at the same coordinates."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The GameCatalog resource kind of the resolved item."
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The canonical GameCatalog resource key of the resolved item."
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The exact GameCatalog game ID resolved from the save. It selects an item variant where applicable."
           },
           "containerSection": {
             "type": "string",
@@ -1829,11 +1844,11 @@
             "description": "The raw stored acquisition index."
           }
         },
-        "required": ["ownedItemID", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+        "required": ["ownedItemID", "kind", "key", "gameID", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
       },
       "CharacterInventory": {
         "type": "object",
-        "description": "One page of the raw native InventoryHeld records of one character slot. Phase 1 of the Inventory surface: apart from the owned-item identity of each record there is no name, no GameCatalog identity, no family, no variant, no equipped state, no capacity and no Storage record. An inactive or residual slot reports active false, total 0 and an empty array, mints no identity, and still reports the current saveRevision.",
+        "description": "One page of resolved InventoryHeld records of one character slot. Every active record carries an ItemDocument kind, canonical key and exact resolved gameID; the remaining physical fields and paging rules are preserved. An inactive or residual slot reports active false, total 0 and an empty array, mints no identity, and still reports the current saveRevision.",
         "properties": {
           "saveSessionID": {
             "type": "string"
@@ -1932,12 +1947,27 @@
       },
       "StorageRecord": {
         "type": "object",
-        "description": "One non-empty physical Storage Box record, plus the identity of the row it was read from. ownedItemID is the opaque identity of the record itself; containerSection and physicalIndex identify the physical row it currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
+        "description": "One non-empty physical Storage Box record, its opaque owned-item identity and its resolved ItemDocument identity. kind and key are the canonical catalog resource reference; gameID is the exact catalog game ID resolved from the save and selects a materialised variant where applicable. containerSection and physicalIndex identify the physical row it currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
         "properties": {
           "ownedItemID": {
             "type": "string",
             "minLength": 1,
             "description": "Opaque identity of this physical record, valid only for the saveRevision of the enclosing result and only inside the save session that produced it. Compare it byte for byte; never parse, trim, normalise or persist it. It encodes no handle, no index and no slot address, and a Storage record never shares it with an Inventory record at the same coordinates."
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The GameCatalog resource kind of the resolved item."
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The canonical GameCatalog resource key of the resolved item."
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The exact GameCatalog game ID resolved from the save. It selects an item variant where applicable."
           },
           "containerSection": {
             "type": "string",
@@ -1965,11 +1995,11 @@
             "description": "The raw stored acquisition index."
           }
         },
-        "required": ["ownedItemID", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+        "required": ["ownedItemID", "kind", "key", "gameID", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
       },
       "CharacterStorage": {
         "type": "object",
-        "description": "One page of the raw native Storage Box records of one character slot. Phase 1 of the Storage surface: apart from the owned-item identity of each record there is no name, no GameCatalog identity, no family, no variant, no capacity and no Inventory record. An inactive or residual slot reports active false, total 0 and an empty array, mints no identity, and still reports the current saveRevision.",
+        "description": "One page of resolved Storage Box records of one character slot. Every active record carries an ItemDocument kind, canonical key and exact resolved gameID; the remaining physical fields and paging rules are preserved. An inactive or residual slot reports active false, total 0 and an empty array, mints no identity, and still reports the current saveRevision.",
         "properties": {
           "saveSessionID": {
             "type": "string"

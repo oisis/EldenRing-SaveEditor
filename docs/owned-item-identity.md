@@ -251,15 +251,18 @@ is deferred to a named task, not to an open decision.
 
 ### 2.6 Absence of native evidence — stated separately
 
-**There is currently no native-save evidence in this repository for the
-persistence of an item instance.**
+**There is currently no controlled native-save diff evidence in this repository
+for the persistence of an item instance.**
 
 - No `.sl2` or native `.dat` file is tracked by git (`git ls-files` returns
   none).
 - Every SaveEngine test builds a **synthetic** fixture in a temp directory
   (`writeInventoryFixture`, `backend/saveengine/inventory_test.go:81`). A
   synthetic fixture proves that the reader handles a byte layout; it does not
-  prove that the layout is what the game writes.
+  prove item-instance persistence after a game reload.
+- The read-only PC and PS4 artifacts kept under `tmp/` establish that the
+  current parser can locate the relevant slot data, but are not controlled
+  before/after item-mutation evidence.
 - The legacy findings L5 and L6 come from legacy Go tests over legacy
   in-memory fixtures, not from a diff of two native saves.
 
@@ -274,10 +277,11 @@ identity.
 ## 3. What must not be weakened
 
 `GetInventory` and `GetStorage` are implemented, documented and locked as
-phase 1: raw native records, no catalog resolution, no identity (C1–C3). The
-tests `TestGetInventoryContractIsRawPhaseOne` and
-`TestGetStorageContractIsRawPhaseOne` assert the exact `SupportedResourceTypes`
-value and the exact ordered variable list.
+resolved ItemDocument getters: they expose raw physical fields together with
+`ownedItemID`, `saveRevision`, `kind`, `key` and the exact resolved `gameID`.
+The tests `TestGetInventoryContractResolvesItemDocuments` and
+`TestGetStorageContractResolvesItemDocuments` assert the exact
+`SupportedResourceTypes` value and the exact ordered variable list.
 
 Phase 2b (§6.4) changes that contract and therefore requires explicit user
 approval under the regression-test rules of `AGENTS.md`, with replacement
@@ -642,6 +646,9 @@ endpoint. Therefore `TestGetInventoryContractIsRawPhaseOne`
 (`backend/endpoints/inventory/get_storage_test.go:395`) stay exactly as they are
 and must keep passing untouched.
 
+That statement applied to Task 2a only. Task 2b subsequently replaced those
+raw-phase contract tests with the ItemDocument contract tests recorded in §6.4.
+
 **What this task does require approval for: the result shape.** Adding two
 fields to the public result widens what the getters return, so every test that
 asserts a *complete* result or a *complete* record list with
@@ -706,34 +713,26 @@ This task also updates `docs/endpoints/inventory/get_inventory.md`,
 rules in `AGENTS.md`. The route, the endpoint index and the Scalar navigation do
 not change, because no endpoint is added or removed.
 
-### 6.3 Gate — controlled native-save research for the GaItem parser
+### 6.3 Gate — GaItem parser evidence
 
-Not a code task, and it produces no commit in `backend/`. It is a blocking
-prerequisite of Task 2b, stated as its own step because a prerequisite buried in
-a paragraph is a prerequisite that gets skipped.
+**Closed for the read-only Task 2b getter.** The accepted basis is the matching
+1.5.8/1.6.8 GaItem reader, the static read-only PC and PS4 artifacts in `tmp/`,
+and synthetic coverage of both platform entry points and both legacy record
+counts. This is sufficient to resolve an existing loaded snapshot fail-closed;
+it does not establish a mutation, serialization or game-reload guarantee.
 
-§2.6 records that this repository holds **no** native-save evidence for the
-GaItem record: every fixture is synthetic, and the legacy record model (L9) is
-legacy testimony, not a read of a real save. Resolving a record to `kind`, `key`
-and a variant requires parsing that record, so Task 2b cannot start on the
-current evidence without turning a hypothesis into production behaviour, which
-`AGENTS.md` forbids.
-
-This gate closes when the record layout is established from controlled evidence
-on read-only copies, across the applicable platform and slot-version variants,
-and the findings are written down with their confidence separated as §2 does.
-Until then Task 2b, and therefore everything downstream of it, stays blocked.
-Task 1 and Task 2a are unaffected: neither parses a record.
+No new PS4 test artifact is required for this task. If setters, WriteSave or a
+platform-specific discrepancy later need stronger evidence, this gate must be
+reopened for that narrower operation.
 
 ### 6.4 Task 2b — catalog resolution in the two getters
 
-Only after Task 2a ships and the §6.3 gate is closed. This is the task that
-resolves records against GameCatalog and ends the raw phase-1 contract. It
-changes `SupportedResourceTypes` and the documented contract, so it — and only
-it — requires explicit approval to modify
-`TestGetInventoryContractIsRawPhaseOne` and
-`TestGetStorageContractIsRawPhaseOne` (C3), reporting the exact assertions, the
-old contract, the conflict, and replacement coverage that is at least as strong.
+Completed after Task 2a and the §6.3 gate. This task resolves records against
+GameCatalog and ends the raw phase-1 contract. It changes
+`SupportedResourceTypes` and the documented contract; the approved replacement
+tests are `TestGetInventoryContractResolvesItemDocuments` and
+`TestGetStorageContractResolvesItemDocuments`, preserving the exact ordered
+variable-list assertions while requiring `ItemDocument`.
 
 It carries the full synchronisation set in the same task:
 `docs/endpoints/inventory/*.md`, `docs/endpoints/README.md`,
@@ -786,7 +785,7 @@ Every task above must cover, at the layer where the behaviour is observable:
 | Platform | PC and PS4, both producing IDs and both rejecting a foreign one. |
 | Slot state | Active, inactive, and residual (a deleted character whose data is still in the file) — a residual slot mints no IDs and its data is not searched, but the result still carries the current revision. |
 | Sentinels | Handles `0x00000000` and `0xFFFFFFFF` get no ID and stay invisible (C6). |
-| Unknown / malformed data | An unresolvable handle still gets an ID and is still listed; it is never dropped, repaired or reinterpreted. |
+| Unknown / malformed data | An unresolvable handle, malformed GaItem table or unknown catalog game ID rejects the whole getter result; it is never dropped, repaired, reinterpreted or replaced. |
 | Stackable goods | The same `kind`/`key` present in Inventory and in Storage yields two distinct IDs; two rows of the same stackable item in one container yield two distinct IDs. |
 | Idempotent minting | Re-reading the same revision returns identical IDs; page 1 then page 2, both sections then one section, and Inventory read before Storage or after it, all yield the same ID for the same physical record (§4.2). |
 | Lazy materialisation | Reading only Inventory does not mint Storage entries, and the later first Storage read of the same revision succeeds and mints them. |

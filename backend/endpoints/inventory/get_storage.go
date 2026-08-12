@@ -1,65 +1,75 @@
 /*
 Endpoint: GetStorage
 EndpointID: get_storage
-Purpose: Returns raw native Storage Box records from one character slot without resolving them through GameCatalog.
-How it works: The runtime handler passes saveSessionID, characterID, containerSection and the paging values to SaveEngine, which reads one slot of the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot, parses no save data of its own and calls no other endpoint.
-Supported resource types: —.
+Purpose: Returns Storage Box records from one character slot resolved to ItemDocument identities.
+How it works: The runtime handler reads the records and their save-side game IDs through SaveEngine, then resolves each ID through the already loaded GameCatalog. The endpoint opens no file, parses no save data of its own and calls no other endpoint.
+Supported resource types: ItemDocument.
 Input variables: saveSessionID, characterID, containerSection, page, pageSize.
-GameCatalog variables read: none; this phase returns raw state and resolves no ItemDocument.
-Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the physical Storage Box records of the requested section; the getter is non-mutating, keeps gaItemHandle and acquisitionIndex raw, masks only the documented high bit of quantity and applies paging.
+GameCatalog variables read: the kind and key of every ItemDocument resolved by its save-side game ID.
+Save variables read: the UserData10 activity flag of the requested slot and, for an active slot, the physical Storage Box records and GaItem table; the getter is non-mutating, keeps gaItemHandle and acquisitionIndex raw, masks only the documented high bit of quantity and applies paging.
 Implementation status: implemented
 */
 package inventory
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
 // GetStorageEndpointID is the stable backend identifier of GetStorage.
 const GetStorageEndpointID = "get_storage"
 
-// GetStorageDefinition describes the public getter contract. This is phase 1:
-// the contract carries no GameCatalog resource type and no family variable,
-// because a raw record proves neither an item identity nor a family.
+// GetStorageDefinition describes the public getter contract.
 var GetStorageDefinition = contract.MustDefine(contract.Definition{
 	Name:                       "GetStorage",
 	ID:                         GetStorageEndpointID,
 	Kind:                       contract.Getter,
-	SupportedResourceTypes:     "—",
+	SupportedResourceTypes:     "ItemDocument",
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "containerSection", "page", "pageSize"},
-	Description:                "Returns raw native Storage Box records from one character slot without resolving them through GameCatalog.",
+	Description:                "Returns Storage Box records from one character slot resolved to ItemDocument identities.",
 })
 
-// GetStorageResult is the typed result of GetStorage. The shape is owned by
-// SaveEngine, so the endpoint neither reshapes nor duplicates it. GaItemHandle
-// and AcquisitionIndex are returned exactly as stored, Quantity is returned with
-// the high bit removed by the 0x7FFFFFFF mask, and no other value is normalised
-// or resolved against GameCatalog. OwnedItemID and SaveRevision are minted and
-// rendered by SaveEngine; the endpoint passes both through untouched and parses
-// neither.
-type GetStorageResult = saveengine.CharacterStorage
+// StorageRecord is one physical Storage Box row plus its public catalog
+// identity. GameID is the exact catalog game ID resolved from the save; for an
+// upgraded or infused item it selects the materialised catalog variant, while
+// Kind and Key remain the canonical resource reference.
+type StorageRecord struct {
+	OwnedItemID      string              `json:"ownedItemID"`
+	Kind             schema.ResourceKind `json:"kind"`
+	Key              string              `json:"key"`
+	GameID           uint32              `json:"gameID"`
+	ContainerSection string              `json:"containerSection"`
+	PhysicalIndex    int                 `json:"physicalIndex"`
+	GaItemHandle     uint32              `json:"gaItemHandle"`
+	Quantity         uint32              `json:"quantity"`
+	AcquisitionIndex uint32              `json:"acquisitionIndex"`
+}
 
-// GetStorage returns one page of the raw Storage Box records stored in one
-// character slot of an existing save session.
-//
-// This is the first phase of the Storage surface. Apart from the owned-item
-// identity of each record and the revision it was minted under, the result
-// carries no name, no kind, no key, no family, no variant, no capacity and no
-// Inventory record: those need a verified GaItem parser and belong to a later
-// phase.
-//
-// The endpoint is thin: it rejects a missing engine and delegates everything
-// else. Validating saveSessionID, characterID, containerSection and the paging
-// values, reading the snapshot and deciding what an active, inactive or residual
-// slot exposes belong to SaveEngine. The session must already exist; this
-// endpoint never creates one, so it calls neither LoadSave, nor GetInventory,
-// nor any other endpoint, opens no file, reads no GameCatalog and returns no raw
-// save byte.
+// GetStorageResult is one resolved page of Storage Box records.
+type GetStorageResult struct {
+	SaveSessionID string          `json:"saveSessionID"`
+	SaveRevision  string          `json:"saveRevision"`
+	CharacterID   int             `json:"characterID"`
+	Active        bool            `json:"active"`
+	Records       []StorageRecord `json:"records"`
+	Total         int             `json:"total"`
+	Page          int             `json:"page"`
+	PageSize      int             `json:"pageSize"`
+}
+
+// GetStorage returns one page of Storage Box records stored in one character
+// slot of an existing save session. Every listed record is resolved to one
+// ItemDocument by its GaItem-backed game ID. The result retains the physical
+// fields from the raw reader, but no name, family filter, capacity or Inventory
+// record is added here.
 func GetStorage(
 	engine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
 	saveSessionID string,
 	characterID int,
 	containerSection string,
@@ -69,5 +79,53 @@ func GetStorage(
 	if engine == nil {
 		return GetStorageResult{}, errors.New("save engine is not available")
 	}
-	return engine.GetStorage(saveSessionID, characterID, containerSection, page, pageSize)
+	if gameCatalog == nil {
+		return GetStorageResult{}, errors.New("game catalog is not available")
+	}
+
+	stored, err := engine.GetStorage(saveSessionID, characterID, containerSection, page, pageSize)
+	if err != nil {
+		return GetStorageResult{}, err
+	}
+	result := GetStorageResult{
+		SaveSessionID: stored.SaveSessionID,
+		SaveRevision:  stored.SaveRevision,
+		CharacterID:   stored.CharacterID,
+		Active:        stored.Active,
+		Records:       make([]StorageRecord, 0, len(stored.Records)),
+		Total:         stored.Total,
+		Page:          stored.Page,
+		PageSize:      stored.PageSize,
+	}
+	if !stored.Active {
+		return result, nil
+	}
+
+	handles := make([]uint32, len(stored.Records))
+	for index, record := range stored.Records {
+		handles[index] = record.GaItemHandle
+	}
+	gameIDs, err := engine.ResolveGaItemIDs(saveSessionID, characterID, handles)
+	if err != nil {
+		return GetStorageResult{}, err
+	}
+	for index, record := range stored.Records {
+		resource, exists := gameCatalog.ItemByGameID(gameIDs[index])
+		if !exists || resource.Kind != schema.ResourceKindItem || resource.Item == nil || resource.Key == "" {
+			return GetStorageResult{}, fmt.Errorf("storage record %d: game ID 0x%08X is not a known item",
+				index, gameIDs[index])
+		}
+		result.Records = append(result.Records, StorageRecord{
+			OwnedItemID:      record.OwnedItemID,
+			Kind:             resource.Kind,
+			Key:              resource.Key,
+			GameID:           gameIDs[index],
+			ContainerSection: record.ContainerSection,
+			PhysicalIndex:    record.PhysicalIndex,
+			GaItemHandle:     record.GaItemHandle,
+			Quantity:         record.Quantity,
+			AcquisitionIndex: record.AcquisitionIndex,
+		})
+	}
+	return result, nil
 }

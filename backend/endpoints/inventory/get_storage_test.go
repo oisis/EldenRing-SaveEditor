@@ -34,7 +34,7 @@ const (
 	getStoragePS4EntryMarker     = 0x7F7F7F7F
 
 	getStorageSlot     = 3
-	getStorageAnchorAt = 0x0640
+	getStorageAnchorAt = 0xA028
 
 	// Distance from the anchor to the acquired-projectile count, the stride of
 	// one projectile record and the three fixed blocks between the projectile
@@ -107,20 +107,20 @@ func getStorageKeyRows() []getStorageRow {
 	}
 }
 
-func getStorageWantCommon() []saveengine.StorageRecord {
-	return []saveengine.StorageRecord{
-		{ContainerSection: "common", PhysicalIndex: 1, GaItemHandle: 0xB000272E, Quantity: 3, AcquisitionIndex: 7},
-		{ContainerSection: "common", PhysicalIndex: 6, GaItemHandle: 0x90001111, Quantity: 1, AcquisitionIndex: 9},
+func getStorageWantCommon() []StorageRecord {
+	return []StorageRecord{
+		{Kind: "item", Key: "4000272E", GameID: 0x4000272E, ContainerSection: "common", PhysicalIndex: 1, GaItemHandle: 0xB000272E, Quantity: 3, AcquisitionIndex: 7},
+		{Kind: "item", Key: "100704E0", GameID: 0x100704E0, ContainerSection: "common", PhysicalIndex: 6, GaItemHandle: 0x90001111, Quantity: 1, AcquisitionIndex: 9},
 	}
 }
 
-func getStorageWantKey() []saveengine.StorageRecord {
-	return []saveengine.StorageRecord{
-		{ContainerSection: "key", PhysicalIndex: 1, GaItemHandle: 0xC0000001, Quantity: 1, AcquisitionIndex: 12},
+func getStorageWantKey() []StorageRecord {
+	return []StorageRecord{
+		{Kind: "item", Key: "8000EA60", GameID: 0x8000EA60, ContainerSection: "key", PhysicalIndex: 1, GaItemHandle: 0xC0000001, Quantity: 1, AcquisitionIndex: 12},
 	}
 }
 
-func getStorageWantAll() []saveengine.StorageRecord {
+func getStorageWantAll() []StorageRecord {
 	return append(getStorageWantCommon(), getStorageWantKey()...)
 }
 
@@ -128,7 +128,7 @@ func getStorageWantAll() []saveengine.StorageRecord {
 // its physical coordinates, and proves on the way that each one is present and
 // unique. A token is opaque by contract, so a test outside SaveEngine may not
 // spell it out or parse it; the coordinates are the only handle it has on one.
-func getStorageIdentities(t *testing.T, records []saveengine.StorageRecord) map[string]string {
+func getStorageIdentities(t *testing.T, records []StorageRecord) map[string]string {
 	t.Helper()
 
 	byRow := make(map[string]string, len(records))
@@ -152,8 +152,8 @@ func getStorageIdentities(t *testing.T, records []saveengine.StorageRecord) map[
 // value stays exact, so a filtered or paged read that reordered, re-numbered or
 // re-identified a record still fails.
 func getStorageWithIDs(
-	t *testing.T, want []saveengine.StorageRecord, identities map[string]string,
-) []saveengine.StorageRecord {
+	t *testing.T, want []StorageRecord, identities map[string]string,
+) []StorageRecord {
 	t.Helper()
 
 	for index := range want {
@@ -201,6 +201,13 @@ func writeGetStorageFixture(t *testing.T, platform string, active bool, anchorAt
 	}
 
 	copy(data[slotBase+anchorAt:], getStorageAnchor)
+	if anchorAt == getStorageAnchorAt {
+		binary.LittleEndian.PutUint32(data[slotBase:], 82)
+		binary.LittleEndian.PutUint32(data[slotBase+0x20:], 0x90001111)
+		binary.LittleEndian.PutUint32(data[slotBase+0x24:], 0x100704E0)
+		binary.LittleEndian.PutUint32(data[slotBase+0x30:], 0xC0000001)
+		binary.LittleEndian.PutUint32(data[slotBase+0x34:], 0x8000EA60)
+	}
 
 	countAt := anchorAt + getStorageProjectileCountAt
 	if countAt+4 <= getStorageSlotDataSize {
@@ -248,8 +255,9 @@ func TestGetStorageReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 	for _, platform := range []string{"pc", "ps4"} {
 		t.Run(platform, func(t *testing.T) {
 			engine, sessionID := loadGetStorageSession(t, platform, true, getStorageAnchorAt)
+			gameCatalog := inventoryCatalog(t)
 
-			result, err := GetStorage(engine, sessionID, getStorageSlot, "", 0, 0)
+			result, err := GetStorage(engine, gameCatalog, sessionID, getStorageSlot, "", 0, 0)
 			if err != nil {
 				t.Fatalf("GetStorage: %v", err)
 			}
@@ -271,7 +279,7 @@ func TestGetStorageReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 			// Nothing was committed in between, so the second read of the same
 			// revision has to be identical down to every identifier.
-			again, err := GetStorage(engine, sessionID, getStorageSlot, "", 0, 0)
+			again, err := GetStorage(engine, gameCatalog, sessionID, getStorageSlot, "", 0, 0)
 			if err != nil {
 				t.Fatalf("second GetStorage: %v", err)
 			}
@@ -284,28 +292,31 @@ func TestGetStorageReturnsTheRawRecordsOfBothPlatforms(t *testing.T) {
 
 // The endpoint must delegate: its result has to be the SaveEngine result itself,
 // not a reshaped, re-ordered or re-paged copy of it.
-func TestGetStorageDelegatesToSaveEngine(t *testing.T) {
+func TestGetStorageResolvesSaveEngineRecords(t *testing.T) {
 	engine, sessionID := loadGetStorageSession(t, "pc", true, getStorageAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 
 	want, err := engine.GetStorage(sessionID, getStorageSlot, "key", 1, 1)
 	if err != nil {
 		t.Fatalf("engine.GetStorage: %v", err)
 	}
-	result, err := GetStorage(engine, sessionID, getStorageSlot, "key", 1, 1)
+	result, err := GetStorage(engine, gameCatalog, sessionID, getStorageSlot, "key", 1, 1)
 	if err != nil {
 		t.Fatalf("GetStorage: %v", err)
 	}
-	if !reflect.DeepEqual(result, want) {
-		t.Errorf("endpoint result = %+v, want the SaveEngine result %+v", result, want)
+	if len(result.Records) != 1 || result.Records[0].OwnedItemID != want.Records[0].OwnedItemID ||
+		result.Records[0].GaItemHandle != want.Records[0].GaItemHandle {
+		t.Errorf("endpoint record = %+v, want SaveEngine row %+v", result.Records, want.Records)
 	}
 }
 
 func TestGetStorageFiltersAndPages(t *testing.T) {
 	engine, sessionID := loadGetStorageSession(t, "pc", true, getStorageAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 
 	// The canonical unfiltered, unpaged read is what every case below is compared
 	// against, so a section filter or a page that changed an identifier fails.
-	canonical, err := GetStorage(engine, sessionID, getStorageSlot, "", 0, 0)
+	canonical, err := GetStorage(engine, gameCatalog, sessionID, getStorageSlot, "", 0, 0)
 	if err != nil {
 		t.Fatalf("canonical GetStorage: %v", err)
 	}
@@ -318,19 +329,19 @@ func TestGetStorageFiltersAndPages(t *testing.T) {
 		wantTotal      int
 		wantPage       int
 		wantPageSize   int
-		want           []saveengine.StorageRecord
+		want           []StorageRecord
 	}{
 		"common only":  {"common", 0, 0, 2, 1, 50, getStorageWithIDs(t, getStorageWantCommon(), identities)},
 		"key only":     {"key", 0, 0, 1, 1, 50, getStorageWithIDs(t, getStorageWantKey(), identities)},
 		"both":         {"", 0, 0, 3, 1, 50, all},
 		"first page":   {"", 1, 2, 3, 1, 2, all[:2]},
 		"last page":    {"", 2, 2, 3, 2, 2, all[2:]},
-		"beyond total": {"", 7, 2, 3, 7, 2, []saveengine.StorageRecord{}},
+		"beyond total": {"", 7, 2, 3, 7, 2, []StorageRecord{}},
 	}
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
 			result, err := GetStorage(
-				engine, sessionID, getStorageSlot, testCase.section, testCase.page, testCase.pageSize)
+				engine, gameCatalog, sessionID, getStorageSlot, testCase.section, testCase.page, testCase.pageSize)
 			if err != nil {
 				t.Fatalf("GetStorage: %v", err)
 			}
@@ -356,8 +367,9 @@ func TestGetStorageFiltersAndPages(t *testing.T) {
 
 func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 	engine, sessionID := loadGetStorageSession(t, "pc", false, getStorageAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 
-	result, err := GetStorage(engine, sessionID, getStorageSlot, "", 0, 0)
+	result, err := GetStorage(engine, gameCatalog, sessionID, getStorageSlot, "", 0, 0)
 	if err != nil {
 		t.Fatalf("GetStorage: %v", err)
 	}
@@ -366,7 +378,7 @@ func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 		SaveSessionID: sessionID,
 		SaveRevision:  "0",
 		CharacterID:   getStorageSlot,
-		Records:       []saveengine.StorageRecord{},
+		Records:       []StorageRecord{},
 		Page:          1,
 		PageSize:      50,
 	}
@@ -377,6 +389,7 @@ func TestGetStorageReportsAResidualSlotAsInactive(t *testing.T) {
 
 func TestGetStorageRejectsInvalidRequests(t *testing.T) {
 	engine, sessionID := loadGetStorageSession(t, "pc", true, getStorageAnchorAt)
+	gameCatalog := inventoryCatalog(t)
 	// The anchor sits so close to the end of the slot that the section no longer
 	// fits inside the slot data.
 	truncatedEngine, truncatedID := loadGetStorageSession(t, "pc", true,
@@ -417,7 +430,7 @@ func TestGetStorageRejectsInvalidRequests(t *testing.T) {
 	for name, testCase := range cases {
 		t.Run(name, func(t *testing.T) {
 			result, err := GetStorage(
-				testCase.engine, testCase.saveSessionID, testCase.characterID,
+				testCase.engine, gameCatalog, testCase.saveSessionID, testCase.characterID,
 				testCase.section, testCase.page, testCase.pageSize)
 			if err == nil {
 				t.Fatalf("GetStorage accepted %s", strconv.Quote(name))
@@ -429,6 +442,18 @@ func TestGetStorageRejectsInvalidRequests(t *testing.T) {
 				t.Errorf("result = %+v, want the zero value", result)
 			}
 		})
+	}
+}
+
+func TestGetStorageRejectsANilCatalog(t *testing.T) {
+	engine, sessionID := loadGetStorageSession(t, "pc", true, getStorageAnchorAt)
+
+	result, err := GetStorage(engine, nil, sessionID, getStorageSlot, "", 0, 0)
+	if err == nil || err.Error() != "game catalog is not available" {
+		t.Errorf("nil catalog error = %v, want game catalog is not available", err)
+	}
+	if !reflect.DeepEqual(result, GetStorageResult{}) {
+		t.Errorf("nil catalog result = %+v, want the zero value", result)
 	}
 }
 
@@ -450,7 +475,7 @@ func TestGetStorageRejectsASlotWithoutTheStorageMarker(t *testing.T) {
 		t.Fatalf("LoadSave: %v", err)
 	}
 
-	result, err := GetStorage(engine, session.SaveSessionID, getStorageSlot, "", 0, 0)
+	result, err := GetStorage(engine, inventoryCatalog(t), session.SaveSessionID, getStorageSlot, "", 0, 0)
 	if err == nil {
 		t.Fatalf("GetStorage accepted a slot without a storage marker: %+v", result)
 	}
@@ -459,9 +484,9 @@ func TestGetStorageRejectsASlotWithoutTheStorageMarker(t *testing.T) {
 	}
 }
 
-func TestGetStorageContractIsRawPhaseOne(t *testing.T) {
-	if GetStorageDefinition.SupportedResourceTypes != "—" {
-		t.Errorf("supported resource types = %q, want the raw phase-1 contract without a resource type",
+func TestGetStorageContractResolvesItemDocuments(t *testing.T) {
+	if GetStorageDefinition.SupportedResourceTypes != "ItemDocument" {
+		t.Errorf("supported resource types = %q, want ItemDocument",
 			GetStorageDefinition.SupportedResourceTypes)
 	}
 	want := []string{"saveSessionID", "characterID", "containerSection", "page", "pageSize"}

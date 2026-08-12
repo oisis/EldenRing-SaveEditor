@@ -2,29 +2,20 @@
 
 ## Overview
 
-`GetInventory` returns one page of the raw, native `InventoryHeld` records stored
-in one physical character slot of a save session that already exists in
-SaveEngine. It reads the session's private snapshot only and reports every
-non-empty record exactly as the save stores it.
+`GetInventory` returns one page of native `InventoryHeld` records stored in one
+physical character slot of an existing SaveEngine session. Every listed record
+is resolved through the private `GaItem` table and GameCatalog.
 
-**This is phase 1 of the Inventory surface: raw native inventory reading.** The
-result deliberately contains nothing that a raw record cannot prove. Apart from
-the `ownedItemID` of each record and the `saveRevision` it was minted under, it
-does **not** return:
+Each record carries the canonical ItemDocument `kind`/`key` pair and the exact
+resolved `gameID`; the latter selects the materialised catalog variant for an
+upgraded or infused item. `ownedItemID` remains the separate opaque identity of
+the owned physical record. Native handles, acquisition indices, quantity masks,
+physical order and paging remain visible unchanged.
 
-- item names or any other presentation data;
-- GameCatalog identity — no `kind`, no `key`, no resource reference;
-- `family`;
-- variants, infusion, upgrade level or Ash of War;
-- equipped state;
-- capacity;
-- Storage (`inventory_storage_box`) records.
-
-All of those require a verified `GaItem` parser and belong to a later phase. A
-raw handle is not an item identity, so nothing here is resolved, named or
-classified. The `ownedItemID` is an *instance* identity minted by SaveEngine, not
-an item identity: it says which physical record was read, never what that record
-holds.
+This phase deliberately does not add a name, `family` filter, equipped state,
+capacity or Storage records. A malformed GaItem table, an instance-backed handle
+without a GaItem record, or a game ID absent from GameCatalog rejects the whole
+request; no partial result or substitute item is returned.
 
 The session must have been created earlier by
 [`LoadSave`](../savesession/load_save.md). `GetInventory` never creates one, so
@@ -48,7 +39,8 @@ neither the save, nor the session, nor any application state.
 
 ```go
 func GetInventory(
-	engine *saveengine.Engine,
+    engine *saveengine.Engine,
+    gameCatalog *gamecatalog.Catalog,
 	saveSessionID string,
 	characterID int,
 	containerSection string,
@@ -60,6 +52,7 @@ func GetInventory(
 | Parameter | Type | Meaning |
 |---|---|---|
 | `engine` | `*saveengine.Engine` | The SaveEngine instance supplied by the backend caller. It owns the sessions; the endpoint never creates one. A `nil` engine is rejected. |
+| `gameCatalog` | `*gamecatalog.Catalog` | The already loaded catalog used to resolve each record. A `nil` catalog is rejected. |
 | `saveSessionID` | `string` | Identifier of an existing session, exactly as returned by `LoadSave`. It is passed to SaveEngine unchanged. |
 | `characterID` | `int` | The physical slot index, `0` to `9`. It is the same index `GetSaveCharacters` reports positionally. |
 | `containerSection` | `string` | Physical section filter: `""`, `"common"` or `"key"`. |
@@ -107,10 +100,11 @@ They follow the same convention as
 ## Output
 
 ```go
-type GetInventoryResult = saveengine.CharacterInventory
-
 type InventoryRecord struct {
 	OwnedItemID      string `json:"ownedItemID"`
+	Kind             schema.ResourceKind `json:"kind"`
+	Key              string `json:"key"`
+	GameID           uint32 `json:"gameID"`
 	ContainerSection string `json:"containerSection"`
 	PhysicalIndex    int    `json:"physicalIndex"`
 	GaItemHandle     uint32 `json:"gaItemHandle"`
@@ -118,7 +112,7 @@ type InventoryRecord struct {
 	AcquisitionIndex uint32 `json:"acquisitionIndex"`
 }
 
-type CharacterInventory struct {
+type GetInventoryResult struct {
 	SaveSessionID string            `json:"saveSessionID"`
 	SaveRevision  string            `json:"saveRevision"`
 	CharacterID   int               `json:"characterID"`
@@ -144,6 +138,9 @@ type CharacterInventory struct {
 | Record field | Type | Meaning |
 |---|---|---|
 | `ownedItemID` | `string` | Opaque identity of this physical record under `saveRevision`. Non-empty, unique inside one result. |
+| `kind` | `string` | GameCatalog resource kind. Always `item`. |
+| `key` | `string` | Canonical GameCatalog resource key. |
+| `gameID` | `uint32` | Exact game ID resolved from the save; it selects a catalog variant when applicable. |
 | `containerSection` | `string` | The physical section the record was read from: `"common"` or `"key"`. |
 | `physicalIndex` | `int` | The position of the record inside its own section, counted from `0`. |
 | `gaItemHandle` | `uint32` | The raw stored `GaItem` handle. |
@@ -230,15 +227,17 @@ Absent records are skipped and never reported. **No other handle is
 reinterpreted.** A handle this phase cannot explain stays visible exactly as
 stored instead of being dropped, normalised or turned into a different value.
 
-### Raw values only
+### Catalog resolution and physical values
 
 - `gaItemHandle` and `acquisitionIndex` are returned exactly as stored. Neither
   is masked, normalised, validated or resolved.
 - `quantity` is the stored value with the high bit masked off (`& 0x7FFFFFFF`),
   because that bit is not part of the count. That is the only transformation
   this endpoint performs.
-- No name is created, no GameCatalog resource is resolved and no unknown value
-  is hidden.
+- `kind`, `key` and `gameID` come only from the resolved ItemDocument. A missing
+  catalog item rejects the whole request; no name, key or variant is invented.
+- `gaItemHandle` and `acquisitionIndex` remain raw physical values and are not
+  accepted as a public item reference.
 
 ### Active, inactive and residual slots
 
@@ -301,6 +300,7 @@ Every failure returns the zero result and changes nothing.
 | Situation | Behaviour |
 |---|---|
 | `engine` is `nil` | `save engine is not available` — a backend wiring error, not client input. |
+| `gameCatalog` is `nil` | `game catalog is not available` — a backend wiring error, not client input. |
 | `saveSessionID` is empty | `saveSessionID is required`. No lookup is attempted. |
 | `saveSessionID` is unknown or closed | `unknown save session "<id>"`. A closed or never-created session is never resolved to a different one. |
 | `characterID` is outside `0..9` | `characterID <id> is outside the range 0..9`. Checked only after the session resolves. |
@@ -309,6 +309,8 @@ Every failure returns the zero result and changes nothing.
 | `pageSize` is negative | `pageSize must not be negative; got <value>`. |
 | An active slot carries no anchor | `character <id> carries no inventory anchor`. |
 | The section would reach past the end of the slot | `inventory of character <id> does not fit into its slot`. |
+| The GaItem marker/table is missing, truncated or internally ambiguous | The request is rejected; no raw record is returned as a substitute. |
+| A listed handle has no resolvable game ID or its game ID is absent from GameCatalog | The request is rejected; no partial page is returned. |
 | A required range lies outside the snapshot | The read is rejected before it happens, and the error names the character slot involved. |
 
 The last three rows are fail-closed by design: for an active slot the whole
@@ -321,8 +323,9 @@ An inactive or residual slot is not in this table: it is a successful result. A
 valid page beyond `total` is not in this table either: it is a successful,
 empty page.
 
-Stored values are never an error. No `gaItemHandle`, `quantity` or
-`acquisitionIndex` is rejected for being unknown, out of range or implausible.
+The physical fields themselves remain raw and are never normalised. Resolution
+is different: an unresolvable handle or unknown catalog item rejects the whole
+request.
 
 ## Read-only behaviour
 
@@ -334,8 +337,8 @@ Stored values are never an error. No `gaItemHandle`, `quantity` or
 ## Dependencies
 
 - The endpoint delegates to `backend/saveengine` and calls no other endpoint.
-- It reads no GameCatalog data. No value is looked up, named, or validated
-  against the catalog.
+- It joins the raw records with GameCatalog and returns the canonical `kind`/`key`
+  plus exact resolved `gameID`; no full document, name or synthetic value is returned.
 - It does not import `backend/core`, `backend/db`, `backend/editor`,
   `backend/templates`, `backend/vm`, or `internal/`. SaveForge 2.0 is
   greenfield.
@@ -384,18 +387,18 @@ section and a `nil` engine.
 The identity contract is covered as well: every returned record carries a
 non-empty `ownedItemID`, two records of one read never share one, a repeated,
 filtered or paged read of the same revision reports the same identifier for the
-same physical record, a residual slot mints none, the absent sentinels receive
-none, and a record whose handle cannot be explained still gets one. That the two
-containers never share an identity is proved in
+same physical record, a residual slot mints none, and the absent sentinels
+receive none. The resolved-record coverage additionally exercises
+handle-encoded goods, an armor GaItem and an Ash-of-War GaItem on both synthetic
+platforms; an unresolved table, handle or catalog item fails closed. That the
+two containers never share an identity is proved in
 `backend/saveengine/owned_item_containers_test.go`, on the one fixture that
 carries an `InventoryHeld` section and a Storage Box in the same slot.
 
 ## Current limitations
 
-- This is phase 1. Apart from the owned-item identity the result is raw: no
-  names, no GameCatalog identity, no `family`, no variants, no equipped state,
-  no capacity and no Storage records. Those need a separate, verified `GaItem`
-  parser.
+- The result is semantically resolved to ItemDocument identities, but does not
+  add names, `family` filtering, equipped state, capacity or Storage data.
 - `ownedItemID` does not survive a reload or a restart. It is minted per session
   and per revision, and there is deliberately no persistent instance key,
   because no native evidence for one has been established.

@@ -1571,7 +1571,7 @@ const (
 	inventoryRouteSlotDataBase = int64(pcHeaderSize) + 0x10
 	inventoryRouteUserData10   = int64(pcHeaderSize) + 10*0x280010 + 0x10
 	inventoryRouteFlagsOffset  = 0x1954
-	inventoryRouteAnchorAt     = 0x0640
+	inventoryRouteAnchorAt     = 0xA03A
 	inventoryRouteCommonAt     = 505
 	inventoryRouteKeyAt        = inventoryRouteCommonAt + 0xA80*12 + 4
 )
@@ -1588,6 +1588,13 @@ func writeInventoryFixture(t *testing.T) string {
 
 	anchorBase := inventoryRouteSlotDataBase + inventoryRouteAnchorAt
 	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase:], 82)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase+0x20:], 0xB000272E)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase+0x24:], 0x000F4240)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase+0x35:], 0x90001111)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase+0x39:], 0x000F4240)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase+0x4A:], 0xC0000001)
+	binary.LittleEndian.PutUint32(data[inventoryRouteSlotDataBase+0x4E:], 0x8000EA60)
 
 	record := func(at int64, handle, quantity, acquisition uint32) {
 		binary.LittleEndian.PutUint32(data[anchorBase+at:], handle)
@@ -1612,8 +1619,9 @@ func TestInventoryRoute(t *testing.T) {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
 	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/inventory"
+	gameCatalog := newPrototypeCatalog(t)
 
-	want, err := inventory.GetInventory(saveEngine, session.SaveSessionID, 0, "", 0, 0)
+	want, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
 	if err != nil {
 		t.Fatalf("inventory.GetInventory: %v", err)
 	}
@@ -1628,7 +1636,7 @@ func TestInventoryRoute(t *testing.T) {
 
 	// The section filter and both paging values have to reach the getter.
 	target := base + "?containerSection=key&page=1&pageSize=1"
-	wantKey, err := inventory.GetInventory(saveEngine, session.SaveSessionID, 0, "key", 1, 1)
+	wantKey, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "key", 1, 1)
 	if err != nil {
 		t.Fatalf("inventory.GetInventory(key): %v", err)
 	}
@@ -1664,7 +1672,7 @@ const (
 	storageRouteSlotDataBase = int64(pcHeaderSize) + 0x10
 	storageRouteUserData10   = int64(pcHeaderSize) + 10*0x280010 + 0x10
 	storageRouteFlagsOffset  = 0x1954
-	storageRouteAnchorAt     = 0x0640
+	storageRouteAnchorAt     = 0xA03A
 	storageRouteProjCountAt  = 0xD0 + 0x58 + 0x1C + 0x58 + 0x58 + 0x9011 + 0x74 + 0x8C + 0x18
 	storageRouteProjectiles  = 4
 	storageRouteBlocksBefore = 0x9C + 0x0C + 0x12F
@@ -1686,6 +1694,13 @@ func writeStorageFixture(t *testing.T) string {
 
 	anchorBase := storageRouteSlotDataBase + storageRouteAnchorAt
 	copy(data[anchorBase:], equippedSpellsFixtureAnchor)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase:], 82)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase+0x20:], 0xB000272E)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase+0x24:], 0x000F4240)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase+0x35:], 0x90001111)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase+0x39:], 0x000F4240)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase+0x4A:], 0xC0000001)
+	binary.LittleEndian.PutUint32(data[storageRouteSlotDataBase+0x4E:], 0x8000EA60)
 	binary.LittleEndian.PutUint32(data[anchorBase+storageRouteProjCountAt:], storageRouteProjectiles)
 
 	record := func(at int64, handle, quantity, acquisition uint32) {
@@ -1711,8 +1726,9 @@ func TestStorageRoute(t *testing.T) {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
 	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/storage"
+	gameCatalog := newPrototypeCatalog(t)
 
-	want, err := inventory.GetStorage(saveEngine, session.SaveSessionID, 0, "", 0, 0)
+	want, err := inventory.GetStorage(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
 	if err != nil {
 		t.Fatalf("inventory.GetStorage: %v", err)
 	}
@@ -1727,7 +1743,7 @@ func TestStorageRoute(t *testing.T) {
 
 	// The section filter and both paging values have to reach the getter.
 	target := base + "?containerSection=key&page=1&pageSize=1"
-	wantKey, err := inventory.GetStorage(saveEngine, session.SaveSessionID, 0, "key", 1, 1)
+	wantKey, err := inventory.GetStorage(saveEngine, gameCatalog, session.SaveSessionID, 0, "key", 1, 1)
 	if err != nil {
 		t.Fatalf("inventory.GetStorage(key): %v", err)
 	}
