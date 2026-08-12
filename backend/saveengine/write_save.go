@@ -8,6 +8,66 @@ import (
 	"path/filepath"
 )
 
+// WriteSaveResult reports a successfully persisted session revision.
+type WriteSaveResult struct {
+	SaveSessionID string `json:"saveSessionID"`
+	SaveRevision  string `json:"saveRevision"`
+}
+
+// WriteSave serializes and reload-validates the current session snapshot before
+// atomically writing it to target. The explicit target is never inferred from
+// the file the session was loaded from.
+//
+// The complete operation runs under Engine.mutex. A failure leaves the live
+// snapshot, revision, dirty flag and identity registry untouched. Once the
+// atomic write succeeds, the validated candidate becomes the live snapshot,
+// the revision advances, all identities from the previous revision expire and
+// the session becomes clean.
+func (engine *Engine) WriteSave(
+	saveSessionID string,
+	expectedRevision string,
+	target string,
+) (WriteSaveResult, error) {
+	if !isCanonicalRevision(expectedRevision) {
+		return WriteSaveResult{}, fmt.Errorf(
+			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+	}
+	if saveSessionID == "" {
+		return WriteSaveResult{}, errors.New("saveSessionID is required")
+	}
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	loaded, exists := engine.sessions[saveSessionID]
+	if !exists {
+		return WriteSaveResult{}, fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+	current := loaded.session.revisionString()
+	if expectedRevision != current {
+		return WriteSaveResult{}, fmt.Errorf(
+			"expectedRevision %q does not match the current saveRevision %q",
+			expectedRevision, current)
+	}
+
+	candidate, err := serializeContainer(loaded)
+	if err != nil {
+		return WriteSaveResult{}, fmt.Errorf("cannot serialize save session %q: %w", saveSessionID, err)
+	}
+	if err := validateSerialized(candidate, loaded.session.platform); err != nil {
+		return WriteSaveResult{}, fmt.Errorf("cannot validate save session %q: %w", saveSessionID, err)
+	}
+	if err := writeAtomically(target, candidate); err != nil {
+		return WriteSaveResult{}, fmt.Errorf("cannot write save session %q: %w", saveSessionID, err)
+	}
+
+	loaded.snapshot = &codec{data: candidate}
+	loaded.session.dirty = false
+	return WriteSaveResult{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  loaded.session.advanceRevision(),
+	}, nil
+}
+
 // serializeContainer prepares an independent candidate for a future WriteSave.
 // It performs no I/O and never changes the session snapshot.
 //

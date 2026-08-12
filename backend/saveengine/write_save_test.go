@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/binary"
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -363,5 +364,192 @@ func TestWriteAtomicallyRejectsMissingParentDirectory(t *testing.T) {
 	}
 	if _, err := os.Lstat(target); !os.IsNotExist(err) {
 		t.Fatalf("rejected write created target: %v", err)
+	}
+}
+
+func TestWriteSavePersistsBothPlatformsAndAdvancesACleanRevision(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			source := writeOwnedItemContainerFixture(t, platform)
+			sourceBefore, err := os.ReadFile(source)
+			if err != nil {
+				t.Fatalf("read source: %v", err)
+			}
+
+			engine := New()
+			info, err := engine.LoadSave(source, string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+			inventory, err := engine.GetInventory(
+				info.SaveSessionID, ownedContainerTestSlot, "", 0, 0)
+			if err != nil {
+				t.Fatalf("GetInventory: %v", err)
+			}
+			oldID := inventory.Records[0].OwnedItemID
+			target := filepath.Join(t.TempDir(), "written-save")
+
+			result, err := engine.WriteSave(info.SaveSessionID, "0", target)
+			if err != nil {
+				t.Fatalf("WriteSave: %v", err)
+			}
+			if result != (WriteSaveResult{SaveSessionID: info.SaveSessionID, SaveRevision: "1"}) {
+				t.Errorf("WriteSave result = %+v, want session %q at revision 1",
+					result, info.SaveSessionID)
+			}
+
+			written, err := os.ReadFile(target)
+			if err != nil {
+				t.Fatalf("read target: %v", err)
+			}
+			engine.mutex.Lock()
+			loaded := engine.sessions[info.SaveSessionID]
+			if !bytes.Equal(loaded.snapshot.data, written) {
+				t.Error("live snapshot differs from the persisted candidate")
+			}
+			if loaded.session.dirty {
+				t.Error("successful WriteSave left the session dirty")
+			}
+			if len(loaded.session.ownedByID) != 0 || len(loaded.session.ownedByLocator) != 0 {
+				t.Error("successful WriteSave retained identities from the previous revision")
+			}
+			engine.mutex.Unlock()
+
+			if _, err := engine.GetOwnedItem(info.SaveSessionID, ownedContainerTestSlot, oldID); !errors.Is(err, errStaleOwnedItemID) {
+				t.Errorf("GetOwnedItem after WriteSave error = %v, want errStaleOwnedItemID", err)
+			}
+			sourceAfter, err := os.ReadFile(source)
+			if err != nil {
+				t.Fatalf("re-read source: %v", err)
+			}
+			if !bytes.Equal(sourceAfter, sourceBefore) {
+				t.Error("WriteSave changed the file the session was loaded from")
+			}
+
+			reloaded := New()
+			if _, err := reloaded.LoadSave(target, string(platform)); err != nil {
+				t.Fatalf("reload persisted target: %v", err)
+			}
+		})
+	}
+}
+
+func TestWriteSavePersistsMutationAndClearsDirtyState(t *testing.T) {
+	engine, saveSessionID, ownedItemID := quantityTestTarget(
+		t, PlatformPC, ownedContainerInventory)
+	mutation, err := engine.SetOwnedItemQuantity(
+		saveSessionID,
+		ownedContainerTestSlot,
+		ownedItemID,
+		5,
+		"0",
+		ownedContainerTestGameID,
+		quantityTestMaxPerRecord,
+		quantityTestMaxContainerTotal,
+	)
+	if err != nil {
+		t.Fatalf("SetOwnedItemQuantity: %v", err)
+	}
+	if _, dirty := quantityTestSession(t, engine, saveSessionID); !dirty {
+		t.Fatal("committed mutation did not make the session dirty")
+	}
+
+	inventory, err := engine.GetInventory(saveSessionID, ownedContainerTestSlot, "", 0, 0)
+	if err != nil {
+		t.Fatalf("GetInventory after mutation: %v", err)
+	}
+	currentID := inventory.Records[0].OwnedItemID
+	target := filepath.Join(t.TempDir(), "persisted.sl2")
+	result, err := engine.WriteSave(saveSessionID, mutation.SaveRevision, target)
+	if err != nil {
+		t.Fatalf("WriteSave: %v", err)
+	}
+	if result.SaveRevision != "2" {
+		t.Errorf("WriteSave revision = %q, want %q", result.SaveRevision, "2")
+	}
+	if _, dirty := quantityTestSession(t, engine, saveSessionID); dirty {
+		t.Error("WriteSave did not clear the dirty state")
+	}
+	if _, err := engine.GetOwnedItem(saveSessionID, ownedContainerTestSlot, currentID); !errors.Is(err, errStaleOwnedItemID) {
+		t.Errorf("GetOwnedItem after WriteSave error = %v, want errStaleOwnedItemID", err)
+	}
+
+	reloaded := New()
+	reloadedInfo, err := reloaded.LoadSave(target, string(PlatformPC))
+	if err != nil {
+		t.Fatalf("reload persisted mutation: %v", err)
+	}
+	raw := quantityTestRaw(t, reloaded, reloadedInfo.SaveSessionID, quantityTestOffset(
+		PlatformPC, ownedContainerInventory, InventorySectionCommon, ownedContainerTestCommonIndex))
+	if raw != 5 {
+		t.Errorf("persisted raw quantity = 0x%08X, want 0x%08X", raw, uint32(5))
+	}
+}
+
+func TestWriteSaveRejectionsLeaveSessionAndTargetUntouched(t *testing.T) {
+	engine, saveSessionID := loadOwnedItemContainers(t, PlatformPC)
+	inventory, err := engine.GetInventory(saveSessionID, ownedContainerTestSlot, "", 0, 0)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	ownedItemID := inventory.Records[0].OwnedItemID
+	target := filepath.Join(t.TempDir(), "existing.sl2")
+	if err := os.WriteFile(target, []byte("unchanged target"), 0o600); err != nil {
+		t.Fatalf("write existing target: %v", err)
+	}
+	directoryTarget := t.TempDir()
+
+	engine.mutex.Lock()
+	loaded := engine.sessions[saveSessionID]
+	snapshotBefore := bytes.Clone(loaded.snapshot.data)
+	revisionBefore := loaded.session.revision
+	dirtyBefore := loaded.session.dirty
+	identitiesBefore := len(loaded.session.ownedByID)
+	engine.mutex.Unlock()
+
+	tests := map[string]struct {
+		saveSessionID string
+		revision      string
+		target        string
+		message       string
+	}{
+		"malformed revision": {saveSessionID, "00", target, "canonical decimal saveRevision"},
+		"stale revision":     {saveSessionID, "7", target, "does not match the current saveRevision"},
+		"missing session":    {"", "0", target, "saveSessionID is required"},
+		"unknown session":    {"missing", "0", target, "unknown save session"},
+		"directory target":   {saveSessionID, "0", directoryTarget, "is not a regular file"},
+	}
+	for name, testCase := range tests {
+		t.Run(name, func(t *testing.T) {
+			result, err := engine.WriteSave(
+				testCase.saveSessionID, testCase.revision, testCase.target)
+			if err == nil || !strings.Contains(err.Error(), testCase.message) {
+				t.Fatalf("WriteSave error = %v, want it to contain %q", err, testCase.message)
+			}
+			if result != (WriteSaveResult{}) {
+				t.Errorf("rejected WriteSave result = %+v, want zero value", result)
+			}
+
+			engine.mutex.Lock()
+			loaded := engine.sessions[saveSessionID]
+			_, identityStillKnown := loaded.session.ownedByID[ownedItemID]
+			if !bytes.Equal(loaded.snapshot.data, snapshotBefore) ||
+				loaded.session.revision != revisionBefore ||
+				loaded.session.dirty != dirtyBefore ||
+				len(loaded.session.ownedByID) != identitiesBefore ||
+				len(loaded.session.ownedByLocator) != identitiesBefore ||
+				!identityStillKnown {
+				t.Error("rejected WriteSave changed the live session")
+			}
+			engine.mutex.Unlock()
+
+			data, err := os.ReadFile(target)
+			if err != nil {
+				t.Fatalf("read existing target: %v", err)
+			}
+			if string(data) != "unchanged target" {
+				t.Errorf("rejected WriteSave changed target to %q", data)
+			}
+		})
 	}
 }

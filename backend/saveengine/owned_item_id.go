@@ -126,6 +126,24 @@ func (session *Session) revisionString() string {
 	return strconv.FormatUint(session.revision, 10)
 }
 
+// isCanonicalRevision accepts exactly the decimal representation emitted by
+// revisionString. Callers still compare the original string byte for byte; the
+// parsed value never becomes part of the public contract.
+func isCanonicalRevision(value string) bool {
+	parsed, err := strconv.ParseUint(value, 10, 64)
+	return err == nil && strconv.FormatUint(parsed, 10) == value
+}
+
+// advanceRevision retires every identity of the current revision and returns
+// the next revision in its public form. The caller owns the dirty-state outcome
+// and must already hold Engine.mutex.
+func (session *Session) advanceRevision() string {
+	session.revision++
+	session.ownedByLocator = make(map[ownedItemLocator]string)
+	session.ownedByID = make(map[string]ownedItemLocator)
+	return session.revisionString()
+}
+
 // commitRevision runs commit as the mutating step of the session registered
 // under saveSessionID and, only when it succeeds, advances the revision by one,
 // marks the session dirty and drops every identity minted under the previous
@@ -169,9 +187,6 @@ func (engine *Engine) commitRevision(
 	}
 
 	session := loaded.session
-	session.revision++
 	session.dirty = true
-	session.ownedByLocator = make(map[ownedItemLocator]string)
-	session.ownedByID = make(map[string]ownedItemLocator)
-	return session.revisionString(), nil
+	return session.advanceRevision(), nil
 }

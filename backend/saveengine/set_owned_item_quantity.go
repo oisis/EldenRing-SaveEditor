@@ -4,18 +4,17 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"strconv"
 )
 
 // This file holds the first mutation of SaveForge 2.0: it sets the quantity of
 // one existing physical record addressed by its opaque OwnedItemID. It creates
 // no record, removes none, merges none, moves none and reorders none. It changes
 // exactly the four quantity bytes of the addressed record inside the session's
-// private snapshot, and it never touches the file the session was loaded from —
-// there is no WriteSave yet.
+// private snapshot and never writes a file itself; persistence belongs to
+// WriteSave.
 //
-// It is an internal SaveEngine boundary, not an endpoint. The public
-// SetOwnedItemQuantity endpoint is still contract-only.
+// It is the internal SaveEngine boundary used by the public
+// SetOwnedItemQuantity endpoint.
 
 // ownedItemQuantityFlag is the high bit the game keeps on a stored quantity. The
 // two container readers mask it off with their own constant because it is not
@@ -354,18 +353,4 @@ func littleEndianUint32(value uint32) []byte {
 	raw := make([]byte, 4)
 	binary.LittleEndian.PutUint32(raw, value)
 	return raw
-}
-
-// isCanonicalRevision reports whether value is exactly what revisionString
-// produces for some revision: a non-empty decimal rendering of a uint64 with no
-// sign, no prefix, no padding, no separator and no whitespace. "0" is canonical;
-// "", "00", "+1", " 1" and "1 " are not.
-//
-// Round-tripping through the same pair of functions revisionString uses is the
-// definition of canonical, so the shape rule cannot drift from the renderer. No
-// number leaves this check: the revision itself is only ever compared as a
-// string, byte for byte.
-func isCanonicalRevision(value string) bool {
-	parsed, err := strconv.ParseUint(value, 10, 64)
-	return err == nil && strconv.FormatUint(parsed, 10) == value
 }

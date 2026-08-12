@@ -34,8 +34,8 @@ type Session struct {
 	// dirty reports whether a mutation has been committed into the private
 	// snapshot of this session since it was loaded. It starts false and only
 	// commitRevision sets it, in the same critical section as the increment, so a
-	// rejected or rolled back mutation never marks the session changed. Nothing
-	// clears it yet: no WriteSave exists.
+	// rejected or rolled back mutation never marks the session changed. A
+	// successful WriteSave clears it in its own commit critical section.
 	dirty bool
 	// ownedByLocator and ownedByID are the two directions of one identity
 	// registry, valid for the current revision only.
@@ -53,8 +53,8 @@ type SessionInfo struct {
 	Format        string `json:"format"`
 	// UnsavedChanges reports whether the private snapshot of the session carries a
 	// committed mutation. It is false for a freshly loaded session and stays false
-	// while every mutation is rejected or rolled back. It says nothing about the
-	// file on disk, which is never written at this stage.
+	// while every mutation is rejected or rolled back. A successful WriteSave
+	// clears it after persisting the validated snapshot.
 	UnsavedChanges bool `json:"unsavedChanges"`
 }
 

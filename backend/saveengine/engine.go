@@ -1,7 +1,6 @@
-// Package saveengine is the sole owner of save reading in SaveForge 2.0. The
-// current stage is read-only: it opens a local save, recognises its container,
-// validates the structure the stage depends on and creates a session. It never
-// modifies the file it opened.
+// Package saveengine owns save reading, in-memory mutation and explicit writes
+// in SaveForge 2.0. Loading remains read-only; only WriteSave writes a validated
+// snapshot to the caller's explicit target.
 package saveengine
 
 import (
@@ -14,18 +13,17 @@ import (
 // Both supported magics are four bytes long.
 const magicLength = 4
 
-// Engine owns the read-only save sessions of one backend instance. Sessions are
-// kept under their own identifier because a later GetLoadedSave reads a session
-// by its saveSessionID.
+// Engine owns the save sessions of one backend instance. Sessions are kept under
+// their own identifier because every later operation addresses one by its
+// saveSessionID.
 type Engine struct {
 	mutex    sync.Mutex
 	sessions map[string]*loadedSave
 }
 
-// loadedSave is the private state of one session: its metadata model and the
-// private, read-only snapshot of the file it was created from. Nothing here
-// leaves the package; a later GetLoadedSave will read the snapshot through the
-// engine instead of exposing it.
+// loadedSave is the private state of one session: its metadata model and mutable
+// snapshot. Nothing here leaves the package; callers read and mutate it only
+// through Engine operations.
 type loadedSave struct {
 	session  *Session
 	snapshot *codec
