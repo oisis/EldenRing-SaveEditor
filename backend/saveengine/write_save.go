@@ -4,6 +4,8 @@ import (
 	"crypto/md5"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 )
 
 // serializeContainer prepares an independent candidate for a future WriteSave.
@@ -150,6 +152,52 @@ func validateSerialized(candidate []byte, expectedPlatform Platform) error {
 				)
 			}
 		}
+	}
+	return nil
+}
+
+// writeAtomically writes candidate to a temporary file beside target and only
+// replaces target after the complete candidate has been flushed and closed.
+// Existing regular-file permissions are preserved; a new target uses 0644.
+func writeAtomically(target string, candidate []byte) error {
+	if target == "" {
+		return errors.New("write target is empty")
+	}
+
+	mode := os.FileMode(0o644)
+	info, err := os.Lstat(target)
+	switch {
+	case err == nil:
+		if !info.Mode().IsRegular() {
+			return fmt.Errorf("write target %q is not a regular file", target)
+		}
+		mode = info.Mode().Perm()
+	case !errors.Is(err, os.ErrNotExist):
+		return fmt.Errorf("cannot inspect write target %q: %w", target, err)
+	}
+
+	temporary, err := os.CreateTemp(filepath.Dir(target), ".saveforge-write-*")
+	if err != nil {
+		return fmt.Errorf("cannot create temporary save beside %q: %w", target, err)
+	}
+	temporaryPath := temporary.Name()
+	defer os.Remove(temporaryPath)
+	defer temporary.Close()
+
+	if err := temporary.Chmod(mode); err != nil {
+		return fmt.Errorf("cannot set temporary save permissions: %w", err)
+	}
+	if _, err := temporary.Write(candidate); err != nil {
+		return fmt.Errorf("cannot write temporary save: %w", err)
+	}
+	if err := temporary.Sync(); err != nil {
+		return fmt.Errorf("cannot flush temporary save: %w", err)
+	}
+	if err := temporary.Close(); err != nil {
+		return fmt.Errorf("cannot close temporary save: %w", err)
+	}
+	if err := os.Rename(temporaryPath, target); err != nil {
+		return fmt.Errorf("cannot replace write target %q: %w", target, err)
 	}
 	return nil
 }

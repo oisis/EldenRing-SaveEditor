@@ -5,6 +5,8 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"os"
+	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 )
@@ -259,5 +261,107 @@ func TestValidateSerializedDoesNotInspectResidualSlotData(t *testing.T) {
 	}
 	if err := validateSerialized(candidate, PlatformPC); err != nil {
 		t.Fatalf("validateSerialized inspected residual slot data: %v", err)
+	}
+}
+
+func TestWriteAtomicallyCreatesAndReplacesRegularFile(t *testing.T) {
+	directory := t.TempDir()
+	target := filepath.Join(directory, "save.sl2")
+
+	if err := writeAtomically(target, []byte("first candidate")); err != nil {
+		t.Fatalf("writeAtomically new target: %v", err)
+	}
+	data, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read new target: %v", err)
+	}
+	if string(data) != "first candidate" {
+		t.Fatalf("new target = %q, want %q", data, "first candidate")
+	}
+	if runtime.GOOS != "windows" {
+		info, err := os.Stat(target)
+		if err != nil {
+			t.Fatalf("stat new target: %v", err)
+		}
+		if got := info.Mode().Perm(); got != 0o644 {
+			t.Errorf("new target permissions = %04o, want 0644", got)
+		}
+	}
+
+	if err := os.Chmod(target, 0o600); err != nil {
+		t.Fatalf("chmod existing target: %v", err)
+	}
+	if err := writeAtomically(target, []byte("replacement")); err != nil {
+		t.Fatalf("writeAtomically existing target: %v", err)
+	}
+	data, err = os.ReadFile(target)
+	if err != nil {
+		t.Fatalf("read replaced target: %v", err)
+	}
+	if string(data) != "replacement" {
+		t.Fatalf("replaced target = %q, want %q", data, "replacement")
+	}
+	if runtime.GOOS != "windows" {
+		info, err := os.Stat(target)
+		if err != nil {
+			t.Fatalf("stat replaced target: %v", err)
+		}
+		if got := info.Mode().Perm(); got != 0o600 {
+			t.Errorf("replaced target permissions = %04o, want 0600", got)
+		}
+	}
+
+	entries, err := os.ReadDir(directory)
+	if err != nil {
+		t.Fatalf("read target directory: %v", err)
+	}
+	for _, entry := range entries {
+		if strings.HasPrefix(entry.Name(), ".saveforge-write-") {
+			t.Errorf("temporary file leaked after successful write: %q", entry.Name())
+		}
+	}
+}
+
+func TestWriteAtomicallyRejectsUnsafeTargetsWithoutChangingThem(t *testing.T) {
+	directory := t.TempDir()
+	if err := writeAtomically("", []byte("candidate")); err == nil ||
+		!strings.Contains(err.Error(), "write target is empty") {
+		t.Errorf("empty-target error = %v", err)
+	}
+
+	if err := writeAtomically(directory, []byte("candidate")); err == nil ||
+		!strings.Contains(err.Error(), "is not a regular file") {
+		t.Errorf("directory-target error = %v", err)
+	}
+
+	realTarget := filepath.Join(directory, "existing.sl2")
+	if err := os.WriteFile(realTarget, []byte("unchanged"), 0o600); err != nil {
+		t.Fatalf("write symlink target: %v", err)
+	}
+	symlinkTarget := filepath.Join(directory, "save-link.sl2")
+	if err := os.Symlink(realTarget, symlinkTarget); err != nil {
+		t.Skipf("cannot create symlink on this platform: %v", err)
+	}
+	if err := writeAtomically(symlinkTarget, []byte("candidate")); err == nil ||
+		!strings.Contains(err.Error(), "is not a regular file") {
+		t.Errorf("symlink-target error = %v", err)
+	}
+	data, err := os.ReadFile(realTarget)
+	if err != nil {
+		t.Fatalf("read symlink destination: %v", err)
+	}
+	if string(data) != "unchanged" {
+		t.Errorf("rejected symlink write changed destination to %q", data)
+	}
+}
+
+func TestWriteAtomicallyRejectsMissingParentDirectory(t *testing.T) {
+	target := filepath.Join(t.TempDir(), "missing", "save.sl2")
+	if err := writeAtomically(target, []byte("candidate")); err == nil ||
+		!strings.Contains(err.Error(), "cannot create temporary save") {
+		t.Fatalf("missing-parent error = %v", err)
+	}
+	if _, err := os.Lstat(target); !os.IsNotExist(err) {
+		t.Fatalf("rejected write created target: %v", err)
 	}
 }
