@@ -43,6 +43,21 @@ func LoadSave(
 | `source` | `string` | Path of a local save file. It is passed to SaveEngine unchanged: it is never rewritten, resolved against a search path, or guessed from a file name. |
 | `expectedPlatform` | `string` | The platform the caller expects, or an empty value for no expectation. |
 
+The local HTTP request carries both values as a JSON body:
+
+```http
+POST /api/v1/save-sessions
+Content-Type: application/json
+```
+
+The `Content-Type` header is required and must be `application/json`. A valid
+media-type parameter is accepted, so `application/json; charset=utf-8` is the
+same media type. A missing header, a malformed header, and any other media type
+are rejected with `400` before the body is decoded and before the endpoint or
+SaveEngine is called, so a refused request opens no file and creates no session.
+The rule exists because a `POST` carrying `text/plain` or no `Content-Type` is a
+CORS simple request, which a browser sends without a preflight.
+
 ### `expectedPlatform`
 
 - The accepted values are the empty string, `pc`, and `ps4`.

@@ -34,21 +34,14 @@ var SetOwnedItemQuantityDefinition = contract.MustDefine(contract.Definition{
 	Description:                "Sets the quantity of an existing item instance while respecting stack and container limits.",
 })
 
-// SetOwnedItemQuantityResult reports the one committed quantity change.
+// SetOwnedItemQuantityResult is the public name of the receipt SaveEngine owns.
 //
-// SaveRevision is the revision the change committed under, which is the previous
-// one plus exactly 1. OwnedItemID is echoed back exactly as supplied and is
-// already stale: the commit retired every identity of the previous revision, so
-// it identifies the performed operation rather than a record the caller may
-// address again. Reading the container back under the new revision mints fresh
-// identities.
-type SetOwnedItemQuantityResult struct {
-	SaveSessionID string `json:"saveSessionID"`
-	SaveRevision  string `json:"saveRevision"`
-	OwnedItemID   string `json:"ownedItemID"`
-	CharacterID   int    `json:"characterID"`
-	Quantity      uint32 `json:"quantity"`
-}
+// The mutation and its result model belong to SaveEngine, so this is an alias
+// rather than a copy: the endpoint adds no field, drops none and renames none,
+// and the JSON contract is whatever saveengine.SetOwnedItemQuantityResult
+// declares. See that type for what SaveRevision and the deliberately stale
+// OwnedItemID mean.
+type SetOwnedItemQuantityResult = saveengine.SetOwnedItemQuantityResult
 
 // SetOwnedItemQuantity sets the stored quantity of the one owned instance
 // ownedItemID was minted for.
@@ -153,7 +146,7 @@ func SetOwnedItemQuantity(
 			"owned item %q lives in unknown container %q", ownedItemID, owned.Container)
 	}
 
-	committed, err := engine.SetOwnedItemQuantity(
+	return engine.SetOwnedItemQuantity(
 		saveSessionID,
 		characterID,
 		ownedItemID,
@@ -163,15 +156,4 @@ func SetOwnedItemQuantity(
 		min(stack.Rules.MaxPerStack, maxContainerTotal),
 		maxContainerTotal,
 	)
-	if err != nil {
-		return SetOwnedItemQuantityResult{}, err
-	}
-
-	return SetOwnedItemQuantityResult{
-		SaveSessionID: committed.SaveSessionID,
-		SaveRevision:  committed.SaveRevision,
-		OwnedItemID:   committed.OwnedItemID,
-		CharacterID:   committed.CharacterID,
-		Quantity:      committed.Quantity,
-	}, nil
 }

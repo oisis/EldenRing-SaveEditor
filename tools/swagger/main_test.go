@@ -591,7 +591,9 @@ func writePCFixture(t *testing.T) string {
 
 // doSave serves one save-session request against a handler that shares the given
 // engine. A nil engine is the -allow-external-bind mode, in which no
-// save-session route is registered.
+// save-session route is registered. The request mirrors what a documented client
+// sends: a body is declared as application/json, and a bodyless one declares
+// nothing.
 func doSave(
 	t *testing.T,
 	saveEngine *saveengine.Engine,
@@ -601,13 +603,36 @@ func doSave(
 ) *httptest.ResponseRecorder {
 	t.Helper()
 
+	contentType := ""
+	if body != "" {
+		contentType = "application/json"
+	}
+	return doSaveTyped(t, saveEngine, method, target, body, contentType)
+}
+
+// doSaveTyped is doSave with a caller-chosen Content-Type. An empty contentType
+// sends no header at all.
+func doSaveTyped(
+	t *testing.T,
+	saveEngine *saveengine.Engine,
+	method string,
+	target string,
+	body string,
+	contentType string,
+) *httptest.ResponseRecorder {
+	t.Helper()
+
 	var reader io.Reader
 	if body != "" {
 		reader = strings.NewReader(body)
 	}
+	request := httptest.NewRequest(method, target, reader)
+	if contentType != "" {
+		request.Header.Set("Content-Type", contentType)
+	}
 	recorder := httptest.NewRecorder()
 	newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
-		ServeHTTP(recorder, httptest.NewRequest(method, target, reader))
+		ServeHTTP(recorder, request)
 	return recorder
 }
 
@@ -696,6 +721,61 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 		http.StatusBadRequest,
 		wantUnknown,
 	)
+}
+
+// A POST declaring text/plain, or declaring nothing at all, is a CORS simple
+// request, so a foreign page can send it without a preflight. Both bodied POST
+// routes must refuse it before they create a session or write a file, and must
+// still accept the media type with a charset parameter.
+func TestBodiedPostRoutesRequireJSONContentType(t *testing.T) {
+	saveEngine := saveengine.New()
+	source := writePCFixture(t)
+	loadBody := `{"source":` + strconv.Quote(source) + `,"expectedPlatform":"pc"}`
+
+	for _, contentType := range []string{"text/plain", ""} {
+		rejected := doSaveTyped(t, saveEngine, http.MethodPost, "/api/v1/save-sessions", loadBody, contentType)
+		if rejected.Code != http.StatusBadRequest {
+			t.Fatalf("LoadSave with Content-Type %q: status = %d, want 400 (body %q)",
+				contentType, rejected.Code, rejected.Body.String())
+		}
+		var envelope map[string]string
+		if err := json.Unmarshal(rejected.Body.Bytes(), &envelope); err != nil {
+			t.Fatalf("decode rejection body %q: %v", rejected.Body.String(), err)
+		}
+		if envelope["error"] == "" {
+			t.Fatalf("the rejection carries no error message: %q", rejected.Body.String())
+		}
+	}
+
+	created := doSaveTyped(t, saveEngine, http.MethodPost, "/api/v1/save-sessions", loadBody,
+		"application/json; charset=utf-8")
+	assertOK(t, created, "POST /api/v1/save-sessions with a charset parameter")
+	var session saveengine.SessionInfo
+	if err := json.Unmarshal(created.Body.Bytes(), &session); err != nil {
+		t.Fatalf("decode LoadSave body %q: %v", created.Body.String(), err)
+	}
+
+	target := filepath.Join(t.TempDir(), "written.sl2")
+	writeBody := `{"expectedRevision":"0","target":` + strconv.Quote(target) + `}`
+	writeTarget := "/api/v1/save-sessions/" + session.SaveSessionID + "/write"
+
+	for _, contentType := range []string{"text/plain", ""} {
+		refused := doSaveTyped(t, saveEngine, http.MethodPost, writeTarget, writeBody, contentType)
+		if refused.Code != http.StatusBadRequest {
+			t.Fatalf("WriteSave with Content-Type %q: status = %d, want 400 (body %q)",
+				contentType, refused.Code, refused.Body.String())
+		}
+		if _, err := os.Stat(target); !os.IsNotExist(err) {
+			t.Fatalf("the rejected WriteSave request still touched the target: %v", err)
+		}
+	}
+
+	written := doSaveTyped(t, saveEngine, http.MethodPost, writeTarget, writeBody,
+		"application/json; charset=utf-8")
+	assertOK(t, written, "POST /api/v1/save-sessions/{id}/write with a charset parameter")
+	if _, err := os.Stat(target); err != nil {
+		t.Fatalf("the accepted WriteSave request wrote no target: %v", err)
+	}
 }
 
 func TestSaveCharacterRoutesMatchGetters(t *testing.T) {
@@ -971,7 +1051,24 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, exists := document.Comps.Schemas["ResourceID"]; exists {
 		t.Fatal("openapi.json still declares the removed ResourceID schema")
 	}
+	assertQuantityFitsTheRecord(t, document.Comps.Schemas)
 	assertRelationEndpointsAreResourceRefs(t, document.Comps.Schemas)
+}
+
+// SaveEngine stores a quantity in 31 bits because 0x80000000 is a preserved
+// record flag, so a document promising the full uint32 range would advertise
+// values SetOwnedItemQuantity rejects.
+func assertQuantityFitsTheRecord(t *testing.T, schemas map[string]any) {
+	t.Helper()
+
+	for _, name := range []string{"SetOwnedItemQuantityRequest", "SetOwnedItemQuantityResult"} {
+		schema, _ := schemas[name].(map[string]any)
+		properties, _ := schema["properties"].(map[string]any)
+		quantity, _ := properties["quantity"].(map[string]any)
+		if quantity["maximum"] != float64(2147483647) {
+			t.Fatalf("%s.quantity maximum = %v, want 2147483647", name, quantity["maximum"])
+		}
+	}
 }
 
 // A save-session route is registered only when the explorer runs without

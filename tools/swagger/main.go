@@ -12,6 +12,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"mime"
 	"net"
 	"net/http"
 	"os"
@@ -309,6 +310,30 @@ func withPortalCORS(next http.Handler) http.Handler {
 	})
 }
 
+// requireJSONBody refuses a POST body that does not declare application/json.
+//
+// A POST carrying text/plain, a form media type or no Content-Type at all is a
+// CORS simple request: the browser sends it without a preflight, so a foreign
+// page could reach a session-creating or file-writing route even though the
+// refused origin never gets to read the answer. The check runs before the body
+// is decoded and before any endpoint or SaveEngine call, so a rejected request
+// performs no operation. Parameters are allowed, because
+// "application/json; charset=utf-8" is the same media type.
+func requireJSONBody(request *http.Request) error {
+	declared := request.Header.Get("Content-Type")
+	if declared == "" {
+		return errors.New("Content-Type must be application/json; the request declared none")
+	}
+	mediaType, _, err := mime.ParseMediaType(declared)
+	if err != nil {
+		return fmt.Errorf("Content-Type %q is not a valid media type; it must be application/json", declared)
+	}
+	if mediaType != "application/json" {
+		return fmt.Errorf("Content-Type must be application/json; the request declared %q", mediaType)
+	}
+	return nil
+}
+
 // loadSaveRequest is the JSON body of POST /api/v1/save-sessions. Both fields
 // reach LoadSave exactly as sent: they are never trimmed, normalised or given a
 // default here.
@@ -351,6 +376,10 @@ func registerSaveSessionRoutes(
 	gameCatalog *gamecatalog.Catalog,
 ) {
 	mux.HandleFunc("POST /api/v1/save-sessions", func(writer http.ResponseWriter, request *http.Request) {
+		if err := requireJSONBody(request); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
 		var body loadSaveRequest
 		decoder := json.NewDecoder(request.Body)
 		// An unknown field is a client mistake, not something to ignore silently.
@@ -377,6 +406,10 @@ func registerSaveSessionRoutes(
 	})
 
 	mux.HandleFunc("POST /api/v1/save-sessions/{saveSessionID}/write", func(writer http.ResponseWriter, request *http.Request) {
+		if err := requireJSONBody(request); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
 		var body writeSaveRequest
 		decoder := json.NewDecoder(request.Body)
 		decoder.DisallowUnknownFields()

@@ -2300,8 +2300,8 @@
             "type": "integer",
             "format": "int64",
             "minimum": 1,
-            "maximum": 4294967295,
-            "description": "Requested stored quantity. It is never clamped; the resolved item and container limits may impose a lower maximum."
+            "maximum": 2147483647,
+            "description": "Requested stored quantity. The record stores it in 31 bits, because the high bit 0x80000000 of the raw field is a preserved flag and not part of the count. It is never clamped; the resolved item and container limits may impose a lower maximum."
           },
           "expectedRevision": {
             "type": "string",
@@ -2340,7 +2340,7 @@
             "type": "integer",
             "format": "int64",
             "minimum": 1,
-            "maximum": 4294967295
+            "maximum": 2147483647
           }
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "quantity"]

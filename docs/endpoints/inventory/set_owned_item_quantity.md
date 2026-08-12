@@ -98,6 +98,10 @@ shape. The full identity contract lives in
 - `0` is an error, not a removal: this endpoint never removes a record.
 - The stored high bit (`0x80000000`) is not part of the count. It is preserved by
   SaveEngine exactly as the game left it: never set here, never cleared here.
+- Because that highest bit does not belong to the number, the count occupies the
+  remaining 31 bits and the accepted range is `1..2147483647`, not the full
+  `uint32` range. A larger value is rejected by SaveEngine before any byte
+  changes, whatever the item and container limits are.
 
 ### `expectedRevision`
 
@@ -215,6 +219,7 @@ no `UnsavedChanges` flag and no identity.
 | `storage.maxStorage` is unknown or `0`, for a Storage record | `owned item "<id>": item 0x<gameID> carries no storage limit`. |
 | The record lives in an unknown container | `owned item "<id>" lives in unknown container "<container>"`. |
 | `quantity` is `0` | `quantity must be at least 1; removing a record is a separate operation`. |
+| `quantity` exceeds `2147483647` | `quantity <n> exceeds the 2147483647 the record can store`. The highest bit of the raw field is a preserved flag, so it is not available to the count. |
 | `quantity` exceeds `maxPerRecord` | `quantity <n> exceeds the limit of <max> per record`. Nothing is clamped. |
 | `quantity` would raise the container total above `maxContainerTotal` | The request is rejected with the resulting total and the limit named. Nothing is merged, deduplicated, moved or reindexed to make it fit. |
 | `expectedRevision` is not a canonical decimal revision | `expectedRevision must be a canonical decimal saveRevision; got "<value>"`. |

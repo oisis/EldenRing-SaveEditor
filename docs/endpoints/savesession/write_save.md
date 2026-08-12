@@ -58,6 +58,15 @@ The JSON body is strict. Both fields are required, and unknown fields are
 rejected. Neither value is trimmed, normalised, parsed by the transport, or
 given a default.
 
+The `Content-Type` header is required and must be `application/json`. A valid
+media-type parameter is accepted, so `application/json; charset=utf-8` is the
+same media type. A missing header, a malformed header, and any other media type
+are rejected with `400` before the body is decoded and before the endpoint or
+SaveEngine is called, so a refused request writes nothing and advances no
+revision. The rule exists because a `POST` carrying `text/plain` or no
+`Content-Type` is a CORS simple request, which a browser sends without a
+preflight.
+
 ## Output
 
 ```go
