@@ -9,9 +9,11 @@ import (
 )
 
 // codec is the only component of SaveForge 2.0 with direct access to raw save
-// bytes. It reads a file once into a private in-memory snapshot, never writes,
-// and exposes nothing but private, bounded reads used to check magics, length
-// and data ranges.
+// bytes. It reads a file once into a private in-memory snapshot and exposes
+// nothing but private, bounded accessors: the reads used to check magics, length
+// and data ranges, and one equally bounded write into the snapshot. It never
+// touches the file it was created from, which is closed before openCodec
+// returns.
 type codec struct {
 	data []byte
 }
@@ -67,6 +69,23 @@ func (source *codec) readAt(offset int64, length int) ([]byte, error) {
 	buffer := make([]byte, length)
 	copy(buffer, source.data[offset:])
 	return buffer, nil
+}
+
+// writeAt replaces the range [offset, offset+len(data)) of the snapshot with
+// data. The whole range is checked against the snapshot before the first byte is
+// changed, so a range reaching past the end is rejected without a partial write,
+// and an accepted write touches exactly that range and nothing else.
+//
+// It writes into the private in-memory snapshot only. No file is opened and
+// nothing is persisted; the user's save is untouched until a later WriteSave
+// exists.
+func (source *codec) writeAt(offset int64, data []byte) error {
+	if !source.covers(offset, int64(len(data))) {
+		return fmt.Errorf("range [0x%X, 0x%X) is outside the file (0x%X bytes)",
+			offset, offset+int64(len(data)), source.length())
+	}
+	copy(source.data[offset:], data)
+	return nil
 }
 
 // indexIn reports the absolute offset of the first occurrence of pattern inside

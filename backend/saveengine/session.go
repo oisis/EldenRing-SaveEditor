@@ -15,9 +15,10 @@ const (
 	PlatformPS4 Platform = "ps4"
 )
 
-// Session is the read-only model of one loaded save. It deliberately holds no
-// file path, no handle, no offsets, no raw bytes and no character data: the
-// current stage only recognises and validates a container.
+// Session is the model of one loaded save. It deliberately holds no file path,
+// no handle, no offsets, no raw bytes and no character data: it recognises and
+// validates a container and carries the identity state of the records read from
+// it.
 //
 // revision, ownedByLocator, ownedByID and ownedSeq are the private owned-item
 // identity state described in owned_item_id.go. None of them is part of
@@ -30,6 +31,12 @@ type Session struct {
 	// revision is the private saveRevision of this session. It starts at 0 and
 	// only commitRevision advances it.
 	revision uint64
+	// dirty reports whether a mutation has been committed into the private
+	// snapshot of this session since it was loaded. It starts false and only
+	// commitRevision sets it, in the same critical section as the increment, so a
+	// rejected or rolled back mutation never marks the session changed. Nothing
+	// clears it yet: no WriteSave exists.
+	dirty bool
 	// ownedByLocator and ownedByID are the two directions of one identity
 	// registry, valid for the current revision only.
 	ownedByLocator map[ownedItemLocator]string
@@ -44,8 +51,10 @@ type SessionInfo struct {
 	SaveSessionID string `json:"saveSessionID"`
 	Platform      string `json:"platform"`
 	Format        string `json:"format"`
-	// UnsavedChanges is always false at this stage: a read-only session cannot
-	// change anything.
+	// UnsavedChanges reports whether the private snapshot of the session carries a
+	// committed mutation. It is false for a freshly loaded session and stays false
+	// while every mutation is rejected or rolled back. It says nothing about the
+	// file on disk, which is never written at this stage.
 	UnsavedChanges bool `json:"unsavedChanges"`
 }
 
@@ -78,6 +87,6 @@ func (session *Session) Info() SessionInfo {
 		SaveSessionID:  session.id,
 		Platform:       string(session.platform),
 		Format:         session.format,
-		UnsavedChanges: false,
+		UnsavedChanges: session.dirty,
 	}
 }

@@ -127,40 +127,51 @@ func (session *Session) revisionString() string {
 }
 
 // commitRevision runs commit as the mutating step of the session registered
-// under saveSessionID and, only when it succeeds, advances the revision by one
-// and drops every identity minted under the previous one. The registry is not
-// rebuilt here: it re-materialises when a container is read again.
+// under saveSessionID and, only when it succeeds, advances the revision by one,
+// marks the session dirty and drops every identity minted under the previous
+// revision. The registry is not rebuilt here: it re-materialises when a
+// container is read again. The new revision is returned as its canonical decimal
+// string, so the caller reports exactly the value the next request has to match.
 //
-// A commit error leaves the revision, both registry maps and the sequence
-// exactly as they were, so a validation failure or a rollback never invalidates
-// an identity for a change that did not happen.
+// A commit error leaves the revision, the dirty flag, both registry maps and the
+// sequence exactly as they were and returns an empty revision, so a validation
+// failure or a rollback never invalidates an identity, and never claims an
+// unsaved change, for a change that did not happen.
 //
-// commit runs under the existing process-wide Engine.mutex, so no caller can
-// observe a committed change with a stale revision or the reverse.
+// commit receives the loaded session it is about to mutate and runs under the
+// existing process-wide Engine.mutex, which this function takes exactly once. It
+// may therefore use every session and container helper that requires the lock to
+// be held already, and must not call a public engine method, which would take
+// the same lock again.
 //
-// ponytail: this is the whole mutation path. The engine is read-only today, so
-// there is no exported mutation API and no transaction framework — the callback
-// is the smallest hook that makes the increment, the non-increment and the
-// invalidation testable. Widen it when the first real mutation lands.
-func (engine *Engine) commitRevision(saveSessionID string, commit func() error) error {
+// ponytail: this is the whole mutation path. The callback is the smallest hook
+// that keeps the increment, the non-increment and the invalidation in one place;
+// there is no transaction framework, no mutation-plan type and no per-session
+// lock. Widen it only when a mutation needs something this signature cannot
+// express.
+func (engine *Engine) commitRevision(
+	saveSessionID string,
+	commit func(*loadedSave) error,
+) (string, error) {
 	if saveSessionID == "" {
-		return errors.New("saveSessionID is required")
+		return "", errors.New("saveSessionID is required")
 	}
 
 	engine.mutex.Lock()
 	defer engine.mutex.Unlock()
 	loaded, exists := engine.sessions[saveSessionID]
 	if !exists {
-		return fmt.Errorf("unknown save session %q", saveSessionID)
+		return "", fmt.Errorf("unknown save session %q", saveSessionID)
 	}
 
-	if err := commit(); err != nil {
-		return err
+	if err := commit(loaded); err != nil {
+		return "", err
 	}
 
 	session := loaded.session
 	session.revision++
+	session.dirty = true
 	session.ownedByLocator = make(map[ownedItemLocator]string)
 	session.ownedByID = make(map[string]ownedItemLocator)
-	return nil
+	return session.revisionString(), nil
 }

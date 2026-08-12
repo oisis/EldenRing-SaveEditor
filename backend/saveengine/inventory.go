@@ -263,19 +263,9 @@ func (engine *Engine) GetInventory(
 // slot is active: an inactive slot is answered from its activity flag alone and
 // its data is never searched.
 func readInventoryRecords(loaded *loadedSave, characterID int) ([]InventoryRecord, error) {
-	base, slotEnd := inventorySlotBounds(loaded.session.platform, characterID)
-
-	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, inventoryHeldAnchor)
+	sectionAt, err := inventoryHeldSectionAt(loaded, characterID)
 	if err != nil {
-		return nil, fmt.Errorf("cannot search the inventory of character %d: %w", characterID, err)
-	}
-	if anchor < 0 {
-		return nil, fmt.Errorf("character %d carries no inventory anchor", characterID)
-	}
-
-	sectionAt := anchor + inventoryHeldCommonOffset
-	if sectionAt+inventoryHeldSectionSize > slotEnd {
-		return nil, fmt.Errorf("inventory of character %d does not fit into its slot", characterID)
+		return nil, err
 	}
 	section, err := loaded.snapshot.readAt(sectionAt, inventoryHeldSectionSize)
 	if err != nil {
@@ -295,6 +285,34 @@ func readInventoryRecords(loaded *loadedSave, characterID int) ([]InventoryRecor
 		})
 	}
 	return records, nil
+}
+
+// inventoryHeldSectionAt locates the InventoryHeld section of one active slot
+// and returns the absolute offset of its first common record.
+//
+// It is the single source of truth for the anchor of this container and for the
+// bounds of the section behind it: readInventoryRecords reads the section from
+// here, and the quantity setter derives the offset of one record from the same
+// value, so a reader and a writer can never disagree about where a row lives.
+//
+// The caller must already hold Engine.mutex and must have established that the
+// slot is active.
+func inventoryHeldSectionAt(loaded *loadedSave, characterID int) (int64, error) {
+	base, slotEnd := inventorySlotBounds(loaded.session.platform, characterID)
+
+	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, inventoryHeldAnchor)
+	if err != nil {
+		return 0, fmt.Errorf("cannot search the inventory of character %d: %w", characterID, err)
+	}
+	if anchor < 0 {
+		return 0, fmt.Errorf("character %d carries no inventory anchor", characterID)
+	}
+
+	sectionAt := anchor + inventoryHeldCommonOffset
+	if sectionAt+inventoryHeldSectionSize > slotEnd {
+		return 0, fmt.Errorf("inventory of character %d does not fit into its slot", characterID)
+	}
+	return sectionAt, nil
 }
 
 // appendInventoryRecords decodes one physical section and appends its non-empty

@@ -308,36 +308,9 @@ func (engine *Engine) GetStorage(
 // slot is active: an inactive slot is answered from its activity flag alone and
 // its data is never searched.
 func readStorageRecords(loaded *loadedSave, characterID int) ([]StorageRecord, error) {
-	base, slotEnd := storageSlotBounds(loaded.session.platform, characterID)
-
-	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, storageAnchor)
+	sectionAt, err := storageBoxSectionAt(loaded, characterID)
 	if err != nil {
-		return nil, fmt.Errorf("cannot search the storage of character %d: %w", characterID, err)
-	}
-	if anchor < 0 {
-		return nil, fmt.Errorf("character %d carries no storage anchor", characterID)
-	}
-
-	countAt := anchor + storageProjectileCountOffset
-	if countAt+4 > slotEnd {
-		return nil, fmt.Errorf("projectile count of character %d lies outside its slot", characterID)
-	}
-	rawCount, err := loaded.snapshot.readAt(countAt, 4)
-	if err != nil {
-		return nil, fmt.Errorf("cannot read projectile count of character %d: %w", characterID, err)
-	}
-	// The count is widened to int64 before it is multiplied, so a declared
-	// length can never wrap into a small, seemingly valid offset.
-	count := int64(binary.LittleEndian.Uint32(rawCount))
-	if count > storageMaxProjectileRecords {
-		return nil, fmt.Errorf(
-			"character %d declares %d projectile records, want at most %d",
-			characterID, count, storageMaxProjectileRecords)
-	}
-
-	sectionAt := countAt + 4 + count*storageProjectileRecordSize + storageBlocksBeforeSection
-	if sectionAt+storageSectionSize > slotEnd {
-		return nil, fmt.Errorf("storage of character %d does not fit into its slot", characterID)
+		return nil, err
 	}
 	section, err := loaded.snapshot.readAt(sectionAt, storageSectionSize)
 	if err != nil {
@@ -357,6 +330,53 @@ func readStorageRecords(loaded *loadedSave, characterID int) ([]StorageRecord, e
 		})
 	}
 	return records, nil
+}
+
+// storageBoxSectionAt walks one active slot across the one dynamic length the
+// save itself declares and returns the absolute offset of the first byte of its
+// Storage Box.
+//
+// It is the single source of truth for the anchor of this container, the
+// projectile count and the bounds of the section behind them:
+// readStorageRecords reads the section from here, and the quantity setter
+// derives the offset of one record from the same value, so a reader and a writer
+// can never disagree about where a row lives.
+//
+// The caller must already hold Engine.mutex and must have established that the
+// slot is active.
+func storageBoxSectionAt(loaded *loadedSave, characterID int) (int64, error) {
+	base, slotEnd := storageSlotBounds(loaded.session.platform, characterID)
+
+	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, storageAnchor)
+	if err != nil {
+		return 0, fmt.Errorf("cannot search the storage of character %d: %w", characterID, err)
+	}
+	if anchor < 0 {
+		return 0, fmt.Errorf("character %d carries no storage anchor", characterID)
+	}
+
+	countAt := anchor + storageProjectileCountOffset
+	if countAt+4 > slotEnd {
+		return 0, fmt.Errorf("projectile count of character %d lies outside its slot", characterID)
+	}
+	rawCount, err := loaded.snapshot.readAt(countAt, 4)
+	if err != nil {
+		return 0, fmt.Errorf("cannot read projectile count of character %d: %w", characterID, err)
+	}
+	// The count is widened to int64 before it is multiplied, so a declared
+	// length can never wrap into a small, seemingly valid offset.
+	count := int64(binary.LittleEndian.Uint32(rawCount))
+	if count > storageMaxProjectileRecords {
+		return 0, fmt.Errorf(
+			"character %d declares %d projectile records, want at most %d",
+			characterID, count, storageMaxProjectileRecords)
+	}
+
+	sectionAt := countAt + 4 + count*storageProjectileRecordSize + storageBlocksBeforeSection
+	if sectionAt+storageSectionSize > slotEnd {
+		return 0, fmt.Errorf("storage of character %d does not fit into its slot", characterID)
+	}
+	return sectionAt, nil
 }
 
 // appendStorageRecords decodes one physical section and appends its non-empty
