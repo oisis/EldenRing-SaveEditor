@@ -3,6 +3,8 @@ package saveengine
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/binary"
+	"os"
 	"strings"
 	"testing"
 )
@@ -113,5 +115,149 @@ func TestSerializeContainerRejectsShortPCSnapshotWithoutChangingIt(t *testing.T)
 	}
 	if !bytes.Equal(original, before) {
 		t.Error("rejected PC serialization changed the session snapshot")
+	}
+}
+
+func TestValidateSerializedReloadsOwnedItemsOnBothPlatformsWithoutTouchingTheSession(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			engine := New()
+			info, err := engine.LoadSave(writeOwnedItemContainerFixture(t, platform), "")
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			engine.mutex.Lock()
+			loaded := engine.sessions[info.SaveSessionID]
+			candidate, err := serializeContainer(loaded)
+			beforeRevision := loaded.session.revision
+			beforeDirty := loaded.session.dirty
+			beforeIDs := len(loaded.session.ownedByID)
+			engine.mutex.Unlock()
+			if err != nil {
+				t.Fatalf("serializeContainer: %v", err)
+			}
+			beforeCandidate := bytes.Clone(candidate)
+
+			if err := validateSerialized(candidate, platform); err != nil {
+				t.Fatalf("validateSerialized: %v", err)
+			}
+			if !bytes.Equal(candidate, beforeCandidate) {
+				t.Error("validation changed the serialized candidate")
+			}
+
+			engine.mutex.Lock()
+			if loaded.session.revision != beforeRevision || loaded.session.dirty != beforeDirty ||
+				len(loaded.session.ownedByID) != beforeIDs || len(loaded.session.ownedByLocator) != beforeIDs {
+				t.Errorf(
+					"validation changed the live session: revision %d, dirty %v, IDs %d/%d; want %d, %v, %d/%d",
+					loaded.session.revision,
+					loaded.session.dirty,
+					len(loaded.session.ownedByID),
+					len(loaded.session.ownedByLocator),
+					beforeRevision,
+					beforeDirty,
+					beforeIDs,
+					beforeIDs,
+				)
+			}
+			engine.mutex.Unlock()
+		})
+	}
+}
+
+func TestValidateSerializedRejectsWrongPlatformAndMalformedContainer(t *testing.T) {
+	data := make([]byte, pcFixtureSize)
+	copy(data, pcHeader())
+	candidate, err := serializeContainer(serializationTestLoaded(PlatformPC, data))
+	if err != nil {
+		t.Fatalf("serializeContainer: %v", err)
+	}
+
+	if err := validateSerialized(candidate, PlatformPS4); err == nil ||
+		!strings.Contains(err.Error(), "is a pc save, expected ps4") {
+		t.Errorf("wrong-platform error = %v", err)
+	}
+	if err := validateSerialized(candidate, Platform("other")); err == nil ||
+		!strings.Contains(err.Error(), `unknown expected platform "other"`) {
+		t.Errorf("unknown-platform error = %v", err)
+	}
+
+	malformed := bytes.Clone(candidate)
+	binary.LittleEndian.PutUint32(malformed[pcEntryCountOffset:], pcEntryCount-1)
+	if err := validateSerialized(malformed, PlatformPC); err == nil ||
+		!strings.Contains(err.Error(), "declares 11 BND4 entries, want 12") {
+		t.Errorf("malformed-container error = %v", err)
+	}
+	if err := validateSerialized([]byte{1, 2, 3}, PlatformPC); err == nil ||
+		!strings.Contains(err.Error(), "too short to identify") {
+		t.Errorf("short-candidate error = %v", err)
+	}
+	if err := validateSerialized([]byte{1, 2, 3, 4}, PlatformPC); err == nil ||
+		!strings.Contains(err.Error(), "neither a native PC nor a native PS4 container") {
+		t.Errorf("unknown-container error = %v", err)
+	}
+}
+
+func TestValidateSerializedRejectsMalformedActiveOwnedItems(t *testing.T) {
+	cases := map[string]struct {
+		mutate  func([]byte)
+		message string
+	}{
+		"missing GaItem marker": {
+			mutate: func(data []byte) {
+				slotBase := pcSlotDataOffset + ownedContainerTestSlot*pcSlotBlockSize
+				clear(data[slotBase+ownedContainerTestAnchorAt : slotBase+ownedContainerTestAnchorAt+int64(len(gaItemAnchor))])
+			},
+			message: "slot carries no GaItem marker",
+		},
+		"unresolvable Inventory handle": {
+			mutate: func(data []byte) {
+				slotBase := pcSlotDataOffset + ownedContainerTestSlot*pcSlotBlockSize
+				recordAt := slotBase + ownedContainerTestAnchorAt + inventoryHeldCommonOffset +
+					ownedContainerTestCommonIndex*inventoryHeldRecordSize
+				binary.LittleEndian.PutUint32(data[recordAt:], gaItemWeaponHandle|1)
+			},
+			message: "inventory record common/1: GaItem handle 0x80000001 has no record",
+		},
+	}
+
+	for name, testCase := range cases {
+		t.Run(name, func(t *testing.T) {
+			path := writeOwnedItemContainerFixture(t, PlatformPC)
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("read synthetic fixture: %v", err)
+			}
+			testCase.mutate(data)
+			candidate, err := serializeContainer(serializationTestLoaded(PlatformPC, data))
+			if err != nil {
+				t.Fatalf("serializeContainer: %v", err)
+			}
+
+			if err := validateSerialized(candidate, PlatformPC); err == nil ||
+				!strings.Contains(err.Error(), testCase.message) {
+				t.Errorf("validateSerialized error = %v, want it to contain %q", err, testCase.message)
+			}
+		})
+	}
+}
+
+func TestValidateSerializedDoesNotInspectResidualSlotData(t *testing.T) {
+	path := writeOwnedItemContainerFixture(t, PlatformPC)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read synthetic fixture: %v", err)
+	}
+	data[pcUserData10DataOffset+userData10ActiveFlagsOffset+ownedContainerTestSlot] = 0
+	slotBase := pcSlotDataOffset + ownedContainerTestSlot*pcSlotBlockSize
+	clear(data[slotBase+ownedContainerTestAnchorAt : slotBase+ownedContainerTestAnchorAt+int64(len(gaItemAnchor))])
+
+	candidate, err := serializeContainer(serializationTestLoaded(PlatformPC, data))
+	if err != nil {
+		t.Fatalf("serializeContainer: %v", err)
+	}
+	if err := validateSerialized(candidate, PlatformPC); err != nil {
+		t.Fatalf("validateSerialized inspected residual slot data: %v", err)
 	}
 }

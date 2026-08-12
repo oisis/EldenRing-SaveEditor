@@ -16,6 +16,10 @@ decisions are deliberately deferred and do not block that implementation:
   start when console testing is resumed.
 - Confirm on a game-accepted output that `CSPlayerGameDataHash` remains
   untouched.
+- Extend the in-memory WriteSave reload from the currently mutable
+  Inventory/Storage/GaItem surface to the remaining 1.5.8/1.6.8 write-ahead
+  checks, including the full offset chain and stat sanity, when SaveForge 2.0
+  has shared readers for those invariants.
 - Test encrypted PC output after `LoadSave` gains AES support.
 - Decide and test automatic backup and retention for an existing write target.
 - Test atomic replacement of an existing target on Windows.
