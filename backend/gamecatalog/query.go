@@ -1,6 +1,7 @@
 package gamecatalog
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 
@@ -27,6 +28,78 @@ func (catalog *Catalog) ResourceByKindAndKey(
 		return schema.Resource{}, err
 	}
 	return cloneResource(resource), nil
+}
+
+// ResourceByKindKeyAndVariant resolves one item resource by the exact
+// (kind, key) pair and selects either its base document or exactly one of the
+// variants stored under that same pair. It is the single place that turns the
+// shared (kind, key, variantID) input of the item endpoints into one document,
+// so every caller selects a variant by the same rule.
+//
+// variantID is optional: a nil variantID selects the base ItemDocument, and a
+// non-nil variantID selects only the stored variant of this resource whose
+// ItemVariant.GameID is known and exactly equal to it. ItemVariant.GameID is
+// the only variant identifier; nothing is derived from affinity, upgrade level
+// or ID arithmetic, and no variant is ever synthesised. The base Item.GameID,
+// an alias game ID and a variant that belongs to another resource are all
+// unknown variants here, because the lookup never leaves the resolved resource
+// and never consults the global game-ID index. Neither kind nor key is
+// trimmed, normalised or retried under another kind, exactly as
+// ResourceByKindAndKey resolves them.
+//
+// The result keeps the public identity (kind, key) of the resolved resource
+// while Item.GameID and the document data are those of the selected variant.
+// It is an independent deep copy, so mutating it never reaches the catalog.
+func (catalog *Catalog) ResourceByKindKeyAndVariant(
+	kind schema.ResourceKind,
+	key string,
+	variantID *uint32,
+) (schema.Resource, error) {
+	if catalog == nil {
+		return schema.Resource{}, errors.New("game catalog is not loaded")
+	}
+	if kind == "" {
+		return schema.Resource{}, errors.New("resource kind is required")
+	}
+	if kind != schema.ResourceKindItem {
+		return schema.Resource{}, fmt.Errorf(
+			"resource kind %q carries no item document; only kind %q is supported",
+			kind,
+			schema.ResourceKindItem,
+		)
+	}
+	if key == "" {
+		return schema.Resource{}, errors.New("resource key is required")
+	}
+	stored, err := catalog.requireResource(kind, key)
+	if err != nil {
+		return schema.Resource{}, err
+	}
+	if stored.Item == nil {
+		return schema.Resource{}, fmt.Errorf(
+			"resource kind %q key %q has no item document",
+			kind,
+			key,
+		)
+	}
+	resource := cloneResource(stored)
+	if variantID == nil {
+		return resource, nil
+	}
+	for _, variant := range resource.Item.Variants {
+		if !variant.GameID.Known || variant.GameID.Value != *variantID {
+			continue
+		}
+		materialized := schema.MaterializeVariant(*resource.Item, variant)
+		resource.Item = &materialized
+		return resource, nil
+	}
+	return schema.Resource{}, fmt.Errorf(
+		"unknown variant ID 0x%08X for resource kind %q key %q",
+		*variantID,
+		kind,
+		key,
+	)
 }
 
 // CapabilitySummary carries the two flags a list needs to decide whether a

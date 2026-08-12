@@ -5,6 +5,7 @@ Purpose: Returns the current capacity of the relevant containers and supporting 
 How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
 Supported resource types: ItemDocument.
 Input variables: characterID, destination, kind, key, variantID, quantity.
+Variant selection: the optional variantID selects the base item document when it is absent and exactly one stored variant of the same (kind, key) pair when it is present; gamecatalog.Catalog.ResourceByKindKeyAndVariant is the single implementation of that rule.
 GameCatalog variables read: the fields required to resolve and validate the declared resource types; the exact projection belongs to the endpoint runtime specification.
 Save variables read: the state required by the declared variables; the getter must remain non-mutating.
 Implementation status: contract definition only; no runtime handler is implemented in this file yet.
