@@ -397,7 +397,7 @@
         "operationId": "loadSave",
         "tags": ["Save sessions"],
         "summary": "LoadSave",
-        "description": "Creates a read-only save session for a local save file and returns its metadata. The source path and the expected platform are passed to the endpoint exactly as sent: they are never trimmed, normalised or defaulted, and the source file is never modified. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Creates a save session from a read-only snapshot of a local save file and returns its metadata. The source path and the expected platform are passed to the endpoint exactly as sent: they are never trimmed, normalised or defaulted, and the source file is never modified. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "requestBody": {
           "required": true,
           "content": {
@@ -410,7 +410,7 @@
         },
         "responses": {
           "200": {
-            "description": "The created read-only session",
+            "description": "The created session",
             "content": {
               "application/json": {
                 "schema": {
@@ -489,6 +489,51 @@
           },
           "400": {
             "description": "An empty, unknown or already closed session identifier",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/write": {
+      "post": {
+        "operationId": "writeSave",
+        "tags": ["Save sessions"],
+        "summary": "WriteSave",
+        "description": "Serializes and reload-validates the current session snapshot, then atomically writes it to the explicitly specified local target. A successful write always advances saveRevision, retires every ownedItemID from the previous revision and clears unsavedChanges. A failure leaves the session and an existing target unchanged. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WriteSaveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The persisted session and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WriteSaveResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed body, an unknown body field, invalid or stale revision, unknown session, invalid candidate, or target write failure",
             "content": {
               "application/json": {
                 "schema": {
@@ -1306,6 +1351,41 @@
         },
         "required": ["source"]
       },
+      "WriteSaveRequest": {
+        "type": "object",
+        "description": "Body of WriteSave. Both fields reach the endpoint exactly as sent; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          },
+          "target": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Explicit local destination path, passed unchanged and never inferred from LoadSave."
+          }
+        },
+        "required": ["expectedRevision", "target"]
+      },
+      "WriteSaveResult": {
+        "type": "object",
+        "description": "The session revision committed by a successful WriteSave.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision"]
+      },
       "CloseSaveResult": {
         "type": "object",
         "description": "Confirmation that the named session was removed from memory. The source save file is untouched.",
@@ -1321,7 +1401,7 @@
       },
       "SessionInfo": {
         "type": "object",
-        "description": "Safe public metadata of a read-only save session. It carries no path, SteamID, offset, handle or save byte.",
+        "description": "Safe public metadata of a save session. It carries no path, SteamID, offset, handle or save byte.",
         "properties": {
           "saveSessionID": {
             "type": "string"
@@ -1335,7 +1415,7 @@
           },
           "unsavedChanges": {
             "type": "boolean",
-            "description": "Always false at this stage: a read-only session cannot change anything."
+            "description": "True after a committed in-memory mutation and false after LoadSave or a successful WriteSave."
           }
         },
         "required": ["saveSessionID", "platform", "format", "unsavedChanges"]

@@ -33,11 +33,11 @@ var LoadSaveDefinition = contract.MustDefine(contract.Definition{
 
 // LoadSaveResult is the typed result of LoadSave: the identifier of the created
 // session, its platform, its container format and its unsaved-changes state,
-// which is always false for a freshly created read-only session. The shape is
+// which is always false for a freshly created session. The shape is
 // owned by SaveEngine, so the endpoint neither reshapes nor duplicates it.
 type LoadSaveResult = saveengine.SessionInfo
 
-// LoadSave creates a new read-only save session for the local file at source.
+// LoadSave creates a new save session from the local file at source.
 //
 // The endpoint is thin: it holds no format rule, no magic, no offset and no
 // platform validation of its own. Recognition, the expectedPlatform check and

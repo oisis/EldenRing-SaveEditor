@@ -1,10 +1,9 @@
 # OwnedItemID and saveRevision — shared Inventory contract
 
-> **Status: approved. Tasks 1, 2a, 2b, 3 and 4 are implemented, and the first
-> public mutation endpoint, `inventory.SetOwnedItemQuantity`, is implemented on
-> top of `saveengine.Engine.SetOwnedItemQuantity`. It is session-only and not
-> exposed by any transport. Every other public setter endpoint is still
-> contract-only.**
+> **Status: approved. The identity tasks, the first mutation, and `WriteSave`
+> are implemented. `WriteSave` is exposed by the local explorer;
+> `inventory.SetOwnedItemQuantity` remains Go-only pending its own transport
+> task. Every other public setter endpoint is still contract-only.**
 >
 > This document is the design record of the contract, not endpoint
 > documentation. The implemented endpoints are described in
@@ -16,11 +15,9 @@
 >
 > **What the first mutation does and does not mean.** It changes the four
 > quantity bytes of one record inside the session's private in-memory snapshot
-> and nothing else. There is still **no `WriteSave`**: no file is opened for
-> writing, and the user's save on disk is untouched. A committed mutation is
-> reported by `SessionInfo.UnsavedChanges`, which now means exactly "the private
-> snapshot of this session holds a committed change", not "something happened on
-> disk".
+> and opens no file itself. A separate successful `WriteSave` persists that
+> snapshot, advances the revision again, retires previous identities, and clears
+> `SessionInfo.UnsavedChanges`.
 
 | | |
 |---|---|
@@ -28,7 +25,7 @@
 | Proposed owner | `backend/saveengine` (one component), never an endpoint |
 | Affected contracts today | originally 12 contract-only endpoint files declaring `ownedItemID`, `weaponOwnedItemID` or `orderedOwnedItemIDs`; `get_owned_item.go` is implemented since Task 3 and `set_owned_item_quantity.go` since Task 5, so 10 remain contract-only |
 | Affects implemented code | yes since Tasks 1, 2a, 2b, 3, 4 and 5 — `GetInventory`, `GetStorage` and `GetOwnedItem` are implemented, `saveengine.Engine.SetOwnedItemQuantity` is the first implemented mutation, and `inventory.SetOwnedItemQuantity` is the first implemented mutation *endpoint*; every other setter endpoint is still a separate later task |
-| Transport | `GetOwnedItem` is transport-exposed by the local explorer since Task 3; `SetOwnedItemQuantity` is implemented but not exposed by any transport, because a mutation cannot be offered before `WriteSave` exists |
+| Transport | `GetOwnedItem` and `WriteSave` are transport-exposed by the local explorer; `SetOwnedItemQuantity` is implemented but remains unexposed pending a separate transport task |
 
 ---
 
@@ -195,7 +192,7 @@ only records the decision those changes must follow.
 | C2 | Both getters return an `OwnedItemID` per record and a `saveRevision` per result, minted by the session registry. | `backend/saveengine/inventory.go:103-112`, `backend/saveengine/storage.go:143-150`, `docs/endpoints/inventory/get_inventory.md` |
 | C3 | The public getter contract is locked by an assertion on the exact `SupportedResourceTypes` value (`ItemDocument`) and the exact ordered variable list. Changing either is a protected-test change. The raw phase-one contract tests were replaced under Task 2b by `TestGetInventoryContractResolvesItemDocuments` and `TestGetStorageContractResolvesItemDocuments`. | `backend/endpoints/inventory/get_inventory_test.go:453`, `get_storage_test.go:487`, `get_owned_item_test.go:238` |
 | C4 | `saveengine.Session` holds `id`, `platform`, `format`, the private `revision` counter, the private `dirty` flag, the two-directional identity registry `ownedByLocator` / `ownedByID` and the mint counter `ownedSeq`. None of them is part of `SessionInfo` except through `SessionInfo.UnsavedChanges`, which reports `dirty`. There is still no per-character state. | `backend/saveengine/session.go` |
-| C5 | The engine has exactly one mutation, `SetOwnedItemQuantity`, and it changes the private in-memory snapshot only. There is still **no file write path**: no `WriteSave`, no `UndoCharacterChanges`. Its implemented surface is `LoadSave`, `GetSessionInfo`, `CloseSession`, the character readers, `GetInventory`, `GetStorage`, `ResolveGaItemIDs`, `GetOwnedItem` and `SetOwnedItemQuantity`. The revision-increment path is the unexported `commitRevision`, whose only caller is that setter. | `backend/saveengine/engine.go`, `backend/saveengine/owned_item.go`, `backend/saveengine/set_owned_item_quantity.go`, `backend/saveengine/owned_item_id.go` |
+| C5 | The engine implements one content mutation, `SetOwnedItemQuantity`, plus `WriteSave`. The setter changes only the private snapshot and marks it dirty; `WriteSave` serializes, reload-validates and atomically persists that snapshot, then advances the revision and clears the dirty state. `UndoCharacterChanges` remains unimplemented. | `backend/saveengine/set_owned_item_quantity.go`, `backend/saveengine/write_save.go`, `backend/saveengine/owned_item_id.go` |
 | C6 | Two native sentinels mark an absent record: handle `0x00000000` and `0xFFFFFFFF`. Both getters skip them; every other handle is reported as stored. | `backend/saveengine/inventory.go:54-58, 312` |
 | C7 | The stored quantity carries a high bit that is not part of the count. Each container reader states and applies that mask once for its own section — `inventoryHeldQuantityMask` for InventoryHeld, `storageQuantityMask` for the Storage Box — and no other reader masks a quantity. The writer never uses a masked value: it reads the raw four bytes, keeps their high bit exactly as the game left it, and replaces only the 31-bit count (`newRaw = (oldRaw & 0x80000000) \| quantity`). | `backend/saveengine/inventory.go`, `backend/saveengine/storage.go`, `backend/saveengine/set_owned_item_quantity.go` |
 | C8 | The 2.0 API spec forbids public setters that take raw bytes, offsets, handles, indices or event flags, and forbids accepting GaItem handles as a public identity. | `tmp/app-se/endpoints-2.0.md` lines 9 and 200 |
@@ -853,9 +850,9 @@ boundary for the future endpoint, and it changed no endpoint, no route, no
 
 What it establishes, and what it deliberately does not:
 
-- **In memory only.** The change lands in the session's private snapshot. There
-  is no `WriteSave`, no file is opened for writing, and the save on disk is
-  unchanged. `SessionInfo.UnsavedChanges` becomes `true` and means exactly that.
+- **In memory only.** This mutation lands in the session's private snapshot and
+  opens no file. `SessionInfo.UnsavedChanges` becomes `true`; the separately
+  implemented `WriteSave` is now the operation that persists and clears it.
 - **One critical section.** `commitRevision` takes the process-wide
   `Engine.mutex` exactly once and hands the locked session to the mutation, which
   therefore uses only the helpers that already require the lock
@@ -890,8 +887,8 @@ What it establishes, and what it deliberately does not:
 Implemented: `inventory.SetOwnedItemQuantity`. It is the endpoint task §6.7 left
 open, and it is the first public mutation of SaveForge 2.0. It is **session-only
 and not exposed**: no HTTP route, no `openapi.json` operation, no Scalar
-navigation entry, no Wails binding, no CLI command and no frontend, because a
-mutation cannot be offered through a transport before `WriteSave` exists. The
+navigation entry, no Wails binding, no CLI command and no frontend. `WriteSave`
+now exists; exposing this setter remains a separate endpoint transport task. The
 documented contract lives in
 [`docs/endpoints/inventory/set_owned_item_quantity.md`](endpoints/inventory/set_owned_item_quantity.md).
 
@@ -995,7 +992,7 @@ bound by them.
 
 The identity, the registry and the three getters are implemented, and so are the
 revision increment together with the first mutation that drives it (§6.7) and the
-first public mutation endpoint, `SetOwnedItemQuantity` (§6.8). What remains
-unimplemented is every other public setter endpoint, every other mutation, and
-`WriteSave` with the §5.3 rule that a write always increments the revision. Each
-needs its own explicitly approved task.
+first public mutation endpoint, `SetOwnedItemQuantity` (§6.8). `WriteSave` now
+implements the §5.3 rule and is exposed by the local explorer. What remains
+unimplemented is every other public setter endpoint and every other mutation;
+transport exposure of `SetOwnedItemQuantity` is also still a separate task.

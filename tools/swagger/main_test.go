@@ -659,6 +659,22 @@ func TestSaveSessionLifecycleRoutes(t *testing.T) {
 		t.Fatal("characters route body differs from the GetSaveCharacters result")
 	}
 
+	writtenTarget := filepath.Join(t.TempDir(), "written.sl2")
+	written := doSave(t, saveEngine, http.MethodPost,
+		"/api/v1/save-sessions/"+session.SaveSessionID+"/write",
+		`{"expectedRevision":"0","target":`+strconv.Quote(writtenTarget)+`}`)
+	assertOK(t, written, "POST /api/v1/save-sessions/{id}/write")
+	var writeResult saveengine.WriteSaveResult
+	if err := json.Unmarshal(written.Body.Bytes(), &writeResult); err != nil {
+		t.Fatalf("decode WriteSave body %q: %v", written.Body.String(), err)
+	}
+	if writeResult.SaveSessionID != session.SaveSessionID || writeResult.SaveRevision != "1" {
+		t.Fatalf("WriteSave result = %+v, want the session at revision 1", writeResult)
+	}
+	if _, err := saveengine.New().LoadSave(writtenTarget, "pc"); err != nil {
+		t.Fatalf("reload WriteSave target: %v", err)
+	}
+
 	closed := doSave(t, saveEngine, http.MethodDelete, "/api/v1/save-sessions/"+session.SaveSessionID, "")
 	assertOK(t, closed, "DELETE /api/v1/save-sessions/{id}")
 	var confirmation closeSaveResponse
@@ -779,6 +795,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 	}{
 		{http.MethodPost, "/api/v1/save-sessions", `{"source":"unused-by-a-missing-route","expectedPlatform":""}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session", ""},
+		{http.MethodPost, "/api/v1/save-sessions/any-session/write", `{"expectedRevision":"0","target":"unused"}`},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
@@ -867,6 +884,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	for path, method := range map[string]string{
 		"/api/v1/save-sessions":                                                                    "post",
 		"/api/v1/save-sessions/{saveSessionID}":                                                    "get",
+		"/api/v1/save-sessions/{saveSessionID}/write":                                              "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters":                                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                   "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                     "get",
@@ -920,6 +938,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"AppearancePresetSummary",
 		"GetAppearancePresetsResult",
 		"LoadSaveRequest",
+		"WriteSaveRequest",
+		"WriteSaveResult",
 		"CloseSaveResult",
 		"SessionInfo",
 		"SaveCharacters",
@@ -973,8 +993,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 17 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 17", found)
+	if found != 18 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 18", found)
 	}
 }
 

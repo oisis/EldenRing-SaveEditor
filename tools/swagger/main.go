@@ -317,6 +317,14 @@ type loadSaveRequest struct {
 	ExpectedPlatform string `json:"expectedPlatform"`
 }
 
+// writeSaveRequest is the JSON body of POST
+// /api/v1/save-sessions/{saveSessionID}/write. Both values reach WriteSave
+// exactly as sent; the route owns no revision or path rule.
+type writeSaveRequest struct {
+	ExpectedRevision string `json:"expectedRevision"`
+	Target           string `json:"target"`
+}
+
 // closeSaveResponse is the confirmation of DELETE /api/v1/save-sessions/{id}.
 // CloseSave returns no value, so the route states the closed session itself.
 type closeSaveResponse struct {
@@ -324,8 +332,8 @@ type closeSaveResponse struct {
 	Closed        bool   `json:"closed"`
 }
 
-// registerSaveSessionRoutes exposes the read-only save-session lifecycle and the
-// implemented character getters. Every route calls exactly one endpoint and
+// registerSaveSessionRoutes exposes the implemented save-session lifecycle and
+// character getters. Every route calls exactly one endpoint and
 // serialises its typed result; the source path, the save content and the
 // character data are never logged. The catalog is passed on to the one getter
 // that resolves save values into catalog documents.
@@ -353,6 +361,27 @@ func registerSaveSessionRoutes(
 
 	mux.HandleFunc("GET /api/v1/save-sessions/{saveSessionID}", func(writer http.ResponseWriter, request *http.Request) {
 		result, err := savesession.GetLoadedSave(saveEngine, request.PathValue("saveSessionID"))
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+
+	mux.HandleFunc("POST /api/v1/save-sessions/{saveSessionID}/write", func(writer http.ResponseWriter, request *http.Request) {
+		var body writeSaveRequest
+		decoder := json.NewDecoder(request.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&body); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		result, err := savesession.WriteSave(
+			saveEngine,
+			request.PathValue("saveSessionID"),
+			body.ExpectedRevision,
+			body.Target,
+		)
 		if err != nil {
 			writeError(writer, http.StatusBadRequest, err)
 			return

@@ -79,7 +79,7 @@ type SetOwnedItemQuantityResult struct {
 // The mutation itself belongs to SaveEngine, which performs it atomically under
 // its own lock, verifies the write, rolls back a failed one and advances the
 // session revision only on success. It changes the session's private snapshot;
-// no file is written, because there is no WriteSave yet.
+// a later, separate WriteSave persists that snapshot.
 func SetOwnedItemQuantity(
 	engine *saveengine.Engine,
 	gameCatalog *gamecatalog.Catalog,

@@ -87,6 +87,11 @@
                 "filepath": "../../../docs/endpoints/savesession/get_loaded_save.md",
                 "title": "GetLoadedSave"
               },
+              "/write-save": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/write_save.md",
+                "title": "WriteSave"
+              },
               "/close-save": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/savesession/close_save.md",

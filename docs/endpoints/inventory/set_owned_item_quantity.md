@@ -10,8 +10,9 @@ removes none, merges none, moves none and reorders none: it changes exactly the
 four quantity bytes of the one addressed record.
 
 **The mutation touches the session's private in-memory snapshot only.** There is
-no `WriteSave` yet, so no file is opened for writing and the user's save on disk
-is left byte-for-byte unchanged. A committed change is reported by
+no file write inside this endpoint, so the user's save on disk is left
+byte-for-byte unchanged until a separate [`WriteSave`](../savesession/write_save.md)
+succeeds. A committed change is reported by
 `SessionInfo.UnsavedChanges`, which means exactly "the private snapshot of this
 session holds a committed change" and says nothing about the disk.
 
@@ -33,7 +34,7 @@ no other endpoint.
 | Kind | Mutation |
 | Domain | `inventory` |
 | Implementation status | implemented |
-| Transport status | not exposed — no HTTP route, no OpenAPI operation, no Scalar navigation entry, no Wails binding, no CLI command and no frontend. It is callable only as a Go function, because a mutation of the private snapshot cannot be offered through a transport before `WriteSave` exists. |
+| Transport status | not exposed — no HTTP route, OpenAPI operation, Scalar navigation entry, Wails binding, CLI command or frontend. It remains callable only as a Go function; transport exposure is a separate task now that `WriteSave` exists. |
 | Implementation source | [../../../backend/endpoints/inventory/set_owned_item_quantity.go](../../../backend/endpoints/inventory/set_owned_item_quantity.go) |
 | Test source | [../../../backend/endpoints/inventory/set_owned_item_quantity_test.go](../../../backend/endpoints/inventory/set_owned_item_quantity_test.go) |
 | Save access | read-write on the session's private in-memory snapshot; no file is opened |
@@ -260,10 +261,9 @@ access under `-race`.
 
 - **No transport.** The endpoint is a Go function. It is deliberately absent from
   the local explorer routes, `tools/swagger/openapi.json` and the Scalar
-  navigation until `WriteSave` exists; exposing a mutation whose result can never
-  be persisted would present a contract the application cannot honour.
-- **No `WriteSave`.** The change lives in the session's private snapshot until
-  the process ends or the session is closed. Nothing reaches the disk.
+  navigation until its own transport contract is implemented.
+- **Separate persistence.** The change remains in the session's private snapshot
+  until `WriteSave` succeeds. Closing the session first discards it.
 - The endpoint sets a quantity. It does not add, remove, move, merge, split or
   reorder a record, and it never creates the missing record for an item the
   character does not own.

@@ -112,8 +112,8 @@ process.
 - The only transport is the local developer explorer route `DELETE /api/v1/save-sessions/{saveSessionID}`,
   which is registered only without `-allow-external-bind`. There is no Wails
   binding, no CLI command, and no frontend for the endpoint.
-- There is no unsaved-changes handling, no expected revision, and no write path,
-  because the current stage is read-only: a session can hold no pending change.
-  A later mutating stage will need its own explicit contract change.
+- `CloseSave` has no unsaved-changes policy and accepts no expected revision. It
+  may therefore close a dirty session; callers that need persistence must call
+  `WriteSave` successfully before closing it.
 - There is no way to list sessions and no way to close all of them at once. Each
   session is closed by its own identifier.

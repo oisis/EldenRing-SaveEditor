@@ -72,7 +72,7 @@ type SessionInfo struct {
 | `saveSessionID` | `string` | Identifier of the created session. Always non-empty on success and unique per session. A later `GetLoadedSave` will read a session by this value. |
 | `platform` | `string` | The recognised platform: `pc` or `ps4`. Never guessed and never taken from the file name. |
 | `format` | `string` | The recognised container format: `bnd4` for PC and `ps4-container` for PS4. |
-| `unsavedChanges` | `bool` | Always `false`. The session is read-only at this stage, so it can hold no pending change. |
+| `unsavedChanges` | `bool` | Always `false` for a newly loaded session. Later mutations may set it, and a successful `WriteSave` clears it. |
 
 On any error the result is the zero value: `saveSessionID` is empty and no
 session exists.
@@ -81,12 +81,13 @@ The result deliberately carries no absolute path, no `SteamID`, no offset, no
 handle, no raw save bytes, and no character data. The `Session` model inside
 SaveEngine stores none of them either: it is metadata only.
 
-The file content itself lives in a private, read-only snapshot that SaveEngine
+The file content itself lives in a private snapshot that SaveEngine
 keeps next to the session, under the same `saveSessionID`. The snapshot is
 package-private: no public type, field, or method of SaveEngine or of this
-endpoint exposes it, its size, or the path it came from. The future getters will
-read save data exclusively from the snapshot bound to a `saveSessionID`, never
-by reopening the user's file.
+endpoint exposes it, its size, or the path it came from. The getters read save
+data exclusively from the snapshot bound to a `saveSessionID`, never
+by reopening the user's file; mutations and `WriteSave` operate on that same
+session-owned snapshot.
 
 ## Processing flow
 
@@ -197,8 +198,8 @@ followed that change.
 - Structural recognition only: characters, inventory, storage, equipment, world
   state, slot content, `SteamID`, `UserData11`, and MD5 checksums are not read
   or verified.
-- The public result carries metadata only. There is no `GetLoadedSave`, no
-  `WriteSave`, and no `CloseSave`, so the snapshot cannot yet be read back or
-  released, and nothing can be written to a save.
-- Sessions and their snapshots live in memory for the lifetime of the engine.
-  Each session holds the full file content, and nothing frees it yet.
+- The public result carries metadata only. `GetLoadedSave` reads that metadata,
+  `WriteSave` persists the session snapshot, and `CloseSave` releases it through
+  separate endpoints.
+- Each open session holds the full file content until `CloseSave` removes the
+  session or the engine itself is released.
