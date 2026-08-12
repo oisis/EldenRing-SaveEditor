@@ -175,6 +175,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/get_storage.md",
                 "title": "GetStorage"
+              },
+              "/get-owned-item": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/get_owned_item.md",
+                "title": "GetOwnedItem"
               }
             }
           },

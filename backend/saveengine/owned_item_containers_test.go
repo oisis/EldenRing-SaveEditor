@@ -28,18 +28,33 @@ const (
 	ownedContainerTestAcquisition = 7
 )
 
-// writeOwnedItemContainerFixture builds a synthetic PC save whose single active
-// slot carries an InventoryHeld section and a Storage Box behind an empty
-// declared projectile list. Both getters measure from the same confirmed anchor,
-// so one anchor serves both.
-func writeOwnedItemContainerFixture(t *testing.T) string {
+// writeOwnedItemContainerFixture builds a synthetic save of the given platform
+// whose single active slot carries an InventoryHeld section and a Storage Box
+// behind an empty declared projectile list. Both getters measure from the same
+// confirmed anchor, so one anchor serves both. The two platforms differ only in
+// the container around the slot, which is exactly what the platform split of the
+// two readers claims.
+func writeOwnedItemContainerFixture(t *testing.T, platform Platform) string {
 	t.Helper()
 
-	data := make([]byte, pcFixtureSize)
-	copy(data, pcHeader())
-	data[pcUserData10DataOffset+userData10ActiveFlagsOffset+ownedContainerTestSlot] = 1
+	var data []byte
+	var userData10Base, slotBase int64
+	switch platform {
+	case PlatformPC:
+		data = make([]byte, pcFixtureSize)
+		copy(data, pcHeader())
+		userData10Base = pcUserData10DataOffset
+		slotBase = inventoryTestPCSlotDataBase + ownedContainerTestSlot*inventoryTestPCSlotStride
+	case PlatformPS4:
+		data = make([]byte, ps4FixtureSize)
+		copy(data, ps4Header())
+		userData10Base = ps4UserData10DataOffset
+		slotBase = inventoryTestPS4SlotDataBase + ownedContainerTestSlot*inventoryTestPS4SlotStride
+	default:
+		t.Fatalf("unknown platform %q", platform)
+	}
 
-	slotBase := int64(inventoryTestPCSlotDataBase + ownedContainerTestSlot*inventoryTestPCSlotStride)
+	data[userData10Base+userData10ActiveFlagsOffset+ownedContainerTestSlot] = 1
 	copy(data[slotBase+ownedContainerTestAnchorAt:], inventoryTestAnchor)
 
 	putRow := func(at int64) {
@@ -70,7 +85,7 @@ func writeOwnedItemContainerFixture(t *testing.T) string {
 
 func TestInventoryAndStorageNeverShareAnIdentity(t *testing.T) {
 	engine := New()
-	loaded, err := engine.LoadSave(writeOwnedItemContainerFixture(t), "")
+	loaded, err := engine.LoadSave(writeOwnedItemContainerFixture(t, PlatformPC), "")
 	if err != nil {
 		t.Fatalf("LoadSave: %v", err)
 	}

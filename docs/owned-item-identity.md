@@ -13,9 +13,9 @@
 |---|---|
 | Scope | `OwnedItemID` and `saveRevision`, shared by the Inventory and Equipment surfaces |
 | Proposed owner | `backend/saveengine` (one component), never an endpoint |
-| Affected contracts today | exactly 12 contract-only endpoint files declaring `ownedItemID`, `weaponOwnedItemID` or `orderedOwnedItemIDs` |
-| Affects implemented code | no — `GetInventory` and `GetStorage` stay phase 1 until a separate approved task |
-| Transport | none proposed; no handler, no route, no OpenAPI entry, no Scalar entry |
+| Affected contracts today | originally 12 contract-only endpoint files declaring `ownedItemID`, `weaponOwnedItemID` or `orderedOwnedItemIDs`; `get_owned_item.go` is implemented since Task 3, so 11 remain contract-only |
+| Affects implemented code | yes since Tasks 1, 2a, 2b and 3 — `GetInventory`, `GetStorage` and `GetOwnedItem` are implemented; the setters are still separate later tasks |
+| Transport | `GetOwnedItem` is transport-exposed by the local explorer since Task 3; the setters have none |
 
 ---
 
@@ -740,6 +740,23 @@ It carries the full synchronisation set in the same task:
 `tools/swagger/docs-portal/scalar.config.json` and `tools/swagger/main_test.go`.
 
 ### 6.5 Task 3 — `GetOwnedItem` and the setters as consumers
+
+**`GetOwnedItem` is implemented.** It was completed after Task 2b, with the full
+contract below and none of the three exclusions it rules out. Its
+`SupportedResourceVariables` are `saveSessionID`, `characterID`, `ownedItemID` in
+that order, and it is transport-exposed as
+`GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}`
+of the local explorer. `GetInventory` and `GetStorage` kept their behaviour: the
+complete physical read of each container was extracted into one private reader
+per container, which both the paging getter and `GetOwnedItem` now share, so the
+anchors, bounds, section sizes, sentinels, quantity mask, physical indexes and
+minting still have exactly one owner each. The documented contract lives in
+[`docs/endpoints/inventory/get_owned_item.md`](endpoints/inventory/get_owned_item.md).
+
+**The setters remain unimplemented.** They are separate later tasks, each
+additionally depending on the mutation and rollback machinery this document does
+not design. The `saveSessionID` amendment of the remaining contract files (§1.4)
+travels with them, one endpoint at a time.
 
 **`GetOwnedItem` comes last of the getters, not first.** It may only start after
 Task 1, Task 2a, the §6.3 research gate and Task 2b, in that order.

@@ -857,6 +857,47 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}": {
+      "get": {
+        "operationId": "getOwnedItem",
+        "tags": ["Inventory"],
+        "summary": "GetOwnedItem",
+        "description": "Returns one owned item instance addressed by its opaque ownedItemID, resolved to an ItemDocument identity. The identifier is valid only inside the save session and the saveRevision that issued it; it is compared byte for byte and is never parsed, trimmed, normalised or reconstructed. Only the container the identifier was minted in is read, so a Storage identifier never resolves into an Inventory record at the same coordinates and there is no fallback search of the other container. kind and key are the canonical GameCatalog resource reference, while gameID is the exact catalog game ID resolved from the save and therefore selects an item variant where applicable. The physical fields are preserved: gaItemHandle and acquisitionIndex stay raw and only the documented high bit of quantity is masked off. An empty, unknown, retired, foreign or wrong-character identifier, a record that no longer exists, an unresolved GaItem handle and an unknown catalog item each reject the whole request. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/OwnedItemID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The one resolved owned item instance",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnedItem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, an empty, unknown, retired or foreign ownedItemID, an ownedItemID belonging to another character, an ownedItemID whose physical record no longer exists, an unresolvable GaItem handle, or a game ID absent from GameCatalog",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures": {
       "get": {
         "operationId": "getGestures",
@@ -1076,6 +1117,16 @@
           "format": "int32"
         },
         "example": 0
+      },
+      "OwnedItemID": {
+        "name": "ownedItemID",
+        "in": "path",
+        "required": true,
+        "description": "Opaque owned-item identity exactly as a previous GetInventory or GetStorage result reported it. It is valid only inside that save session and only while its saveRevision is unchanged. Pass it back unchanged: it is never parsed, trimmed, normalised or reconstructed, and it encodes no handle, no index and no slot address.",
+        "schema": {
+          "type": "string",
+          "minLength": 1
+        }
       },
       "ResourceKind": {
         "name": "kind",
@@ -2038,6 +2089,76 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "active", "records", "total", "page", "pageSize"]
+      },
+      "OwnedItem": {
+        "type": "object",
+        "description": "One owned item instance addressed by its opaque ownedItemID, with its resolved ItemDocument identity. kind and key are the canonical catalog resource reference; gameID is the exact catalog game ID resolved from the save and selects a materialised variant where applicable. container, containerSection and physicalIndex describe the physical row the instance currently occupies and are deliberately not an item identity, because a row moves when the game rewrites the section. gaItemHandle and acquisitionIndex are raw stored values, while quantity has its high bit removed by the 0x7FFFFFFF mask.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The revision this result was read under, and the one the ownedItemID is valid for. A non-empty decimal string with no sign, prefix, padding or separator. It is deliberately not a JSON number, because a uint64 above 2^53-1 would round in a JavaScript client. Carry it back unchanged as expectedRevision and compare it byte for byte; never parse, increment or order it."
+          },
+          "ownedItemID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The requested identity, echoed back unchanged. It stays opaque and is scoped to this save session and this saveRevision."
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The GameCatalog resource kind of the resolved item."
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The canonical GameCatalog resource key of the resolved item."
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The exact GameCatalog game ID resolved from the save. It selects an item variant where applicable."
+          },
+          "container": {
+            "type": "string",
+            "enum": ["inventory", "storage"],
+            "description": "The physical container the instance lives in. It is part of the identity: the same coordinates in the other container are a different record."
+          },
+          "containerSection": {
+            "type": "string",
+            "enum": ["common", "key"],
+            "description": "The physical section the record was read from."
+          },
+          "physicalIndex": {
+            "type": "integer",
+            "format": "int32",
+            "description": "Position of the record inside its own section, counted from 0."
+          },
+          "gaItemHandle": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The raw stored GaItem handle. It is not normalised, validated or resolved against GameCatalog."
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The stored quantity with the high bit masked off, because that bit is not part of the count."
+          },
+          "acquisitionIndex": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The raw stored acquisition index."
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "kind", "key", "gameID", "container", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
       },
       "Error": {
         "type": "object",

@@ -789,6 +789,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -864,19 +865,20 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	// The save-session routes exist only in the local loopback mode, so the
 	// document has to describe them with their own methods.
 	for path, method := range map[string]string{
-		"/api/v1/save-sessions":                                                          "post",
-		"/api/v1/save-sessions/{saveSessionID}":                                          "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters":                               "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":         "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":           "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":      "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":       "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":     "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":     "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":       "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":         "get",
-		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":        "get",
+		"/api/v1/save-sessions":                                                                    "post",
+		"/api/v1/save-sessions/{saveSessionID}":                                                    "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters":                                         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                   "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                     "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                 "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":               "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":               "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture":           "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":                 "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                   "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}": "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                  "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -934,6 +936,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterInventory",
 		"StorageRecord",
 		"CharacterStorage",
+		"OwnedItem",
 		"GestureEntry",
 		"GetGesturesResult",
 	} {
@@ -970,8 +973,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 16 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 16", found)
+	if found != 17 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 17", found)
 	}
 }
 
@@ -1660,6 +1663,65 @@ func TestInventoryRoute(t *testing.T) {
 		"/api/v1/save-sessions/any-session/characters/0/inventory", "")
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("inventory route without an engine: status = %d, want 404 (body %q)",
+			absent.Code, absent.Body.String())
+	}
+}
+
+// The owned-item route addresses one instance instead of a page, so it is
+// verified on the same fixture the inventory route uses: the identifier can only
+// come from a container read of that very session.
+func TestOwnedItemRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newPrototypeCatalog(t)
+
+	listed, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory: %v", err)
+	}
+	if len(listed.Records) != 3 {
+		t.Fatalf("fixture listed %d records, want 3", len(listed.Records))
+	}
+
+	// Every path parameter has to reach the getter, so each of the three records
+	// is fetched through the route by its own identifier.
+	for _, record := range listed.Records {
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/owned-items/" + url.PathEscape(record.OwnedItemID)
+		want, err := inventory.GetOwnedItem(
+			saveEngine, gameCatalog, session.SaveSessionID, 0, record.OwnedItemID)
+		if err != nil {
+			t.Fatalf("inventory.GetOwnedItem: %v", err)
+		}
+		recorder := doSave(t, saveEngine, http.MethodGet, target, "")
+		assertOK(t, recorder, target)
+		if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+			t.Fatalf("owned-item route body differs from the GetOwnedItem result for %s", target)
+		}
+	}
+
+	// The identifier is never trimmed or reconstructed by the transport, and a
+	// slot the token was not minted for is rejected rather than resolved.
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/"
+	for _, target := range []string{
+		base + "0/owned-items/" + url.PathEscape(" "+listed.Records[0].OwnedItemID),
+		base + "0/owned-items/" + url.PathEscape(listed.Records[0].OwnedItemID+"0"),
+		base + "1/owned-items/" + url.PathEscape(listed.Records[0].OwnedItemID),
+		base + "one/owned-items/" + url.PathEscape(listed.Records[0].OwnedItemID),
+	} {
+		rejected := doSave(t, saveEngine, http.MethodGet, target, "")
+		if rejected.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", target, rejected.Code, rejected.Body.String())
+		}
+	}
+
+	absent := doSave(t, nil, http.MethodGet,
+		"/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", "")
+	if absent.Code != http.StatusNotFound {
+		t.Fatalf("owned-item route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
 	}
 }

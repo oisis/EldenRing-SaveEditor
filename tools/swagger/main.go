@@ -516,8 +516,8 @@ func registerSaveSessionRoutes(
 	)
 
 	// The inventory route is the one save-session route with paging, so it uses
-	// the same query parsing as the catalog list routes. It reads no catalog:
-	// this phase returns raw native records only.
+	// the same query parsing as the catalog list routes. It calls
+	// inventory.GetInventory, which resolves every record through the catalog.
 	mux.HandleFunc(
 		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory",
 		func(writer http.ResponseWriter, request *http.Request) {
@@ -555,9 +555,9 @@ func registerSaveSessionRoutes(
 	)
 
 	// The storage route mirrors the inventory route: it is the second
-	// save-session route with paging and reads no catalog either, because this
-	// phase returns raw native records only. It calls GetStorage and nothing
-	// else, so the two containers stay independent.
+	// save-session route with paging and resolves its records through the catalog
+	// the same way. It calls GetStorage and nothing else, so the two containers
+	// stay independent.
 	mux.HandleFunc(
 		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage",
 		func(writer http.ResponseWriter, request *http.Request) {
@@ -585,6 +585,33 @@ func registerSaveSessionRoutes(
 				query.Get("containerSection"),
 				page,
 				pageSize,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	// The owned-item route addresses one instance instead of a page, so the
+	// opaque identifier is the last path segment. It is handed over exactly as it
+	// arrived: the transport never parses, trims, normalises or reconstructs it,
+	// and it owns no identity rule of its own.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.GetOwnedItem(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

@@ -228,41 +228,9 @@ func (engine *Engine) GetInventory(
 		return inventory, nil
 	}
 
-	base, slotEnd := inventorySlotBounds(loaded.session.platform, characterID)
-
-	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, inventoryHeldAnchor)
+	records, err := readInventoryRecords(loaded, characterID)
 	if err != nil {
-		return CharacterInventory{}, fmt.Errorf(
-			"cannot search the inventory of character %d: %w", characterID, err)
-	}
-	if anchor < 0 {
-		return CharacterInventory{}, fmt.Errorf("character %d carries no inventory anchor", characterID)
-	}
-
-	sectionAt := anchor + inventoryHeldCommonOffset
-	if sectionAt+inventoryHeldSectionSize > slotEnd {
-		return CharacterInventory{}, fmt.Errorf(
-			"inventory of character %d does not fit into its slot", characterID)
-	}
-	section, err := loaded.snapshot.readAt(sectionAt, inventoryHeldSectionSize)
-	if err != nil {
-		return CharacterInventory{}, fmt.Errorf("cannot read inventory of character %d: %w", characterID, err)
-	}
-
-	// Both physical sections are decoded and identified before anything is
-	// filtered or paged, so containerSection, page and pageSize decide only which
-	// records are returned and never which identity a record gets.
-	keyEnd := inventoryHeldSectionSize - inventoryHeldTrailingCounters
-	records := appendInventoryRecords(
-		make([]InventoryRecord, 0), section[:inventoryHeldCommonSize], InventorySectionCommon)
-	records = appendInventoryRecords(records, section[inventoryHeldKeyAt:keyEnd], InventorySectionKey)
-	for index := range records {
-		records[index].OwnedItemID = loaded.session.mintOwnedItemID(ownedItemLocator{
-			characterID:      characterID,
-			container:        ownedContainerInventory,
-			containerSection: records[index].ContainerSection,
-			physicalIndex:    records[index].PhysicalIndex,
-		})
+		return CharacterInventory{}, err
 	}
 
 	matches := records
@@ -279,6 +247,54 @@ func (engine *Engine) GetInventory(
 	inventory.Total = len(matches)
 	inventory.Records = inventoryPage(matches, page, pageSize)
 	return inventory, nil
+}
+
+// readInventoryRecords locates the InventoryHeld section of one active slot,
+// decodes both of its physical sections and returns every non-empty record with
+// its owned-item identity minted, in physical native order.
+//
+// It is the single source of truth for the anchor, the bounds checks, the
+// section layout, the sentinels, the quantity mask, the physical index and the
+// minting. GetInventory adds only the section filter and the paging on top, so
+// containerSection, page and pageSize can never influence which identity a
+// record gets. Both physical sections are always decoded and identified here.
+//
+// The caller must already hold Engine.mutex and must have established that the
+// slot is active: an inactive slot is answered from its activity flag alone and
+// its data is never searched.
+func readInventoryRecords(loaded *loadedSave, characterID int) ([]InventoryRecord, error) {
+	base, slotEnd := inventorySlotBounds(loaded.session.platform, characterID)
+
+	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, inventoryHeldAnchor)
+	if err != nil {
+		return nil, fmt.Errorf("cannot search the inventory of character %d: %w", characterID, err)
+	}
+	if anchor < 0 {
+		return nil, fmt.Errorf("character %d carries no inventory anchor", characterID)
+	}
+
+	sectionAt := anchor + inventoryHeldCommonOffset
+	if sectionAt+inventoryHeldSectionSize > slotEnd {
+		return nil, fmt.Errorf("inventory of character %d does not fit into its slot", characterID)
+	}
+	section, err := loaded.snapshot.readAt(sectionAt, inventoryHeldSectionSize)
+	if err != nil {
+		return nil, fmt.Errorf("cannot read inventory of character %d: %w", characterID, err)
+	}
+
+	keyEnd := inventoryHeldSectionSize - inventoryHeldTrailingCounters
+	records := appendInventoryRecords(
+		make([]InventoryRecord, 0), section[:inventoryHeldCommonSize], InventorySectionCommon)
+	records = appendInventoryRecords(records, section[inventoryHeldKeyAt:keyEnd], InventorySectionKey)
+	for index := range records {
+		records[index].OwnedItemID = loaded.session.mintOwnedItemID(ownedItemLocator{
+			characterID:      characterID,
+			container:        ownedContainerInventory,
+			containerSection: records[index].ContainerSection,
+			physicalIndex:    records[index].PhysicalIndex,
+		})
+	}
+	return records, nil
 }
 
 // appendInventoryRecords decodes one physical section and appends its non-empty
