@@ -55,6 +55,8 @@ const (
 	addItemTestBlocksBeforeStore = 0x9C + 0x0C + 0x12F
 	addItemTestStorageAt         = addItemTestProjectileCountAt + 4 + addItemTestBlocksBeforeStore
 	addItemTestStorageCommonAt   = 4
+	addItemTestStorageKeyCountAt = addItemTestStorageCommonAt + 0x780*addItemTestRecordSize
+	addItemTestStorageKeyAt      = addItemTestStorageKeyCountAt + 4
 	addItemTestStorageSize       = 4 + 0x780*12 + 4 + 0x80*12 + 8
 
 	// The chain onwards to GaItemGameData: GestureGameData, the declared region
@@ -140,8 +142,10 @@ type addItemTestFixture struct {
 	common          []addItemTestRow
 	key             []addItemTestRow
 	storage         []addItemTestRow
+	storageKey      []addItemTestRow
 	commonCount     uint32
 	storageCount    uint32
+	storageKeyCount uint32
 	nextEquipIndex  uint32
 	nextAcquisition uint32
 	gaItemData      []uint32
@@ -224,11 +228,15 @@ func writeAddItemFixture(t *testing.T, content addItemTestFixture) string {
 	for _, row := range content.storage {
 		putRow(addItemTestStorageAt+addItemTestStorageCommonAt, row)
 	}
+	for _, row := range content.storageKey {
+		putRow(addItemTestStorageAt+addItemTestStorageKeyAt, row)
+	}
 
 	put(addItemTestCommonCountAt, content.commonCount)
 	put(addItemTestNextEquipAt, content.nextEquipIndex)
 	put(addItemTestNextAcqAt, content.nextAcquisition)
 	put(addItemTestStorageAt, content.storageCount)
+	put(addItemTestStorageAt+addItemTestStorageKeyCountAt, content.storageKeyCount)
 
 	declared := uint32(len(content.gaItemData))
 	if content.gaItemDataCount != 0 {
@@ -325,18 +333,27 @@ func addItemTestChangedRanges(t *testing.T, before, after []byte) [][2]int64 {
 func addItemTestAssertChanged(t *testing.T, before, after []byte, expected [][2]int64) {
 	t.Helper()
 
-	for _, changed := range addItemTestChangedRanges(t, before, after) {
+	changedRanges := addItemTestChangedRanges(t, before, after)
+	observed := make([]bool, len(expected))
+	for _, changed := range changedRanges {
 		inside := false
-		for _, allowed := range expected {
+		for index, allowed := range expected {
 			from, to := addItemTestAnchorAt+allowed[0], addItemTestAnchorAt+allowed[1]
 			if changed[0] >= from && changed[1] <= to {
 				inside = true
+				observed[index] = true
 				break
 			}
 		}
 		if !inside {
 			t.Errorf("the mutation changed the unexpected range [0x%X, 0x%X) of the slot",
 				changed[0], changed[1])
+		}
+	}
+	for index, seen := range observed {
+		if !seen {
+			t.Errorf("the mutation did not change any byte of expected range [0x%X, 0x%X)",
+				addItemTestAnchorAt+expected[index][0], addItemTestAnchorAt+expected[index][1])
 		}
 	}
 }
@@ -692,6 +709,43 @@ func TestAddItemToInventoryAddsNoGaItemDataEntryForAnItemHeldInStorage(t *testin
 	}
 }
 
+func TestAddItemToInventoryRejectsAnItemHeldInStorageKey(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			content := addItemTestFixture{
+				platform: platform, slot: 2, tailMarker: true,
+				common: []addItemTestRow{
+					{index: 0, handle: addItemTestGoodsHandle, rawQuantity: 3, acquisition: 1},
+				},
+				storageKey: []addItemTestRow{
+					{index: 0, handle: addItemTestGoodsHandle, rawQuantity: 1, acquisition: 3},
+				},
+				commonCount: 1, storageKeyCount: 1, gaItemData: []uint32{addItemTestGoodsID},
+			}
+			engine := New()
+			loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+			before := addItemTestSlotData(t, engine, loaded.SaveSessionID, platform, content.slot)
+
+			// The existing Inventory common row would normally take the top-up branch.
+			// Storage key must still be preflighted first and reject the whole mutation.
+			_, err = engine.AddItemToInventory(
+				loaded.SaveSessionID, content.slot, addItemTestGoodsID, 1, "0", false, 40, 600)
+			if err == nil || !strings.Contains(err.Error(), "storage key record") {
+				t.Fatalf("an item held in Storage key reported %v, want a storage-key rejection", err)
+			}
+			after := addItemTestSlotData(t, engine, loaded.SaveSessionID, platform, content.slot)
+			addItemTestAssertChanged(t, before, after, nil)
+			if revision, dirty := addItemTestSessionState(
+				t, engine, loaded.SaveSessionID); revision != "0" || dirty {
+				t.Errorf("the rejected add left the session at revision %q, dirty %v", revision, dirty)
+			}
+		})
+	}
+}
+
 func TestAddItemToInventoryRejectsAndChangesNothing(t *testing.T) {
 	base := func() addItemTestFixture {
 		return addItemTestFixture{
@@ -714,7 +768,10 @@ func TestAddItemToInventoryRejectsAndChangesNothing(t *testing.T) {
 	fullCount := base()
 	fullCount.commonCount = addItemTestCommonRecords
 	exhaustedAllocator := base()
-	exhaustedAllocator.nextAcquisition = 0xFFFFFFFF
+	// 0xFFFFFFFC is the last safe stored mark. The first value above it proves
+	// that the public mutation rejects the exact overflow boundary without
+	// changing the snapshot or session state.
+	exhaustedAllocator.nextAcquisition = 0xFFFFFFFD
 
 	cases := []struct {
 		name              string
@@ -816,6 +873,7 @@ func TestNextAcquisitionIndexStabilisesTheMark(t *testing.T) {
 	// an even value, and the new record takes the odd index one past it.
 	for _, testCase := range []struct{ stored, want uint32 }{
 		{0, 435}, {1, 435}, {433, 435}, {434, 435}, {435, 437}, {968, 969}, {969, 971},
+		{0xFFFFFFFB, 0xFFFFFFFD}, {0xFFFFFFFC, 0xFFFFFFFD},
 	} {
 		got, err := nextAcquisitionIndex(testCase.stored, 0)
 		if err != nil {
@@ -825,8 +883,33 @@ func TestNextAcquisitionIndexStabilisesTheMark(t *testing.T) {
 			t.Errorf("nextAcquisitionIndex(%d) = %d, want %d", testCase.stored, got, testCase.want)
 		}
 	}
-	if _, err := nextAcquisitionIndex(0xFFFFFFFF, 0); err == nil {
-		t.Error("an exhausted allocator was accepted")
+	for _, stored := range []uint32{0xFFFFFFFD, 0xFFFFFFFE, 0xFFFFFFFF} {
+		if _, err := nextAcquisitionIndex(stored, 0); err == nil {
+			t.Errorf("exhausted allocator 0x%08X was accepted", stored)
+		}
+	}
+}
+
+func TestAddItemToInventoryAcceptsTheLastSafeAcquisitionMark(t *testing.T) {
+	content := addItemTestFixture{
+		platform: PlatformPC, slot: 2, nextAcquisition: 0xFFFFFFFC,
+	}
+	engine := New()
+	loaded, err := engine.LoadSave(writeAddItemFixture(t, content), string(PlatformPC))
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	if _, err := engine.AddItemToInventory(
+		loaded.SaveSessionID, content.slot, addItemTestGoodsID, 1, "0", false, 40, 600); err != nil {
+		t.Fatalf("AddItemToInventory: %v", err)
+	}
+	after := addItemTestSlotData(t, engine, loaded.SaveSessionID, PlatformPC, content.slot)
+	if acquisition := addItemTestUint32(after, addItemTestCommonAt+8); acquisition != 0xFFFFFFFD {
+		t.Errorf("acquisition index is 0x%08X, want 0xFFFFFFFD", acquisition)
+	}
+	if next := addItemTestUint32(after, addItemTestNextAcqAt); next != 0xFFFFFFFE {
+		t.Errorf("NextAcquisitionSortId is 0x%08X, want 0xFFFFFFFE", next)
 	}
 }
 

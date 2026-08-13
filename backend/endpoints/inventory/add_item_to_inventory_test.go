@@ -30,6 +30,7 @@ const (
 
 	// A real key-routed goods document, used unchanged.
 	addItemTestKeyItemKey = "40002134"
+	addItemTestMapKey     = "400021A3"
 
 	// Two real documents that carry the goods game-ID prefix without being goods,
 	// so only the family gate keeps them out.
@@ -223,11 +224,22 @@ func TestAddItemToInventoryRejectsWhatTheCatalogDoesNotAllow(t *testing.T) {
 		key     string
 		variant *uint32
 		wants   string
+		// A case that deliberately changes the fixture record's catalog game ID
+		// re-reads the unchanged save through the original catalog after rejection.
+		checkStateWithBaseCatalog bool
 	}{
 		{
 			name:  "key-routed resource",
 			key:   addItemTestKeyItemKey,
-			wants: "key section",
+			wants: "does not distinguish common from key routing",
+		},
+		{
+			// Maps are key_items resources that legacy kept in common. Rejecting this
+			// real document proves that the category gate is deliberately broader than
+			// the confirmed key-routed subset rather than an accidental ID list.
+			name:  "common-routed map in the broad key category",
+			key:   addItemTestMapKey,
+			wants: "does not distinguish common from key routing",
 		},
 		{
 			// A spell carries the same game-ID prefix as a goods resource, so only
@@ -241,6 +253,17 @@ func TestAddItemToInventoryRejectsWhatTheCatalogDoesNotAllow(t *testing.T) {
 			name:  "spirit ash behind the goods prefix",
 			key:   addItemTestSpiritAshKey,
 			wants: "is of family",
+		},
+		{
+			name: "family and game ID prefix disagree",
+			catalog: func(t *testing.T) *gamecatalog.Catalog {
+				return quantityTestCatalog(t, addItemTestThen("tools", 600, 40,
+					func(document *schema.ItemDocument) {
+						document.GameID.Value = 0x2FFFFFFE
+					}))
+			},
+			wants:                     "which disagree",
+			checkStateWithBaseCatalog: true,
 		},
 		{
 			name: "unknown category",
@@ -330,7 +353,11 @@ func TestAddItemToInventoryRejectsWhatTheCatalogDoesNotAllow(t *testing.T) {
 			if !strings.Contains(err.Error(), testCase.wants) {
 				t.Errorf("error %q does not mention %q", err, testCase.wants)
 			}
-			quantity, total, revision, dirty := addItemTestState(t, engine, catalog, sessionID)
+			stateCatalog := catalog
+			if testCase.checkStateWithBaseCatalog {
+				stateCatalog = inventoryCatalog(t)
+			}
+			quantity, total, revision, dirty := addItemTestState(t, engine, stateCatalog, sessionID)
 			if quantity != 3 || total != 3 || revision != "0" || dirty {
 				t.Errorf("the rejected add left common#1 at %d of %d records, revision %q, dirty %v",
 					quantity, total, revision, dirty)

@@ -8,7 +8,7 @@ import (
 
 // This file holds the third mutation of SaveForge 2.0: it adds one item to the
 // common section of InventoryHeld. It moves no record, merges none, reorders
-// none and reindexes none, it never touches the key section, the Storage Box,
+// none and reindexes none, it never writes the key section, the Storage Box,
 // Equipment or any other structure, and it never allocates a record in the
 // variable-length GaItem table. It changes the session's private snapshot only;
 // persistence belongs to WriteSave.
@@ -44,10 +44,10 @@ import (
 //
 // What it deliberately does not do:
 //
-//   - It never writes the key section. A key-routed item whose first record
-//     would have to be created there is rejected by the endpoint above, and an
-//     item that already holds a key record is rejected here, so a second,
-//     wrongly routed copy can never appear in the common section.
+//   - It never writes a key section. A key-routed item whose first record would
+//     have to be created there is rejected by the endpoint above, and an item
+//     that already holds an Inventory or Storage key record is rejected here,
+//     so a second, wrongly routed copy can never appear in common.
 //   - It never allocates a GaItem record, so weapons, armour and Ashes of War —
 //     the families whose handle only exists as such a record — never reach this
 //     mutation. Allocating one means repacking a variable-length section, which
@@ -61,9 +61,10 @@ const (
 	// equipment, and the mark itself sits two above that reservation.
 	addItemAcquisitionFloor uint32 = 434
 
-	// addItemMaxAcquisitionMark rejects a counter so high that raising it would
-	// wrap. A save at that value is corrupt rather than full.
-	addItemMaxAcquisitionMark uint32 = 0xFFFFFFF0
+	// addItemMaxAcquisitionMark is the greatest stored mark for which parity
+	// stabilisation, the assigned index and the following stored mark all fit in
+	// uint32. A save above it cannot be advanced without wrapping.
+	addItemMaxAcquisitionMark uint32 = ^uint32(0) - 3
 
 	// The two trailing counters sit behind the key records, NextEquipIndex first.
 	addItemNextEquipIndexOffset    = inventoryHeldSectionSize - inventoryHeldTrailingCounters
@@ -294,12 +295,16 @@ func addItemToInventoryRecord(
 			quantity, gameID, total, maxContainerTotal)
 	}
 
+	owned, err := ownsPhysicalRecord(loaded, characterID, records, handle, gameID)
+	if err != nil {
+		return addedInventoryRecord{}, err
+	}
 	if target >= 0 {
 		return topUpInventoryRecord(
 			loaded, characterID, records[target], gameID, quantity, maxPerRecord)
 	}
 	return createInventoryRecord(
-		loaded, characterID, records, handle, gameID, quantity)
+		loaded, characterID, handle, gameID, quantity, owned)
 }
 
 // topUpInventoryRecord raises the quantity of the one existing common record of
@@ -361,10 +366,10 @@ func topUpInventoryRecord(
 func createInventoryRecord(
 	loaded *loadedSave,
 	characterID int,
-	records []InventoryRecord,
 	handle uint32,
 	gameID uint32,
 	quantity uint32,
+	owned bool,
 ) (addedInventoryRecord, error) {
 	sectionAt, err := inventoryHeldSectionAt(loaded, characterID)
 	if err != nil {
@@ -415,10 +420,6 @@ func createInventoryRecord(
 	// SaveForge 1.5.8 and 1.6.8 read it, so a further copy of an already owned
 	// item never creates a second entry.
 	var gaItemData []byteWrite
-	owned, err := ownsPhysicalRecord(loaded, characterID, records, handle)
-	if err != nil {
-		return addedInventoryRecord{}, err
-	}
 	if !owned {
 		gaItemData, err = planGaItemDataInsertion(loaded, characterID, gameID)
 		if err != nil {
@@ -465,9 +466,12 @@ func firstFreeInventoryRow(loaded *loadedSave, sectionAt int64, characterID int)
 }
 
 // ownsPhysicalRecord reports whether the character already holds a physical
-// record carrying handle, in either InventoryHeld section or in the common
-// section of the Storage Box. The Inventory records are the ones the caller has
-// already read, so the section is not decoded twice.
+// common-section record carrying handle, in InventoryHeld or the Storage Box.
+// The caller has already rejected a matching Inventory key record. A matching
+// Storage key record is rejected here rather than treated as ownership: this
+// mutation may not use an unsupported location to suppress the GaItemData entry
+// of the new common record. The Inventory records are the ones the caller has
+// already read, so that container is not decoded twice.
 //
 // The caller must already hold Engine.mutex.
 func ownsPhysicalRecord(
@@ -475,22 +479,31 @@ func ownsPhysicalRecord(
 	characterID int,
 	records []InventoryRecord,
 	handle uint32,
+	gameID uint32,
 ) (bool, error) {
+	owned := false
 	for _, record := range records {
-		if record.GaItemHandle == handle {
-			return true, nil
+		if record.GaItemHandle != handle {
+			continue
 		}
+		owned = true
 	}
-	stored, err := readOwnedRecords(loaded, characterID, ownedContainerStorage)
+	stored, err := readStorageRecords(loaded, characterID)
 	if err != nil {
 		return false, err
 	}
 	for _, record := range stored {
-		if record.gaItemHandle == handle {
-			return true, nil
+		if record.GaItemHandle != handle {
+			continue
 		}
+		if record.ContainerSection == StorageSectionKey {
+			return false, fmt.Errorf(
+				"item 0x%08X already holds a storage key record of character %d, and this mutation"+
+					" writes common records only", gameID, characterID)
+		}
+		owned = true
 	}
-	return false, nil
+	return owned, nil
 }
 
 // nextAcquisitionIndex derives the acquisition index of a new record from the

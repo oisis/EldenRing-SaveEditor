@@ -25,21 +25,20 @@ import (
 // AddItemToInventoryEndpointID is the stable backend identifier of AddItemToInventory.
 const AddItemToInventoryEndpointID = "add_item_to_inventory"
 
-// addItemKeyCategory is the catalog category of every resource the game routes
-// into the key section of InventoryHeld. This endpoint writes the common section
-// only, so it refuses the whole category rather than the four families
-// SaveForge 1.x routed there: the category is a stated fact of every goods
-// document, and rejecting it needs no hardcoded ID, no schema field and no
-// regeneration. The rule is deliberately wider than the legacy routing — a map
-// or a bell bearing is a key_items resource the game keeps in the common section
-// — and it costs reach in exchange for never writing a key-routed item into the
-// wrong section.
+// addItemKeyCategory contains every resource the game routes into the key
+// section of InventoryHeld, but also common-section resources such as maps and
+// bell bearings. This endpoint writes common only and cannot derive the narrower
+// routing subset from the catalog, so it refuses the ambiguous category rather
+// than hardcoding IDs or guessing. The rule deliberately costs reach in exchange
+// for never writing a key-routed item into the wrong section.
 const addItemKeyCategory = "key_items"
 
-// The two families this endpoint accepts, and the game-ID prefix each of them
-// carries. Only these two have a save-side handle derived from the game ID
-// alone; every other family needs a record in the variable-length GaItem table,
-// which the mutation never allocates.
+// The two families this endpoint has a confirmed InventoryHeld write contract
+// for, and the game-ID prefix each of them carries. Weapons, armour and Ashes of
+// War need a record in the variable-length GaItem table, which the mutation
+// never allocates. Spells and spirit ashes share the goods prefix but do not
+// share this mutation's confirmed inventory semantics, so the family gate keeps
+// them out independently of the prefix check.
 const (
 	addItemGoodsPrefix    uint32 = 0x40000000
 	addItemTalismanPrefix uint32 = 0x20000000
@@ -84,8 +83,9 @@ type AddItemToInventoryResult = saveengine.AddItemToInventoryResult
 //   - The game ID has to be known and its prefix has to agree with the family. A
 //     disagreement is a hard error and is never silently corrected.
 //
-//   - The category has to be known and must not be key_items, so a resource the
-//     game routes into the key section is never written into the common one.
+//   - The category has to be known and must not be key_items. That category does
+//     not distinguish common from key routing, so the common-only endpoint
+//     rejects all of it rather than guessing.
 //
 //   - The record mode has to be known and decides the shape of the add.
 //
@@ -169,8 +169,9 @@ func AddItemToInventory(
 	}
 	if item.Category.Value == addItemKeyCategory {
 		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q is a %q resource, which the game keeps in the key section;"+
-				" this endpoint writes the common section only", kind, key, addItemKeyCategory)
+			"resource kind %q key %q is in category %q, which does not distinguish common from"+
+				" key routing; this common-only endpoint rejects the category fail-closed",
+			kind, key, addItemKeyCategory)
 	}
 
 	storage := item.Storage

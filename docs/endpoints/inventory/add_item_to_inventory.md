@@ -28,9 +28,9 @@ every other record. The receipt reports the physical coordinates of the written
 row instead; to address it, re-read the container under the new revision.
 
 The endpoint owns exactly the decisions SaveEngine cannot make: which families
-may be added at all, which resources are key-routed, the record mode and the two
-limits. It opens no file, parses no save data of its own and calls no other
-endpoint.
+may be added at all, which ambiguous category must be rejected, the record mode
+and the two limits. It opens no file, parses no save data of its own and calls no
+other endpoint.
 
 | | |
 |---|---|
@@ -48,27 +48,27 @@ endpoint.
 
 Only two item families are accepted: **`goods`** and **`talisman`**.
 
-Those are exactly the families whose save-side `GaItem` handle is derived from
-the game ID alone (`0xB0000000 | id` and `0xA0000000 | id`). Every other family —
-weapons, armour, Ashes of War, spells, spirit ashes, gestures — needs a record in
-the variable-length `GaItem` table, and allocating one means repacking that
-section and shifting everything behind it. That is the retired SaveForge 1.x
-rebuild path; this project does not revive it, so those families are rejected
-before a byte is read.
+Those are the two families for which this endpoint has a confirmed
+`InventoryHeld` write contract. Their save-side `GaItem` handles are derived from
+the game ID alone (`0xB0000000 | id` and `0xA0000000 | id`). Weapons, armour and
+Ashes of War need records in the variable-length `GaItem` table, and allocating
+one means repacking that section and shifting everything behind it. Spells and
+spirit ashes share the goods `0x4` prefix, but they do not share this mutation's
+confirmed inventory semantics. The family gate therefore rejects them even
+though the prefix alone would produce a handle.
 
 The family gate is the **primary** rule and is checked before anything else. A
 game-ID prefix alone would not do: spells and spirit ashes carry the same
 `0x4` prefix goods do.
 
 Additionally, every resource whose `item.category` is **`key_items`** is
-rejected. The game keeps those in the key section of `InventoryHeld`, and this
-endpoint writes the common section only. The rule is deliberately **wider** than
-the SaveForge 1.x routing, which sent only the Crafting Kit, the cookbooks, the
-Cracked Pot and the Crimson Crystal Tear to the key section and left the rest of
-the category — maps, bell bearings and the like — in the common section. Refusing
-the whole category costs reach and needs no hardcoded ID, no schema field and no
-catalog regeneration; writing a key-routed item into the wrong section would cost
-correctness.
+rejected. That catalog category does not distinguish common-section resources
+from the confirmed subset routed to the key section: SaveForge 1.x sent only the
+Crafting Kit, the cookbooks, the Cracked Pot and the Crimson Crystal Tear to key,
+while maps, bell bearings and the rest stayed in common. This endpoint writes
+common only and refuses the whole ambiguous category fail-closed. That costs
+reach but needs no hardcoded ID, no schema field and no catalog regeneration;
+writing a key-routed item into the wrong section would cost correctness.
 
 ## Input
 
@@ -243,6 +243,10 @@ it is below it, stabilised to an even value, and the new record takes the odd
 index one past it — which keeps consecutive adds in distinct game-side sort
 buckets, because the game sorts by `index >> 1`.
 
+The greatest safe stored mark is `0xFFFFFFFC`: it produces acquisition index
+`0xFFFFFFFD` and leaves `0xFFFFFFFE` in the counter. Every greater stored value is
+rejected before mutation because advancing it would wrap `uint32`.
+
 The first free row is the lowest common row carrying one of the two native absent
 sentinels, `0x00000000` or `0xFFFFFFFF`. A section without one is a rejection,
 never an overwrite of an occupied row.
@@ -293,8 +297,9 @@ no-op and the count does not move.
 9. Under the lock, SaveEngine validates the whole plan before the first byte
    changes: the revision, the `characterID` range, the activity flag of the slot,
    the derived handle, the container total across both sections, the absence of a
-   key record for that item, the free row, the count header, both allocators and
-   the `GaItemData` position.
+   key record for that item in Inventory and Storage, whether Storage common
+   already holds a physical copy, the free row, the count header, both allocators
+   and the `GaItemData` position.
 10. Every write of the plan is applied, then verified. A write or a verification
     that fails restores the exact previous bytes of everything the plan changed,
     in reverse order, and reports an error without advancing the revision,
@@ -316,7 +321,7 @@ no `UnsavedChanges` flag and no identity.
 | `item.gameID` is unknown | `resource kind "<kind>" key "<key>" has an unknown game ID`. |
 | The family and the game-ID prefix disagree | `... declares family "<family>" and game ID 0x<gameID>, which disagree`. |
 | `item.category` is unknown | `resource kind "<kind>" key "<key>" has an unknown category`. |
-| `item.category` is `key_items` | `... is a "key_items" resource, which the game keeps in the key section; this endpoint writes the common section only`. |
+| `item.category` is `key_items` | `... is in category "key_items", which does not distinguish common from key routing; this common-only endpoint rejects the category fail-closed`. |
 | `storage.maxInventory` is unknown or `0` | `resource kind "<kind>" key "<key>" carries no inventory limit`. |
 | `storage.recordMode` is unknown | `resource kind "<kind>" key "<key>" has an unknown record mode`. |
 | `capabilities.stack` is unknown, disabled, or carries no limit | `... has an unknown stack capability` / `... stores a quantity but does not stack` / `... carries no stack limit`. |
@@ -332,7 +337,8 @@ no `UnsavedChanges` flag and no identity.
 | The slot is inactive or residual | `character <id> is not active and receives no item`. Its slot data is never located or written. |
 | The derived handle would need a `GaItem` record | `game ID 0x<gameID> needs a record in the GaItem table, which this mutation never allocates`. |
 | A record of the container carries an unresolvable handle | The resolution error. An add never proceeds past data the engine cannot decode. |
-| The item already holds a record in the key section | `item 0x<gameID> already holds a key record of character <id>, and this mutation never writes the key section`. |
+| The item already holds an Inventory or Storage key record | The error names the container, item and character and explains that the mutation writes common records only. |
+| The Storage Box cannot be located or decoded | The Storage reader error. Storage is checked before both top-up and create, so malformed data never lets the mutation bypass key routing or first-copy `GaItemData` rules. |
 | The common section holds no free record | `the common inventory section of character <id> holds no free record`. |
 | The common item count already reads `0xA80` | `the inventory of character <id> declares 2688 of 2688 common records and receives no item`. |
 | `GaItemData` declares `7000` or more active entries | `character <id> declares <n> active GaItemData entries, want fewer than 7000`. |
@@ -414,4 +420,7 @@ that no byte, revision or dirty flag moved, and a full parse → mutate → seri
 - **Common section only.** Every `key_items` resource is refused, including the
   ones SaveForge 1.x kept in the common section.
 - **Inventory only.** Adding to the Storage Box is a separate endpoint.
+- **Storage is still validated.** Both add shapes read Storage to reject a matching
+  key record and to decide whether a common record is the first physical copy;
+  malformed Storage therefore rejects an Inventory add without mutation.
 - It accepts no mode, so Safe Mode and Chaos Mode limits are out of scope here.
