@@ -374,6 +374,13 @@ type setPhysickMixtureRequest struct {
 	ExpectedRevision     string                `json:"expectedRevision"`
 }
 
+// setPouchItemsRequest is the strict JSON body of the complete six-position
+// Pouch assignment.
+type setPouchItemsRequest struct {
+	SlotAssignments  []*string `json:"slotAssignments"`
+	ExpectedRevision string    `json:"expectedRevision"`
+}
+
 // setEquippedSpellsRequest is the strict JSON body of the equipped spells route.
 type setEquippedSpellsRequest struct {
 	OrderedResources []*schema.ResourceRef `json:"orderedResources"`
@@ -679,6 +686,41 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := equipment.GetPouchItems(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setPouchItemsRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := equipment.SetPouchItems(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.SlotAssignments,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

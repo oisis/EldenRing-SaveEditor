@@ -730,8 +730,55 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "setPouchItems",
+        "tags": ["Equipment"],
+        "summary": "SetPouchItems",
+        "description": "Atomically replaces all six Pouch slot positions. slotAssignments contains exactly six nullable ownedItemID strings in stored order; null clears that exact position. Every ownedItemID must resolve to an active Inventory record with positive quantity whose catalog resource allows the pouch slot. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPouchItemsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Pouch items assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetPouchItemsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An invalid position count, an unowned, unequipable or zero-quantity item, duplicate slots, a stale revision or an active slot whose pouch items cannot be located inside its slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
+
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture": {
       "get": {
         "operationId": "getPhysickMixture",
@@ -2466,6 +2513,59 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "crystalTearResources"]
+      },
+      "SetPouchItemsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete six-position Pouch assignment and optimistic-concurrency revision. A null array entry clears that exact position.",
+        "properties": {
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "Exactly six positions in stored order. Each position is null to clear the slot, or a public ownedItemID string pointing to an active Inventory record.",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["slotAssignments", "expectedRevision"]
+      },
+      "SetPouchItemsResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete Pouch assignment, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
       },
       "SetEquippedSpellsRequest": {
         "type": "object",

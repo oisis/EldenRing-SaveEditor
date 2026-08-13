@@ -7,6 +7,7 @@ import (
 	"crypto/cipher"
 	"encoding/binary"
 	"encoding/json"
+	"fmt"
 	"io"
 	"math"
 	"net/http"
@@ -885,6 +886,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/pouch-items", `{"slotAssignments":[null,null,null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", `{"crystalTearResources":[null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", ""},
@@ -1020,6 +1022,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[equippedSpells]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", equippedSpells)
 	}
+	pouchItems := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items"
+	if _, hasPut := document.Paths[pouchItems]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", pouchItems)
+	}
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
 	for _, name := range []string{
@@ -1066,6 +1072,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterQuickItems",
 		"PouchItemSlot",
 		"CharacterPouchItems",
+		"SetPouchItemsRequest",
+		"SetPouchItemsResult",
 		"CharacterPhysickMixture",
 		"SetPhysickMixtureRequest",
 		"SetPhysickMixtureResult",
@@ -1140,8 +1148,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 28 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 28", found)
+	if found != 29 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 29", found)
 	}
 }
 
@@ -1708,6 +1716,103 @@ func TestSetPhysickMixtureRoute(t *testing.T) {
 	if want := [2]uint32{0x40002AF9, saveengine.PhysickEmptyTearID}; mixture.Tears != want {
 		t.Errorf("stored tears = %08X/%08X, want %08X/%08X",
 			mixture.Tears[0], mixture.Tears[1], want[0], want[1])
+	}
+}
+
+func writeSetPouchItemsRouteFixture(t *testing.T) string {
+	t.Helper()
+
+	path := writeActiveSpellsFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	anchorBase := equippedSpellsSlotDataBase + equippedSpellsAnchorAt
+
+	pairAt := anchorBase + 0x92CD
+	for i := 0; i < 6; i++ {
+		binary.LittleEndian.PutUint32(data[pairAt+int64(i)*8:], 0)
+		binary.LittleEndian.PutUint32(data[pairAt+int64(i)*8+4:], 0xFFFFFFFF)
+	}
+
+	countAt := anchorBase + 0x931D
+	binary.LittleEndian.PutUint32(data[countAt:], 17)
+
+	tailAt := countAt + 4 + 17*8 + 0x80
+	for i := 0; i < 6; i++ {
+		binary.LittleEndian.PutUint32(data[tailAt+int64(i)*4:], 0xFFFFFFFF)
+	}
+
+	inventoryAt := anchorBase + 505
+	binary.LittleEndian.PutUint32(data[inventoryAt-4:], 1)
+	binary.LittleEndian.PutUint32(data[inventoryAt:], 0xB00006A4)
+	binary.LittleEndian.PutUint32(data[inventoryAt+4:], 10)
+	binary.LittleEndian.PutUint32(data[inventoryAt+8:], 1)
+
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("update fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetPouchItemsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+	session, err := savesession.LoadSave(saveEngine, writeSetPouchItemsRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	inv, err := saveEngine.GetInventory(session.SaveSessionID, 0, "common", 1, 50)
+	if err != nil || len(inv.Records) == 0 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(inv.Records))
+	}
+	tok := inv.Records[0].OwnedItemID
+
+	assignments := make([]*string, 6)
+	assignments[0] = &tok
+
+	body, err := json.Marshal(setPouchItemsRequest{
+		SlotAssignments:  assignments,
+		ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+
+	url := fmt.Sprintf("/api/v1/save-sessions/%s/characters/0/pouch-items", session.SaveSessionID)
+	request := httptest.NewRequest(http.MethodPut, url, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+
+	response := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body = %s", response.Code, response.Body.String())
+	}
+
+	var got equipment.SetPouchItemsResult
+	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" || got.CharacterID != 0 {
+		t.Fatalf("result header = %+v", got)
+	}
+	if got.SlotAssignments[0] == nil || got.SlotAssignments[0].Key != "400006A4" {
+		t.Errorf("slot 0 = %+v, want key 400006A4", got.SlotAssignments[0])
+	}
+	for i := 1; i < 6; i++ {
+		if got.SlotAssignments[i] != nil {
+			t.Errorf("slot %d = %+v, want nil", i, got.SlotAssignments[i])
+		}
+	}
+
+	pouchItems, err := equipment.GetPouchItems(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("GetPouchItems: %v", err)
+	}
+	if pouchState := pouchItems.Items[0]; pouchState.ItemID == 0 || pouchState.EquipIndex < 0x180 {
+		t.Errorf("GetPouchItems slot 0 = %+v, want valid item and index", pouchState)
 	}
 }
 

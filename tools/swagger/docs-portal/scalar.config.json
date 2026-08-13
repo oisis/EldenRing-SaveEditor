@@ -165,6 +165,11 @@
                 "filepath": "../../../docs/endpoints/equipment/get_pouch_items.md",
                 "title": "GetPouchItems"
               },
+              "/set-pouch-items": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/set_pouch_items.md",
+                "title": "SetPouchItems"
+              },
               "/get-physick-mixture": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/equipment/get_physick_mixture.md",
