@@ -1355,6 +1355,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes": {
+      "patch": {
+        "operationId": "setCharacterRunes",
+        "tags": ["Character"],
+        "summary": "SetCharacterRunes",
+        "description": "Assigns the exact number of held runes under expectedRevision control. The accepted range is 0 through 999,999,999 inclusive; an out-of-range value is rejected rather than clamped. The adjacent TotalGetSoul field and every unrelated field remain unchanged. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterRunesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed held-runes assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterRunesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, runes outside 0..999999999, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats": {
       "get": {
         "operationId": "getCharacterStats",
@@ -1872,6 +1920,49 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "name"]
+      },
+      "SetCharacterRunesRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Exact held-runes assignment and optimistic-concurrency revision.",
+        "properties": {
+          "runes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 999999999,
+            "description": "Exact held-runes value to store. Values outside the legal range are rejected, never clamped."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["runes", "expectedRevision"]
+      },
+      "SetCharacterRunesResult": {
+        "type": "object",
+        "description": "Receipt for one committed held-runes assignment.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "runes": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 999999999
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "runes"]
       },
       "CharacterStats": {
         "type": "object",

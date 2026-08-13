@@ -118,6 +118,11 @@
                 "filepath": "../../../docs/endpoints/character/set_character_name.md",
                 "title": "SetCharacterName"
               },
+              "/set-character-runes": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/set_character_runes.md",
+                "title": "SetCharacterRunes"
+              },
               "/get-character-stats": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/get_character_stats.md",

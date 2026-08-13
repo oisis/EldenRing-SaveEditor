@@ -358,6 +358,13 @@ type setCharacterNameRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setCharacterRunesRequest is the strict JSON body of the held-runes route. A
+// pointer distinguishes an omitted runes field from an explicit zero.
+type setCharacterRunesRequest struct {
+	Runes            *uint32 `json:"runes"`
+	ExpectedRevision string  `json:"expectedRevision"`
+}
+
 // setOwnedItemQuantityRequest is the strict JSON body of the quantity route.
 // The transport owns no quantity or revision rule; both values reach the
 // endpoint unchanged.
@@ -532,6 +539,44 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				body.Name,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterRunesRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Runes == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("runes is required"))
+				return
+			}
+			result, err := character.SetCharacterRunes(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				*body.Runes,
 				body.ExpectedRevision,
 			)
 			if err != nil {
