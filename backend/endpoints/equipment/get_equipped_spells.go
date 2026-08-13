@@ -60,11 +60,11 @@ type EquippedSpellSlot struct {
 	MemorySlots     int    `json:"memorySlots"`
 }
 
-// GetEquippedSpellsResult is the typed result of GetEquippedSpells: the fourteen
-// physical records in stored order, the Memory Slots the occupied ones consume,
+// GetEquippedSpellsResult is the typed result of GetEquippedSpells: the twelve
+// public playable spell memory slots in stored order, the Memory Slots the occupied ones consume,
 // and the Memory Slots the character may fill.
 //
-// An inactive slot — including a residual one — reports Active false, fourteen
+// An inactive slot — including a residual one — reports Active false, twelve
 // zero-value records and both counts zero.
 type GetEquippedSpellsResult struct {
 	SaveSessionID        string              `json:"saveSessionID"`
@@ -108,11 +108,12 @@ func GetEquippedSpells(
 		return GetEquippedSpellsResult{}, err
 	}
 
+	const publicSpellSlotCount = 12
 	result := GetEquippedSpellsResult{
 		SaveSessionID: stored.SaveSessionID,
 		CharacterID:   stored.CharacterID,
 		Active:        stored.Active,
-		Spells:        make([]EquippedSpellSlot, len(stored.Spells)),
+		Spells:        make([]EquippedSpellSlot, publicSpellSlotCount),
 	}
 	if !stored.Active {
 		// An inactive slot carries no spell state at all, so nothing is resolved
@@ -120,7 +121,7 @@ func GetEquippedSpells(
 		return result, nil
 	}
 
-	for index, raw := range stored.Spells {
+	for index, raw := range stored.Spells[:publicSpellSlotCount] {
 		result.Spells[index] = EquippedSpellSlot{RawMagicParamID: raw}
 		if raw == equippedSpellEmptyID {
 			continue

@@ -31,15 +31,16 @@ const (
 		10*getEquippedSpellsSlotBlockSize + 0x10
 	getEquippedSpellsFlagsOffset = 0x1954
 
-	getEquippedSpellsSlot            = 3
-	getEquippedSpellsAnchorAt        = 0x0640
-	getEquippedSpellsSectionAt       = 0x9205
-	getEquippedSpellsCountAt         = 0x931D
-	getEquippedSpellsInventoryAt     = 505
-	getEquippedSpellsTalismansAt     = -241
-	getEquippedSpellsProjectileCount = 17
-	getEquippedSpellsRecordCount     = 14
-	getEquippedSpellsRecordSize      = 8
+	getEquippedSpellsSlot                = 3
+	getEquippedSpellsAnchorAt            = 0x0640
+	getEquippedSpellsSectionAt           = 0x9205
+	getEquippedSpellsCountAt             = 0x931D
+	getEquippedSpellsInventoryAt         = 505
+	getEquippedSpellsTalismansAt         = -241
+	getEquippedSpellsProjectileCount     = 17
+	getEquippedSpellsPublicRecordCount   = 12
+	getEquippedSpellsPhysicalRecordCount = 14
+	getEquippedSpellsRecordSize          = 8
 
 	// The fixture gives the character three Memory Stones, so the base capacity
 	// of two plus three stones is the expected available capacity.
@@ -97,7 +98,7 @@ func writeGetEquippedSpellsFixture(t *testing.T, occupied []uint32) string {
 	anchorBase := slotBase + getEquippedSpellsAnchorAt
 	copy(data[anchorBase:], getEquippedSpellsAnchor)
 
-	for index := 0; index < getEquippedSpellsRecordCount; index++ {
+	for index := 0; index < getEquippedSpellsPhysicalRecordCount; index++ {
 		at := anchorBase + getEquippedSpellsSectionAt + int64(index)*getEquippedSpellsRecordSize
 		spellID, follower := uint32(0xFFFFFFFF), uint32(0x00000000)
 		if index < len(occupied) {
@@ -192,8 +193,8 @@ func TestGetEquippedSpellsResolvesEveryOccupiedRecord(t *testing.T) {
 		t.Fatalf("result header = %q/%d/%t, want %q/%d/true",
 			result.SaveSessionID, result.CharacterID, result.Active, sessionID, getEquippedSpellsSlot)
 	}
-	if len(result.Spells) != getEquippedSpellsRecordCount {
-		t.Fatalf("record count = %d, want %d", len(result.Spells), getEquippedSpellsRecordCount)
+	if len(result.Spells) != getEquippedSpellsPublicRecordCount {
+		t.Fatalf("record count = %d, want %d", len(result.Spells), getEquippedSpellsPublicRecordCount)
 	}
 
 	wantOccupied := []EquippedSpellSlot{
@@ -207,7 +208,7 @@ func TestGetEquippedSpellsResolvesEveryOccupiedRecord(t *testing.T) {
 		}
 	}
 	// Every remaining record keeps the native sentinel and stays unresolved.
-	for index := len(wantOccupied); index < getEquippedSpellsRecordCount; index++ {
+	for index := len(wantOccupied); index < getEquippedSpellsPublicRecordCount; index++ {
 		want := EquippedSpellSlot{RawMagicParamID: 0xFFFFFFFF}
 		if result.Spells[index] != want {
 			t.Errorf("empty record %d = %+v, want %+v", index, result.Spells[index], want)
@@ -378,8 +379,8 @@ func TestGetEquippedSpellsReportsAnInactiveSlot(t *testing.T) {
 	if result.Active || result.UsedMemorySlots != 0 || result.AvailableMemorySlots != 0 {
 		t.Fatalf("result = %+v, want an inactive slot with both counts zero", result)
 	}
-	if len(result.Spells) != getEquippedSpellsRecordCount {
-		t.Fatalf("record count = %d, want %d", len(result.Spells), getEquippedSpellsRecordCount)
+	if len(result.Spells) != getEquippedSpellsPublicRecordCount {
+		t.Fatalf("record count = %d, want %d", len(result.Spells), getEquippedSpellsPublicRecordCount)
 	}
 	for index, spell := range result.Spells {
 		if spell != (EquippedSpellSlot{}) {

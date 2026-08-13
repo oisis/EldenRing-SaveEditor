@@ -548,3 +548,240 @@ func TestGetEquippedSpellsMutatesNothing(t *testing.T) {
 		t.Error("the source save changed while it was only read")
 	}
 }
+
+func TestSetEquippedSpellsHappyPath(t *testing.T) {
+	cases := map[string]struct {
+		platform Platform
+		slot     int
+	}{
+		"PC":  {PlatformPC, 3},
+		"PS4": {PlatformPS4, 1},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			content := spellsFixture{
+				platform: tc.platform, slot: tc.slot, flag: 1, anchorAt: 0x2000,
+				occupiedIDs: []uint32{0x1770}, projectileCount: 5,
+				memoryStones: 3, additionalTalismans: 1, moonAtField: -1,
+			}
+			path := writeSpellsFixture(t, content)
+			engine := New()
+			loaded, err := engine.LoadSave(path, "")
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			newSpells := []uint32{0x0FA0, 0x1068}
+			res, err := engine.SetEquippedSpells(loaded.SaveSessionID, tc.slot, newSpells, 4, "0")
+			if err != nil {
+				t.Fatalf("SetEquippedSpells: %v", err)
+			}
+			if res.SaveRevision != "1" {
+				t.Errorf("revision = %q, want 1", res.SaveRevision)
+			}
+			if !reflect.DeepEqual(res.RawMagicParamIDs, newSpells) {
+				t.Errorf("spells = %v, want %v", res.RawMagicParamIDs, newSpells)
+			}
+			if res.UsedMemorySlots != 4 || res.AvailableMemorySlots != 5 {
+				t.Errorf("used/available = %d/%d, want 4/5", res.UsedMemorySlots, res.AvailableMemorySlots)
+			}
+
+			stored, err := engine.GetEquippedSpells(loaded.SaveSessionID, tc.slot)
+			if err != nil {
+				t.Fatalf("GetEquippedSpells after mutation: %v", err)
+			}
+			if stored.Spells[0] != 0x0FA0 || stored.Spells[1] != 0x1068 || stored.Spells[2] != 0xFFFFFFFF {
+				t.Errorf("stored spells = %v, want [0x0FA0 0x1068 0xFFFFFFFF...]", stored.Spells[:3])
+			}
+		})
+	}
+}
+
+func TestSetEquippedSpellsCapacityWithAndWithoutMoon(t *testing.T) {
+	// 8 memory stones -> 2 + 8 = 10 capacity without Moon
+	contentNoMoon := spellsFixture{
+		platform: PlatformPC, slot: 2, flag: 1, anchorAt: 0x1500,
+		memoryStones: 8, additionalTalismans: 3, moonAtField: -1,
+	}
+	pathNoMoon := writeSpellsFixture(t, contentNoMoon)
+	engineNoMoon := New()
+	loadedNoMoon, err := engineNoMoon.LoadSave(pathNoMoon, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// 11 slots cost > 10 available -> fail
+	_, err = engineNoMoon.SetEquippedSpells(loadedNoMoon.SaveSessionID, 2, []uint32{0x1068, 0x1108}, 11, "0")
+	if err == nil {
+		t.Fatal("SetEquippedSpells accepted used slots exceeding capacity")
+	}
+
+	// With Moon of Nokstella equipped in unlocked field -> 2 + 8 + 2 = 12 capacity
+	contentMoon := spellsFixture{
+		platform: PlatformPC, slot: 2, flag: 1, anchorAt: 0x1500,
+		memoryStones: 8, additionalTalismans: 3, moonAtField: 1,
+	}
+	pathMoon := writeSpellsFixture(t, contentMoon)
+	engineMoon := New()
+	loadedMoon, err := engineMoon.LoadSave(pathMoon, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	resMoon, err := engineMoon.SetEquippedSpells(loadedMoon.SaveSessionID, 2, []uint32{0x1068, 0x1108}, 11, "0")
+	if err != nil {
+		t.Fatalf("SetEquippedSpells with Moon failed: %v", err)
+	}
+	if resMoon.AvailableMemorySlots != 12 {
+		t.Errorf("availableMemorySlots = %d, want 12", resMoon.AvailableMemorySlots)
+	}
+}
+
+func TestSetEquippedSpellsRejectsNonEmptyTailPositions(t *testing.T) {
+	var records [14][2]uint32
+	for i := range records {
+		records[i] = [2]uint32{0xFFFFFFFF, 0x00000000}
+	}
+	records[12] = [2]uint32{0x1770, 0xFFFFFFFF} // Non-empty position 13
+
+	content := spellsFixture{
+		platform: PlatformPC, slot: 0, flag: 1, anchorAt: 0x1000,
+		records: &records,
+	}
+	path := writeSpellsFixture(t, content)
+	engine := New()
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	_, err = engine.SetEquippedSpells(loaded.SaveSessionID, 0, []uint32{0x0FA0}, 1, "0")
+	if err == nil || !bytes.Contains([]byte(err.Error()), []byte("position 13 or 14")) {
+		t.Fatalf("expected non-empty tail position error, got %v", err)
+	}
+}
+
+func TestSetEquippedSpellsPreservesPositions13And14Bytes(t *testing.T) {
+	content := spellsFixture{
+		platform: PlatformPC, slot: 0, flag: 1, anchorAt: 0x1000,
+		occupiedIDs: []uint32{0x1770},
+	}
+	path := writeSpellsFixture(t, content)
+	engine := New()
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	slotBase := int64(spellsPCSlotDataBase)
+	anchorBase := slotBase + content.anchorAt
+	tailOffset := anchorBase + spellsSectionAt + 12*spellsRecordSize
+
+	engine.mutex.Lock()
+	sess := engine.sessions[loaded.SaveSessionID]
+	engine.mutex.Unlock()
+
+	beforeTail, err := sess.snapshot.readAt(tailOffset, 16)
+	if err != nil {
+		t.Fatalf("read tail before: %v", err)
+	}
+
+	_, err = engine.SetEquippedSpells(loaded.SaveSessionID, 0, []uint32{0x0FA0, 0x1068}, 4, "0")
+	if err != nil {
+		t.Fatalf("SetEquippedSpells: %v", err)
+	}
+
+	afterTail, err := sess.snapshot.readAt(tailOffset, 16)
+	if err != nil {
+		t.Fatalf("read tail after: %v", err)
+	}
+
+	if !bytes.Equal(beforeTail, afterTail) {
+		t.Errorf("tail bytes changed: before %X, after %X", beforeTail, afterTail)
+	}
+}
+
+func TestSetEquippedSpellsActiveIndexBehavior(t *testing.T) {
+	content := spellsFixture{
+		platform: PlatformPC, slot: 0, flag: 1, anchorAt: 0x1000,
+		occupiedIDs: []uint32{0x1770, 0x0FA0, 0x1068},
+	}
+	path := writeSpellsFixture(t, content)
+	engine := New()
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	slotBase := int64(spellsPCSlotDataBase)
+	anchorBase := slotBase + content.anchorAt
+	activeIdxOffset := anchorBase + spellsSectionAt + 112
+
+	engine.mutex.Lock()
+	sess := engine.sessions[loaded.SaveSessionID]
+	engine.mutex.Unlock()
+
+	// Set active index to 2 manually in snapshot
+	binary.LittleEndian.PutUint32(sess.snapshot.data[activeIdxOffset:], 2)
+
+	// Mutate to 2 spells -> previous index 2 is out of bounds [0..1] -> reset to 0
+	_, err = engine.SetEquippedSpells(loaded.SaveSessionID, 0, []uint32{0x0FA0, 0x1068}, 4, "0")
+	if err != nil {
+		t.Fatalf("SetEquippedSpells: %v", err)
+	}
+	idxAfter := binary.LittleEndian.Uint32(sess.snapshot.data[activeIdxOffset:])
+	if idxAfter != 0 {
+		t.Errorf("active index = %d, want 0 (out of bounds reset)", idxAfter)
+	}
+
+	// Mutate to empty list -> active index set to 0xFFFFFFFF
+	_, err = engine.SetEquippedSpells(loaded.SaveSessionID, 0, nil, 0, "1")
+	if err != nil {
+		t.Fatalf("SetEquippedSpells empty: %v", err)
+	}
+	idxEmpty := binary.LittleEndian.Uint32(sess.snapshot.data[activeIdxOffset:])
+	if idxEmpty != 0xFFFFFFFF {
+		t.Errorf("active index empty = 0x%08X, want 0xFFFFFFFF", idxEmpty)
+	}
+}
+
+func TestSetEquippedSpellsRejectsInvalidRecordPairInPlayableSlots(t *testing.T) {
+	var records [14][2]uint32
+	for i := range records {
+		records[i] = [2]uint32{0xFFFFFFFF, 0x00000000}
+	}
+	records[2] = [2]uint32{0x1770, 0x00000000} // Invalid pair in record index 2 (record 3)
+
+	content := spellsFixture{
+		platform: PlatformPC, slot: 0, flag: 1, anchorAt: 0x1000,
+		records: &records,
+	}
+	path := writeSpellsFixture(t, content)
+	engine := New()
+	loaded, err := engine.LoadSave(path, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	engine.mutex.Lock()
+	sess := engine.sessions[loaded.SaveSessionID]
+	engine.mutex.Unlock()
+	snapshotBefore := append([]byte(nil), sess.snapshot.data...)
+
+	wantErr := "spell record 2 of character 0 stores the pair (0x00001770, 0x00000000), which is neither empty nor occupied"
+	_, err = engine.SetEquippedSpells(loaded.SaveSessionID, 0, []uint32{0x0FA0}, 1, "0")
+	if err == nil || err.Error() != wantErr {
+		t.Fatalf("error = %v, want %q", err, wantErr)
+	}
+
+	if !bytes.Equal(snapshotBefore, sess.snapshot.data) {
+		t.Error("snapshot bytes changed after rejected mutation")
+	}
+	if rev := sess.session.revisionString(); rev != "0" {
+		t.Errorf("revision = %q, want 0", rev)
+	}
+	if sess.session.dirty {
+		t.Error("session is dirty, want clean")
+	}
+}

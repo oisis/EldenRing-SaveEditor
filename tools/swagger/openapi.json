@@ -821,7 +821,7 @@
         "operationId": "getEquippedSpells",
         "tags": ["Equipment"],
         "summary": "GetEquippedSpells",
-        "description": "Returns the fourteen physical EquippedSpells records of one character slot, in stored order, together with the Memory Slots the occupied records consume and the Memory Slots the character may fill. Every record keeps the raw MagicParam ID exactly as stored, including the native empty sentinel 0xFFFFFFFF, whose record exposes no resolved resource data. An occupied record is resolved through GameCatalog as an ItemDocument of the spell family; a raw identifier that resolves to no known spell with a known name and a known Memory Slots cost is an error, never an invented value. An inactive or residual slot is a normal result with active false, fourteen zero-value records and both counts zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Returns the twelve public playable EquippedSpells records of one character slot, in stored order, together with the Memory Slots the occupied records consume and the Memory Slots the character may fill. Every record keeps the raw MagicParam ID exactly as stored, including the native empty sentinel 0xFFFFFFFF, whose record exposes no resolved resource data. An occupied record is resolved through GameCatalog as an ItemDocument of the spell family; a raw identifier that resolves to no known spell with a known name and a known Memory Slots cost is an error, never an invented value. An inactive or residual slot is a normal result with active false, twelve zero-value records and both counts zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SaveSessionID"
@@ -843,6 +843,52 @@
           },
           "400": {
             "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, an active slot whose equipped spells or capacity data cannot be located inside its slot, a spell record the game never writes, or an occupied raw MagicParam ID that does not resolve to a known spell",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "operationId": "setEquippedSpells",
+        "tags": ["Equipment"],
+        "summary": "SetEquippedSpells",
+        "description": "Atomically replaces the equipped spell loadout for one active character. orderedResources contains at most 12 ResourceRef entries in desired memory slot order. Every resource must resolve to a spell item with confirmed equipment capability allowing spell_memory, each spell can appear at most once, and the sum of Memory Slots costs cannot exceed the character's available capacity. An empty list clears the loadout. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEquippedSpellsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed spell loadout receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetEquippedSpellsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, a stale expectedRevision, more than 12 spells, duplicate spells, an item that is not a spell, or total Memory Slots cost exceeding available capacity",
             "content": {
               "application/json": {
                 "schema": {
@@ -2421,6 +2467,66 @@
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "crystalTearResources"]
       },
+      "SetEquippedSpellsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Compact list of spell resources and optimistic-concurrency revision.",
+        "properties": {
+          "orderedResources": {
+            "type": "array",
+            "maxItems": 12,
+            "description": "At most 12 spell resources in desired memory slot order.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceRef"
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["orderedResources", "expectedRevision"]
+      },
+      "SetEquippedSpellsResult": {
+        "type": "object",
+        "description": "Receipt for one committed equipped-spells update, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderedResources": {
+            "type": "array",
+            "maxItems": 12,
+            "items": {
+              "$ref": "#/components/schemas/ResourceRef"
+            }
+          },
+          "usedMemorySlots": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "availableMemorySlots": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "orderedResources",
+          "usedMemorySlots",
+          "availableMemorySlots"
+        ]
+      },
       "EquippedSpellSlot": {
         "type": "object",
         "description": "One physical EquippedSpells record: the raw MagicParam ID exactly as stored, and the GameCatalog resource key, name and Memory Slots cost of the spell it resolves to. The three resolved fields are empty or zero only for the native empty record, whose raw identifier is the sentinel 0xFFFFFFFF.",
@@ -2449,7 +2555,7 @@
       },
       "CharacterEquippedSpells": {
         "type": "object",
-        "description": "Equipped spells of one character slot: the fourteen physical EquippedSpells records in stored order, the Memory Slots the occupied records consume, and the Memory Slots the character may fill. An inactive slot reports active false, fourteen zero-value records and both counts zero.",
+        "description": "Equipped spells of one character slot: the twelve public playable EquippedSpells records in stored order, the Memory Slots the occupied records consume, and the Memory Slots the character may fill. An inactive slot reports active false, twelve zero-value records and both counts zero.",
         "properties": {
           "saveSessionID": {
             "type": "string"
@@ -2463,9 +2569,9 @@
           },
           "spells": {
             "type": "array",
-            "description": "The fourteen physical spell records, in stored order. The raw MagicParam identifier of every record is returned without any normalisation.",
-            "minItems": 14,
-            "maxItems": 14,
+            "description": "The twelve public playable spell records, in stored order. The raw MagicParam identifier of every record is returned without any normalisation.",
+            "minItems": 12,
+            "maxItems": 12,
             "items": {
               "$ref": "#/components/schemas/EquippedSpellSlot"
             }

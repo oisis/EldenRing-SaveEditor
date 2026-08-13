@@ -887,6 +887,8 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", `{"crystalTearResources":[null,null],"expectedRevision":"0"}`},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", `{"orderedResources":[],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
@@ -1014,6 +1016,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[physickMixture]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", physickMixture)
 	}
+	equippedSpells := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells"
+	if _, hasPut := document.Paths[equippedSpells]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", equippedSpells)
+	}
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
 	for _, name := range []string{
@@ -1134,8 +1140,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 27 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 27", found)
+	if found != 28 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 28", found)
 	}
 }
 
@@ -1758,6 +1764,57 @@ func TestEquippedSpellsRouteMatchesTheGetter(t *testing.T) {
 	}
 }
 
+func TestSetEquippedSpellsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	body, err := json.Marshal(setEquippedSpellsRequest{
+		OrderedResources: []*schema.ResourceRef{
+			{Kind: schema.ResourceKindItem, Key: "40000FA0"},
+			{Kind: schema.ResourceKindItem, Key: "40000FA1"},
+		},
+		ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("marshal body: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/equipped-spells"
+	request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+
+	var got equipment.SetEquippedSpellsResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if got.SaveRevision != "1" || got.CharacterID != 0 {
+		t.Fatalf("result = %+v, want revision 1 and character 0", got)
+	}
+	if len(got.OrderedResources) != 2 ||
+		got.OrderedResources[0].Key != "40000FA0" ||
+		got.OrderedResources[1].Key != "40000FA1" {
+		t.Fatalf("orderedResources = %+v, want 40000FA0 and 40000FA1", got.OrderedResources)
+	}
+
+	spells, err := equipment.GetEquippedSpells(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("GetEquippedSpells: %v", err)
+	}
+	if len(spells.Spells) != 12 ||
+		spells.Spells[0].ResourceKey != "40000FA0" ||
+		spells.Spells[1].ResourceKey != "40000FA1" ||
+		spells.Spells[2].ResourceKey != "" {
+		t.Errorf("stored spells = %+v, want compact loadout with pebble and swift shard", spells.Spells[:3])
+	}
+}
+
 func TestEquippedSpellsRouteRejectsAMalformedCharacterID(t *testing.T) {
 	saveEngine := saveengine.New()
 	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
@@ -1806,7 +1863,10 @@ func TestEquippedSpellsRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
 	if _, hasGet := operation["get"]; !hasGet {
 		t.Fatalf("openapi.json describes %s without a GET operation", path)
 	}
-	for _, name := range []string{"EquippedSpellSlot", "CharacterEquippedSpells"} {
+	if _, hasPut := operation["put"]; !hasPut {
+		t.Fatalf("openapi.json describes %s without a PUT operation", path)
+	}
+	for _, name := range []string{"EquippedSpellSlot", "CharacterEquippedSpells", "SetEquippedSpellsRequest", "SetEquippedSpellsResult"} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
 		}

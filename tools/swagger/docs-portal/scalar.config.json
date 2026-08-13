@@ -179,6 +179,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/equipment/get_equipped_spells.md",
                 "title": "GetEquippedSpells"
+              },
+              "/set-equipped-spells": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/set_equipped_spells.md",
+                "title": "SetEquippedSpells"
               }
             }
           },

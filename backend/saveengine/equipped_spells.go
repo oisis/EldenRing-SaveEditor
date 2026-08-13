@@ -1,6 +1,7 @@
 package saveengine
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -42,6 +43,7 @@ const (
 	equippedSpellEmptyID          uint32 = 0xFFFFFFFF
 	equippedSpellEmptyFollower    uint32 = 0x00000000
 	equippedSpellOccupiedFollower uint32 = 0xFFFFFFFF
+	equippedSpellRawIDLimit       uint32 = 0x10000000
 
 	// Active spell capacity. A character starts with two memory slots, every
 	// Memory Stone adds one, the game caps the stones at eight, and Moon of
@@ -145,6 +147,16 @@ type CharacterEquippedSpells struct {
 	AvailableMemorySlots int                            `json:"availableMemorySlots"`
 }
 
+// CharacterEquippedSpellsMutation reports one committed equipped-spells update.
+type CharacterEquippedSpellsMutation struct {
+	SaveSessionID        string   `json:"saveSessionID"`
+	SaveRevision         string   `json:"saveRevision"`
+	CharacterID          int      `json:"characterID"`
+	RawMagicParamIDs     []uint32 `json:"rawMagicParamIDs"`
+	UsedMemorySlots      int      `json:"usedMemorySlots"`
+	AvailableMemorySlots int      `json:"availableMemorySlots"`
+}
+
 // GetEquippedSpells returns the raw equipped-spell state stored in one physical
 // character slot of an existing session. Like the other character readers it
 // reads the session's private snapshot through the codec only: it opens no file,
@@ -220,6 +232,177 @@ func (engine *Engine) GetEquippedSpells(saveSessionID string, characterID int) (
 	spells.Spells = records
 	spells.AvailableMemorySlots = available
 	return spells, nil
+}
+
+// SetEquippedSpells atomically replaces the first 12 spell memory positions of
+// one active character slot and updates the active spell index if needed.
+func (engine *Engine) SetEquippedSpells(
+	saveSessionID string,
+	characterID int,
+	rawSpellIDs []uint32,
+	usedMemorySlots int,
+	expectedRevision string,
+) (CharacterEquippedSpellsMutation, error) {
+	if !isCanonicalRevision(expectedRevision) {
+		return CharacterEquippedSpellsMutation{}, fmt.Errorf(
+			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+	}
+	if len(rawSpellIDs) > spellMaxMemorySlots {
+		return CharacterEquippedSpellsMutation{}, fmt.Errorf(
+			"cannot equip more than %d spells; got %d", spellMaxMemorySlots, len(rawSpellIDs))
+	}
+
+	seen := make(map[uint32]struct{}, len(rawSpellIDs))
+	for index, rawID := range rawSpellIDs {
+		if rawID == 0 || rawID >= equippedSpellRawIDLimit {
+			return CharacterEquippedSpellsMutation{}, fmt.Errorf(
+				"spell slot %d: 0x%08X is not a raw MagicParam ID", index, rawID)
+		}
+		if _, duplicate := seen[rawID]; duplicate {
+			return CharacterEquippedSpellsMutation{}, fmt.Errorf(
+				"spell slot %d: raw MagicParam ID 0x%08X is duplicated", index, rawID)
+		}
+		seen[rawID] = struct{}{}
+	}
+
+	var availableSlots int
+	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+		if characterID < 0 || characterID >= characterSlotCount {
+			return fmt.Errorf("characterID %d is outside the range 0..%d",
+				characterID, characterSlotCount-1)
+		}
+
+		current := loaded.session.revisionString()
+		if expectedRevision != current {
+			return fmt.Errorf(
+				"expectedRevision %q does not match the current saveRevision %q",
+				expectedRevision, current)
+		}
+
+		flag, err := loaded.snapshot.readAt(
+			userData10Base(loaded.session.platform)+userData10ActiveFlagsOffset+int64(characterID), 1)
+		if err != nil {
+			return fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
+		}
+		if flag[0] != userData10ActiveFlagValue {
+			return fmt.Errorf("character %d is not active", characterID)
+		}
+
+		base := slotDataBase(loaded.session.platform, characterID)
+		slotEnd := base + characterSlotDataSize
+
+		anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, equippedSpellsAnchor)
+		if err != nil {
+			return fmt.Errorf(
+				"cannot search the equipped spells of character %d: %w", characterID, err)
+		}
+		if anchor < 0 {
+			return fmt.Errorf("character %d carries no equipped-spells anchor", characterID)
+		}
+
+		sectionAt := anchor + equippedSpellsSectionOffset
+		if sectionAt+116 > slotEnd {
+			return fmt.Errorf("equipped spells of character %d do not fit into its slot", characterID)
+		}
+
+		existingRecords, err := readEquippedSpellRecords(loaded.snapshot, anchor, slotEnd, characterID)
+		if err != nil {
+			return err
+		}
+		if existingRecords[12] != equippedSpellEmptyID || existingRecords[13] != equippedSpellEmptyID {
+			return fmt.Errorf(
+				"physical spell position 13 or 14 of character %d is not empty; mutation aborted", characterID)
+		}
+
+		section, err := loaded.snapshot.readAt(sectionAt, 116)
+		if err != nil {
+			return fmt.Errorf("cannot read equipped spells section of character %d: %w", characterID, err)
+		}
+
+		available, err := readAvailableMemorySlots(loaded.snapshot, anchor, base, slotEnd, characterID)
+		if err != nil {
+			return err
+		}
+		if usedMemorySlots > available {
+			return fmt.Errorf(
+				"used memory slots %d exceeds available capacity %d for character %d",
+				usedMemorySlots, available, characterID)
+		}
+		availableSlots = available
+
+		origActiveIndex := binary.LittleEndian.Uint32(section[112:])
+		var newActiveIndex uint32
+		if len(rawSpellIDs) == 0 {
+			newActiveIndex = equippedSpellEmptyID
+		} else if origActiveIndex != equippedSpellEmptyID && origActiveIndex < uint32(len(rawSpellIDs)) {
+			newActiveIndex = origActiveIndex
+		} else {
+			newActiveIndex = 0
+		}
+
+		beforeSpells := section[:96]
+		beforeTail := section[96:112]
+		beforeActive := section[112:116]
+
+		afterSpells := make([]byte, 96)
+		for i := 0; i < 12; i++ {
+			if i < len(rawSpellIDs) {
+				binary.LittleEndian.PutUint32(afterSpells[i*8:], rawSpellIDs[i])
+				binary.LittleEndian.PutUint32(afterSpells[i*8+4:], equippedSpellOccupiedFollower)
+			} else {
+				binary.LittleEndian.PutUint32(afterSpells[i*8:], equippedSpellEmptyID)
+				binary.LittleEndian.PutUint32(afterSpells[i*8+4:], equippedSpellEmptyFollower)
+			}
+		}
+
+		afterActive := make([]byte, 4)
+		binary.LittleEndian.PutUint32(afterActive, newActiveIndex)
+
+		if bytes.Equal(beforeSpells, afterSpells) && bytes.Equal(beforeActive, afterActive) {
+			return nil
+		}
+
+		if err := loaded.snapshot.writeAt(sectionAt, afterSpells); err != nil {
+			return fmt.Errorf("cannot write equipped spells of character %d: %w", characterID, err)
+		}
+		if err := loaded.snapshot.writeAt(sectionAt+112, afterActive); err != nil {
+			loaded.snapshot.writeAt(sectionAt, beforeSpells)
+			return fmt.Errorf("cannot write active spell index of character %d: %w", characterID, err)
+		}
+
+		written, verifyErr := loaded.snapshot.readAt(sectionAt, 116)
+		if verifyErr == nil &&
+			bytes.Equal(written[:96], afterSpells) &&
+			bytes.Equal(written[96:112], beforeTail) &&
+			bytes.Equal(written[112:116], afterActive) {
+			return nil
+		}
+
+		rb1 := loaded.snapshot.writeAt(sectionAt, beforeSpells)
+		rb2 := loaded.snapshot.writeAt(sectionAt+112, beforeActive)
+		if rb1 != nil || rb2 != nil {
+			return fmt.Errorf(
+				"equipped spells of character %d could not be verified and could not be restored: %v, %v",
+				characterID, rb1, rb2)
+		}
+		return errors.New("equipped spells mutation could not be verified; the save is unchanged")
+	})
+	if err != nil {
+		return CharacterEquippedSpellsMutation{}, err
+	}
+
+	if rawSpellIDs == nil {
+		rawSpellIDs = []uint32{}
+	}
+
+	return CharacterEquippedSpellsMutation{
+		SaveSessionID:        saveSessionID,
+		SaveRevision:         saveRevision,
+		CharacterID:          characterID,
+		RawMagicParamIDs:     rawSpellIDs,
+		UsedMemorySlots:      usedMemorySlots,
+		AvailableMemorySlots: availableSlots,
+	}, nil
 }
 
 // readEquippedSpellRecords reads the fourteen physical records and validates

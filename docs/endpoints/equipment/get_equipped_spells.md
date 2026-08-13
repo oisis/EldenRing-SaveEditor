@@ -2,7 +2,7 @@
 
 ## Overview
 
-`GetEquippedSpells` returns the fourteen physical `EquippedSpells` records of one
+`GetEquippedSpells` returns the twelve public playable `EquippedSpells` records of one
 character slot of a save session that already exists in SaveEngine, resolves
 every occupied record through GameCatalog, and reports how many Memory Slots the
 loadout consumes and how many the character may fill.
@@ -84,7 +84,7 @@ type GetEquippedSpellsResult struct {
 | `saveSessionID` | `string` | Identifier of the session that was read. It equals the requested value. |
 | `characterID` | `int` | The requested slot index, `0` to `9`. It equals the requested value. |
 | `active` | `bool` | `true` only when the slot's activity flag is exactly `1`. Any other flag value is not active. |
-| `spells` | array of exactly 14 entries | The fourteen physical records in stored order. |
+| `spells` | array of exactly 12 entries | The twelve public playable memory slots in stored order. |
 | `usedMemorySlots` | `int` | Sum of the Memory Slots costs of the occupied records. |
 | `availableMemorySlots` | `int` | Memory Slots the character may fill. |
 
@@ -97,15 +97,12 @@ Every entry of `spells` carries:
 | `name` | `string` | GameCatalog presentation name of the resolved spell. Empty only for the native empty record. |
 | `memorySlots` | `int` | GameCatalog Memory Slots cost of the resolved spell. Zero only for the native empty record. |
 
-### The fourteen physical records
+### The twelve public playable records
 
-The save always keeps fourteen `EquippedSpells` records, and all fourteen are
-returned in stored order. The count never varies with how many spells the
-character has memorised or how many memory slots the character has unlocked:
-records the game cannot use are still physical records and are still reported.
-
-Each record is a pair of two little-endian `uint32`: the raw MagicParam ID and
-the follower field behind it. The game writes exactly two combinations:
+The public API exposes the twelve playable memory slots. Physical records 13 and
+14 are not public spell slots and are not returned in the result. Each record is
+a pair of two little-endian `uint32`: the raw MagicParam ID and the follower field
+behind it. The game writes exactly two combinations:
 
 | Record | Raw MagicParam ID | Follower |
 |---|---|---|

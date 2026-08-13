@@ -374,6 +374,12 @@ type setPhysickMixtureRequest struct {
 	ExpectedRevision     string                `json:"expectedRevision"`
 }
 
+// setEquippedSpellsRequest is the strict JSON body of the equipped spells route.
+type setEquippedSpellsRequest struct {
+	OrderedResources []*schema.ResourceRef `json:"orderedResources"`
+	ExpectedRevision string                `json:"expectedRevision"`
+}
+
 // setOwnedItemQuantityRequest is the strict JSON body of the quantity route.
 // The transport owns no quantity or revision rule; both values reach the
 // endpoint unchanged.
@@ -743,6 +749,41 @@ func registerSaveSessionRoutes(
 			}
 			result, err := equipment.GetEquippedSpells(
 				saveEngine, gameCatalog, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setEquippedSpellsRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := equipment.SetEquippedSpells(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.OrderedResources,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return
