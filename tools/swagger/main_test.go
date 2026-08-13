@@ -33,6 +33,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -885,6 +886,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", `{"crystalTearResources":[null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
@@ -1008,6 +1010,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths[ownedItem]["delete"]; !hasDelete {
 		t.Fatalf("openapi.json describes no DELETE for %s", ownedItem)
 	}
+	physickMixture := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture"
+	if _, hasPut := document.Paths[physickMixture]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", physickMixture)
+	}
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
 	for _, name := range []string{
@@ -1055,6 +1061,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"PouchItemSlot",
 		"CharacterPouchItems",
 		"CharacterPhysickMixture",
+		"SetPhysickMixtureRequest",
+		"SetPhysickMixtureResult",
 		"InventoryRecord",
 		"CharacterInventory",
 		"StorageRecord",
@@ -1126,8 +1134,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 26 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 26", found)
+	if found != 27 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 27", found)
 	}
 }
 
@@ -1623,6 +1631,77 @@ func TestSetCharacterRunesRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)",
 			target, recorder.Code, recorder.Body.String())
+	}
+}
+
+func writeSetPhysickMixtureRouteFixture(t *testing.T) string {
+	t.Helper()
+
+	path := writeActiveSpellsFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	anchorBase := equippedSpellsSlotDataBase + equippedSpellsAnchorAt
+	inventoryAt := anchorBase + 505
+	binary.LittleEndian.PutUint32(data[inventoryAt-4:], 1)
+	binary.LittleEndian.PutUint32(data[inventoryAt:], 0xB00000FA)
+	binary.LittleEndian.PutUint32(data[inventoryAt+4:], 1)
+	keyAt := inventoryAt + 0xA80*12 + 4
+	binary.LittleEndian.PutUint32(data[keyAt-4:], 1)
+	binary.LittleEndian.PutUint32(data[keyAt:], 0xB0002AF9)
+	binary.LittleEndian.PutUint32(data[keyAt+4:], 1)
+
+	physickAt := anchorBase + 0x931D + 4 + 0x9C
+	binary.LittleEndian.PutUint32(data[physickAt:], saveengine.PhysickEmptyTearID)
+	binary.LittleEndian.PutUint32(data[physickAt+4:], saveengine.PhysickEmptyTearID)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("update fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetPhysickMixtureRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+	session, err := savesession.LoadSave(saveEngine, writeSetPhysickMixtureRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	body, err := json.Marshal(setPhysickMixtureRequest{
+		CrystalTearResources: []*schema.ResourceRef{
+			{Kind: schema.ResourceKindItem, Key: "40002AF9"}, nil,
+		},
+		ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("marshal body: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/physick-mixture"
+	request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+
+	var got equipment.SetPhysickMixtureResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if got.SaveRevision != "1" || got.CharacterID != 0 ||
+		got.CrystalTearResources[0] == nil || got.CrystalTearResources[1] != nil {
+		t.Fatalf("result = %+v, want revision 1 and one occupied position", got)
+	}
+
+	mixture, err := equipment.GetPhysickMixture(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("GetPhysickMixture: %v", err)
+	}
+	if want := [2]uint32{0x40002AF9, saveengine.PhysickEmptyTearID}; mixture.Tears != want {
+		t.Errorf("stored tears = %08X/%08X, want %08X/%08X",
+			mixture.Tears[0], mixture.Tears[1], want[0], want[1])
 	}
 }
 

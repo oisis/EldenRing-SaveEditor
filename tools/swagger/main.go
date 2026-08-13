@@ -31,6 +31,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -365,6 +366,14 @@ type setCharacterRunesRequest struct {
 	ExpectedRevision string  `json:"expectedRevision"`
 }
 
+// setPhysickMixtureRequest is the strict JSON body of the complete two-position
+// Physick assignment. A null entry clears that exact position; the endpoint
+// validates the required length and every catalog reference.
+type setPhysickMixtureRequest struct {
+	CrystalTearResources []*schema.ResourceRef `json:"crystalTearResources"`
+	ExpectedRevision     string                `json:"expectedRevision"`
+}
+
 // setOwnedItemQuantityRequest is the strict JSON body of the quantity route.
 // The transport owns no quantity or revision rule; both values reach the
 // endpoint unchanged.
@@ -681,6 +690,41 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := equipment.GetPhysickMixture(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setPhysickMixtureRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := equipment.SetPhysickMixture(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.CrystalTearResources,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

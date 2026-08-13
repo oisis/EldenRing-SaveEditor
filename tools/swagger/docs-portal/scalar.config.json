@@ -170,6 +170,11 @@
                 "filepath": "../../../docs/endpoints/equipment/get_physick_mixture.md",
                 "title": "GetPhysickMixture"
               },
+              "/set-physick-mixture": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/set_physick_mixture.md",
+                "title": "SetPhysickMixture"
+              },
               "/get-equipped-spells": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/equipment/get_equipped_spells.md",

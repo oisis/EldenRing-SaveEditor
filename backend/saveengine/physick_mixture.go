@@ -144,41 +144,9 @@ func (engine *Engine) GetPhysickMixture(saveSessionID string, characterID int) (
 		return mixture, nil
 	}
 
-	base := slotDataBase(loaded.session.platform, characterID)
-	slotEnd := base + characterSlotDataSize
-
-	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, physickMixtureAnchor)
+	blockAt, err := physickMixtureAt(loaded, characterID)
 	if err != nil {
-		return CharacterPhysickMixture{}, fmt.Errorf(
-			"cannot search the physick mixture of character %d: %w", characterID, err)
-	}
-	if anchor < 0 {
-		return CharacterPhysickMixture{}, fmt.Errorf("character %d carries no physick anchor", characterID)
-	}
-
-	countAt := anchor + physickProjectileCountOffset
-	if countAt+4 > slotEnd {
-		return CharacterPhysickMixture{}, fmt.Errorf(
-			"projectile count of character %d lies outside its slot", characterID)
-	}
-	rawCount, err := loaded.snapshot.readAt(countAt, 4)
-	if err != nil {
-		return CharacterPhysickMixture{}, fmt.Errorf(
-			"cannot read projectile count of character %d: %w", characterID, err)
-	}
-	// The count is widened to int64 before it is multiplied, so a declared
-	// length can never wrap into a small, seemingly valid offset.
-	count := int64(binary.LittleEndian.Uint32(rawCount))
-	if count > physickMaxProjectileRecords {
-		return CharacterPhysickMixture{}, fmt.Errorf(
-			"character %d declares %d projectile records, want at most %d",
-			characterID, count, physickMaxProjectileRecords)
-	}
-
-	blockAt := countAt + 4 + count*physickProjectileRecordSize + physickArmamentsBlockSize
-	if blockAt+physickReadSize > slotEnd {
-		return CharacterPhysickMixture{}, fmt.Errorf(
-			"physick mixture of character %d does not fit into its slot", characterID)
+		return CharacterPhysickMixture{}, err
 	}
 	block, err := loaded.snapshot.readAt(blockAt, physickReadSize)
 	if err != nil {
@@ -191,4 +159,49 @@ func (engine *Engine) GetPhysickMixture(saveSessionID string, characterID int) (
 		mixture.Tears[index] = binary.LittleEndian.Uint32(block[index*4:])
 	}
 	return mixture, nil
+}
+
+// physickMixtureAt locates the first byte of EquipPhysicsData for one active
+// slot. The getter and setter share this chain so they cannot disagree about a
+// dynamic projectile length or about the bounds of the two mixture fields.
+// The caller must already hold Engine.mutex and establish that the slot is
+// active.
+func physickMixtureAt(loaded *loadedSave, characterID int) (int64, error) {
+	base := slotDataBase(loaded.session.platform, characterID)
+	slotEnd := base + characterSlotDataSize
+
+	anchor, err := loaded.snapshot.indexIn(base, characterSlotDataSize, physickMixtureAnchor)
+	if err != nil {
+		return 0, fmt.Errorf(
+			"cannot search the physick mixture of character %d: %w", characterID, err)
+	}
+	if anchor < 0 {
+		return 0, fmt.Errorf("character %d carries no physick anchor", characterID)
+	}
+
+	countAt := anchor + physickProjectileCountOffset
+	if countAt+4 > slotEnd {
+		return 0, fmt.Errorf(
+			"projectile count of character %d lies outside its slot", characterID)
+	}
+	rawCount, err := loaded.snapshot.readAt(countAt, 4)
+	if err != nil {
+		return 0, fmt.Errorf(
+			"cannot read projectile count of character %d: %w", characterID, err)
+	}
+	// The count is widened to int64 before it is multiplied, so a declared
+	// length can never wrap into a small, seemingly valid offset.
+	count := int64(binary.LittleEndian.Uint32(rawCount))
+	if count > physickMaxProjectileRecords {
+		return 0, fmt.Errorf(
+			"character %d declares %d projectile records, want at most %d",
+			characterID, count, physickMaxProjectileRecords)
+	}
+
+	blockAt := countAt + 4 + count*physickProjectileRecordSize + physickArmamentsBlockSize
+	if blockAt+physickReadSize > slotEnd {
+		return 0, fmt.Errorf(
+			"physick mixture of character %d does not fit into its slot", characterID)
+	}
+	return blockAt, nil
 }

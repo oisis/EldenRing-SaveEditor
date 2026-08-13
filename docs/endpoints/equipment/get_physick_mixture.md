@@ -142,8 +142,8 @@ On any error the result is the zero value.
    slot data.
 4. For an active slot only, SaveEngine locates the confirmed 65-byte anchor
    inside the data of that one slot. The anchor is stated locally in
-   `backend/saveengine/physick_mixture.go`; this getter shares no state, no
-   helper and no reader with any other endpoint.
+   `backend/saveengine/physick_mixture.go`; the dynamic locator is shared only
+   with `SetPhysickMixture`, so the reader and writer cannot drift apart.
 5. The projectile count is read as a raw `uint32` at the constant distance
    `0x931D` behind the anchor. That distance is the sum of the confirmed fixed
    structures between the two positions — `SpEffect` `0x00D0`,
@@ -170,8 +170,8 @@ MD5 prefix in front of every slot and the PS4 container does not. The layout
 behind that base, including the whole Physick chain, is identical, so both
 platforms run the same search and the same reads.
 
-The endpoint is thin by design: it contains no SaveEngine rule, it holds no
-knowledge of the save format, and there is no shared endpoint helper behind it.
+The endpoint is thin by design: it contains no SaveEngine rule and holds no
+knowledge of the save format. The shared locator remains private to SaveEngine.
 It calls no other endpoint — in particular neither `LoadSave`, `GetLoadedSave`,
 `CloseSave`, `GetSaveCharacters`, `GetCharacterProfile`, `GetCharacterStats`,
 `GetCharacterAppearance`, `GetEquipment`, `GetQuickItems`, nor `GetPouchItems`.
@@ -242,5 +242,6 @@ count of `200001`, and a mixture range reaching past the end of the slot.
   No Wails binding, no CLI command and no frontend reaches the endpoint.
 - It reports raw state only. No value is resolved into an `ItemDocument`, no
   Crystal Tear name, icon or effect is produced, and GameCatalog is not read.
-- It is a getter. Changing the mixture is not possible: the session is read-only
-  at this stage.
+- Changing the mixture is a separate operation documented under
+  [`SetPhysickMixture`](set_physick_mixture.md); this getter itself remains
+  read-only.

@@ -768,6 +768,52 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "setPhysickMixture",
+        "tags": ["Equipment"],
+        "summary": "SetPhysickMixture",
+        "description": "Atomically replaces both Flask of Wondrous Physick positions. crystalTearResources contains exactly two nullable ResourceRef entries in stored order; null clears that exact position. Every resource must resolve to an owned goods item with a confirmed equipment capability allowing the physick slot, the same tear cannot occupy both positions, and the character must own the Flask itself. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPhysickMixtureRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Physick mixture assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetPhysickMixtureResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, an unknown or ineligible resource, an unowned tear or Flask, a duplicate tear, an inactive character, a stale revision, or a Physick block that cannot be located safely",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells": {
@@ -2317,6 +2363,63 @@
           "active",
           "tears"
         ]
+      },
+      "SetPhysickMixtureRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete two-position Physick assignment and optimistic-concurrency revision. A null array entry clears that exact position.",
+        "properties": {
+          "crystalTearResources": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Exactly two positions in stored order. Each non-null ResourceRef must resolve to an owned Crystal Tear; null is the native empty position.",
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              ],
+              "nullable": true
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["crystalTearResources", "expectedRevision"]
+      },
+      "SetPhysickMixtureResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete Physick assignment, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "crystalTearResources": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "crystalTearResources"]
       },
       "EquippedSpellSlot": {
         "type": "object",
