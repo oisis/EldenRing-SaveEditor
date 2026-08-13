@@ -245,38 +245,11 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 // before it is multiplied or added, so a corrupt value can never wrap into a
 // small, seemingly valid offset.
 func eventFlagSectionStart(loaded *loadedSave, characterID int) (int64, error) {
-	base, slotEnd := eventFlagSlotBounds(loaded.session.platform, characterID)
-
-	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, eventFlagAnchor)
-	if err != nil {
-		return 0, fmt.Errorf("cannot search the event flags of character %d: %w", characterID, err)
-	}
-	if anchor < 0 {
-		return 0, fmt.Errorf("character %d carries no event flag anchor", characterID)
-	}
-
-	projectiles, err := eventFlagDeclaredValue(loaded, characterID,
-		anchor+eventFlagProjectileCountOffset, slotEnd, "projectile count", eventFlagMaxProjectileRecords)
+	at, slotEnd, err := eventFlagGaItemGameDataAt(loaded, characterID)
 	if err != nil {
 		return 0, err
 	}
-	at := anchor + eventFlagProjectileCountOffset + 4 +
-		projectiles*eventFlagProjectileRecordSize +
-		eventFlagBlocksBeforeStorage + eventFlagStorageBoxSize + eventFlagGestureSectionSize
-
-	regions, err := eventFlagDeclaredValue(loaded, characterID,
-		at, slotEnd, "region count", eventFlagMaxRegionRecords)
-	if err != nil {
-		return 0, err
-	}
-	at += 4 + regions*eventFlagRegionRecordSize + eventFlagHorseSize + eventFlagBloodStainSize
-
-	menuSize, err := eventFlagDeclaredValue(loaded, characterID,
-		at+4, slotEnd, "menu profile size", eventFlagMaxDynamicSize)
-	if err != nil {
-		return 0, err
-	}
-	at += eventFlagDynamicHeaderSize + menuSize + eventFlagTrophyEquipSize + eventFlagGaItemGameDataSize
+	at += eventFlagGaItemGameDataSize
 
 	tutorialSize, err := eventFlagDeclaredValue(loaded, characterID,
 		at+4, slotEnd, "tutorial size", eventFlagMaxDynamicSize)
@@ -302,6 +275,50 @@ func eventFlagSectionStart(loaded *loadedSave, characterID int) (int64, error) {
 			"event flags of character %d do not fit into the save file", characterID)
 	}
 	return sectionAt, nil
+}
+
+// eventFlagGaItemGameDataAt walks the same confirmed chain up to the first byte
+// of GaItemGameData and reports it together with the end of the slot.
+//
+// It is the single owner of that walk. The bitfield reader continues from here
+// over the fixed GaItemGameData block, and the GaItemData mutation addresses the
+// block itself from the same value, so a reader and a writer can never disagree
+// about where it starts. Whether the block fits into the slot is the caller's
+// check: the bitfield reader proves that through the sections behind it, and the
+// mutation proves it for the block itself.
+func eventFlagGaItemGameDataAt(loaded *loadedSave, characterID int) (int64, int64, error) {
+	base, slotEnd := eventFlagSlotBounds(loaded.session.platform, characterID)
+
+	anchor, err := loaded.snapshot.indexIn(base, slotEnd-base, eventFlagAnchor)
+	if err != nil {
+		return 0, 0, fmt.Errorf("cannot search the event flags of character %d: %w", characterID, err)
+	}
+	if anchor < 0 {
+		return 0, 0, fmt.Errorf("character %d carries no event flag anchor", characterID)
+	}
+
+	projectiles, err := eventFlagDeclaredValue(loaded, characterID,
+		anchor+eventFlagProjectileCountOffset, slotEnd, "projectile count", eventFlagMaxProjectileRecords)
+	if err != nil {
+		return 0, 0, err
+	}
+	at := anchor + eventFlagProjectileCountOffset + 4 +
+		projectiles*eventFlagProjectileRecordSize +
+		eventFlagBlocksBeforeStorage + eventFlagStorageBoxSize + eventFlagGestureSectionSize
+
+	regions, err := eventFlagDeclaredValue(loaded, characterID,
+		at, slotEnd, "region count", eventFlagMaxRegionRecords)
+	if err != nil {
+		return 0, 0, err
+	}
+	at += 4 + regions*eventFlagRegionRecordSize + eventFlagHorseSize + eventFlagBloodStainSize
+
+	menuSize, err := eventFlagDeclaredValue(loaded, characterID,
+		at+4, slotEnd, "menu profile size", eventFlagMaxDynamicSize)
+	if err != nil {
+		return 0, 0, err
+	}
+	return at + eventFlagDynamicHeaderSize + menuSize + eventFlagTrophyEquipSize, slotEnd, nil
 }
 
 // eventFlagDeclaredValue reads one little-endian uint32 the save declares — a

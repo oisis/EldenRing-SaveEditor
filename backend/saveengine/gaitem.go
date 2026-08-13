@@ -165,6 +165,28 @@ func gaItemSize(gameID uint32) int {
 	}
 }
 
+// gaItemHandleForGameID derives the handle a new record of gameID has to carry.
+//
+// It is the exact inverse of the record-free branch of resolveGaItemHandle
+// below, and it sits beside it so the two can never drift apart: only the two
+// families whose handle is derived from the game ID alone — accessories and
+// goods — have one, because only they need no record in the variable-length
+// GaItem table. Every other family is rejected here rather than given a handle
+// that would resolve to nothing.
+func gaItemHandleForGameID(gameID uint32) (uint32, error) {
+	lower := gameID & 0x0FFFFFFF
+	switch gameID & gaItemHandleTypeMask {
+	case 0x20000000:
+		return gaItemAccessoryHandle | lower, nil
+	case 0x40000000:
+		return gaItemGoodsHandle | lower, nil
+	default:
+		return 0, fmt.Errorf(
+			"game ID 0x%08X needs a record in the GaItem table, which this mutation never allocates",
+			gameID)
+	}
+}
+
 func resolveGaItemHandle(byHandle map[uint32]uint32, handle uint32) (uint32, error) {
 	if gameID, exists := byHandle[handle]; exists {
 		return gameID, nil

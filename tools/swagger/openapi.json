@@ -855,6 +855,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/items": {
+      "post": {
+        "operationId": "addItemToInventory",
+        "tags": ["Inventory"],
+        "summary": "AddItemToInventory",
+        "description": "Adds one resource or variant to the common section of InventoryHeld in the session snapshot. quantity is a delta and is always at least 1: an item that stores a quantity in one record is topped up on its first common record and receives a new record otherwise, and an item that stores every copy in its own record always receives a new record with quantity 1. The endpoint resolves (kind, key, variantID) through GameCatalog and rejects, without changing the session, every family other than goods and talisman, a family that disagrees with the game-ID prefix, a key_items resource, an unknown category, record mode or inventory limit, a quantity above the per-record or container limit, an inactive character, a full common section, an item that already holds a key record, and a stale or malformed expectedRevision. A successful mutation writes the record, the common item count, NextEquipIndex, NextAcquisitionSortId and, for an item the character owns no physical record of yet, one active GaItemData entry; it advances saveRevision by exactly one, marks the session dirty and retires every ownedItemID from the previous revision. WriteSave remains a separate operation. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddItemToInventoryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed add and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddItemToInventoryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, an invalid characterID, quantity or expectedRevision, an unknown session, kind, key or variantID, a resource this endpoint never adds, unusable catalog data, an inactive character, a full container, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage": {
       "get": {
         "operationId": "getStorage",
@@ -2432,6 +2480,103 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "kind", "key", "gameID", "container", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+      },
+      "AddItemToInventoryRequest": {
+        "type": "object",
+        "description": "Body of AddItemToInventory. Every value reaches the endpoint unchanged; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Resource kind, matched exactly and never normalised."
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Resource key inside that kind, matched exactly and never normalised."
+          },
+          "variantID": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "nullable": true,
+            "description": "Optional variant game ID. Absent or null selects the base item document; a value selects exactly the stored variant of the same (kind, key) pair that declares it."
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Amount added, never a target total. It is never clamped; the resolved per-record and container limits may impose a lower maximum, and a separate-instances resource accepts 1 only."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["kind", "key", "quantity", "expectedRevision"]
+      },
+      "AddItemToInventoryResult": {
+        "type": "object",
+        "description": "Receipt for one committed add. It carries no ownedItemID: the successful mutation advanced saveRevision and retired every identity of the previous one, so the row is addressed again by reading the container back.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "description": "Save-side game ID of the resolved resource or variant."
+          },
+          "added": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "The delta that was applied."
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "The value the written record stores now."
+          },
+          "createdRecord": {
+            "type": "boolean",
+            "description": "True when a new record was opened, false when an existing one was topped up."
+          },
+          "containerSection": {
+            "type": "string",
+            "enum": ["common"],
+            "description": "Always the common section; this endpoint never writes the key section."
+          },
+          "physicalIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "description": "Physical row of the written record inside the common section."
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "gameID", "added", "quantity", "createdRecord", "containerSection", "physicalIndex"]
       },
       "RemoveOwnedItemRequest": {
         "type": "object",

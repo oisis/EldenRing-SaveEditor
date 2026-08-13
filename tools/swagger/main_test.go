@@ -889,6 +889,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
+		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/inventory/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
 	} {
@@ -977,6 +978,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":                        "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/items":                    "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}":          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": "patch",
@@ -1048,6 +1050,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"StorageRecord",
 		"CharacterStorage",
 		"OwnedItem",
+		"AddItemToInventoryRequest",
+		"AddItemToInventoryResult",
 		"SetOwnedItemQuantityRequest",
 		"SetOwnedItemQuantityResult",
 		"GestureEntry",
@@ -1072,7 +1076,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 func assertQuantityFitsTheRecord(t *testing.T, schemas map[string]any) {
 	t.Helper()
 
-	for _, name := range []string{"SetOwnedItemQuantityRequest", "SetOwnedItemQuantityResult"} {
+	for _, name := range []string{
+		"SetOwnedItemQuantityRequest", "SetOwnedItemQuantityResult",
+		"AddItemToInventoryRequest", "AddItemToInventoryResult",
+	} {
 		schema, _ := schemas[name].(map[string]any)
 		properties, _ := schema["properties"].(map[string]any)
 		quantity, _ := properties["quantity"].(map[string]any)
@@ -1105,8 +1112,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 21 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 21", found)
+	if found != 22 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 22", found)
 	}
 }
 
@@ -2022,6 +2029,107 @@ func TestSetOwnedItemQuantityRoute(t *testing.T) {
 	}
 	if updated.SaveRevision != "1" || updated.Records[0].Quantity != 4 {
 		t.Fatalf("updated inventory = %+v, want quantity 4 at revision 1", updated)
+	}
+}
+
+func TestAddItemToInventoryRoute(t *testing.T) {
+	// This route needs one addable catalog item, which the Throwing Dagger is: a
+	// goods resource outside category key_items that stacks up to 40 per record
+	// and per inventory. The shared fixture stays unchanged; nothing in it holds
+	// that item, so the add opens a new record.
+	fixture := writeInventoryFixture(t)
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	before, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory: %v", err)
+	}
+
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/inventory/items"
+	serve := func(method, target, body string) *httptest.ResponseRecorder {
+		var reader io.Reader
+		if body != "" {
+			reader = strings.NewReader(body)
+		}
+		request := httptest.NewRequest(method, target, reader)
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	// A session-mutating POST that arrives as a CORS simple request performs no
+	// operation at all.
+	for _, contentType := range []string{"text/plain", ""} {
+		request := httptest.NewRequest(http.MethodPost, target, strings.NewReader(
+			`{"kind":"item","key":"400006A4","quantity":3,"expectedRevision":"0"}`))
+		if contentType != "" {
+			request.Header.Set("Content-Type", contentType)
+		} else {
+			request.Header.Del("Content-Type")
+		}
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("add with Content-Type %q: status = %d, want 400 (body %q)",
+				contentType, recorder.Code, recorder.Body.String())
+		}
+	}
+
+	malformed := serve(http.MethodPost, target,
+		`{"kind":"item","key":"400006A4","quantity":3,"expectedRevision":"0","unknown":true}`)
+	if malformed.Code != http.StatusBadRequest {
+		t.Fatalf("strict body: status = %d, want 400 (body %q)", malformed.Code, malformed.Body.String())
+	}
+	info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo after malformed body: %v", err)
+	}
+	if info.UnsavedChanges {
+		t.Fatal("malformed body changed the session")
+	}
+
+	recorder := serve(http.MethodPost, target,
+		`{"kind":"item","key":"400006A4","quantity":3,"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.AddItemToInventoryResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode AddItemToInventory body %q: %v", recorder.Body.String(), err)
+	}
+	want := inventory.AddItemToInventoryResult{
+		SaveSessionID:    session.SaveSessionID,
+		SaveRevision:     "1",
+		CharacterID:      0,
+		GameID:           0x400006A4,
+		Added:            3,
+		Quantity:         3,
+		CreatedRecord:    true,
+		ContainerSection: "common",
+		PhysicalIndex:    result.PhysicalIndex,
+	}
+	if !reflect.DeepEqual(result, want) {
+		t.Fatalf("AddItemToInventory result = %+v, want %+v", result, want)
+	}
+
+	after, err := inventory.GetInventory(saveEngine, gameCatalog, session.SaveSessionID, 0, "", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory after the add: %v", err)
+	}
+	if after.SaveRevision != "1" || after.Total != before.Total+1 {
+		t.Fatalf("updated inventory = %+v, want %d records at revision 1", after, before.Total+1)
+	}
+
+	// The revision has advanced, so repeating the same request is rejected
+	// instead of adding a second record.
+	repeated := serve(http.MethodPost, target,
+		`{"kind":"item","key":"400006A4","quantity":3,"expectedRevision":"0"}`)
+	if repeated.Code != http.StatusBadRequest {
+		t.Fatalf("repeated add: status = %d, want 400 (body %q)",
+			repeated.Code, repeated.Body.String())
 	}
 }
 

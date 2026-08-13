@@ -358,6 +358,18 @@ type setOwnedItemQuantityRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// addItemToInventoryRequest is the strict JSON body of the add route. The
+// transport owns no catalog, family, routing, quantity or revision rule; every
+// value reaches the endpoint unchanged, and an absent variantID stays absent
+// rather than becoming a zero.
+type addItemToInventoryRequest struct {
+	Kind             string  `json:"kind"`
+	Key              string  `json:"key"`
+	VariantID        *uint32 `json:"variantID"`
+	Quantity         uint32  `json:"quantity"`
+	ExpectedRevision string  `json:"expectedRevision"`
+}
+
 // removeOwnedItemRequest is the strict JSON body of the removal route. The
 // revision travels in the body like it does for every other mutation, so the
 // transport keeps one convention; it reaches the endpoint unchanged.
@@ -622,6 +634,50 @@ func registerSaveSessionRoutes(
 				query.Get("containerSection"),
 				page,
 				pageSize,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	// Adding an item creates or tops up a record of the same collection the
+	// inventory route lists, so it posts to that collection. The route parses
+	// only the typed path/body envelope and delegates every catalog, family,
+	// routing, limit, revision and mutation rule to AddItemToInventory.
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/items",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			// This is a session-mutating POST, so it carries the same
+			// simple-request guard the two other POST routes do.
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body addItemToInventoryRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.AddItemToInventory(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.Kind,
+				body.Key,
+				body.VariantID,
+				body.Quantity,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
