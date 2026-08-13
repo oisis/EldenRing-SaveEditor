@@ -993,6 +993,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-talismans": {
+      "put": {
+        "operationId": "setEquippedTalismans",
+        "tags": ["Equipment"],
+        "summary": "SetEquippedTalismans",
+        "description": "Atomically replaces the compact talisman loadout for one active character. orderedOwnedItemIDs contains at most four revision-scoped tokens in desired slot order; the list length cannot exceed the character's unlocked talisman-slot count. Every token must address a positive-quantity talisman in Inventory common with confirmed equipment capability allowing talisman. An empty list clears all four player-visible fields. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEquippedTalismansRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed talisman loadout receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetEquippedTalismansResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, an invalid character or revision, too many talismans for the unlocked slots, an invalid or stale ownedItemID, a duplicate or ineligible talisman, or inconsistent existing representations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory": {
       "get": {
         "operationId": "getInventory",
@@ -2724,6 +2772,64 @@
           "orderedResources",
           "usedMemorySlots",
           "availableMemorySlots"
+        ]
+      },
+      "SetEquippedTalismansRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Compact ordered list of owned talisman instances and optimistic-concurrency revision.",
+        "properties": {
+          "orderedOwnedItemIDs": {
+            "type": "array",
+            "maxItems": 4,
+            "description": "At most four ownedItemID tokens in desired talisman-slot order. The list must also fit the character's unlocked slot count.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["orderedOwnedItemIDs", "expectedRevision"]
+      },
+      "SetEquippedTalismansResult": {
+        "type": "object",
+        "description": "Receipt for one committed talisman loadout, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderedResources": {
+            "type": "array",
+            "maxItems": 4,
+            "items": {
+              "$ref": "#/components/schemas/ResourceRef"
+            }
+          },
+          "unlockedSlots": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1,
+            "maximum": 4
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "orderedResources",
+          "unlockedSlots"
         ]
       },
       "EquippedSpellSlot": {

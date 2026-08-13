@@ -88,7 +88,7 @@ var equipmentAnchor = []byte{
 //	 7 bolts1               18 talisman2
 //	 8 arrows2              19 talisman3
 //	 9 bolts2               20 talisman4
-//	10 unknown0x28          21 talisman5
+//	10 unknown0x28          21 unknown0x54
 //
 // The unknown fields are reported as stored, like every other field.
 //

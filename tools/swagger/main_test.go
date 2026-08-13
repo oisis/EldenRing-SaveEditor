@@ -892,6 +892,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", `{"crystalTearResources":[null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", `{"orderedResources":[],"expectedRevision":"0"}`},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-talismans", `{"orderedOwnedItemIDs":[],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
@@ -1023,6 +1024,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[equippedSpells]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", equippedSpells)
 	}
+	equippedTalismans := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-talismans"
+	if _, hasPut := document.Paths[equippedTalismans]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", equippedTalismans)
+	}
 	quickItems := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items"
 	if _, hasPut := document.Paths[quickItems]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", quickItems)
@@ -1077,6 +1082,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterQuickItems",
 		"SetQuickItemsRequest",
 		"SetQuickItemsResult",
+		"SetEquippedTalismansRequest",
+		"SetEquippedTalismansResult",
 		"PouchItemSlot",
 		"CharacterPouchItems",
 		"SetPouchItemsRequest",
@@ -1155,8 +1162,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 30 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 30", found)
+	if found != 31 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 31", found)
 	}
 }
 
@@ -1832,6 +1839,80 @@ func TestSetQuickItemsRoute(t *testing.T) {
 	}
 	if quick.Items[0].ItemID == 0 || quick.Items[0].EquipIndex != 0x180 {
 		t.Errorf("quick item 0 = %+v, want valid inventory reference", quick.Items[0])
+	}
+}
+
+func writeSetEquippedTalismansRouteFixture(t *testing.T) string {
+	t.Helper()
+	path := writeSetPouchItemsRouteFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	anchor := equippedSpellsSlotDataBase + equippedSpellsAnchorAt
+	for _, blockAt := range []int64{0x115, 0x189, 0x1E1} {
+		for index := 0; index < 4; index++ {
+			value := uint32(0xFFFFFFFF)
+			if blockAt == 0x1E1 {
+				value = 0
+			}
+			binary.LittleEndian.PutUint32(data[anchor+blockAt+int64(index*4):], value)
+		}
+	}
+	countAt := anchor + 0x931D
+	armamentsAt := countAt + 4 + 17*8
+	for index := 17; index <= 20; index++ {
+		binary.LittleEndian.PutUint32(data[armamentsAt+int64(index*4):], 0xFFFFFFFF)
+	}
+	inventoryAt := anchor + 505
+	binary.LittleEndian.PutUint32(data[inventoryAt:], 0xA0000474)
+	binary.LittleEndian.PutUint32(data[inventoryAt+4:], 1)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("update fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetEquippedTalismansRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+	session, err := savesession.LoadSave(
+		saveEngine, writeSetEquippedTalismansRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	inventory, err := saveEngine.GetInventory(session.SaveSessionID, 0, "common", 1, 50)
+	if err != nil || len(inventory.Records) != 1 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(inventory.Records))
+	}
+	body, err := json.Marshal(setEquippedTalismansRequest{
+		OrderedOwnedItemIDs: []string{inventory.Records[0].OwnedItemID},
+		ExpectedRevision:    "0",
+	})
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	target := fmt.Sprintf(
+		"/api/v1/save-sessions/%s/characters/0/equipped-talismans", session.SaveSessionID)
+	request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body = %s", response.Code, response.Body.String())
+	}
+
+	var got equipment.SetEquippedTalismansResult
+	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got.SaveRevision != "1" || got.UnlockedSlots != 1 ||
+		len(got.OrderedResources) != 1 || got.OrderedResources[0].Key != "20000474" {
+		t.Fatalf("result = %+v", got)
+	}
+	equipped, err := saveEngine.GetEquipment(session.SaveSessionID, 0)
+	if err != nil || equipped.Slots[17] != 0x20000474 {
+		t.Fatalf("GetEquipment: %v, talisman1=0x%08X", err, equipped.Slots[17])
 	}
 }
 

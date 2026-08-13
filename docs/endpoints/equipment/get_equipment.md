@@ -87,10 +87,12 @@ The order of `slots` is fixed and is the order the save stores the fields in:
 | 7 | `bolts1` | 18 | `talisman2` |
 | 8 | `arrows2` | 19 | `talisman3` |
 | 9 | `bolts2` | 20 | `talisman4` |
-| 10 | `unknown0x28` | 21 | `talisman5` |
+| 10 | `unknown0x28` | 21 | `unknown0x54` |
 
 All 22 fields are always returned, including the three `unknown` fields and
-`talisman5`. Nothing is filtered out and no index is skipped.
+`unknown0x54`. Nothing is filtered out and no index is skipped. The raw getter
+reports field 21, but `SetEquippedTalismans` does not treat that technical field
+as a player-visible talisman slot and leaves it untouched.
 
 ### Raw values only
 

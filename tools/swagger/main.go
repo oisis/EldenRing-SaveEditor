@@ -394,6 +394,12 @@ type setEquippedSpellsRequest struct {
 	ExpectedRevision string                `json:"expectedRevision"`
 }
 
+// setEquippedTalismansRequest is the strict JSON body of the compact talisman loadout route.
+type setEquippedTalismansRequest struct {
+	OrderedOwnedItemIDs []string `json:"orderedOwnedItemIDs"`
+	ExpectedRevision    string   `json:"expectedRevision"`
+}
+
 // setOwnedItemQuantityRequest is the strict JSON body of the quantity route.
 // The transport owns no quantity or revision rule; both values reach the
 // endpoint unchanged.
@@ -866,6 +872,45 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				body.OrderedResources,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-talismans",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setEquippedTalismansRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.OrderedOwnedItemIDs == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("orderedOwnedItemIDs is required"))
+				return
+			}
+			result, err := equipment.SetEquippedTalismans(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.OrderedOwnedItemIDs,
 				body.ExpectedRevision,
 			)
 			if err != nil {
