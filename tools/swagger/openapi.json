@@ -1173,6 +1173,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock": {
+      "put": {
+        "operationId": "setCookbookUnlocked",
+        "tags": ["World"],
+        "summary": "SetCookbookUnlocked",
+        "description": "Sets or clears the unlock state of one catalog cookbook in a character slot of a save session. Resolves the single event flag ID from GameCatalog and mutates only that bit. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCookbookUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed cookbook unlock state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCookbookUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, invalid expectedRevision, unknown session, inactive slot, invalid catalog resource, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -2259,6 +2307,59 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "cookbooks"]
+      },
+      "SetCookbookUnlockedRequest": {
+        "type": "object",
+        "description": "The request body for setting a cookbook unlock state.",
+        "additionalProperties": false,
+        "properties": {
+          "cookbookKind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The public GameCatalog resource kind (e.g. item)."
+          },
+          "cookbookKey": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$",
+            "description": "The public 8-digit hex resource key of the cookbook."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True to set the unlock bit, false to clear it."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["cookbookKind", "cookbookKey", "unlocked", "expectedRevision"]
+      },
+      "SetCookbookUnlockedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful cookbook unlock mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "cookbookKind": {
+            "type": "string"
+          },
+          "cookbookKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "cookbookKind", "cookbookKey", "unlocked"]
       },
       "GestureEntry": {
         "type": "object",

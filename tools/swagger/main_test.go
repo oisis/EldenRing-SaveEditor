@@ -984,6 +984,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                           "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1058,6 +1059,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetGesturesResult",
 		"CookbookEntry",
 		"GetCookbooksResult",
+		"SetCookbookUnlockedRequest",
+		"SetCookbookUnlockedResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1112,8 +1115,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 22 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 22", found)
+	if found != 23 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 23", found)
 	}
 }
 
@@ -1293,7 +1296,7 @@ func TestPortalPreflightAllowsTheDocumentedMethodsAndHeaders(t *testing.T) {
 	}
 	methods := recorder.Header().Get("Access-Control-Allow-Methods")
 	for _, method := range []string{
-		http.MethodGet, http.MethodPost, http.MethodPatch, http.MethodDelete, http.MethodOptions,
+		http.MethodGet, http.MethodPost, http.MethodPut, http.MethodPatch, http.MethodDelete, http.MethodOptions,
 	} {
 		if !strings.Contains(methods, method) {
 			t.Fatalf("Access-Control-Allow-Methods = %q, want it to allow %s", methods, method)
@@ -2547,4 +2550,124 @@ func TestCookbooksRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())
 	}
+}
+
+func TestSetCookbookUnlockedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	boolPointer := func(value bool) *bool { return &value }
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+
+		bodyBytes, _ := json.Marshal(setCookbookUnlockedRequest{
+			CookbookKind:     "item",
+			CookbookKey:      "40002455",
+			Unlocked:         boolPointer(true),
+			ExpectedRevision: "0",
+		})
+
+		req := httptest.NewRequest(http.MethodPut,
+			"/api/v1/save-sessions/"+session.SaveSessionID+"/characters/0/cookbooks/unlock",
+			bytes.NewReader(bodyBytes))
+		req.Header.Set("Content-Type", "application/json")
+
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, req)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200: %s", recorder.Code, recorder.Body.String())
+		}
+
+		assertJSONContentType(t, recorder)
+
+		var got world.SetCookbookUnlockedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+		if got.SaveRevision != "1" || !got.Unlocked || got.CookbookKey != "40002455" {
+			t.Errorf("got = %+v, want revision 1 and unlocked true", got)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetCookbookUnlocked(
+			saveEngine, gameCatalog, directSession.SaveSessionID, 0, "item", "40002455", true, "0")
+		if err != nil {
+			t.Fatalf("world.SetCookbookUnlocked: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/cookbooks/unlock"
+		for name, body := range map[string]string{
+			"missing unlocked": `{"cookbookKind":"item","cookbookKey":"40002455","expectedRevision":"0"}`,
+			"unknown field":    `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPut, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+		request := httptest.NewRequest(http.MethodPut, base, strings.NewReader(
+			`{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`))
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("missing Content-Type: status = %d, want 400 (body %q)",
+				recorder.Code, recorder.Body.String())
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+		result, err := world.SetCookbookUnlocked(
+			saveEngine, gameCatalog, session.SaveSessionID, 0, "item", "40002455", true, "0")
+		if err != nil {
+			t.Fatalf("valid mutation after rejected bodies: %v", err)
+		}
+		if result.SaveRevision != "1" {
+			t.Errorf("revision after rejected bodies = %q, want first commit revision 1", result.SaveRevision)
+		}
+	})
+
+	t.Run("absent without engine", func(t *testing.T) {
+		bodyBytes, _ := json.Marshal(setCookbookUnlockedRequest{
+			CookbookKind:     "item",
+			CookbookKey:      "40002455",
+			Unlocked:         boolPointer(true),
+			ExpectedRevision: "0",
+		})
+		req := httptest.NewRequest(http.MethodPut,
+			"/api/v1/save-sessions/session1/characters/0/cookbooks/unlock",
+			bytes.NewReader(bodyBytes))
+		req.Header.Set("Content-Type", "application/json")
+
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder, req)
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("status = %d, want 404 when save engine is nil", recorder.Code)
+		}
+	})
 }

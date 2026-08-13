@@ -200,75 +200,20 @@ func catalogCookbooks(gameCatalog *gamecatalog.Catalog) ([]declaredCookbook, err
 		if err != nil {
 			return nil, fmt.Errorf("item %q: %w", summary.Key, err)
 		}
-		if resource.Item == nil {
+		cookbook, found, err := declaredCookbookFromResource(resource)
+		if err != nil {
+			return nil, err
+		}
+		if !found {
 			continue
 		}
-
-		// A resource without a cookbook unlock is not a cookbook and is skipped;
-		// one that carries a cookbook unlock must be a goods item declaring that
-		// single unlock, so that one resource is one entry.
-		index, found := 0, 0
-		for position, unlock := range resource.Item.Unlocks {
-			if unlock.Kind.Known && unlock.Kind.Value == cookbookUnlockKind {
-				if found == 0 {
-					index = position
-				}
-				found++
-			}
-		}
-		if found == 0 {
-			continue
-		}
-		if resource.Key == "" {
-			return nil, fmt.Errorf("a cookbook resource carries no key")
-		}
-		// The catalog already refuses to load an item whose family is unknown; the
-		// guard stays so the value is never read past its Known flag.
-		if !resource.Item.Family.Known {
-			return nil, fmt.Errorf(
-				"cookbook %q has no known item family, want %q",
-				resource.Key, schema.ItemFamilyGoods)
-		}
-		if resource.Item.Family.Value != schema.ItemFamilyGoods {
-			return nil, fmt.Errorf(
-				"cookbook %q has item family %q, want %q",
-				resource.Key, resource.Item.Family.Value, schema.ItemFamilyGoods)
-		}
-		if found > 1 {
-			return nil, fmt.Errorf(
-				"cookbook %q declares %d cookbook unlocks, want exactly one",
-				resource.Key, found)
-		}
-
-		unlock := resource.Item.Unlocks[index]
-		if !unlock.EventFlagID.Known {
-			return nil, fmt.Errorf(
-				"cookbook %q unlock %d has no known event flag ID", resource.Key, index)
-		}
-		if !unlock.Name.Known || unlock.Name.Value == "" {
-			return nil, fmt.Errorf(
-				"cookbook %q unlock %d has no known name", resource.Key, index)
-		}
-		if !unlock.Category.Known || unlock.Category.Value == "" {
-			return nil, fmt.Errorf(
-				"cookbook %q unlock %d has no known category", resource.Key, index)
-		}
-		if owner, taken := owners[unlock.EventFlagID.Value]; taken {
+		if owner, taken := owners[cookbook.eventFlagID]; taken {
 			return nil, fmt.Errorf(
 				"cookbooks %q and %q both declare event flag %d",
-				owner, resource.Key, unlock.EventFlagID.Value)
+				owner, resource.Key, cookbook.eventFlagID)
 		}
-		owners[unlock.EventFlagID.Value] = resource.Key
-
-		declared = append(declared, declaredCookbook{
-			entry: CookbookEntry{
-				Kind:     resource.Kind,
-				Key:      resource.Key,
-				Name:     unlock.Name.Value,
-				Category: unlock.Category.Value,
-			},
-			eventFlagID: unlock.EventFlagID.Value,
-		})
+		owners[cookbook.eventFlagID] = resource.Key
+		declared = append(declared, cookbook)
 	}
 
 	sort.SliceStable(declared, func(i, j int) bool {
@@ -283,4 +228,68 @@ func catalogCookbooks(gameCatalog *gamecatalog.Catalog) ([]declaredCookbook, err
 	})
 
 	return declared, nil
+}
+
+// declaredCookbookFromResource applies the one cookbook-definition rule shared
+// by the getter and setter. A resource without a cookbook unlock is not a
+// cookbook; once it declares one, every required field is fail-closed.
+func declaredCookbookFromResource(resource schema.Resource) (declaredCookbook, bool, error) {
+	if resource.Item == nil {
+		return declaredCookbook{}, false, nil
+	}
+
+	index, found := 0, 0
+	for position, unlock := range resource.Item.Unlocks {
+		if unlock.Kind.Known && unlock.Kind.Value == cookbookUnlockKind {
+			if found == 0 {
+				index = position
+			}
+			found++
+		}
+	}
+	if found == 0 {
+		return declaredCookbook{}, false, nil
+	}
+	if resource.Key == "" {
+		return declaredCookbook{}, false, fmt.Errorf("a cookbook resource carries no key")
+	}
+	if !resource.Item.Family.Known {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"cookbook %q has no known item family, want %q",
+			resource.Key, schema.ItemFamilyGoods)
+	}
+	if resource.Item.Family.Value != schema.ItemFamilyGoods {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"cookbook %q has item family %q, want %q",
+			resource.Key, resource.Item.Family.Value, schema.ItemFamilyGoods)
+	}
+	if found > 1 {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"cookbook %q declares %d cookbook unlocks, want exactly one",
+			resource.Key, found)
+	}
+
+	unlock := resource.Item.Unlocks[index]
+	if !unlock.EventFlagID.Known {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"cookbook %q unlock %d has no known event flag ID", resource.Key, index)
+	}
+	if !unlock.Name.Known || unlock.Name.Value == "" {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"cookbook %q unlock %d has no known name", resource.Key, index)
+	}
+	if !unlock.Category.Known || unlock.Category.Value == "" {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"cookbook %q unlock %d has no known category", resource.Key, index)
+	}
+
+	return declaredCookbook{
+		entry: CookbookEntry{
+			Kind:     resource.Kind,
+			Key:      resource.Key,
+			Name:     unlock.Name.Value,
+			Category: unlock.Category.Value,
+		},
+		eventFlagID: unlock.EventFlagID.Value,
+	}, true, nil
 }

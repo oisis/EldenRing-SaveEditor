@@ -232,6 +232,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_cookbooks.md",
                 "title": "GetCookbooks"
+              },
+              "/set-cookbook-unlocked": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_cookbook_unlocked.md",
+                "title": "SetCookbookUnlocked"
               }
             }
           }

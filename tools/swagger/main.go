@@ -297,7 +297,7 @@ func withPortalCORS(next http.Handler) http.Handler {
 		// which is what makes the browser block the request it was asking about.
 		if request.Method == http.MethodOptions && request.Header.Get("Access-Control-Request-Method") != "" {
 			if allowed {
-				writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE, OPTIONS")
+				writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, OPTIONS")
 				// The documented request bodies are application/json; no other
 				// request header is needed.
 				writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
@@ -310,7 +310,7 @@ func withPortalCORS(next http.Handler) http.Handler {
 	})
 }
 
-// requireJSONBody refuses a POST body that does not declare application/json.
+// requireJSONBody refuses a mutating body that does not declare application/json.
 //
 // A POST carrying text/plain, a form media type or no Content-Type at all is a
 // CORS simple request: the browser sends it without a preflight, so a foreign
@@ -374,6 +374,14 @@ type addItemToInventoryRequest struct {
 // revision travels in the body like it does for every other mutation, so the
 // transport keeps one convention; it reaches the endpoint unchanged.
 type removeOwnedItemRequest struct {
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
+// setCookbookUnlockedRequest is the strict JSON body of the set cookbook unlocked route.
+type setCookbookUnlockedRequest struct {
+	CookbookKind     string `json:"cookbookKind"`
+	CookbookKey      string `json:"cookbookKey"`
+	Unlocked         *bool  `json:"unlocked"`
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
@@ -868,6 +876,47 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				request.URL.Query().Get("availabilityFilter"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCookbookUnlockedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Unlocked == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				return
+			}
+			result, err := world.SetCookbookUnlocked(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.CookbookKind,
+				body.CookbookKey,
+				*body.Unlocked,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

@@ -445,8 +445,8 @@ prove that `availabilityFilter` arrives unchanged, that an invalid filter answer
 
 ## Current limitations
 
-- It is a getter. Unlocking or locking a cookbook is not possible:
-  `SetCookbookUnlocked` is a contract only.
+- It is a getter. Unlocking or locking a cookbook is a separate operation:
+  [`SetCookbookUnlocked`](set_cookbook_unlocked.md).
 - Only event flag blocks `67` and `68` are supported by the reader. Every
   cookbook of the current stored catalog lies in them, but a future cookbook
   outside those blocks would be rejected instead of answered.

@@ -13,7 +13,8 @@ import (
 // is located through the confirmed anchor of that one slot and walked forwards
 // across the whole chain. This reader owns its own anchor, its own layout
 // constants and its own bounds checks; it borrows no position, helper or parsing
-// function from another getter and calls no other getter.
+// function from another getter. The cookbook mutation reuses this exact locator
+// and resolver so reads and writes cannot drift.
 const (
 	// eventFlagProjectileCountOffset is the distance from the anchor to the
 	// uint32 that declares how many acquired-projectile records follow it. It is
@@ -218,7 +219,7 @@ type eventFlagPosition struct {
 }
 
 // resolveEventFlag places one identifier inside the bitfield. Only the two
-// cookbook blocks this reader has confirmed evidence for are supported; every
+// cookbook blocks this subsystem has confirmed evidence for are supported; every
 // other block is rejected by name instead of being answered from a guessed
 // position, so an unsupported identifier can never be reported as false.
 func resolveEventFlag(id uint32) (eventFlagPosition, error) {
@@ -282,10 +283,11 @@ func eventFlagSectionStart(loaded *loadedSave, characterID int) (int64, error) {
 //
 // It is the single owner of that walk. The bitfield reader continues from here
 // over the fixed GaItemGameData block, and the GaItemData mutation addresses the
-// block itself from the same value, so a reader and a writer can never disagree
-// about where it starts. Whether the block fits into the slot is the caller's
-// check: the bitfield reader proves that through the sections behind it, and the
-// mutation proves it for the block itself.
+// block itself from the same value, while the cookbook mutation reuses the
+// bitfield locator, so readers and writers cannot disagree about where either
+// section starts. Whether the block fits into the slot is the caller's check:
+// the bitfield locator proves that through the sections behind it, and the
+// GaItemData mutation proves it for the block itself.
 func eventFlagGaItemGameDataAt(loaded *loadedSave, characterID int) (int64, int64, error) {
 	base, slotEnd := eventFlagSlotBounds(loaded.session.platform, characterID)
 
