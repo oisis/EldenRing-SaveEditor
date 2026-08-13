@@ -113,6 +113,11 @@
                 "filepath": "../../../docs/endpoints/character/get_character_profile.md",
                 "title": "GetCharacterProfile"
               },
+              "/set-character-name": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/set_character_name.md",
+                "title": "SetCharacterName"
+              },
               "/get-character-stats": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/get_character_stats.md",

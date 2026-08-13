@@ -172,5 +172,6 @@ whose raw values survive a cleared flag, and the rejected `characterID` values
   binding, no CLI command, and no frontend for the endpoint.
 - It reports the confirmed profile fields only. Stats, appearance, inventory,
   storage, equipment, and world state are not readable yet.
-- It is a getter. Changing a name, class, gender, or play time is not possible:
-  the session is read-only at this stage.
+- It is a getter. The name can be changed separately through
+  [`SetCharacterName`](set_character_name.md); changing class, gender, or play
+  time is not supported.

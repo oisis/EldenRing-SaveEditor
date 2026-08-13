@@ -1307,6 +1307,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name": {
+      "patch": {
+        "operationId": "setCharacterName",
+        "tags": ["Character"],
+        "summary": "SetCharacterName",
+        "description": "Assigns the exact character name in both confirmed UTF-16LE save fields under expectedRevision control. The name must be non-empty valid UTF-8, contain no U+0000, and fit in 16 UTF-16 code units; it is never trimmed, normalised, truncated, or filtered. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterNameRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed character-name assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterNameResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, invalid name or expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats": {
       "get": {
         "operationId": "getCharacterStats",
@@ -1786,6 +1834,44 @@
           "gender",
           "secondsPlayed"
         ]
+      },
+      "SetCharacterNameRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Exact character-name assignment and optimistic-concurrency revision. The name is limited by UTF-16 code units rather than Unicode code points.",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact name to store. It must be valid UTF-8, contain no U+0000, and encode to at most 16 UTF-16 code units. No trimming, normalisation, truncation, or character whitelist is applied."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["name", "expectedRevision"]
+      },
+      "SetCharacterNameResult": {
+        "type": "object",
+        "description": "Receipt for one committed character-name assignment.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "name"]
       },
       "CharacterStats": {
         "type": "object",

@@ -973,6 +973,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/write":                                                       "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters":                                                  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name":                               "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                              "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
@@ -1041,6 +1042,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SessionInfo",
 		"SaveCharacters",
 		"CharacterProfile",
+		"SetCharacterNameRequest",
+		"SetCharacterNameResult",
 		"CharacterStats",
 		"CharacterAppearance",
 		"CharacterEquipment",
@@ -1120,8 +1123,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 24 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 24", found)
+	if found != 25 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 25", found)
 	}
 }
 
@@ -1411,6 +1414,105 @@ func writeActiveSpellsFixture(t *testing.T) string {
 		t.Fatalf("write fixture: %v", err)
 	}
 	return path
+}
+
+func TestSetCharacterNameRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, err := json.Marshal(setCharacterNameRequest{
+			Name: "Ranni 🌙", ExpectedRevision: "0",
+		})
+		if err != nil {
+			t.Fatalf("marshal body: %v", err)
+		}
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/name"
+		request := httptest.NewRequest(http.MethodPatch, target, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got character.SetCharacterNameResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+		if got.SaveRevision != "1" || got.CharacterID != 0 || got.Name != "Ranni 🌙" {
+			t.Errorf("result = %+v, want revision 1 and exact name", got)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := character.SetCharacterName(
+			saveEngine, directSession.SaveSessionID, 0, "Ranni 🌙", "0")
+		if err != nil {
+			t.Fatalf("character.SetCharacterName: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/name"
+		for name, body := range map[string]string{
+			"empty name":    `{"name":"","expectedRevision":"0"}`,
+			"unknown field": `{"name":"Ranni","expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPatch, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)",
+						recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+
+		request := httptest.NewRequest(http.MethodPatch, base, strings.NewReader(
+			`{"name":"Ranni","expectedRevision":"0"}`))
+		recorder := httptest.NewRecorder()
+		newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("missing Content-Type: status = %d, want 400 (body %q)",
+				recorder.Code, recorder.Body.String())
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+	})
+}
+
+func TestSetCharacterNameRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/name"
+	recorder := doSave(t, nil, http.MethodPatch, target,
+		`{"name":"Ranni","expectedRevision":"0"}`)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)",
+			target, recorder.Code, recorder.Body.String())
+	}
 }
 
 // newFullCatalog builds a catalog from the embedded catalog data. The prototype

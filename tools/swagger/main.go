@@ -350,6 +350,14 @@ type writeSaveRequest struct {
 	Target           string `json:"target"`
 }
 
+// setCharacterNameRequest is the strict JSON body of the character-name route.
+// Both values reach the endpoint unchanged; the transport owns no Unicode,
+// length or revision rule.
+type setCharacterNameRequest struct {
+	Name             string `json:"name"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setOwnedItemQuantityRequest is the strict JSON body of the quantity route.
 // The transport owns no quantity or revision rule; both values reach the
 // endpoint unchanged.
@@ -492,6 +500,40 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := character.GetCharacterProfile(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterNameRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.SetCharacterName(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.Name,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return
