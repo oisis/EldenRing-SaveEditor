@@ -692,6 +692,52 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "setQuickItems",
+        "tags": ["Equipment"],
+        "summary": "SetQuickItems",
+        "description": "Atomically replaces all ten Quick Items positions. slotAssignments contains exactly ten nullable ownedItemID strings in stored order; null clears that exact position. Every ownedItemID must resolve to an active common Inventory record with positive quantity whose catalog resource allows the quick_item slot. The active Quick Item index is preserved. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetQuickItemsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Quick Items assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetQuickItemsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An invalid position count, an unowned, unequipable or zero-quantity item, duplicate items, a stale revision or an active slot whose Quick Items state is inconsistent",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items": {
@@ -2513,6 +2559,59 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "crystalTearResources"]
+      },
+      "SetQuickItemsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete ten-position Quick Items assignment and optimistic-concurrency revision. A null array entry clears that exact position.",
+        "properties": {
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 10,
+            "maxItems": 10,
+            "description": "Exactly ten positions in stored order. Each position is null to clear the slot, or a public ownedItemID string pointing to an active common Inventory record.",
+            "items": {
+              "type": "string",
+              "nullable": true
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["slotAssignments", "expectedRevision"]
+      },
+      "SetQuickItemsResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete Quick Items assignment, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 10,
+            "maxItems": 10,
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
       },
       "SetPouchItemsRequest": {
         "type": "object",

@@ -160,6 +160,11 @@
                 "filepath": "../../../docs/endpoints/equipment/get_quick_items.md",
                 "title": "GetQuickItems"
               },
+              "/set-quick-items": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/set_quick_items.md",
+                "title": "SetQuickItems"
+              },
               "/get-pouch-items": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/equipment/get_pouch_items.md",

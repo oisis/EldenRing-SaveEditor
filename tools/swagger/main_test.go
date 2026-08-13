@@ -885,6 +885,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quick-items", `{"slotAssignments":[null,null,null,null,null,null,null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/pouch-items", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/pouch-items", `{"slotAssignments":[null,null,null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/physick-mixture", ""},
@@ -1022,6 +1023,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[equippedSpells]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", equippedSpells)
 	}
+	quickItems := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items"
+	if _, hasPut := document.Paths[quickItems]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", quickItems)
+	}
 	pouchItems := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items"
 	if _, hasPut := document.Paths[pouchItems]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", pouchItems)
@@ -1070,6 +1075,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterEquipment",
 		"QuickItemSlot",
 		"CharacterQuickItems",
+		"SetQuickItemsRequest",
+		"SetQuickItemsResult",
 		"PouchItemSlot",
 		"CharacterPouchItems",
 		"SetPouchItemsRequest",
@@ -1148,8 +1155,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 29 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 29", found)
+	if found != 30 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 30", found)
 	}
 }
 
@@ -1753,6 +1760,79 @@ func writeSetPouchItemsRouteFixture(t *testing.T) string {
 		t.Fatalf("update fixture: %v", err)
 	}
 	return path
+}
+
+func writeSetQuickItemsRouteFixture(t *testing.T) string {
+	t.Helper()
+
+	path := writeSetPouchItemsRouteFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	anchorBase := equippedSpellsSlotDataBase + equippedSpellsAnchorAt
+	pairAt := anchorBase + 0x9279
+	for i := 0; i < 10; i++ {
+		binary.LittleEndian.PutUint32(data[pairAt+int64(i)*8:], 0)
+		binary.LittleEndian.PutUint32(data[pairAt+int64(i)*8+4:], 0xFFFFFFFF)
+	}
+	countAt := anchorBase + 0x931D
+	tailAt := countAt + 4 + 17*8 + 0x58
+	for i := 0; i < 10; i++ {
+		binary.LittleEndian.PutUint32(data[tailAt+int64(i)*4:], 0xFFFFFFFF)
+	}
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("update fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetQuickItemsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+	session, err := savesession.LoadSave(saveEngine, writeSetQuickItemsRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	inventory, err := saveEngine.GetInventory(session.SaveSessionID, 0, "common", 1, 50)
+	if err != nil || len(inventory.Records) == 0 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(inventory.Records))
+	}
+	token := inventory.Records[0].OwnedItemID
+	assignments := make([]*string, 10)
+	assignments[0] = &token
+	body, err := json.Marshal(setQuickItemsRequest{
+		SlotAssignments: assignments, ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+
+	target := fmt.Sprintf(
+		"/api/v1/save-sessions/%s/characters/0/quick-items", session.SaveSessionID)
+	request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body = %s", response.Code, response.Body.String())
+	}
+
+	var got equipment.SetQuickItemsResult
+	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got.SaveRevision != "1" || got.CharacterID != 0 ||
+		got.SlotAssignments[0] == nil || got.SlotAssignments[0].Key != "400006A4" {
+		t.Fatalf("result = %+v", got)
+	}
+	quick, err := equipment.GetQuickItems(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("GetQuickItems: %v", err)
+	}
+	if quick.Items[0].ItemID == 0 || quick.Items[0].EquipIndex != 0x180 {
+		t.Errorf("quick item 0 = %+v, want valid inventory reference", quick.Items[0])
+	}
 }
 
 func TestSetPouchItemsRoute(t *testing.T) {
