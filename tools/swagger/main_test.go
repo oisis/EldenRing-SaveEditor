@@ -891,7 +891,9 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/inventory/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/gestures/unlock", `{"gestureKind":"item","gestureKey":"401EA7AB","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -983,6 +985,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}":          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                           "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures/unlock":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 	} {
@@ -1057,6 +1060,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetOwnedItemQuantityResult",
 		"GestureEntry",
 		"GetGesturesResult",
+		"SetGestureUnlockedRequest",
+		"SetGestureUnlockedResult",
 		"CookbookEntry",
 		"GetCookbooksResult",
 		"SetCookbookUnlockedRequest",
@@ -1115,8 +1120,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 23 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 23", found)
+	if found != 24 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 24", found)
 	}
 }
 
@@ -2395,6 +2400,94 @@ func TestGesturesRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())
 	}
+}
+
+func TestSetGestureUnlockedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	boolPointer := func(value bool) *bool { return &value }
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, _ := json.Marshal(setGestureUnlockedRequest{
+			GestureKind:      "item",
+			GestureKey:       "401EA7AB",
+			Unlocked:         boolPointer(true),
+			ExpectedRevision: "0",
+		})
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/gestures/unlock"
+		request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got world.SetGestureUnlockedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+		if got.SaveRevision != "1" || !got.Unlocked || got.GestureKey != "401EA7AB" {
+			t.Errorf("result = %+v, want revision 1 and unlocked gesture 401EA7AB", got)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetGestureUnlocked(
+			saveEngine, gameCatalog, directSession.SaveSessionID, 0,
+			"item", "401EA7AB", true, "0")
+		if err != nil {
+			t.Fatalf("world.SetGestureUnlocked: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeGesturesFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/gestures/unlock"
+		for name, body := range map[string]string{
+			"missing unlocked": `{"gestureKind":"item","gestureKey":"401EA7AB","expectedRevision":"0"}`,
+			"unknown field":    `{"gestureKind":"item","gestureKey":"401EA7AB","unlocked":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPut, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+
+		request := httptest.NewRequest(http.MethodPut, base, strings.NewReader(
+			`{"gestureKind":"item","gestureKey":"401EA7AB","unlocked":true,"expectedRevision":"0"}`))
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("missing Content-Type: status = %d, want 400 (body %q)",
+				recorder.Code, recorder.Body.String())
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+	})
 }
 
 // The cookbooks route joins the catalog cookbook definitions with the event flag

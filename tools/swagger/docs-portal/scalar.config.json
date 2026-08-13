@@ -228,6 +228,11 @@
                 "filepath": "../../../docs/endpoints/world/get_gestures.md",
                 "title": "GetGestures"
               },
+              "/set-gesture-unlocked": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_gesture_unlocked.md",
+                "title": "SetGestureUnlocked"
+              },
               "/get-cookbooks": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_cookbooks.md",

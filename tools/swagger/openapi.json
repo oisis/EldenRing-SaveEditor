@@ -1132,6 +1132,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures/unlock": {
+      "put": {
+        "operationId": "setGestureUnlocked",
+        "tags": ["World"],
+        "summary": "SetGestureUnlocked",
+        "description": "Sets the unlock state of one logical gesture resource in an active character slot. The request identifies the gesture only by its exact GameCatalog kind and key; the endpoint resolves the canonical save slot internally and never exposes a writable slotID. GestureGameData stores an unlocked gesture as its odd canonical ID and its locked form as the preceding even value. Unlocking replaces that exact even record first and otherwise consumes the first 0xFFFFFFFE sentinel; locking replaces every duplicate of the exact odd ID. Unknown values, zeroes, unrelated records and empty slots are never sanitised or reordered. The twelve confirmed starting gestures cannot be locked. Ring of Miquella is the one confirmed alias: slot 227 is the protected pre-order grant and slot 233 is the earnable form. Either form satisfies unlock; a missing logical Ring creates only 233, and the resource cannot be locked while 227 exists. A successful assignment, including an idempotent one, advances saveRevision by exactly one and marks the private session dirty; WriteSave remains separate. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGestureUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed logical gesture state assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetGestureUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, a non-decimal or out-of-range characterID, an invalid or stale expectedRevision, an unknown session, an inactive slot, a non-gesture or unsupported multi-slot catalog resource, an attempt to lock a protected starting or pre-order gesture, a full GestureGameData block, an invalid gesture layout, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks": {
       "get": {
         "operationId": "getCookbooks",
@@ -2417,6 +2465,59 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "gestures"]
+      },
+      "SetGestureUnlockedRequest": {
+        "type": "object",
+        "description": "The exact public identity and desired state of one logical gesture resource.",
+        "additionalProperties": false,
+        "properties": {
+          "gestureKind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The public GameCatalog resource kind."
+          },
+          "gestureKey": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$",
+            "description": "The public 8-digit hexadecimal resource key of the gesture."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "The desired logical unlock state."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision expected by the caller."
+          }
+        },
+        "required": ["gestureKind", "gestureKey", "unlocked", "expectedRevision"]
+      },
+      "SetGestureUnlockedResult": {
+        "type": "object",
+        "description": "The committed logical gesture state and the new save revision. The physical slot ID remains internal.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "gestureKind": {
+            "type": "string"
+          },
+          "gestureKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "gestureKind", "gestureKey", "unlocked"]
       },
       "StorageRecord": {
         "type": "object",

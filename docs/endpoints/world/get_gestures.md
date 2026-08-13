@@ -207,11 +207,11 @@ The canonical save slot ID is the value GameCatalog stores in
 `rowID × 2 + 1`. Every canonical gesture slot ID is therefore odd.
 
 - The match is an exact `uint32` comparison against the stored records.
-- There is **no** even/odd "body type" theory. An earlier SaveForge build wrote
-  even identifiers that the game silently ignored; that model is wrong and is not
-  reproduced here.
-- An even stored value is **never** converted into the odd value next to it, and
-  the odd value next to it is **not** unlocked because of it.
+- There is **no** even/odd "body type" theory. The preceding even value is the
+  native locked representation of an odd canonical gesture, not an alternative
+  unlocked variant.
+- This getter never converts that locked record into the odd value next to it,
+  so the odd gesture is correctly reported as locked.
 
 ### Sentinels, zero, unknown values and duplicates
 
@@ -257,11 +257,11 @@ whole. The declared projectile count is widened to `int64` before it is
 multiplied, so a declared length can never wrap into a small, seemingly valid
 offset, and a count above `200000` is treated as corrupt instead of followed.
 
-The gesture reader in
-[`backend/saveengine/gestures.go`](../../../backend/saveengine/gestures.go) owns
-its own anchor, its own layout constants, its own location algorithm and its own
-bounds checks. It calls neither `GetStorage` nor any other getter, and it borrows
-no private constant or helper from one.
+The gesture operations in
+[`backend/saveengine/gestures.go`](../../../backend/saveengine/gestures.go) share
+one private locator for this anchor, layout and bounds rule. `GetGestures` still
+calls neither `GetStorage` nor another endpoint; the shared locator exists only
+so the getter and `SetGestureUnlocked` cannot drift to different positions.
 
 ## Active, inactive and residual slots
 
