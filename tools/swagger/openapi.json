@@ -1752,6 +1752,51 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/network-settings/preset": {
+      "put": {
+        "operationId": "applyNetworkPreset",
+        "tags": ["Network"],
+        "summary": "ApplyNetworkPreset",
+        "description": "Resolves one exact, case-sensitive presetID from the loaded GameCatalog and applies its complete 22-field parameter set through the same SaveEngine operation as SetNetworkSettings. Legacy aliases absent from the catalog are rejected; no fallback or partial application exists. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyNetworkPresetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The selected preset and committed network settings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyNetworkPresetResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON, a missing or unknown presetID, a revision conflict, an unavailable catalog or session, or a UserData11 that cannot be safely rewritten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthz",
@@ -4050,6 +4095,39 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "networkSettings"]
+      },
+      "ApplyNetworkPresetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "presetID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        },
+        "required": ["presetID", "expectedRevision"]
+      },
+      "ApplyNetworkPresetResult": {
+        "type": "object",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "presetID": {
+            "type": "string"
+          },
+          "networkSettings": {
+            "$ref": "#/components/schemas/NetworkParamValues"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "presetID", "networkSettings"]
       },
       "AppearancePresetSummary": {
         "type": "object",

@@ -59,12 +59,7 @@ func GetNetworkPresets(
 	gameCatalog *gamecatalog.Catalog,
 	presetID string,
 ) (GetNetworkPresetsResult, error) {
-	if gameCatalog == nil {
-		return GetNetworkPresetsResult{}, errors.New("game catalog is not loaded")
-	}
-	// The catalog returns an independent copy, so a caller mutating one result
-	// cannot affect another.
-	presets, err := gameCatalog.NetworkPresets()
+	presets, err := networkPresets(gameCatalog)
 	if err != nil {
 		return GetNetworkPresetsResult{}, err
 	}
@@ -73,11 +68,32 @@ func GetNetworkPresets(
 		return GetNetworkPresetsResult{Presets: presets}, nil
 	}
 
+	preset, err := findNetworkPreset(presets, presetID)
+	if err != nil {
+		return GetNetworkPresetsResult{}, err
+	}
+	return GetNetworkPresetsResult{Presets: []NetworkPreset{preset}}, nil
+}
+
+func networkPresets(gameCatalog *gamecatalog.Catalog) ([]NetworkPreset, error) {
+	if gameCatalog == nil {
+		return nil, errors.New("game catalog is not loaded")
+	}
+	// The catalog returns an independent copy, so a caller mutating one result
+	// cannot affect another.
+	return gameCatalog.NetworkPresets()
+}
+
+// findNetworkPreset is the single exact-ID rule shared by listing one preset
+// and applying it. It deliberately has no aliases, trimming or fallback.
+func findNetworkPreset(presets []NetworkPreset, presetID string) (NetworkPreset, error) {
+	if presetID == "" {
+		return NetworkPreset{}, errors.New("presetID is required")
+	}
 	for _, preset := range presets {
 		if preset.ID == presetID {
-			return GetNetworkPresetsResult{Presets: []NetworkPreset{preset}}, nil
+			return preset, nil
 		}
 	}
-
-	return GetNetworkPresetsResult{}, fmt.Errorf("unknown network preset %q", presetID)
+	return NetworkPreset{}, fmt.Errorf("unknown network preset %q", presetID)
 }

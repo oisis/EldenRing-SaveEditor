@@ -999,6 +999,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1070,6 +1071,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetNetworkSettingsResult",
 		"SetNetworkSettingsRequest",
 		"SetNetworkSettingsResult",
+		"ApplyNetworkPresetRequest",
+		"ApplyNetworkPresetResult",
 		"AppearancePresetSummary",
 		"GetAppearancePresetsResult",
 		"LoadSaveRequest",
@@ -1170,8 +1173,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 32 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 32", found)
+	if found != 33 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 33", found)
 	}
 }
 
@@ -2386,6 +2389,40 @@ func TestNetworkSettingsRoute(t *testing.T) {
 		t.Fatalf("stored network settings body %q differs from the committed values", stored.Body.String())
 	}
 
+	presets, err := network.GetNetworkPresets(newPrototypeCatalog(t), "faster-reds")
+	if err != nil {
+		t.Fatalf("GetNetworkPresets: %v", err)
+	}
+	presetBody, err := json.Marshal(applyNetworkPresetRequest{
+		PresetID:         "faster-reds",
+		ExpectedRevision: "1",
+	})
+	if err != nil {
+		t.Fatalf("marshal preset request: %v", err)
+	}
+	presetTarget := target + "/preset"
+	applied := doSave(t, saveEngine, http.MethodPut, presetTarget, string(presetBody))
+	assertOK(t, applied, presetTarget)
+	preset := presets.Presets[0]
+	wantApplied := network.ApplyNetworkPresetResult{
+		SaveSessionID:   session.SaveSessionID,
+		SaveRevision:    "2",
+		PresetID:        preset.ID,
+		NetworkSettings: preset.Parameters,
+	}
+	if !reflect.DeepEqual(decode(t, applied.Body.Bytes()), marshalled(t, wantApplied)) {
+		t.Fatalf("apply network preset body %q differs from the expected result", applied.Body.String())
+	}
+
+	stored = doSave(t, saveEngine, http.MethodGet, target, "")
+	assertOK(t, stored, target)
+	if !reflect.DeepEqual(decode(t, stored.Body.Bytes()), marshalled(t, network.GetNetworkSettingsResult{
+		SaveSessionID: session.SaveSessionID,
+		Parameters:    preset.Parameters,
+	})) {
+		t.Fatalf("stored network settings body %q differs from the applied preset", stored.Body.String())
+	}
+
 	absent := doSave(t, nil, http.MethodGet, target, "")
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("%s without an engine: status = %d, want 404 (body %q)",
@@ -2395,6 +2432,11 @@ func TestNetworkSettingsRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("PUT %s without an engine: status = %d, want 404 (body %q)",
 			target, absent.Code, absent.Body.String())
+	}
+	absent = doSave(t, nil, http.MethodPut, presetTarget, string(presetBody))
+	if absent.Code != http.StatusNotFound {
+		t.Fatalf("PUT %s without an engine: status = %d, want 404 (body %q)",
+			presetTarget, absent.Code, absent.Body.String())
 	}
 }
 

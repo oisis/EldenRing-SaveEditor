@@ -4,8 +4,9 @@
 
 `SetNetworkSettings` atomically replaces the complete set of 22 supported
 network parameters in `UserData11` of an already loaded save session. It accepts
-direct values; it does not load or apply a GameCatalog preset. `ApplyNetworkPreset`
-can later resolve a preset and delegate to this same SaveEngine operation.
+direct values; it does not load or apply a GameCatalog preset.
+`ApplyNetworkPreset` resolves a preset and delegates to this same SaveEngine
+operation.
 
 | | |
 |---|---|

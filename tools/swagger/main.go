@@ -450,6 +450,13 @@ type setNetworkSettingsRequest struct {
 	ExpectedRevision string                         `json:"expectedRevision"`
 }
 
+// applyNetworkPresetRequest is the strict JSON body of the preset application
+// route. The endpoint resolves presetID; the transport does not normalise it.
+type applyNetworkPresetRequest struct {
+	PresetID         string `json:"presetID"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // closeSaveResponse is the confirmation of DELETE /api/v1/save-sessions/{id}.
 // CloseSave returns no value, so the route states the closed session itself.
 type closeSaveResponse struct {
@@ -1316,6 +1323,35 @@ func registerSaveSessionRoutes(
 				saveEngine,
 				request.PathValue("saveSessionID"),
 				body.NetworkSettings,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/network-settings/preset",
+		func(writer http.ResponseWriter, request *http.Request) {
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body applyNetworkPresetRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := network.ApplyNetworkPreset(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				body.PresetID,
 				body.ExpectedRevision,
 			)
 			if err != nil {

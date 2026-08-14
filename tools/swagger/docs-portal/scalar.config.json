@@ -256,6 +256,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/network/set_network_settings.md",
                 "title": "SetNetworkSettings"
+              },
+              "/apply-network-preset": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/network/apply_network_preset.md",
+                "title": "ApplyNetworkPreset"
               }
             }
           },
