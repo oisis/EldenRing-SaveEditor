@@ -351,6 +351,12 @@ type writeSaveRequest struct {
 	Target           string `json:"target"`
 }
 
+// deleteCharacterRequest is the strict JSON body of the permanent slot
+// deletion route. SaveEngine owns the revision and deletion rules.
+type deleteCharacterRequest struct {
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setCharacterActiveRequest is the strict JSON body of the slot-activity
 // route. A pointer distinguishes an omitted active field from explicit false.
 type setCharacterActiveRequest struct {
@@ -725,6 +731,39 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := character.GetCharacterProfile(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"DELETE /api/v1/save-sessions/{saveSessionID}/characters/{characterID}",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body deleteCharacterRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.DeleteCharacter(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

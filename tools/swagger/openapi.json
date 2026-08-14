@@ -2370,6 +2370,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}": {
+      "delete": {
+        "operationId": "deleteCharacter",
+        "tags": ["Character"],
+        "summary": "DeleteCharacter",
+        "description": "Permanently clears one active or residual character in place without shifting any other slot. The mutation zeroes exactly the target slot data, activity flag and complete profile summary under expectedRevision control. This differs from SetCharacterActive(false), which preserves residual character data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteCharacterRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed character deletion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteCharacterResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, invalid expectedRevision, unknown session, invalid slot, empty or malformed slot, unsupported activity flag, stale revision, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active": {
       "patch": {
         "operationId": "setCharacterActive",
@@ -3129,6 +3177,36 @@
           "gender",
           "secondsPlayed"
         ]
+      },
+      "DeleteCharacterRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Optimistic-concurrency revision for one permanent character deletion.",
+        "properties": {
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["expectedRevision"]
+      },
+      "DeleteCharacterResult": {
+        "type": "object",
+        "description": "Receipt for one committed permanent character deletion.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID"]
       },
       "SetCharacterActiveRequest": {
         "type": "object",
