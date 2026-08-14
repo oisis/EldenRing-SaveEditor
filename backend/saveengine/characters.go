@@ -1,6 +1,7 @@
 package saveengine
 
 import (
+	"bytes"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -239,4 +240,49 @@ func decodeCharacterName(raw []byte) string {
 		units = append(units, unit)
 	}
 	return string(utf16.Decode(units))
+}
+
+func bytesAreZero(data []byte) bool {
+	for _, value := range data {
+		if value != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// restoreCharacterSlotRanges restores and verifies the three physical ranges
+// owned by one character-slot mutation. DeleteCharacter and CloneCharacter use
+// the same rollback so their atomicity cannot drift apart.
+func restoreCharacterSlotRanges(
+	snapshot *codec,
+	characterID int,
+	slotAt int64,
+	slotBefore []byte,
+	summaryAt int64,
+	summaryBefore []byte,
+	flagAt int64,
+	flagBefore []byte,
+	failure string,
+) error {
+	if err := errors.Join(
+		snapshot.writeAt(slotAt, slotBefore),
+		snapshot.writeAt(summaryAt, summaryBefore),
+		snapshot.writeAt(flagAt, flagBefore),
+	); err != nil {
+		return fmt.Errorf("%s and the prior data of character %d could not be restored: %w",
+			failure, characterID, err)
+	}
+
+	slotRestored, slotErr := snapshot.readAt(slotAt, len(slotBefore))
+	summaryRestored, summaryErr := snapshot.readAt(summaryAt, len(summaryBefore))
+	flagRestored, flagErr := snapshot.readAt(flagAt, len(flagBefore))
+	if slotErr != nil || summaryErr != nil || flagErr != nil ||
+		!bytes.Equal(slotRestored, slotBefore) ||
+		!bytes.Equal(summaryRestored, summaryBefore) ||
+		!bytes.Equal(flagRestored, flagBefore) {
+		return fmt.Errorf("%s and the rollback of character %d could not be verified",
+			failure, characterID)
+	}
+	return fmt.Errorf("%s; the save is unchanged", failure)
 }

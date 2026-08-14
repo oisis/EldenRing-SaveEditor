@@ -113,6 +113,11 @@
                 "filepath": "../../../docs/endpoints/character/get_character_profile.md",
                 "title": "GetCharacterProfile"
               },
+              "/clone-character": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/clone_character.md",
+                "title": "CloneCharacter"
+              },
               "/delete-character": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/delete_character.md",

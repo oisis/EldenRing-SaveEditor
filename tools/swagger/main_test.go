@@ -994,6 +994,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}":                                                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/write":                                                       "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters":                                                  "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{sourceCharacterID}/clone":                        "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}":                                    "delete",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active":                             "patch",
@@ -1132,6 +1133,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SessionInfo",
 		"SaveCharacters",
 		"CharacterProfile",
+		"CloneCharacterRequest",
+		"CloneCharacterResult",
 		"DeleteCharacterRequest",
 		"DeleteCharacterResult",
 		"SetCharacterActiveRequest",
@@ -1267,8 +1270,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 53 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 53", found)
+	if found != 54 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 54", found)
 	}
 }
 
@@ -1604,6 +1607,56 @@ func TestDeleteCharacterRoute(t *testing.T) {
 	}
 }
 
+func TestCloneCharacterRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	if _, err := saveEngine.SetCharacterName(
+		session.SaveSessionID, 0, "Ranni", "0"); err != nil {
+		t.Fatalf("SetCharacterName fixture setup: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/clone"
+
+	for name, body := range map[string]string{
+		"missing target": `{ "expectedRevision":"1" }`,
+		"unknown field":  `{ "targetSlotID":1,"expectedRevision":"1","extra":true }`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			rejected := doSave(t, saveEngine, http.MethodPost, target, body)
+			if rejected.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, body = %q", rejected.Code, rejected.Body.String())
+			}
+		})
+	}
+
+	recorder := doSave(t, saveEngine, http.MethodPost, target,
+		`{"targetSlotID":1,"expectedRevision":"1"}`)
+	assertOK(t, recorder, target)
+	var got character.CloneCharacterResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	want := character.CloneCharacterResult{
+		SaveSessionID:     session.SaveSessionID,
+		SaveRevision:      "2",
+		SourceCharacterID: 0,
+		TargetSlotID:      1,
+		Name:              "Ranni 2",
+	}
+	if got != want {
+		t.Errorf("result = %+v, want %+v", got, want)
+	}
+	profile, err := saveEngine.GetCharacterProfile(session.SaveSessionID, 1)
+	if err != nil {
+		t.Fatalf("GetCharacterProfile: %v", err)
+	}
+	if !profile.Active || profile.Name != "Ranni 2" {
+		t.Errorf("profile = %+v, want active Ranni 2", profile)
+	}
+}
+
 func TestSetCharacterActiveRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
@@ -1931,6 +1984,16 @@ func TestDeleteCharacterRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	target := "/api/v1/save-sessions/any-session/characters/0"
 	recorder := doSave(t, nil, http.MethodDelete, target,
 		`{"expectedRevision":"0"}`)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)",
+			target, recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestCloneCharacterRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/clone"
+	recorder := doSave(t, nil, http.MethodPost, target,
+		`{"targetSlotID":1,"expectedRevision":"0"}`)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)",
 			target, recorder.Code, recorder.Body.String())

@@ -357,6 +357,13 @@ type deleteCharacterRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// cloneCharacterRequest is the strict JSON body of the slot-cloning route. A
+// pointer distinguishes an omitted targetSlotID from the valid slot zero.
+type cloneCharacterRequest struct {
+	TargetSlotID     *int   `json:"targetSlotID"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setCharacterActiveRequest is the strict JSON body of the slot-activity
 // route. A pointer distinguishes an omitted active field from explicit false.
 type setCharacterActiveRequest struct {
@@ -731,6 +738,45 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := character.GetCharacterProfile(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{sourceCharacterID}/clone",
+		func(writer http.ResponseWriter, request *http.Request) {
+			sourceCharacterID, err := parseCharacterID(
+				request.PathValue("sourceCharacterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body cloneCharacterRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.TargetSlotID == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("targetSlotID is required"))
+				return
+			}
+			result, err := character.CloneCharacter(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				sourceCharacterID,
+				*body.TargetSlotID,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

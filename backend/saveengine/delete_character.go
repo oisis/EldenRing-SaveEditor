@@ -2,7 +2,6 @@ package saveengine
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 )
 
@@ -73,14 +72,18 @@ func (engine *Engine) DeleteCharacter(
 			return fmt.Errorf("cannot clear data of character %d: %w", characterID, err)
 		}
 		if err := loaded.snapshot.writeAt(summaryAt, clearedSummary); err != nil {
-			return rollbackCharacterDeletion(
+			return restoreCharacterSlotRanges(
 				loaded.snapshot, characterID, slotAt, slotBefore, summaryAt, summaryBefore,
-				flagAt, flagBefore, "the profile summary could not be cleared")
+				flagAt, flagBefore, fmt.Sprintf(
+					"character %d was not deleted: the profile summary could not be cleared",
+					characterID))
 		}
 		if err := loaded.snapshot.writeAt(flagAt, []byte{userData10InactiveFlagValue}); err != nil {
-			return rollbackCharacterDeletion(
+			return restoreCharacterSlotRanges(
 				loaded.snapshot, characterID, slotAt, slotBefore, summaryAt, summaryBefore,
-				flagAt, flagBefore, "the activity flag could not be cleared")
+				flagAt, flagBefore, fmt.Sprintf(
+					"character %d was not deleted: the activity flag could not be cleared",
+					characterID))
 		}
 
 		slotWritten, slotErr := loaded.snapshot.readAt(slotAt, characterSlotDataSize)
@@ -92,9 +95,10 @@ func (engine *Engine) DeleteCharacter(
 			flagWritten[0] == userData10InactiveFlagValue {
 			return nil
 		}
-		return rollbackCharacterDeletion(
+		return restoreCharacterSlotRanges(
 			loaded.snapshot, characterID, slotAt, slotBefore, summaryAt, summaryBefore,
-			flagAt, flagBefore, "the deletion could not be verified")
+			flagAt, flagBefore, fmt.Sprintf(
+				"character %d was not deleted: the deletion could not be verified", characterID))
 	})
 	if err != nil {
 		return DeleteCharacterResult{}, err
@@ -143,47 +147,4 @@ func characterCanBeDeleted(
 			characterID, err)
 	}
 	return decodeCharacterName(playerName) != "", nil
-}
-
-func bytesAreZero(data []byte) bool {
-	for _, value := range data {
-		if value != 0 {
-			return false
-		}
-	}
-	return true
-}
-
-func rollbackCharacterDeletion(
-	snapshot *codec,
-	characterID int,
-	slotAt int64,
-	slotBefore []byte,
-	summaryAt int64,
-	summaryBefore []byte,
-	flagAt int64,
-	flagBefore []byte,
-	reason string,
-) error {
-	if err := errors.Join(
-		snapshot.writeAt(slotAt, slotBefore),
-		snapshot.writeAt(summaryAt, summaryBefore),
-		snapshot.writeAt(flagAt, flagBefore),
-	); err != nil {
-		return fmt.Errorf("character %d could not be deleted and its prior data could not be restored: %w",
-			characterID, err)
-	}
-
-	slotRestored, slotErr := snapshot.readAt(slotAt, len(slotBefore))
-	summaryRestored, summaryErr := snapshot.readAt(summaryAt, len(summaryBefore))
-	flagRestored, flagErr := snapshot.readAt(flagAt, len(flagBefore))
-	if slotErr != nil || summaryErr != nil || flagErr != nil ||
-		!bytes.Equal(slotRestored, slotBefore) ||
-		!bytes.Equal(summaryRestored, summaryBefore) ||
-		!bytes.Equal(flagRestored, flagBefore) {
-		return fmt.Errorf("character %d could not be deleted and its rollback could not be verified",
-			characterID)
-	}
-	return fmt.Errorf("character %d was not deleted: %s; the save is unchanged",
-		characterID, reason)
 }
