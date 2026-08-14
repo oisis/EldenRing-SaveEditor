@@ -104,8 +104,7 @@ const (
 )
 
 // regulationKey is the AES-256-CBC key of the regulation blob. Both platforms
-// use the same key; it is used for decryption only, and this package holds no
-// encryption path.
+// use the same key for reading and writing the private session snapshot.
 var regulationKey = []byte{
 	0x99, 0xBF, 0xFC, 0x36, 0x6A, 0x6B, 0xC8, 0xC6,
 	0xF5, 0x82, 0x7D, 0x09, 0x36, 0x02, 0xD6, 0x76,
@@ -257,8 +256,16 @@ func decompressRegulation(archive []byte) ([]byte, error) {
 // alone; no index, order or size is assumed, and an archive without that entry
 // is an error rather than a fallback to another parameter file.
 func findNetworkParamRow(bnd4 []byte) ([]byte, error) {
+	row, _, err := locateNetworkParamRow(bnd4)
+	return row, err
+}
+
+// locateNetworkParamRow also reports the row's absolute BND4 offset. The
+// setter needs that offset to replace only the affected native ZSTD blocks on
+// PS4; the getter deliberately discards it.
+func locateNetworkParamRow(bnd4 []byte) ([]byte, int, error) {
 	if len(bnd4) < bnd4EntryTableOffset || string(bnd4[:len(bnd4Magic)]) != bnd4Magic {
-		return nil, errors.New("the decompressed regulation is not a BND4 archive")
+		return nil, 0, errors.New("the decompressed regulation is not a BND4 archive")
 	}
 	files := int(binary.LittleEndian.Uint32(bnd4[bnd4FileCountOffset:]))
 	name := encodeUTF16LE(networkParamName)
@@ -276,30 +283,34 @@ func findNetworkParamRow(bnd4 []byte) ([]byte, error) {
 		size := int64(binary.LittleEndian.Uint64(bnd4[entry+bnd4EntrySizeOffset:]))
 		dataAt := int64(binary.LittleEndian.Uint32(bnd4[entry+bnd4EntryDataOffset:]))
 		if size < 0 || dataAt < 0 || dataAt+size > int64(len(bnd4)) {
-			return nil, errors.New("NetworkParam.param reaches past the regulation archive")
+			return nil, 0, errors.New("NetworkParam.param reaches past the regulation archive")
 		}
-		return parseNetworkParamRow(bnd4[dataAt : dataAt+size])
+		row, rowAt, err := parseNetworkParamRow(bnd4[dataAt : dataAt+size])
+		if err != nil {
+			return nil, 0, err
+		}
+		return row, int(dataAt) + rowAt, nil
 	}
-	return nil, fmt.Errorf("the regulation archive holds no %s (%d entries)", networkParamName, files)
+	return nil, 0, fmt.Errorf("the regulation archive holds no %s (%d entries)", networkParamName, files)
 }
 
 // parseNetworkParamRow reads the parameter header far enough to reach the data
 // of row 0. Only the confirmed long-data-offset layout is accepted, and a row
 // that does not provide the full 0x24C bytes the 22 values live in is rejected
 // instead of being read partially.
-func parseNetworkParamRow(param []byte) ([]byte, error) {
+func parseNetworkParamRow(param []byte) ([]byte, int, error) {
 	if len(param) < networkParamHeaderSize {
-		return nil, fmt.Errorf("%s is too small (%d bytes)", networkParamName, len(param))
+		return nil, 0, fmt.Errorf("%s is too small (%d bytes)", networkParamName, len(param))
 	}
 	if param[networkParamFormatOffset]&networkParamLongDataFlag == 0 {
-		return nil, fmt.Errorf("%s uses the unsupported format flags 0x%02X",
+		return nil, 0, fmt.Errorf("%s uses the unsupported format flags 0x%02X",
 			networkParamName, param[networkParamFormatOffset])
 	}
 	rowAt := int64(binary.LittleEndian.Uint64(param[networkParamRow0Offset:]))
 	if rowAt <= 0 || rowAt+networkParamRowSize > int64(len(param)) {
-		return nil, fmt.Errorf("%s declares the unusable row offset 0x%X", networkParamName, rowAt)
+		return nil, 0, fmt.Errorf("%s declares the unusable row offset 0x%X", networkParamName, rowAt)
 	}
-	return param[rowAt : rowAt+networkParamRowSize], nil
+	return param[rowAt : rowAt+networkParamRowSize], int(rowAt), nil
 }
 
 // decodeNetworkParams reads the 22 values from the row data. The row is already

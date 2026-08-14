@@ -998,6 +998,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures/unlock":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
+		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1036,6 +1037,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[pouchItems]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", pouchItems)
 	}
+	networkSettings := "/api/v1/save-sessions/{saveSessionID}/network-settings"
+	if _, hasPut := document.Paths[networkSettings]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", networkSettings)
+	}
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
 	for _, name := range []string{
@@ -1062,6 +1067,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"NetworkParamValues",
 		"NetworkPreset",
 		"GetNetworkPresetsResult",
+		"GetNetworkSettingsResult",
+		"SetNetworkSettingsRequest",
+		"SetNetworkSettingsResult",
 		"AppearancePresetSummary",
 		"GetAppearancePresetsResult",
 		"LoadSaveRequest",
@@ -1162,8 +1170,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 31 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 31", found)
+	if found != 32 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 32", found)
 	}
 }
 
@@ -2327,9 +2335,65 @@ func TestNetworkSettingsRoute(t *testing.T) {
 		t.Fatalf("network settings body %q differs from the expected values", recorder.Body.String())
 	}
 
+	settings := gamecatalog.NetworkParamValues{
+		MaxBreakInTargetListCount:     8,
+		BreakInRequestIntervalTimeSec: 12,
+		BreakInRequestTimeOutSec:      8,
+		BreakInRequestAreaCount:       8,
+		SummonTimeoutTime:             45,
+		ReloadSignIntervalTime2:       20,
+		ReloadSignTotalCount:          40,
+		ReloadSignCellCount:           20,
+		UpdateSignIntervalTime:        15,
+		SingGetMax:                    64,
+		SignDownloadSpan:              15,
+		SignUpdateSpan:                20,
+		ReloadVisitListCoolTime:       8,
+		MaxCoopBlueSummonCount:        2,
+		MaxVisitListCount:             10,
+		ReloadSearchCoopBlueMin:       10,
+		ReloadSearchCoopBlueMax:       40,
+		AllAreaSearchRateCoopBlue:     60,
+		AllAreaSearchRateVsBlue:       30,
+		VisitorListMax:                10,
+		VisitorTimeOutTime:            60,
+		VisitorDownloadSpan:           60,
+	}
+	body, err := json.Marshal(setNetworkSettingsRequest{
+		NetworkSettings:  settings,
+		ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	updated := doSave(t, saveEngine, http.MethodPut, target, string(body))
+	assertOK(t, updated, target)
+	wantSet := network.SetNetworkSettingsResult{
+		SaveSessionID:   session.SaveSessionID,
+		SaveRevision:    "1",
+		NetworkSettings: settings,
+	}
+	if !reflect.DeepEqual(decode(t, updated.Body.Bytes()), marshalled(t, wantSet)) {
+		t.Fatalf("set network settings body %q differs from the expected result", updated.Body.String())
+	}
+
+	stored := doSave(t, saveEngine, http.MethodGet, target, "")
+	assertOK(t, stored, target)
+	if !reflect.DeepEqual(decode(t, stored.Body.Bytes()), marshalled(t, network.GetNetworkSettingsResult{
+		SaveSessionID: session.SaveSessionID,
+		Parameters:    settings,
+	})) {
+		t.Fatalf("stored network settings body %q differs from the committed values", stored.Body.String())
+	}
+
 	absent := doSave(t, nil, http.MethodGet, target, "")
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("%s without an engine: status = %d, want 404 (body %q)",
+			target, absent.Code, absent.Body.String())
+	}
+	absent = doSave(t, nil, http.MethodPut, target, string(body))
+	if absent.Code != http.StatusNotFound {
+		t.Fatalf("PUT %s without an engine: status = %d, want 404 (body %q)",
 			target, absent.Code, absent.Body.String())
 	}
 }

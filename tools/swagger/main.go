@@ -443,6 +443,13 @@ type setGestureUnlockedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setNetworkSettingsRequest is the strict JSON body of the complete network
+// settings replacement. SaveEngine owns every field and cross-field rule.
+type setNetworkSettingsRequest struct {
+	NetworkSettings  gamecatalog.NetworkParamValues `json:"networkSettings"`
+	ExpectedRevision string                         `json:"expectedRevision"`
+}
+
 // closeSaveResponse is the confirmation of DELETE /api/v1/save-sessions/{id}.
 // CloseSave returns no value, so the route states the closed session itself.
 type closeSaveResponse struct {
@@ -1283,6 +1290,34 @@ func registerSaveSessionRoutes(
 		"GET /api/v1/save-sessions/{saveSessionID}/network-settings",
 		func(writer http.ResponseWriter, request *http.Request) {
 			result, err := network.GetNetworkSettings(saveEngine, request.PathValue("saveSessionID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/network-settings",
+		func(writer http.ResponseWriter, request *http.Request) {
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setNetworkSettingsRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := network.SetNetworkSettings(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				body.NetworkSettings,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

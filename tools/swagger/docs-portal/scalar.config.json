@@ -251,6 +251,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/network/get_network_settings.md",
                 "title": "GetNetworkSettings"
+              },
+              "/set-network-settings": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/network/set_network_settings.md",
+                "title": "SetNetworkSettings"
               }
             }
           },

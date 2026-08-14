@@ -23,7 +23,7 @@ set have exactly the same 22 fields and JSON names.
 | Test source | [../../../backend/endpoints/network/get_network_settings_test.go](../../../backend/endpoints/network/get_network_settings_test.go) |
 | Data source | the `UserData11` regulation of the loaded save session, read by SaveEngine |
 | Save access | read-only — SaveEngine reads the private session snapshot; no file is opened by this endpoint |
-| Mutation | none — no setter, no write path and no save, snapshot, session or catalog state is changed |
+| Mutation | none — this getter changes no save, snapshot, session or catalog state; `SetNetworkSettings` is the separate write endpoint |
 
 ## Input
 
@@ -64,7 +64,7 @@ type GetNetworkSettingsResult struct {
 `maxCoopBlueSummonCount`, `maxVisitListCount`, `reloadSearchCoopBlueMin`,
 `reloadSearchCoopBlueMax`, `allAreaSearchRateCoopBlue`,
 `allAreaSearchRateVsBlue`, `visitorListMax`, `visitorTimeOutTime` and
-`visitorDownloadSpan`. Twelve of them are `int32` and ten are `float32`, exactly
+`visitorDownloadSpan`. Ten of them are `int32` and twelve are `float32`, exactly
 as stored.
 
 ## How the values are read
@@ -134,8 +134,8 @@ register it and answers `404`. The path segment is passed to
 `network.GetNetworkSettings` unchanged; a successful call returns `200` and every
 endpoint error returns `400`.
 
-There is no Wails binding, no frontend view, no CLI command, no setter and no
-write path for this endpoint.
+There is no Wails binding, frontend view or CLI command for this endpoint. The
+separate `SetNetworkSettings` endpoint owns the write path.
 
 ## Local verification
 

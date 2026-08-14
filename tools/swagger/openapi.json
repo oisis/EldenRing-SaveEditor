@@ -1707,6 +1707,49 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "setNetworkSettings",
+        "tags": ["Network"],
+        "summary": "SetNetworkSettings",
+        "description": "Atomically replaces all 22 supported NetworkParam values in UserData11 after validating every field, the three cross-field relationships and expectedRevision. PC DFLT/ZSTD and PS4 DFLT/ZSTD use their confirmed platform-specific write paths; no preset is loaded and no other regulation row is changed. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetNetworkSettingsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed complete network parameter assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetNetworkSettingsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed JSON, an invalid field or field relationship, a revision conflict, an unknown session, or a UserData11 that cannot be safely rewritten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/healthz": {
@@ -3978,6 +4021,35 @@
           }
         },
         "required": ["saveSessionID", "parameters"]
+      },
+      "SetNetworkSettingsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "networkSettings": {
+            "$ref": "#/components/schemas/NetworkParamValues"
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        },
+        "required": ["networkSettings", "expectedRevision"]
+      },
+      "SetNetworkSettingsResult": {
+        "type": "object",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "networkSettings": {
+            "$ref": "#/components/schemas/NetworkParamValues"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "networkSettings"]
       },
       "AppearancePresetSummary": {
         "type": "object",
