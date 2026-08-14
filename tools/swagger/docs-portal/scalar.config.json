@@ -372,6 +372,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_cookbook_unlocked.md",
                 "title": "SetCookbookUnlocked"
+              },
+              "/set-bell-bearing-unlocked": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_bell_bearing_unlocked.md",
+                "title": "SetBellBearingUnlocked"
               }
             }
           }

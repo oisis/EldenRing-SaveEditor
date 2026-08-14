@@ -2195,6 +2195,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings/unlock": {
+      "put": {
+        "operationId": "setBellBearingUnlocked",
+        "tags": ["World"],
+        "summary": "SetBellBearingUnlocked",
+        "description": "Sets or clears the handed-in state of one catalog Bell Bearing. Setting unlocked=true atomically sets its acquisition flag and consumes every matching raw-ID or goods-handle record from Inventory common/key and Storage common. Setting unlocked=false clears only the flag and never creates an item. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBellBearingUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed Bell Bearing handed-in state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetBellBearingUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, invalid expectedRevision, unknown session, inactive slot, invalid Bell Bearing resource, malformed event flags or containers, a referenced matching record, a matching Storage key record, or a write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades": {
       "get": {
         "operationId": "getWhetblades",
@@ -4325,6 +4373,59 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "bellBearings"]
+      },
+      "SetBellBearingUnlockedRequest": {
+        "type": "object",
+        "description": "The request body for setting a Bell Bearing handed-in state.",
+        "additionalProperties": false,
+        "properties": {
+          "bellBearingKind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The public GameCatalog resource kind."
+          },
+          "bellBearingKey": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$",
+            "description": "The public 8-digit hex resource key of the Bell Bearing."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True to mark the Bell Bearing as handed in and consume matching records; false to clear only the acquisition flag."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["bellBearingKind", "bellBearingKey", "unlocked", "expectedRevision"]
+      },
+      "SetBellBearingUnlockedResult": {
+        "type": "object",
+        "description": "The receipt returned after a successful Bell Bearing handed-in state mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bellBearingKind": {
+            "type": "string"
+          },
+          "bellBearingKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "bellBearingKind", "bellBearingKey", "unlocked"]
       },
       "WhetbladeEntry": {
         "type": "object",

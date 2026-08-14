@@ -1019,6 +1019,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures/unlock":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings":                      "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings/unlock":               "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1197,6 +1198,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetCookbooksResult",
 		"BellBearingEntry",
 		"GetBellBearingsResult",
+		"SetBellBearingUnlockedRequest",
+		"SetBellBearingUnlockedResult",
 		"WhetbladeEntry",
 		"GetWhetbladesResult",
 		"SetCookbookUnlockedRequest",
@@ -1258,8 +1261,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 50 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 50", found)
+	if found != 51 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 51", found)
 	}
 }
 
@@ -4435,6 +4438,89 @@ func TestBellBearingsRouteMatchesTheGetter(t *testing.T) {
 	if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantFiltered)) {
 		t.Fatal("filtered bell bearings route body differs from the getter result")
 	}
+}
+
+func TestSetBellBearingUnlockedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	boolPointer := func(value bool) *bool { return &value }
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, _ := json.Marshal(setBellBearingUnlockedRequest{
+			BellBearingKind: "item", BellBearingKey: "400022CF",
+			Unlocked: boolPointer(true), ExpectedRevision: "0",
+		})
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/bell-bearings/unlock"
+		request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got world.SetBellBearingUnlockedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+		if got.SaveRevision != "1" || !got.Unlocked || got.BellBearingKey != "400022CF" {
+			t.Errorf("result = %+v, want revision 1 and unlocked Bell Bearing 400022CF", got)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetBellBearingUnlocked(
+			saveEngine, gameCatalog, directSession.SaveSessionID, 0,
+			"item", "400022CF", true, "0")
+		if err != nil {
+			t.Fatalf("world.SetBellBearingUnlocked: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid body before mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/bell-bearings/unlock"
+		request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(
+			`{"bellBearingKind":"item","bellBearingKey":"400022CF","expectedRevision":"0"}`))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("rejected body dirtied the session: %+v", info)
+		}
+	})
+
+	t.Run("absent without engine", func(t *testing.T) {
+		target := "/api/v1/save-sessions/session1/characters/0/bell-bearings/unlock"
+		request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(
+			`{"bellBearingKind":"item","bellBearingKey":"400022CF","unlocked":true,"expectedRevision":"0"}`))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusNotFound {
+			t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+		}
+	})
 }
 
 func writeWhetbladesRouteFixture(t *testing.T) string {
