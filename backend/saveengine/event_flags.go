@@ -229,6 +229,10 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 		blockPosition = 10
 	case 65:
 		blockPosition = 15
+	case 1042378:
+		// Whetstone Knife's confirmed system-affinity flag 1042378601
+		// occupies byte 0xA0D0C in both SaveForge 1.5.8 and 1.6.8.
+		blockPosition = 5269
 	case 67:
 		blockPosition = 17
 	case 68:

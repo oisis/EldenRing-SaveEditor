@@ -392,6 +392,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_bell_bearing_unlocked.md",
                 "title": "SetBellBearingUnlocked"
+              },
+              "/set-whetblade-unlocked": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_whetblade_unlocked.md",
+                "title": "SetWhetbladeUnlocked"
               }
             }
           }

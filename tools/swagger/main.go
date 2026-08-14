@@ -617,6 +617,14 @@ type setBellBearingUnlockedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setWhetbladeUnlockedRequest is the strict JSON body of the Whetblade mutation.
+type setWhetbladeUnlockedRequest struct {
+	WhetbladeKind    string `json:"whetbladeKind"`
+	WhetbladeKey     string `json:"whetbladeKey"`
+	Unlocked         *bool  `json:"unlocked"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setGestureUnlockedRequest is the strict JSON body of the gesture mutation.
 type setGestureUnlockedRequest struct {
 	GestureKind      string `json:"gestureKind"`
@@ -2183,6 +2191,47 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				request.URL.Query().Get("availabilityFilter"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setWhetbladeUnlockedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Unlocked == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				return
+			}
+			result, err := world.SetWhetbladeUnlocked(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.WhetbladeKind,
+				body.WhetbladeKey,
+				*body.Unlocked,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

@@ -2284,6 +2284,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock": {
+      "put": {
+        "operationId": "setWhetbladeUnlocked",
+        "tags": ["World"],
+        "summary": "SetWhetbladeUnlocked",
+        "description": "Sets or clears one catalog Whetblade, its related affinity flags and its Inventory item in one atomic mutation. The shared Ashes of War menu flag remains set while any other Whetblade has its main event flag or positive-quantity Inventory item. Bundled acquisitions such as Storm Stomp are separate resources and remain unchanged. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetWhetbladeUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed Whetblade state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetWhetbladeUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, invalid expectedRevision, unknown session, inactive slot, invalid or conflicting Whetblade catalog data, malformed Inventory or event flags, duplicate target records, a referenced target record, or a write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock": {
       "put": {
         "operationId": "setCookbookUnlocked",
@@ -4745,6 +4793,59 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "whetblades"]
+      },
+      "SetWhetbladeUnlockedRequest": {
+        "type": "object",
+        "description": "The request body for setting one Whetblade state.",
+        "additionalProperties": false,
+        "properties": {
+          "whetbladeKind": {
+            "type": "string",
+            "enum": ["item"],
+            "description": "The public GameCatalog resource kind."
+          },
+          "whetbladeKey": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$",
+            "description": "The public 8-digit hex resource key of the Whetblade."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True to add and unlock the Whetblade; false to remove and lock it."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["whetbladeKind", "whetbladeKey", "unlocked", "expectedRevision"]
+      },
+      "SetWhetbladeUnlockedResult": {
+        "type": "object",
+        "description": "The receipt returned after a successful Whetblade state mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "whetbladeKind": {
+            "type": "string"
+          },
+          "whetbladeKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "whetbladeKind", "whetbladeKey", "unlocked"]
       },
       "SetCookbookUnlockedRequest": {
         "type": "object",

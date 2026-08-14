@@ -1024,6 +1024,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings":                      "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings/unlock":               "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
@@ -1211,6 +1212,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetBellBearingUnlockedResult",
 		"WhetbladeEntry",
 		"GetWhetbladesResult",
+		"SetWhetbladeUnlockedRequest",
+		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
 		"SetCookbookUnlockedResult",
 	} {
@@ -1270,8 +1273,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 54 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 54", found)
+	if found != 55 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 55", found)
 	}
 }
 
@@ -4748,6 +4751,73 @@ func TestWhetbladesRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, filtered, target)
 	if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantFiltered)) {
 		t.Fatal("filtered whetblades route body differs from the getter result")
+	}
+}
+
+func TestSetWhetbladeUnlockedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	unlocked := true
+	session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	body, _ := json.Marshal(setWhetbladeUnlockedRequest{
+		WhetbladeKind: "item", WhetbladeKey: "4000230C",
+		Unlocked: &unlocked, ExpectedRevision: "0",
+	})
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/whetblades/unlock"
+	request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+
+	var got world.SetWhetbladeUnlockedResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if got.SaveRevision != "1" || !got.Unlocked || got.WhetbladeKey != "4000230C" {
+		t.Errorf("result = %+v, want revision 1 and unlocked Whetblade 4000230C", got)
+	}
+
+	directSession, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave direct session: %v", err)
+	}
+	want, err := world.SetWhetbladeUnlocked(
+		saveEngine, gameCatalog, directSession.SaveSessionID, 0,
+		"item", "4000230C", true, "0")
+	if err != nil {
+		t.Fatalf("world.SetWhetbladeUnlocked: %v", err)
+	}
+	want.SaveSessionID = got.SaveSessionID
+	if got != want {
+		t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+	}
+
+	rejectedSession, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave rejected session: %v", err)
+	}
+	rejectedTarget := "/api/v1/save-sessions/" + rejectedSession.SaveSessionID +
+		"/characters/0/whetblades/unlock"
+	rejected := httptest.NewRequest(http.MethodPut, rejectedTarget, strings.NewReader(
+		`{"whetbladeKind":"item","whetbladeKey":"4000230C","expectedRevision":"0"}`))
+	rejected.Header.Set("Content-Type", "application/json")
+	rejectedRecorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(rejectedRecorder, rejected)
+	if rejectedRecorder.Code != http.StatusBadRequest {
+		t.Fatalf("missing unlocked status = %d, want 400", rejectedRecorder.Code)
+	}
+	info, err := saveEngine.GetSessionInfo(rejectedSession.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	if info.UnsavedChanges {
+		t.Errorf("rejected body dirtied the session: %+v", info)
 	}
 }
 

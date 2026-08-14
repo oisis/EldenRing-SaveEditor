@@ -371,24 +371,49 @@ func createInventoryRecord(
 	quantity uint32,
 	owned bool,
 ) (addedInventoryRecord, error) {
-	sectionAt, err := inventoryHeldSectionAt(loaded, characterID)
+	result, writes, err := planInventoryRecordCreation(
+		loaded, characterID, handle, gameID, quantity, owned)
 	if err != nil {
 		return addedInventoryRecord{}, err
+	}
+	if err := applyByteWrites(loaded.snapshot, writes); err != nil {
+		return addedInventoryRecord{}, fmt.Errorf("item 0x%08X: %w", gameID, err)
+	}
+	return result, nil
+}
+
+// planInventoryRecordCreation validates and describes one new common record
+// without changing the snapshot. It is shared by the public common-item add and
+// domain mutations that must compose the same confirmed record write with
+// additional state in one atomic byte plan.
+//
+// The caller must already hold Engine.mutex.
+func planInventoryRecordCreation(
+	loaded *loadedSave,
+	characterID int,
+	handle uint32,
+	gameID uint32,
+	quantity uint32,
+	owned bool,
+) (addedInventoryRecord, []byteWrite, error) {
+	sectionAt, err := inventoryHeldSectionAt(loaded, characterID)
+	if err != nil {
+		return addedInventoryRecord{}, nil, err
 	}
 
 	row, err := firstFreeInventoryRow(loaded, sectionAt, characterID)
 	if err != nil {
-		return addedInventoryRecord{}, err
+		return addedInventoryRecord{}, nil, err
 	}
 
 	commonCountAt := sectionAt - addItemCommonCountBackDistance
 	commonCount, err := loaded.snapshot.uint32At(commonCountAt)
 	if err != nil {
-		return addedInventoryRecord{}, fmt.Errorf(
+		return addedInventoryRecord{}, nil, fmt.Errorf(
 			"cannot read the common item count of character %d: %w", characterID, err)
 	}
 	if commonCount >= inventoryHeldCommonRecords {
-		return addedInventoryRecord{}, fmt.Errorf(
+		return addedInventoryRecord{}, nil, fmt.Errorf(
 			"the inventory of character %d declares %d of %d common records and receives no item",
 			characterID, commonCount, inventoryHeldCommonRecords)
 	}
@@ -396,23 +421,23 @@ func createInventoryRecord(
 	equipIndexAt := sectionAt + addItemNextEquipIndexOffset
 	equipIndex, err := loaded.snapshot.uint32At(equipIndexAt)
 	if err != nil {
-		return addedInventoryRecord{}, fmt.Errorf(
+		return addedInventoryRecord{}, nil, fmt.Errorf(
 			"cannot read NextEquipIndex of character %d: %w", characterID, err)
 	}
 	if equipIndex == ^uint32(0) {
-		return addedInventoryRecord{}, fmt.Errorf(
+		return addedInventoryRecord{}, nil, fmt.Errorf(
 			"NextEquipIndex of character %d cannot be advanced", characterID)
 	}
 
 	acquisitionAt := sectionAt + addItemNextAcquisitionOffset
 	nextAcquisition, err := loaded.snapshot.uint32At(acquisitionAt)
 	if err != nil {
-		return addedInventoryRecord{}, fmt.Errorf(
+		return addedInventoryRecord{}, nil, fmt.Errorf(
 			"cannot read NextAcquisitionSortId of character %d: %w", characterID, err)
 	}
 	acquisitionIndex, err := nextAcquisitionIndex(nextAcquisition, characterID)
 	if err != nil {
-		return addedInventoryRecord{}, err
+		return addedInventoryRecord{}, nil, err
 	}
 
 	// The GaItemData entry belongs to the first physical copy of an item ID only.
@@ -423,7 +448,7 @@ func createInventoryRecord(
 	if !owned {
 		gaItemData, err = planGaItemDataInsertion(loaded, characterID, gameID)
 		if err != nil {
-			return addedInventoryRecord{}, err
+			return addedInventoryRecord{}, nil, err
 		}
 	}
 
@@ -438,10 +463,7 @@ func createInventoryRecord(
 		{at: equipIndexAt, data: littleEndianUint32(equipIndex + 1)},
 		{at: acquisitionAt, data: littleEndianUint32(acquisitionIndex + 1)},
 	}, gaItemData...)
-	if err := applyByteWrites(loaded.snapshot, writes); err != nil {
-		return addedInventoryRecord{}, fmt.Errorf("item 0x%08X: %w", gameID, err)
-	}
-	return addedInventoryRecord{physicalIndex: row, quantity: quantity, created: true}, nil
+	return addedInventoryRecord{physicalIndex: row, quantity: quantity, created: true}, writes, nil
 }
 
 // firstFreeInventoryRow reports the lowest common row that carries one of the
