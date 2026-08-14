@@ -2,26 +2,109 @@
 Endpoint: SetInventoryOrder
 EndpointID: set_inventory_order
 Purpose: Sets the complete order of supported Inventory instances without changing their semantic contents.
-How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
-Supported resource types: ItemDocument.
-Input variables: characterID, orderedOwnedItemIDs, expectedRevision.
-GameCatalog variables read: the fields required to resolve and validate the declared resource types; the exact projection belongs to the endpoint runtime specification.
-Save variables processed: the state required by the declared variables; the mutation must validate a complete plan and finish with full success or rollback.
-Implementation status: contract definition only; no runtime handler is implemented in this file yet.
+How it works: The runtime handler classifies Inventory records through GameCatalog and delegates one complete ordered identity permutation to SaveEngine.
+Supported resource types: ItemDocument in a confirmed Inventory order category, excluding the technical Unarmed record.
+Input variables: saveSessionID, characterID, orderedOwnedItemIDs, expectedRevision.
+GameCatalog variables read: item.gameID and item.category.
+Save variables processed: acquisition indices of every supported Inventory common record and Inventory NextAcquisitionSortId; physical rows, handles, quantities, key records, NextEquipIndex, Equipment, Storage and GaItem data stay unchanged.
+Implementation status: implemented
 */
 package inventory
 
-import "github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
 
 // SetInventoryOrderEndpointID is the stable backend identifier of SetInventoryOrder.
 const SetInventoryOrderEndpointID = "set_inventory_order"
+
+const inventoryOrderUnarmedKey = "0001ADB0"
 
 // SetInventoryOrderDefinition describes the public mutation contract.
 var SetInventoryOrderDefinition = contract.MustDefine(contract.Definition{
 	Name:                       "SetInventoryOrder",
 	ID:                         SetInventoryOrderEndpointID,
 	Kind:                       contract.Mutation,
-	SupportedResourceTypes:     "ItemDocument",
-	SupportedResourceVariables: []string{"characterID", "orderedOwnedItemIDs", "expectedRevision"},
+	SupportedResourceTypes:     "ItemDocument in a confirmed Inventory order category, excluding the technical Unarmed record",
+	SupportedResourceVariables: []string{"saveSessionID", "characterID", "orderedOwnedItemIDs", "expectedRevision"},
 	Description:                "Sets the complete order of supported Inventory instances without changing their semantic contents.",
 })
+
+// SetInventoryOrderResult reports the committed order in stable catalog terms.
+type SetInventoryOrderResult struct {
+	SaveSessionID      string               `json:"saveSessionID"`
+	SaveRevision       string               `json:"saveRevision"`
+	CharacterID        int                  `json:"characterID"`
+	OrderedResources   []schema.ResourceRef `json:"orderedResources"`
+	AcquisitionIndices []uint32             `json:"acquisitionIndices"`
+}
+
+// SetInventoryOrder replaces the complete supported order of Inventory common.
+func SetInventoryOrder(
+	engine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+	saveSessionID string,
+	characterID int,
+	orderedOwnedItemIDs []string,
+	expectedRevision string,
+) (SetInventoryOrderResult, error) {
+	if engine == nil {
+		return SetInventoryOrderResult{}, errors.New("save engine is not available")
+	}
+	if gameCatalog == nil {
+		return SetInventoryOrderResult{}, errors.New("game catalog is not available")
+	}
+
+	classify := func(gameID uint32) (bool, error) {
+		resource, found := gameCatalog.ItemByGameID(gameID)
+		if !found || resource.Kind != schema.ResourceKindItem ||
+			resource.Item == nil || resource.Key == "" {
+			return false, fmt.Errorf(
+				"item with game ID 0x%08X is not found in game catalog", gameID)
+		}
+		if !resource.Item.Category.Known {
+			return false, fmt.Errorf(
+				"resource kind %q key %q has an unknown category", resource.Kind, resource.Key)
+		}
+		if resource.Key == inventoryOrderUnarmedKey {
+			return false, nil
+		}
+		switch resource.Item.Category.Value {
+		case "melee_armaments", "ranged_and_catalysts", "shields", "talismans",
+			"head", "chest", "arms", "legs":
+			return true, nil
+		default:
+			return false, nil
+		}
+	}
+
+	mutation, err := engine.SetInventoryOrder(
+		saveSessionID, characterID, orderedOwnedItemIDs, expectedRevision, classify)
+	if err != nil {
+		return SetInventoryOrderResult{}, err
+	}
+
+	resources := make([]schema.ResourceRef, len(mutation.GameIDs))
+	for index, gameID := range mutation.GameIDs {
+		resource, found := gameCatalog.ItemByGameID(gameID)
+		if !found {
+			return SetInventoryOrderResult{}, fmt.Errorf(
+				"committed game ID 0x%08X could not be found in game catalog", gameID)
+		}
+		resources[index] = resource.Ref()
+	}
+
+	return SetInventoryOrderResult{
+		SaveSessionID:      mutation.SaveSessionID,
+		SaveRevision:       mutation.SaveRevision,
+		CharacterID:        mutation.CharacterID,
+		OrderedResources:   resources,
+		AcquisitionIndices: mutation.AcquisitionIndices,
+	}, nil
+}

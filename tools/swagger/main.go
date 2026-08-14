@@ -487,6 +487,14 @@ type setOwnedItemQuantityRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setInventoryOrderRequest is the strict JSON body of the complete supported
+// Inventory common order. SaveEngine and GameCatalog own every identity,
+// category, completeness, revision and acquisition-index rule.
+type setInventoryOrderRequest struct {
+	OrderedOwnedItemIDs []string `json:"orderedOwnedItemIDs"`
+	ExpectedRevision    string   `json:"expectedRevision"`
+}
+
 // moveOwnedItemToInventoryRequest is the strict JSON body of the move route.
 type moveOwnedItemToInventoryRequest struct {
 	TargetPosition   *int   `json:"targetPosition"`
@@ -1258,6 +1266,45 @@ func registerSaveSessionRoutes(
 				query.Get("containerSection"),
 				page,
 				pageSize,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/order",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setInventoryOrderRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.OrderedOwnedItemIDs == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("orderedOwnedItemIDs is required"))
+				return
+			}
+			result, err := inventory.SetInventoryOrder(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.OrderedOwnedItemIDs,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

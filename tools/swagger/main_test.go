@@ -899,6 +899,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", `{"orderedResources":[],"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-talismans", `{"orderedOwnedItemIDs":[],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/inventory/order", `{"orderedOwnedItemIDs":["any-token"],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
@@ -1002,6 +1003,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":                        "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/order":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/items":                    "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}":          "get",
@@ -1155,6 +1157,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"AddItemToInventoryResult",
 		"SetOwnedItemQuantityRequest",
 		"SetOwnedItemQuantityResult",
+		"SetInventoryOrderRequest",
+		"SetInventoryOrderResult",
 		"MoveOwnedItemToInventoryRequest",
 		"MoveOwnedItemToInventoryResult",
 		"MoveOwnedItemToStorageRequest",
@@ -1229,8 +1233,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 43 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 43", found)
+	if found != 44 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 44", found)
 	}
 }
 
@@ -2959,6 +2963,85 @@ func TestInventoryRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("inventory route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
+	}
+}
+
+func TestSetInventoryOrderRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	listed, err := saveEngine.GetInventory(
+		session.SaveSessionID, 0, saveengine.InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory: %v", err)
+	}
+	ownedItemIDs := make(map[int]string)
+	for _, record := range listed.Records {
+		if record.PhysicalIndex == 0 || record.PhysicalIndex == 5 {
+			ownedItemIDs[record.PhysicalIndex] = record.OwnedItemID
+		}
+	}
+	if len(ownedItemIDs) != 2 {
+		t.Fatalf("fixture has %d supported Dagger records, want two", len(ownedItemIDs))
+	}
+
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/inventory/order"
+	serve := func(body string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(newFullCatalog(t), testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	for name, body := range map[string]string{
+		"missing order": `{"expectedRevision":"0"}`,
+		"unknown field": `{"orderedOwnedItemIDs":[],"expectedRevision":"0","unknown":true}`,
+	} {
+		recorder := serve(body)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)",
+				name, recorder.Code, recorder.Body.String())
+		}
+	}
+
+	body, err := json.Marshal(setInventoryOrderRequest{
+		OrderedOwnedItemIDs: []string{ownedItemIDs[5], ownedItemIDs[0]},
+		ExpectedRevision:    "0",
+	})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	recorder := serve(string(body))
+	assertOK(t, recorder, target)
+	var result inventory.SetInventoryOrderResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetInventoryOrder body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveSessionID != session.SaveSessionID || result.SaveRevision != "1" ||
+		result.CharacterID != 0 || len(result.OrderedResources) != 2 ||
+		result.OrderedResources[0].Key != daggerResourceKey ||
+		result.OrderedResources[1].Key != daggerResourceKey ||
+		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{434, 436}) {
+		t.Fatalf("SetInventoryOrder result = %+v", result)
+	}
+
+	updated, err := saveEngine.GetInventory(
+		session.SaveSessionID, 0, saveengine.InventorySectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetInventory after reorder: %v", err)
+	}
+	wantIndices := map[int]uint32{5: 434, 0: 436}
+	for _, record := range updated.Records {
+		if want, exists := wantIndices[record.PhysicalIndex]; exists &&
+			record.AcquisitionIndex != want {
+			t.Fatalf("Dagger at physical index %d has acquisition index %d, want %d",
+				record.PhysicalIndex, record.AcquisitionIndex, want)
+		}
 	}
 }
 
