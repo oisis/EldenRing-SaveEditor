@@ -750,6 +750,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments": {
+      "put": {
+        "operationId": "setEquippedArmaments",
+        "tags": ["Equipment"],
+        "summary": "SetEquippedArmaments",
+        "description": "Atomically replaces the six hand-armament slots of one active character in left 1, right 1, left 2, right 2, left 3 and right 3 order. Each position is a revision-scoped ownedItemID for a positive weapon record in Inventory common or null. GameCatalog must confirm that every selected weapon can be equipped in the corresponding left-hand or right-hand slot, and one physical weapon record cannot occupy two positions. Null selects the existing native Unarmed record; multiple null positions may share it. The operation fails closed if that technical record is absent because it never allocates or repacks GaItem. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEquippedArmamentsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed complete hand-armament assignment receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetEquippedArmamentsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, an invalid character or revision, an invalid or stale ownedItemID, a Storage or key record, zero quantity, a wrong item family or hand slot, a duplicated physical weapon record, a missing native Unarmed record, an unresolved handle, or inconsistent existing representations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor": {
       "put": {
         "operationId": "setEquippedArmor",
@@ -2873,6 +2921,80 @@
           "active",
           "slots"
         ]
+      },
+      "SetEquippedArmamentsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete six-position hand-armament assignment and optimistic-concurrency revision.",
+        "properties": {
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "description": "Exactly six positions in left 1, right 1, left 2, right 2, left 3 and right 3 order. Each position is null to select the native Unarmed record, or an ownedItemID string for a positive Inventory common weapon record.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "nullable": true
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["slotAssignments", "expectedRevision"]
+      },
+      "SetEquippedArmamentsResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete hand-armament assignment, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/EquippedArmamentAssignment"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
+      },
+      "EquippedArmamentAssignment": {
+        "type": "object",
+        "description": "Canonical catalog identity plus the exact materialized weapon game ID, which preserves upgrade and infusion variants.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["item"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$"
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "uint32",
+            "minimum": 0
+          }
+        },
+        "required": ["kind", "key", "gameID"]
       },
       "SetEquippedArmorRequest": {
         "type": "object",

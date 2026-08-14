@@ -887,6 +887,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance", `{"appearance":{},"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance/preset", `{"presetID":"geralt-of-rivia-the-witcher","expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-armaments", `{"slotAssignments":[null,null,null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-armor", `{"slotAssignments":[null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quick-items", `{"slotAssignments":[null,null,null,null,null,null,null,null,null,null],"expectedRevision":"0"}`},
@@ -992,6 +993,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor":                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items":                        "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":                        "get",
@@ -1107,6 +1109,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"ApplyAppearancePresetRequest",
 		"ApplyAppearancePresetResult",
 		"CharacterEquipment",
+		"EquippedArmamentAssignment",
+		"SetEquippedArmamentsRequest",
+		"SetEquippedArmamentsResult",
 		"SetEquippedArmorRequest",
 		"SetEquippedArmorResult",
 		"QuickItemSlot",
@@ -1193,8 +1198,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 37 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 37", found)
+	if found != 38 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 38", found)
 	}
 }
 
@@ -2050,6 +2055,100 @@ func TestSetQuickItemsRoute(t *testing.T) {
 	}
 	if quick.Items[0].ItemID == 0 || quick.Items[0].EquipIndex != 0x180 {
 		t.Errorf("quick item 0 = %+v, want valid inventory reference", quick.Items[0])
+	}
+}
+
+func writeSetEquippedArmamentsRouteFixture(t *testing.T) string {
+	t.Helper()
+	const (
+		anchorAt    = 0xA07B
+		inventoryAt = anchorAt + 505
+		unarmedID   = uint32(0x0001ADB0)
+		weaponID    = uint32(0x000F4240)
+	)
+
+	data := make([]byte, pcFixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[pcEntryCountOffset:], pcEntryCount)
+	data[equippedSpellsUserData10Offset+equippedSpellsFlagsOffset] = 1
+	binary.LittleEndian.PutUint32(data[equippedSpellsSlotDataBase:], 83)
+
+	for index := 0; index < 7; index++ {
+		handle := uint32(0x80000100 + index)
+		gameID := weaponID
+		if index == 0 {
+			gameID = unarmedID
+		}
+		position := equippedSpellsSlotDataBase + 0x20 + int64(index*21)
+		binary.LittleEndian.PutUint32(data[position:], handle)
+		binary.LittleEndian.PutUint32(data[position+4:], gameID)
+		rowAt := equippedSpellsSlotDataBase + inventoryAt + int64(index*12)
+		binary.LittleEndian.PutUint32(data[rowAt:], handle)
+		binary.LittleEndian.PutUint32(data[rowAt+4:], 1)
+		binary.LittleEndian.PutUint32(data[rowAt+8:], uint32(index+1))
+	}
+	anchor := equippedSpellsSlotDataBase + anchorAt
+	copy(data[anchor:], equippedSpellsFixtureAnchor)
+	armamentsAt := anchor + 0x931D + 4
+	for slot := 0; slot < 6; slot++ {
+		binary.LittleEndian.PutUint32(data[anchor+0xD1+int64(slot*4):], 0x180)
+		binary.LittleEndian.PutUint32(data[anchor+0x145+int64(slot*4):], unarmedID)
+		binary.LittleEndian.PutUint32(data[anchor+0x19D+int64(slot*4):], 0x80000100)
+		binary.LittleEndian.PutUint32(data[armamentsAt+int64(slot*4):], unarmedID)
+	}
+
+	path := filepath.Join(t.TempDir(), "set-equipped-armaments-route.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetEquippedArmamentsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+	session, err := savesession.LoadSave(
+		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	inventory, err := saveEngine.GetInventory(session.SaveSessionID, 0, "common", 1, 50)
+	if err != nil || len(inventory.Records) != 7 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(inventory.Records))
+	}
+	assignments := make([]*string, 6)
+	for slot := range assignments {
+		token := inventory.Records[slot+1].OwnedItemID
+		assignments[slot] = &token
+	}
+	body, err := json.Marshal(setEquippedArmamentsRequest{
+		SlotAssignments:  assignments,
+		ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("json.Marshal: %v", err)
+	}
+	target := fmt.Sprintf(
+		"/api/v1/save-sessions/%s/characters/0/equipped-armaments", session.SaveSessionID)
+	request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(response, request)
+	if response.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200; body = %s", response.Code, response.Body.String())
+	}
+
+	var got equipment.SetEquippedArmamentsResult
+	if err := json.Unmarshal(response.Body.Bytes(), &got); err != nil {
+		t.Fatalf("json.Unmarshal: %v", err)
+	}
+	if got.SaveRevision != "1" || got.SlotAssignments[0] == nil ||
+		got.SlotAssignments[0].Key != "000F4240" {
+		t.Fatalf("result = %+v", got)
+	}
+	equipped, err := saveEngine.GetEquipment(session.SaveSessionID, 0)
+	if err != nil || equipped.Slots[0] != 0x000F4240 || equipped.Slots[5] != 0x000F4240 {
+		t.Fatalf("GetEquipment: %v, slots=%#v", err, equipped.Slots)
 	}
 }
 
