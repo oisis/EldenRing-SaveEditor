@@ -155,7 +155,7 @@ func (engine *Engine) GetCharacterAppearance(saveSessionID string, characterID i
 		return CharacterAppearance{}, fmt.Errorf("cannot read voice type of character %d: %w", characterID, err)
 	}
 
-	block, err := readFaceData(loaded.snapshot, loaded.session.platform, characterID)
+	_, block, err := readFaceData(loaded.snapshot, loaded.session.platform, characterID)
 	if err != nil {
 		return CharacterAppearance{}, err
 	}
@@ -193,36 +193,36 @@ func findAppearancePlayerAnchor(source *codec, platform Platform, characterID in
 	return anchor, nil
 }
 
-// readFaceData returns a copy of the appearance block of one slot: the first
-// confirmed block of that slot's data. Later copies of the same header exist in
-// a healthy slot — they sit behind the sections this getter never touches — and
+// readFaceData returns the absolute offset and a copy of the first confirmed
+// appearance block of one slot. Later copies of the same header exist in a
+// healthy slot — they sit behind the sections this reader never touches — and
 // are ignored; the first block is the appearance the game reads.
 //
 // A missing block, a first block whose header declares anything but the
 // confirmed alignment and inner size, and a first block reaching past the end of
 // the slot are all hard errors. No later block is tried as a fallback.
-func readFaceData(source *codec, platform Platform, characterID int) ([]byte, error) {
+func readFaceData(source *codec, platform Platform, characterID int) (int64, []byte, error) {
 	base := slotDataBase(platform, characterID)
 	start, err := source.indexIn(base, characterSlotDataSize, faceDataHeader)
 	if err != nil {
-		return nil, fmt.Errorf("cannot search the appearance of character %d: %w", characterID, err)
+		return 0, nil, fmt.Errorf("cannot search the appearance of character %d: %w", characterID, err)
 	}
 	if start < 0 {
-		return nil, fmt.Errorf("character %d carries no appearance block", characterID)
+		return 0, nil, fmt.Errorf("character %d carries no appearance block", characterID)
 	}
 	if start+faceDataSize > base+characterSlotDataSize {
-		return nil, fmt.Errorf("appearance block of character %d does not fit into its slot", characterID)
+		return 0, nil, fmt.Errorf("appearance block of character %d does not fit into its slot", characterID)
 	}
 
 	block, err := source.readAt(start, faceDataSize)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read appearance of character %d: %w", characterID, err)
+		return 0, nil, fmt.Errorf("cannot read appearance of character %d: %w", characterID, err)
 	}
 	alignment := binary.LittleEndian.Uint32(block[faceDataAlignmentOffset:])
 	innerSize := binary.LittleEndian.Uint32(block[faceDataInnerSizeOffset:])
 	if alignment != faceDataAlignment || innerSize != faceDataInnerSize {
-		return nil, fmt.Errorf("appearance block of character %d declares alignment %d and inner size 0x%X, want %d and 0x%X",
+		return 0, nil, fmt.Errorf("appearance block of character %d declares alignment %d and inner size 0x%X, want %d and 0x%X",
 			characterID, alignment, innerSize, faceDataAlignment, faceDataInnerSize)
 	}
-	return block, nil
+	return start, block, nil
 }

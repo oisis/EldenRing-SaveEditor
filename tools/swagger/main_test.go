@@ -883,6 +883,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance", `{"appearance":{},"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quick-items", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quick-items", `{"slotAssignments":[null,null,null,null,null,null,null,null,null,null],"expectedRevision":"0"}`},
@@ -1018,6 +1019,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths[ownedItem]["delete"]; !hasDelete {
 		t.Fatalf("openapi.json describes no DELETE for %s", ownedItem)
 	}
+	characterAppearance := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance"
+	if _, hasPut := document.Paths[characterAppearance]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", characterAppearance)
+	}
 	physickMixture := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture"
 	if _, hasPut := document.Paths[physickMixture]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", physickMixture)
@@ -1088,6 +1093,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetCharacterRunesResult",
 		"CharacterStats",
 		"CharacterAppearance",
+		"CharacterAppearanceValues",
+		"SetCharacterAppearanceRequest",
+		"SetCharacterAppearanceResult",
 		"CharacterEquipment",
 		"QuickItemSlot",
 		"CharacterQuickItems",
@@ -1173,8 +1181,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 33 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 33", found)
+	if found != 34 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 34", found)
 	}
 }
 
@@ -1553,6 +1561,82 @@ func TestSetCharacterNameRoute(t *testing.T) {
 			t.Errorf("session after rejected bodies = %+v, want clean", info)
 		}
 	})
+}
+
+func TestSetCharacterAppearanceRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	fixture := writeActiveSpellsFixture(t)
+	fixtureData, err := os.ReadFile(fixture)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	face := fixtureData[equippedSpellsSlotDataBase+0x3000:]
+	copy(face, []byte{0xFF, 0xFF, 0xFF, 0xFF, 'F', 'A', 'C', 'E'})
+	binary.LittleEndian.PutUint32(face[0x08:], 4)
+	binary.LittleEndian.PutUint32(face[0x0C:], 0x120)
+	if err := os.WriteFile(fixture, fixtureData, 0o600); err != nil {
+		t.Fatalf("rewrite fixture: %v", err)
+	}
+	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	current, err := character.GetCharacterAppearance(
+		saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("GetCharacterAppearance: %v", err)
+	}
+	gender, voiceType := uint8(0), uint8(5)
+	requestBody := setCharacterAppearanceRequest{
+		Appearance: &setCharacterAppearanceValuesRequest{
+			Gender:    &gender,
+			VoiceType: &voiceType,
+			ModelIDs:  append([]uint32(nil), current.ModelIDs[:]...),
+			FaceShape: append([]uint8(nil), current.FaceShape[:]...),
+			Body:      append([]uint8(nil), current.Body[:]...),
+			Skin:      append([]uint8(nil), current.Skin[:]...),
+		},
+		ExpectedRevision: "0",
+	}
+	body, err := json.Marshal(requestBody)
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/appearance"
+	recorder := doSave(t, saveEngine, http.MethodPut, target, string(body))
+	assertOK(t, recorder, target)
+
+	var got character.SetCharacterAppearanceResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" ||
+		got.CharacterID != 0 || got.Appearance.Gender != gender ||
+		got.Appearance.VoiceType != voiceType {
+		t.Errorf("result = %+v, want committed appearance receipt", got)
+	}
+
+	requestBody.Appearance.ModelIDs = requestBody.Appearance.ModelIDs[:7]
+	requestBody.ExpectedRevision = "1"
+	body, err = json.Marshal(requestBody)
+	if err != nil {
+		t.Fatalf("marshal invalid request: %v", err)
+	}
+	rejected := doSave(t, saveEngine, http.MethodPut, target, string(body))
+	if rejected.Code != http.StatusBadRequest ||
+		!strings.Contains(rejected.Body.String(), "appearance.modelIDs has 7 values, want exactly 8") {
+		t.Fatalf("invalid array: status = %d, body = %q", rejected.Code, rejected.Body.String())
+	}
+	readBack, err := character.GetCharacterAppearance(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("GetCharacterAppearance after rejection: %v", err)
+	}
+	if readBack.ModelIDs != got.Appearance.ModelIDs ||
+		readBack.FaceShape != got.Appearance.FaceShape ||
+		readBack.Body != got.Appearance.Body || readBack.Skin != got.Appearance.Skin {
+		t.Error("rejected transport request changed the appearance")
+	}
 }
 
 func TestSetCharacterNameRouteIsAbsentWithoutAnEngine(t *testing.T) {

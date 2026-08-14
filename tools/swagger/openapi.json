@@ -616,6 +616,52 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "setCharacterAppearance",
+        "tags": ["Character"],
+        "summary": "SetCharacterAppearance",
+        "description": "Atomically replaces the complete raw appearance of one active character under expectedRevision control. Gender must be 0 or 1, voiceType must be 0 through 5, and all four raw arrays must have their exact physical lengths. Unknown FACE bytes remain unchanged and the two confirmed dependent sex-flag bytes are reset to zero. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterAppearanceRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed complete appearance assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterAppearanceResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, invalid appearance value or array length, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment": {
@@ -2470,6 +2516,105 @@
           "body",
           "skin"
         ]
+      },
+      "CharacterAppearanceValues": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete writable raw appearance model. Model identifiers retain their full uint32 values; the other arrays contain raw save bytes.",
+        "properties": {
+          "gender": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [0, 1]
+          },
+          "voiceType": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 5
+          },
+          "modelIDs": {
+            "type": "array",
+            "minItems": 8,
+            "maxItems": 8,
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 0,
+              "maximum": 4294967295
+            }
+          },
+          "faceShape": {
+            "type": "array",
+            "minItems": 64,
+            "maxItems": 64,
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 255
+            }
+          },
+          "body": {
+            "type": "array",
+            "minItems": 7,
+            "maxItems": 7,
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 255
+            }
+          },
+          "skin": {
+            "type": "array",
+            "minItems": 91,
+            "maxItems": 91,
+            "items": {
+              "type": "integer",
+              "format": "int32",
+              "minimum": 0,
+              "maximum": 255
+            }
+          }
+        },
+        "required": ["gender", "voiceType", "modelIDs", "faceShape", "body", "skin"]
+      },
+      "SetCharacterAppearanceRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete raw appearance assignment and optimistic-concurrency revision.",
+        "properties": {
+          "appearance": {
+            "$ref": "#/components/schemas/CharacterAppearanceValues"
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["appearance", "expectedRevision"]
+      },
+      "SetCharacterAppearanceResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete appearance assignment.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "appearance": {
+            "$ref": "#/components/schemas/CharacterAppearanceValues"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "appearance"]
       },
       "CharacterEquipment": {
         "type": "object",

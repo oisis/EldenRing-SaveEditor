@@ -214,5 +214,6 @@ inner size.
   No Wails binding, no CLI command and no frontend reaches the endpoint.
 - It reports the raw stored appearance only. No preset name is matched, no
   identifier is resolved to an in-game part, and no colour is converted.
-- It is a getter. Changing the appearance is not possible: the session is
-  read-only at this stage.
+- Raw appearance changes are available through
+  [`SetCharacterAppearance`](set_character_appearance.md). Preset resolution
+  and application remain separate concerns.

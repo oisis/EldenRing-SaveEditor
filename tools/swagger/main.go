@@ -366,6 +366,57 @@ type setCharacterRunesRequest struct {
 	ExpectedRevision string  `json:"expectedRevision"`
 }
 
+// setCharacterAppearanceValuesRequest keeps required zero-valued scalar fields
+// distinguishable from omitted ones and validates the four physical array
+// lengths before converting them to SaveEngine's fixed-size model.
+type setCharacterAppearanceValuesRequest struct {
+	Gender    *uint8   `json:"gender"`
+	VoiceType *uint8   `json:"voiceType"`
+	ModelIDs  []uint32 `json:"modelIDs"`
+	FaceShape []uint8  `json:"faceShape"`
+	Body      []uint8  `json:"body"`
+	Skin      []uint8  `json:"skin"`
+}
+
+type setCharacterAppearanceRequest struct {
+	Appearance       *setCharacterAppearanceValuesRequest `json:"appearance"`
+	ExpectedRevision string                               `json:"expectedRevision"`
+}
+
+func (request setCharacterAppearanceValuesRequest) values() (character.CharacterAppearanceValues, error) {
+	if request.Gender == nil {
+		return character.CharacterAppearanceValues{}, errors.New("appearance.gender is required")
+	}
+	if request.VoiceType == nil {
+		return character.CharacterAppearanceValues{}, errors.New("appearance.voiceType is required")
+	}
+	for _, field := range []struct {
+		name string
+		got  int
+		want int
+	}{
+		{"modelIDs", len(request.ModelIDs), 8},
+		{"faceShape", len(request.FaceShape), 64},
+		{"body", len(request.Body), 7},
+		{"skin", len(request.Skin), 91},
+	} {
+		if field.got != field.want {
+			return character.CharacterAppearanceValues{}, fmt.Errorf(
+				"appearance.%s has %d values, want exactly %d", field.name, field.got, field.want)
+		}
+	}
+
+	values := character.CharacterAppearanceValues{
+		Gender:    *request.Gender,
+		VoiceType: *request.VoiceType,
+	}
+	copy(values.ModelIDs[:], request.ModelIDs)
+	copy(values.FaceShape[:], request.FaceShape)
+	copy(values.Body[:], request.Body)
+	copy(values.Skin[:], request.Skin)
+	return values, nil
+}
+
 // setPhysickMixtureRequest is the strict JSON body of the complete two-position
 // Physick assignment. A null entry clears that exact position; the endpoint
 // validates the required length and every catalog reference.
@@ -662,6 +713,49 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := character.GetCharacterAppearance(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterAppearanceRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Appearance == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("appearance is required"))
+				return
+			}
+			values, err := body.Appearance.values()
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.SetCharacterAppearance(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				values,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

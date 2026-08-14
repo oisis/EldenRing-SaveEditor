@@ -132,6 +132,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/get_character_appearance.md",
                 "title": "GetCharacterAppearance"
+              },
+              "/set-character-appearance": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/set_character_appearance.md",
+                "title": "SetCharacterAppearance"
               }
             }
           },
