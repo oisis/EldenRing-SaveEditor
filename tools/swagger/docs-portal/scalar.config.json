@@ -148,6 +148,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/appearance/get_appearance_presets.md",
                 "title": "GetAppearancePresets"
+              },
+              "/apply-appearance-preset": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/appearance/apply_appearance_preset.md",
+                "title": "ApplyAppearancePreset"
               }
             }
           },

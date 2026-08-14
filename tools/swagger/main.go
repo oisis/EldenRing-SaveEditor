@@ -383,6 +383,13 @@ type setCharacterAppearanceRequest struct {
 	ExpectedRevision string                               `json:"expectedRevision"`
 }
 
+// applyAppearancePresetRequest is the strict JSON body of the appearance
+// preset route. The endpoint resolves presetID exactly.
+type applyAppearancePresetRequest struct {
+	PresetID         string `json:"presetID"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 func (request setCharacterAppearanceValuesRequest) values() (character.CharacterAppearanceValues, error) {
 	if request.Gender == nil {
 		return character.CharacterAppearanceValues{}, errors.New("appearance.gender is required")
@@ -754,6 +761,41 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				values,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body applyAppearancePresetRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := appearance.ApplyAppearancePreset(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.PresetID,
 				body.ExpectedRevision,
 			)
 			if err != nil {

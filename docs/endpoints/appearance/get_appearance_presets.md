@@ -285,5 +285,5 @@ repository.
 - The result carries list metadata only. The full appearance configuration is
   never returned by this getter.
 - There is no paging, no sorting, no fuzzy search, and no favourites.
-- The endpoint only reports presets. Applying one to a character
-  (`ApplyAppearancePreset`) is a separate endpoint and is not implemented here.
+- The endpoint only reports presets. Applying one to a character is handled by
+  the separate [`ApplyAppearancePreset`](apply_appearance_preset.md) mutation.

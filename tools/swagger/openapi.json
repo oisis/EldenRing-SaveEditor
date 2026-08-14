@@ -664,6 +664,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset": {
+      "put": {
+        "operationId": "applyAppearancePreset",
+        "tags": ["Appearance"],
+        "summary": "ApplyAppearancePreset",
+        "description": "Resolves one appearance preset exactly in the loaded GameCatalog and atomically applies its complete confirmed appearance model through SetCharacterAppearance under expectedRevision control. Unknown presets and unconfirmed model mappings fail without mutation. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyAppearancePresetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The selected preset and committed complete appearance assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyAppearancePresetResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, empty or unknown presetID, unconfirmed model mapping, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment": {
       "get": {
         "operationId": "getEquipment",
@@ -2615,6 +2663,46 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "appearance"]
+      },
+      "ApplyAppearancePresetRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "presetID": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Exact, case-sensitive appearance preset ID from GameCatalog."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["presetID", "expectedRevision"]
+      },
+      "ApplyAppearancePresetResult": {
+        "type": "object",
+        "description": "Receipt for one appearance preset applied through the complete appearance mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "presetID": {
+            "type": "string"
+          },
+          "appearance": {
+            "$ref": "#/components/schemas/CharacterAppearanceValues"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "presetID", "appearance"]
       },
       "CharacterEquipment": {
         "type": "object",
