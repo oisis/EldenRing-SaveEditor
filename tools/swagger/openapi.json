@@ -1514,6 +1514,57 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/move-to-inventory": {
+      "post": {
+        "operationId": "moveOwnedItemToInventory",
+        "tags": ["Inventory"],
+        "summary": "MoveOwnedItemToInventory",
+        "description": "Moves one complete physical record from Storage common to the first free Inventory common row and places it at the requested logical acquisition-order position without shifting existing physical Inventory rows. GameCatalog must provide a known non-key category and positive maxInventory. SaveEngine rejects a Storage key record, a full or over-limit destination, ambiguous or inconsistent acquisition ordering, an invalid position, stale identity or stale revision before changing any byte. The move preserves the handle and raw quantity, allocates no GaItem record, performs no merge, rehandle or repack, leaves NextEquipIndex and every Equipment, Quick Item and Pouch reference untouched, and advances Inventory NextAcquisitionSortId. A successful mutation advances saveRevision by exactly one and retires every ownedItemID from the previous revision. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/OwnedItemID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveOwnedItemToInventoryRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Storage-to-Inventory move and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MoveOwnedItemToInventoryResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, an invalid characterID, targetPosition or expectedRevision, an unknown or stale session or ownedItemID, a non-Storage or key-section record, an unresolved or ambiguously routed item, a destination limit or capacity failure, inconsistent acquisition ordering, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/move-to-storage": {
       "post": {
         "operationId": "moveOwnedItemToStorage",
@@ -4411,6 +4462,44 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "quantity"]
+      },
+      "MoveOwnedItemToInventoryRequest": {
+        "type": "object",
+        "description": "Body of MoveOwnedItemToInventory. Both values reach the endpoint unchanged; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "targetPosition": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 2688,
+            "description": "Zero-based insertion position in the logical acquisition-index order of common Inventory. The current record count is the append position."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["targetPosition", "expectedRevision"]
+      },
+      "MoveOwnedItemToInventoryResult": {
+        "type": "object",
+        "description": "Receipt for one committed Storage-to-Inventory move. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
+        "properties": {
+          "saveSessionID": {"type": "string", "minLength": 1},
+          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
+          "ownedItemID": {"type": "string", "minLength": 1},
+          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
+          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295},
+          "quantity": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 2147483647},
+          "containerSection": {"type": "string", "enum": ["common"]},
+          "targetPosition": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 2688},
+          "physicalIndex": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 2687},
+          "acquisitionIndex": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295}
+        },
+        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "gameID", "quantity", "containerSection", "targetPosition", "physicalIndex", "acquisitionIndex"]
       },
       "MoveOwnedItemToStorageRequest": {
         "type": "object",

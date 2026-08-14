@@ -256,6 +256,11 @@
                 "filepath": "../../../docs/endpoints/inventory/set_owned_item_quantity.md",
                 "title": "SetOwnedItemQuantity"
               },
+              "/move-owned-item-to-inventory": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/move_owned_item_to_inventory.md",
+                "title": "MoveOwnedItemToInventory"
+              },
               "/move-owned-item-to-storage": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/move_owned_item_to_storage.md",

@@ -116,7 +116,8 @@ endpoint that touches save state; no endpoint outside this list is in scope.
 | `GetOwnedItem` | satisfied since Task 3: declares `saveSessionID`, `characterID`, `ownedItemID`, in that exact order (`backend/endpoints/inventory/get_owned_item.go:33`) |
 | `SetOwnedItemQuantity` | satisfied since Task 5: declares `saveSessionID`, `characterID`, `ownedItemID`, `quantity`, `expectedRevision`, in that exact order (`backend/endpoints/inventory/set_owned_item_quantity.go:33`) |
 | `RemoveOwnedItem` | satisfied: declares `saveSessionID`, `characterID`, `ownedItemID`, `expectedRevision`, in that exact order (`backend/endpoints/inventory/remove_owned_item.go:30`) |
-| `MoveOwnedItemToInventory`, `MoveOwnedItemToStorage`, `SetWeaponUpgradeLevel`, `SetWeaponInfusion`, `SetSpiritAshUpgradeLevel` | declare `ownedItemID` without `saveSessionID` — must gain it |
+| `MoveOwnedItemToInventory` | satisfied: declares `saveSessionID`, `characterID`, `ownedItemID`, `targetPosition`, `expectedRevision`, in that exact order (`backend/endpoints/inventory/move_owned_item_to_inventory.go:37`) |
+| `MoveOwnedItemToStorage`, `SetWeaponUpgradeLevel`, `SetWeaponInfusion`, `SetSpiritAshUpgradeLevel` | declare `ownedItemID` without `saveSessionID` — must gain it |
 | `SetWeaponAshOfWar` | declares `weaponOwnedItemID` without `saveSessionID` — must gain it |
 | `SetInventoryOrder`, `SetStorageOrder` | declare `orderedOwnedItemIDs` without `saveSessionID` — must gain it |
 | `SetEquippedTalismans` | declares `characterID`, `orderedOwnedItemIDs`, `expectedRevision` without `saveSessionID` — must gain it |

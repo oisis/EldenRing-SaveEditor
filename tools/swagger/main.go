@@ -487,6 +487,12 @@ type setOwnedItemQuantityRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// moveOwnedItemToInventoryRequest is the strict JSON body of the move route.
+type moveOwnedItemToInventoryRequest struct {
+	TargetPosition   *int   `json:"targetPosition"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // moveOwnedItemToStorageRequest is the strict JSON body of the move route.
 // The endpoint owns the position, revision and destination-limit rules.
 type moveOwnedItemToStorageRequest struct {
@@ -1431,6 +1437,42 @@ func registerSaveSessionRoutes(
 				characterID,
 				request.PathValue("ownedItemID"),
 				body.Quantity,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/move-to-inventory",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body moveOwnedItemToInventoryRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.TargetPosition == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("targetPosition is required"))
+				return
+			}
+			result, err := inventory.MoveOwnedItemToInventory(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				*body.TargetPosition,
 				body.ExpectedRevision,
 			)
 			if err != nil {
