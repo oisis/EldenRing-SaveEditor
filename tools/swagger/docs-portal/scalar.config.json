@@ -170,6 +170,11 @@
                 "filepath": "../../../docs/endpoints/equipment/get_equipment.md",
                 "title": "GetEquipment"
               },
+              "/set-equipped-armor": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/equipment/set_equipped_armor.md",
+                "title": "SetEquippedArmor"
+              },
               "/get-quick-items": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/equipment/get_quick_items.md",

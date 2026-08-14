@@ -453,6 +453,13 @@ type setQuickItemsRequest struct {
 	ExpectedRevision string    `json:"expectedRevision"`
 }
 
+// setEquippedArmorRequest is the strict JSON body of the complete head,
+// chest, arms and legs assignment.
+type setEquippedArmorRequest struct {
+	SlotAssignments  []*string `json:"slotAssignments"`
+	ExpectedRevision string    `json:"expectedRevision"`
+}
+
 // setEquippedSpellsRequest is the strict JSON body of the equipped spells route.
 type setEquippedSpellsRequest struct {
 	OrderedResources []*schema.ResourceRef `json:"orderedResources"`
@@ -861,6 +868,41 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := equipment.GetEquipment(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setEquippedArmorRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := equipment.SetEquippedArmor(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.SlotAssignments,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

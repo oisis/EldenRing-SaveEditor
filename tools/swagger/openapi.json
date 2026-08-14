@@ -750,6 +750,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor": {
+      "put": {
+        "operationId": "setEquippedArmor",
+        "tags": ["Equipment"],
+        "summary": "SetEquippedArmor",
+        "description": "Atomically replaces the head, chest, arms and legs armor slots of one active character. slotAssignments contains exactly four revision-scoped ownedItemID strings or null values in that order. Every token must address a positive-quantity armor record in Inventory common with confirmed equipment capability for the exact slot. Null selects the existing native bare-body record; the operation fails closed if that technical record is absent because it never allocates or repacks GaItem. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetEquippedArmorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed complete armor assignment receipt",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetEquippedArmorResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, an invalid character or revision, an invalid or stale ownedItemID, a Storage or key record, zero quantity, a wrong armor family or slot, a missing native bare-body record, an unresolved handle, or inconsistent existing representations",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quick-items": {
       "get": {
         "operationId": "getQuickItems",
@@ -2825,6 +2873,60 @@
           "active",
           "slots"
         ]
+      },
+      "SetEquippedArmorRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete four-position armor assignment and optimistic-concurrency revision.",
+        "properties": {
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "Exactly four positions in head, chest, arms and legs order. Each position is null to select the native bare-body record, or an ownedItemID string for a positive Inventory common armor record.",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "nullable": true
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["slotAssignments", "expectedRevision"]
+      },
+      "SetEquippedArmorResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete armor assignment, expressed with public catalog identities.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "slotAssignments": {
+            "type": "array",
+            "minItems": 4,
+            "maxItems": 4,
+            "items": {
+              "allOf": [
+                {
+                  "$ref": "#/components/schemas/ResourceRef"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "slotAssignments"]
       },
       "QuickItemSlot": {
         "type": "object",
