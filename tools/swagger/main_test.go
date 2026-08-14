@@ -907,6 +907,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/move-to-inventory", `{"targetPosition":0,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/move-to-storage", `{"targetPosition":0,"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/upgrade-level", `{"upgradeLevel":1,"expectedRevision":"0"}`},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/ash-of-war", `{"ashOfWarKind":null,"ashOfWarKey":null,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/inventory/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/storage/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
@@ -1048,6 +1049,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPatch := document.Paths[weaponUpgrade]["patch"]; !hasPatch {
 		t.Fatalf("openapi.json describes no PATCH for %s", weaponUpgrade)
 	}
+	weaponAshOfWar := ownedItem + "/ash-of-war"
+	if _, hasPatch := document.Paths[weaponAshOfWar]["patch"]; !hasPatch {
+		t.Fatalf("openapi.json describes no PATCH for %s", weaponAshOfWar)
+	}
 	spiritAshUpgrade := ownedItem + "/spirit-ash-upgrade-level"
 	if _, hasPatch := document.Paths[spiritAshUpgrade]["patch"]; !hasPatch {
 		t.Fatalf("openapi.json describes no PATCH for %s", spiritAshUpgrade)
@@ -1178,6 +1183,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetSpiritAshUpgradeLevelResult",
 		"SetWeaponInfusionRequest",
 		"SetWeaponInfusionResult",
+		"SetWeaponAshOfWarRequest",
+		"SetWeaponAshOfWarResult",
 		"GestureEntry",
 		"GetGesturesResult",
 		"SetGestureUnlockedRequest",
@@ -1243,8 +1250,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 47 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 47", found)
+	if found != 48 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 48", found)
 	}
 }
 
@@ -3534,6 +3541,59 @@ func TestSetWeaponInfusionRoute(t *testing.T) {
 		result.OwnedItemID != ownedItemID || result.PreviousGameID != 1000000 ||
 		result.GameID != 1000100 || result.Affinity != schema.AffinityHeavy ||
 		result.UpgradeLevel != 0 {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func writeSetWeaponAshOfWarRouteFixture(t *testing.T) string {
+	t.Helper()
+	path := writeSetEquippedArmamentsRouteFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	aoWAt := equippedSpellsSlotDataBase + 0x20 + 7*21
+	binary.LittleEndian.PutUint32(data[aoWAt:], 0xC0000200)
+	binary.LittleEndian.PutUint32(data[aoWAt+4:], 0x8000EA60)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetWeaponAshOfWarRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(
+		saveEngine, writeSetWeaponAshOfWarRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	listed, err := saveEngine.GetInventory(
+		session.SaveSessionID, 0, saveengine.InventorySectionCommon, 1, 50)
+	if err != nil || len(listed.Records) < 2 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(listed.Records))
+	}
+	ownedItemID := listed.Records[1].OwnedItemID
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID) + "/ash-of-war"
+
+	rejected := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"ashOfWarKind":"item","expectedRevision":"0"}`)
+	if rejected.Code != http.StatusBadRequest ||
+		!strings.Contains(rejected.Body.String(), "ashOfWarKey is required") {
+		t.Fatalf("missing key: status = %d, body = %q",
+			rejected.Code, rejected.Body.String())
+	}
+	recorder := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"ashOfWarKind":"item","ashOfWarKey":"8000EA60","expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.SetWeaponAshOfWarResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetWeaponAshOfWar body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveRevision != "1" || result.WeaponOwnedItemID != ownedItemID ||
+		result.WeaponGameID != 0x000F4240 || result.PreviousAshOfWarGameID != 0 ||
+		result.AshOfWarGameID != 0x8000EA60 {
 		t.Fatalf("result = %+v", result)
 	}
 }

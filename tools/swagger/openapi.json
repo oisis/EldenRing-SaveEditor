@@ -1973,6 +1973,57 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/ash-of-war": {
+      "patch": {
+        "operationId": "setWeaponAshOfWar",
+        "tags": ["Inventory"],
+        "summary": "SetWeaponAshOfWar",
+        "description": "Mounts an existing free Ash of War copy on one owned weapon, changes its current custom Ash, or removes it. For mounting, GameCatalog validates the weapon capability and the compatible_with_aow relation. SaveEngine requires unique weapon and Ash GaItem records, rejects shared or malformed references, and changes only the four-byte AoW handle field of the weapon. Both resource selectors set to null remove the custom Ash and write the native zero sentinel. The endpoint never allocates, removes or repacks a GaItem. A successful mutation advances saveRevision by exactly one and retires every ownedItemID from the previous revision. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/OwnedItemID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetWeaponAshOfWarRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed weapon Ash of War mutation and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetWeaponAshOfWarResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, missing or mismatched Ash selectors, an invalid characterID or expectedRevision, an unknown or stale session or ownedItemID, an unsupported weapon, an unknown or incompatible Ash of War, no free physical copy, a shared or malformed save-side reference, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures": {
       "get": {
         "operationId": "getGestures",
@@ -5116,6 +5167,47 @@
           "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 25}
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "affinity", "upgradeLevel"]
+      },
+      "SetWeaponAshOfWarRequest": {
+        "type": "object",
+        "description": "Body of SetWeaponAshOfWar. Both selector fields are required. Two strings mount the exact resource; two nulls remove the custom Ash. Unknown fields and a string/null mismatch are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "ashOfWarKind": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "Exact GameCatalog resource kind, or null for removal."
+          },
+          "ashOfWarKey": {
+            "type": "string",
+            "nullable": true,
+            "minLength": 1,
+            "description": "Exact GameCatalog key inside ashOfWarKind, or null for removal."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["ashOfWarKind", "ashOfWarKey", "expectedRevision"]
+      },
+      "SetWeaponAshOfWarResult": {
+        "type": "object",
+        "description": "Receipt for one committed weapon Ash of War mutation. Zero in either Ash game-ID field means no custom Ash. The echoed weaponOwnedItemID is already stale under the returned revision.",
+        "properties": {
+          "saveSessionID": {"type": "string", "minLength": 1},
+          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
+          "weaponOwnedItemID": {"type": "string", "minLength": 1},
+          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
+          "container": {"type": "string", "enum": ["inventory", "storage"]},
+          "weaponGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
+          "previousAshOfWarGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 2415919103},
+          "ashOfWarGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 2415919103}
+        },
+        "required": ["saveSessionID", "saveRevision", "weaponOwnedItemID", "characterID", "container", "weaponGameID", "previousAshOfWarGameID", "ashOfWarGameID"]
       },
       "Error": {
         "type": "object",

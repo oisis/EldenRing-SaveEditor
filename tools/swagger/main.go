@@ -530,6 +530,28 @@ type setWeaponInfusionRequest struct {
 	ExpectedRevision string          `json:"expectedRevision"`
 }
 
+// setWeaponAshOfWarRequest keeps the two resource selectors as raw JSON so the
+// transport can distinguish an explicit null (remove) from an omitted field.
+type setWeaponAshOfWarRequest struct {
+	AshOfWarKind     json.RawMessage `json:"ashOfWarKind"`
+	AshOfWarKey      json.RawMessage `json:"ashOfWarKey"`
+	ExpectedRevision string          `json:"expectedRevision"`
+}
+
+func requiredNullableString(raw json.RawMessage, name string) (*string, error) {
+	if raw == nil {
+		return nil, fmt.Errorf("%s is required", name)
+	}
+	if string(raw) == "null" {
+		return nil, nil
+	}
+	var value string
+	if err := json.Unmarshal(raw, &value); err != nil {
+		return nil, fmt.Errorf("%s must be a string or null: %w", name, err)
+	}
+	return &value, nil
+}
+
 // addItemToInventoryRequest is the strict JSON body of the add route. The
 // transport owns no catalog, family, routing, quantity or revision rule; every
 // value reaches the endpoint unchanged, and an absent variantID stays absent
@@ -1797,6 +1819,49 @@ func registerSaveSessionRoutes(
 				characterID,
 				request.PathValue("ownedItemID"),
 				body.Affinity,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/ash-of-war",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setWeaponAshOfWarRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			ashOfWarKind, err := requiredNullableString(body.AshOfWarKind, "ashOfWarKind")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			ashOfWarKey, err := requiredNullableString(body.AshOfWarKey, "ashOfWarKey")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.SetWeaponAshOfWar(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				ashOfWarKind,
+				ashOfWarKey,
 				body.ExpectedRevision,
 			)
 			if err != nil {
