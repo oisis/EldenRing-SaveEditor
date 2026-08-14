@@ -18,6 +18,11 @@ const AppearancePresetsPath = "presets/appearance.json"
 // preview image of every appearance preset.
 const AppearanceAssetDirectory = "assets/appearance"
 
+const (
+	defaultTypeAAppearancePresetID = "geralt-of-rivia-the-witcher"
+	defaultTypeBAppearancePresetID = "ciri-the-princess-of-cintra-from-witcher"
+)
+
 // Lengths of the three appearance blobs. They are the stored contract of the
 // legacy FaceData layout and are never derived from the file.
 const (
@@ -339,17 +344,61 @@ func (catalog *Catalog) AppearancePresets() ([]AppearancePreset, error) {
 	return cloneAppearancePresets(catalog.appearancePresets), nil
 }
 
+// AppearancePreset returns one preset matched exactly and case-sensitively by
+// its stable ID. The result is independent of the catalog's stored copy.
+func (catalog *Catalog) AppearancePreset(presetID string) (AppearancePreset, error) {
+	if presetID == "" {
+		return AppearancePreset{}, fmt.Errorf("presetID is required")
+	}
+	if len(catalog.appearancePresets) == 0 {
+		return AppearancePreset{}, fmt.Errorf("appearance presets are not loaded")
+	}
+	for _, preset := range catalog.appearancePresets {
+		if preset.ID == presetID {
+			return cloneAppearancePreset(preset), nil
+		}
+	}
+	return AppearancePreset{}, fmt.Errorf("unknown appearance preset %q", presetID)
+}
+
+// DefaultAppearancePreset returns the complete preset used when switching a
+// character to the requested body type: 0 is Type B and 1 is Type A.
+func (catalog *Catalog) DefaultAppearancePreset(bodyType uint8) (AppearancePreset, error) {
+	var presetID string
+	switch bodyType {
+	case 0:
+		presetID = defaultTypeBAppearancePresetID
+	case 1:
+		presetID = defaultTypeAAppearancePresetID
+	default:
+		return AppearancePreset{}, fmt.Errorf(
+			"gender %d is outside the range 0..1", bodyType)
+	}
+	preset, err := catalog.AppearancePreset(presetID)
+	if err != nil {
+		return AppearancePreset{}, err
+	}
+	if preset.BodyType != bodyType {
+		return AppearancePreset{}, fmt.Errorf(
+			"default appearance preset %q has bodyType %d, want %d",
+			preset.ID, preset.BodyType, bodyType)
+	}
+	return preset, nil
+}
+
 // cloneAppearancePresets copies the only reference type a preset carries, so
 // neither the stored slice nor its tags are shared with a caller.
 func cloneAppearancePresets(presets []AppearancePreset) []AppearancePreset {
 	cloned := make([]AppearancePreset, len(presets))
 	for index, preset := range presets {
-		// A non-nil empty slice keeps "no tags" distinct from a missing field in
-		// the public JSON of every consumer.
-		tags := make([]string, len(preset.Tags))
-		copy(tags, preset.Tags)
-		preset.Tags = tags
-		cloned[index] = preset
+		cloned[index] = cloneAppearancePreset(preset)
 	}
 	return cloned
+}
+
+func cloneAppearancePreset(preset AppearancePreset) AppearancePreset {
+	// A non-nil empty slice keeps "no tags" distinct from a missing field in
+	// the public JSON of every consumer.
+	preset.Tags = append([]string{}, preset.Tags...)
+	return preset
 }

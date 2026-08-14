@@ -359,6 +359,13 @@ type setCharacterNameRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setCharacterGenderRequest is the strict JSON body of the body-type route. A
+// pointer distinguishes an omitted gender from the valid Type B value zero.
+type setCharacterGenderRequest struct {
+	Gender           *uint8 `json:"gender"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setCharacterRunesRequest is the strict JSON body of the held-runes route. A
 // pointer distinguishes an omitted runes field from an explicit zero.
 type setCharacterRunesRequest struct {
@@ -646,6 +653,45 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				body.Name,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gender",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterGenderRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Gender == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("gender is required"))
+				return
+			}
+			result, err := character.SetCharacterGender(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				*body.Gender,
 				body.ExpectedRevision,
 			)
 			if err != nil {

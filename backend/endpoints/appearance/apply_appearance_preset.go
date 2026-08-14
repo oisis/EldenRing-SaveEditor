@@ -13,7 +13,6 @@ package appearance
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
@@ -59,27 +58,12 @@ func ApplyAppearancePreset(
 	if gameCatalog == nil {
 		return ApplyAppearancePresetResult{}, errors.New("game catalog is not loaded")
 	}
-	if presetID == "" {
-		return ApplyAppearancePresetResult{}, errors.New("presetID is required")
-	}
-
-	presets, err := gameCatalog.AppearancePresets()
+	selected, err := gameCatalog.AppearancePreset(presetID)
 	if err != nil {
 		return ApplyAppearancePresetResult{}, err
 	}
-	var selected *gamecatalog.AppearancePreset
-	for index := range presets {
-		if presets[index].ID == presetID {
-			selected = &presets[index]
-			break
-		}
-	}
-	if selected == nil {
-		return ApplyAppearancePresetResult{}, fmt.Errorf(
-			"unknown appearance preset %q", presetID)
-	}
 
-	modelIDs, err := gamecatalog.AppearanceModelIDs(*selected)
+	modelIDs, err := gamecatalog.AppearanceModelIDs(selected)
 	if err != nil {
 		return ApplyAppearancePresetResult{}, err
 	}

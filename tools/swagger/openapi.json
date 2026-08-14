@@ -1682,6 +1682,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gender": {
+      "patch": {
+        "operationId": "setCharacterGender",
+        "tags": ["Character"],
+        "summary": "SetCharacterGender",
+        "description": "Switches the character to body type 0 (Type B) or 1 (Type A) by applying the complete confirmed default appearance preset for that type: Ciri for Type B and Geralt for Type A. The operation uses the same atomic mutation as SetCharacterAppearance and therefore also updates voice type, all confirmed FACE fields and the two dependent sex-flag bytes. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterGenderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The selected default preset and committed complete appearance assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterGenderResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, gender outside 0..1, missing default preset, unconfirmed model mapping, invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes": {
       "patch": {
         "operationId": "setCharacterRunes",
@@ -2335,6 +2383,48 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "name"]
+      },
+      "SetCharacterGenderRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Body-type assignment through the confirmed default appearance preset and optimistic-concurrency revision.",
+        "properties": {
+          "gender": {
+            "type": "integer",
+            "format": "int32",
+            "enum": [0, 1],
+            "description": "Target body type: 0 applies the Type B Ciri default; 1 applies the Type A Geralt default."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["gender", "expectedRevision"]
+      },
+      "SetCharacterGenderResult": {
+        "type": "object",
+        "description": "Receipt for one body-type change through its complete default appearance preset.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "presetID": {
+            "type": "string"
+          },
+          "appearance": {
+            "$ref": "#/components/schemas/CharacterAppearanceValues"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "presetID", "appearance"]
       },
       "SetCharacterRunesRequest": {
         "type": "object",

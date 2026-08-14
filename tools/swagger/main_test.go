@@ -881,6 +881,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodDelete, "/api/v1/save-sessions/any-session", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/gender", `{"gender":0,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance", `{"appearance":{},"expectedRevision":"0"}`},
@@ -984,6 +985,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters":                                                  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name":                               "patch",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gender":                             "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes":                              "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                              "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
@@ -1091,6 +1093,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"CharacterProfile",
 		"SetCharacterNameRequest",
 		"SetCharacterNameResult",
+		"SetCharacterGenderRequest",
+		"SetCharacterGenderResult",
 		"SetCharacterRunesRequest",
 		"SetCharacterRunesResult",
 		"CharacterStats",
@@ -1185,8 +1189,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 35 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 35", found)
+	if found != 36 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 36", found)
 	}
 }
 
@@ -1640,6 +1644,58 @@ func TestSetCharacterAppearanceRoute(t *testing.T) {
 		readBack.FaceShape != got.Appearance.FaceShape ||
 		readBack.Body != got.Appearance.Body || readBack.Skin != got.Appearance.Skin {
 		t.Error("rejected transport request changed the appearance")
+	}
+}
+
+func TestSetCharacterGenderRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	fixture := writeActiveSpellsFixture(t)
+	fixtureData, err := os.ReadFile(fixture)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	face := fixtureData[equippedSpellsSlotDataBase+0x3000:]
+	copy(face, []byte{0xFF, 0xFF, 0xFF, 0xFF, 'F', 'A', 'C', 'E'})
+	binary.LittleEndian.PutUint32(face[0x08:], 4)
+	binary.LittleEndian.PutUint32(face[0x0C:], 0x120)
+	if err := os.WriteFile(fixture, fixtureData, 0o600); err != nil {
+		t.Fatalf("rewrite fixture: %v", err)
+	}
+	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	gender := uint8(0)
+	body, err := json.Marshal(setCharacterGenderRequest{
+		Gender: &gender, ExpectedRevision: "0",
+	})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/gender"
+	recorder := doSave(t, saveEngine, http.MethodPatch, target, string(body))
+	assertOK(t, recorder, target)
+
+	var got character.SetCharacterGenderResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	wantModelIDs := [8]uint32{40, 0, 0, 0, 0, 0, 0, 0}
+	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" ||
+		got.CharacterID != 0 ||
+		got.PresetID != "ciri-the-princess-of-cintra-from-witcher" ||
+		got.Appearance.Gender != gender || got.Appearance.ModelIDs != wantModelIDs {
+		t.Fatalf("result = %+v, want committed Type B default", got)
+	}
+
+	rejected := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"expectedRevision":"1"}`)
+	if rejected.Code != http.StatusBadRequest ||
+		!strings.Contains(rejected.Body.String(), "gender is required") {
+		t.Fatalf("missing gender: status = %d, body = %q",
+			rejected.Code, rejected.Body.String())
 	}
 }
 

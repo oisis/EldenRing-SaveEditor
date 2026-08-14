@@ -301,3 +301,70 @@ func TestCatalogAppearancePresetsAreIndependentPerCall(t *testing.T) {
 		t.Fatalf("presets[0].ID = %q, want %q", third[0].ID, want.ID)
 	}
 }
+
+func TestCatalogAppearancePresetLookupIsExactAndIndependent(t *testing.T) {
+	presets, err := LoadAppearancePresets(catalogdata.Files())
+	if err != nil {
+		t.Fatalf("LoadAppearancePresets: %v", err)
+	}
+	catalog := &Catalog{appearancePresets: cloneAppearancePresets(presets)}
+
+	got, err := catalog.AppearancePreset(defaultTypeAAppearancePresetID)
+	if err != nil {
+		t.Fatalf("AppearancePreset: %v", err)
+	}
+	if got.ID != defaultTypeAAppearancePresetID || got.BodyType != 1 {
+		t.Fatalf("preset = %+v, want the default Type A preset", got)
+	}
+	got.Tags = append(got.Tags, "mutated")
+	again, err := catalog.AppearancePreset(defaultTypeAAppearancePresetID)
+	if err != nil {
+		t.Fatalf("AppearancePreset again: %v", err)
+	}
+	if len(again.Tags) != 0 {
+		t.Fatalf("stored tags = %#v, want an independent empty slice", again.Tags)
+	}
+
+	for _, presetID := range []string{"", "Geralt-Of-Rivia-The-Witcher", "unknown"} {
+		if _, err := catalog.AppearancePreset(presetID); err == nil {
+			t.Fatalf("AppearancePreset(%q) accepted an invalid ID", presetID)
+		}
+	}
+}
+
+func TestCatalogDefaultAppearancePresetMapsBothBodyTypes(t *testing.T) {
+	presets, err := LoadAppearancePresets(catalogdata.Files())
+	if err != nil {
+		t.Fatalf("LoadAppearancePresets: %v", err)
+	}
+	catalog := &Catalog{appearancePresets: cloneAppearancePresets(presets)}
+
+	for bodyType, wantID := range map[uint8]string{
+		0: defaultTypeBAppearancePresetID,
+		1: defaultTypeAAppearancePresetID,
+	} {
+		got, err := catalog.DefaultAppearancePreset(bodyType)
+		if err != nil {
+			t.Fatalf("DefaultAppearancePreset(%d): %v", bodyType, err)
+		}
+		if got.ID != wantID || got.BodyType != bodyType {
+			t.Fatalf("DefaultAppearancePreset(%d) = %+v, want %q", bodyType, got, wantID)
+		}
+	}
+	if _, err := catalog.DefaultAppearancePreset(2); err == nil ||
+		!strings.Contains(err.Error(), "gender 2 is outside the range 0..1") {
+		t.Fatalf("DefaultAppearancePreset(2) error = %v", err)
+	}
+
+	for index := range presets {
+		if presets[index].ID == defaultTypeBAppearancePresetID {
+			presets[index].BodyType = 1
+			break
+		}
+	}
+	inconsistent := &Catalog{appearancePresets: cloneAppearancePresets(presets)}
+	if _, err := inconsistent.DefaultAppearancePreset(0); err == nil ||
+		!strings.Contains(err.Error(), "has bodyType 1, want 0") {
+		t.Fatalf("inconsistent default error = %v", err)
+	}
+}
