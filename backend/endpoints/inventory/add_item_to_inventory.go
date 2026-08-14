@@ -18,7 +18,6 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
-	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -123,57 +122,11 @@ func AddItemToInventory(
 		return AddItemToInventoryResult{}, errors.New("game catalog is not available")
 	}
 
-	resource, err := gameCatalog.ResourceByKindKeyAndVariant(schema.ResourceKind(kind), key, variantID)
+	resolved, err := resolveCommonItemAddition(gameCatalog, kind, key, variantID)
 	if err != nil {
 		return AddItemToInventoryResult{}, err
 	}
-	if resource.Item == nil {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q has no item document", kind, key)
-	}
-	item := resource.Item
-
-	if !item.Family.Known {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q has an unknown family", kind, key)
-	}
-	var familyPrefix uint32
-	switch item.Family.Value {
-	case schema.ItemFamilyGoods:
-		familyPrefix = addItemGoodsPrefix
-	case schema.ItemFamilyTalisman:
-		familyPrefix = addItemTalismanPrefix
-	default:
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q is of family %q; this endpoint adds only %q and %q",
-			kind, key, item.Family.Value, schema.ItemFamilyGoods, schema.ItemFamilyTalisman)
-	}
-
-	if !item.GameID.Known {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q has an unknown game ID", kind, key)
-	}
-	gameID := item.GameID.Value
-	// The prefix is an independent consistency gate rather than a second family
-	// test: a document whose two facts disagree is rejected, never reinterpreted
-	// into whichever of them looks more plausible.
-	if gameID&addItemFamilyPrefix != familyPrefix {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q declares family %q and game ID 0x%08X, which disagree",
-			kind, key, item.Family.Value, gameID)
-	}
-
-	if !item.Category.Known {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q has an unknown category", kind, key)
-	}
-	if item.Category.Value == addItemKeyCategory {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q is in category %q, which does not distinguish common from"+
-				" key routing; this common-only endpoint rejects the category fail-closed",
-			kind, key, addItemKeyCategory)
-	}
-
+	item := resolved.resource.Item
 	storage := item.Storage
 	if !storage.MaxInventory.Known || storage.MaxInventory.Value == 0 {
 		return AddItemToInventoryResult{}, fmt.Errorf(
@@ -181,46 +134,15 @@ func AddItemToInventory(
 	}
 	maxContainerTotal := storage.MaxInventory.Value
 
-	if !storage.RecordMode.Known {
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q has an unknown record mode", kind, key)
-	}
-	var separateInstances bool
-	var maxPerRecord uint32
-	switch storage.RecordMode.Value {
-	case schema.RecordModeQuantityStack:
-		stack := item.Capabilities.Stack
-		if !stack.Known {
-			return AddItemToInventoryResult{}, fmt.Errorf(
-				"resource kind %q key %q has an unknown stack capability", kind, key)
-		}
-		if !stack.Enabled {
-			return AddItemToInventoryResult{}, fmt.Errorf(
-				"resource kind %q key %q stores a quantity but does not stack", kind, key)
-		}
-		if stack.Rules == nil || stack.Rules.MaxPerStack == 0 {
-			return AddItemToInventoryResult{}, fmt.Errorf(
-				"resource kind %q key %q carries no stack limit", kind, key)
-		}
-		// Fail-closed exactly as SetOwnedItemQuantity derives it: one physical row
-		// never holds more than the per-stack limit, whatever the container allows.
-		maxPerRecord = min(stack.Rules.MaxPerStack, maxContainerTotal)
-	case schema.RecordModeSeparateInstances:
-		separateInstances = true
-		maxPerRecord = 1
-	default:
-		return AddItemToInventoryResult{}, fmt.Errorf(
-			"resource kind %q key %q declares the unsupported record mode %q",
-			kind, key, storage.RecordMode.Value)
-	}
+	maxPerRecord := min(resolved.maxPerStack, maxContainerTotal)
 
 	return engine.AddItemToInventory(
 		saveSessionID,
 		characterID,
-		gameID,
+		resolved.gameID,
 		quantity,
 		expectedRevision,
-		separateInstances,
+		resolved.separateInstances,
 		maxPerRecord,
 		maxContainerTotal,
 	)

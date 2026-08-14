@@ -241,6 +241,11 @@
                 "filepath": "../../../docs/endpoints/inventory/get_storage.md",
                 "title": "GetStorage"
               },
+              "/get-item-capacity": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/get_item_capacity.md",
+                "title": "GetItemCapacity"
+              },
               "/get-owned-item": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/get_owned_item.md",

@@ -1278,6 +1278,66 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/item-capacity": {
+      "get": {
+        "operationId": "getItemCapacity",
+        "tags": ["Inventory"],
+        "summary": "GetItemCapacity",
+        "description": "Performs a read-only preflight for adding one goods or talisman resource to common Inventory or common Storage. The result reports the current and resulting item quantity, the catalog container limit, free and required physical records, free and required GaItemData entries, and the first limiting factor. It is not a reservation: a later mutation must verify its own expectedRevision and repeat every capacity check. key_items, families that require the retired variable-length GaItem allocator, the unresolved Flasks shared-charge family, and non-depositable goods targeting Storage are rejected fail-closed. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {"$ref": "#/components/parameters/SaveSessionID"},
+          {"$ref": "#/components/parameters/CharacterID"},
+          {
+            "name": "destination",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "enum": ["inventory", "storage"]}
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "minLength": 1}
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "string", "minLength": 1}
+          },
+          {
+            "name": "variantID",
+            "in": "query",
+            "required": false,
+            "schema": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295}
+          },
+          {
+            "name": "quantity",
+            "in": "query",
+            "required": true,
+            "schema": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 4294967295}
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current non-reserving capacity preflight",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/ItemCapacity"}
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed query data, an unknown session, character, resource or variant, unsupported or incomplete catalog semantics, ambiguous key routing, malformed save data, or an unsupported item family",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Error"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/order": {
       "put": {
         "operationId": "setInventoryOrder",
@@ -4359,6 +4419,34 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "kind", "key", "gameID", "container", "containerSection", "physicalIndex", "gaItemHandle", "quantity", "acquisitionIndex"]
+      },
+      "ItemCapacity": {
+        "type": "object",
+        "description": "Read-only item-add preflight. Empty limitingFactor means every checked budget fits; no capacity is reserved.",
+        "properties": {
+          "saveSessionID": {"type": "string", "minLength": 1},
+          "saveRevision": {"type": "string", "pattern": "^(0|[1-9][0-9]*)$"},
+          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
+          "active": {"type": "boolean"},
+          "destination": {"type": "string", "enum": ["inventory", "storage"]},
+          "kind": {"type": "string", "minLength": 1},
+          "key": {"type": "string", "minLength": 1},
+          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 4294967295},
+          "quantity": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 4294967295},
+          "canFit": {"type": "boolean"},
+          "limitingFactor": {
+            "type": "string",
+            "enum": ["", "per_record_quantity", "container_quantity", "physical_records", "acquisition_allocator", "gaitemdata_entries"]
+          },
+          "currentQuantity": {"type": "integer", "format": "int64", "minimum": 0},
+          "quantityAfter": {"type": "integer", "format": "int64", "minimum": 0},
+          "maxContainerQuantity": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 4294967295},
+          "freePhysicalRecords": {"type": "integer", "format": "int32", "minimum": 0},
+          "physicalRecordsRequired": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 1},
+          "freeGaItemDataEntries": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 7000},
+          "gaItemDataEntriesRequired": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 1}
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "active", "destination", "kind", "key", "gameID", "quantity", "canFit", "limitingFactor", "currentQuantity", "quantityAfter", "maxContainerQuantity", "freePhysicalRecords", "physicalRecordsRequired", "freeGaItemDataEntries", "gaItemDataEntriesRequired"]
       },
       "AddItemToInventoryRequest": {
         "type": "object",

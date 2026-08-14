@@ -899,6 +899,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-spells", `{"orderedResources":[],"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-talismans", `{"orderedOwnedItemIDs":[],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/storage", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/item-capacity?destination=inventory&kind=item&key=400006A4&quantity=1", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/inventory/order", `{"orderedOwnedItemIDs":["any-token"],"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
@@ -1003,6 +1004,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/pouch-items":                        "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/item-capacity":                      "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/order":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/items":                    "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                            "get",
@@ -1165,6 +1167,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"MoveOwnedItemToInventoryResult",
 		"MoveOwnedItemToStorageRequest",
 		"MoveOwnedItemToStorageResult",
+		"ItemCapacity",
 		"SetWeaponUpgradeLevelRequest",
 		"SetWeaponUpgradeLevelResult",
 		"SetSpiritAshUpgradeLevelRequest",
@@ -1235,8 +1238,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 45 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 45", found)
+	if found != 46 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 46", found)
 	}
 }
 
@@ -3527,6 +3530,53 @@ func TestSetWeaponInfusionRoute(t *testing.T) {
 		result.GameID != 1000100 || result.Affinity != schema.AffinityHeavy ||
 		result.UpgradeLevel != 0 {
 		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestGetItemCapacityRoute(t *testing.T) {
+	fixture := writeInventoryFixture(t)
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	base := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/item-capacity"
+	target := base + "?destination=inventory&kind=item&key=400006A4&quantity=3"
+
+	want, err := inventory.GetItemCapacity(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, "inventory",
+		"item", "400006A4", nil, 3)
+	if err != nil {
+		t.Fatalf("inventory.GetItemCapacity: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodGet, target, nil)
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatalf("item-capacity route body differs from endpoint result: %s", recorder.Body.String())
+	}
+	info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	if info.UnsavedChanges || want.SaveRevision != "0" {
+		t.Fatalf("capacity route changed session state: result=%+v info=%+v", want, info)
+	}
+
+	for _, malformed := range []string{
+		base + "?destination=inventory&kind=item&key=400006A4",
+		base + "?destination=inventory&kind=item&key=400006A4&quantity=1&variantID=not-a-number",
+	} {
+		request := httptest.NewRequest(http.MethodGet, malformed, nil)
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)",
+				malformed, recorder.Code, recorder.Body.String())
+		}
 	}
 }
 

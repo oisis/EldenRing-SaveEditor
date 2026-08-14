@@ -1284,6 +1284,44 @@ func registerSaveSessionRoutes(
 	)
 
 	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/item-capacity",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			query := request.URL.Query()
+			variantID, err := parseOptionalUint32(query.Get("variantID"), "variantID")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			quantity, err := parseRequiredUint32(query.Get("quantity"), "quantity")
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.GetItemCapacity(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				query.Get("destination"),
+				query.Get("kind"),
+				query.Get("key"),
+				variantID,
+				quantity,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
 		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/order",
 		func(writer http.ResponseWriter, request *http.Request) {
 			characterID, err := parseCharacterID(request.PathValue("characterID"))
@@ -1967,6 +2005,29 @@ func parsePagingValue(raw string, name string) (int, error) {
 		return 0, fmt.Errorf("%s must be an integer; got %q", name, raw)
 	}
 	return value, nil
+}
+
+func parseOptionalUint32(raw string, name string) (*uint32, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	value, err := strconv.ParseUint(raw, 10, 32)
+	if err != nil {
+		return nil, fmt.Errorf("%s must be a decimal uint32; got %q", name, raw)
+	}
+	parsed := uint32(value)
+	return &parsed, nil
+}
+
+func parseRequiredUint32(raw string, name string) (uint32, error) {
+	if raw == "" {
+		return 0, fmt.Errorf("%s is required", name)
+	}
+	value, err := strconv.ParseUint(raw, 10, 32)
+	if err != nil {
+		return 0, fmt.Errorf("%s must be a decimal uint32; got %q", name, raw)
+	}
+	return uint32(value), nil
 }
 
 func serveAsset(writer http.ResponseWriter, name string, contentType string) {

@@ -1,28 +1,148 @@
 /*
 Endpoint: GetItemCapacity
 EndpointID: get_item_capacity
-Purpose: Returns the current capacity of the relevant containers and supporting structures and the cost of the planned item addition. The getter reserves and mutates nothing.
-How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
-Supported resource types: ItemDocument.
-Input variables: characterID, destination, kind, key, variantID, quantity.
+Purpose: Reports whether one planned addition fits the selected common item container and the physical-record and GaItemData cost it would consume. The getter reserves and mutates nothing.
+How it works: The handler resolves the requested resource through GameCatalog, proves the common-only add contract and destination-specific limits, then asks SaveEngine for one read-only preflight against the private session snapshot.
+Supported resource types: ItemDocument of family goods or talisman, outside category key_items and the unresolved Flasks subcategory; Storage additionally requires depositable goods.
+Input variables: saveSessionID, characterID, destination, kind, key, variantID, quantity.
 Variant selection: the optional variantID selects the base item document when it is absent and exactly one stored variant of the same (kind, key) pair when it is present; gamecatalog.Catalog.ResourceByKindKeyAndVariant is the single implementation of that rule.
-GameCatalog variables read: the fields required to resolve and validate the declared resource types; the exact projection belongs to the endpoint runtime specification.
-Save variables read: the state required by the declared variables; the getter must remain non-mutating.
-Implementation status: contract definition only; no runtime handler is implemented in this file yet.
+GameCatalog variables read: item.family, item.gameID, item.category, item.subcategory, item.storage.recordMode, item.storage.maxInventory or maxStorage, item.capabilities.stack, and item.goods.isDepositable for goods targeting Storage.
+Save variables read: activity and revision; both common and key sections of Inventory and Storage; the GaItem table needed to resolve their handles; the destination common count and acquisition allocators; and the active GaItemData count and IDs. Nothing is written or reserved.
+Implementation status: implemented
 */
 package inventory
 
-import "github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
 
 // GetItemCapacityEndpointID is the stable backend identifier of GetItemCapacity.
 const GetItemCapacityEndpointID = "get_item_capacity"
 
+const itemCapacityFlasksSubcategory = "Flasks"
+
 // GetItemCapacityDefinition describes the public getter contract.
 var GetItemCapacityDefinition = contract.MustDefine(contract.Definition{
-	Name:                       "GetItemCapacity",
-	ID:                         GetItemCapacityEndpointID,
-	Kind:                       contract.Getter,
-	SupportedResourceTypes:     "ItemDocument",
-	SupportedResourceVariables: []string{"characterID", "destination", "kind", "key", "variantID", "quantity"},
-	Description:                "Returns the current capacity of the relevant containers and supporting structures and the cost of the planned item addition. The getter reserves and mutates nothing.",
+	Name:                   "GetItemCapacity",
+	ID:                     GetItemCapacityEndpointID,
+	Kind:                   contract.Getter,
+	SupportedResourceTypes: "ItemDocument of family goods or talisman supported by common-only addition",
+	SupportedResourceVariables: []string{
+		"saveSessionID", "characterID", "destination", "kind", "key", "variantID", "quantity",
+	},
+	Description: "Reports the current common-container, allocator and GaItemData capacity for one" +
+		" planned item addition without reserving or mutating anything.",
 })
+
+// GetItemCapacityResult adds the public catalog identity to the read-only
+// SaveEngine preflight. The embedded capacity remains the single definition of
+// every save-derived field.
+type GetItemCapacityResult struct {
+	saveengine.ItemCapacity
+	Kind schema.ResourceKind `json:"kind"`
+	Key  string              `json:"key"`
+}
+
+// GetItemCapacity returns a snapshot-only preflight for adding quantity of one
+// catalog resource to common Inventory or common Storage.
+//
+// The result is informational rather than a reservation. A later mutation must
+// still supply and verify expectedRevision, because any successful mutation may
+// invalidate these numbers immediately after this getter returns.
+func GetItemCapacity(
+	engine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+	saveSessionID string,
+	characterID int,
+	destination string,
+	kind string,
+	key string,
+	variantID *uint32,
+	quantity uint32,
+) (GetItemCapacityResult, error) {
+	if engine == nil {
+		return GetItemCapacityResult{}, errors.New("save engine is not available")
+	}
+	if gameCatalog == nil {
+		return GetItemCapacityResult{}, errors.New("game catalog is not available")
+	}
+	switch destination {
+	case saveengine.ItemCapacityDestinationInventory, saveengine.ItemCapacityDestinationStorage:
+	default:
+		return GetItemCapacityResult{}, fmt.Errorf(
+			"destination must be %q or %q; got %q",
+			saveengine.ItemCapacityDestinationInventory,
+			saveengine.ItemCapacityDestinationStorage,
+			destination)
+	}
+
+	resolved, err := resolveCommonItemAddition(gameCatalog, kind, key, variantID)
+	if err != nil {
+		return GetItemCapacityResult{}, err
+	}
+	item := resolved.resource.Item
+	if !item.Subcategory.Known {
+		return GetItemCapacityResult{}, fmt.Errorf(
+			"resource kind %q key %q has an unknown subcategory", kind, key)
+	}
+	if item.Subcategory.Value == itemCapacityFlasksSubcategory {
+		return GetItemCapacityResult{}, fmt.Errorf(
+			"resource kind %q key %q is a Flask whose shared charge limit is not represented"+
+				" by one catalog capacity; it is rejected fail-closed", kind, key)
+	}
+
+	var maxContainerTotal, maxPerRecord uint32
+	switch destination {
+	case saveengine.ItemCapacityDestinationInventory:
+		if !item.Storage.MaxInventory.Known || item.Storage.MaxInventory.Value == 0 {
+			return GetItemCapacityResult{}, fmt.Errorf(
+				"resource kind %q key %q carries no inventory limit", kind, key)
+		}
+		maxContainerTotal = item.Storage.MaxInventory.Value
+		maxPerRecord = min(resolved.maxPerStack, maxContainerTotal)
+	case saveengine.ItemCapacityDestinationStorage:
+		if !item.Storage.MaxStorage.Known || item.Storage.MaxStorage.Value == 0 {
+			return GetItemCapacityResult{}, fmt.Errorf(
+				"resource kind %q key %q carries no storage limit", kind, key)
+		}
+		if item.Family.Value == schema.ItemFamilyGoods {
+			if item.Goods == nil || !item.Goods.IsDepositable.Known {
+				return GetItemCapacityResult{}, fmt.Errorf(
+					"resource kind %q key %q has unknown Storage depositability", kind, key)
+			}
+			if !item.Goods.IsDepositable.Value {
+				return GetItemCapacityResult{}, fmt.Errorf(
+					"resource kind %q key %q cannot be deposited into Storage", kind, key)
+			}
+		}
+		maxContainerTotal = item.Storage.MaxStorage.Value
+		// Storage stores its repository quantity in one physical record. Both
+		// legacy versions bound that value by maxStorage, not maxPerStack.
+		maxPerRecord = maxContainerTotal
+	}
+
+	capacity, err := engine.GetItemCapacity(
+		saveSessionID,
+		characterID,
+		destination,
+		resolved.gameID,
+		quantity,
+		resolved.separateInstances,
+		maxPerRecord,
+		maxContainerTotal,
+	)
+	if err != nil {
+		return GetItemCapacityResult{}, err
+	}
+	return GetItemCapacityResult{
+		ItemCapacity: capacity,
+		Kind:         resolved.resource.Kind,
+		Key:          resolved.resource.Key,
+	}, nil
+}
