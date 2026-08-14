@@ -995,6 +995,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/write":                                                       "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters":                                                  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active":                             "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name":                               "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gender":                             "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes":                              "patch",
@@ -1130,6 +1131,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SessionInfo",
 		"SaveCharacters",
 		"CharacterProfile",
+		"SetCharacterActiveRequest",
+		"SetCharacterActiveResult",
 		"SetCharacterNameRequest",
 		"SetCharacterNameResult",
 		"SetCharacterGenderRequest",
@@ -1261,8 +1264,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 51 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 51", found)
+	if found != 52 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 52", found)
 	}
 }
 
@@ -1554,6 +1557,40 @@ func writeActiveSpellsFixture(t *testing.T) string {
 	return path
 }
 
+func TestSetCharacterActiveRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/active"
+
+	recorder := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"active":false,"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var got character.SetCharacterActiveResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" ||
+		got.CharacterID != 0 || got.Active {
+		t.Errorf("result = %+v, want inactive character 0 at revision 1", got)
+	}
+
+	for name, body := range map[string]string{
+		"missing active": `{"expectedRevision":"1"}`,
+		"unknown field":  `{"active":true,"expectedRevision":"1","extra":1}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			rejected := doSave(t, saveEngine, http.MethodPatch, target, body)
+			if rejected.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, body = %q", rejected.Code, rejected.Body.String())
+			}
+		})
+	}
+}
+
 func TestSetCharacterNameRoute(t *testing.T) {
 	saveEngine := saveengine.New()
 
@@ -1827,6 +1864,16 @@ func TestSetCharacterNameRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	target := "/api/v1/save-sessions/any-session/characters/0/name"
 	recorder := doSave(t, nil, http.MethodPatch, target,
 		`{"name":"Ranni","expectedRevision":"0"}`)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)",
+			target, recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestSetCharacterActiveRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/active"
+	recorder := doSave(t, nil, http.MethodPatch, target,
+		`{"active":false,"expectedRevision":"0"}`)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)",
 			target, recorder.Code, recorder.Body.String())

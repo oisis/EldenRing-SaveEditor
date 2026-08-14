@@ -2370,6 +2370,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active": {
+      "patch": {
+        "operationId": "setCharacterActive",
+        "tags": ["Character"],
+        "summary": "SetCharacterActive",
+        "description": "Changes one physical character slot's activity flag under expectedRevision control. Deactivation preserves all character data. Reactivation is allowed only for a residual slot with a confirmed statistics anchor and a non-empty PlayerGameData or profile-summary name. An idempotent request returns the current revision without marking the session dirty. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterActiveRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The accepted character activity state",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterActiveResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, invalid expectedRevision, unknown session, invalid slot, empty or malformed residual slot, unsupported activity flag, stale revision, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/name": {
       "patch": {
         "operationId": "setCharacterName",
@@ -3081,6 +3129,43 @@
           "gender",
           "secondsPlayed"
         ]
+      },
+      "SetCharacterActiveRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Target slot activity and optimistic-concurrency revision.",
+        "properties": {
+          "active": {
+            "type": "boolean",
+            "description": "Target activity state. False preserves residual character bytes; true requires confirmed residual character data when the slot is currently inactive."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["active", "expectedRevision"]
+      },
+      "SetCharacterActiveResult": {
+        "type": "object",
+        "description": "Receipt for one accepted character activity assignment.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "active"]
       },
       "SetCharacterNameRequest": {
         "type": "object",

@@ -351,6 +351,13 @@ type writeSaveRequest struct {
 	Target           string `json:"target"`
 }
 
+// setCharacterActiveRequest is the strict JSON body of the slot-activity
+// route. A pointer distinguishes an omitted active field from explicit false.
+type setCharacterActiveRequest struct {
+	Active           *bool  `json:"active"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setCharacterNameRequest is the strict JSON body of the character-name route.
 // Both values reach the endpoint unchanged; the transport owns no Unicode,
 // length or revision rule.
@@ -718,6 +725,44 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := character.GetCharacterProfile(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/active",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterActiveRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Active == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("active is required"))
+				return
+			}
+			result, err := character.SetCharacterActive(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				*body.Active,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

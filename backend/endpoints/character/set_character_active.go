@@ -2,16 +2,21 @@
 Endpoint: SetCharacterActive
 EndpointID: set_character_active
 Purpose: Changes the activity state of a character slot.
-How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
+How it works: The runtime handler delegates the complete request to SaveEngine, which validates the expected revision and changes only the confirmed UserData10 activity flag.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, active, expectedRevision.
 GameCatalog variables read: none required by the current contract.
-Save variables processed: the state required by the declared variables; the mutation must validate a complete plan and finish with full success or rollback.
-Implementation status: contract definition only; no runtime handler is implemented in this file yet.
+Save variables processed: the UserData10 activity flag; reactivation also reads the confirmed statistics anchor and both character-name fields to reject a truly empty slot.
+Implementation status: implemented
 */
 package character
 
-import "github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+import (
+	"errors"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
 
 // SetCharacterActiveEndpointID is the stable backend identifier of SetCharacterActive.
 const SetCharacterActiveEndpointID = "set_character_active"
@@ -25,3 +30,22 @@ var SetCharacterActiveDefinition = contract.MustDefine(contract.Definition{
 	SupportedResourceVariables: []string{"saveSessionID", "characterID", "active", "expectedRevision"},
 	Description:                "Changes the activity state of a character slot.",
 })
+
+// SetCharacterActiveResult is the SaveEngine mutation receipt.
+type SetCharacterActiveResult = saveengine.SetCharacterActiveResult
+
+// SetCharacterActive changes one physical slot's activity state. SaveEngine
+// owns the slot, residual-data, revision and binary-format rules.
+func SetCharacterActive(
+	engine *saveengine.Engine,
+	saveSessionID string,
+	characterID int,
+	active bool,
+	expectedRevision string,
+) (SetCharacterActiveResult, error) {
+	if engine == nil {
+		return SetCharacterActiveResult{}, errors.New("save engine is not available")
+	}
+	return engine.SetCharacterActive(
+		saveSessionID, characterID, active, expectedRevision)
+}
