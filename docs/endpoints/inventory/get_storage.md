@@ -7,10 +7,11 @@ physical character slot of an existing SaveEngine session. Every listed record
 is resolved through the private `GaItem` table and GameCatalog.
 
 Each record carries the canonical ItemDocument `kind`/`key` pair and the exact
-resolved `gameID`; the latter selects the materialised catalog variant for an
-upgraded or infused item. `ownedItemID` remains the separate opaque identity of
-the owned physical record. Native handles, acquisition indices, quantity masks,
-physical order and paging remain visible unchanged.
+resolved `gameID`. A stored variant preserves an affinity, while a confirmed
+weapon-upgrade range resolves the exact level without changing that canonical
+identity. `ownedItemID` remains the separate opaque identity of the owned
+physical record. Native handles, acquisition indices, quantity masks, physical
+order and paging remain visible unchanged.
 
 This phase deliberately does not add a name, `family` filter, capacity or
 Inventory records. A malformed GaItem table, an instance-backed handle without

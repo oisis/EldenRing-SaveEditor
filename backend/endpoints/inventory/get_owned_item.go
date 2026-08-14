@@ -36,9 +36,9 @@ var GetOwnedItemDefinition = contract.MustDefine(contract.Definition{
 })
 
 // GetOwnedItemResult is one owned physical record plus its public catalog
-// identity. GameID is the exact catalog game ID resolved from the save; for an
-// upgraded or infused item it selects the materialised catalog variant, while
-// Kind and Key remain the canonical resource reference.
+// identity. GameID is the exact catalog game ID resolved from the save. Stored
+// variants preserve affinity and a confirmed weapon-upgrade range resolves its
+// level; Kind and Key remain the canonical resource reference.
 //
 // OwnedItemID is echoed back exactly as supplied and stays opaque: it is valid
 // only inside the session and the SaveRevision that issued it.

@@ -902,6 +902,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/upgrade-level", `{"upgradeLevel":1,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/inventory/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/gestures/unlock", `{"gestureKind":"item","gestureKey":"401EA7AB","unlocked":true,"expectedRevision":"0"}`},
@@ -1027,6 +1028,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths[ownedItem]["delete"]; !hasDelete {
 		t.Fatalf("openapi.json describes no DELETE for %s", ownedItem)
 	}
+	weaponUpgrade := ownedItem + "/upgrade-level"
+	if _, hasPatch := document.Paths[weaponUpgrade]["patch"]; !hasPatch {
+		t.Fatalf("openapi.json describes no PATCH for %s", weaponUpgrade)
+	}
 	characterAppearance := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance"
 	if _, hasPut := document.Paths[characterAppearance]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", characterAppearance)
@@ -1136,6 +1141,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"AddItemToInventoryResult",
 		"SetOwnedItemQuantityRequest",
 		"SetOwnedItemQuantityResult",
+		"SetWeaponUpgradeLevelRequest",
+		"SetWeaponUpgradeLevelResult",
 		"GestureEntry",
 		"GetGesturesResult",
 		"SetGestureUnlockedRequest",
@@ -1198,8 +1205,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 38 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 38", found)
+	if found != 39 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 39", found)
 	}
 }
 
@@ -3152,6 +3159,43 @@ func TestSetOwnedItemQuantityRoute(t *testing.T) {
 	}
 	if updated.SaveRevision != "1" || updated.Records[0].Quantity != 4 {
 		t.Fatalf("updated inventory = %+v, want quantity 4 at revision 1", updated)
+	}
+}
+
+func TestSetWeaponUpgradeLevelRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(
+		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	listed, err := saveEngine.GetInventory(
+		session.SaveSessionID, 0, saveengine.InventorySectionCommon, 1, 50)
+	if err != nil || len(listed.Records) < 2 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(listed.Records))
+	}
+	ownedItemID := listed.Records[1].OwnedItemID
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID) + "/upgrade-level"
+
+	rejected := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"expectedRevision":"0"}`)
+	if rejected.Code != http.StatusBadRequest ||
+		!strings.Contains(rejected.Body.String(), "upgradeLevel is required") {
+		t.Fatalf("missing level: status = %d, body = %q",
+			rejected.Code, rejected.Body.String())
+	}
+	recorder := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"upgradeLevel":5,"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.SetWeaponUpgradeLevelResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetWeaponUpgradeLevel body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveSessionID != session.SaveSessionID || result.SaveRevision != "1" ||
+		result.OwnedItemID != ownedItemID || result.PreviousGameID != 1000000 ||
+		result.GameID != 1000005 || result.UpgradeLevel != 5 {
+		t.Fatalf("result = %+v", result)
 	}
 }
 

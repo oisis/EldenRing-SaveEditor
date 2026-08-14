@@ -35,9 +35,9 @@ var GetInventoryDefinition = contract.MustDefine(contract.Definition{
 })
 
 // InventoryRecord is one physical InventoryHeld row plus its public catalog
-// identity. GameID is the exact catalog game ID resolved from the save; for an
-// upgraded or infused item it selects the materialised catalog variant, while
-// Kind and Key remain the canonical resource reference.
+// identity. GameID is the exact catalog game ID resolved from the save. Stored
+// variants preserve affinity and a confirmed weapon-upgrade range resolves its
+// level; Kind and Key remain the canonical resource reference.
 type InventoryRecord struct {
 	OwnedItemID      string              `json:"ownedItemID"`
 	Kind             schema.ResourceKind `json:"kind"`

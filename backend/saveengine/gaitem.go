@@ -93,62 +93,91 @@ func (engine *Engine) ResolveGaItemIDs(
 }
 
 func readGaItemMap(source *codec, platform Platform, characterID int) (map[uint32]uint32, error) {
+	byHandle := make(map[uint32]uint32)
+	err := walkGaItemRecords(source, platform, characterID, func(record gaItemRecord) error {
+		handle, gameID := record.handle, record.gameID
+		if handle == 0 || gameID == 0 || gameID == 0xFFFFFFFF {
+			return nil
+		}
+		switch handle & gaItemHandleTypeMask {
+		case gaItemWeaponHandle, gaItemArmorHandle, gaItemAccessoryHandle, gaItemGoodsHandle, gaItemAshOfWarHandle:
+			if previous, duplicate := byHandle[handle]; duplicate && previous != gameID {
+				return fmt.Errorf("GaItem handle 0x%08X maps to both 0x%08X and 0x%08X", handle, previous, gameID)
+			}
+			byHandle[handle] = gameID
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return byHandle, nil
+}
+
+type gaItemRecord struct {
+	at     int64
+	handle uint32
+	gameID uint32
+}
+
+// walkGaItemRecords is the single parser of the variable-length GaItem table.
+// It visits each record without materialising a second table in memory, while
+// readers and mutations still share version counts, sizes and exact positions.
+func walkGaItemRecords(
+	source *codec,
+	platform Platform,
+	characterID int,
+	visit func(gaItemRecord) error,
+) error {
 	base, slotEnd := inventorySlotBounds(platform, characterID)
 	version, err := source.uint32At(base)
 	if err != nil {
-		return nil, fmt.Errorf("cannot read slot version: %w", err)
+		return fmt.Errorf("cannot read slot version: %w", err)
 	}
 	if version == 0 {
-		return nil, errors.New("slot has no GaItem table")
+		return errors.New("slot has no GaItem table")
 	}
 
 	anchor, err := source.indexIn(base, slotEnd-base, gaItemAnchor)
 	if err != nil {
-		return nil, fmt.Errorf("cannot search GaItem marker: %w", err)
+		return fmt.Errorf("cannot search GaItem marker: %w", err)
 	}
 	if anchor < 0 {
-		return nil, errors.New("slot carries no GaItem marker")
+		return errors.New("slot carries no GaItem marker")
 	}
 	start := base + gaItemTableOffset
 	if anchor < start {
-		return nil, errors.New("GaItem marker precedes the GaItem table")
+		return errors.New("GaItem marker precedes the GaItem table")
 	}
 
 	table, err := source.readAt(start, int(anchor-start))
 	if err != nil {
-		return nil, fmt.Errorf("cannot read GaItem table: %w", err)
+		return fmt.Errorf("cannot read GaItem table: %w", err)
 	}
 	count := gaItemCurrentRecordCount
 	if version <= gaItemVersionBreak {
 		count = gaItemOldRecordCount
 	}
 
-	byHandle := make(map[uint32]uint32)
 	position := 0
 	for index := 0; index < count; index++ {
 		if position+gaItemRecordSize > len(table) {
-			return nil, fmt.Errorf("GaItem record %d does not fit before the marker", index)
+			return fmt.Errorf("GaItem record %d does not fit before the marker", index)
 		}
 		handle := binary.LittleEndian.Uint32(table[position:])
 		gameID := binary.LittleEndian.Uint32(table[position+4:])
 		recordSize := gaItemSize(gameID)
 		if position+recordSize > len(table) {
-			return nil, fmt.Errorf("GaItem record %d exceeds the marker", index)
+			return fmt.Errorf("GaItem record %d exceeds the marker", index)
+		}
+		if err := visit(gaItemRecord{
+			at: start + int64(position), handle: handle, gameID: gameID,
+		}); err != nil {
+			return err
 		}
 		position += recordSize
-
-		if handle == 0 || gameID == 0 || gameID == 0xFFFFFFFF {
-			continue
-		}
-		switch handle & gaItemHandleTypeMask {
-		case gaItemWeaponHandle, gaItemArmorHandle, gaItemAccessoryHandle, gaItemGoodsHandle, gaItemAshOfWarHandle:
-			if previous, duplicate := byHandle[handle]; duplicate && previous != gameID {
-				return nil, fmt.Errorf("GaItem handle 0x%08X maps to both 0x%08X and 0x%08X", handle, previous, gameID)
-			}
-			byHandle[handle] = gameID
-		}
 	}
-	return byHandle, nil
+	return nil
 }
 
 func gaItemSize(gameID uint32) int {

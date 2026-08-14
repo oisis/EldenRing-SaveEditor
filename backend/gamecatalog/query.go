@@ -216,7 +216,12 @@ func (catalog *Catalog) resourceByRef(ref schema.ResourceRef) (schema.Resource, 
 func (catalog *Catalog) ItemByGameID(gameID uint32) (schema.Resource, bool) {
 	ref, exists := catalog.byItemGameID[gameID]
 	if !exists {
-		return schema.Resource{}, false
+		resource, _, matches := catalog.weaponUpgradeAnchor(gameID)
+		if matches != 1 {
+			return schema.Resource{}, false
+		}
+		resource.Item.GameID.Value = gameID
+		return resource, true
 	}
 	resource, exists := catalog.resourceByRef(ref)
 	if !exists || resource.Item == nil || resource.Item.GameID.Value == gameID {
@@ -236,6 +241,98 @@ func (catalog *Catalog) ItemByGameID(gameID uint32) (schema.Resource, bool) {
 		}
 	}
 	return schema.Resource{}, false
+}
+
+// WeaponUpgradeTarget resolves one exact save-side weapon ID to the canonical
+// catalog resource and derives the ID of the requested level without changing
+// its affinity anchor. The catalog owns this arithmetic because upgrade rules
+// and stored affinity variants are catalog semantics, not save layout.
+func (catalog *Catalog) WeaponUpgradeTarget(
+	currentGameID uint32,
+	upgradeLevel uint8,
+) (uint32, error) {
+	if catalog == nil {
+		return 0, errors.New("game catalog is not loaded")
+	}
+	resource, currentLevel, matches := catalog.weaponUpgradeAnchor(currentGameID)
+	if matches == 0 {
+		return 0, fmt.Errorf(
+			"game ID 0x%08X is not a catalog weapon upgrade", currentGameID)
+	}
+	if matches != 1 {
+		return 0, fmt.Errorf(
+			"game ID 0x%08X matches more than one weapon upgrade range", currentGameID)
+	}
+
+	upgrade := resource.Item.Capabilities.Upgrade
+	if !upgrade.Known {
+		return 0, fmt.Errorf(
+			"weapon 0x%08X has an unknown upgrade capability", currentGameID)
+	}
+	if !upgrade.Enabled {
+		return 0, fmt.Errorf("weapon 0x%08X cannot be upgraded", currentGameID)
+	}
+	if upgrade.Rules == nil {
+		return 0, fmt.Errorf("weapon 0x%08X carries no upgrade rules", currentGameID)
+	}
+	if upgrade.Rules.Model != schema.UpgradeModelStandard &&
+		upgrade.Rules.Model != schema.UpgradeModelSomber {
+		return 0, fmt.Errorf(
+			"weapon 0x%08X uses unsupported upgrade model %q", currentGameID, upgrade.Rules.Model)
+	}
+	if upgradeLevel > upgrade.Rules.MaxLevel {
+		return 0, fmt.Errorf(
+			"upgradeLevel %d exceeds the catalog limit of %d for weapon 0x%08X",
+			upgradeLevel, upgrade.Rules.MaxLevel, currentGameID)
+	}
+
+	anchor := currentGameID - uint32(currentLevel)
+	return anchor + uint32(upgradeLevel), nil
+}
+
+// weaponUpgradeAnchor finds the one base or stored affinity anchor whose
+// catalog range contains gameID. It deliberately scans only after the exact
+// game-ID index misses, so normal lookups remain constant-time and the catalog
+// does not carry a second, expanded index of every possible upgrade level.
+func (catalog *Catalog) weaponUpgradeAnchor(gameID uint32) (schema.Resource, uint8, int) {
+	if catalog == nil {
+		return schema.Resource{}, 0, 0
+	}
+	var match schema.Resource
+	var level uint8
+	matches := 0
+	for _, stored := range catalog.byKind[schema.ResourceKindItem] {
+		if stored.Item == nil || !stored.Item.Family.Known ||
+			stored.Item.Family.Value != schema.ItemFamilyWeapon {
+			continue
+		}
+		matchCandidate := func(anchor uint32, upgrade schema.Capability[schema.UpgradeRules]) bool {
+			maxLevel := uint8(0)
+			if upgrade.Known && upgrade.Enabled && upgrade.Rules != nil {
+				maxLevel = upgrade.Rules.MaxLevel
+			}
+			return gameID >= anchor && gameID-anchor <= uint32(maxLevel)
+		}
+		if matchCandidate(stored.Item.GameID.Value, stored.Item.Capabilities.Upgrade) {
+			match = cloneResource(stored)
+			level = uint8(gameID - stored.Item.GameID.Value)
+			matches++
+		}
+		for _, variant := range stored.Item.Variants {
+			if !variant.GameID.Known || !variant.UpgradeLevel.Known || variant.UpgradeLevel.Value != 0 {
+				continue
+			}
+			if !matchCandidate(variant.GameID.Value, variant.Data.Capabilities.Upgrade) {
+				continue
+			}
+			match = cloneResource(stored)
+			materialized := schema.MaterializeVariant(*match.Item, variant)
+			match.Item = &materialized
+			level = uint8(gameID - variant.GameID.Value)
+			matches++
+		}
+	}
+	return match, level, matches
 }
 
 func (catalog *Catalog) ItemViewByGameID(gameID uint32) (ItemView, bool) {

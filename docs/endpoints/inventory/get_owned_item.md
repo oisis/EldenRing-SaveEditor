@@ -7,8 +7,9 @@ session, addressed by the opaque `ownedItemID` a previous
 [`GetInventory`](get_inventory.md) or [`GetStorage`](get_storage.md) result
 reported. The record is read through the private `GaItem` table and resolved
 through GameCatalog, so the result carries the canonical ItemDocument
-`kind`/`key` pair and the exact resolved `gameID`; the latter selects the
-materialised catalog variant for an upgraded or infused item.
+`kind`/`key` pair and the exact resolved `gameID`. A stored variant preserves an
+affinity, while a confirmed weapon-upgrade range resolves the exact level
+without changing that canonical identity.
 
 `ownedItemID` is **not** a stable item reference. It is opaque, session-scoped
 and revision-scoped: it is valid only inside the session that minted it and only

@@ -487,6 +487,13 @@ type setOwnedItemQuantityRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setWeaponUpgradeLevelRequest is the strict JSON body of the weapon upgrade
+// route. SaveEngine and GameCatalog own every level and mutation rule.
+type setWeaponUpgradeLevelRequest struct {
+	UpgradeLevel     *uint8 `json:"upgradeLevel"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // addItemToInventoryRequest is the strict JSON body of the add route. The
 // transport owns no catalog, family, routing, quantity or revision rule; every
 // value reaches the endpoint unchanged, and an absent variantID stays absent
@@ -1410,6 +1417,42 @@ func registerSaveSessionRoutes(
 				characterID,
 				request.PathValue("ownedItemID"),
 				body.Quantity,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/upgrade-level",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setWeaponUpgradeLevelRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.UpgradeLevel == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("upgradeLevel is required"))
+				return
+			}
+			result, err := inventory.SetWeaponUpgradeLevel(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				*body.UpgradeLevel,
 				body.ExpectedRevision,
 			)
 			if err != nil {
