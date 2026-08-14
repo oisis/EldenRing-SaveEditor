@@ -290,6 +290,87 @@ func (catalog *Catalog) WeaponUpgradeTarget(
 	return anchor + uint32(upgradeLevel), nil
 }
 
+// SpiritAshUpgradeTarget resolves one exact save-side Spirit Ash ID and returns
+// the stored catalog variant for the requested level. Unlike weapon upgrades,
+// Spirit Ash chains are explicit variants and are never derived arithmetically.
+func (catalog *Catalog) SpiritAshUpgradeTarget(
+	currentGameID uint32,
+	upgradeLevel uint8,
+) (uint32, error) {
+	if catalog == nil {
+		return 0, errors.New("game catalog is not loaded")
+	}
+	ref, exists := catalog.byItemGameID[currentGameID]
+	if !exists {
+		return 0, fmt.Errorf("game ID 0x%08X is not a catalog Spirit Ash", currentGameID)
+	}
+	resource, err := catalog.requireResource(ref.Kind, ref.Key)
+	if err != nil {
+		return 0, err
+	}
+	item := resource.Item
+	if item == nil || !item.Family.Known || item.Family.Value != schema.ItemFamilySpiritAsh {
+		return 0, fmt.Errorf("game ID 0x%08X is not a catalog Spirit Ash", currentGameID)
+	}
+
+	upgrade := item.Capabilities.Upgrade
+	if !upgrade.Known {
+		return 0, fmt.Errorf("Spirit Ash 0x%08X has an unknown upgrade capability", currentGameID)
+	}
+	if !upgrade.Enabled {
+		return 0, fmt.Errorf("Spirit Ash 0x%08X cannot be upgraded", currentGameID)
+	}
+	if upgrade.Rules == nil {
+		return 0, fmt.Errorf("Spirit Ash 0x%08X carries no upgrade rules", currentGameID)
+	}
+	if upgrade.Rules.Model != schema.UpgradeModelGraveGlovewort &&
+		upgrade.Rules.Model != schema.UpgradeModelGhostGlovewort {
+		return 0, fmt.Errorf(
+			"Spirit Ash 0x%08X uses unsupported upgrade model %q",
+			currentGameID, upgrade.Rules.Model)
+	}
+	if upgradeLevel > upgrade.Rules.MaxLevel {
+		return 0, fmt.Errorf(
+			"upgradeLevel %d exceeds the catalog limit of %d for Spirit Ash 0x%08X",
+			upgradeLevel, upgrade.Rules.MaxLevel, currentGameID)
+	}
+
+	currentMatches := 0
+	if item.GameID.Known && item.GameID.Value == currentGameID {
+		currentMatches++
+	}
+	for _, variant := range item.Variants {
+		if variant.GameID.Known && variant.GameID.Value == currentGameID &&
+			variant.Kind.Known && variant.Kind.Value == schema.ItemVariantUpgrade &&
+			variant.UpgradeLevel.Known {
+			currentMatches++
+		}
+	}
+	if currentMatches != 1 {
+		return 0, fmt.Errorf(
+			"Spirit Ash game ID 0x%08X has %d matching upgrade identities, want exactly 1",
+			currentGameID, currentMatches)
+	}
+
+	if upgradeLevel == 0 {
+		return item.GameID.Value, nil
+	}
+	target, matches := uint32(0), 0
+	for _, variant := range item.Variants {
+		if variant.Kind.Known && variant.Kind.Value == schema.ItemVariantUpgrade &&
+			variant.UpgradeLevel.Known && variant.UpgradeLevel.Value == upgradeLevel &&
+			variant.GameID.Known {
+			target, matches = variant.GameID.Value, matches+1
+		}
+	}
+	if matches != 1 {
+		return 0, fmt.Errorf(
+			"Spirit Ash 0x%08X has %d stored variants for upgradeLevel %d, want exactly 1",
+			currentGameID, matches, upgradeLevel)
+	}
+	return target, nil
+}
+
 // WeaponInfusionTarget resolves one exact save-side weapon ID and derives the
 // ID of the requested affinity while preserving its current upgrade level.
 func (catalog *Catalog) WeaponInfusionTarget(

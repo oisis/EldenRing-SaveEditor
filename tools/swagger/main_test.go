@@ -1032,6 +1032,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPatch := document.Paths[weaponUpgrade]["patch"]; !hasPatch {
 		t.Fatalf("openapi.json describes no PATCH for %s", weaponUpgrade)
 	}
+	spiritAshUpgrade := ownedItem + "/spirit-ash-upgrade-level"
+	if _, hasPatch := document.Paths[spiritAshUpgrade]["patch"]; !hasPatch {
+		t.Fatalf("openapi.json describes no PATCH for %s", spiritAshUpgrade)
+	}
 	characterAppearance := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance"
 	if _, hasPut := document.Paths[characterAppearance]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", characterAppearance)
@@ -1143,6 +1147,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetOwnedItemQuantityResult",
 		"SetWeaponUpgradeLevelRequest",
 		"SetWeaponUpgradeLevelResult",
+		"SetSpiritAshUpgradeLevelRequest",
+		"SetSpiritAshUpgradeLevelResult",
 		"SetWeaponInfusionRequest",
 		"SetWeaponInfusionResult",
 		"GestureEntry",
@@ -1207,8 +1213,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 40 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 40", found)
+	if found != 41 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 41", found)
 	}
 }
 
@@ -3197,6 +3203,61 @@ func TestSetWeaponUpgradeLevelRoute(t *testing.T) {
 	if result.SaveSessionID != session.SaveSessionID || result.SaveRevision != "1" ||
 		result.OwnedItemID != ownedItemID || result.PreviousGameID != 1000000 ||
 		result.GameID != 1000005 || result.UpgradeLevel != 5 {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestSetSpiritAshUpgradeLevelRoute(t *testing.T) {
+	path := writeSetEquippedArmamentsRouteFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	const spiritAshRowAt = equippedSpellsSlotDataBase + 0xA07B + 505 + 12
+	binary.LittleEndian.PutUint32(data[spiritAshRowAt:], 0xB0038A44)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, path, "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	listed, err := saveEngine.GetInventory(
+		session.SaveSessionID, 0, saveengine.InventorySectionCommon, 1, 50)
+	if err != nil || len(listed.Records) < 2 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(listed.Records))
+	}
+	ownedItemID := listed.Records[1].OwnedItemID
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID) +
+		"/spirit-ash-upgrade-level"
+	gameCatalog := newFullCatalog(t)
+
+	serve := func(body string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodPatch, target, strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		return recorder
+	}
+	rejected := serve(`{"expectedRevision":"0"}`)
+	if rejected.Code != http.StatusBadRequest ||
+		!strings.Contains(rejected.Body.String(), "upgradeLevel is required") {
+		t.Fatalf("missing level: status = %d, body = %q",
+			rejected.Code, rejected.Body.String())
+	}
+	recorder := serve(`{"upgradeLevel":10,"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.SetSpiritAshUpgradeLevelResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetSpiritAshUpgradeLevel body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveRevision != "1" || result.OwnedItemID != ownedItemID ||
+		result.PreviousGameID != 0x40038A44 || result.GameID != 0x40038A4A ||
+		result.UpgradeLevel != 10 {
 		t.Fatalf("result = %+v", result)
 	}
 }

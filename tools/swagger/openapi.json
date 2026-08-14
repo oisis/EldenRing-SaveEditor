@@ -1565,6 +1565,57 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/spirit-ash-upgrade-level": {
+      "patch": {
+        "operationId": "setSpiritAshUpgradeLevel",
+        "tags": ["Inventory"],
+        "summary": "SetSpiritAshUpgradeLevel",
+        "description": "Sets the upgrade level of one existing owned Spirit Ash. GameCatalog selects the exact stored grave- or ghost-glovewort variant and enforces its maximum level; SaveEngine atomically updates the goods handle, GaItemData and matching Quick Items or Pouch representations without allocating or repacking records. A successful mutation advances saveRevision by exactly one and retires every ownedItemID from the previous revision. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/OwnedItemID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSpiritAshUpgradeLevelRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Spirit Ash upgrade mutation and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetSpiritAshUpgradeLevelResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, an invalid characterID, upgradeLevel or expectedRevision, an unknown or stale session or ownedItemID, an unsupported Spirit Ash or upgrade model, an inconsistent save-side reference, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/infusion": {
       "patch": {
         "operationId": "setWeaponInfusion",
@@ -4343,6 +4394,42 @@
           "previousGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
           "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
           "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 25}
+        },
+        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "upgradeLevel"]
+      },
+      "SetSpiritAshUpgradeLevelRequest": {
+        "type": "object",
+        "description": "Body of SetSpiritAshUpgradeLevel. Both values reach the endpoint unchanged; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "upgradeLevel": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 10,
+            "description": "Requested target level. Grave- and ghost-glovewort Spirit Ashes use the catalog maximum, currently 10."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["upgradeLevel", "expectedRevision"]
+      },
+      "SetSpiritAshUpgradeLevelResult": {
+        "type": "object",
+        "description": "Receipt for one committed Spirit Ash upgrade-level mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
+        "properties": {
+          "saveSessionID": {"type": "string", "minLength": 1},
+          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
+          "ownedItemID": {"type": "string", "minLength": 1},
+          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
+          "container": {"type": "string", "enum": ["inventory", "storage"]},
+          "previousGameID": {"type": "integer", "format": "int64", "minimum": 1073741824, "maximum": 1342177279},
+          "gameID": {"type": "integer", "format": "int64", "minimum": 1073741824, "maximum": 1342177279},
+          "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 10}
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "upgradeLevel"]
       },

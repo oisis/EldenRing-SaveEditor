@@ -12,6 +12,8 @@ const (
 	PouchEmptyGameID     uint32 = 0xFFFFFFFF
 	pouchEmptyItemID     uint32 = 0x00000000
 	pouchEmptyEquipIndex uint32 = 0xFFFFFFFF
+	pouchItemsTailOffset        = 0x80
+	pouchItemsTailSize          = pouchItemSlotCount * 4
 )
 
 // SetPouchItemsResult reports one committed six-slot Pouch assignment.
@@ -85,8 +87,8 @@ func (engine *Engine) SetPouchItems(
 		}
 
 		armamentsOff := countAt + 4 + count*equipmentProjectileRecordSize
-		tailAt := armamentsOff + 0x80
-		if tailAt+24 > slotEnd {
+		tailAt := armamentsOff + pouchItemsTailOffset
+		if tailAt+pouchItemsTailSize > slotEnd {
 			return fmt.Errorf("equipped-armaments tail of character %d does not fit into its slot", characterID)
 		}
 
@@ -94,7 +96,7 @@ func (engine *Engine) SetPouchItems(
 		if err != nil {
 			return fmt.Errorf("cannot read pouch EquipItemData of character %d: %w", characterID, err)
 		}
-		beforeTail, err := loaded.snapshot.readAt(tailAt, 24)
+		beforeTail, err := loaded.snapshot.readAt(tailAt, pouchItemsTailSize)
 		if err != nil {
 			return fmt.Errorf("cannot read pouch equipped-armaments tail of character %d: %w", characterID, err)
 		}
@@ -202,7 +204,7 @@ func (engine *Engine) SetPouchItems(
 		}
 
 		afterPairs := make([]byte, pouchItemsReadSize)
-		afterTail := make([]byte, 24)
+		afterTail := make([]byte, pouchItemsTailSize)
 		for i := 0; i < pouchItemSlotCount; i++ {
 			binary.LittleEndian.PutUint32(afterPairs[i*8:], targetHandles[i])
 			binary.LittleEndian.PutUint32(afterPairs[i*8+4:], targetEquipIndexes[i])
@@ -225,7 +227,7 @@ func (engine *Engine) SetPouchItems(
 		}
 
 		writtenPairs, errPairs := loaded.snapshot.readAt(pairAt, pouchItemsReadSize)
-		writtenTail, errTail := loaded.snapshot.readAt(tailAt, 24)
+		writtenTail, errTail := loaded.snapshot.readAt(tailAt, pouchItemsTailSize)
 		if errPairs == nil && errTail == nil && bytes.Equal(writtenPairs, afterPairs) && bytes.Equal(writtenTail, afterTail) {
 			return nil
 		}

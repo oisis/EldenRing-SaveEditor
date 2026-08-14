@@ -487,9 +487,9 @@ type setOwnedItemQuantityRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
-// setWeaponUpgradeLevelRequest is the strict JSON body of the weapon upgrade
-// route. SaveEngine and GameCatalog own every level and mutation rule.
-type setWeaponUpgradeLevelRequest struct {
+// setUpgradeLevelRequest is the strict JSON body shared by the two owned-item
+// upgrade routes. SaveEngine and GameCatalog own every level and mutation rule.
+type setUpgradeLevelRequest struct {
 	UpgradeLevel     *uint8 `json:"upgradeLevel"`
 	ExpectedRevision string `json:"expectedRevision"`
 }
@@ -1442,7 +1442,7 @@ func registerSaveSessionRoutes(
 				writeError(writer, http.StatusBadRequest, err)
 				return
 			}
-			var body setWeaponUpgradeLevelRequest
+			var body setUpgradeLevelRequest
 			decoder := json.NewDecoder(request.Body)
 			decoder.DisallowUnknownFields()
 			if err := decoder.Decode(&body); err != nil {
@@ -1454,6 +1454,42 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := inventory.SetWeaponUpgradeLevel(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				*body.UpgradeLevel,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/spirit-ash-upgrade-level",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setUpgradeLevelRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.UpgradeLevel == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("upgradeLevel is required"))
+				return
+			}
+			result, err := inventory.SetSpiritAshUpgradeLevel(
 				saveEngine,
 				gameCatalog,
 				request.PathValue("saveSessionID"),

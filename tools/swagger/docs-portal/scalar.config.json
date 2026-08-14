@@ -261,6 +261,11 @@
                 "filepath": "../../../docs/endpoints/inventory/set_weapon_upgrade_level.md",
                 "title": "SetWeaponUpgradeLevel"
               },
+              "/set-spirit-ash-upgrade-level": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/set_spirit_ash_upgrade_level.md",
+                "title": "SetSpiritAshUpgradeLevel"
+              },
               "/set-weapon-infusion": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/set_weapon_infusion.md",
