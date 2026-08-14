@@ -902,6 +902,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", ""},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token", `{"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/quantity", `{"quantity":1,"expectedRevision":"0"}`},
+		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/move-to-storage", `{"targetPosition":0,"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/upgrade-level", `{"upgradeLevel":1,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/inventory/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
@@ -1028,6 +1029,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths[ownedItem]["delete"]; !hasDelete {
 		t.Fatalf("openapi.json describes no DELETE for %s", ownedItem)
 	}
+	moveToStorage := ownedItem + "/move-to-storage"
+	if _, hasPost := document.Paths[moveToStorage]["post"]; !hasPost {
+		t.Fatalf("openapi.json describes no POST for %s", moveToStorage)
+	}
 	weaponUpgrade := ownedItem + "/upgrade-level"
 	if _, hasPatch := document.Paths[weaponUpgrade]["patch"]; !hasPatch {
 		t.Fatalf("openapi.json describes no PATCH for %s", weaponUpgrade)
@@ -1145,6 +1150,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"AddItemToInventoryResult",
 		"SetOwnedItemQuantityRequest",
 		"SetOwnedItemQuantityResult",
+		"MoveOwnedItemToStorageRequest",
+		"MoveOwnedItemToStorageResult",
 		"SetWeaponUpgradeLevelRequest",
 		"SetWeaponUpgradeLevelResult",
 		"SetSpiritAshUpgradeLevelRequest",
@@ -1180,6 +1187,7 @@ func assertQuantityFitsTheRecord(t *testing.T, schemas map[string]any) {
 	for _, name := range []string{
 		"SetOwnedItemQuantityRequest", "SetOwnedItemQuantityResult",
 		"AddItemToInventoryRequest", "AddItemToInventoryResult",
+		"MoveOwnedItemToStorageResult",
 	} {
 		schema, _ := schemas[name].(map[string]any)
 		properties, _ := schema["properties"].(map[string]any)
@@ -1213,8 +1221,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 41 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 41", found)
+	if found != 42 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 42", found)
 	}
 }
 
@@ -3167,6 +3175,65 @@ func TestSetOwnedItemQuantityRoute(t *testing.T) {
 	}
 	if updated.SaveRevision != "1" || updated.Records[0].Quantity != 4 {
 		t.Fatalf("updated inventory = %+v, want quantity 4 at revision 1", updated)
+	}
+}
+
+func TestMoveOwnedItemToStorageRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeInventoryFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	listed, err := inventory.GetInventory(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, "common", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetInventory: %v", err)
+	}
+	ownedItemID := ""
+	for _, record := range listed.Records {
+		if record.PhysicalIndex == 5 {
+			ownedItemID = record.OwnedItemID
+			break
+		}
+	}
+	if ownedItemID == "" {
+		t.Fatal("fixture returned no storable weapon record")
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID) + "/move-to-storage"
+
+	malformed := doSave(t, saveEngine, http.MethodPost, target,
+		`{"targetPosition":0,"expectedRevision":"0","unknown":true}`)
+	if malformed.Code != http.StatusBadRequest {
+		t.Fatalf("strict body: status = %d, want 400 (body %q)",
+			malformed.Code, malformed.Body.String())
+	}
+	missing := doSave(t, saveEngine, http.MethodPost, target,
+		`{"expectedRevision":"0"}`)
+	if missing.Code != http.StatusBadRequest ||
+		!strings.Contains(missing.Body.String(), "targetPosition is required") {
+		t.Fatalf("missing targetPosition: status = %d, body = %q",
+			missing.Code, missing.Body.String())
+	}
+	recorder := doSave(t, saveEngine, http.MethodPost, target,
+		`{"targetPosition":0,"expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.MoveOwnedItemToStorageResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode MoveOwnedItemToStorage body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveRevision != "1" || result.OwnedItemID != ownedItemID ||
+		result.GameID != 1000000 || result.TargetPosition != 0 || result.PhysicalIndex != 0 {
+		t.Fatalf("result = %+v", result)
+	}
+	stored, err := inventory.GetStorage(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, "common", 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetStorage: %v", err)
+	}
+	if len(stored.Records) != 1 || stored.Records[0].GameID != 1000000 {
+		t.Fatalf("Storage records = %+v", stored.Records)
 	}
 }
 

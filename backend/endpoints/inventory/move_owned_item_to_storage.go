@@ -1,17 +1,25 @@
 /*
 Endpoint: MoveOwnedItemToStorage
 EndpointID: move_owned_item_to_storage
-Purpose: Atomically moves a specific instance from Inventory to Storage.
-How it works: The runtime handler validates the complete request and expected revision, resolves catalog resources when applicable, and delegates one atomic operation to SaveEngine.
-Supported resource types: ItemDocument dozwolony w Storage.
-Input variables: characterID, ownedItemID, targetPosition, expectedRevision.
-GameCatalog variables read: the fields required to resolve and validate the declared resource types; the exact projection belongs to the endpoint runtime specification.
-Save variables processed: the state required by the declared variables; the mutation must validate a complete plan and finish with full success or rollback.
-Implementation status: contract definition only; no runtime handler is implemented in this file yet.
+Purpose: Atomically moves one common Inventory record to common Storage.
+How it works: The runtime handler resolves the addressed record and its item document, derives the Storage limit and delegates one atomic move to SaveEngine.
+Supported resource types: ItemDocument with a known positive maxStorage.
+Input variables: saveSessionID, characterID, ownedItemID, targetPosition, expectedRevision.
+GameCatalog variables read: item.gameID and item.storage.maxStorage.
+Save variables processed: one Inventory common record and count, the affected common Storage rows and count, and Storage NextAcquisitionSortId; NextEquipIndex, GaItem data and references stay unchanged.
+Implementation status: implemented
 */
 package inventory
 
-import "github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+import (
+	"errors"
+	"fmt"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
 
 // MoveOwnedItemToStorageEndpointID is the stable backend identifier of MoveOwnedItemToStorage.
 const MoveOwnedItemToStorageEndpointID = "move_owned_item_to_storage"
@@ -21,7 +29,66 @@ var MoveOwnedItemToStorageDefinition = contract.MustDefine(contract.Definition{
 	Name:                       "MoveOwnedItemToStorage",
 	ID:                         MoveOwnedItemToStorageEndpointID,
 	Kind:                       contract.Mutation,
-	SupportedResourceTypes:     "ItemDocument dozwolony w Storage",
-	SupportedResourceVariables: []string{"characterID", "ownedItemID", "targetPosition", "expectedRevision"},
-	Description:                "Atomically moves a specific instance from Inventory to Storage.",
+	SupportedResourceTypes:     "ItemDocument with a known positive maxStorage",
+	SupportedResourceVariables: []string{"saveSessionID", "characterID", "ownedItemID", "targetPosition", "expectedRevision"},
+	Description:                "Atomically moves one common Inventory record to common Storage.",
 })
+
+type MoveOwnedItemToStorageResult = saveengine.MoveOwnedItemToStorageResult
+
+func MoveOwnedItemToStorage(
+	engine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+	saveSessionID string,
+	characterID int,
+	ownedItemID string,
+	targetPosition int,
+	expectedRevision string,
+) (MoveOwnedItemToStorageResult, error) {
+	if engine == nil {
+		return MoveOwnedItemToStorageResult{}, errors.New("save engine is not available")
+	}
+	if gameCatalog == nil {
+		return MoveOwnedItemToStorageResult{}, errors.New("game catalog is not available")
+	}
+
+	owned, err := engine.GetOwnedItem(saveSessionID, characterID, ownedItemID)
+	if err != nil {
+		return MoveOwnedItemToStorageResult{}, err
+	}
+	if owned.Container != "inventory" {
+		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
+			"owned item %q is in %s, not Inventory", ownedItemID, owned.Container)
+	}
+	if owned.ContainerSection != saveengine.InventorySectionCommon {
+		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
+			"owned item %q is in Inventory section %q; moving key records to Storage is not supported",
+			ownedItemID, owned.ContainerSection)
+	}
+
+	gameIDs, err := engine.ResolveGaItemIDs(
+		saveSessionID, characterID, []uint32{owned.GaItemHandle})
+	if err != nil {
+		return MoveOwnedItemToStorageResult{}, err
+	}
+	gameID := gameIDs[0]
+	resource, exists := gameCatalog.ItemByGameID(gameID)
+	if !exists || resource.Kind != schema.ResourceKindItem || resource.Item == nil || resource.Key == "" {
+		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
+			"owned item %q: game ID 0x%08X is not a known item", ownedItemID, gameID)
+	}
+	if !resource.Item.Storage.MaxStorage.Known || resource.Item.Storage.MaxStorage.Value == 0 {
+		return MoveOwnedItemToStorageResult{}, fmt.Errorf(
+			"owned item %q: item 0x%08X cannot be stored", ownedItemID, gameID)
+	}
+
+	return engine.MoveOwnedItemToStorage(
+		saveSessionID,
+		characterID,
+		ownedItemID,
+		targetPosition,
+		expectedRevision,
+		gameID,
+		resource.Item.Storage.MaxStorage.Value,
+	)
+}
