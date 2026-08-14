@@ -2,13 +2,8 @@ package saveengine
 
 import "fmt"
 
-const (
-	itemOrderReservedIndexMax uint32 = 432
-	itemOrderUnsafeIndex      uint32 = 10000
-)
-
-// SetInventoryOrderResult reports one committed supported Inventory order.
-type SetInventoryOrderResult struct {
+// SetStorageOrderResult reports one committed supported Storage order.
+type SetStorageOrderResult struct {
 	SaveSessionID      string   `json:"saveSessionID"`
 	SaveRevision       string   `json:"saveRevision"`
 	CharacterID        int      `json:"characterID"`
@@ -16,36 +11,36 @@ type SetInventoryOrderResult struct {
 	AcquisitionIndices []uint32 `json:"acquisitionIndices"`
 }
 
-type inventoryOrderEntry struct {
+type storageOrderEntry struct {
 	physicalIndex int
 	gameID        uint32
 	acquisition   uint32
 }
 
-// SetInventoryOrder atomically replaces the logical order of every supported
-// Inventory common record. classifyGameID identifies the immutable catalog
-// subset owned by the endpoint; SaveEngine owns identities and binary layout.
-func (engine *Engine) SetInventoryOrder(
+// SetStorageOrder atomically replaces the logical order of every supported
+// Storage common record. classifyGameID identifies the immutable catalog subset
+// owned by the endpoint; SaveEngine owns identities and binary layout.
+func (engine *Engine) SetStorageOrder(
 	saveSessionID string,
 	characterID int,
 	orderedOwnedItemIDs []string,
 	expectedRevision string,
 	classifyGameID func(uint32) (bool, error),
-) (SetInventoryOrderResult, error) {
+) (SetStorageOrderResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
-		return SetInventoryOrderResult{}, fmt.Errorf(
+		return SetStorageOrderResult{}, fmt.Errorf(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 	if len(orderedOwnedItemIDs) == 0 {
-		return SetInventoryOrderResult{}, fmt.Errorf("orderedOwnedItemIDs must not be empty")
+		return SetStorageOrderResult{}, fmt.Errorf("orderedOwnedItemIDs must not be empty")
 	}
-	if len(orderedOwnedItemIDs) > inventoryHeldCommonRecords {
-		return SetInventoryOrderResult{}, fmt.Errorf(
+	if len(orderedOwnedItemIDs) > storageCommonRecords {
+		return SetStorageOrderResult{}, fmt.Errorf(
 			"orderedOwnedItemIDs contains %d records, want at most %d",
-			len(orderedOwnedItemIDs), inventoryHeldCommonRecords)
+			len(orderedOwnedItemIDs), storageCommonRecords)
 	}
 	if classifyGameID == nil {
-		return SetInventoryOrderResult{}, fmt.Errorf("Inventory order classifier is required")
+		return SetStorageOrderResult{}, fmt.Errorf("Storage order classifier is required")
 	}
 
 	var gameIDs, acquisitionIndices []uint32
@@ -69,7 +64,7 @@ func (engine *Engine) SetInventoryOrder(
 			return fmt.Errorf("character %d is not active", characterID)
 		}
 
-		records, err := readInventoryRecords(loaded, characterID)
+		records, err := readStorageRecords(loaded, characterID)
 		if err != nil {
 			return err
 		}
@@ -78,28 +73,28 @@ func (engine *Engine) SetInventoryOrder(
 			return fmt.Errorf("cannot resolve items of character %d: %w", characterID, err)
 		}
 
-		eligible := make(map[string]inventoryOrderEntry)
+		eligible := make(map[string]storageOrderEntry)
 		retainedBuckets := make(map[uint32]struct{})
 		for _, record := range records {
-			if record.ContainerSection != InventorySectionCommon {
+			if record.ContainerSection != StorageSectionCommon {
 				retainedBuckets[record.AcquisitionIndex>>1] = struct{}{}
 				continue
 			}
 			gameID, err := resolveGaItemHandle(byHandle, record.GaItemHandle)
 			if err != nil {
-				return fmt.Errorf("Inventory common record %d of character %d: %w",
+				return fmt.Errorf("Storage common record %d of character %d: %w",
 					record.PhysicalIndex, characterID, err)
 			}
 			supported, err := classifyGameID(gameID)
 			if err != nil {
-				return fmt.Errorf("Inventory common record %d of character %d: %w",
+				return fmt.Errorf("Storage common record %d of character %d: %w",
 					record.PhysicalIndex, characterID, err)
 			}
 			if !supported {
 				retainedBuckets[record.AcquisitionIndex>>1] = struct{}{}
 				continue
 			}
-			eligible[record.OwnedItemID] = inventoryOrderEntry{
+			eligible[record.OwnedItemID] = storageOrderEntry{
 				physicalIndex: record.PhysicalIndex,
 				gameID:        gameID,
 				acquisition:   record.AcquisitionIndex,
@@ -108,10 +103,10 @@ func (engine *Engine) SetInventoryOrder(
 
 		if len(orderedOwnedItemIDs) != len(eligible) {
 			return fmt.Errorf(
-				"orderedOwnedItemIDs contains %d records, but Inventory common has %d supported records",
+				"orderedOwnedItemIDs contains %d records, but Storage common has %d supported records",
 				len(orderedOwnedItemIDs), len(eligible))
 		}
-		ordered := make([]inventoryOrderEntry, len(orderedOwnedItemIDs))
+		ordered := make([]storageOrderEntry, len(orderedOwnedItemIDs))
 		seen := make(map[string]int, len(orderedOwnedItemIDs))
 		for position, ownedItemID := range orderedOwnedItemIDs {
 			if ownedItemID == "" {
@@ -128,34 +123,34 @@ func (engine *Engine) SetInventoryOrder(
 			if err != nil {
 				return fmt.Errorf("orderedOwnedItemIDs[%d]: %w", position, err)
 			}
-			if locator.container != ownedContainerInventory ||
-				locator.containerSection != InventorySectionCommon {
+			if locator.container != ownedContainerStorage ||
+				locator.containerSection != StorageSectionCommon {
 				return fmt.Errorf(
-					"orderedOwnedItemIDs[%d]: ownedItemID %q must address Inventory common",
+					"orderedOwnedItemIDs[%d]: ownedItemID %q must address Storage common",
 					position, ownedItemID)
 			}
 			entry, found := eligible[ownedItemID]
 			if !found {
 				return fmt.Errorf(
-					"orderedOwnedItemIDs[%d]: ownedItemID %q is not supported by Inventory order",
+					"orderedOwnedItemIDs[%d]: ownedItemID %q is not supported by Storage order",
 					position, ownedItemID)
 			}
 			ordered[position] = entry
 		}
 
-		inventoryAt, err := inventoryHeldSectionAt(loaded, characterID)
+		storageAt, err := storageBoxSectionAt(loaded, characterID)
 		if err != nil {
 			return err
 		}
-		nextAcquisitionAt := inventoryAt + addItemNextAcquisitionOffset
+		nextAcquisitionAt := storageAt + storageKeyAt + storageKeySize + 4
 		storedNext, err := loaded.snapshot.uint32At(nextAcquisitionAt)
 		if err != nil {
 			return fmt.Errorf(
-				"cannot read NextAcquisitionSortId of character %d: %w", characterID, err)
+				"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
 		}
 		indices, err := planItemOrderIndices(storedNext, len(ordered), retainedBuckets)
 		if err != nil {
-			return fmt.Errorf("character %d: %w", characterID, err)
+			return fmt.Errorf("character %d Storage: %w", characterID, err)
 		}
 
 		writes := make([]byteWrite, 0, len(ordered)+1)
@@ -164,7 +159,8 @@ func (engine *Engine) SetInventoryOrder(
 				continue
 			}
 			writes = append(writes, byteWrite{
-				at:   inventoryAt + int64(entry.physicalIndex)*inventoryHeldRecordSize + 8,
+				at: storageAt + storageCommonAt +
+					int64(entry.physicalIndex)*storageRecordSize + 8,
 				data: littleEndianUint32(indices[position]),
 			})
 		}
@@ -173,7 +169,7 @@ func (engine *Engine) SetInventoryOrder(
 			data: littleEndianUint32(indices[len(indices)-1] + 1),
 		})
 		if err := applyByteWrites(loaded.snapshot, writes); err != nil {
-			return fmt.Errorf("cannot set Inventory order: %w", err)
+			return fmt.Errorf("cannot set Storage order: %w", err)
 		}
 
 		gameIDs = make([]uint32, len(ordered))
@@ -184,47 +180,14 @@ func (engine *Engine) SetInventoryOrder(
 		return nil
 	})
 	if err != nil {
-		return SetInventoryOrderResult{}, err
+		return SetStorageOrderResult{}, err
 	}
 
-	return SetInventoryOrderResult{
+	return SetStorageOrderResult{
 		SaveSessionID:      saveSessionID,
 		SaveRevision:       saveRevision,
 		CharacterID:        characterID,
 		GameIDs:            gameIDs,
 		AcquisitionIndices: acquisitionIndices,
 	}, nil
-}
-
-func planItemOrderIndices(
-	storedNext uint32,
-	count int,
-	retainedBuckets map[uint32]struct{},
-) ([]uint32, error) {
-	base := uint64(storedNext)
-	if base <= uint64(itemOrderReservedIndexMax) {
-		base = uint64(itemOrderReservedIndexMax) + 2
-	}
-	if base%2 != 0 {
-		base++
-	}
-	for bucket := range retainedBuckets {
-		after := (uint64(bucket) + 1) * 2
-		if after > base {
-			base = after
-		}
-	}
-
-	last := base + uint64(count-1)*2
-	if last >= uint64(itemOrderUnsafeIndex) {
-		return nil, fmt.Errorf(
-			"item order would assign acquisition index %d, want at most %d",
-			last, itemOrderUnsafeIndex-1)
-	}
-
-	indices := make([]uint32, count)
-	for position := range indices {
-		indices[position] = uint32(base) + uint32(position)*2
-	}
-	return indices, nil
 }

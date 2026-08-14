@@ -167,13 +167,13 @@ func TestSetInventoryOrderRejectsInvalidPermutationsWithoutMutation(t *testing.T
 	}
 }
 
-func TestPlanInventoryOrderIndicesRejectsTheUnsafeBoundary(t *testing.T) {
-	indices, err := planInventoryOrderIndices(500, 1, map[uint32]struct{}{350: {}})
+func TestPlanItemOrderIndicesRejectsTheUnsafeBoundary(t *testing.T) {
+	indices, err := planItemOrderIndices(500, 1, map[uint32]struct{}{350: {}})
 	if err != nil || !reflect.DeepEqual(indices, []uint32{702}) {
 		t.Fatalf("indices = %v, error = %v, want [702]", indices, err)
 	}
 
-	_, err = planInventoryOrderIndices(9998, 2, nil)
+	_, err = planItemOrderIndices(9998, 2, nil)
 	if err == nil || !strings.Contains(err.Error(), "10000") {
 		t.Fatalf("error = %v, want unsafe-index rejection", err)
 	}

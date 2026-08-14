@@ -1159,6 +1159,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetOwnedItemQuantityResult",
 		"SetInventoryOrderRequest",
 		"SetInventoryOrderResult",
+		"SetStorageOrderRequest",
+		"SetStorageOrderResult",
 		"MoveOwnedItemToInventoryRequest",
 		"MoveOwnedItemToInventoryResult",
 		"MoveOwnedItemToStorageRequest",
@@ -1233,8 +1235,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 44 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 44", found)
+	if found != 45 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 45", found)
 	}
 }
 
@@ -3741,6 +3743,85 @@ func TestStorageRoute(t *testing.T) {
 	if absent.Code != http.StatusNotFound {
 		t.Fatalf("storage route without an engine: status = %d, want 404 (body %q)",
 			absent.Code, absent.Body.String())
+	}
+}
+
+func TestSetStorageOrderRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeStorageFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	listed, err := saveEngine.GetStorage(
+		session.SaveSessionID, 0, saveengine.StorageSectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetStorage: %v", err)
+	}
+	ownedItemIDs := make(map[int]string)
+	for _, record := range listed.Records {
+		if record.PhysicalIndex == 0 || record.PhysicalIndex == 5 {
+			ownedItemIDs[record.PhysicalIndex] = record.OwnedItemID
+		}
+	}
+	if len(ownedItemIDs) != 2 {
+		t.Fatalf("fixture has %d supported Dagger Storage records, want two", len(ownedItemIDs))
+	}
+
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/storage/order"
+	serve := func(body string) *httptest.ResponseRecorder {
+		request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(newFullCatalog(t), testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		return recorder
+	}
+
+	for name, body := range map[string]string{
+		"missing order": `{"expectedRevision":"0"}`,
+		"unknown field": `{"orderedOwnedItemIDs":[],"expectedRevision":"0","unknown":true}`,
+	} {
+		recorder := serve(body)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)",
+				name, recorder.Code, recorder.Body.String())
+		}
+	}
+
+	body, err := json.Marshal(setStorageOrderRequest{
+		OrderedOwnedItemIDs: []string{ownedItemIDs[5], ownedItemIDs[0]},
+		ExpectedRevision:    "0",
+	})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	recorder := serve(string(body))
+	assertOK(t, recorder, target)
+	var result inventory.SetStorageOrderResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetStorageOrder body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveSessionID != session.SaveSessionID || result.SaveRevision != "1" ||
+		result.CharacterID != 0 || len(result.OrderedResources) != 2 ||
+		result.OrderedResources[0].Key != daggerResourceKey ||
+		result.OrderedResources[1].Key != daggerResourceKey ||
+		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{434, 436}) {
+		t.Fatalf("SetStorageOrder result = %+v", result)
+	}
+
+	updated, err := saveEngine.GetStorage(
+		session.SaveSessionID, 0, saveengine.StorageSectionCommon, 1, 50)
+	if err != nil {
+		t.Fatalf("GetStorage after reorder: %v", err)
+	}
+	wantIndices := map[int]uint32{5: 434, 0: 436}
+	for _, record := range updated.Records {
+		if want, exists := wantIndices[record.PhysicalIndex]; exists &&
+			record.AcquisitionIndex != want {
+			t.Fatalf("Dagger at physical index %d has acquisition index %d, want %d",
+				record.PhysicalIndex, record.AcquisitionIndex, want)
+		}
 	}
 }
 

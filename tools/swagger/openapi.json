@@ -1421,6 +1421,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage/order": {
+      "put": {
+        "operationId": "setStorageOrder",
+        "tags": ["Inventory"],
+        "summary": "SetStorageOrder",
+        "description": "Replaces the complete logical order of supported common Storage records. The request must contain every current ownedItemID whose GameCatalog category is melee_armaments, ranged_and_catalysts, shields, talismans, head, chest, arms or legs, excluding the technical Unarmed record, exactly once. Unsupported common records and every key record remain untouched. A successful mutation assigns fresh even acquisition indices with stride 2, starting above the reserved range and avoiding retained sort buckets; it rejects any plan that would reach acquisition index 10000. Storage NextAcquisitionSortId advances past the assigned range, while physical rows, handles, quantities, Storage NextEquipIndex, Inventory, Equipment and GaItem data remain unchanged. The mutation advances saveRevision by exactly one, marks the session dirty and retires all previous-revision ownedItemID tokens. WriteSave remains separate. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetStorageOrderRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Storage order and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetStorageOrderResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed input, an invalid character or revision, an incomplete or duplicate order, a stale, foreign, Inventory, key or unsupported ownedItemID, inconsistent catalog or save data, or no safe acquisition-index range",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}": {
       "get": {
         "operationId": "getOwnedItem",
@@ -4568,6 +4616,80 @@
             "type": "array",
             "minItems": 1,
             "maxItems": 2688,
+            "description": "Fresh native acquisition indices assigned in the same order as orderedResources.",
+            "items": {
+              "type": "integer",
+              "format": "int64",
+              "minimum": 434,
+              "maximum": 9999
+            }
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "orderedResources",
+          "acquisitionIndices"
+        ]
+      },
+      "SetStorageOrderRequest": {
+        "type": "object",
+        "description": "Complete permutation of the supported common Storage instances and the optimistic-concurrency revision. Unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "orderedOwnedItemIDs": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1920,
+            "uniqueItems": true,
+            "description": "Every current supported common Storage ownedItemID exactly once, in desired logical order.",
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["orderedOwnedItemIDs", "expectedRevision"]
+      },
+      "SetStorageOrderResult": {
+        "type": "object",
+        "description": "Receipt for one committed complete supported Storage order. Every ownedItemID used by the request is stale after the revision advance.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "orderedResources": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1920,
+            "description": "Committed order expressed with stable GameCatalog resource identities.",
+            "items": {
+              "$ref": "#/components/schemas/ResourceRef"
+            }
+          },
+          "acquisitionIndices": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 1920,
             "description": "Fresh native acquisition indices assigned in the same order as orderedResources.",
             "items": {
               "type": "integer",

@@ -261,6 +261,11 @@
                 "filepath": "../../../docs/endpoints/inventory/set_inventory_order.md",
                 "title": "SetInventoryOrder"
               },
+              "/set-storage-order": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/inventory/set_storage_order.md",
+                "title": "SetStorageOrder"
+              },
               "/move-owned-item-to-inventory": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/inventory/move_owned_item_to_inventory.md",

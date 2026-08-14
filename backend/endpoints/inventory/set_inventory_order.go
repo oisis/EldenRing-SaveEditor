@@ -24,7 +24,7 @@ import (
 // SetInventoryOrderEndpointID is the stable backend identifier of SetInventoryOrder.
 const SetInventoryOrderEndpointID = "set_inventory_order"
 
-const inventoryOrderUnarmedKey = "0001ADB0"
+const itemOrderUnarmedKey = "0001ADB0"
 
 // SetInventoryOrderDefinition describes the public mutation contract.
 var SetInventoryOrderDefinition = contract.MustDefine(contract.Definition{
@@ -61,31 +61,11 @@ func SetInventoryOrder(
 		return SetInventoryOrderResult{}, errors.New("game catalog is not available")
 	}
 
-	classify := func(gameID uint32) (bool, error) {
-		resource, found := gameCatalog.ItemByGameID(gameID)
-		if !found || resource.Kind != schema.ResourceKindItem ||
-			resource.Item == nil || resource.Key == "" {
-			return false, fmt.Errorf(
-				"item with game ID 0x%08X is not found in game catalog", gameID)
-		}
-		if !resource.Item.Category.Known {
-			return false, fmt.Errorf(
-				"resource kind %q key %q has an unknown category", resource.Kind, resource.Key)
-		}
-		if resource.Key == inventoryOrderUnarmedKey {
-			return false, nil
-		}
-		switch resource.Item.Category.Value {
-		case "melee_armaments", "ranged_and_catalysts", "shields", "talismans",
-			"head", "chest", "arms", "legs":
-			return true, nil
-		default:
-			return false, nil
-		}
-	}
-
 	mutation, err := engine.SetInventoryOrder(
-		saveSessionID, characterID, orderedOwnedItemIDs, expectedRevision, classify)
+		saveSessionID, characterID, orderedOwnedItemIDs, expectedRevision,
+		func(gameID uint32) (bool, error) {
+			return supportsItemOrder(gameCatalog, gameID)
+		})
 	if err != nil {
 		return SetInventoryOrderResult{}, err
 	}
@@ -107,4 +87,27 @@ func SetInventoryOrder(
 		OrderedResources:   resources,
 		AcquisitionIndices: mutation.AcquisitionIndices,
 	}, nil
+}
+
+func supportsItemOrder(gameCatalog *gamecatalog.Catalog, gameID uint32) (bool, error) {
+	resource, found := gameCatalog.ItemByGameID(gameID)
+	if !found || resource.Kind != schema.ResourceKindItem ||
+		resource.Item == nil || resource.Key == "" {
+		return false, fmt.Errorf(
+			"item with game ID 0x%08X is not found in game catalog", gameID)
+	}
+	if !resource.Item.Category.Known {
+		return false, fmt.Errorf(
+			"resource kind %q key %q has an unknown category", resource.Kind, resource.Key)
+	}
+	if resource.Key == itemOrderUnarmedKey {
+		return false, nil
+	}
+	switch resource.Item.Category.Value {
+	case "melee_armaments", "ranged_and_catalysts", "shields", "talismans",
+		"head", "chest", "arms", "legs":
+		return true, nil
+	default:
+		return false, nil
+	}
 }
