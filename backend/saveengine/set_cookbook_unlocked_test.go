@@ -315,6 +315,10 @@ func TestSetCookbookUnlockedRejectsUnsupportedFlagsAndCorruptData(t *testing.T) 
 			normalID, 66999,
 			"event flag 66999 lies in block 66, which this reader does not support",
 		},
+		"whetblade block 60": {
+			normalID, 60130,
+			"event flag 60130 lies in block 60, which this reader does not support",
+		},
 		"block 69": {
 			normalID, 69000,
 			"event flag 69000 lies in block 69, which this reader does not support",

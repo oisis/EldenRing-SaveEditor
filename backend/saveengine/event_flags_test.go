@@ -106,7 +106,7 @@ type eventFlagTestFixture struct {
 func eventFlagTestPosition(t *testing.T, id uint32) (int64, uint8) {
 	t.Helper()
 
-	position := map[uint32]int64{67: 17, 68: 18}[id/1000]
+	position := map[uint32]int64{60: 10, 65: 15, 67: 17, 68: 18}[id/1000]
 	if position == 0 {
 		t.Fatalf("test fixture cannot place event flag %d", id)
 	}
@@ -228,8 +228,9 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	}
 }
 
-func TestGetEventFlagsResolvesBothBlocksAtTheirBoundaries(t *testing.T) {
+func TestGetEventFlagsResolvesSupportedBlocksAtTheirBoundaries(t *testing.T) {
 	content := eventFlagTestContent(PlatformPC)
+	content.set = append(content.set, 60000, 60999, 65000, 65999)
 
 	engine := New()
 	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
@@ -237,11 +238,14 @@ func TestGetEventFlagsResolvesBothBlocksAtTheirBoundaries(t *testing.T) {
 		t.Fatalf("LoadSave: %v", err)
 	}
 
-	// The first and the last flag of both supported blocks, so an off-by-one in
+	// The first and the last flag of every supported block, so an off-by-one in
 	// the byte or in the bit direction lands on a neighbour that is set
 	// differently.
-	requested := []uint32{67000, 67999, 68000, 68999}
-	want := map[uint32]bool{67000: true, 67999: true, 68000: false, 68999: false}
+	requested := []uint32{60000, 60999, 65000, 65999, 67000, 67999, 68000, 68999}
+	want := map[uint32]bool{
+		60000: true, 60999: true, 65000: true, 65999: true,
+		67000: true, 67999: true, 68000: false, 68999: false,
+	}
 
 	result, err := engine.GetEventFlags(loaded.SaveSessionID, content.slot, requested)
 	if err != nil {

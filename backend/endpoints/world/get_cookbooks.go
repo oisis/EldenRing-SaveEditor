@@ -282,6 +282,12 @@ func declaredCookbookFromResource(resource schema.Resource) (declaredCookbook, b
 		return declaredCookbook{}, false, fmt.Errorf(
 			"cookbook %q unlock %d has no known category", resource.Key, index)
 	}
+	block := unlock.EventFlagID.Value / 1000
+	if block != 67 && block != 68 {
+		return declaredCookbook{}, false, fmt.Errorf(
+			"event flag %d lies in block %d, which this reader does not support",
+			unlock.EventFlagID.Value, block)
+	}
 
 	return declaredCookbook{
 		entry: CookbookEntry{

@@ -1968,6 +1968,29 @@ func registerSaveSessionRoutes(
 	)
 
 	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.GetWhetblades(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.URL.Query().Get("availabilityFilter"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
 		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock",
 		func(writer http.ResponseWriter, request *http.Request) {
 			characterID, err := parseCharacterID(request.PathValue("characterID"))

@@ -655,6 +655,26 @@ func TestGetCookbooksRejectsADuplicateEventFlagID(t *testing.T) {
 	}
 }
 
+func TestGetCookbooksRejectsAFlagFromAnotherSupportedDomain(t *testing.T) {
+	engine, sessionID := loadCookbooksSession(t, true)
+
+	resources := patchCookbookUnlock(t, storedCookbookResources(t), getCookbooksFirstKey,
+		func(unlock *schema.ItemUnlock) { unlock.EventFlagID.Value = 60130 })
+
+	result, err := GetCookbooks(
+		engine, cookbooksCatalogOf(t, resources), sessionID, getCookbooksSlot, "")
+	if err == nil {
+		t.Fatal("GetCookbooks accepted a whetblade event flag for a cookbook")
+	}
+	want := "event flag 60130 lies in block 60, which this reader does not support"
+	if err.Error() != want {
+		t.Errorf("error = %q, want %q", err, want)
+	}
+	if len(result.Cookbooks) != 0 || result.Active {
+		t.Errorf("result = %+v, want the zero value", result)
+	}
+}
+
 func TestGetCookbooksRejectsACookbookUnlockOutsideTheGoodsFamily(t *testing.T) {
 	engine, sessionID := loadCookbooksSession(t, true)
 

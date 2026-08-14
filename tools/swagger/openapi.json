@@ -2154,6 +2154,47 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades": {
+      "get": {
+        "operationId": "getWhetblades",
+        "tags": ["World"],
+        "summary": "GetWhetblades",
+        "description": "Returns the six goods resources that GameCatalog declares through exactly one item.unlocks entry of kind whetblade: Whetstone Knife and the five Whetblades. A resource is unlocked when its main event flag is set or its positive-quantity goods record is present in common or key InventoryHeld, matching the confirmed SaveForge 1.5.8 and 1.6.8 state rule. GameCatalog owns each public kind, key, name, game ID and event flag; the raw identifiers stay private. Results are ordered by name and then key. An inactive or residual slot reports active false and every entry locked without reading its slot data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/AvailabilityFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Whetblades of the character slot that passed availabilityFilter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetWhetbladesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an invalid availabilityFilter, an active slot whose InventoryHeld or event flag section is malformed, an unsupported event flag block, or incomplete or conflicting Whetblade catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock": {
       "put": {
         "operationId": "setCookbookUnlocked",
@@ -4191,6 +4232,54 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "cookbooks"]
+      },
+      "WhetbladeEntry": {
+        "type": "object",
+        "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["item"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when the main event flag is set or a positive-quantity copy exists in common or key InventoryHeld."
+          }
+        },
+        "required": ["kind", "key", "name", "unlocked"]
+      },
+      "GetWhetbladesResult": {
+        "type": "object",
+        "description": "The Whetblades of one character slot that passed availabilityFilter, ordered by name and then key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "whetblades": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WhetbladeEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "whetblades"]
       },
       "SetCookbookUnlockedRequest": {
         "type": "object",

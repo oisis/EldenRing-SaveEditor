@@ -46,6 +46,12 @@ func (engine *Engine) SetCookbookUnlocked(
 		return SetCookbookUnlockedResult{}, fmt.Errorf(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
+	block := eventFlagID / eventFlagsPerBlock
+	if block != 67 && block != 68 {
+		return SetCookbookUnlockedResult{}, fmt.Errorf(
+			"event flag %d lies in block %d, which this reader does not support",
+			eventFlagID, block)
+	}
 
 	position, err := resolveEventFlag(eventFlagID)
 	if err != nil {

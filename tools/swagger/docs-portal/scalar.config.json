@@ -358,6 +358,11 @@
                 "filepath": "../../../docs/endpoints/world/get_cookbooks.md",
                 "title": "GetCookbooks"
               },
+              "/get-whetblades": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_whetblades.md",
+                "title": "GetWhetblades"
+              },
               "/set-cookbook-unlocked": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_cookbook_unlocked.md",
