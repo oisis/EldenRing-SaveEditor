@@ -46,7 +46,7 @@ func TestGetItemCapacityRejectsUnsupportedCatalogSemantics(t *testing.T) {
 			name: "flask shared limit",
 			catalog: addItemTestThen("tools", 20, 20, func(item *schema.ItemDocument) {
 				item.Subcategory = schema.Fact[string]{
-					Known: true, Value: itemCapacityFlasksSubcategory,
+					Known: true, Value: addItemFlasksSubcategory,
 					Provenance: item.Subcategory.Provenance,
 				}
 			}),

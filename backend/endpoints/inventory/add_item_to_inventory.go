@@ -18,6 +18,7 @@ import (
 
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -39,10 +40,142 @@ const addItemKeyCategory = "key_items"
 // share this mutation's confirmed inventory semantics, so the family gate keeps
 // them out independently of the prefix check.
 const (
-	addItemGoodsPrefix    uint32 = 0x40000000
-	addItemTalismanPrefix uint32 = 0x20000000
-	addItemFamilyPrefix   uint32 = 0xF0000000
+	addItemGoodsPrefix       uint32 = 0x40000000
+	addItemTalismanPrefix    uint32 = 0x20000000
+	addItemFamilyPrefix      uint32 = 0xF0000000
+	addItemFlasksSubcategory        = "Flasks"
 )
+
+type commonItemAddition struct {
+	resource          schema.Resource
+	gameID            uint32
+	separateInstances bool
+	maxPerStack       uint32
+}
+
+// resolveCommonItemAddition proves the catalog facts shared by the capacity
+// getter and both common-container add endpoints.
+func resolveCommonItemAddition(
+	gameCatalog *gamecatalog.Catalog,
+	kind string,
+	key string,
+	variantID *uint32,
+) (commonItemAddition, error) {
+	resource, err := gameCatalog.ResourceByKindKeyAndVariant(schema.ResourceKind(kind), key, variantID)
+	if err != nil {
+		return commonItemAddition{}, err
+	}
+	if resource.Item == nil {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q has no item document", kind, key)
+	}
+	item := resource.Item
+	if !item.Family.Known {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q has an unknown family", kind, key)
+	}
+	var familyPrefix uint32
+	switch item.Family.Value {
+	case schema.ItemFamilyGoods:
+		familyPrefix = addItemGoodsPrefix
+	case schema.ItemFamilyTalisman:
+		familyPrefix = addItemTalismanPrefix
+	default:
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q is of family %q; common item addition supports only %q and %q",
+			kind, key, item.Family.Value, schema.ItemFamilyGoods, schema.ItemFamilyTalisman)
+	}
+	if !item.GameID.Known {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q has an unknown game ID", kind, key)
+	}
+	gameID := item.GameID.Value
+	if gameID&addItemFamilyPrefix != familyPrefix {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q declares family %q and game ID 0x%08X, which disagree",
+			kind, key, item.Family.Value, gameID)
+	}
+	if !item.Category.Known {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q has an unknown category", kind, key)
+	}
+	if item.Category.Value == addItemKeyCategory {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q is in category %q, which does not distinguish common from"+
+				" key routing; common-only operations reject the category fail-closed",
+			kind, key, addItemKeyCategory)
+	}
+	if !item.Storage.RecordMode.Known {
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q has an unknown record mode", kind, key)
+	}
+	resolved := commonItemAddition{resource: resource, gameID: gameID}
+	switch item.Storage.RecordMode.Value {
+	case schema.RecordModeQuantityStack:
+		stack := item.Capabilities.Stack
+		if !stack.Known {
+			return commonItemAddition{}, fmt.Errorf(
+				"resource kind %q key %q has an unknown stack capability", kind, key)
+		}
+		if !stack.Enabled {
+			return commonItemAddition{}, fmt.Errorf(
+				"resource kind %q key %q stores a quantity but does not stack", kind, key)
+		}
+		if stack.Rules == nil || stack.Rules.MaxPerStack == 0 {
+			return commonItemAddition{}, fmt.Errorf(
+				"resource kind %q key %q carries no stack limit", kind, key)
+		}
+		resolved.maxPerStack = stack.Rules.MaxPerStack
+	case schema.RecordModeSeparateInstances:
+		resolved.separateInstances = true
+		resolved.maxPerStack = 1
+	default:
+		return commonItemAddition{}, fmt.Errorf(
+			"resource kind %q key %q declares the unsupported record mode %q",
+			kind, key, item.Storage.RecordMode.Value)
+	}
+	return resolved, nil
+}
+
+func validateCommonItemAdditionSubcategory(
+	resolved commonItemAddition,
+	kind string,
+	key string,
+) error {
+	item := resolved.resource.Item
+	if !item.Subcategory.Known {
+		return fmt.Errorf("resource kind %q key %q has an unknown subcategory", kind, key)
+	}
+	if item.Subcategory.Value == addItemFlasksSubcategory {
+		return fmt.Errorf(
+			"resource kind %q key %q is a Flask whose shared charge limit is not represented"+
+				" by one catalog capacity; it is rejected fail-closed", kind, key)
+	}
+	return nil
+}
+
+func storageCommonItemAdditionLimit(
+	resolved commonItemAddition,
+	kind string,
+	key string,
+) (uint32, error) {
+	item := resolved.resource.Item
+	if !item.Storage.MaxStorage.Known || item.Storage.MaxStorage.Value == 0 {
+		return 0, fmt.Errorf(
+			"resource kind %q key %q carries no storage limit", kind, key)
+	}
+	if item.Family.Value == schema.ItemFamilyGoods {
+		if item.Goods == nil || !item.Goods.IsDepositable.Known {
+			return 0, fmt.Errorf(
+				"resource kind %q key %q has unknown Storage depositability", kind, key)
+		}
+		if !item.Goods.IsDepositable.Value {
+			return 0, fmt.Errorf(
+				"resource kind %q key %q cannot be deposited into Storage", kind, key)
+		}
+	}
+	return item.Storage.MaxStorage.Value, nil
+}
 
 // AddItemToInventoryDefinition describes the public mutation contract.
 var AddItemToInventoryDefinition = contract.MustDefine(contract.Definition{

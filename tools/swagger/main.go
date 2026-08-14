@@ -542,6 +542,16 @@ type addItemToInventoryRequest struct {
 	ExpectedRevision string  `json:"expectedRevision"`
 }
 
+// addItemToStorageRequest is the strict JSON body of the common-Storage add
+// route. Every value reaches the endpoint unchanged.
+type addItemToStorageRequest struct {
+	Kind             string  `json:"kind"`
+	Key              string  `json:"key"`
+	VariantID        *uint32 `json:"variantID"`
+	Quantity         uint32  `json:"quantity"`
+	ExpectedRevision string  `json:"expectedRevision"`
+}
+
 // removeOwnedItemRequest is the strict JSON body of the removal route. The
 // revision travels in the body like it does for every other mutation, so the
 // transport keeps one convention; it reaches the endpoint unchanged.
@@ -1435,6 +1445,44 @@ func registerSaveSessionRoutes(
 				query.Get("containerSection"),
 				page,
 				pageSize,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage/items",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body addItemToStorageRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := inventory.AddItemToStorage(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.Kind,
+				body.Key,
+				body.VariantID,
+				body.Quantity,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

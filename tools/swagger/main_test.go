@@ -908,6 +908,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/move-to-storage", `{"targetPosition":0,"expectedRevision":"0"}`},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/owned-items/any-token/upgrade-level", `{"upgradeLevel":1,"expectedRevision":"0"}`},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/inventory/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
+		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/storage/items", `{"kind":"item","key":"400006A4","quantity":1,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/gestures/unlock", `{"gestureKind":"item","gestureKey":"401EA7AB","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
@@ -1008,6 +1009,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/order":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/inventory/items":                    "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage/items":                      "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}":          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/quantity": "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                           "get",
@@ -1157,6 +1159,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"OwnedItem",
 		"AddItemToInventoryRequest",
 		"AddItemToInventoryResult",
+		"AddItemToStorageRequest",
+		"AddItemToStorageResult",
 		"SetOwnedItemQuantityRequest",
 		"SetOwnedItemQuantityResult",
 		"SetInventoryOrderRequest",
@@ -1203,6 +1207,7 @@ func assertQuantityFitsTheRecord(t *testing.T, schemas map[string]any) {
 	for _, name := range []string{
 		"SetOwnedItemQuantityRequest", "SetOwnedItemQuantityResult",
 		"AddItemToInventoryRequest", "AddItemToInventoryResult",
+		"AddItemToStorageRequest", "AddItemToStorageResult",
 		"MoveOwnedItemToInventoryResult",
 		"MoveOwnedItemToStorageResult",
 	} {
@@ -1238,8 +1243,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 46 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 46", found)
+	if found != 47 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 47", found)
 	}
 }
 
@@ -3678,6 +3683,51 @@ func TestAddItemToInventoryRoute(t *testing.T) {
 	if repeated.Code != http.StatusBadRequest {
 		t.Fatalf("repeated add: status = %d, want 400 (body %q)",
 			repeated.Code, repeated.Body.String())
+	}
+}
+
+func TestAddItemToStorageRoute(t *testing.T) {
+	fixture := writeInventoryFixture(t)
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, fixture, "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/storage/items"
+	request := httptest.NewRequest(http.MethodPost, target, strings.NewReader(
+		`{"kind":"item","key":"400006A4","quantity":3,"expectedRevision":"0"}`))
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+
+	var result inventory.AddItemToStorageResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode AddItemToStorage body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveRevision != "1" || result.GameID != 0x400006A4 ||
+		result.Added != 3 || result.Quantity != 3 || !result.CreatedRecord ||
+		result.ContainerSection != saveengine.StorageSectionCommon {
+		t.Fatalf("AddItemToStorage result = %+v", result)
+	}
+	stored, err := inventory.GetStorage(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, saveengine.StorageSectionCommon, 0, 0)
+	if err != nil {
+		t.Fatalf("inventory.GetStorage: %v", err)
+	}
+	if stored.SaveRevision != "1" {
+		t.Fatalf("Storage revision = %q, want 1", stored.SaveRevision)
+	}
+	found := false
+	for _, record := range stored.Records {
+		if record.GameID == 0x400006A4 && record.Quantity == 3 {
+			found = true
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("Storage does not contain the added Throwing Dagger: %+v", stored.Records)
 	}
 }
 

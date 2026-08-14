@@ -1481,6 +1481,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage/items": {
+      "post": {
+        "operationId": "addItemToStorage",
+        "tags": ["Inventory"],
+        "summary": "AddItemToStorage",
+        "description": "Adds one goods or talisman resource or variant to common Storage in the session snapshot. quantity is a positive delta: the first matching quantity stack is topped up, while a new stack or separate instance receives the first free physical row. The endpoint rejects key_items, the unresolved Flasks subcategory, non-depositable goods, unknown or zero Storage limits, unsupported families and record modes, inconsistent game-ID prefixes, full containers, unsafe allocators, key-section conflicts and stale revisions before mutation. A genuinely empty Storage uses the native index 2 and initializes NextEquipIndex to 128; populated Storage preserves NextEquipIndex and advances its acquisition high-water mark. A first physical copy also receives one active GaItemData entry without repacking any section. The mutation is atomic, advances saveRevision once and leaves persistence to WriteSave. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddItemToStorageRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed Storage add and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddItemToStorageResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, an invalid characterID, quantity or expectedRevision, an unknown session, kind, key or variantID, an unsupported or non-depositable resource, unusable catalog or save data, an inactive character, a full container, an unsafe allocator or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/storage/order": {
       "put": {
         "operationId": "setStorageOrder",
@@ -4541,6 +4589,97 @@
             "format": "int32",
             "minimum": 0,
             "description": "Physical row of the written record inside the common section."
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "gameID", "added", "quantity", "createdRecord", "containerSection", "physicalIndex"]
+      },
+      "AddItemToStorageRequest": {
+        "type": "object",
+        "description": "Body of AddItemToStorage. Every value reaches the endpoint unchanged; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Resource kind, matched exactly and never normalised."
+          },
+          "key": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Resource key inside that kind, matched exactly and never normalised."
+          },
+          "variantID": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295,
+            "nullable": true,
+            "description": "Optional variant game ID. Absent or null selects the base item document; a value selects exactly the stored variant of the same (kind, key) pair that declares it."
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "Amount added, never a target total. It is never clamped; maxStorage may impose a lower maximum, and a separate-instances resource accepts 1 only."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["kind", "key", "quantity", "expectedRevision"]
+      },
+      "AddItemToStorageResult": {
+        "type": "object",
+        "description": "Receipt for one committed common-Storage add. It carries physical coordinates rather than an ownedItemID because the mutation retires every identity of the previous revision.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "gameID": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0,
+            "maximum": 4294967295
+          },
+          "added": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "quantity": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "createdRecord": {
+            "type": "boolean"
+          },
+          "containerSection": {
+            "type": "string",
+            "enum": ["common"]
+          },
+          "physicalIndex": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "gameID", "added", "quantity", "createdRecord", "containerSection", "physicalIndex"]
