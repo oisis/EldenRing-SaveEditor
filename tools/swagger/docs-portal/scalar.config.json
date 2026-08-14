@@ -358,6 +358,11 @@
                 "filepath": "../../../docs/endpoints/world/get_cookbooks.md",
                 "title": "GetCookbooks"
               },
+              "/get-bell-bearings": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_bell_bearings.md",
+                "title": "GetBellBearings"
+              },
               "/get-whetblades": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_whetblades.md",

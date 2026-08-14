@@ -219,9 +219,9 @@ type eventFlagPosition struct {
 }
 
 // resolveEventFlag places one identifier inside the bitfield. Only blocks with
-// confirmed cookbook or whetblade evidence are supported; every other block is
-// rejected by name instead of being answered from a guessed position, so an
-// unsupported identifier can never be reported as false.
+// confirmed cookbook, whetblade or bell bearing evidence are supported; every
+// other block is rejected by name instead of being answered from a guessed
+// position, so an unsupported identifier can never be reported as false.
 func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 	var blockPosition int64
 	switch block := id / eventFlagsPerBlock; block {
@@ -233,6 +233,8 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 		blockPosition = 17
 	case 68:
 		blockPosition = 18
+	case 11109:
+		blockPosition = 11129
 	default:
 		return eventFlagPosition{}, fmt.Errorf(
 			"event flag %d lies in block %d, which this reader does not support", id, block)

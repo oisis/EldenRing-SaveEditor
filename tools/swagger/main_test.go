@@ -913,6 +913,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/gestures", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/gestures/unlock", `{"gestureKind":"item","gestureKey":"401EA7AB","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bell-bearings", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/whetblades", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
@@ -1017,6 +1018,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures":                           "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures/unlock":                    "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings":                      "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1193,6 +1195,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetGestureUnlockedResult",
 		"CookbookEntry",
 		"GetCookbooksResult",
+		"BellBearingEntry",
+		"GetBellBearingsResult",
 		"WhetbladeEntry",
 		"GetWhetbladesResult",
 		"SetCookbookUnlockedRequest",
@@ -1254,8 +1258,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 49 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 49", found)
+	if found != 50 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 50", found)
 	}
 }
 
@@ -4367,6 +4371,69 @@ func TestCookbooksRouteMatchesTheGetter(t *testing.T) {
 	if malformed.Code != http.StatusBadRequest {
 		t.Fatalf("malformed characterID: status = %d, want 400 (body %q)",
 			malformed.Code, malformed.Body.String())
+	}
+}
+
+func writeBellBearingsRouteFixture(t *testing.T) string {
+	t.Helper()
+	path := writeCookbooksFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	const bellBearingFlag = uint32(11109710)
+	index := int64(bellBearingFlag % 1000)
+	offset := int64(11129)*cookbooksRouteEventFlagBlock + index/8
+	anchorBase := gesturesRouteSlotDataBase + gesturesRouteAnchorAt
+	data[anchorBase+cookbooksRouteSectionAt+offset] |= 1 << uint8(7-index%8)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestBellBearingsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeBellBearingsRouteFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	base := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/bell-bearings"
+	serve := func(target string) *httptest.ResponseRecorder {
+		t.Helper()
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+		return recorder
+	}
+	want, err := world.GetBellBearings(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, "")
+	if err != nil {
+		t.Fatalf("world.GetBellBearings: %v", err)
+	}
+	if !want.Active || len(want.BellBearings) != 62 {
+		t.Fatalf("fixture result = active %t with %d bell bearings, want true/62",
+			want.Active, len(want.BellBearings))
+	}
+
+	recorder := serve(base)
+	assertOK(t, recorder, base)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("bell bearings route body differs from the getter result")
+	}
+
+	target := base + "?availabilityFilter=unlocked"
+	wantFiltered, err := world.GetBellBearings(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, "unlocked")
+	if err != nil {
+		t.Fatalf("world.GetBellBearings(unlocked): %v", err)
+	}
+	filtered := serve(target)
+	assertOK(t, filtered, target)
+	if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantFiltered)) {
+		t.Fatal("filtered bell bearings route body differs from the getter result")
 	}
 }
 

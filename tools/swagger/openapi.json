@@ -2154,6 +2154,47 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings": {
+      "get": {
+        "operationId": "getBellBearings",
+        "tags": ["World"],
+        "summary": "GetBellBearings",
+        "description": "Returns every goods resource that GameCatalog declares through exactly one item.unlocks entry of kind bell_bearing. GameCatalog owns the public kind, key, name, category and event flag, while the raw flag remains private. A Bell Bearing is unlocked only when its acquisition flag is set, matching SaveForge 1.5.8 and 1.6.8 semantics for a Bell Bearing handed to the Twin Maiden Husks; an item still held in Inventory or Storage is not treated as handed in. Results are ordered by category, name and key. An inactive or residual slot reports active false and every entry locked without reading its event flag bitfield. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/AvailabilityFilter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The Bell Bearings of the character slot that passed availabilityFilter",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBellBearingsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an invalid availabilityFilter, a malformed event flag section, an unsupported event flag block, or incomplete or conflicting Bell Bearing catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades": {
       "get": {
         "operationId": "getWhetblades",
@@ -4232,6 +4273,58 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "cookbooks"]
+      },
+      "BellBearingEntry": {
+        "type": "object",
+        "description": "One goods ItemDocument that declares exactly one bell_bearing unlock, together with its acquisition state. The raw event flag is not exposed.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["item"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[0-9A-F]{8}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "category": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when the Bell Bearing acquisition flag is set."
+          }
+        },
+        "required": ["kind", "key", "name", "category", "unlocked"]
+      },
+      "GetBellBearingsResult": {
+        "type": "object",
+        "description": "The Bell Bearings of one character slot that passed availabilityFilter, ordered by category, name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "bellBearings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BellBearingEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "bellBearings"]
       },
       "WhetbladeEntry": {
         "type": "object",

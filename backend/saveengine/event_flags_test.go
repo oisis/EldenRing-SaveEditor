@@ -106,7 +106,7 @@ type eventFlagTestFixture struct {
 func eventFlagTestPosition(t *testing.T, id uint32) (int64, uint8) {
 	t.Helper()
 
-	position := map[uint32]int64{60: 10, 65: 15, 67: 17, 68: 18}[id/1000]
+	position := map[uint32]int64{60: 10, 65: 15, 67: 17, 68: 18, 11109: 11129}[id/1000]
 	if position == 0 {
 		t.Fatalf("test fixture cannot place event flag %d", id)
 	}
@@ -202,6 +202,7 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
 		t.Run(string(platform), func(t *testing.T) {
 			content := eventFlagTestContent(platform)
+			content.set = append(content.set, 11109710)
 
 			engine := New()
 			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
@@ -210,7 +211,8 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 			}
 
 			result, err := engine.GetEventFlags(
-				loaded.SaveSessionID, content.slot, []uint32{67000, 67110})
+				loaded.SaveSessionID, content.slot,
+				[]uint32{67000, 67110, 11109710, 11109711})
 			if err != nil {
 				t.Fatalf("GetEventFlags: %v", err)
 			}
@@ -219,7 +221,9 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 				SaveSessionID: loaded.SaveSessionID,
 				CharacterID:   content.slot,
 				Active:        true,
-				Flags:         map[uint32]bool{67000: true, 67110: false},
+				Flags: map[uint32]bool{
+					67000: true, 67110: false, 11109710: true, 11109711: false,
+				},
 			}
 			if !reflect.DeepEqual(result, want) {
 				t.Errorf("result = %+v, want %+v", result, want)
@@ -230,7 +234,7 @@ func TestGetEventFlagsReadsTheActiveSlotOfBothPlatforms(t *testing.T) {
 
 func TestGetEventFlagsResolvesSupportedBlocksAtTheirBoundaries(t *testing.T) {
 	content := eventFlagTestContent(PlatformPC)
-	content.set = append(content.set, 60000, 60999, 65000, 65999)
+	content.set = append(content.set, 60000, 60999, 65000, 65999, 11109000, 11109999)
 
 	engine := New()
 	loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), "")
@@ -241,10 +245,14 @@ func TestGetEventFlagsResolvesSupportedBlocksAtTheirBoundaries(t *testing.T) {
 	// The first and the last flag of every supported block, so an off-by-one in
 	// the byte or in the bit direction lands on a neighbour that is set
 	// differently.
-	requested := []uint32{60000, 60999, 65000, 65999, 67000, 67999, 68000, 68999}
+	requested := []uint32{
+		60000, 60999, 65000, 65999, 67000, 67999, 68000, 68999,
+		11109000, 11109999,
+	}
 	want := map[uint32]bool{
 		60000: true, 60999: true, 65000: true, 65999: true,
 		67000: true, 67999: true, 68000: false, 68999: false,
+		11109000: true, 11109999: true,
 	}
 
 	result, err := engine.GetEventFlags(loaded.SaveSessionID, content.slot, requested)
