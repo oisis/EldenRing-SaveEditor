@@ -494,6 +494,13 @@ type setWeaponUpgradeLevelRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setWeaponInfusionRequest is the strict JSON body of the weapon infusion
+// route. GameCatalog owns the affinity vocabulary and compatibility rules.
+type setWeaponInfusionRequest struct {
+	Affinity         schema.Affinity `json:"affinity"`
+	ExpectedRevision string          `json:"expectedRevision"`
+}
+
 // addItemToInventoryRequest is the strict JSON body of the add route. The
 // transport owns no catalog, family, routing, quantity or revision rule; every
 // value reaches the endpoint unchanged, and an absent variantID stays absent
@@ -1453,6 +1460,42 @@ func registerSaveSessionRoutes(
 				characterID,
 				request.PathValue("ownedItemID"),
 				*body.UpgradeLevel,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/infusion",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setWeaponInfusionRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Affinity == "" {
+				writeError(writer, http.StatusBadRequest, errors.New("affinity is required"))
+				return
+			}
+			result, err := inventory.SetWeaponInfusion(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.PathValue("ownedItemID"),
+				body.Affinity,
 				body.ExpectedRevision,
 			)
 			if err != nil {

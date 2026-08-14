@@ -1143,6 +1143,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetOwnedItemQuantityResult",
 		"SetWeaponUpgradeLevelRequest",
 		"SetWeaponUpgradeLevelResult",
+		"SetWeaponInfusionRequest",
+		"SetWeaponInfusionResult",
 		"GestureEntry",
 		"GetGesturesResult",
 		"SetGestureUnlockedRequest",
@@ -1205,8 +1207,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 39 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 39", found)
+	if found != 40 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 40", found)
 	}
 }
 
@@ -3195,6 +3197,44 @@ func TestSetWeaponUpgradeLevelRoute(t *testing.T) {
 	if result.SaveSessionID != session.SaveSessionID || result.SaveRevision != "1" ||
 		result.OwnedItemID != ownedItemID || result.PreviousGameID != 1000000 ||
 		result.GameID != 1000005 || result.UpgradeLevel != 5 {
+		t.Fatalf("result = %+v", result)
+	}
+}
+
+func TestSetWeaponInfusionRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(
+		saveEngine, writeSetEquippedArmamentsRouteFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	listed, err := saveEngine.GetInventory(
+		session.SaveSessionID, 0, saveengine.InventorySectionCommon, 1, 50)
+	if err != nil || len(listed.Records) < 2 {
+		t.Fatalf("GetInventory: %v, len=%d", err, len(listed.Records))
+	}
+	ownedItemID := listed.Records[1].OwnedItemID
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/owned-items/" + url.PathEscape(ownedItemID) + "/infusion"
+
+	rejected := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"expectedRevision":"0"}`)
+	if rejected.Code != http.StatusBadRequest ||
+		!strings.Contains(rejected.Body.String(), "affinity is required") {
+		t.Fatalf("missing affinity: status = %d, body = %q",
+			rejected.Code, rejected.Body.String())
+	}
+	recorder := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"affinity":"heavy","expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var result inventory.SetWeaponInfusionResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("decode SetWeaponInfusion body %q: %v", recorder.Body.String(), err)
+	}
+	if result.SaveSessionID != session.SaveSessionID || result.SaveRevision != "1" ||
+		result.OwnedItemID != ownedItemID || result.PreviousGameID != 1000000 ||
+		result.GameID != 1000100 || result.Affinity != schema.AffinityHeavy ||
+		result.UpgradeLevel != 0 {
 		t.Fatalf("result = %+v", result)
 	}
 }

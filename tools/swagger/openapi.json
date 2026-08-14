@@ -1565,6 +1565,57 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}/infusion": {
+      "patch": {
+        "operationId": "setWeaponInfusion",
+        "tags": ["Inventory"],
+        "summary": "SetWeaponInfusion",
+        "description": "Sets the affinity of one existing owned weapon while preserving its upgrade level and mounted Ash of War. GameCatalog validates the affinity against the weapon's confirmed capability and stored variant anchors; SaveEngine atomically updates the weapon GaItem ID, GaItemData and matching equipped hand-slot ID representations without allocating or repacking records. A successful mutation advances saveRevision by exactly one and retires every ownedItemID from the previous revision. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          },
+          {
+            "$ref": "#/components/parameters/OwnedItemID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetWeaponInfusionRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed weapon infusion mutation and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetWeaponInfusionResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed or unknown body data, an invalid characterID, affinity or expectedRevision, an unknown or stale session or ownedItemID, an unsupported weapon affinity, missing catalog anchors, an inconsistent save-side reference, or a rejected atomic mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gestures": {
       "get": {
         "operationId": "getGestures",
@@ -4294,6 +4345,41 @@
           "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 25}
         },
         "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "upgradeLevel"]
+      },
+      "SetWeaponInfusionRequest": {
+        "type": "object",
+        "description": "Body of SetWeaponInfusion. Both values reach the endpoint unchanged; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "affinity": {
+            "type": "string",
+            "enum": ["standard", "heavy", "keen", "quality", "fire", "flame_art", "lightning", "sacred", "magic", "cold", "poison", "blood", "occult"],
+            "description": "Requested target affinity. The resolved weapon's catalog capability may allow only a subset."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["affinity", "expectedRevision"]
+      },
+      "SetWeaponInfusionResult": {
+        "type": "object",
+        "description": "Receipt for one committed weapon affinity mutation. The echoed ownedItemID is already stale because the successful mutation advanced saveRevision.",
+        "properties": {
+          "saveSessionID": {"type": "string", "minLength": 1},
+          "saveRevision": {"type": "string", "minLength": 1, "pattern": "^(0|[1-9][0-9]*)$"},
+          "ownedItemID": {"type": "string", "minLength": 1},
+          "characterID": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 9},
+          "container": {"type": "string", "enum": ["inventory", "storage"]},
+          "previousGameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
+          "gameID": {"type": "integer", "format": "int64", "minimum": 0, "maximum": 268435455},
+          "affinity": {"type": "string", "enum": ["standard", "heavy", "keen", "quality", "fire", "flame_art", "lightning", "sacred", "magic", "cold", "poison", "blood", "occult"]},
+          "upgradeLevel": {"type": "integer", "format": "int32", "minimum": 0, "maximum": 25}
+        },
+        "required": ["saveSessionID", "saveRevision", "ownedItemID", "characterID", "container", "previousGameID", "gameID", "affinity", "upgradeLevel"]
       },
       "Error": {
         "type": "object",

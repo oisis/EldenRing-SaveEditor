@@ -290,6 +290,97 @@ func (catalog *Catalog) WeaponUpgradeTarget(
 	return anchor + uint32(upgradeLevel), nil
 }
 
+// WeaponInfusionTarget resolves one exact save-side weapon ID and derives the
+// ID of the requested affinity while preserving its current upgrade level.
+func (catalog *Catalog) WeaponInfusionTarget(
+	currentGameID uint32,
+	affinity schema.Affinity,
+) (uint32, uint8, error) {
+	if catalog == nil {
+		return 0, 0, errors.New("game catalog is not loaded")
+	}
+	resource, currentLevel, matches := catalog.weaponUpgradeAnchor(currentGameID)
+	if matches == 0 {
+		return 0, 0, fmt.Errorf(
+			"game ID 0x%08X is not a catalog weapon infusion", currentGameID)
+	}
+	if matches != 1 {
+		return 0, 0, fmt.Errorf(
+			"game ID 0x%08X matches more than one weapon infusion range", currentGameID)
+	}
+
+	stored, err := catalog.requireResource(resource.Kind, resource.Key)
+	if err != nil {
+		return 0, 0, err
+	}
+	infusion := stored.Item.Capabilities.Infusion
+	if !infusion.Known {
+		return 0, 0, fmt.Errorf(
+			"weapon 0x%08X has an unknown infusion capability", currentGameID)
+	}
+	if !infusion.Enabled {
+		return 0, 0, fmt.Errorf("weapon 0x%08X cannot be infused", currentGameID)
+	}
+	if infusion.Rules == nil {
+		return 0, 0, fmt.Errorf("weapon 0x%08X carries no infusion rules", currentGameID)
+	}
+	allowed := false
+	for _, candidate := range infusion.Rules.AllowedAffinities {
+		if candidate == affinity {
+			allowed = true
+			break
+		}
+	}
+	if !allowed {
+		return 0, 0, fmt.Errorf(
+			"affinity %q is not allowed for weapon 0x%08X", affinity, currentGameID)
+	}
+
+	currentAnchor := currentGameID - uint32(currentLevel)
+	if currentAnchor != stored.Item.GameID.Value {
+		currentMatches := 0
+		for _, variant := range stored.Item.Variants {
+			if variant.GameID.Known && variant.GameID.Value == currentAnchor &&
+				variant.Affinity.Known && variant.UpgradeLevel.Known &&
+				variant.UpgradeLevel.Value == 0 {
+				currentMatches++
+			}
+		}
+		if currentMatches != 1 {
+			return 0, 0, fmt.Errorf(
+				"weapon 0x%08X has %d matching current affinity anchors, want exactly 1",
+				currentGameID, currentMatches)
+		}
+	}
+
+	targetAnchor := stored.Item.GameID.Value
+	targetUpgrade := stored.Item.Capabilities.Upgrade
+	if affinity != schema.AffinityStandard {
+		targetMatches := 0
+		for _, variant := range stored.Item.Variants {
+			if variant.GameID.Known && variant.Affinity.Known &&
+				variant.Affinity.Value == affinity && variant.UpgradeLevel.Known &&
+				variant.UpgradeLevel.Value == 0 {
+				targetAnchor = variant.GameID.Value
+				targetUpgrade = variant.Data.Capabilities.Upgrade
+				targetMatches++
+			}
+		}
+		if targetMatches != 1 {
+			return 0, 0, fmt.Errorf(
+				"weapon 0x%08X has %d catalog anchors for affinity %q, want exactly 1",
+				currentGameID, targetMatches, affinity)
+		}
+	}
+	if !targetUpgrade.Known || !targetUpgrade.Enabled || targetUpgrade.Rules == nil ||
+		currentLevel > targetUpgrade.Rules.MaxLevel {
+		return 0, 0, fmt.Errorf(
+			"affinity %q cannot preserve upgrade level %d for weapon 0x%08X",
+			affinity, currentLevel, currentGameID)
+	}
+	return targetAnchor + uint32(currentLevel), currentLevel, nil
+}
+
 // weaponUpgradeAnchor finds the one base or stored affinity anchor whose
 // catalog range contains gameID. It deliberately scans only after the exact
 // game-ID index misses, so normal lookups remain constant-time and the catalog

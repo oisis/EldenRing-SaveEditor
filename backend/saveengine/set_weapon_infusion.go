@@ -1,9 +1,7 @@
 package saveengine
 
-// SetWeaponUpgradeLevelResult reports one committed upgrade-level change.
-// OwnedItemID identifies the record that was changed but is stale after the
-// returned revision advances, like every other owned-item mutation receipt.
-type SetWeaponUpgradeLevelResult struct {
+// SetWeaponInfusionResult reports one committed affinity change.
+type SetWeaponInfusionResult struct {
 	SaveSessionID  string `json:"saveSessionID"`
 	SaveRevision   string `json:"saveRevision"`
 	OwnedItemID    string `json:"ownedItemID"`
@@ -11,28 +9,26 @@ type SetWeaponUpgradeLevelResult struct {
 	Container      string `json:"container"`
 	PreviousGameID uint32 `json:"previousGameID"`
 	GameID         uint32 `json:"gameID"`
-	UpgradeLevel   uint8  `json:"upgradeLevel"`
 }
 
-// SetWeaponUpgradeLevel changes the exact save-side game ID of one existing
-// weapon record while preserving its base weapon and affinity.
-func (engine *Engine) SetWeaponUpgradeLevel(
+// SetWeaponInfusion changes one weapon affinity while preserving its upgrade
+// level, handle, container position and mounted Ash of War.
+func (engine *Engine) SetWeaponInfusion(
 	saveSessionID string,
 	characterID int,
 	ownedItemID string,
-	upgradeLevel uint8,
 	expectedRevision string,
 	expectedGameID uint32,
 	targetGameID uint32,
-) (SetWeaponUpgradeLevelResult, error) {
+) (SetWeaponInfusionResult, error) {
 	saveRevision, container, err := engine.setOwnedWeaponGameID(
 		saveSessionID, characterID, ownedItemID, expectedRevision, expectedGameID, targetGameID)
 	if err != nil {
-		return SetWeaponUpgradeLevelResult{}, err
+		return SetWeaponInfusionResult{}, err
 	}
-	return SetWeaponUpgradeLevelResult{
+	return SetWeaponInfusionResult{
 		SaveSessionID: saveSessionID, SaveRevision: saveRevision, OwnedItemID: ownedItemID,
 		CharacterID: characterID, Container: container, PreviousGameID: expectedGameID,
-		GameID: targetGameID, UpgradeLevel: upgradeLevel,
+		GameID: targetGameID,
 	}, nil
 }
