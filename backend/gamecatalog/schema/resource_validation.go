@@ -21,6 +21,8 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 		return validateBossResource(resource, sources)
 	case ResourceKindMapRegion:
 		return validateMapRegionResource(resource, sources)
+	case ResourceKindTutorial:
+		return validateTutorialResource(resource, sources)
 	default:
 		return fmt.Errorf("resource %q: unsupported kind %q", resource.Key, resource.Kind)
 	}
@@ -45,6 +47,7 @@ func validateSoleDocument(resource Resource) error {
 		{ResourceKindGrace, resource.Grace != nil},
 		{ResourceKindBoss, resource.Boss != nil},
 		{ResourceKindMapRegion, resource.MapRegion != nil},
+		{ResourceKindTutorial, resource.Tutorial != nil},
 	}
 	for _, document := range present {
 		if document.carried && document.kind != resource.Kind {
@@ -403,6 +406,41 @@ func validateMapRegionResource(resource Resource, sources map[SourceID]struct{})
 		return fmt.Errorf(
 			"resource %q: mapRegion.visibleEventFlagID %d lies outside block %d, the only block the curated map visibility table confirms",
 			resource.Key, visible.Value, mapRegionFlagBlock)
+	}
+	return nil
+}
+
+// validateTutorialResource requires the stable TutorialParam identity and the
+// official non-empty title used to present the resource. Untitled parameter
+// rows are not converted into guessed public resources by the generator.
+func validateTutorialResource(resource Resource, sources map[SourceID]struct{}) error {
+	if err := validateSlugKey(ResourceKindTutorial, resource.Key); err != nil {
+		return err
+	}
+	if err := validateSoleDocument(resource); err != nil {
+		return err
+	}
+	if resource.Tutorial == nil {
+		return fmt.Errorf("resource %q: tutorial document is required", resource.Key)
+	}
+	tutorialID := resource.Tutorial.TutorialID
+	if err := validateFact("tutorial.tutorialID", tutorialID, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !tutorialID.Known || tutorialID.Value == 0 {
+		return fmt.Errorf("resource %q: tutorial.tutorialID must be known and non-zero", resource.Key)
+	}
+	if resource.Key != fmt.Sprintf("%d", tutorialID.Value) {
+		return fmt.Errorf(
+			"resource %q: tutorial key must equal tutorial.tutorialID %d",
+			resource.Key, tutorialID.Value)
+	}
+	title := resource.Tutorial.Title
+	if err := validateFact("tutorial.title", title, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !title.Known || title.Value == "" {
+		return fmt.Errorf("resource %q: tutorial.title must be known and non-empty", resource.Key)
 	}
 	return nil
 }

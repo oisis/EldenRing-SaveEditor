@@ -34,6 +34,10 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		mapRegion := *resource.MapRegion
 		cloned.MapRegion = &mapRegion
 	}
+	if resource.Tutorial != nil {
+		tutorial := *resource.Tutorial
+		cloned.Tutorial = &tutorial
+	}
 	if resource.Item == nil {
 		return cloned
 	}

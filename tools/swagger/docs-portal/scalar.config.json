@@ -428,6 +428,11 @@
                 "filepath": "../../../docs/endpoints/world/get_map_regions.md",
                 "title": "GetMapRegions"
               },
+              "/get-tutorials": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_tutorials.md",
+                "title": "GetTutorials"
+              },
               "/get-summoning-pools": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_summoning_pools.md",

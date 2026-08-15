@@ -924,6 +924,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/graces", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bosses", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/map-regions", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/tutorials", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -965,8 +966,12 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		OpenAPI string                    `json:"openapi"`
 		Paths   map[string]map[string]any `json:"paths"`
 		Comps   struct {
-			Parameters map[string]any `json:"parameters"`
-			Schemas    map[string]any `json:"schemas"`
+			Parameters map[string]struct {
+				Schema struct {
+					Enum []string `json:"enum"`
+				} `json:"schema"`
+			} `json:"parameters"`
+			Schemas map[string]any `json:"schemas"`
 		} `json:"components"`
 	}
 	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
@@ -1041,6 +1046,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions":                        "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1124,7 +1130,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	assertLoopbackOnlySaveSessionRoutes(t, document.Paths)
 
 	for _, name := range []string{
-		"ResourceKind", "ResourceKey", "RelationType", "RelationDirection", "AvailabilityFilter",
+		"ResourceKind", "ResourceKey", "ResourceTypeFilter", "RelationType",
+		"RelationDirection", "AvailabilityFilter",
 	} {
 		if _, exists := document.Comps.Parameters[name]; !exists {
 			t.Fatalf("openapi.json is missing the shared %s parameter", name)
@@ -1132,6 +1139,13 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 	if _, exists := document.Comps.Parameters["ResourceID"]; exists {
 		t.Fatal("openapi.json still declares the removed ResourceID parameter")
+	}
+	resourceTypes := document.Comps.Parameters["ResourceTypeFilter"].Schema.Enum
+	if !reflect.DeepEqual(resourceTypes, []string{
+		"", "item", "colosseum", "region", "summoning_pool", "grace", "boss",
+		"map_region", "tutorial",
+	}) {
+		t.Fatalf("ResourceTypeFilter enum = %v", resourceTypes)
 	}
 	for _, name := range []string{
 		"Error",
@@ -1145,6 +1159,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GraceDocument",
 		"BossDocument",
 		"MapRegionDocument",
+		"TutorialDocument",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1261,6 +1276,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetBossesResult",
 		"MapRegionEntry",
 		"GetMapRegionsResult",
+		"TutorialEntry",
+		"GetTutorialsResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1291,6 +1308,7 @@ var resourceUnionDocuments = map[string]string{
 	"grace":          "grace",
 	"boss":           "boss",
 	"map_region":     "mapRegion",
+	"tutorial":       "tutorial",
 }
 
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
@@ -1328,11 +1346,11 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 7 {
-		t.Fatalf("Resource has %d oneOf branches, want 7", len(branches))
+	if len(branches) != 8 {
+		t.Fatalf("Resource has %d oneOf branches, want 8", len(branches))
 	}
 	for index, kind := range []string{
-		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region",
+		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial",
 	} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
@@ -1500,8 +1518,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 65 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 65", found)
+	if found != 66 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 66", found)
 	}
 }
 
@@ -5408,6 +5426,35 @@ func TestMapRegionsRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, recorder, target)
 	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
 		t.Fatal("map regions route body differs from the GetMapRegions result")
+	}
+}
+
+func TestTutorialsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/tutorials?availabilityFilter=locked"
+
+	want, err := world.GetTutorials(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, "locked")
+	if err != nil {
+		t.Fatalf("world.GetTutorials: %v", err)
+	}
+	if !want.Active || len(want.Tutorials) != 72 {
+		t.Fatalf("fixture result = active %t with %d tutorials, want true/72",
+			want.Active, len(want.Tutorials))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("tutorials route body differs from the GetTutorials result")
 	}
 }
 

@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool, a GraceDocument for kind grace, a BossDocument for kind boss or a MapRegionDocument for kind map_region. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool, a GraceDocument for kind grace, a BossDocument for kind boss, a MapRegionDocument for kind map_region or a TutorialDocument for kind tutorial. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools, graces, bosses and map regions carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools, graces, bosses, map regions and tutorials carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2470,6 +2470,37 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials": {
+      "get": {
+        "operationId": "getTutorials",
+        "tags": ["World"],
+        "summary": "GetTutorials",
+        "description": "Returns the 72 user-facing TutorialParam records that have an official non-empty TutorialTitle, joined with their membership in the character's TutorialData list. Technical/dummy rows and titleless control prompts are not exposed. Results are ordered by title and key, then filtered by availabilityFilter. An inactive or residual slot reports every tutorial locked without reading its slot data. Available only in local loopback mode; an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {"$ref": "#/components/parameters/SaveSessionID"},
+          {"$ref": "#/components/parameters/CharacterID"},
+          {"$ref": "#/components/parameters/AvailabilityFilter"}
+        ],
+        "responses": {
+          "200": {
+            "description": "The user-facing tutorials of the character slot that passed availabilityFilter",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/GetTutorialsResult"}
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an invalid availabilityFilter, a malformed TutorialData section, or incomplete tutorial catalog data",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Error"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools": {
       "get": {
         "operationId": "getSummoningPools",
@@ -3395,10 +3426,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces, bosses and map regions in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces, bosses, map regions and tutorials in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region"]
+          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial"]
         },
         "example": "item"
       },
@@ -5635,6 +5666,39 @@
         },
         "required": ["saveSessionID", "characterID", "active", "mapRegions"]
       },
+      "TutorialEntry": {
+        "type": "object",
+        "description": "One TutorialDocument reduced to its public identity, official title and current TutorialData membership. The TutorialParam row ID is represented once by the decimal resource key, without a second numeric field.",
+        "properties": {
+          "kind": {"type": "string", "enum": ["tutorial"]},
+          "key": {"type": "string", "pattern": "^[0-9]+$"},
+          "title": {"type": "string", "minLength": 1},
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when the TutorialParam row ID is present in the character's TutorialData list."
+          }
+        },
+        "required": ["kind", "key", "title", "unlocked"]
+      },
+      "GetTutorialsResult": {
+        "type": "object",
+        "description": "The user-facing tutorials of one character slot that passed availabilityFilter, ordered by title and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {"type": "string"},
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {"type": "boolean"},
+          "tutorials": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/TutorialEntry"}
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "tutorials"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6855,14 +6919,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument, kind 'boss' carries BossDocument and kind 'map_region' carries MapRegionDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument, kind 'boss' carries BossDocument, kind 'map_region' carries MapRegionDocument and kind 'tutorial' carries TutorialDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region"]
+            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial"]
           },
           "item": {
             "type": "object",
@@ -6886,6 +6950,9 @@
           },
           "mapRegion": {
             "$ref": "#/components/schemas/MapRegionDocument"
+          },
+          "tutorial": {
+            "$ref": "#/components/schemas/TutorialDocument"
           }
         },
         "required": ["key", "kind"],
@@ -6904,7 +6971,8 @@
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
                 {"required": ["boss"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           },
@@ -6922,7 +6990,8 @@
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
                 {"required": ["boss"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           },
@@ -6940,7 +7009,8 @@
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
                 {"required": ["boss"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           },
@@ -6958,7 +7028,8 @@
                 {"required": ["region"]},
                 {"required": ["grace"]},
                 {"required": ["boss"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           },
@@ -6976,7 +7047,8 @@
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
                 {"required": ["boss"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           },
@@ -6994,7 +7066,8 @@
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           },
@@ -7012,7 +7085,27 @@
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
-                {"required": ["boss"]}
+                {"required": ["boss"]},
+                {"required": ["tutorial"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["tutorial"]
+              }
+            },
+            "required": ["tutorial"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]},
+                {"required": ["region"]},
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]},
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]}
               ]
             }
           }
@@ -7288,6 +7381,33 @@
           }
         },
         "required": ["name", "areaLabel", "visibleEventFlagID"]
+      },
+      "TutorialDocument": {
+        "type": "object",
+        "description": "schema.TutorialDocument. The TutorialParam row ID stored in TutorialData and the official English TutorialTitle are separate known facts with independent provenance.",
+        "properties": {
+          "tutorialID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the TutorialParam row ID used as the resource key and stored in TutorialData after unlock.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 4294967295},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "title": {
+            "type": "object",
+            "description": "schema.Fact[string] holding the official non-empty TutorialTitle FMG value.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["tutorialID", "title"]
       },
       "ItemVariant": {
         "type": "object",

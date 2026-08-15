@@ -322,13 +322,12 @@ func eventFlagSectionStart(loaded *loadedSave, characterID int) (int64, error) {
 // eventFlagGaItemGameDataAt walks the same confirmed chain up to the first byte
 // of GaItemGameData and reports it together with the end of the slot.
 //
-// It is the single owner of that walk. The bitfield reader continues from here
-// over the fixed GaItemGameData block, and the GaItemData mutation addresses the
-// block itself from the same value, while the cookbook mutation reuses the
-// bitfield locator, so readers and writers cannot disagree about where either
-// section starts. Whether the block fits into the slot is the caller's check:
-// the bitfield locator proves that through the sections behind it, and the
-// GaItemData mutation proves it for the block itself.
+// It is the single owner of that walk. The bitfield and TutorialData readers
+// continue from here over the fixed GaItemGameData block, and the GaItemData
+// mutation addresses the block itself from the same value, while the cookbook
+// mutation reuses the bitfield locator. Whether the block fits into the slot is
+// the caller's check: the readers prove that through the sections behind it,
+// and the GaItemData mutation proves it for the block itself.
 func eventFlagGaItemGameDataAt(loaded *loadedSave, characterID int) (int64, int64, error) {
 	base, slotEnd := eventFlagSlotBounds(loaded.session.platform, characterID)
 

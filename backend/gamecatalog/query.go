@@ -183,6 +183,11 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// projected into a summary.
 			summary.NameKnown = resource.MapRegion.Name.Known
 			summary.Name = resource.MapRegion.Name.Value
+		case resource.Tutorial != nil:
+			// A tutorial exposes its official title in summaries; the physical
+			// TutorialParam row ID remains part of the full document.
+			summary.NameKnown = resource.Tutorial.Title.Known
+			summary.Name = resource.Tutorial.Title.Value
 		}
 		summaries = append(summaries, summary)
 	}

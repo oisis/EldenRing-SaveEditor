@@ -143,7 +143,7 @@ and the single capability:
     {
       "name": "game_catalog",
       "minimumVersion": 1,
-      "currentVersion": 14
+      "currentVersion": 15
     }
   ],
   "capabilities": [

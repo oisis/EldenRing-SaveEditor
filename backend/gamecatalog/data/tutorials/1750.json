@@ -1,0 +1,28 @@
+{
+  "key": "1750",
+  "kind": "tutorial",
+  "tutorial": {
+    "tutorialID": {
+      "known": true,
+      "value": 1750,
+      "provenance": {
+        "source": "regulation_tutorial_param",
+        "method": "TutorialParam row ID stored in TutorialData after unlock",
+        "table": "TutorialParam",
+        "row": "1750",
+        "field": "Row ID"
+      }
+    },
+    "title": {
+      "known": true,
+      "value": "Adding Affinities",
+      "provenance": {
+        "source": "game_text_tutorial_title_base",
+        "method": "resolved TutorialTitle.fmg entry 302000 from TutorialParam.textId",
+        "table": "TutorialParam",
+        "row": "1750",
+        "field": "textId"
+      }
+    }
+  }
+}
