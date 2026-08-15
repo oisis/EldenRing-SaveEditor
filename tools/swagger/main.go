@@ -351,6 +351,14 @@ type writeSaveRequest struct {
 	Target           string `json:"target"`
 }
 
+// setSaveAccountIDRequest is the strict JSON body of the account-identifier
+// route. accountID stays a string so a large identifier survives JSON, and both
+// values reach the endpoint exactly as sent.
+type setSaveAccountIDRequest struct {
+	AccountID        string `json:"accountID"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // deleteCharacterRequest is the strict JSON body of the permanent slot
 // deletion route. SaveEngine owns the revision and deletion rules.
 type deleteCharacterRequest struct {
@@ -718,6 +726,34 @@ func registerSaveSessionRoutes(
 		}
 		writeJSON(writer, http.StatusOK, result)
 	})
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/account-id",
+		func(writer http.ResponseWriter, request *http.Request) {
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setSaveAccountIDRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := savesession.SetSaveAccountID(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				body.AccountID,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
 
 	mux.HandleFunc("DELETE /api/v1/save-sessions/{saveSessionID}", func(writer http.ResponseWriter, request *http.Request) {
 		saveSessionID := request.PathValue("saveSessionID")

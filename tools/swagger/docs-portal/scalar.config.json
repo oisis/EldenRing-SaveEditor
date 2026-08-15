@@ -92,6 +92,11 @@
                 "filepath": "../../../docs/endpoints/savesession/write_save.md",
                 "title": "WriteSave"
               },
+              "/set-save-account-id": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/savesession/set_save_account_id.md",
+                "title": "SetSaveAccountID"
+              },
               "/close-save": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/savesession/close_save.md",

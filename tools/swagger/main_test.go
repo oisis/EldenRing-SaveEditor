@@ -878,6 +878,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPost, "/api/v1/save-sessions", `{"source":"unused-by-a-missing-route","expectedPlatform":""}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session", ""},
 		{http.MethodPost, "/api/v1/save-sessions/any-session/write", `{"expectedRevision":"0","target":"unused"}`},
+		{http.MethodPatch, "/api/v1/save-sessions/any-session/account-id", `{"accountID":"1","expectedRevision":"0"}`},
 		{http.MethodDelete, "/api/v1/save-sessions/any-session", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
@@ -993,6 +994,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions":                                                                             "post",
 		"/api/v1/save-sessions/{saveSessionID}":                                                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/write":                                                       "post",
+		"/api/v1/save-sessions/{saveSessionID}/account-id":                                                  "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters":                                                  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{sourceCharacterID}/clone":                        "post",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}":                                    "delete",
@@ -1273,8 +1275,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 55 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 55", found)
+	if found != 56 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 56", found)
 	}
 }
 
@@ -1684,6 +1686,43 @@ func TestSetCharacterActiveRoute(t *testing.T) {
 	for name, body := range map[string]string{
 		"missing active": `{"expectedRevision":"1"}`,
 		"unknown field":  `{"active":true,"expectedRevision":"1","extra":1}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			rejected := doSave(t, saveEngine, http.MethodPatch, target, body)
+			if rejected.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, body = %q", rejected.Code, rejected.Body.String())
+			}
+		})
+	}
+}
+
+func TestSetSaveAccountIDRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/account-id"
+
+	recorder := doSave(t, saveEngine, http.MethodPatch, target,
+		`{"accountID":"1311768467463790320","expectedRevision":"0"}`)
+	assertOK(t, recorder, target)
+	var got savesession.SetSaveAccountIDResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if got.SaveSessionID != session.SaveSessionID || got.SaveRevision != "1" {
+		t.Errorf("result = %+v, want the session at revision 1", got)
+	}
+	// The identifier is private account data and must not travel back.
+	if strings.Contains(recorder.Body.String(), "1311768467463790320") {
+		t.Errorf("the response repeats the identifier: %q", recorder.Body.String())
+	}
+
+	for name, body := range map[string]string{
+		"missing accountID":        `{"expectedRevision":"1"}`,
+		"missing expectedRevision": `{"accountID":"1"}`,
+		"unknown field":            `{"accountID":"1","expectedRevision":"1","extra":1}`,
 	} {
 		t.Run(name, func(t *testing.T) {
 			rejected := doSave(t, saveEngine, http.MethodPatch, target, body)

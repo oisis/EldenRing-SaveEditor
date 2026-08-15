@@ -545,6 +545,51 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/account-id": {
+      "patch": {
+        "operationId": "setSaveAccountID",
+        "tags": ["Save sessions"],
+        "summary": "SetSaveAccountID",
+        "description": "Writes the save owner identifier into the global UserData10 copy and into the own copy of every active character slot, as one atomic plan with verification and rollback. An inactive or residual slot is never touched. PC only: a PS4 session is rejected before any account-identifier field is read or written, because PS4 carries no confirmed Steam identity. accountID is a string holding the canonical decimal representation of a uint64, because JSON and JavaScript lose the precision of large identifiers; it is never echoed back in a result, an error or a log. The change stays in the private session snapshot until a later WriteSave persists it. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSaveAccountIDRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The session and its new revision",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetSaveAccountIDResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Malformed body, an unknown body field, a non-canonical accountID, an invalid or stale expectedRevision, an unknown session, a PS4 session, or an unparseable active slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters": {
       "get": {
         "operationId": "getSaveCharacters",
@@ -3154,6 +3199,42 @@
       "WriteSaveResult": {
         "type": "object",
         "description": "The session revision committed by a successful WriteSave.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "minLength": 1
+          },
+          "saveRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision"]
+      },
+      "SetSaveAccountIDRequest": {
+        "type": "object",
+        "description": "Body of SetSaveAccountID. Both fields are required and reach the endpoint exactly as sent; unknown fields are rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "accountID": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal representation of a uint64: 0, or an unsigned number without leading zeros that fits into 64 bits. It is a string because JSON and JavaScript lose the precision of large identifiers."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Current canonical decimal saveRevision, compared exactly and never normalised."
+          }
+        },
+        "required": ["accountID", "expectedRevision"]
+      },
+      "SetSaveAccountIDResult": {
+        "type": "object",
+        "description": "The session revision committed by a successful SetSaveAccountID. It never carries the identifier.",
         "properties": {
           "saveSessionID": {
             "type": "string",
