@@ -43,6 +43,9 @@ func (catalog *Catalog) deriveRelations(sources map[schema.SourceID]struct{}) er
 
 func (catalog *Catalog) deriveRequiredContainerRelations(sources map[schema.SourceID]struct{}) error {
 	for _, resource := range catalog.sortedResources() {
+		if resource.Item == nil {
+			continue
+		}
 		required := resource.Item.Acquisition.RequiredContainerID
 		if !required.Known {
 			continue
@@ -74,6 +77,9 @@ func (catalog *Catalog) itemsForCompatibility() ([]schema.Resource, []schema.Res
 	weapons := make([]schema.Resource, 0)
 	ashes := make([]schema.Resource, 0)
 	for _, resource := range catalog.sortedResources() {
+		if resource.Item == nil {
+			continue
+		}
 		switch resource.Item.Family.Value {
 		case schema.ItemFamilyWeapon:
 			weapons = append(weapons, resource)

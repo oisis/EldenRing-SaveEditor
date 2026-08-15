@@ -137,7 +137,8 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 	summaries := make([]ResourceSummary, 0, len(stored))
 	for _, resource := range stored {
 		summary := ResourceSummary{Kind: resource.Kind, Key: resource.Key}
-		if resource.Item != nil {
+		switch {
+		case resource.Item != nil:
 			summary.FamilyKnown = resource.Item.Family.Known
 			summary.Family = resource.Item.Family.Value
 			summary.NameKnown = resource.Item.Presentation.Name.Known
@@ -149,6 +150,11 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			summary.AshOfWarMount = summariseCapability(capabilities.AshOfWarMount)
 			summary.Stack = summariseCapability(capabilities.Stack)
 			summary.Equipment = summariseCapability(capabilities.Equipment)
+		case resource.Colosseum != nil:
+			// A colosseum has a name but no family and no capability, so those
+			// stay zero and no filter built on them can ever match it.
+			summary.NameKnown = resource.Colosseum.Name.Known
+			summary.Name = resource.Colosseum.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}

@@ -1,0 +1,25 @@
+{
+  "key": "limgrave_colosseum",
+  "kind": "colosseum",
+  "colosseum": {
+    "name": {
+      "known": true,
+      "value": "Limgrave Colosseum",
+      "provenance": {
+        "source": "game_text_place_name_base",
+        "method": "resolved PlaceName.fmg entry 450100 from the English FMG extract"
+      }
+    },
+    "unlockEventFlagID": {
+      "known": true,
+      "value": 60360,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated colosseum activation event flag of the legacy catalog, region \"Limgrave\"",
+        "table": "Colosseums",
+        "row": "60360",
+        "field": "map key"
+      }
+    }
+  }
+}

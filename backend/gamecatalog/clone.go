@@ -10,6 +10,10 @@ func cloneManifest(manifest schema.Manifest) schema.Manifest {
 
 func cloneResource(resource schema.Resource) schema.Resource {
 	cloned := resource
+	if resource.Colosseum != nil {
+		colosseum := *resource.Colosseum
+		cloned.Colosseum = &colosseum
+	}
 	if resource.Item == nil {
 		return cloned
 	}

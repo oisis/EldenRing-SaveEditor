@@ -97,12 +97,15 @@ func NewWithData(data CatalogData) (*Catalog, error) {
 		if _, duplicate := byKey[ref.Key]; duplicate {
 			return nil, fmt.Errorf("resource %d: duplicate resource kind %q key %q", index, ref.Kind, ref.Key)
 		}
+		cloned := cloneResource(resource)
+		byKey[ref.Key] = cloned
+		// Only an item carries a game ID, so only an item enters that index.
+		if cloned.Item == nil {
+			continue
+		}
 		if existing, exists := catalog.byItemGameID[resource.Item.GameID.Value]; exists && existing != ref {
 			return nil, fmt.Errorf("resource %d: duplicate item game ID 0x%08X", index, resource.Item.GameID.Value)
 		}
-
-		cloned := cloneResource(resource)
-		byKey[ref.Key] = cloned
 		catalog.byItemGameID[cloned.Item.GameID.Value] = ref
 		for _, variant := range cloned.Item.Variants {
 			if existing, exists := catalog.byItemGameID[variant.GameID.Value]; exists && existing != ref {

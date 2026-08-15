@@ -1,0 +1,25 @@
+{
+  "key": "caelid_colosseum",
+  "kind": "colosseum",
+  "colosseum": {
+    "name": {
+      "known": true,
+      "value": "Caelid Colosseum",
+      "provenance": {
+        "source": "game_text_place_name_base",
+        "method": "resolved PlaceName.fmg entry 450200 from the English FMG extract"
+      }
+    },
+    "unlockEventFlagID": {
+      "known": true,
+      "value": 60350,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated colosseum activation event flag of the legacy catalog, region \"Caelid\"",
+        "table": "Colosseums",
+        "row": "60350",
+        "field": "map key"
+      }
+    }
+  }
+}

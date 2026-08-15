@@ -13,6 +13,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/schema"
 	dbviewer "github.com/oisis/EldenRing-SaveForge/tools/viewer"
 )
 
@@ -30,6 +31,9 @@ func TestEmbeddedResourcesHaveOfficialName(t *testing.T) {
 		t.Fatal("embedded catalog has no resources")
 	}
 	for _, resource := range resources {
+		if resource.Kind != schema.ResourceKindItem {
+			continue
+		}
 		if resource.Item == nil {
 			t.Fatalf("resource %q has no item document", resource.Key)
 		}

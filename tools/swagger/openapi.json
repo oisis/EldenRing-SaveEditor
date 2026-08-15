@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so a colosseum carries an empty family and is never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2288,6 +2288,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums": {
+      "get": {
+        "operationId": "getColosseums",
+        "tags": ["World"],
+        "summary": "GetColosseums",
+        "description": "Returns the three colosseum resources GameCatalog declares, each with its unlock state. GameCatalog owns the public kind, key and name as well as the unlock event flag; this result carries no event flag identifier and no save-layout detail, while the full catalog document with its provenance stays available through GetResource. All flags are read in one bulk SaveEngine call. Results are ordered by name and then key. An inactive or residual slot reports active false and every entry locked without reading its slot data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The colosseums of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetColosseumsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an active slot whose event flag section is malformed, an unsupported event flag block, or incomplete or conflicting colosseum catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades": {
       "get": {
         "operationId": "getWhetblades",
@@ -3143,7 +3181,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. An item key is eight uppercase hexadecimal characters without a kind prefix. Not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters, a colosseum key is lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3175,10 +3213,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind. Only 'item' exists today.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items and colosseums in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item"]
+          "enum": ["", "item", "colosseum"]
         },
         "example": "item"
       },
@@ -5100,6 +5138,54 @@
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "bellBearingKind", "bellBearingKey", "unlocked"]
       },
+      "ColosseumEntry": {
+        "type": "object",
+        "description": "One colosseum ColosseumDocument reduced to its public identity together with its logical unlock state. The entry carries no unlock event flag; the full document does.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["colosseum"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when the declared unlock event flag is set in the character slot."
+          }
+        },
+        "required": ["kind", "key", "name", "unlocked"]
+      },
+      "GetColosseumsResult": {
+        "type": "object",
+        "description": "The colosseums of one character slot, ordered by name and then key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "colosseums": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ColosseumEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "colosseums"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6320,21 +6406,96 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. The item document is passed through as stored in the catalog; its full shape is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries the ItemDocument in 'item' and kind 'colosseum' carries the ColosseumDocument in 'colosseum'. The document of the other kind is absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
-            "type": "string"
+            "type": "string",
+            "enum": ["item", "colosseum"]
           },
           "item": {
             "type": "object",
-            "nullable": true,
+            "description": "The complete schema.ItemDocument as stored, with presentation, capabilities, safety, storage, acquisition, modifiers, links, variants, aliases, unlocks, related technical records, source records, the family block and full provenance. Present exactly when kind is 'item'.",
             "additionalProperties": true
+          },
+          "colosseum": {
+            "$ref": "#/components/schemas/ColosseumDocument"
           }
         },
-        "required": ["key", "kind", "item"]
+        "required": ["key", "kind"],
+        "oneOf": [
+          {
+            "properties": {
+              "kind": {
+                "enum": ["item"]
+              }
+            },
+            "required": ["item"],
+            "not": {
+              "required": ["colosseum"]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["colosseum"]
+              }
+            },
+            "required": ["colosseum"],
+            "not": {
+              "required": ["item"]
+            }
+          }
+        ]
+      },
+      "ColosseumDocument": {
+        "type": "object",
+        "description": "schema.ColosseumDocument. The arena name and the unlock event flag come from different sources, so each is a separate fact with its own provenance and neither is derived from the other.",
+        "properties": {
+          "name": {
+            "type": "object",
+            "description": "schema.Fact[string] holding the arena name the game itself shows.",
+            "properties": {
+              "known": {
+                "type": "boolean",
+                "enum": [true]
+              },
+              "value": {
+                "type": "string",
+                "minLength": 1
+              },
+              "provenance": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "unlockEventFlagID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the event flag whose set bit records the unlock in a save. GetColosseums does not report it; the full document does.",
+            "properties": {
+              "known": {
+                "type": "boolean",
+                "enum": [true]
+              },
+              "value": {
+                "type": "integer",
+                "format": "int64",
+                "minimum": 1,
+                "maximum": 4294967295
+              },
+              "provenance": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["name", "unlockEventFlagID"]
       },
       "ItemVariant": {
         "type": "object",
@@ -6424,7 +6585,7 @@
           },
           "name": {
             "type": "string",
-            "description": "Empty when the item name is not known. There is no fallback to the key or to a placeholder.",
+            "description": "The item name or the colosseum name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
             "example": "Dagger"
           }
         },

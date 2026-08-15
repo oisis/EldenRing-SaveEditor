@@ -274,6 +274,10 @@ func variantName(resource schema.Resource, variant schema.ItemVariant) string {
 func (server *Server) families() []string {
 	seen := make(map[schema.ItemFamily]struct{})
 	for _, document := range server.data.Documents {
+		// The Viewer is an item tool: a resource of another kind is skipped.
+		if document.Resource.Item == nil {
+			continue
+		}
 		seen[document.Resource.Item.Family.Value] = struct{}{}
 	}
 	families := make([]string, 0, len(seen))

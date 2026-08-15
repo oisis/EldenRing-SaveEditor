@@ -1,0 +1,25 @@
+{
+  "key": "royal_colosseum",
+  "kind": "colosseum",
+  "colosseum": {
+    "name": {
+      "known": true,
+      "value": "Royal Colosseum",
+      "provenance": {
+        "source": "game_text_place_name_base",
+        "method": "resolved PlaceName.fmg entry 450000 from the English FMG extract"
+      }
+    },
+    "unlockEventFlagID": {
+      "known": true,
+      "value": 60370,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated colosseum activation event flag of the legacy catalog, region \"Leyndell\"",
+        "table": "Colosseums",
+        "row": "60370",
+        "field": "map key"
+      }
+    }
+  }
+}

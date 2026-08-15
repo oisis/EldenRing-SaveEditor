@@ -3,7 +3,8 @@ package schema
 type ResourceKind string
 
 const (
-	ResourceKindItem ResourceKind = "item"
+	ResourceKindItem      ResourceKind = "item"
+	ResourceKindColosseum ResourceKind = "colosseum"
 )
 
 // ResourceRef is the identity of one catalog resource: the exact pair
@@ -15,10 +16,15 @@ type ResourceRef struct {
 	Key  string       `json:"key"`
 }
 
+// Resource is the union of the document types the catalog stores. Exactly one
+// document pointer matches Kind and every other one stays nil; the nil ones are
+// omitted from JSON, so a document never carries a null field for a type it is
+// not.
 type Resource struct {
-	Key  string        `json:"key"`
-	Kind ResourceKind  `json:"kind"`
-	Item *ItemDocument `json:"item"`
+	Key       string             `json:"key"`
+	Kind      ResourceKind       `json:"kind"`
+	Item      *ItemDocument      `json:"item,omitempty"`
+	Colosseum *ColosseumDocument `json:"colosseum,omitempty"`
 }
 
 func (resource Resource) Ref() ResourceRef {

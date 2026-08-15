@@ -1,7 +1,7 @@
 {
   "manifest": {
-    "schemaVersion": 8,
-    "dataVersion": "d914450487d5e5e6c53b857bb6cdff5642237b03ac297a21ba6563b56111d69b",
+    "schemaVersion": 9,
+    "dataVersion": "89d754bb8c2d0198628273c6a2b41f71cbe4d641ebad582c8c11bf28a3cde67b",
     "gameVersion": "1.16-class",
     "sources": [
       {
@@ -213,10 +213,26 @@
         "reviewed": true
       },
       {
+        "id": "game_text_place_name_base",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item.msgbnd/PlaceName.fmg",
+        "version": "47f319b7a1e045cb225261f0e03b301cbef74427b03d3caa8bc060b8c1023ba0",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "game_text_place_name_dlc",
+        "kind": "game_text_fmg_extract",
+        "location": "regulation.bin/msg/engus/item_dlc02.msgbnd/PlaceName_dlc01.fmg",
+        "version": "6b1612e1cff99c5540ea7f001a909e9c535d20c1fb06d816629e5584eb1a6beb",
+        "evidence": "game_data",
+        "reviewed": true
+      },
+      {
         "id": "legacy_db_data",
-        "kind": "legacy_item_catalog",
+        "kind": "legacy_saveforge_data",
         "location": "archive/saveforge-1.6.8/backend/db/data",
-        "version": "52edfb01c6deeee7601ce51527082602b8b9f719d05118cec2afa9ae71b3fbf3",
+        "version": "f40cdb6e0bc17b08645a4a74bc0bbe4b4392af39cb55bcd9884dcfc1032cacda",
         "evidence": "curated",
         "reviewed": true
       },
@@ -232,13 +248,16 @@
         "id": "legacy_unknown",
         "kind": "legacy_unresolved_item",
         "location": "archive/saveforge-1.6.8/backend/db/data/gestures.go",
-        "version": "52edfb01c6deeee7601ce51527082602b8b9f719d05118cec2afa9ae71b3fbf3",
+        "version": "f40cdb6e0bc17b08645a4a74bc0bbe4b4392af39cb55bcd9884dcfc1032cacda",
         "evidence": "unknown",
         "reviewed": false
       }
     ]
   },
   "documents": [
+    "colosseums/caelid_colosseum.json",
+    "colosseums/limgrave_colosseum.json",
+    "colosseums/royal_colosseum.json",
     "items/armor/10009c40.json",
     "items/armor/10009ca4.json",
     "items/armor/10009d08.json",

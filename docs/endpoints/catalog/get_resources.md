@@ -77,9 +77,9 @@ explicitly case-insensitive.
 
 Matched exactly and case-sensitively against `schema.Resource.Kind`.
 
-- Empty means every kind.
-- `item` is the only kind the current schema declares, so it is the only accepted
-  non-empty value.
+- Empty means every kind, which today mixes items and colosseums in one page.
+- `item` and `colosseum` are the kinds the current schema declares, so they are
+  the only accepted non-empty values.
 - Any other value, including `Item`, is rejected with
   `unsupported resource type "…"`. It is not silently ignored and it does not
   fall back to the unfiltered list.
@@ -94,8 +94,8 @@ Matched exactly and case-sensitively against `Item.Family`.
   `gesture`. No family is invented here.
 - Any other value is rejected with `unknown item family "…"`.
 - A resource matches only when it carries an item document **and** its family is
-  `Known`. A resource whose family was never established is never reported as a
-  member of the requested family.
+  `Known`. A resource whose family was never established, and every resource of
+  a non-item kind, is never reported as a member of the requested family.
 - A valid family that no resource carries yields an empty page and `total` 0, not
   the unfiltered list.
 
@@ -133,8 +133,9 @@ this filter requires the catalog to declare the relation first.
 A case-insensitive substring search.
 
 - Empty means no search.
-- The search runs against `Resource.Key` and against the item name
-  (`Item.Presentation.Name.Value`).
+- The search runs against `Resource.Key` and against the resource name: the item
+  name (`Item.Presentation.Name.Value`) or the colosseum name
+  (`Colosseum.Name.Value`).
 - An unknown name is the empty string in the projection, so it is never searched
   as a placeholder value.
 - A resource matches when the substring occurs in either field.
@@ -180,7 +181,7 @@ and `kind`, `key`, `family`, and `name` are the only four fields of an entry.
   back as `1` and `50`.
 - `family` is empty when the resource carries no item document or its family is
   not `Known`.
-- `name` is empty when `Item.Presentation.Name.Known` is false. There is no
+- `name` is empty when the name of the resource is not `Known`. There is no
   fallback to the key, to a category, or to a placeholder: a synthesised name
   would be indistinguishable from a real one.
 
@@ -207,7 +208,7 @@ no `ItemDocument`.
 | Condition | Message |
 |---|---|
 | `gameCatalog` is `nil` | `game catalog is not loaded` |
-| `resourceType` is neither empty nor `item` | `unsupported resource type "…"` |
+| `resourceType` is neither empty nor `item` nor `colosseum` | `unsupported resource type "…"` |
 | `family` is neither empty nor a `schema.ItemFamily` | `unknown item family "…"` |
 | `capability` is neither empty nor a capability name | `unknown capability "…"` |
 | `endpointId` is not empty | `the endpointId filter is not supported because GameCatalog does not declare endpoint relations yet; got "…"` |
@@ -357,7 +358,9 @@ negative filter and paging values.
   `*gamecatalog.Catalog` supplied by the caller.
 - `endpointId` is accepted only as an empty value. GameCatalog declares no
   endpoint relations yet, so the filter cannot be answered from data.
-- `item` is the only resource kind the schema declares today.
+- `item` and `colosseum` are the resource kinds the schema declares today. The
+  `family` and `capability` filters describe items only and never match a
+  colosseum.
 - The result is a projection for lists and pickers. A caller that needs the full
   document calls `GetResource` for the selected `(kind, key)` pair.
 - Filtering and paging run over the whole resource set on every call; there is no

@@ -208,7 +208,7 @@ which change whenever the catalog data is regenerated:
 
 ```json
 {
-  "schemaVersion": 8,
+  "schemaVersion": 9,
   "dataVersion": "<current-data-hash>",
   "gameVersion": "<current-game-version>",
   "valid": true,

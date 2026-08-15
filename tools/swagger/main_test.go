@@ -918,6 +918,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/cookbooks", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bell-bearings", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/whetblades", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/colosseums", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1029,6 +1030,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings":                      "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings/unlock":               "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1230,6 +1232,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetBellBearingUnlockedResult",
 		"WhetbladeEntry",
 		"GetWhetbladesResult",
+		"ColosseumEntry",
+		"GetColosseumsResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1244,6 +1248,60 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 	assertQuantityFitsTheRecord(t, document.Comps.Schemas)
 	assertRelationEndpointsAreResourceRefs(t, document.Comps.Schemas)
+}
+
+// The document declares OpenAPI 3.0.3, whose Schema Object has no const
+// keyword, so the Resource union has to discriminate kind with a one-element
+// enum instead.
+func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+	if strings.Contains(recorder.Body.String(), `"const"`) {
+		t.Fatal("openapi.json uses the const keyword, which OpenAPI 3.0.3 does not define")
+	}
+
+	var document struct {
+		OpenAPI string `json:"openapi"`
+		Comps   struct {
+			Schemas map[string]struct {
+				OneOf []struct {
+					Properties map[string]struct {
+						Enum []string `json:"enum"`
+					} `json:"properties"`
+					Required []string `json:"required"`
+					Not      struct {
+						Required []string `json:"required"`
+					} `json:"not"`
+				} `json:"oneOf"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+	if document.OpenAPI != "3.0.3" {
+		t.Fatalf("openapi = %q, want 3.0.3", document.OpenAPI)
+	}
+
+	branches := document.Comps.Schemas["Resource"].OneOf
+	if len(branches) != 2 {
+		t.Fatalf("Resource has %d oneOf branches, want 2", len(branches))
+	}
+	for index, pair := range [][2]string{{"item", "colosseum"}, {"colosseum", "item"}} {
+		kind, other := pair[0], pair[1]
+		branch := branches[index]
+		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
+			t.Fatalf("Resource oneOf[%d].kind enum = %v, want [%s]", index, got, kind)
+		}
+		if len(branch.Required) != 1 || branch.Required[0] != kind {
+			t.Fatalf("Resource oneOf[%d] required = %v, want [%s]", index, branch.Required, kind)
+		}
+		if len(branch.Not.Required) != 1 || branch.Not.Required[0] != other {
+			t.Fatalf("Resource oneOf[%d] not.required = %v, want [%s]", index, branch.Not.Required, other)
+		}
+	}
 }
 
 // SaveEngine stores a quantity in 31 bits because 0x80000000 is a preserved
@@ -1291,8 +1349,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 59 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 59", found)
+	if found != 60 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 60", found)
 	}
 }
 
@@ -4953,6 +5011,33 @@ func TestWhetbladesRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, filtered, target)
 	if !reflect.DeepEqual(decode(t, filtered.Body.Bytes()), marshalled(t, wantFiltered)) {
 		t.Fatal("filtered whetblades route body differs from the getter result")
+	}
+}
+
+func TestColosseumsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/colosseums"
+
+	want, err := world.GetColosseums(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetColosseums: %v", err)
+	}
+	if !want.Active || len(want.Colosseums) != 3 {
+		t.Fatalf("fixture result = active %t with %d colosseums, want true/3",
+			want.Active, len(want.Colosseums))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("colosseums route body differs from the GetColosseums result")
 	}
 }
 

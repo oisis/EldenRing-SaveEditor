@@ -134,7 +134,7 @@ func TestTheRingGestureStorageLimitsComeFromRegulation(t *testing.T) {
 
 func indexEmbeddedStorage(t *testing.T) map[uint32]schema.ItemStorage {
 	t.Helper()
-	resources := loadEmbeddedResources(t)
+	resources := loadEmbeddedItemResources(t)
 	storages := make(map[uint32]schema.ItemStorage, len(resources))
 	for _, resource := range resources {
 		storages[resource.Item.GameID.Value] = resource.Item.Storage

@@ -48,7 +48,7 @@ var wantLegacyNameFallbacks = map[uint32]string{
 // its names from its own official FMG catalog, with provenance that names the
 // exact FMG file and entry ID, and that every family is actually represented.
 func TestEmbeddedNamesComeFromTheOfficialFMGPerFamily(t *testing.T) {
-	resources := loadEmbeddedResources(t)
+	resources := loadEmbeddedItemResources(t)
 	seenFamilies := make(map[schema.ItemFamily]int, len(wantNameSourceByFamily))
 	for _, resource := range resources {
 		item := resource.Item
@@ -155,7 +155,7 @@ func TestEmbeddedLegacyNameFallbacksKeepSafetyMarkers(t *testing.T) {
 	for gameID, name := range wantLegacyNameFallbacks {
 		remaining[gameID] = name
 	}
-	for _, resource := range loadEmbeddedResources(t) {
+	for _, resource := range loadEmbeddedItemResources(t) {
 		item := resource.Item
 		want, expected := remaining[item.GameID.Value]
 		if !expected {
@@ -314,22 +314,30 @@ func TestViewerRendersEstablishedLegacyNameFallbacks(t *testing.T) {
 	}
 }
 
-func loadEmbeddedResources(t *testing.T) []schema.Resource {
+// loadEmbeddedItemResources returns the item resources of the embedded catalog.
+// Every caller asserts on ItemDocument facts, so resources of another kind are
+// dropped here instead of in each test.
+func loadEmbeddedItemResources(t *testing.T) []schema.Resource {
 	t.Helper()
 	data, err := loader.LoadFS(catalogdata.Files())
 	if err != nil {
 		t.Fatalf("LoadFS: %v", err)
 	}
-	resources := data.Resources()
+	resources := make([]schema.Resource, 0, len(data.Documents))
+	for _, resource := range data.Resources() {
+		if resource.Kind == schema.ResourceKindItem {
+			resources = append(resources, resource)
+		}
+	}
 	if len(resources) == 0 {
-		t.Fatal("embedded catalog has no resources")
+		t.Fatal("embedded catalog has no item resources")
 	}
 	return resources
 }
 
 func indexEmbeddedNames(t *testing.T) map[uint32]schema.Fact[string] {
 	t.Helper()
-	resources := loadEmbeddedResources(t)
+	resources := loadEmbeddedItemResources(t)
 	names := make(map[uint32]schema.Fact[string], len(resources))
 	for _, resource := range resources {
 		names[resource.Item.GameID.Value] = resource.Item.Presentation.Name

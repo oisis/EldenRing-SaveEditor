@@ -403,6 +403,11 @@
                 "filepath": "../../../docs/endpoints/world/get_whetblades.md",
                 "title": "GetWhetblades"
               },
+              "/get-colosseums": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_colosseums.md",
+                "title": "GetColosseums"
+              },
               "/set-cookbook-unlocked": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_cookbook_unlocked.md",

@@ -5,7 +5,7 @@ Purpose: Returns the complete document of one resource, including capabilities, 
 How it works: The runtime handler validates kind and key, resolves the exact (kind, key) pair against the already loaded GameCatalog, and returns a typed result built from an independent deep copy without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
 Input variables: kind, key.
-GameCatalog variables read: the resource stored under the given (Resource.Kind, Resource.Key) pair including its full schema.ItemDocument (presentation, capabilities, safety, storage, acquisition, modifiers, links, variants, aliases, unlocks, related technical records, source records and family data).
+GameCatalog variables read: the resource stored under the given (Resource.Kind, Resource.Key) pair including the full document of its kind: for kind item the schema.ItemDocument (presentation, capabilities, safety, storage, acquisition, modifiers, links, variants, aliases, unlocks, related technical records, source records and family data), for kind colosseum the schema.ColosseumDocument (name and unlock event flag ID, each with its own provenance).
 Save variables read: none; the endpoint never opens or reads a save.
 Implementation status: implemented; GetResource is the runtime handler of this contract.
 */
@@ -37,9 +37,13 @@ type GetResourceResult struct {
 	Resource schema.Resource `json:"resource"`
 }
 
-// GetResource returns one catalog resource in full. Relations are not part of
-// this result; they belong to GetResourceRelations. The resource identity is
-// the pair (kind, key), for example kind "item" and key "000F4240": the kind is
+// GetResource returns one catalog resource in full, whatever its kind: the
+// result carries the document of the resolved kind and no document of any
+// other, so an item never reports a colosseum field and a colosseum never
+// reports an item one. Relations are not part of this result; they belong to
+// GetResourceRelations. The resource identity is the pair (kind, key), for
+// example kind "item" and key "000F4240" or kind "colosseum" and key
+// "royal_colosseum": the kind is
 // resolved first and the key is matched exactly inside that kind only. Neither
 // value is trimmed, normalised, parsed, or retried under another kind, so the
 // pre-migration key "item:000F4240" is an unknown key and never an alias. A
