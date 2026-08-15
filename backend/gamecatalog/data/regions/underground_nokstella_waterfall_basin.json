@@ -1,0 +1,39 @@
+{
+  "key": "underground_nokstella_waterfall_basin",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1201014,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201014",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Nokstella Waterfall Basin",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201014",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201014",
+        "field": "Area"
+      }
+    }
+  }
+}

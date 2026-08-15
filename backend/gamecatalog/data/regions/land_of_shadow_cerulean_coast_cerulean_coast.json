@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_cerulean_coast_cerulean_coast",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6830000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6830000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Cerulean Coast: Cerulean Coast",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6830000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6830000",
+        "field": "Area"
+      }
+    }
+  }
+}

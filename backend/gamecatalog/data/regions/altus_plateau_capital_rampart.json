@@ -1,0 +1,39 @@
+{
+  "key": "altus_plateau_capital_rampart",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6301090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6301090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Capital Rampart",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6301090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Altus Plateau",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6301090",
+        "field": "Area"
+      }
+    }
+  }
+}

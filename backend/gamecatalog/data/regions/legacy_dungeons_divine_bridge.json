@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_divine_bridge",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1100017,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100017",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Divine Bridge",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100017",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100017",
+        "field": "Area"
+      }
+    }
+  }
+}

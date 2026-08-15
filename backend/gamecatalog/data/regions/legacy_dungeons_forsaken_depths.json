@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_forsaken_depths",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 3500008,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3500008",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Forsaken Depths",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3500008",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3500008",
+        "field": "Area"
+      }
+    }
+  }
+}

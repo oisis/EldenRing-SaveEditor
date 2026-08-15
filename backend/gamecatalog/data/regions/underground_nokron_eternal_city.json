@@ -1,0 +1,39 @@
+{
+  "key": "underground_nokron_eternal_city",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1207026,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1207026",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Nokron, Eternal City",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1207026",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1207026",
+        "field": "Area"
+      }
+    }
+  }
+}

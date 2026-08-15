@@ -1,0 +1,39 @@
+{
+  "key": "underground_prince_of_death_s_throne",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1203000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Prince of Death's Throne",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203000",
+        "field": "Area"
+      }
+    }
+  }
+}

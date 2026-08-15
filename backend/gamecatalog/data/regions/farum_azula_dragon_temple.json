@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_dragon_temple",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300017,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300017",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Dragon Temple",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300017",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300017",
+        "field": "Area"
+      }
+    }
+  }
+}

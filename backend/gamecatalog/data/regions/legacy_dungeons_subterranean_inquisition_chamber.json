@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_subterranean_inquisition_chamber",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1600022,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1600022",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Subterranean Inquisition Chamber",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1600022",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1600022",
+        "field": "Area"
+      }
+    }
+  }
+}

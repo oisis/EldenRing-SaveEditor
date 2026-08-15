@@ -1,0 +1,39 @@
+{
+  "key": "underground_great_waterfall_crest_part_ii",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1203002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Great Waterfall Crest Part II",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203002",
+        "field": "Area"
+      }
+    }
+  }
+}

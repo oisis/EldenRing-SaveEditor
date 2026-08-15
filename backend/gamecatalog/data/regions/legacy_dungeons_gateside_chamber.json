@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_gateside_chamber",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1000006,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1000006",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Gateside Chamber",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1000006",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1000006",
+        "field": "Area"
+      }
+    }
+  }
+}

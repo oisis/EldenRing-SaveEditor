@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_shadow_keep_tree_worship_sanctum",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 2100015,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2100015",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Shadow Keep: Tree-Worship Sanctum",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2100015",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2100015",
+        "field": "Area"
+      }
+    }
+  }
+}

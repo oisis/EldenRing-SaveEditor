@@ -1,0 +1,39 @@
+{
+  "key": "underground_aqueduct_facing_cliffs",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1202003,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202003",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Aqueduct-Facing Cliffs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202003",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202003",
+        "field": "Area"
+      }
+    }
+  }
+}

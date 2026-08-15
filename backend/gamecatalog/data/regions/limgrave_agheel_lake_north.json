@@ -1,0 +1,39 @@
+{
+  "key": "limgrave_agheel_lake_north",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6100002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6100002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Agheel Lake North",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6100002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6100002",
+        "field": "Area"
+      }
+    }
+  }
+}

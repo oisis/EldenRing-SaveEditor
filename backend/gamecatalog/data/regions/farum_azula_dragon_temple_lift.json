@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_dragon_temple_lift",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300019,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300019",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Dragon Temple Lift",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300019",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300019",
+        "field": "Area"
+      }
+    }
+  }
+}

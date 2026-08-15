@@ -1,0 +1,39 @@
+{
+  "key": "catacombs_caves_tunnels_divine_tower_of_limgrave",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 3410090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3410090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Divine Tower of Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3410090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Catacombs, Caves \u0026 Tunnels",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3410090",
+        "field": "Area"
+      }
+    }
+  }
+}

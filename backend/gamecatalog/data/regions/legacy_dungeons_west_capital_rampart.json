@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_west_capital_rampart",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1100016,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100016",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "West Capital Rampart",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100016",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100016",
+        "field": "Area"
+      }
+    }
+  }
+}

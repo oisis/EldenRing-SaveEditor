@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_scadu_altus_darklight_catacombs",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 4002001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4002001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Scadu Altus: Darklight Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4002001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4002001",
+        "field": "Area"
+      }
+    }
+  }
+}

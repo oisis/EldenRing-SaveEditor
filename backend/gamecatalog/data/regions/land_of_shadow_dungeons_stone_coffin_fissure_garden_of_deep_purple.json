@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_stone_coffin_fissure_garden_of_deep_purple",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 2200000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2200000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Stone Coffin Fissure: Garden of Deep Purple",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2200000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2200000",
+        "field": "Area"
+      }
+    }
+  }
+}

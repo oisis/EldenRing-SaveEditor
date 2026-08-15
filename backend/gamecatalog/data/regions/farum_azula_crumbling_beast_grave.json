@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_crumbling_beast_grave",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300012,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300012",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Crumbling Beast Grave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300012",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300012",
+        "field": "Area"
+      }
+    }
+  }
+}

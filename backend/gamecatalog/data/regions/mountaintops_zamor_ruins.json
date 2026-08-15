@@ -1,0 +1,39 @@
+{
+  "key": "mountaintops_zamor_ruins",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6501000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6501000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Zamor Ruins",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6501000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mountaintops",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6501000",
+        "field": "Area"
+      }
+    }
+  }
+}

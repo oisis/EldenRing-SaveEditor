@@ -1,0 +1,39 @@
+{
+  "key": "mt_gelmir_seethewater_terminus",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6302002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6302002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Seethewater Terminus",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6302002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mt. Gelmir",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6302002",
+        "field": "Area"
+      }
+    }
+  }
+}

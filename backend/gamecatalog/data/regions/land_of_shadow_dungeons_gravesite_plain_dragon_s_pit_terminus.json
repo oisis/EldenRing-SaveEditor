@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_gravesite_plain_dragon_s_pit_terminus",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 4301090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4301090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Gravesite Plain: Dragon's Pit Terminus",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4301090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4301090",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_gravesite_plain_pillar_path",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6810000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6810000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Gravesite Plain: Pillar Path",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6810000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6810000",
+        "field": "Area"
+      }
+    }
+  }
+}

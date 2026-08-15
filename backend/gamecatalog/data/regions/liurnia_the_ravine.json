@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_the_ravine",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200006,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200006",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "The Ravine",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200006",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200006",
+        "field": "Area"
+      }
+    }
+  }
+}

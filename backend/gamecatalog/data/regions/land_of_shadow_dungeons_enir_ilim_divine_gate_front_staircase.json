@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_enir_ilim_divine_gate_front_staircase",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 2001007,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2001007",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Enir-Ilim: Divine Gate Front Staircase",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2001007",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "2001007",
+        "field": "Area"
+      }
+    }
+  }
+}

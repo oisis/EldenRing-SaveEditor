@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_liurnia_highway_south",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Liurnia Highway South",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200001",
+        "field": "Area"
+      }
+    }
+  }
+}

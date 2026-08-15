@@ -11,25 +11,30 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 )
 
-const nonItemResourcePath = "colosseums/royal_colosseum.json"
+var nonItemResourcePaths = []string{
+	"colosseums/royal_colosseum.json",
+	"regions/limgrave_the_first_step.json",
+}
 
-// catalogFSWithColosseum extends the two-item test catalog with one stored
-// colosseum, which is a resource that carries no item document at all.
-func catalogFSWithColosseum(t *testing.T) fstest.MapFS {
+// catalogFSWithNonItems extends the two-item test catalog with stored resources
+// that carry no item document at all.
+func catalogFSWithNonItems(t *testing.T) fstest.MapFS {
 	t.Helper()
 
 	files := embeddedCatalogMapFS(t)
-	content, err := fs.ReadFile(catalogdata.Files(), nonItemResourcePath)
-	if err != nil {
-		t.Fatalf("read embedded %s: %v", nonItemResourcePath, err)
+	for _, path := range nonItemResourcePaths {
+		content, err := fs.ReadFile(catalogdata.Files(), path)
+		if err != nil {
+			t.Fatalf("read embedded %s: %v", path, err)
+		}
+		files[path] = &fstest.MapFile{Data: content}
 	}
-	files[nonItemResourcePath] = &fstest.MapFile{Data: content}
 
 	var index loader.CatalogFile
 	if err := json.Unmarshal(files["catalog.json"].Data, &index); err != nil {
 		t.Fatalf("decode test catalog.json: %v", err)
 	}
-	index.Documents = append(index.Documents, nonItemResourcePath)
+	index.Documents = append(index.Documents, nonItemResourcePaths...)
 	indexJSON, err := json.Marshal(index)
 	if err != nil {
 		t.Fatalf("encode test catalog.json: %v", err)
@@ -41,7 +46,7 @@ func catalogFSWithColosseum(t *testing.T) fstest.MapFS {
 // The Viewer is an item tool. A catalog that also stores resources of another
 // kind must not panic it, and the family list must stay item-only.
 func TestViewerIgnoresNonItemResources(t *testing.T) {
-	data, err := loader.LoadFS(catalogFSWithColosseum(t))
+	data, err := loader.LoadFS(catalogFSWithNonItems(t))
 	if err != nil {
 		t.Fatalf("LoadFS: %v", err)
 	}

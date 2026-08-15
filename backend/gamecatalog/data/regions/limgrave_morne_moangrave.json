@@ -1,0 +1,39 @@
+{
+  "key": "limgrave_morne_moangrave",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6102020,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6102020",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Morne Moangrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6102020",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6102020",
+        "field": "Area"
+      }
+    }
+  }
+}

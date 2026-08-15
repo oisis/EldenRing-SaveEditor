@@ -1,0 +1,39 @@
+{
+  "key": "mountaintops_consecrated_snowfield",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6502000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6502000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Consecrated Snowfield",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6502000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mountaintops",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6502000",
+        "field": "Area"
+      }
+    }
+  }
+}

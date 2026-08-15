@@ -1,0 +1,39 @@
+{
+  "key": "haligtree_malenia_goddess_of_rot",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1500000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Malenia, Goddess of Rot",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Haligtree",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500000",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_rauh_base_scorpion_river_catacombs",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 4001001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4001001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Rauh Base: Scorpion River Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4001001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4001001",
+        "field": "Area"
+      }
+    }
+  }
+}

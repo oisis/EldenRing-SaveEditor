@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_abyssal_woods_abyssal_woods",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6860000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6860000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Abyssal Woods: Abyssal Woods",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6860000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6860000",
+        "field": "Area"
+      }
+    }
+  }
+}

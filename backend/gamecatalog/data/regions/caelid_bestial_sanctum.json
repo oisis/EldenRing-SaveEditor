@@ -1,0 +1,39 @@
+{
+  "key": "caelid_bestial_sanctum",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6402001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6402001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Bestial Sanctum",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6402001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6402001",
+        "field": "Area"
+      }
+    }
+  }
+}

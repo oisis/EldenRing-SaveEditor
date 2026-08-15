@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_main_caria_manor_gate",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200007,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200007",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Main Caria Manor Gate",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200007",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200007",
+        "field": "Area"
+      }
+    }
+  }
+}

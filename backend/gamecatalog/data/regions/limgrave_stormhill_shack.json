@@ -1,0 +1,39 @@
+{
+  "key": "limgrave_stormhill_shack",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6101000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6101000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Stormhill Shack",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6101000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6101000",
+        "field": "Area"
+      }
+    }
+  }
+}

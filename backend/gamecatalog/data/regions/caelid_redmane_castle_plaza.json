@@ -1,0 +1,39 @@
+{
+  "key": "caelid_redmane_castle_plaza",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6400010,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400010",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Redmane Castle Plaza",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400010",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400010",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_gravesite_plain_fog_rift_catacombs",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 4000001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4000001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Gravesite Plain: Fog Rift Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4000001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4000001",
+        "field": "Area"
+      }
+    }
+  }
+}

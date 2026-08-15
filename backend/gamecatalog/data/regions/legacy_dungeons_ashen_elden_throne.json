@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_ashen_elden_throne",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1105000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1105000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Ashen Elden Throne",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1105000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1105000",
+        "field": "Area"
+      }
+    }
+  }
+}

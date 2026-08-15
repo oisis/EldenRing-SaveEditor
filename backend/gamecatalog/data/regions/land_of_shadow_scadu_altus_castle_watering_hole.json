@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_scadu_altus_castle_watering_hole",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6903090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6903090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Scadu Altus: Castle Watering Hole",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6903090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6903090",
+        "field": "Area"
+      }
+    }
+  }
+}

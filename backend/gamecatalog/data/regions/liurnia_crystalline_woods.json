@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_crystalline_woods",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200005,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200005",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Crystalline Woods",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200005",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200005",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "underground_mimic_tear",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1202020,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202020",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Mimic Tear",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202020",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202020",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_stranded_graveyard",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1800001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1800001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Stranded Graveyard",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1800001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1800001",
+        "field": "Area"
+      }
+    }
+  }
+}

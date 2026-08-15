@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_shadow_keep_main_gate_plaza",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6900010,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6900010",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Shadow Keep: Main Gate Plaza",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6900010",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6900010",
+        "field": "Area"
+      }
+    }
+  }
+}

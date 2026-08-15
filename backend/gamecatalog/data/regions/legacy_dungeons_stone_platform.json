@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_stone_platform",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1900000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1900000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Stone Platform",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1900000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1900000",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -5,6 +5,7 @@ type ResourceKind string
 const (
 	ResourceKindItem      ResourceKind = "item"
 	ResourceKindColosseum ResourceKind = "colosseum"
+	ResourceKindRegion    ResourceKind = "region"
 )
 
 // ResourceRef is the identity of one catalog resource: the exact pair
@@ -25,6 +26,7 @@ type Resource struct {
 	Kind      ResourceKind       `json:"kind"`
 	Item      *ItemDocument      `json:"item,omitempty"`
 	Colosseum *ColosseumDocument `json:"colosseum,omitempty"`
+	Region    *RegionDocument    `json:"region,omitempty"`
 }
 
 func (resource Resource) Ref() ResourceRef {

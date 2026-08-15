@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_liurnia_lake_shore",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Liurnia Lake Shore",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200002",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_jagged_peak_mountainside",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6850000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6850000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Jagged Peak: Mountainside",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6850000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6850000",
+        "field": "Area"
+      }
+    }
+  }
+}

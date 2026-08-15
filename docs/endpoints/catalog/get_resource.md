@@ -6,7 +6,8 @@
 already loaded GameCatalog, whatever its kind: an `ItemDocument` for kind `item`
 with its capabilities, variants, presentation and provenance, a
 `ColosseumDocument` for kind `colosseum` with its name, its unlock event flag ID
-and the provenance of both. It returns no relations; those belong to
+and the provenance of both, or a `RegionDocument` for kind `region` with its
+internal region ID, name and area. It returns no relations; those belong to
 [`GetResourceRelations`](get_resource_relations.md).
 
 | | |
@@ -47,8 +48,8 @@ The pair is **not**:
 
 The lookup resolves the kind first and the key only inside that kind:
 
-- `kind` is matched exactly against `Resource.Kind`. `item` and `colosseum` are
-  the kinds the current schema supports.
+- `kind` is matched exactly against `Resource.Kind`. `item`, `colosseum` and
+  `region` are the kinds the current schema supports.
 - `key` is matched exactly against `Resource.Key` inside the resolved kind. The
   same key may later exist under a different kind, so the key alone is not an
   identity.
@@ -60,9 +61,10 @@ The lookup resolves the kind first and the key only inside that kind:
 
 `schema.ValidateResource` requires an item key to be exactly eight uppercase
 hexadecimal characters (`0-9`, `A-F`), so `000F4240` is well formed and
-`000f4240` is not. A colosseum key uses lowercase letters, digits and
-underscores, for example `royal_colosseum`. `gamecatalog.New` rejects a catalog
-containing the same `(kind, key)` pair twice, so at most one resource can match.
+`000f4240` is not. Colosseum and region keys use lowercase letters, digits and
+underscores, for example `royal_colosseum` and `limgrave_the_first_step`.
+`gamecatalog.New` rejects a catalog containing the same `(kind, key)` pair
+twice, so at most one resource can match.
 
 ### The catalog argument
 
@@ -102,13 +104,13 @@ kind.
 | Field | Type | Meaning |
 |---|---|---|
 | `key` | `string` | The stable `Resource.Key` the lookup matched, for an item eight uppercase hexadecimal characters. |
-| `kind` | `string` | Resource kind, `item` or `colosseum`. |
+| `kind` | `string` | Resource kind, `item`, `colosseum` or `region`. |
 | `item` | `ItemDocument` | The complete item document. Present only for kind `item`. |
 | `colosseum` | `ColosseumDocument` | The complete colosseum document. Present only for kind `colosseum`. |
+| `region` | `RegionDocument` | The complete curated region document. Present only for kind `region`. |
 
 `schema.Resource` is a union over those kinds: exactly one document field is
-present and the other is omitted from the JSON entirely, so a colosseum response
-carries no `item` key and never `"item": null`.
+present and the others are omitted from the JSON entirely.
 
 The `item` document is returned whole, exactly as `schema.ItemDocument` defines
 it, including `presentation`, `capabilities`, `safety`, `storage`, `acquisition`,
@@ -201,9 +203,9 @@ whitespace-only kind and key, values with leading or trailing whitespace, an
 unknown kind, an unknown key, a lowercase key, the pre-migration prefixed key, a
 numeric string and a numeric `GameID` passed as a string, the four distinguishable
 kind and key failures, and the immutability of the returned result. They also
-cover a colosseum resource: its `ColosseumDocument` with both facts and their
-provenance, the absence of an item document, the independence of the returned
-copy, and a JSON body that carries no `item` field at all.
+cover colosseum and region resources: their complete typed documents and
+provenance, the absence of documents from other kinds, independent returned
+copies, and JSON bodies containing only the matching union field.
 
 ### Print the real getter output
 

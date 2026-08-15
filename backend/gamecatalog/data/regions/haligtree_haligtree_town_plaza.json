@@ -1,0 +1,39 @@
+{
+  "key": "haligtree_haligtree_town_plaza",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1500012,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500012",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Haligtree Town Plaza",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500012",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Haligtree",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500012",
+        "field": "Area"
+      }
+    }
+  }
+}

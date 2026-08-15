@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_crumbling_beast_grave_depths_tempest_facing_balcony",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300013,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300013",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Crumbling Beast Grave Depths, Tempest-Facing Balcony",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300013",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300013",
+        "field": "Area"
+      }
+    }
+  }
+}

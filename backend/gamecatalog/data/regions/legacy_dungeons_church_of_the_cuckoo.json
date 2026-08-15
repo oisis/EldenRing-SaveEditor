@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_church_of_the_cuckoo",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1400013,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1400013",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Church of the Cuckoo",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1400013",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1400013",
+        "field": "Area"
+      }
+    }
+  }
+}

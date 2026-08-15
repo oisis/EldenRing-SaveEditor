@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_eastern_tableland",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200004,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200004",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Eastern Tableland",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200004",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200004",
+        "field": "Area"
+      }
+    }
+  }
+}

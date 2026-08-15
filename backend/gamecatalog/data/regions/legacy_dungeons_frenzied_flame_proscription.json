@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_frenzied_flame_proscription",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 3500092,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3500092",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Frenzied Flame Proscription",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3500092",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3500092",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -919,6 +919,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bell-bearings", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/whetblades", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/colosseums", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/regions", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1031,6 +1032,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bell-bearings/unlock":               "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1128,6 +1130,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SupportedSchema",
 		"GetApplicationInfoResult",
 		"GetCatalogInfoResult",
+		"Resource",
+		"ColosseumDocument",
+		"RegionDocument",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1234,6 +1239,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetWhetbladesResult",
 		"ColosseumEntry",
 		"GetColosseumsResult",
+		"RegionEntry",
+		"GetRegionsResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1272,7 +1279,9 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 					} `json:"properties"`
 					Required []string `json:"required"`
 					Not      struct {
-						Required []string `json:"required"`
+						AnyOf []struct {
+							Required []string `json:"required"`
+						} `json:"anyOf"`
 					} `json:"not"`
 				} `json:"oneOf"`
 			} `json:"schemas"`
@@ -1286,11 +1295,10 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 2 {
-		t.Fatalf("Resource has %d oneOf branches, want 2", len(branches))
+	if len(branches) != 3 {
+		t.Fatalf("Resource has %d oneOf branches, want 3", len(branches))
 	}
-	for index, pair := range [][2]string{{"item", "colosseum"}, {"colosseum", "item"}} {
-		kind, other := pair[0], pair[1]
+	for index, kind := range []string{"item", "colosseum", "region"} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
 			t.Fatalf("Resource oneOf[%d].kind enum = %v, want [%s]", index, got, kind)
@@ -1298,8 +1306,13 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 		if len(branch.Required) != 1 || branch.Required[0] != kind {
 			t.Fatalf("Resource oneOf[%d] required = %v, want [%s]", index, branch.Required, kind)
 		}
-		if len(branch.Not.Required) != 1 || branch.Not.Required[0] != other {
-			t.Fatalf("Resource oneOf[%d] not.required = %v, want [%s]", index, branch.Not.Required, other)
+		if len(branch.Not.AnyOf) != 2 {
+			t.Fatalf("Resource oneOf[%d] excludes %d documents, want 2", index, len(branch.Not.AnyOf))
+		}
+		for _, excluded := range branch.Not.AnyOf {
+			if len(excluded.Required) != 1 || excluded.Required[0] == kind {
+				t.Fatalf("Resource oneOf[%d] invalid exclusion %v", index, excluded.Required)
+			}
 		}
 	}
 }
@@ -1349,8 +1362,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 60 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 60", found)
+	if found != 61 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 61", found)
 	}
 }
 
@@ -5038,6 +5051,33 @@ func TestColosseumsRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, recorder, target)
 	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
 		t.Fatal("colosseums route body differs from the GetColosseums result")
+	}
+}
+
+func TestRegionsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/regions"
+
+	want, err := world.GetRegions(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetRegions: %v", err)
+	}
+	if !want.Active || len(want.Regions) != 274 {
+		t.Fatalf("fixture result = active %t with %d regions, want true/274",
+			want.Active, len(want.Regions))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("regions route body differs from the GetRegions result")
 	}
 }
 

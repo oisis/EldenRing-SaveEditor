@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum or a RegionDocument for kind region. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so a colosseum carries an empty family and is never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums and regions carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2326,6 +2326,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions": {
+      "get": {
+        "operationId": "getRegions",
+        "tags": ["World"],
+        "summary": "GetRegions",
+        "description": "Returns the 274 curated invasion and blue-summon regions GameCatalog declares, each with its exact membership state in the character's UnlockedRegions list. Unknown raw IDs remain private. Results are ordered by area, name and key. An inactive or residual slot reports active false and every entry locked without reading its slot data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated regions of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetRegionsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, a malformed UnlockedRegions section, or conflicting region catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades": {
       "get": {
         "operationId": "getWhetblades",
@@ -3181,7 +3219,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters, a colosseum key is lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum and region keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3213,10 +3251,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items and colosseums in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums and regions in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum"]
+          "enum": ["", "item", "colosseum", "region"]
         },
         "example": "item"
       },
@@ -5186,6 +5224,58 @@
         },
         "required": ["saveSessionID", "characterID", "active", "colosseums"]
       },
+      "RegionEntry": {
+        "type": "object",
+        "description": "One curated RegionDocument reduced to its public identity and its exact membership state in UnlockedRegions. The raw region ID stays private.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["region"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "area": {
+            "type": "string",
+            "minLength": 1
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True when the internal region ID is present in the character's UnlockedRegions list."
+          }
+        },
+        "required": ["kind", "key", "name", "area", "unlocked"]
+      },
+      "GetRegionsResult": {
+        "type": "object",
+        "description": "The curated regions of one character slot, ordered by area, name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "regions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RegionEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "regions"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6406,14 +6496,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries the ItemDocument in 'item' and kind 'colosseum' carries the ColosseumDocument in 'colosseum'. The document of the other kind is absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument and kind 'region' carries RegionDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum"]
+            "enum": ["item", "colosseum", "region"]
           },
           "item": {
             "type": "object",
@@ -6422,6 +6512,9 @@
           },
           "colosseum": {
             "$ref": "#/components/schemas/ColosseumDocument"
+          },
+          "region": {
+            "$ref": "#/components/schemas/RegionDocument"
           }
         },
         "required": ["key", "kind"],
@@ -6434,7 +6527,10 @@
             },
             "required": ["item"],
             "not": {
-              "required": ["colosseum"]
+              "anyOf": [
+                {"required": ["colosseum"]},
+                {"required": ["region"]}
+              ]
             }
           },
           {
@@ -6445,7 +6541,24 @@
             },
             "required": ["colosseum"],
             "not": {
-              "required": ["item"]
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["region"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["region"]
+              }
+            },
+            "required": ["region"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]}
+              ]
             }
           }
         ]
@@ -6496,6 +6609,41 @@
           }
         },
         "required": ["name", "unlockEventFlagID"]
+      },
+      "RegionDocument": {
+        "type": "object",
+        "description": "schema.RegionDocument. Region ID, name and area are separate known facts with provenance from the curated invasion and blue-summon allowlist.",
+        "properties": {
+          "regionID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the internal PlayRegionParam row ID stored in UnlockedRegions.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 1, "maximum": 4294967295},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "name": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "area": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["regionID", "name", "area"]
       },
       "ItemVariant": {
         "type": "object",
@@ -6585,7 +6733,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The item name or the colosseum name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
+            "description": "The item, colosseum or region name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
             "example": "Dagger"
           }
         },

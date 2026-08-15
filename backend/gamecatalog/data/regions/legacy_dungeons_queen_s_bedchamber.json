@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_queen_s_bedchamber",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1100001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Queen's Bedchamber",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1100001",
+        "field": "Area"
+      }
+    }
+  }
+}

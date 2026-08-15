@@ -1,0 +1,39 @@
+{
+  "key": "underground_grand_cloister_part_ii",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1201017,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201017",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Grand Cloister Part II",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201017",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201017",
+        "field": "Area"
+      }
+    }
+  }
+}

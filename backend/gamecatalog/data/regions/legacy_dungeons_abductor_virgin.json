@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_abductor_virgin",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1600020,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1600020",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Abductor Virgin",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1600020",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1600020",
+        "field": "Area"
+      }
+    }
+  }
+}

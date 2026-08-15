@@ -1,0 +1,39 @@
+{
+  "key": "caelid_caelem_ruins",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6400001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Caelem Ruins",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400001",
+        "field": "Area"
+      }
+    }
+  }
+}

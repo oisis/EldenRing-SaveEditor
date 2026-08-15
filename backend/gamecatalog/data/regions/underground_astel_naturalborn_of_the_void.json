@@ -1,0 +1,39 @@
+{
+  "key": "underground_astel_naturalborn_of_the_void",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1204000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1204000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Astel, Naturalborn of the Void",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1204000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1204000",
+        "field": "Area"
+      }
+    }
+  }
+}

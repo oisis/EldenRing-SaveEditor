@@ -1,0 +1,39 @@
+{
+  "key": "underground_night_s_sacred_ground",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1202007,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202007",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Night's Sacred Ground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202007",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1202007",
+        "field": "Area"
+      }
+    }
+  }
+}

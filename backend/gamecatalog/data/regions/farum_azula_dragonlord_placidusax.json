@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_dragonlord_placidusax",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300020,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300020",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Dragonlord Placidusax",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300020",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300020",
+        "field": "Area"
+      }
+    }
+  }
+}

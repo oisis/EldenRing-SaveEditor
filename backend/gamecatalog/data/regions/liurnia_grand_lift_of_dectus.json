@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_grand_lift_of_dectus",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Grand Lift of Dectus",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200090",
+        "field": "Area"
+      }
+    }
+  }
+}

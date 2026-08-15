@@ -14,6 +14,10 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		colosseum := *resource.Colosseum
 		cloned.Colosseum = &colosseum
 	}
+	if resource.Region != nil {
+		region := *resource.Region
+		cloned.Region = &region
+	}
 	if resource.Item == nil {
 		return cloned
 	}

@@ -1,0 +1,39 @@
+{
+  "key": "caelid_caelid_highway_south",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6400000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Caelid Highway South",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400000",
+        "field": "Area"
+      }
+    }
+  }
+}

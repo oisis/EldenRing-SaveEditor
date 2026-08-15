@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_dragon_temple_transept",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300018,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300018",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Dragon Temple Transept",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300018",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300018",
+        "field": "Area"
+      }
+    }
+  }
+}

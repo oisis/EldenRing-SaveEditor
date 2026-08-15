@@ -1,0 +1,39 @@
+{
+  "key": "mountaintops_castle_sol",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6501002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6501002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Castle Sol",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6501002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mountaintops",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6501002",
+        "field": "Area"
+      }
+    }
+  }
+}

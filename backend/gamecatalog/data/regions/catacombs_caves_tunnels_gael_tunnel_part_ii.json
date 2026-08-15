@@ -1,0 +1,39 @@
+{
+  "key": "catacombs_caves_tunnels_gael_tunnel_part_ii",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 3207002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3207002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Gael Tunnel Part II",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3207002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Catacombs, Caves \u0026 Tunnels",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3207002",
+        "field": "Area"
+      }
+    }
+  }
+}

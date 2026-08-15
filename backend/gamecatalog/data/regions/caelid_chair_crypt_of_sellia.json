@@ -1,0 +1,39 @@
+{
+  "key": "caelid_chair_crypt_of_sellia",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6400020,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400020",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Chair-Crypt of Sellia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400020",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400020",
+        "field": "Area"
+      }
+    }
+  }
+}

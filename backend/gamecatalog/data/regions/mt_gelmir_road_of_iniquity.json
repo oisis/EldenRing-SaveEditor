@@ -1,0 +1,39 @@
+{
+  "key": "mt_gelmir_road_of_iniquity",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6302001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6302001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Road of Iniquity",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6302001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mt. Gelmir",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6302001",
+        "field": "Area"
+      }
+    }
+  }
+}

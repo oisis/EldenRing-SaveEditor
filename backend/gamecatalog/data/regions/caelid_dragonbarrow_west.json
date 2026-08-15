@@ -1,0 +1,39 @@
+{
+  "key": "caelid_dragonbarrow_west",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6402000,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6402000",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Dragonbarrow West",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6402000",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6402000",
+        "field": "Area"
+      }
+    }
+  }
+}

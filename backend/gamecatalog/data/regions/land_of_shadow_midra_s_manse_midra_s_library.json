@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_midra_s_manse_midra_s_library",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6860004,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6860004",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Midra's Manse: Midra's Library",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6860004",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6860004",
+        "field": "Area"
+      }
+    }
+  }
+}

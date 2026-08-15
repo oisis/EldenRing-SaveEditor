@@ -1,0 +1,39 @@
+{
+  "key": "mountaintops_fire_giant",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6502010,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6502010",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Fire Giant",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6502010",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mountaintops",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6502010",
+        "field": "Area"
+      }
+    }
+  }
+}

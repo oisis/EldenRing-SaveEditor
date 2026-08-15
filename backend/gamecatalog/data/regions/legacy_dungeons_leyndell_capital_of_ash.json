@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_leyndell_capital_of_ash",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1105011,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1105011",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Leyndell, Capital of Ash",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1105011",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1105011",
+        "field": "Area"
+      }
+    }
+  }
+}

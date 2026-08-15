@@ -1,0 +1,39 @@
+{
+  "key": "underground_deeproot_depths",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1203003,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203003",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Deeproot Depths",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203003",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1203003",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "altus_plateau_altus_highway_junction",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6300002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6300002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Altus Highway Junction",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6300002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Altus Plateau",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6300002",
+        "field": "Area"
+      }
+    }
+  }
+}

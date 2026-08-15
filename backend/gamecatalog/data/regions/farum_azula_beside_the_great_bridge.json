@@ -1,0 +1,39 @@
+{
+  "key": "farum_azula_beside_the_great_bridge",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1300006,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300006",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Beside the Great Bridge",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300006",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Farum Azula",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1300006",
+        "field": "Area"
+      }
+    }
+  }
+}

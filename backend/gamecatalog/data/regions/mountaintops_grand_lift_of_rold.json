@@ -1,0 +1,39 @@
+{
+  "key": "mountaintops_grand_lift_of_rold",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6500090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6500090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Grand Lift of Rold",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6500090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Mountaintops",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6500090",
+        "field": "Area"
+      }
+    }
+  }
+}

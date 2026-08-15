@@ -1,0 +1,39 @@
+{
+  "key": "underground_nokstella_eternal_city",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1201013,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201013",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Nokstella, Eternal City",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201013",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1201013",
+        "field": "Area"
+      }
+    }
+  }
+}

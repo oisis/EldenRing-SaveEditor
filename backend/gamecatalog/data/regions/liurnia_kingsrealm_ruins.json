@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_kingsrealm_ruins",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200003,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200003",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Kingsrealm Ruins",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200003",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200003",
+        "field": "Area"
+      }
+    }
+  }
+}

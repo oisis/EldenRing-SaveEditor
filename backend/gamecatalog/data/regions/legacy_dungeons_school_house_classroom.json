@@ -1,0 +1,39 @@
+{
+  "key": "legacy_dungeons_school_house_classroom",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1400015,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1400015",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "School House Classroom",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1400015",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Legacy Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1400015",
+        "field": "Area"
+      }
+    }
+  }
+}

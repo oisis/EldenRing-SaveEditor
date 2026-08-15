@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_behind_caria_manor",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6200008,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200008",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Behind Caria Manor",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200008",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6200008",
+        "field": "Area"
+      }
+    }
+  }
+}

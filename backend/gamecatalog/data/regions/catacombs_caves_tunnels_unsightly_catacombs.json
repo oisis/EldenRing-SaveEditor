@@ -1,0 +1,39 @@
+{
+  "key": "catacombs_caves_tunnels_unsightly_catacombs",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 3012001,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3012001",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Unsightly Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3012001",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Catacombs, Caves \u0026 Tunnels",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "3012001",
+        "field": "Area"
+      }
+    }
+  }
+}

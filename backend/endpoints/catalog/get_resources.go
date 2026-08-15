@@ -5,7 +5,7 @@ Purpose: Returns a paginated resource list filtered by type, family, capability,
 How it works: The runtime handler reads the already loaded GameCatalog through Catalog.ResourceSummaries, applies the declared filters in catalog order (kind, then key), counts the matches and returns one page of a light projection without loading, reloading or modifying the catalog.
 Supported resource types: GameResource.
 Input variables: resourceType, family, capability, endpointId, search, page, pageSize.
-GameCatalog variables read: Resource.Kind, Resource.Key, Item.Family, Item.Presentation.Name, Item.Capabilities (Known and Enabled only) and Colosseum.Name. The full resource document is never projected; it stays the responsibility of GetResource.
+GameCatalog variables read: Resource.Kind, Resource.Key, Item.Family, Item.Presentation.Name, Item.Capabilities (Known and Enabled only), Colosseum.Name and Region.Name. The full resource document is never projected; it stays the responsibility of GetResource.
 Save variables read: none; the endpoint never opens or reads a save.
 Implementation status: implemented; GetResources is the runtime handler of this contract.
 */
@@ -73,11 +73,12 @@ type GetResourcesResult struct {
 // GetResources returns one page of catalog resources reduced to the fields a
 // list or a picker needs. Every filter is matched exactly and case-sensitively
 // except search, which is case-insensitive on Resource.Key and on the resource
-// name. The accepted resource types are item and colosseum; family and
+// name. The accepted resource types are item, colosseum and region; family and
 // capability describe items only, so a non-empty one of them never matches a
-// colosseum, whose family stays empty. An empty filter never filters. The order is the catalog order, kind first and
-// only then key, so paging is stable across calls. Values are read from a
-// value-only catalog snapshot, so the result can never reach the catalog.
+// colosseum or a region, whose family stays empty. An empty filter never
+// filters. The order is the catalog order, kind first and only then key, so
+// paging is stable across calls. Values are read from a value-only catalog
+// snapshot, so the result can never reach the catalog.
 func GetResources(
 	gameCatalog *gamecatalog.Catalog,
 	resourceType string,
@@ -92,7 +93,7 @@ func GetResources(
 		return GetResourcesResult{}, errors.New("game catalog is not loaded")
 	}
 	switch schema.ResourceKind(resourceType) {
-	case "", schema.ResourceKindItem, schema.ResourceKindColosseum:
+	case "", schema.ResourceKindItem, schema.ResourceKindColosseum, schema.ResourceKindRegion:
 	default:
 		return GetResourcesResult{}, fmt.Errorf("unsupported resource type %q", resourceType)
 	}

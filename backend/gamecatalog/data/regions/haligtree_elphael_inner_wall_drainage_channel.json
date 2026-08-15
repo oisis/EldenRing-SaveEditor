@@ -1,0 +1,39 @@
+{
+  "key": "haligtree_elphael_inner_wall_drainage_channel",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 1500002,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500002",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Elphael Inner Wall, Drainage Channel",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500002",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Haligtree",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "1500002",
+        "field": "Area"
+      }
+    }
+  }
+}

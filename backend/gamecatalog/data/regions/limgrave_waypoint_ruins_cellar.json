@@ -1,0 +1,39 @@
+{
+  "key": "limgrave_waypoint_ruins_cellar",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6100010,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6100010",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Waypoint Ruins Cellar",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6100010",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6100010",
+        "field": "Area"
+      }
+    }
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "key": "land_of_shadow_dungeons_scadu_altus_ruined_forge_of_starfall_past",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 4202090,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4202090",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Scadu Altus: Ruined Forge of Starfall Past",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4202090",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Land of Shadow — Dungeons",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "4202090",
+        "field": "Area"
+      }
+    }
+  }
+}

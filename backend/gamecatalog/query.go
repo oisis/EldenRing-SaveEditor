@@ -155,6 +155,11 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// stay zero and no filter built on them can ever match it.
 			summary.NameKnown = resource.Colosseum.Name.Known
 			summary.Name = resource.Colosseum.Name.Value
+		case resource.Region != nil:
+			// A region likewise carries a name only; its area is part of the full
+			// document and is never projected into a summary.
+			summary.NameKnown = resource.Region.Name.Known
+			summary.Name = resource.Region.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}

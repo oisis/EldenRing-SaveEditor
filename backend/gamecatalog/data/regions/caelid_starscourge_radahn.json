@@ -1,0 +1,39 @@
+{
+  "key": "caelid_starscourge_radahn",
+  "kind": "region",
+  "region": {
+    "regionID": {
+      "known": true,
+      "value": 6400040,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400040",
+        "field": "map key"
+      }
+    },
+    "name": {
+      "known": true,
+      "value": "Starscourge Radahn",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400040",
+        "field": "Name"
+      }
+    },
+    "area": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated invasion and blue-summon region allowlist of the legacy catalog",
+        "table": "Regions",
+        "row": "6400040",
+        "field": "Area"
+      }
+    }
+  }
+}
