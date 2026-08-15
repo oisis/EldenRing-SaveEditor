@@ -672,6 +672,14 @@ type setCookbookUnlockedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setSummoningPoolActivatedRequest is the strict JSON body of the Summoning Pool mutation.
+type setSummoningPoolActivatedRequest struct {
+	SummoningPoolKind string `json:"summoningPoolKind"`
+	SummoningPoolKey  string `json:"summoningPoolKey"`
+	Activated         *bool  `json:"activated"`
+	ExpectedRevision  string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2613,6 +2621,47 @@ func registerSaveSessionRoutes(
 				body.CookbookKind,
 				body.CookbookKey,
 				*body.Unlocked,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools/activate",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setSummoningPoolActivatedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Activated == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("activated is required"))
+				return
+			}
+			result, err := world.SetSummoningPoolActivated(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.SummoningPoolKind,
+				body.SummoningPoolKey,
+				*body.Activated,
 				body.ExpectedRevision,
 			)
 			if err != nil {

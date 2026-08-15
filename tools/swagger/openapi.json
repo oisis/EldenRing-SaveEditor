@@ -2676,6 +2676,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools/activate": {
+      "put": {
+        "operationId": "setSummoningPoolActivated",
+        "tags": ["World"],
+        "summary": "SetSummoningPoolActivated",
+        "description": "Sets or clears the activation state of one curated Summoning Pool in a character slot of a save session. Resolves the single activation event flag ID from GameCatalog and mutates only that bit. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetSummoningPoolActivatedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed Summoning Pool activation state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetSummoningPoolActivatedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, invalid expectedRevision, unknown session, inactive slot, invalid catalog resource, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/profile": {
       "get": {
         "operationId": "getCharacterProfile",
@@ -5852,6 +5900,59 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "cookbookKind", "cookbookKey", "unlocked"]
+      },
+      "SetSummoningPoolActivatedRequest": {
+        "type": "object",
+        "description": "The request body for setting a Summoning Pool activation state.",
+        "additionalProperties": false,
+        "properties": {
+          "summoningPoolKind": {
+            "type": "string",
+            "enum": ["summoning_pool"],
+            "description": "The public GameCatalog resource kind. Always summoning_pool."
+          },
+          "summoningPoolKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The public slug resource key of the Summoning Pool."
+          },
+          "activated": {
+            "type": "boolean",
+            "description": "True to set the activation bit, false to clear it."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["summoningPoolKind", "summoningPoolKey", "activated", "expectedRevision"]
+      },
+      "SetSummoningPoolActivatedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful Summoning Pool activation mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "summoningPoolKind": {
+            "type": "string"
+          },
+          "summoningPoolKey": {
+            "type": "string"
+          },
+          "activated": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "summoningPoolKind", "summoningPoolKey", "activated"]
       },
       "GestureEntry": {
         "type": "object",

@@ -438,6 +438,11 @@
                 "filepath": "../../../docs/endpoints/world/get_summoning_pools.md",
                 "title": "GetSummoningPools"
               },
+              "/set-summoning-pool-activated": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_summoning_pool_activated.md",
+                "title": "SetSummoningPoolActivated"
+              },
               "/set-cookbook-unlocked": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_cookbook_unlocked.md",

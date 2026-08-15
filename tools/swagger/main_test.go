@@ -926,6 +926,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/map-regions", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/tutorials", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/summoning-pools/activate", `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -1043,6 +1044,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools":                    "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools/activate":           "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions":                        "get",
@@ -1282,6 +1284,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
 		"SetCookbookUnlockedResult",
+		"SetSummoningPoolActivatedRequest",
+		"SetSummoningPoolActivatedResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1518,8 +1522,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 66 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 66", found)
+	if found != 67 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 67", found)
 	}
 }
 
@@ -5649,6 +5653,87 @@ func TestSetCookbookUnlockedRoute(t *testing.T) {
 		newHandler(gameCatalog, testApplicationVersion, nil).ServeHTTP(recorder, req)
 		if recorder.Code != http.StatusNotFound {
 			t.Fatalf("status = %d, want 404 when save engine is nil", recorder.Code)
+		}
+	})
+}
+
+func TestSetSummoningPoolActivatedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	activated := true
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		bodyBytes, _ := json.Marshal(setSummoningPoolActivatedRequest{
+			SummoningPoolKind: "summoning_pool",
+			SummoningPoolKey:  "stormveil_castle_liftside_chamber",
+			Activated:         &activated,
+			ExpectedRevision:  "0",
+		})
+
+		request := httptest.NewRequest(http.MethodPut,
+			"/api/v1/save-sessions/"+session.SaveSessionID+"/characters/0/summoning-pools/activate",
+			bytes.NewReader(bodyBytes))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200: %s", recorder.Code, recorder.Body.String())
+		}
+		assertJSONContentType(t, recorder)
+
+		var got world.SetSummoningPoolActivatedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetSummoningPoolActivated(saveEngine, gameCatalog,
+			directSession.SaveSessionID, 0, "summoning_pool", "stormveil_castle_liftside_chamber",
+			true, "0")
+		if err != nil {
+			t.Fatalf("world.SetSummoningPoolActivated: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/summoning-pools/activate"
+		for name, body := range map[string]string{
+			"missing activated": `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","expectedRevision":"0"}`,
+			"unknown field":     `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPut, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
 		}
 	})
 }

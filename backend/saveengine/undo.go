@@ -65,6 +65,8 @@ const (
 	opSetWhetbladeUnlocked     = "set_whetblade_unlocked"
 )
 
+const opSetSummoningPoolActivated = "set_summoning_pool_activated"
+
 // undoPoint is the private, non-serializable restore point of one committed
 // character mutation. It belongs to exactly one session, one characterID and
 // one revision.
