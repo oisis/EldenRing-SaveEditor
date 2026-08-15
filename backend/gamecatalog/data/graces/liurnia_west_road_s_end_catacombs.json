@@ -1,0 +1,72 @@
+{
+  "key": "liurnia_west_road_s_end_catacombs",
+  "kind": "grace",
+  "grace": {
+    "name": {
+      "known": true,
+      "value": "Road's End Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "grace name of the curated table without its trailing region suffix",
+        "table": "Graces",
+        "row": "73003",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Liurnia West",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "trailing parenthesised region suffix of the curated grace name",
+        "table": "Graces",
+        "row": "73003",
+        "field": "Name"
+      }
+    },
+    "visitEventFlagID": {
+      "known": true,
+      "value": 73003,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73003",
+        "field": "map key"
+      }
+    },
+    "bossArena": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73003",
+        "field": "BossArena"
+      }
+    },
+    "dungeonType": {
+      "known": true,
+      "value": "catacomb",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73003",
+        "field": "DungeonType"
+      }
+    },
+    "doorEventFlagID": {
+      "known": true,
+      "value": 1033438600,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73003",
+        "field": "DoorFlag"
+      }
+    }
+  }
+}

@@ -15,6 +15,8 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 		return validateRegionResource(resource, sources)
 	case ResourceKindSummoningPool:
 		return validateSummoningPoolResource(resource, sources)
+	case ResourceKindGrace:
+		return validateGraceResource(resource, sources)
 	default:
 		return fmt.Errorf("resource %q: unsupported kind %q", resource.Key, resource.Kind)
 	}
@@ -36,6 +38,7 @@ func validateSoleDocument(resource Resource) error {
 		{ResourceKindColosseum, resource.Colosseum != nil},
 		{ResourceKindRegion, resource.Region != nil},
 		{ResourceKindSummoningPool, resource.SummoningPool != nil},
+		{ResourceKindGrace, resource.Grace != nil},
 	}
 	for _, document := range present {
 		if document.carried && document.kind != resource.Kind {
@@ -201,6 +204,88 @@ func validateSummoningPoolResource(resource Resource, sources map[SourceID]struc
 		return fmt.Errorf(
 			"resource %q: summoningPool.activationEventFlagID %d lies outside the confirmed block %d..%d",
 			resource.Key, flag.Value, SummoningPoolFlagBlockFirst, SummoningPoolFlagBlockLast)
+	}
+	return nil
+}
+
+// validateGraceResource fails closed: an unknown or empty name, an unknown or
+// empty region label, an unknown or zero visit flag, a visit flag outside the
+// blocks the curated table confirms, an unknown boss-arena fact, an unknown or
+// unsupported dungeon type, an unknown door flag and a door flag on a grace that
+// is behind no sealed dungeon entrance are all rejected, so a grace can never be
+// served without every fact it is presented and resolved by.
+func validateGraceResource(resource Resource, sources map[SourceID]struct{}) error {
+	if err := validateSlugKey(ResourceKindGrace, resource.Key); err != nil {
+		return err
+	}
+	if err := validateSoleDocument(resource); err != nil {
+		return err
+	}
+	if resource.Grace == nil {
+		return fmt.Errorf("resource %q: grace document is required", resource.Key)
+	}
+	name := resource.Grace.Name
+	if err := validateFact("grace.name", name, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !name.Known || name.Value == "" {
+		return fmt.Errorf("resource %q: grace.name must be known and non-empty", resource.Key)
+	}
+	regionLabel := resource.Grace.RegionLabel
+	if err := validateFact("grace.regionLabel", regionLabel, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !regionLabel.Known || regionLabel.Value == "" {
+		return fmt.Errorf(
+			"resource %q: grace.regionLabel must be known and non-empty", resource.Key)
+	}
+	visit := resource.Grace.VisitEventFlagID
+	if err := validateFact("grace.visitEventFlagID", visit, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !visit.Known || visit.Value == 0 {
+		return fmt.Errorf(
+			"resource %q: grace.visitEventFlagID must be known and non-zero", resource.Key)
+	}
+	if !IsConfirmedGraceFlag(visit.Value) {
+		return fmt.Errorf(
+			"resource %q: grace.visitEventFlagID %d lies outside the blocks the curated Graces table confirms",
+			resource.Key, visit.Value)
+	}
+	bossArena := resource.Grace.BossArena
+	if err := validateFact("grace.bossArena", bossArena, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !bossArena.Known {
+		return fmt.Errorf("resource %q: grace.bossArena must be known", resource.Key)
+	}
+	dungeonType := resource.Grace.DungeonType
+	if err := validateFact("grace.dungeonType", dungeonType, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !dungeonType.Known {
+		return fmt.Errorf("resource %q: grace.dungeonType must be known", resource.Key)
+	}
+	switch dungeonType.Value {
+	case GraceDungeonTypeNone, GraceDungeonTypeCatacomb, GraceDungeonTypeHeroGrave:
+	default:
+		return fmt.Errorf("resource %q: grace.dungeonType %q is not a confirmed value",
+			resource.Key, dungeonType.Value)
+	}
+	door := resource.Grace.DoorEventFlagID
+	if err := validateFact("grace.doorEventFlagID", door, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !door.Known {
+		return fmt.Errorf("resource %q: grace.doorEventFlagID must be known", resource.Key)
+	}
+	// Zero is the confirmed value for "no dependent door", and only a grace of a
+	// sealed-entrance dungeon family ever carries a non-zero one in the curated
+	// table. A door flag on a regular grace would be data no record supports.
+	if door.Value != 0 && dungeonType.Value == GraceDungeonTypeNone {
+		return fmt.Errorf(
+			"resource %q: grace.doorEventFlagID %d is set on a grace without a dungeon type",
+			resource.Key, door.Value)
 	}
 	return nil
 }

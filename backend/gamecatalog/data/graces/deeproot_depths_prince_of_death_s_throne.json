@@ -1,0 +1,72 @@
+{
+  "key": "deeproot_depths_prince_of_death_s_throne",
+  "kind": "grace",
+  "grace": {
+    "name": {
+      "known": true,
+      "value": "Prince of Death's Throne",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "grace name of the curated table without its trailing region suffix",
+        "table": "Graces",
+        "row": "71230",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Deeproot Depths",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "trailing parenthesised region suffix of the curated grace name",
+        "table": "Graces",
+        "row": "71230",
+        "field": "Name"
+      }
+    },
+    "visitEventFlagID": {
+      "known": true,
+      "value": 71230,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "71230",
+        "field": "map key"
+      }
+    },
+    "bossArena": {
+      "known": true,
+      "value": true,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "71230",
+        "field": "BossArena"
+      }
+    },
+    "dungeonType": {
+      "known": true,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "71230",
+        "field": "DungeonType"
+      }
+    },
+    "doorEventFlagID": {
+      "known": true,
+      "value": 0,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "71230",
+        "field": "DoorFlag"
+      }
+    }
+  }
+}

@@ -1,0 +1,72 @@
+{
+  "key": "mt_gelmir_unsightly_catacombs",
+  "kind": "grace",
+  "grace": {
+    "name": {
+      "known": true,
+      "value": "Unsightly Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "grace name of the curated table without its trailing region suffix",
+        "table": "Graces",
+        "row": "73012",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Mt. Gelmir",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "trailing parenthesised region suffix of the curated grace name",
+        "table": "Graces",
+        "row": "73012",
+        "field": "Name"
+      }
+    },
+    "visitEventFlagID": {
+      "known": true,
+      "value": 73012,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73012",
+        "field": "map key"
+      }
+    },
+    "bossArena": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73012",
+        "field": "BossArena"
+      }
+    },
+    "dungeonType": {
+      "known": true,
+      "value": "catacomb",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73012",
+        "field": "DungeonType"
+      }
+    },
+    "doorEventFlagID": {
+      "known": true,
+      "value": 1036518600,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "73012",
+        "field": "DoorFlag"
+      }
+    }
+  }
+}

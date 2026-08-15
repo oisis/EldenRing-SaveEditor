@@ -165,6 +165,12 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// part of the full document and is never projected into a summary.
 			summary.NameKnown = resource.SummoningPool.Name.Known
 			summary.Name = resource.SummoningPool.Name.Value
+		case resource.Grace != nil:
+			// A grace likewise carries a name only; its region label, boss-arena
+			// fact, dungeon type and flags are part of the full document and are
+			// never projected into a summary.
+			summary.NameKnown = resource.Grace.Name.Known
+			summary.Name = resource.Grace.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}

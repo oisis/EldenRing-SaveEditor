@@ -1,0 +1,72 @@
+{
+  "key": "castle_ensis_castle_lord_s_chamber",
+  "kind": "grace",
+  "grace": {
+    "name": {
+      "known": true,
+      "value": "Castle-Lord's Chamber",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "grace name of the curated table without its trailing region suffix",
+        "table": "Graces",
+        "row": "76822",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Castle Ensis",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "trailing parenthesised region suffix of the curated grace name",
+        "table": "Graces",
+        "row": "76822",
+        "field": "Name"
+      }
+    },
+    "visitEventFlagID": {
+      "known": true,
+      "value": 76822,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76822",
+        "field": "map key"
+      }
+    },
+    "bossArena": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76822",
+        "field": "BossArena"
+      }
+    },
+    "dungeonType": {
+      "known": true,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76822",
+        "field": "DungeonType"
+      }
+    },
+    "doorEventFlagID": {
+      "known": true,
+      "value": 0,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76822",
+        "field": "DoorFlag"
+      }
+    }
+  }
+}

@@ -106,7 +106,10 @@ type eventFlagTestFixture struct {
 func eventFlagTestPosition(t *testing.T, id uint32) (int64, uint8) {
 	t.Helper()
 
-	position := map[uint32]int64{60: 10, 65: 15, 67: 17, 68: 18, 670: 107, 11109: 11129}[id/1000]
+	position := map[uint32]int64{
+		60: 10, 65: 15, 67: 17, 68: 18, 71: 21, 72: 22, 73: 23, 74: 24, 76: 26,
+		670: 107, 11109: 11129,
+	}[id/1000]
 	if position == 0 {
 		t.Fatalf("test fixture cannot place event flag %d", id)
 	}
@@ -264,6 +267,50 @@ func TestGetEventFlagsResolvesSupportedBlocksAtTheirBoundaries(t *testing.T) {
 	}
 	if !reflect.DeepEqual(result.Flags, want) {
 		t.Errorf("flags = %+v, want %+v", result.Flags, want)
+	}
+}
+
+// The curated Graces table uses the five blocks 71 to 74 and 76. Block 75 has a
+// bitfield position of its own but carries no grace, so the reader must keep
+// rejecting it instead of answering it from a neighbouring position.
+func TestGetEventFlagsResolvesTheGraceBlocksOfBothPlatforms(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			content := eventFlagTestContent(platform)
+			content.set = append(content.set, 71000, 71999, 72000, 73000, 74000, 76000)
+
+			engine := New()
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			// One set flag and its clear neighbour per block, so a block resolved
+			// to a wrong position or a mirrored bit lands on a different value.
+			requested := []uint32{
+				71000, 71001, 71999, 72000, 72001, 73000, 73001, 74000, 74001, 76000, 76001,
+			}
+			want := map[uint32]bool{
+				71000: true, 71001: false, 71999: true,
+				72000: true, 72001: false,
+				73000: true, 73001: false,
+				74000: true, 74001: false,
+				76000: true, 76001: false,
+			}
+
+			result, err := engine.GetEventFlags(loaded.SaveSessionID, content.slot, requested)
+			if err != nil {
+				t.Fatalf("GetEventFlags: %v", err)
+			}
+			if !reflect.DeepEqual(result.Flags, want) {
+				t.Errorf("flags = %+v, want %+v", result.Flags, want)
+			}
+
+			if _, err := engine.GetEventFlags(
+				loaded.SaveSessionID, content.slot, []uint32{75000}); err == nil {
+				t.Error("the unused block 75 was accepted")
+			}
+		})
 	}
 }
 

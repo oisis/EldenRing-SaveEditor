@@ -921,6 +921,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/colosseums", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/regions", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/summoning-pools", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/graces", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1035,6 +1036,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools":                    "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1136,6 +1138,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"ColosseumDocument",
 		"RegionDocument",
 		"SummoningPoolDocument",
+		"GraceDocument",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1246,6 +1249,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetRegionsResult",
 		"SummoningPoolEntry",
 		"GetSummoningPoolsResult",
+		"GraceEntry",
+		"GetGracesResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1273,6 +1278,7 @@ var resourceUnionDocuments = map[string]string{
 	"colosseum":      "colosseum",
 	"region":         "region",
 	"summoning_pool": "summoningPool",
+	"grace":          "grace",
 }
 
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
@@ -1310,10 +1316,10 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 4 {
-		t.Fatalf("Resource has %d oneOf branches, want 4", len(branches))
+	if len(branches) != 5 {
+		t.Fatalf("Resource has %d oneOf branches, want 5", len(branches))
 	}
-	for index, kind := range []string{"item", "colosseum", "region", "summoning_pool"} {
+	for index, kind := range []string{"item", "colosseum", "region", "summoning_pool", "grace"} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
 			t.Fatalf("Resource oneOf[%d].kind enum = %v, want [%s]", index, got, kind)
@@ -1345,6 +1351,92 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 			// Deleting is what rejects the same document excluded twice: the
 			// second copy no longer belongs to the remaining set.
 			delete(missing, excluded.Required[0])
+		}
+	}
+}
+
+// The curated Graces table uses the blocks 71 to 74 and 76, so the document must
+// describe two separate ranges. One continuous 71000-76999 range would advertise
+// the block 75 values that resolveEventFlag rejects and no grace declares.
+func TestGraceVisitEventFlagOpenAPIExcludesBlock75(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Comps struct {
+			Schemas map[string]struct {
+				Properties struct {
+					VisitEventFlagID struct {
+						Properties struct {
+							Value struct {
+								Minimum *uint32 `json:"minimum"`
+								Maximum *uint32 `json:"maximum"`
+								OneOf   []struct {
+									Type    string `json:"type"`
+									Format  string `json:"format"`
+									Minimum uint32 `json:"minimum"`
+									Maximum uint32 `json:"maximum"`
+								} `json:"oneOf"`
+							} `json:"value"`
+						} `json:"properties"`
+					} `json:"visitEventFlagID"`
+				} `json:"properties"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	value := document.Comps.Schemas["GraceDocument"].Properties.VisitEventFlagID.Properties.Value
+	if value.Minimum != nil || value.Maximum != nil {
+		t.Fatal("GraceDocument.visitEventFlagID.value still carries a continuous range")
+	}
+	if len(value.OneOf) != 2 {
+		t.Fatalf("visitEventFlagID.value has %d oneOf branches, want 2", len(value.OneOf))
+	}
+	for index, want := range []struct{ minimum, maximum uint32 }{
+		{71000, 74999},
+		{76000, 76999},
+	} {
+		branch := value.OneOf[index]
+		if branch.Type != "integer" || branch.Format != "int64" {
+			t.Fatalf("branch %d = %q/%q, want integer/int64", index, branch.Type, branch.Format)
+		}
+		if branch.Minimum != want.minimum || branch.Maximum != want.maximum {
+			t.Fatalf("branch %d = %d-%d, want %d-%d",
+				index, branch.Minimum, branch.Maximum, want.minimum, want.maximum)
+		}
+	}
+
+	// oneOf accepts a value when exactly one branch does, which for two disjoint
+	// ranges is the same as any branch accepting it.
+	accepts := func(id uint32) bool {
+		matched := 0
+		for _, branch := range value.OneOf {
+			if id >= branch.Minimum && id <= branch.Maximum {
+				matched++
+			}
+		}
+		return matched == 1
+	}
+	for _, boundary := range []struct {
+		id      uint32
+		allowed bool
+	}{
+		{71000, true},
+		{74999, true},
+		{75000, false},
+		{75999, false},
+		{76000, true},
+		{76999, true},
+		{77000, false},
+	} {
+		if accepts(boundary.id) != boundary.allowed {
+			t.Errorf("visit event flag %d accepted = %t, want %t",
+				boundary.id, accepts(boundary.id), boundary.allowed)
 		}
 	}
 }
@@ -1394,8 +1486,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 62 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 62", found)
+	if found != 63 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 63", found)
 	}
 }
 
@@ -5137,6 +5229,33 @@ func TestSummoningPoolsRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, recorder, target)
 	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
 		t.Fatal("summoning pools route body differs from the GetSummoningPools result")
+	}
+}
+
+func TestGracesRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/graces"
+
+	want, err := world.GetGraces(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetGraces: %v", err)
+	}
+	if !want.Active || len(want.Graces) != 419 {
+		t.Fatalf("fixture result = active %t with %d graces, want true/419",
+			want.Active, len(want.Graces))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("graces route body differs from the GetGraces result")
 	}
 }
 

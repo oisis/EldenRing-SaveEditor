@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region or a SummoningPoolDocument for kind summoning_pool. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool or a GraceDocument for kind grace. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions and summoning pools carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools and graces carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2364,6 +2364,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces": {
+      "get": {
+        "operationId": "getGraces",
+        "tags": ["World"],
+        "summary": "GetGraces",
+        "description": "Returns the 419 curated Sites of Grace GameCatalog declares, each with its visit state read from the confirmed event flag blocks 71 to 74 and 76. Raw event flag IDs are not exposed. regionLabel is a curated presentation and grouping label, not a reference to a region resource. Results are ordered by regionLabel, name and key. An inactive or residual slot reports active false and every entry unvisited without reading its slot data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated Sites of Grace of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetGracesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an unreadable event flag section, or conflicting grace catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools": {
       "get": {
         "operationId": "getSummoningPools",
@@ -3257,7 +3295,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region and summoning pool keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool and grace keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3289,10 +3327,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions and summoning pools in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools and graces in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum", "region", "summoning_pool"]
+          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace"]
         },
         "example": "item"
       },
@@ -5367,6 +5405,68 @@
         },
         "required": ["saveSessionID", "characterID", "active", "summoningPools"]
       },
+      "GraceEntry": {
+        "type": "object",
+        "description": "One curated GraceDocument reduced to its public identity, its curated region label, its boss-arena fact, its dungeon type and its visit state. The raw visit and door event flag IDs stay private.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["grace"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regionLabel": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Curated presentation and grouping label. It is not a resource reference and never resolves to a RegionDocument."
+          },
+          "bossArena": {
+            "type": "boolean",
+            "description": "True when the curated table records the grace as a boss-arena grace."
+          },
+          "dungeonType": {
+            "type": "string",
+            "enum": ["", "catacomb", "hero_grave"],
+            "description": "The confirmed sealed-entrance dungeon family of the grace. Empty is the confirmed value of a grace that is behind no such entrance."
+          },
+          "visited": {
+            "type": "boolean",
+            "description": "True when the visit event flag of the grace is set in the character slot."
+          }
+        },
+        "required": ["kind", "key", "name", "regionLabel", "bossArena", "dungeonType", "visited"]
+      },
+      "GetGracesResult": {
+        "type": "object",
+        "description": "The curated Sites of Grace of one character slot, ordered by regionLabel, name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "graces": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GraceEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "graces"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6587,14 +6687,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument and kind 'summoning_pool' carries SummoningPoolDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument and kind 'grace' carries GraceDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum", "region", "summoning_pool"]
+            "enum": ["item", "colosseum", "region", "summoning_pool", "grace"]
           },
           "item": {
             "type": "object",
@@ -6609,6 +6709,9 @@
           },
           "summoningPool": {
             "$ref": "#/components/schemas/SummoningPoolDocument"
+          },
+          "grace": {
+            "$ref": "#/components/schemas/GraceDocument"
           }
         },
         "required": ["key", "kind"],
@@ -6624,7 +6727,8 @@
               "anyOf": [
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
-                {"required": ["summoningPool"]}
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]}
               ]
             }
           },
@@ -6639,7 +6743,8 @@
               "anyOf": [
                 {"required": ["item"]},
                 {"required": ["region"]},
-                {"required": ["summoningPool"]}
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]}
               ]
             }
           },
@@ -6654,7 +6759,8 @@
               "anyOf": [
                 {"required": ["item"]},
                 {"required": ["colosseum"]},
-                {"required": ["summoningPool"]}
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]}
               ]
             }
           },
@@ -6669,7 +6775,24 @@
               "anyOf": [
                 {"required": ["item"]},
                 {"required": ["colosseum"]},
-                {"required": ["region"]}
+                {"required": ["region"]},
+                {"required": ["grace"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["grace"]
+              }
+            },
+            "required": ["grace"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]},
+                {"required": ["region"]},
+                {"required": ["summoningPool"]}
               ]
             }
           }
@@ -6792,6 +6915,72 @@
         },
         "required": ["name", "regionLabel", "activationEventFlagID"]
       },
+      "GraceDocument": {
+        "type": "object",
+        "description": "schema.GraceDocument. Name, region label, visit event flag ID, boss-arena fact, dungeon type and door event flag ID are separate known facts with provenance from the curated Site of Grace table. The region label is a presentation and grouping label only and is never a resource reference. The door event flag is private catalog data no getter exposes; zero is its confirmed value for a grace with no dependent door.",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "regionLabel": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "visitEventFlagID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the visit event flag of the grace, confirmed to lie inside one of the blocks 71, 72, 73, 74 or 76.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"oneOf": [
+                {"type": "integer", "format": "int64", "minimum": 71000, "maximum": 74999},
+                {"type": "integer", "format": "int64", "minimum": 76000, "maximum": 76999}
+              ]},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "bossArena": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "boolean"},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "dungeonType": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "enum": ["", "catacomb", "hero_grave"]},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "doorEventFlagID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the overworld ObjAct flag that opens the sealed dungeon entrance. Zero means the grace has no dependent door.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 0},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["name", "regionLabel", "visitEventFlagID", "bossArena", "dungeonType", "doorEventFlagID"]
+      },
       "ItemVariant": {
         "type": "object",
         "description": "schema.ItemVariant as stored in the catalog, with full provenance.",
@@ -6880,7 +7069,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The item, colosseum, region or summoning pool name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
+            "description": "The item, colosseum, region, summoning pool or grace name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
             "example": "Dagger"
           }
         },

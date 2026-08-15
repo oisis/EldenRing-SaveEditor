@@ -219,10 +219,10 @@ type eventFlagPosition struct {
 }
 
 // resolveEventFlag places one identifier inside the bitfield. Only blocks with
-// confirmed cookbook, whetblade, bell bearing, colosseum or summoning pool
-// evidence are supported; every other block is rejected by name instead of being
-// answered from a guessed position, so an unsupported identifier can never be
-// reported as false.
+// confirmed cookbook, whetblade, bell bearing, colosseum, summoning pool or
+// grace evidence are supported; every other block is rejected by name instead of
+// being answered from a guessed position, so an unsupported identifier can never
+// be reported as false.
 func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 	var blockPosition int64
 	switch block := id / eventFlagsPerBlock; block {
@@ -230,6 +230,20 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 		blockPosition = 10
 	case 65:
 		blockPosition = 15
+	// Grace visit flags occupy the blocks 71 to 74 and 76, whose BST positions
+	// are identical in SaveForge 1.5.8 and 1.6.8. Block 75 has a BST position
+	// too, but no grace of the curated table lies in it, so it is deliberately
+	// not resolved here.
+	case 71:
+		blockPosition = 21
+	case 72:
+		blockPosition = 22
+	case 73:
+		blockPosition = 23
+	case 74:
+		blockPosition = 24
+	case 76:
+		blockPosition = 26
 	case 1042378:
 		// Whetstone Knife's confirmed system-affinity flag 1042378601
 		// occupies byte 0xA0D0C in both SaveForge 1.5.8 and 1.6.8.

@@ -1,0 +1,72 @@
+{
+  "key": "liurnia_west_ranni_s_rise",
+  "kind": "grace",
+  "grace": {
+    "name": {
+      "known": true,
+      "value": "Ranni's Rise",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "grace name of the curated table without its trailing region suffix",
+        "table": "Graces",
+        "row": "76228",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Liurnia West",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "trailing parenthesised region suffix of the curated grace name",
+        "table": "Graces",
+        "row": "76228",
+        "field": "Name"
+      }
+    },
+    "visitEventFlagID": {
+      "known": true,
+      "value": 76228,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76228",
+        "field": "map key"
+      }
+    },
+    "bossArena": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76228",
+        "field": "BossArena"
+      }
+    },
+    "dungeonType": {
+      "known": true,
+      "value": "",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76228",
+        "field": "DungeonType"
+      }
+    },
+    "doorEventFlagID": {
+      "known": true,
+      "value": 0,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Site of Grace table of the legacy catalog",
+        "table": "Graces",
+        "row": "76228",
+        "field": "DoorFlag"
+      }
+    }
+  }
+}
