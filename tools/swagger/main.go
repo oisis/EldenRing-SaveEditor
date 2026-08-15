@@ -680,6 +680,14 @@ type setSummoningPoolActivatedRequest struct {
 	ExpectedRevision  string `json:"expectedRevision"`
 }
 
+// setBossDefeatedRequest is the strict JSON body of the boss mutation.
+type setBossDefeatedRequest struct {
+	BossKind         string `json:"bossKind"`
+	BossKey          string `json:"bossKey"`
+	Defeated         *bool  `json:"defeated"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2662,6 +2670,47 @@ func registerSaveSessionRoutes(
 				body.SummoningPoolKind,
 				body.SummoningPoolKey,
 				*body.Activated,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses/defeat",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setBossDefeatedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Defeated == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("defeated is required"))
+				return
+			}
+			result, err := world.SetBossDefeated(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.BossKind,
+				body.BossKey,
+				*body.Defeated,
 				body.ExpectedRevision,
 			)
 			if err != nil {

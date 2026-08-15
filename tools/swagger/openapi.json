@@ -2440,6 +2440,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses/defeat": {
+      "put": {
+        "operationId": "setBossDefeated",
+        "tags": ["World"],
+        "summary": "SetBossDefeated",
+        "description": "Sets or clears the defeated state of one curated boss in a character slot of a save session. Resolves the single synchronized defeat event flag ID from GameCatalog and mutates only that bit; no reward, item, Remembrance, arena or world flag is touched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetBossDefeatedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed boss defeat state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetBossDefeatedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, invalid expectedRevision, unknown session, inactive slot, invalid catalog resource, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions": {
       "get": {
         "operationId": "getMapRegions",
@@ -5953,6 +6001,59 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "summoningPoolKind", "summoningPoolKey", "activated"]
+      },
+      "SetBossDefeatedRequest": {
+        "type": "object",
+        "description": "The request body for setting a boss defeat state.",
+        "additionalProperties": false,
+        "properties": {
+          "bossKind": {
+            "type": "string",
+            "enum": ["boss"],
+            "description": "The public GameCatalog resource kind. Always boss."
+          },
+          "bossKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The public slug resource key of the boss."
+          },
+          "defeated": {
+            "type": "boolean",
+            "description": "True to set the synchronized defeat bit, false to clear it."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["bossKind", "bossKey", "defeated", "expectedRevision"]
+      },
+      "SetBossDefeatedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful boss defeat mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "bossKind": {
+            "type": "string"
+          },
+          "bossKey": {
+            "type": "string"
+          },
+          "defeated": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "bossKind", "bossKey", "defeated"]
       },
       "GestureEntry": {
         "type": "object",
