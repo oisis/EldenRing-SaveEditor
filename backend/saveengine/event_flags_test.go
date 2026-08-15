@@ -107,9 +107,10 @@ func eventFlagTestPosition(t *testing.T, id uint32) (int64, uint8) {
 	t.Helper()
 
 	position := map[uint32]int64{
-		9:  9,
+		4: 4, 9: 9,
 		60: 10, 62: 12, 65: 15, 67: 17, 68: 18, 71: 21, 72: 22, 73: 23, 74: 24, 76: 26,
-		670: 107, 11109: 11129,
+		670: 107, 710: 111, 11109: 11129,
+		1043338: 5521,
 	}[id/1000]
 	if position == 0 {
 		t.Fatalf("test fixture cannot place event flag %d", id)

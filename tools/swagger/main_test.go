@@ -1290,6 +1290,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetSummoningPoolActivatedResult",
 		"SetBossDefeatedRequest",
 		"SetBossDefeatedResult",
+		"SetGraceVisitedRequest",
+		"SetGraceVisitedResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1526,8 +1528,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 68 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 68", found)
+	if found != 69 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 69", found)
 	}
 }
 
@@ -5751,6 +5753,102 @@ func TestSetBossDefeatedRoute(t *testing.T) {
 			t.Fatalf("decode openapi.json: %v", err)
 		}
 		path := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses/defeat"
+		if _, exists := document.Paths[path]["put"]; !exists {
+			t.Fatalf("openapi.json describes no PUT for %s", path)
+		}
+	})
+}
+
+func TestSetGraceVisitedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	visited := true
+	const graceKey = "limgrave_west_gatefront"
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		bodyBytes, _ := json.Marshal(setGraceVisitedRequest{
+			GraceKind:        "grace",
+			GraceKey:         graceKey,
+			Visited:          &visited,
+			ExpectedRevision: "0",
+		})
+
+		request := httptest.NewRequest(http.MethodPut,
+			"/api/v1/save-sessions/"+session.SaveSessionID+"/characters/0/graces/visit",
+			bytes.NewReader(bodyBytes))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200: %s", recorder.Code, recorder.Body.String())
+		}
+		assertJSONContentType(t, recorder)
+
+		var got world.SetGraceVisitedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetGraceVisited(saveEngine, gameCatalog,
+			directSession.SaveSessionID, 0, "grace", graceKey, true, "0")
+		if err != nil {
+			t.Fatalf("world.SetGraceVisited: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/graces/visit"
+		for name, body := range map[string]string{
+			"missing visited": `{"graceKind":"grace","graceKey":"` + graceKey + `","expectedRevision":"0"}`,
+			"unknown field":   `{"graceKind":"grace","graceKey":"` + graceKey + `","visited":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPut, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+	})
+
+	// The served document must carry the route, so the transport and the
+	// contract cannot drift apart.
+	t.Run("is described by openapi.json", func(t *testing.T) {
+		recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+		var document struct {
+			Paths map[string]map[string]any `json:"paths"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+			t.Fatalf("decode openapi.json: %v", err)
+		}
+		path := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces/visit"
 		if _, exists := document.Paths[path]["put"]; !exists {
 			t.Fatalf("openapi.json describes no PUT for %s", path)
 		}

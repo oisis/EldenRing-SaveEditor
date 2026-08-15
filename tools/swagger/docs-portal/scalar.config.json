@@ -443,6 +443,11 @@
                 "filepath": "../../../docs/endpoints/world/set_boss_defeated.md",
                 "title": "SetBossDefeated"
               },
+              "/set-grace-visited": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_grace_visited.md",
+                "title": "SetGraceVisited"
+              },
               "/set-summoning-pool-activated": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_summoning_pool_activated.md",

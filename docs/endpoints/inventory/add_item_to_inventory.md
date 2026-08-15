@@ -343,7 +343,7 @@ no `UnsavedChanges` flag and no identity.
 | The common item count already reads `0xA80` | `the inventory of character <id> declares 2688 of 2688 common records and receives no item`. |
 | `GaItemData` declares `7000` or more active entries | `character <id> declares <n> active GaItemData entries, want fewer than 7000`. |
 | An allocator cannot be advanced | `NextEquipIndex of character <id> cannot be advanced` / `NextAcquisitionSortId of character <id> is <n> and cannot be advanced`. |
-| Any write of the plan cannot be verified | The previous bytes of everything the plan changed are restored in reverse order, the revision does not advance, and the error says the inventory is unchanged. |
+| Any write of the plan cannot be verified | The previous bytes of everything the plan changed are restored in reverse order, the revision does not advance, and the error says the snapshot is unchanged. |
 
 ## PC and PS4
 

@@ -270,6 +270,53 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 		blockPosition = 107
 	case 11109:
 		blockPosition = 11129
+	// The four confirmed companion flags of the Gatefront grace: 4680 and 4681
+	// lie in block 4, 710520 in block 710 and 60100 in the already resolved
+	// block 60. Both BST positions are identical in SaveForge 1.5.8 and 1.6.8.
+	case 4:
+		blockPosition = 4
+	case 710:
+		blockPosition = 111
+	// The overworld ObjAct door flags of the eighteen blocks the curated Graces
+	// table actually declares. Only blocks a GraceDocument proves are added; the
+	// neighbouring map blocks carry no curated resource and stay rejected. Every
+	// position below is the BST entry of SaveForge 1.5.8 and 1.6.8 alike.
+	case 1033438:
+		blockPosition = 2791
+	case 1036518:
+		blockPosition = 3687
+	case 1037538:
+		blockPosition = 3981
+	case 1038528:
+		blockPosition = 4254
+	case 1039418:
+		blockPosition = 4457
+	case 1039488:
+		blockPosition = 4506
+	case 1040528:
+		blockPosition = 4814
+	case 1041378:
+		blockPosition = 4989
+	case 1043338:
+		blockPosition = 5521
+	case 1043388:
+		blockPosition = 5556
+	case 1043398:
+		blockPosition = 5563
+	case 1045348:
+		blockPosition = 6088
+	case 1045518:
+		blockPosition = 6207
+	case 1045528:
+		blockPosition = 6214
+	case 1047408:
+		blockPosition = 6690
+	case 1048368:
+		blockPosition = 6942
+	case 1050538:
+		blockPosition = 7621
+	case 1050558:
+		blockPosition = 7635
 	default:
 		return eventFlagPosition{}, fmt.Errorf(
 			"event flag %d lies in block %d, which this reader does not support", id, block)

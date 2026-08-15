@@ -102,9 +102,13 @@ func GetGraces(
 	return result, nil
 }
 
+// declaredGrace is the private projection both grace endpoints share.
+// doorEventFlagID is the private catalog fact SetGraceVisited needs and no
+// getter exposes; it is zero for a grace without a sealed dungeon entrance.
 type declaredGrace struct {
-	entry       GraceEntry
-	eventFlagID uint32
+	entry           GraceEntry
+	eventFlagID     uint32
+	doorEventFlagID uint32
 }
 
 // catalogGraces returns the declared graces ordered by region label, then name
@@ -140,7 +144,8 @@ func catalogGraces(gameCatalog *gamecatalog.Catalog) ([]declaredGrace, error) {
 				BossArena:   resource.Grace.BossArena.Value,
 				DungeonType: resource.Grace.DungeonType.Value,
 			},
-			eventFlagID: flag,
+			eventFlagID:     flag,
+			doorEventFlagID: resource.Grace.DoorEventFlagID.Value,
 		})
 	}
 

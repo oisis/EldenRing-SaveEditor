@@ -611,5 +611,5 @@ func restoreByteWrites(snapshot *codec, applied []byteWrite, reason string) erro
 			return fmt.Errorf("%s and its rollback could not be confirmed", reason)
 		}
 	}
-	return fmt.Errorf("%s; the inventory is unchanged", reason)
+	return fmt.Errorf("%s; the snapshot is unchanged", reason)
 }

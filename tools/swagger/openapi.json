@@ -2488,6 +2488,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces/visit": {
+      "put": {
+        "operationId": "setGraceVisited",
+        "tags": ["World"],
+        "summary": "SetGraceVisited",
+        "description": "Sets or clears the visited state of one curated Site of Grace in a character slot of a save session. Resolves the visit event flag ID and the private door event flag ID from GameCatalog: the visit bit and, for a sealed dungeon entrance, the door bit follow visited symmetrically, while the four confirmed Gatefront companion flags are set on activation only and never cleared. LastRestedGrace, the map, the regions and the inventory are not touched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetGraceVisitedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed grace visit state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetGraceVisitedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, invalid expectedRevision, unknown session, inactive slot, invalid catalog resource, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions": {
       "get": {
         "operationId": "getMapRegions",
@@ -6054,6 +6102,59 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "bossKind", "bossKey", "defeated"]
+      },
+      "SetGraceVisitedRequest": {
+        "type": "object",
+        "description": "The request body for setting a Site of Grace visit state.",
+        "additionalProperties": false,
+        "properties": {
+          "graceKind": {
+            "type": "string",
+            "enum": ["grace"],
+            "description": "The public GameCatalog resource kind. Always grace."
+          },
+          "graceKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The public slug resource key of the Site of Grace."
+          },
+          "visited": {
+            "type": "boolean",
+            "description": "True to set the visit bit and its confirmed dependencies, false to clear the visit and door bits."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["graceKind", "graceKey", "visited", "expectedRevision"]
+      },
+      "SetGraceVisitedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful Site of Grace visit mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "graceKind": {
+            "type": "string"
+          },
+          "graceKey": {
+            "type": "string"
+          },
+          "visited": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "graceKind", "graceKey", "visited"]
       },
       "GestureEntry": {
         "type": "object",

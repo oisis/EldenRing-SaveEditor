@@ -688,6 +688,14 @@ type setBossDefeatedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setGraceVisitedRequest is the strict JSON body of the Site of Grace mutation.
+type setGraceVisitedRequest struct {
+	GraceKind        string `json:"graceKind"`
+	GraceKey         string `json:"graceKey"`
+	Visited          *bool  `json:"visited"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2711,6 +2719,47 @@ func registerSaveSessionRoutes(
 				body.BossKind,
 				body.BossKey,
 				*body.Defeated,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces/visit",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setGraceVisitedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Visited == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("visited is required"))
+				return
+			}
+			result, err := world.SetGraceVisited(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.GraceKind,
+				body.GraceKey,
+				*body.Visited,
 				body.ExpectedRevision,
 			)
 			if err != nil {

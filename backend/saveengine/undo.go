@@ -69,6 +69,8 @@ const opSetSummoningPoolActivated = "set_summoning_pool_activated"
 
 const opSetBossDefeated = "set_boss_defeated"
 
+const opSetGraceVisited = "set_grace_visited"
+
 // undoPoint is the private, non-serializable restore point of one committed
 // character mutation. It belongs to exactly one session, one characterID and
 // one revision.
