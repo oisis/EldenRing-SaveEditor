@@ -1,0 +1,39 @@
+{
+  "key": "altus_volcano_manor_7",
+  "kind": "map_region",
+  "mapRegion": {
+    "name": {
+      "known": true,
+      "value": "Volcano Manor (7)",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62337",
+        "field": "Name"
+      }
+    },
+    "areaLabel": {
+      "known": true,
+      "value": "Altus",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62337",
+        "field": "Area"
+      }
+    },
+    "visibleEventFlagID": {
+      "known": true,
+      "value": 62337,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62337",
+        "field": "map key"
+      }
+    }
+  }
+}

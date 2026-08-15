@@ -1,0 +1,39 @@
+{
+  "key": "limgrave_stormveil_legacy_3",
+  "kind": "map_region",
+  "mapRegion": {
+    "name": {
+      "known": true,
+      "value": "Stormveil Legacy (3)",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62129",
+        "field": "Name"
+      }
+    },
+    "areaLabel": {
+      "known": true,
+      "value": "Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62129",
+        "field": "Area"
+      }
+    },
+    "visibleEventFlagID": {
+      "known": true,
+      "value": 62129,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62129",
+        "field": "map key"
+      }
+    }
+  }
+}

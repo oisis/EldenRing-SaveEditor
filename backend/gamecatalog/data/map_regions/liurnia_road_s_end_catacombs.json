@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_road_s_end_catacombs",
+  "kind": "map_region",
+  "mapRegion": {
+    "name": {
+      "known": true,
+      "value": "Road's End Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62228",
+        "field": "Name"
+      }
+    },
+    "areaLabel": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62228",
+        "field": "Area"
+      }
+    },
+    "visibleEventFlagID": {
+      "known": true,
+      "value": 62228,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62228",
+        "field": "map key"
+      }
+    }
+  }
+}

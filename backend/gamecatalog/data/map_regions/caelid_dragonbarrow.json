@@ -1,0 +1,39 @@
+{
+  "key": "caelid_dragonbarrow",
+  "kind": "map_region",
+  "mapRegion": {
+    "name": {
+      "known": true,
+      "value": "Dragonbarrow",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62041",
+        "field": "Name"
+      }
+    },
+    "areaLabel": {
+      "known": true,
+      "value": "Caelid",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62041",
+        "field": "Area"
+      }
+    },
+    "visibleEventFlagID": {
+      "known": true,
+      "value": 62041,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62041",
+        "field": "map key"
+      }
+    }
+  }
+}

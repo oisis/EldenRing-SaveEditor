@@ -1,0 +1,39 @@
+{
+  "key": "underground_nokstella_eternal_city",
+  "kind": "map_region",
+  "mapRegion": {
+    "name": {
+      "known": true,
+      "value": "Nokstella, Eternal City",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62630",
+        "field": "Name"
+      }
+    },
+    "areaLabel": {
+      "known": true,
+      "value": "Underground",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62630",
+        "field": "Area"
+      }
+    },
+    "visibleEventFlagID": {
+      "known": true,
+      "value": 62630,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated safe map visibility table of the legacy catalog",
+        "table": "MapVisible",
+        "row": "62630",
+        "field": "map key"
+      }
+    }
+  }
+}

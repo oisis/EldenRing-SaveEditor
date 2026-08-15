@@ -17,6 +17,7 @@ var nonItemResourcePaths = []string{
 	"summoning_pools/stormveil_castle_gateside_chamber.json",
 	"graces/weeping_peninsula_tombsward_catacombs.json",
 	"bosses/stormveil_castle_godrick_the_grafted.json",
+	"map_regions/limgrave_limgrave_west.json",
 }
 
 // catalogFSWithNonItems extends the two-item test catalog with stored resources

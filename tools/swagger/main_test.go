@@ -923,6 +923,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/summoning-pools", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/graces", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bosses", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/map-regions", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1039,6 +1040,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses":                             "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions":                        "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1142,6 +1144,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SummoningPoolDocument",
 		"GraceDocument",
 		"BossDocument",
+		"MapRegionDocument",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1256,6 +1259,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetGracesResult",
 		"BossEntry",
 		"GetBossesResult",
+		"MapRegionEntry",
+		"GetMapRegionsResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1285,6 +1290,7 @@ var resourceUnionDocuments = map[string]string{
 	"summoning_pool": "summoningPool",
 	"grace":          "grace",
 	"boss":           "boss",
+	"map_region":     "mapRegion",
 }
 
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
@@ -1322,11 +1328,11 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 6 {
-		t.Fatalf("Resource has %d oneOf branches, want 6", len(branches))
+	if len(branches) != 7 {
+		t.Fatalf("Resource has %d oneOf branches, want 7", len(branches))
 	}
 	for index, kind := range []string{
-		"item", "colosseum", "region", "summoning_pool", "grace", "boss",
+		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region",
 	} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
@@ -1494,8 +1500,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 64 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 64", found)
+	if found != 65 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 65", found)
 	}
 }
 
@@ -5333,6 +5339,75 @@ func TestBossesRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, recorder, target)
 	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
 		t.Fatal("bosses route body differs from the GetBosses result")
+	}
+}
+
+func TestMapRegionVisibilityEventFlagOpenAPICoversBlock62Only(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Comps struct {
+			Schemas map[string]struct {
+				Properties struct {
+					VisibleEventFlagID struct {
+						Properties struct {
+							Value struct {
+								Type    string  `json:"type"`
+								Format  string  `json:"format"`
+								Minimum *uint32 `json:"minimum"`
+								Maximum *uint32 `json:"maximum"`
+							} `json:"value"`
+						} `json:"properties"`
+					} `json:"visibleEventFlagID"`
+				} `json:"properties"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	value := document.Comps.Schemas["MapRegionDocument"].Properties.
+		VisibleEventFlagID.Properties.Value
+	if value.Type != "integer" || value.Format != "int64" {
+		t.Fatalf("visibleEventFlagID.value = %q/%q, want integer/int64",
+			value.Type, value.Format)
+	}
+	if value.Minimum == nil || *value.Minimum != 62000 ||
+		value.Maximum == nil || *value.Maximum != 62999 {
+		t.Fatalf("visibleEventFlagID.value range = %v-%v, want 62000-62999",
+			value.Minimum, value.Maximum)
+	}
+}
+
+func TestMapRegionsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID +
+		"/characters/0/map-regions"
+
+	want, err := world.GetMapRegions(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetMapRegions: %v", err)
+	}
+	if !want.Active || len(want.MapRegions) != 263 {
+		t.Fatalf("fixture result = active %t with %d map regions, want true/263",
+			want.Active, len(want.MapRegions))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("map regions route body differs from the GetMapRegions result")
 	}
 }
 

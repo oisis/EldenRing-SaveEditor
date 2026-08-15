@@ -9,6 +9,7 @@ const (
 	ResourceKindSummoningPool ResourceKind = "summoning_pool"
 	ResourceKindGrace         ResourceKind = "grace"
 	ResourceKindBoss          ResourceKind = "boss"
+	ResourceKindMapRegion     ResourceKind = "map_region"
 )
 
 // ResourceRef is the identity of one catalog resource: the exact pair
@@ -33,6 +34,7 @@ type Resource struct {
 	SummoningPool *SummoningPoolDocument `json:"summoningPool,omitempty"`
 	Grace         *GraceDocument         `json:"grace,omitempty"`
 	Boss          *BossDocument          `json:"boss,omitempty"`
+	MapRegion     *MapRegionDocument     `json:"mapRegion,omitempty"`
 }
 
 func (resource Resource) Ref() ResourceRef {

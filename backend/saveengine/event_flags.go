@@ -219,10 +219,10 @@ type eventFlagPosition struct {
 }
 
 // resolveEventFlag places one identifier inside the bitfield. Only blocks with
-// confirmed cookbook, whetblade, bell bearing, colosseum, summoning pool, grace
-// or boss evidence are supported; every other block is rejected by name instead
-// of being answered from a guessed position, so an unsupported identifier can
-// never be reported as false.
+// confirmed cookbook, whetblade, bell bearing, colosseum, summoning pool, grace,
+// boss or map region evidence are supported; every other block is rejected
+// instead of being answered from a guessed position, so an unsupported
+// identifier can never be reported as false.
 func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 	var blockPosition int64
 	switch block := id / eventFlagsPerBlock; block {
@@ -233,6 +233,13 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 		blockPosition = 9
 	case 60:
 		blockPosition = 10
+	// Map region visibility flags occupy block 62, whose BST position is 12 in
+	// SaveForge 1.5.8 and 1.6.8 alike. Only block 62 is added: block 63 carries
+	// the transient map fragment pickup triggers and block 82 the system-level
+	// map display switches, neither of which is a map region, so both stay
+	// rejected.
+	case 62:
+		blockPosition = 12
 	case 65:
 		blockPosition = 15
 	// Grace visit flags occupy the blocks 71 to 74 and 76, whose BST positions

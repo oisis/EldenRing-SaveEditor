@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool, a GraceDocument for kind grace or a BossDocument for kind boss. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool, a GraceDocument for kind grace, a BossDocument for kind boss or a MapRegionDocument for kind map_region. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools, graces and bosses carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools, graces, bosses and map regions carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2440,6 +2440,36 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions": {
+      "get": {
+        "operationId": "getMapRegions",
+        "tags": ["World"],
+        "summary": "GetMapRegions",
+        "description": "Returns the 263 safe map visibility regions GameCatalog declares from the curated MapVisible table. Each entry carries its visibility state from event flag block 62. System display switches, unsafe sub-region flags and transient map-fragment pickup flags are outside this contract. Raw event flag IDs are not exposed. areaLabel is a presentation and grouping label, not a RegionDocument reference. Results are ordered by areaLabel, name and key. An inactive or residual slot reports active false and every entry invisible without reading its slot data. Available only in local loopback mode; an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {"$ref": "#/components/parameters/SaveSessionID"},
+          {"$ref": "#/components/parameters/CharacterID"}
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated map visibility regions of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/GetMapRegionsResult"}
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an unreadable event flag section, or conflicting map region catalog data",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Error"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools": {
       "get": {
         "operationId": "getSummoningPools",
@@ -3333,7 +3363,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace and boss keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace, boss and map region keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3365,10 +3395,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces and bosses in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces, bosses and map regions in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss"]
+          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region"]
         },
         "example": "item"
       },
@@ -5567,6 +5597,44 @@
         },
         "required": ["saveSessionID", "characterID", "active", "bosses"]
       },
+      "MapRegionEntry": {
+        "type": "object",
+        "description": "One safe MapRegionDocument reduced to its public identity, curated area label and current visibility. The raw visibility event flag ID stays private.",
+        "properties": {
+          "kind": {"type": "string", "enum": ["map_region"]},
+          "key": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "name": {"type": "string", "minLength": 1},
+          "areaLabel": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Curated presentation and grouping label. It is not a resource reference and never resolves to a RegionDocument."
+          },
+          "visible": {
+            "type": "boolean",
+            "description": "True when the map visibility event flag of the region is set in the character slot."
+          }
+        },
+        "required": ["kind", "key", "name", "areaLabel", "visible"]
+      },
+      "GetMapRegionsResult": {
+        "type": "object",
+        "description": "The safe curated map visibility regions of one character slot, ordered by areaLabel, name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {"type": "string"},
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {"type": "boolean"},
+          "mapRegions": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/MapRegionEntry"}
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "mapRegions"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6787,14 +6855,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument and kind 'boss' carries BossDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument, kind 'boss' carries BossDocument and kind 'map_region' carries MapRegionDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss"]
+            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region"]
           },
           "item": {
             "type": "object",
@@ -6815,6 +6883,9 @@
           },
           "boss": {
             "$ref": "#/components/schemas/BossDocument"
+          },
+          "mapRegion": {
+            "$ref": "#/components/schemas/MapRegionDocument"
           }
         },
         "required": ["key", "kind"],
@@ -6832,7 +6903,8 @@
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
-                {"required": ["boss"]}
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]}
               ]
             }
           },
@@ -6849,7 +6921,8 @@
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
-                {"required": ["boss"]}
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]}
               ]
             }
           },
@@ -6866,7 +6939,8 @@
                 {"required": ["colosseum"]},
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
-                {"required": ["boss"]}
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]}
               ]
             }
           },
@@ -6883,7 +6957,8 @@
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
                 {"required": ["grace"]},
-                {"required": ["boss"]}
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]}
               ]
             }
           },
@@ -6900,7 +6975,8 @@
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
-                {"required": ["boss"]}
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]}
               ]
             }
           },
@@ -6917,7 +6993,26 @@
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
-                {"required": ["grace"]}
+                {"required": ["grace"]},
+                {"required": ["mapRegion"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["map_region"]
+              }
+            },
+            "required": ["mapRegion"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]},
+                {"required": ["region"]},
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]},
+                {"required": ["boss"]}
               ]
             }
           }
@@ -7159,6 +7254,41 @@
         },
         "required": ["name", "regionLabel", "encounterType", "remembrance", "defeatEventFlagID"]
       },
+      "MapRegionDocument": {
+        "type": "object",
+        "description": "schema.MapRegionDocument. Name, area label and visibility event flag ID are separate known facts with provenance from the curated safe MapVisible table. The area label is only a presentation and grouping label. System display switches, unsafe sub-region flags and transient pickup flags are absent.",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "areaLabel": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "visibleEventFlagID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding a safe map visibility event flag, confirmed to lie inside block 62 alone.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 62000, "maximum": 62999},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["name", "areaLabel", "visibleEventFlagID"]
+      },
       "ItemVariant": {
         "type": "object",
         "description": "schema.ItemVariant as stored in the catalog, with full provenance.",
@@ -7247,7 +7377,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The item, colosseum, region, summoning pool, grace or boss name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
+            "description": "The item, colosseum, region, summoning pool, grace, boss or map region name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
             "example": "Dagger"
           }
         },

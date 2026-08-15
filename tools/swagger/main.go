@@ -2497,6 +2497,28 @@ func registerSaveSessionRoutes(
 	)
 
 	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.GetMapRegions(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
 		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock",
 		func(writer http.ResponseWriter, request *http.Request) {
 			characterID, err := parseCharacterID(request.PathValue("characterID"))

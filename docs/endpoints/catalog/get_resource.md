@@ -12,7 +12,9 @@ internal region ID, name and area, a `SummoningPoolDocument` for kind
 ID, a `GraceDocument` for kind `grace` with its name, curated region label,
 visit event flag ID, boss-arena fact, dungeon type and door event flag ID, or a
 `BossDocument` for kind `boss` with its name, curated region label, encounter
-type, remembrance fact and synchronized defeat event flag ID. It
+type, remembrance fact and synchronized defeat event flag ID, or a
+`MapRegionDocument` for kind `map_region` with its name, area label and safe
+visibility event flag ID. It
 returns no relations; those belong to
 [`GetResourceRelations`](get_resource_relations.md).
 
@@ -55,8 +57,8 @@ The pair is **not**:
 The lookup resolves the kind first and the key only inside that kind:
 
 - `kind` is matched exactly against `Resource.Kind`. `item`, `colosseum`,
-  `region`, `summoning_pool`, `grace` and `boss` are the kinds the current schema
-  supports.
+  `region`, `summoning_pool`, `grace`, `boss` and `map_region` are the kinds the
+  current schema supports.
 - `key` is matched exactly against `Resource.Key` inside the resolved kind. The
   same key may later exist under a different kind, so the key alone is not an
   identity.
@@ -68,8 +70,8 @@ The lookup resolves the kind first and the key only inside that kind:
 
 `schema.ValidateResource` requires an item key to be exactly eight uppercase
 hexadecimal characters (`0-9`, `A-F`), so `000F4240` is well formed and
-`000f4240` is not. Colosseum, region, summoning pool, grace and boss keys use
-lowercase letters, digits and underscores, for example `royal_colosseum`,
+`000f4240` is not. Colosseum, region, summoning pool, grace, boss and map region
+keys use lowercase letters, digits and underscores, for example `royal_colosseum`,
 `limgrave_the_first_step`, `stormveil_castle_gateside_chamber` and
 `weeping_peninsula_tombsward_catacombs`.
 `gamecatalog.New` rejects a catalog containing the same `(kind, key)` pair
@@ -113,13 +115,14 @@ kind.
 | Field | Type | Meaning |
 |---|---|---|
 | `key` | `string` | The stable `Resource.Key` the lookup matched, for an item eight uppercase hexadecimal characters. |
-| `kind` | `string` | Resource kind, `item`, `colosseum`, `region`, `summoning_pool`, `grace` or `boss`. |
+| `kind` | `string` | Resource kind, `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss` or `map_region`. |
 | `item` | `ItemDocument` | The complete item document. Present only for kind `item`. |
 | `colosseum` | `ColosseumDocument` | The complete colosseum document. Present only for kind `colosseum`. |
 | `region` | `RegionDocument` | The complete curated region document. Present only for kind `region`. |
 | `summoningPool` | `SummoningPoolDocument` | The complete curated summoning pool document. Present only for kind `summoning_pool`. |
 | `grace` | `GraceDocument` | The complete curated Site of Grace document. Present only for kind `grace`. |
 | `boss` | `BossDocument` | The complete curated boss encounter document. Present only for kind `boss`. |
+| `mapRegion` | `MapRegionDocument` | The complete curated safe map visibility document. Present only for kind `map_region`. |
 
 `schema.Resource` is a union over those kinds: exactly one document field is
 present and the others are omitted from the JSON entirely.
@@ -215,7 +218,8 @@ whitespace-only kind and key, values with leading or trailing whitespace, an
 unknown kind, an unknown key, a lowercase key, the pre-migration prefixed key, a
 numeric string and a numeric `GameID` passed as a string, the four distinguishable
 kind and key failures, and the immutability of the returned result. They also
-cover colosseum, region, summoning pool, grace and boss resources: their complete typed documents and
+cover colosseum, region, summoning pool, grace, boss and map region resources:
+their complete typed documents and
 provenance, the absence of documents from other kinds, independent returned
 copies, and JSON bodies containing only the matching union field.
 

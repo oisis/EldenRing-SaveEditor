@@ -19,6 +19,8 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 		return validateGraceResource(resource, sources)
 	case ResourceKindBoss:
 		return validateBossResource(resource, sources)
+	case ResourceKindMapRegion:
+		return validateMapRegionResource(resource, sources)
 	default:
 		return fmt.Errorf("resource %q: unsupported kind %q", resource.Key, resource.Kind)
 	}
@@ -42,6 +44,7 @@ func validateSoleDocument(resource Resource) error {
 		{ResourceKindSummoningPool, resource.SummoningPool != nil},
 		{ResourceKindGrace, resource.Grace != nil},
 		{ResourceKindBoss, resource.Boss != nil},
+		{ResourceKindMapRegion, resource.MapRegion != nil},
 	}
 	for _, document := range present {
 		if document.carried && document.kind != resource.Kind {
@@ -355,6 +358,51 @@ func validateBossResource(resource Resource, sources map[SourceID]struct{}) erro
 		return fmt.Errorf(
 			"resource %q: boss.defeatEventFlagID %d lies outside block %d, the only block the curated Bosses table confirms",
 			resource.Key, defeat.Value, bossFlagBlock)
+	}
+	return nil
+}
+
+// validateMapRegionResource fails closed: an unknown or empty name, an unknown
+// or empty area label, an unknown or zero visibility flag and a visibility flag
+// outside the one block the curated table confirms are all rejected, so a map
+// region can never be served without every fact it is presented and resolved by.
+func validateMapRegionResource(resource Resource, sources map[SourceID]struct{}) error {
+	if err := validateSlugKey(ResourceKindMapRegion, resource.Key); err != nil {
+		return err
+	}
+	if err := validateSoleDocument(resource); err != nil {
+		return err
+	}
+	if resource.MapRegion == nil {
+		return fmt.Errorf("resource %q: map region document is required", resource.Key)
+	}
+	name := resource.MapRegion.Name
+	if err := validateFact("mapRegion.name", name, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !name.Known || name.Value == "" {
+		return fmt.Errorf("resource %q: mapRegion.name must be known and non-empty", resource.Key)
+	}
+	areaLabel := resource.MapRegion.AreaLabel
+	if err := validateFact("mapRegion.areaLabel", areaLabel, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !areaLabel.Known || areaLabel.Value == "" {
+		return fmt.Errorf(
+			"resource %q: mapRegion.areaLabel must be known and non-empty", resource.Key)
+	}
+	visible := resource.MapRegion.VisibleEventFlagID
+	if err := validateFact("mapRegion.visibleEventFlagID", visible, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !visible.Known || visible.Value == 0 {
+		return fmt.Errorf(
+			"resource %q: mapRegion.visibleEventFlagID must be known and non-zero", resource.Key)
+	}
+	if !IsConfirmedMapRegionFlag(visible.Value) {
+		return fmt.Errorf(
+			"resource %q: mapRegion.visibleEventFlagID %d lies outside block %d, the only block the curated map visibility table confirms",
+			resource.Key, visible.Value, mapRegionFlagBlock)
 	}
 	return nil
 }

@@ -423,6 +423,11 @@
                 "filepath": "../../../docs/endpoints/world/get_bosses.md",
                 "title": "GetBosses"
               },
+              "/get-map-regions": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_map_regions.md",
+                "title": "GetMapRegions"
+              },
               "/get-summoning-pools": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_summoning_pools.md",

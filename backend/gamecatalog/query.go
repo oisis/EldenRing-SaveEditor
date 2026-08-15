@@ -177,6 +177,12 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// document and are never projected into a summary.
 			summary.NameKnown = resource.Boss.Name.Known
 			summary.Name = resource.Boss.Name.Value
+		case resource.MapRegion != nil:
+			// A map region likewise carries a name only; its area label and
+			// visibility flag are part of the full document and are never
+			// projected into a summary.
+			summary.NameKnown = resource.MapRegion.Name.Known
+			summary.Name = resource.MapRegion.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}
