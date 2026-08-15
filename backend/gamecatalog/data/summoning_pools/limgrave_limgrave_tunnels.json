@@ -1,0 +1,39 @@
+{
+  "key": "limgrave_limgrave_tunnels",
+  "kind": "summoning_pool",
+  "summoningPool": {
+    "name": {
+      "known": true,
+      "value": "Limgrave Tunnels",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670181",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Limgrave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670181",
+        "field": "Region"
+      }
+    },
+    "activationEventFlagID": {
+      "known": true,
+      "value": 670181,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670181",
+        "field": "map key"
+      }
+    }
+  }
+}

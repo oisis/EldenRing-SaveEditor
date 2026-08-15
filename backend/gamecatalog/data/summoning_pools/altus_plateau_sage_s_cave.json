@@ -1,0 +1,39 @@
+{
+  "key": "altus_plateau_sage_s_cave",
+  "kind": "summoning_pool",
+  "summoningPool": {
+    "name": {
+      "known": true,
+      "value": "Sage's Cave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670373",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Altus Plateau",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670373",
+        "field": "Region"
+      }
+    },
+    "activationEventFlagID": {
+      "known": true,
+      "value": 670373,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670373",
+        "field": "map key"
+      }
+    }
+  }
+}

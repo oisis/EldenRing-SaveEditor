@@ -1,0 +1,39 @@
+{
+  "key": "deeproot_depths_the_nameless_eternal_city",
+  "kind": "summoning_pool",
+  "summoningPool": {
+    "name": {
+      "known": true,
+      "value": "The Nameless Eternal City",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670634",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Deeproot Depths",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670634",
+        "field": "Region"
+      }
+    },
+    "activationEventFlagID": {
+      "known": true,
+      "value": 670634,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670634",
+        "field": "map key"
+      }
+    }
+  }
+}

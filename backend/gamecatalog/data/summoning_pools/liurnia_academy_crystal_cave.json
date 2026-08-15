@@ -1,0 +1,39 @@
+{
+  "key": "liurnia_academy_crystal_cave",
+  "kind": "summoning_pool",
+  "summoningPool": {
+    "name": {
+      "known": true,
+      "value": "Academy Crystal Cave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670272",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Liurnia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670272",
+        "field": "Region"
+      }
+    },
+    "activationEventFlagID": {
+      "known": true,
+      "value": 670272,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670272",
+        "field": "map key"
+      }
+    }
+  }
+}

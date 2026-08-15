@@ -920,6 +920,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/whetblades", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/colosseums", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/regions", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/summoning-pools", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1033,6 +1034,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1133,6 +1135,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"Resource",
 		"ColosseumDocument",
 		"RegionDocument",
+		"SummoningPoolDocument",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1241,6 +1244,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetColosseumsResult",
 		"RegionEntry",
 		"GetRegionsResult",
+		"SummoningPoolEntry",
+		"GetSummoningPoolsResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1260,6 +1265,16 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 // The document declares OpenAPI 3.0.3, whose Schema Object has no const
 // keyword, so the Resource union has to discriminate kind with a one-element
 // enum instead.
+// resourceUnionDocuments maps one resource kind onto the Resource union property
+// that carries its document. They are equal for every kind but summoning_pool,
+// whose document property is camelCase.
+var resourceUnionDocuments = map[string]string{
+	"item":           "item",
+	"colosseum":      "colosseum",
+	"region":         "region",
+	"summoning_pool": "summoningPool",
+}
+
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
 	if recorder.Code != http.StatusOK {
@@ -1295,24 +1310,41 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 3 {
-		t.Fatalf("Resource has %d oneOf branches, want 3", len(branches))
+	if len(branches) != 4 {
+		t.Fatalf("Resource has %d oneOf branches, want 4", len(branches))
 	}
-	for index, kind := range []string{"item", "colosseum", "region"} {
+	for index, kind := range []string{"item", "colosseum", "region", "summoning_pool"} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
 			t.Fatalf("Resource oneOf[%d].kind enum = %v, want [%s]", index, got, kind)
 		}
-		if len(branch.Required) != 1 || branch.Required[0] != kind {
-			t.Fatalf("Resource oneOf[%d] required = %v, want [%s]", index, branch.Required, kind)
+		documentProperty := resourceUnionDocuments[kind]
+		if len(branch.Required) != 1 || branch.Required[0] != documentProperty {
+			t.Fatalf("Resource oneOf[%d] required = %v, want [%s]", index, branch.Required, documentProperty)
 		}
-		if len(branch.Not.AnyOf) != 2 {
-			t.Fatalf("Resource oneOf[%d] excludes %d documents, want 2", index, len(branch.Not.AnyOf))
+		// Counting the exclusions is not enough: three copies of the same foreign
+		// document would pass it while leaving two documents unexcluded.
+		missing := map[string]struct{}{}
+		for _, other := range resourceUnionDocuments {
+			if other != documentProperty {
+				missing[other] = struct{}{}
+			}
+		}
+		if len(branch.Not.AnyOf) != len(missing) {
+			t.Fatalf("Resource oneOf[%d] excludes %d documents, want %d",
+				index, len(branch.Not.AnyOf), len(missing))
 		}
 		for _, excluded := range branch.Not.AnyOf {
-			if len(excluded.Required) != 1 || excluded.Required[0] == kind {
+			if len(excluded.Required) != 1 {
 				t.Fatalf("Resource oneOf[%d] invalid exclusion %v", index, excluded.Required)
 			}
+			if _, expected := missing[excluded.Required[0]]; !expected {
+				t.Fatalf("Resource oneOf[%d] excludes %q, which is not one of the remaining documents",
+					index, excluded.Required[0])
+			}
+			// Deleting is what rejects the same document excluded twice: the
+			// second copy no longer belongs to the remaining set.
+			delete(missing, excluded.Required[0])
 		}
 	}
 }
@@ -1362,8 +1394,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 61 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 61", found)
+	if found != 62 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 62", found)
 	}
 }
 
@@ -5078,6 +5110,33 @@ func TestRegionsRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, recorder, target)
 	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
 		t.Fatal("regions route body differs from the GetRegions result")
+	}
+}
+
+func TestSummoningPoolsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/summoning-pools"
+
+	want, err := world.GetSummoningPools(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetSummoningPools: %v", err)
+	}
+	if !want.Active || len(want.SummoningPools) != 213 {
+		t.Fatalf("fixture result = active %t with %d summoning pools, want true/213",
+			want.Active, len(want.SummoningPools))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("summoning pools route body differs from the GetSummoningPools result")
 	}
 }
 

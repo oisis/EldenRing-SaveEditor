@@ -1,0 +1,39 @@
+{
+  "key": "subterranean_shunning_grounds_forsaken_depths",
+  "kind": "summoning_pool",
+  "summoningPool": {
+    "name": {
+      "known": true,
+      "value": "Forsaken Depths",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670341",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Subterranean Shunning-Grounds",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670341",
+        "field": "Region"
+      }
+    },
+    "activationEventFlagID": {
+      "known": true,
+      "value": 670341,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated Martyr Effigy summoning pool table of the legacy catalog",
+        "table": "SummoningPools",
+        "row": "670341",
+        "field": "map key"
+      }
+    }
+  }
+}

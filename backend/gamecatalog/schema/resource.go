@@ -3,9 +3,10 @@ package schema
 type ResourceKind string
 
 const (
-	ResourceKindItem      ResourceKind = "item"
-	ResourceKindColosseum ResourceKind = "colosseum"
-	ResourceKindRegion    ResourceKind = "region"
+	ResourceKindItem          ResourceKind = "item"
+	ResourceKindColosseum     ResourceKind = "colosseum"
+	ResourceKindRegion        ResourceKind = "region"
+	ResourceKindSummoningPool ResourceKind = "summoning_pool"
 )
 
 // ResourceRef is the identity of one catalog resource: the exact pair
@@ -22,11 +23,12 @@ type ResourceRef struct {
 // omitted from JSON, so a document never carries a null field for a type it is
 // not.
 type Resource struct {
-	Key       string             `json:"key"`
-	Kind      ResourceKind       `json:"kind"`
-	Item      *ItemDocument      `json:"item,omitempty"`
-	Colosseum *ColosseumDocument `json:"colosseum,omitempty"`
-	Region    *RegionDocument    `json:"region,omitempty"`
+	Key           string                 `json:"key"`
+	Kind          ResourceKind           `json:"kind"`
+	Item          *ItemDocument          `json:"item,omitempty"`
+	Colosseum     *ColosseumDocument     `json:"colosseum,omitempty"`
+	Region        *RegionDocument        `json:"region,omitempty"`
+	SummoningPool *SummoningPoolDocument `json:"summoningPool,omitempty"`
 }
 
 func (resource Resource) Ref() ResourceRef {

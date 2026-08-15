@@ -18,6 +18,10 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		region := *resource.Region
 		cloned.Region = &region
 	}
+	if resource.SummoningPool != nil {
+		summoningPool := *resource.SummoningPool
+		cloned.SummoningPool = &summoningPool
+	}
 	if resource.Item == nil {
 		return cloned
 	}

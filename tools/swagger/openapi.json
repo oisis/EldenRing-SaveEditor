@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum or a RegionDocument for kind region. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region or a SummoningPoolDocument for kind summoning_pool. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums and regions carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions and summoning pools carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2364,6 +2364,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools": {
+      "get": {
+        "operationId": "getSummoningPools",
+        "tags": ["World"],
+        "summary": "GetSummoningPools",
+        "description": "Returns the 213 curated Martyr Effigy summoning pools GameCatalog declares, each with its activation state read from the confirmed event flag block 670. Raw event flag IDs are not exposed. regionLabel is a curated presentation and grouping label, not a reference to a region resource. Results are ordered by regionLabel, name and key. An inactive or residual slot reports active false and every entry deactivated without reading its slot data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated summoning pools of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetSummoningPoolsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an unreadable event flag section, or conflicting summoning pool catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades": {
       "get": {
         "operationId": "getWhetblades",
@@ -3219,7 +3257,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum and region keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region and summoning pool keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3251,10 +3289,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums and regions in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions and summoning pools in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum", "region"]
+          "enum": ["", "item", "colosseum", "region", "summoning_pool"]
         },
         "example": "item"
       },
@@ -5276,6 +5314,59 @@
         },
         "required": ["saveSessionID", "characterID", "active", "regions"]
       },
+      "SummoningPoolEntry": {
+        "type": "object",
+        "description": "One curated SummoningPoolDocument reduced to its public identity, its curated region label and its activation state. The raw activation event flag ID stays private.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["summoning_pool"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regionLabel": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Curated presentation and grouping label. It is not a resource reference and never resolves to a RegionDocument."
+          },
+          "activated": {
+            "type": "boolean",
+            "description": "True when the activation event flag of the pool is set in the character slot."
+          }
+        },
+        "required": ["kind", "key", "name", "regionLabel", "activated"]
+      },
+      "GetSummoningPoolsResult": {
+        "type": "object",
+        "description": "The curated summoning pools of one character slot, ordered by regionLabel, name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "summoningPools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SummoningPoolEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "summoningPools"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6496,14 +6587,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument and kind 'region' carries RegionDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument and kind 'summoning_pool' carries SummoningPoolDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum", "region"]
+            "enum": ["item", "colosseum", "region", "summoning_pool"]
           },
           "item": {
             "type": "object",
@@ -6515,6 +6606,9 @@
           },
           "region": {
             "$ref": "#/components/schemas/RegionDocument"
+          },
+          "summoningPool": {
+            "$ref": "#/components/schemas/SummoningPoolDocument"
           }
         },
         "required": ["key", "kind"],
@@ -6529,7 +6623,8 @@
             "not": {
               "anyOf": [
                 {"required": ["colosseum"]},
-                {"required": ["region"]}
+                {"required": ["region"]},
+                {"required": ["summoningPool"]}
               ]
             }
           },
@@ -6543,7 +6638,8 @@
             "not": {
               "anyOf": [
                 {"required": ["item"]},
-                {"required": ["region"]}
+                {"required": ["region"]},
+                {"required": ["summoningPool"]}
               ]
             }
           },
@@ -6557,7 +6653,23 @@
             "not": {
               "anyOf": [
                 {"required": ["item"]},
-                {"required": ["colosseum"]}
+                {"required": ["colosseum"]},
+                {"required": ["summoningPool"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["summoning_pool"]
+              }
+            },
+            "required": ["summoningPool"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]},
+                {"required": ["region"]}
               ]
             }
           }
@@ -6644,6 +6756,41 @@
           }
         },
         "required": ["regionID", "name", "area"]
+      },
+      "SummoningPoolDocument": {
+        "type": "object",
+        "description": "schema.SummoningPoolDocument. Name, region label and activation event flag ID are separate known facts with provenance from the curated Martyr Effigy table. The region label is a presentation and grouping label only and is never a resource reference.",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "regionLabel": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "activationEventFlagID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the activation event flag of the pool, confirmed to lie inside block 670.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 670000, "maximum": 670999},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["name", "regionLabel", "activationEventFlagID"]
       },
       "ItemVariant": {
         "type": "object",
@@ -6733,7 +6880,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The item, colosseum or region name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
+            "description": "The item, colosseum, region or summoning pool name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
             "example": "Dagger"
           }
         },

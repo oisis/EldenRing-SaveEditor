@@ -160,6 +160,11 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// document and is never projected into a summary.
 			summary.NameKnown = resource.Region.Name.Known
 			summary.Name = resource.Region.Name.Value
+		case resource.SummoningPool != nil:
+			// A summoning pool likewise carries a name only; its region label is
+			// part of the full document and is never projected into a summary.
+			summary.NameKnown = resource.SummoningPool.Name.Known
+			summary.Name = resource.SummoningPool.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}
