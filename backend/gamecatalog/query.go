@@ -171,6 +171,12 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// never projected into a summary.
 			summary.NameKnown = resource.Grace.Name.Known
 			summary.Name = resource.Grace.Name.Value
+		case resource.Boss != nil:
+			// A boss likewise carries a name only; its region label, encounter
+			// type, remembrance fact and defeat flag are part of the full
+			// document and are never projected into a summary.
+			summary.NameKnown = resource.Boss.Name.Known
+			summary.Name = resource.Boss.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}

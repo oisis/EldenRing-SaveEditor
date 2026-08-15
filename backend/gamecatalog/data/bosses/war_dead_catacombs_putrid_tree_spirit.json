@@ -1,0 +1,61 @@
+{
+  "key": "war_dead_catacombs_putrid_tree_spirit",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Putrid Tree Spirit",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9216",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "War-Dead Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9216",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "field",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9216",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9216",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9216,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9216",
+        "field": "map key"
+      }
+    }
+  }
+}

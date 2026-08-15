@@ -1,0 +1,61 @@
+{
+  "key": "gaol_cave_frenzied_duelist",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Frenzied Duelist",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9243",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Gaol Cave",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9243",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "field",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9243",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9243",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9243,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9243",
+        "field": "map key"
+      }
+    }
+  }
+}

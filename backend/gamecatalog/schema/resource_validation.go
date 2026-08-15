@@ -17,6 +17,8 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 		return validateSummoningPoolResource(resource, sources)
 	case ResourceKindGrace:
 		return validateGraceResource(resource, sources)
+	case ResourceKindBoss:
+		return validateBossResource(resource, sources)
 	default:
 		return fmt.Errorf("resource %q: unsupported kind %q", resource.Key, resource.Kind)
 	}
@@ -39,6 +41,7 @@ func validateSoleDocument(resource Resource) error {
 		{ResourceKindRegion, resource.Region != nil},
 		{ResourceKindSummoningPool, resource.SummoningPool != nil},
 		{ResourceKindGrace, resource.Grace != nil},
+		{ResourceKindBoss, resource.Boss != nil},
 	}
 	for _, document := range present {
 		if document.carried && document.kind != resource.Kind {
@@ -286,6 +289,72 @@ func validateGraceResource(resource Resource, sources map[SourceID]struct{}) err
 		return fmt.Errorf(
 			"resource %q: grace.doorEventFlagID %d is set on a grace without a dungeon type",
 			resource.Key, door.Value)
+	}
+	return nil
+}
+
+// validateBossResource fails closed: an unknown or empty name, an unknown or
+// empty region label, an unknown or unsupported encounter type, an unknown
+// remembrance fact, an unknown or zero defeat flag and a defeat flag outside the
+// one block the curated table confirms are all rejected, so a boss can never be
+// served without every fact it is presented and resolved by.
+func validateBossResource(resource Resource, sources map[SourceID]struct{}) error {
+	if err := validateSlugKey(ResourceKindBoss, resource.Key); err != nil {
+		return err
+	}
+	if err := validateSoleDocument(resource); err != nil {
+		return err
+	}
+	if resource.Boss == nil {
+		return fmt.Errorf("resource %q: boss document is required", resource.Key)
+	}
+	name := resource.Boss.Name
+	if err := validateFact("boss.name", name, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !name.Known || name.Value == "" {
+		return fmt.Errorf("resource %q: boss.name must be known and non-empty", resource.Key)
+	}
+	regionLabel := resource.Boss.RegionLabel
+	if err := validateFact("boss.regionLabel", regionLabel, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !regionLabel.Known || regionLabel.Value == "" {
+		return fmt.Errorf(
+			"resource %q: boss.regionLabel must be known and non-empty", resource.Key)
+	}
+	encounterType := resource.Boss.EncounterType
+	if err := validateFact("boss.encounterType", encounterType, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !encounterType.Known {
+		return fmt.Errorf("resource %q: boss.encounterType must be known", resource.Key)
+	}
+	switch encounterType.Value {
+	case BossEncounterTypeMain, BossEncounterTypeField:
+	default:
+		return fmt.Errorf("resource %q: boss.encounterType %q is not a confirmed value",
+			resource.Key, encounterType.Value)
+	}
+	remembrance := resource.Boss.Remembrance
+	if err := validateFact("boss.remembrance", remembrance, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !remembrance.Known {
+		return fmt.Errorf("resource %q: boss.remembrance must be known", resource.Key)
+	}
+	defeat := resource.Boss.DefeatEventFlagID
+	if err := validateFact("boss.defeatEventFlagID", defeat, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !defeat.Known || defeat.Value == 0 {
+		return fmt.Errorf(
+			"resource %q: boss.defeatEventFlagID must be known and non-zero", resource.Key)
+	}
+	if !IsConfirmedBossFlag(defeat.Value) {
+		return fmt.Errorf(
+			"resource %q: boss.defeatEventFlagID %d lies outside block %d, the only block the curated Bosses table confirms",
+			resource.Key, defeat.Value, bossFlagBlock)
 	}
 	return nil
 }

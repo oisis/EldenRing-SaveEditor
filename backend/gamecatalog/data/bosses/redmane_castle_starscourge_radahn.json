@@ -1,0 +1,61 @@
+{
+  "key": "redmane_castle_starscourge_radahn",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Starscourge Radahn",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9130",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Redmane Castle",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9130",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "main",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9130",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": true,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9130",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9130,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9130",
+        "field": "map key"
+      }
+    }
+  }
+}

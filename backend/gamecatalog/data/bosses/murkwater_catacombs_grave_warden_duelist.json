@@ -1,0 +1,61 @@
+{
+  "key": "murkwater_catacombs_grave_warden_duelist",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Grave Warden Duelist",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9204",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Murkwater Catacombs",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9204",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "field",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9204",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9204",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9204,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9204",
+        "field": "map key"
+      }
+    }
+  }
+}

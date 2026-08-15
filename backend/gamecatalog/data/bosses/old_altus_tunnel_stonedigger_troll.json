@@ -1,0 +1,61 @@
+{
+  "key": "old_altus_tunnel_stonedigger_troll",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Stonedigger Troll",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9263",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Old Altus Tunnel",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9263",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "field",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9263",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": false,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9263",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9263,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9263",
+        "field": "map key"
+      }
+    }
+  }
+}

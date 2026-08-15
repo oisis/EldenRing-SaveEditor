@@ -1,0 +1,61 @@
+{
+  "key": "miquella_s_haligtree_malenia_blade_of_miquella",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Malenia, Blade of Miquella",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9120",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Miquella's Haligtree",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9120",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "main",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9120",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": true,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9120",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9120,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9120",
+        "field": "map key"
+      }
+    }
+  }
+}

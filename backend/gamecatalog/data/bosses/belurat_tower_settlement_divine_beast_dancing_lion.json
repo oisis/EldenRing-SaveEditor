@@ -1,0 +1,61 @@
+{
+  "key": "belurat_tower_settlement_divine_beast_dancing_lion",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Divine Beast Dancing Lion",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9140",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Belurat, Tower Settlement",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9140",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "main",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9140",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": true,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9140",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9140,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9140",
+        "field": "map key"
+      }
+    }
+  }
+}

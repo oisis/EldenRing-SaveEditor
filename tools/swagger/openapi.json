@@ -115,7 +115,7 @@
         "operationId": "getResource",
         "tags": ["Catalog"],
         "summary": "GetResource",
-        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool or a GraceDocument for kind grace. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
+        "description": "Returns one full catalog resource document of whatever kind the resource is: an ItemDocument for kind item, a ColosseumDocument for kind colosseum, a RegionDocument for kind region, a SummoningPoolDocument for kind summoning_pool, a GraceDocument for kind grace or a BossDocument for kind boss. The resource identity is the exact pair (kind, key); the kind is resolved first and the key only inside that kind.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceKind"
@@ -197,7 +197,7 @@
         "operationId": "getResources",
         "tags": ["Catalog"],
         "summary": "GetResources",
-        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools and graces carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
+        "description": "Returns one page of catalog resources reduced to the fields a list or a picker needs: kind, key, family and name. family and capability describe items only, so colosseums, regions, summoning pools, graces and bosses carry an empty family and are never matched by either filter. Every filter is matched exactly and case-sensitively except search, which is case-insensitive on the key and on the name. An empty filter never filters. The order is the catalog order, kind first and only then key. total counts the matches before paging, and a page beyond the last one returns an empty array, never null. Full documents belong to GetResource.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ResourceTypeFilter"
@@ -2402,6 +2402,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses": {
+      "get": {
+        "operationId": "getBosses",
+        "tags": ["World"],
+        "summary": "GetBosses",
+        "description": "Returns the 110 curated boss encounters GameCatalog declares, each with its defeat state read from the confirmed synchronized event flag block 9. The roughly 97 open-world field bosses that carry a per-map flag only are not part of the curated table and are never reported. Raw event flag IDs are not exposed. regionLabel is a curated presentation and grouping label, not a reference to a region resource. Results are ordered by regionLabel, name and key. An inactive or residual slot reports active false and every entry undefeated without reading its slot data. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The curated boss encounters of the character slot",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBossesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, an unreadable event flag section, or conflicting boss catalog data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools": {
       "get": {
         "operationId": "getSummoningPools",
@@ -3295,7 +3333,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool and grace keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace and boss keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3327,10 +3365,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools and graces in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces and bosses in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace"]
+          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss"]
         },
         "example": "item"
       },
@@ -5467,6 +5505,68 @@
         },
         "required": ["saveSessionID", "characterID", "active", "graces"]
       },
+      "BossEntry": {
+        "type": "object",
+        "description": "One curated BossDocument reduced to its public identity, its curated region label, its encounter type, its remembrance fact and its defeat state. The raw defeat event flag ID stays private.",
+        "properties": {
+          "kind": {
+            "type": "string",
+            "enum": ["boss"]
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "regionLabel": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Curated presentation and grouping label. It is not a resource reference and never resolves to a RegionDocument."
+          },
+          "encounterType": {
+            "type": "string",
+            "enum": ["main", "field"],
+            "description": "The confirmed encounter type of the curated table: main or field."
+          },
+          "remembrance": {
+            "type": "boolean",
+            "description": "True when the curated table records the boss as dropping a Remembrance item."
+          },
+          "defeated": {
+            "type": "boolean",
+            "description": "True when the defeat event flag of the boss is set in the character slot."
+          }
+        },
+        "required": ["kind", "key", "name", "regionLabel", "encounterType", "remembrance", "defeated"]
+      },
+      "GetBossesResult": {
+        "type": "object",
+        "description": "The curated boss encounters of one character slot, ordered by regionLabel, name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "bosses": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BossEntry"
+            }
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "bosses"]
+      },
       "WhetbladeEntry": {
         "type": "object",
         "description": "One goods ItemDocument that declares exactly one whetblade unlock, together with its logical unlock state. Raw event flag and goods identifiers are not exposed.",
@@ -6687,14 +6787,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument and kind 'grace' carries GraceDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument and kind 'boss' carries BossDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum", "region", "summoning_pool", "grace"]
+            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss"]
           },
           "item": {
             "type": "object",
@@ -6712,6 +6812,9 @@
           },
           "grace": {
             "$ref": "#/components/schemas/GraceDocument"
+          },
+          "boss": {
+            "$ref": "#/components/schemas/BossDocument"
           }
         },
         "required": ["key", "kind"],
@@ -6728,7 +6831,8 @@
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
-                {"required": ["grace"]}
+                {"required": ["grace"]},
+                {"required": ["boss"]}
               ]
             }
           },
@@ -6744,7 +6848,8 @@
                 {"required": ["item"]},
                 {"required": ["region"]},
                 {"required": ["summoningPool"]},
-                {"required": ["grace"]}
+                {"required": ["grace"]},
+                {"required": ["boss"]}
               ]
             }
           },
@@ -6760,7 +6865,8 @@
                 {"required": ["item"]},
                 {"required": ["colosseum"]},
                 {"required": ["summoningPool"]},
-                {"required": ["grace"]}
+                {"required": ["grace"]},
+                {"required": ["boss"]}
               ]
             }
           },
@@ -6776,7 +6882,8 @@
                 {"required": ["item"]},
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
-                {"required": ["grace"]}
+                {"required": ["grace"]},
+                {"required": ["boss"]}
               ]
             }
           },
@@ -6792,7 +6899,25 @@
                 {"required": ["item"]},
                 {"required": ["colosseum"]},
                 {"required": ["region"]},
-                {"required": ["summoningPool"]}
+                {"required": ["summoningPool"]},
+                {"required": ["boss"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["boss"]
+              }
+            },
+            "required": ["boss"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]},
+                {"required": ["region"]},
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]}
               ]
             }
           }
@@ -6981,6 +7106,59 @@
         },
         "required": ["name", "regionLabel", "visitEventFlagID", "bossArena", "dungeonType", "doorEventFlagID"]
       },
+      "BossDocument": {
+        "type": "object",
+        "description": "schema.BossDocument. Name, region label, encounter type, remembrance fact and defeat event flag ID are separate known facts with provenance from the curated synchronized boss defeat table. The region label is a presentation and grouping label only and is never a resource reference. The defeat event flag is private catalog data no getter exposes.",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "regionLabel": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "encounterType": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "enum": ["main", "field"]},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "remembrance": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "boolean"},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "defeatEventFlagID": {
+            "type": "object",
+            "description": "schema.Fact[uint32] holding the synchronized defeat event flag of the boss, confirmed to lie inside block 9 alone. The neighbouring blocks 8 and 10 carry no curated boss and are not part of the contract.",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "integer", "format": "int64", "minimum": 9000, "maximum": 9999},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          }
+        },
+        "required": ["name", "regionLabel", "encounterType", "remembrance", "defeatEventFlagID"]
+      },
       "ItemVariant": {
         "type": "object",
         "description": "schema.ItemVariant as stored in the catalog, with full provenance.",
@@ -7069,7 +7247,7 @@
           },
           "name": {
             "type": "string",
-            "description": "The item, colosseum, region, summoning pool or grace name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
+            "description": "The item, colosseum, region, summoning pool, grace or boss name. Empty when the name is not known; there is no fallback to the key or to a placeholder.",
             "example": "Dagger"
           }
         },

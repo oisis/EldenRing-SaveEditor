@@ -1,0 +1,61 @@
+{
+  "key": "stone_coffin_fissure_putrescent_knight",
+  "kind": "boss",
+  "boss": {
+    "name": {
+      "known": true,
+      "value": "Putrescent Knight",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9148",
+        "field": "Name"
+      }
+    },
+    "regionLabel": {
+      "known": true,
+      "value": "Stone Coffin Fissure",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9148",
+        "field": "Region"
+      }
+    },
+    "encounterType": {
+      "known": true,
+      "value": "main",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9148",
+        "field": "Type"
+      }
+    },
+    "remembrance": {
+      "known": true,
+      "value": true,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9148",
+        "field": "Remembrance"
+      }
+    },
+    "defeatEventFlagID": {
+      "known": true,
+      "value": 9148,
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated synchronized boss defeat table of the legacy catalog",
+        "table": "Bosses",
+        "row": "9148",
+        "field": "map key"
+      }
+    }
+  }
+}

@@ -26,6 +26,10 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		grace := *resource.Grace
 		cloned.Grace = &grace
 	}
+	if resource.Boss != nil {
+		boss := *resource.Boss
+		cloned.Boss = &boss
+	}
 	if resource.Item == nil {
 		return cloned
 	}

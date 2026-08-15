@@ -418,6 +418,11 @@
                 "filepath": "../../../docs/endpoints/world/get_graces.md",
                 "title": "GetGraces"
               },
+              "/get-bosses": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_bosses.md",
+                "title": "GetBosses"
+              },
               "/get-summoning-pools": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/get_summoning_pools.md",

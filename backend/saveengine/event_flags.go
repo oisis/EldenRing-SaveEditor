@@ -219,13 +219,18 @@ type eventFlagPosition struct {
 }
 
 // resolveEventFlag places one identifier inside the bitfield. Only blocks with
-// confirmed cookbook, whetblade, bell bearing, colosseum, summoning pool or
-// grace evidence are supported; every other block is rejected by name instead of
-// being answered from a guessed position, so an unsupported identifier can never
-// be reported as false.
+// confirmed cookbook, whetblade, bell bearing, colosseum, summoning pool, grace
+// or boss evidence are supported; every other block is rejected by name instead
+// of being answered from a guessed position, so an unsupported identifier can
+// never be reported as false.
 func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 	var blockPosition int64
 	switch block := id / eventFlagsPerBlock; block {
+	// Synchronized boss defeat flags occupy block 9, whose BST position is 9 in
+	// SaveForge 1.5.8 and 1.6.8 alike. Only block 9 is added: the neighbouring
+	// blocks 8 and 10 carry no curated resource, so they stay rejected.
+	case 9:
+		blockPosition = 9
 	case 60:
 		blockPosition = 10
 	case 65:

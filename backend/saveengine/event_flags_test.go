@@ -107,6 +107,7 @@ func eventFlagTestPosition(t *testing.T, id uint32) (int64, uint8) {
 	t.Helper()
 
 	position := map[uint32]int64{
+		9:  9,
 		60: 10, 65: 15, 67: 17, 68: 18, 71: 21, 72: 22, 73: 23, 74: 24, 76: 26,
 		670: 107, 11109: 11129,
 	}[id/1000]
@@ -309,6 +310,48 @@ func TestGetEventFlagsResolvesTheGraceBlocksOfBothPlatforms(t *testing.T) {
 			if _, err := engine.GetEventFlags(
 				loaded.SaveSessionID, content.slot, []uint32{75000}); err == nil {
 				t.Error("the unused block 75 was accepted")
+			}
+		})
+	}
+}
+
+// The curated Bosses table uses block 9 alone. Its neighbours 8 and 10 carry no
+// curated resource, so the reader must keep rejecting them instead of answering
+// them from an adjacent position.
+func TestGetEventFlagsResolvesTheBossBlockOfBothPlatforms(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			content := eventFlagTestContent(platform)
+			content.set = append(content.set, 9000, 9100, 9281, 9999)
+
+			engine := New()
+			loaded, err := engine.LoadSave(writeEventFlagFixture(t, content), string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+
+			// Both block boundaries plus the first and the last curated boss flag,
+			// each with its clear neighbour, so a wrong block position or a
+			// mirrored bit lands on a different value.
+			requested := []uint32{9000, 9001, 9100, 9101, 9280, 9281, 9998, 9999}
+			want := map[uint32]bool{
+				9000: true, 9001: false, 9100: true, 9101: false,
+				9280: false, 9281: true, 9998: false, 9999: true,
+			}
+
+			result, err := engine.GetEventFlags(loaded.SaveSessionID, content.slot, requested)
+			if err != nil {
+				t.Fatalf("GetEventFlags: %v", err)
+			}
+			if !reflect.DeepEqual(result.Flags, want) {
+				t.Errorf("flags = %+v, want %+v", result.Flags, want)
+			}
+
+			for _, unsupported := range []uint32{8999, 10000} {
+				if _, err := engine.GetEventFlags(
+					loaded.SaveSessionID, content.slot, []uint32{unsupported}); err == nil {
+					t.Errorf("the unsupported neighbouring flag %d was accepted", unsupported)
+				}
 			}
 		})
 	}

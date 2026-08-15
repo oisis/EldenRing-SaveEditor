@@ -922,6 +922,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/regions", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/summoning-pools", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/graces", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bosses", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1037,6 +1038,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces":                             "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
@@ -1139,6 +1141,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"RegionDocument",
 		"SummoningPoolDocument",
 		"GraceDocument",
+		"BossDocument",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1251,6 +1254,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetSummoningPoolsResult",
 		"GraceEntry",
 		"GetGracesResult",
+		"BossEntry",
+		"GetBossesResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1279,6 +1284,7 @@ var resourceUnionDocuments = map[string]string{
 	"region":         "region",
 	"summoning_pool": "summoningPool",
 	"grace":          "grace",
+	"boss":           "boss",
 }
 
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
@@ -1316,10 +1322,12 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 5 {
-		t.Fatalf("Resource has %d oneOf branches, want 5", len(branches))
+	if len(branches) != 6 {
+		t.Fatalf("Resource has %d oneOf branches, want 6", len(branches))
 	}
-	for index, kind := range []string{"item", "colosseum", "region", "summoning_pool", "grace"} {
+	for index, kind := range []string{
+		"item", "colosseum", "region", "summoning_pool", "grace", "boss",
+	} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
 			t.Fatalf("Resource oneOf[%d].kind enum = %v, want [%s]", index, got, kind)
@@ -1486,8 +1494,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 63 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 63", found)
+	if found != 64 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 64", found)
 	}
 }
 
@@ -5256,6 +5264,75 @@ func TestGracesRouteMatchesTheGetter(t *testing.T) {
 	assertOK(t, recorder, target)
 	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
 		t.Fatal("graces route body differs from the GetGraces result")
+	}
+}
+
+// The curated Bosses table uses block 9 alone, so the document must describe
+// exactly that block. A wider range would advertise the neighbouring blocks 8
+// and 10, which resolveEventFlag rejects and no boss declares.
+func TestBossDefeatEventFlagOpenAPICoversBlock9Only(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Comps struct {
+			Schemas map[string]struct {
+				Properties struct {
+					DefeatEventFlagID struct {
+						Properties struct {
+							Value struct {
+								Type    string  `json:"type"`
+								Format  string  `json:"format"`
+								Minimum *uint32 `json:"minimum"`
+								Maximum *uint32 `json:"maximum"`
+							} `json:"value"`
+						} `json:"properties"`
+					} `json:"defeatEventFlagID"`
+				} `json:"properties"`
+			} `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	value := document.Comps.Schemas["BossDocument"].Properties.DefeatEventFlagID.Properties.Value
+	if value.Type != "integer" || value.Format != "int64" {
+		t.Fatalf("defeatEventFlagID.value = %q/%q, want integer/int64", value.Type, value.Format)
+	}
+	if value.Minimum == nil || *value.Minimum != 9000 ||
+		value.Maximum == nil || *value.Maximum != 9999 {
+		t.Fatalf("defeatEventFlagID.value range = %v-%v, want 9000-9999",
+			value.Minimum, value.Maximum)
+	}
+}
+
+func TestBossesRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/bosses"
+
+	want, err := world.GetBosses(saveEngine, gameCatalog, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("world.GetBosses: %v", err)
+	}
+	if !want.Active || len(want.Bosses) != 110 {
+		t.Fatalf("fixture result = active %t with %d bosses, want true/110",
+			want.Active, len(want.Bosses))
+	}
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("bosses route body differs from the GetBosses result")
 	}
 }
 
