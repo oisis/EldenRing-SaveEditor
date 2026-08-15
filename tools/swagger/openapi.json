@@ -2536,6 +2536,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums/unlock": {
+      "put": {
+        "operationId": "setColosseumUnlocked",
+        "tags": ["World"],
+        "summary": "SetColosseumUnlocked",
+        "description": "Sets or clears the unlock state of one colosseum in a character slot of a save session. Resolves the activation event flag ID from GameCatalog; SaveEngine owns the closed rule of the three confirmed arenas. Unlocking writes the activation flag together with the map POI, NPC and matchmaking gate flags of that arena plus the three global colosseum flags; locking clears those four arena flags only. The global flags 6080, 60100 and 69480 are never cleared, because another unlocked arena may still own them and 60100 is shared with the Torrent progression. The physical gate state lives in the WorldGeom blob and is not touched, and no summoning pool, grace, item or region changes. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetColosseumUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed colosseum unlock state change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetColosseumUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, invalid expectedRevision, unknown session, inactive slot, invalid catalog resource, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions": {
       "get": {
         "operationId": "getMapRegions",
@@ -6155,6 +6203,59 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "graceKind", "graceKey", "visited"]
+      },
+      "SetColosseumUnlockedRequest": {
+        "type": "object",
+        "description": "The request body for setting a colosseum unlock state.",
+        "additionalProperties": false,
+        "properties": {
+          "colosseumKind": {
+            "type": "string",
+            "enum": ["colosseum"],
+            "description": "The public GameCatalog resource kind. Always colosseum."
+          },
+          "colosseumKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The public slug resource key of the colosseum."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True to write the four confirmed arena flags plus the three global colosseum flags, false to clear the four arena flags only."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["colosseumKind", "colosseumKey", "unlocked", "expectedRevision"]
+      },
+      "SetColosseumUnlockedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful colosseum unlock mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "colosseumKind": {
+            "type": "string"
+          },
+          "colosseumKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "colosseumKind", "colosseumKey", "unlocked"]
       },
       "GestureEntry": {
         "type": "object",

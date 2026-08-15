@@ -231,6 +231,11 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 	// blocks 8 and 10 carry no curated resource, so they stay rejected.
 	case 9:
 		blockPosition = 9
+	// The global colosseum gameman flag 6080 lies in block 6, whose BST position
+	// is 6 in SaveForge 1.5.8 and 1.6.8 alike. Only block 6 is added; the
+	// neighbouring blocks 5 and 7 carry no curated resource and stay rejected.
+	case 6:
+		blockPosition = 6
 	case 60:
 		blockPosition = 10
 	// Map region visibility flags occupy block 62, whose BST position is 12 in
@@ -264,6 +269,12 @@ func resolveEventFlag(id uint32) (eventFlagPosition, error) {
 		blockPosition = 17
 	case 68:
 		blockPosition = 18
+	// The colosseum NPC/event-memory markers 69450, 69460 and 69470 and the
+	// global 69480 lie in block 69, whose BST position is 19 in SaveForge 1.5.8
+	// and 1.6.8 alike. Only block 69 is added; no current GameCatalog resource
+	// or endpoint requires block 70, so it stays rejected.
+	case 69:
+		blockPosition = 19
 	case 670:
 		// Summoning pool activation flags occupy BST position 107, confirmed for
 		// the whole block in both SaveForge 1.5.8 and 1.6.8.

@@ -107,8 +107,8 @@ func eventFlagTestPosition(t *testing.T, id uint32) (int64, uint8) {
 	t.Helper()
 
 	position := map[uint32]int64{
-		4: 4, 9: 9,
-		60: 10, 62: 12, 65: 15, 67: 17, 68: 18, 71: 21, 72: 22, 73: 23, 74: 24, 76: 26,
+		4: 4, 6: 6, 9: 9,
+		60: 10, 62: 12, 65: 15, 67: 17, 68: 18, 69: 19, 71: 21, 72: 22, 73: 23, 74: 24, 76: 26,
 		670: 107, 710: 111, 11109: 11129,
 		1043338: 5521,
 	}[id/1000]
@@ -462,10 +462,10 @@ func TestGetEventFlagsRejectsWhatItCannotResolve(t *testing.T) {
 		requested     []uint32
 		want          string
 	}{
-		"block below the supported range": {present, []uint32{66999},
+		"unsupported block before the cookbook blocks": {present, []uint32{66999},
 			"event flag 66999 lies in block 66, which this reader does not support"},
-		"block above the supported range": {present, []uint32{69000},
-			"event flag 69000 lies in block 69, which this reader does not support"},
+		"unsupported block between supported blocks": {present, []uint32{70000},
+			"event flag 70000 lies in block 70, which this reader does not support"},
 		"no block at all": {present, []uint32{7},
 			"event flag 7 lies in block 0, which this reader does not support"},
 		"missing anchor": {load(missingAnchor), []uint32{67000},
@@ -556,11 +556,11 @@ func TestGetEventFlagsResolvesEveryIdentifierBeforeTheSlotIsTouched(t *testing.T
 	}
 
 	result, err := engine.GetEventFlags(
-		loaded.SaveSessionID, content.slot, []uint32{67000, 69000})
+		loaded.SaveSessionID, content.slot, []uint32{67000, 70000})
 	if err == nil {
 		t.Fatalf("GetEventFlags accepted an unsupported identifier: %+v", result)
 	}
-	want := "event flag 69000 lies in block 69, which this reader does not support"
+	want := "event flag 70000 lies in block 70, which this reader does not support"
 	if err.Error() != want {
 		t.Errorf("error = %q, want %q", err, want)
 	}

@@ -111,5 +111,6 @@ tests cover fail-closed rejection of a missing name, a missing event flag, a
 missing document and a contradictory resource union. The transport test compares
 the HTTP response with the typed getter result.
 
-`SetColosseumUnlocked` remains contract-only and is deliberately not exposed in
-OpenAPI or Scalar.
+The matching writer is [`SetColosseumUnlocked`](set_colosseum_unlocked.md). It
+shares this resolver, so the reported state and the written activation flag can
+never drift apart.

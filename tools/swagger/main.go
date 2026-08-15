@@ -696,6 +696,14 @@ type setGraceVisitedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setColosseumUnlockedRequest is the strict JSON body of the colosseum mutation.
+type setColosseumUnlockedRequest struct {
+	ColosseumKind    string `json:"colosseumKind"`
+	ColosseumKey     string `json:"colosseumKey"`
+	Unlocked         *bool  `json:"unlocked"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2760,6 +2768,47 @@ func registerSaveSessionRoutes(
 				body.GraceKind,
 				body.GraceKey,
 				*body.Visited,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums/unlock",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setColosseumUnlockedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Unlocked == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				return
+			}
+			result, err := world.SetColosseumUnlocked(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.ColosseumKind,
+				body.ColosseumKey,
+				*body.Unlocked,
 				body.ExpectedRevision,
 			)
 			if err != nil {

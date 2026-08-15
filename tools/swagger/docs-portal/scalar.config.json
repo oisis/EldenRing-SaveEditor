@@ -448,6 +448,11 @@
                 "filepath": "../../../docs/endpoints/world/set_grace_visited.md",
                 "title": "SetGraceVisited"
               },
+              "/set-colosseum-unlocked": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_colosseum_unlocked.md",
+                "title": "SetColosseumUnlocked"
+              },
               "/set-summoning-pool-activated": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_summoning_pool_activated.md",
