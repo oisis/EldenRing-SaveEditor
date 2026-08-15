@@ -1,0 +1,349 @@
+package saveengine
+
+import (
+	"bytes"
+	"encoding/binary"
+	"errors"
+	"fmt"
+)
+
+const (
+	// statsTotalGetSoulOffset is the confirmed lifetime-runes field of
+	// PlayerGameData, called SoulMemory by the legacy implementation. It sits
+	// directly behind the held-runes field.
+	statsTotalGetSoulOffset = int64(-327)
+
+	// statsWritableBlockOffset and statsWritableBlockSize describe the single
+	// contiguous range this mutation owns: from the first attribute through the
+	// last byte of TotalGetSoul. The held-runes field and the three unknown words
+	// inside that range are read and written back byte for byte, so one write and
+	// one rollback cover the whole PlayerGameData part of the mutation.
+	statsWritableBlockOffset = int64(statsVigorOffset)
+	statsWritableBlockSize   = int(statsTotalGetSoulOffset + 4 - statsWritableBlockOffset)
+
+	// Positions of the written fields inside that range.
+	statsBlockLevelPosition        = int(statsLevelOffset - statsWritableBlockOffset)
+	statsBlockTotalGetSoulPosition = int(statsTotalGetSoulOffset - statsWritableBlockOffset)
+
+	// statsClassOffset is the confirmed starting-class byte of PlayerGameData,
+	// counted backwards from the same anchor as every other field of that struct.
+	// It is the authoritative copy of the class and the only one this mutation
+	// validates against; the ProfileSummary copy is menu data that may be stale.
+	// It lies behind TotalGetSoul, outside the range this mutation writes.
+	statsClassOffset = int64(-248)
+
+	statsMinimumAttribute = uint32(1)
+	statsMaximumAttribute = uint32(99)
+
+	// statsLevelBase is the constant of the confirmed level formula
+	// level = sum(attributes) - 79.
+	statsLevelBase    = int64(79)
+	statsMinimumLevel = int64(1)
+	statsMaximumLevel = 8*int64(statsMaximumAttribute) - statsLevelBase
+
+	// LevelPolicyRecalculate is the only accepted levelPolicy. It is matched
+	// exactly: the value is never trimmed, lower-cased or otherwise normalised.
+	LevelPolicyRecalculate = "recalculate"
+)
+
+// characterAttributeCount is the number of writable attributes. Their order is
+// the confirmed save order and is shared by every table in this file.
+const characterAttributeCount = 8
+
+var characterAttributeNames = [characterAttributeCount]string{
+	"vigor", "mind", "endurance", "strength",
+	"dexterity", "intelligence", "faith", "arcane",
+}
+
+// startingClassBaseAttributes holds the base attributes of the ten starting
+// classes, indexed by the StartingClassID stored in the character's
+// PlayerGameData and listed in the same save order as characterAttributeNames. No
+// attribute may be lowered below its starting class's base value, which is what
+// the game itself enforces when respeccing.
+//
+// ponytail: a local table, not a class package and not a GameCatalog lookup.
+// This endpoint needs the ten minima and nothing else — no names, no levels, no
+// catalog resource. Promote it only when a second consumer needs class data.
+var startingClassBaseAttributes = [10][characterAttributeCount]uint32{
+	{15, 10, 11, 14, 13, 9, 9, 7},    // Vagabond
+	{11, 12, 11, 10, 16, 10, 8, 9},   // Warrior
+	{14, 9, 12, 16, 9, 7, 8, 11},     // Hero
+	{10, 11, 10, 9, 13, 9, 8, 14},    // Bandit
+	{9, 15, 9, 8, 12, 16, 7, 9},      // Astrologer
+	{10, 14, 8, 11, 10, 7, 16, 10},   // Prophet
+	{12, 11, 13, 12, 15, 9, 8, 8},    // Samurai
+	{11, 12, 11, 11, 14, 14, 6, 9},   // Prisoner
+	{10, 13, 10, 12, 12, 9, 14, 9},   // Confessor
+	{10, 10, 10, 10, 10, 10, 10, 10}, // Wretch
+}
+
+// CharacterAttributes is the complete writable attribute set of one character.
+// All eight fields are mandatory: the transport rejects a request that omits one
+// instead of reading the omission as the illegal value zero.
+type CharacterAttributes struct {
+	Vigor        uint32 `json:"vigor"`
+	Mind         uint32 `json:"mind"`
+	Endurance    uint32 `json:"endurance"`
+	Strength     uint32 `json:"strength"`
+	Dexterity    uint32 `json:"dexterity"`
+	Intelligence uint32 `json:"intelligence"`
+	Faith        uint32 `json:"faith"`
+	Arcane       uint32 `json:"arcane"`
+}
+
+// ordered returns the eight attributes in the confirmed save order, so range
+// checks, class minima and the physical write all walk the same sequence.
+func (attributes CharacterAttributes) ordered() [characterAttributeCount]uint32 {
+	return [characterAttributeCount]uint32{
+		attributes.Vigor, attributes.Mind, attributes.Endurance, attributes.Strength,
+		attributes.Dexterity, attributes.Intelligence, attributes.Faith, attributes.Arcane,
+	}
+}
+
+// SetCharacterStatsResult reports one committed statistics assignment. It
+// returns the accepted attributes together with the two values SaveEngine
+// derived from them, and exposes no offset, raw byte or starting class.
+type SetCharacterStatsResult struct {
+	SaveSessionID string              `json:"saveSessionID"`
+	SaveRevision  string              `json:"saveRevision"`
+	CharacterID   int                 `json:"characterID"`
+	Attributes    CharacterAttributes `json:"attributes"`
+	Level         uint32              `json:"level"`
+	SoulMemory    uint32              `json:"soulMemory"`
+}
+
+// SetCharacterStats atomically assigns the eight attributes of one active
+// character, together with the two values the save keeps consistent with them:
+// the level, which is always recalculated from the attributes and stored both in
+// PlayerGameData and in the character's ProfileSummary, and TotalGetSoul, which
+// is raised to the minimum lifetime runes that level requires and otherwise left
+// exactly as it is.
+//
+// Nothing else changes. HP, FP and SP with their maximum and base maximum, the
+// held runes, the starting class, the name, the appearance, the inventory and
+// every unrelated byte are preserved; the combat statistics the game derives
+// from the attributes are not recomputed here.
+func (engine *Engine) SetCharacterStats(
+	saveSessionID string,
+	characterID int,
+	attributes CharacterAttributes,
+	levelPolicy string,
+	expectedRevision string,
+) (SetCharacterStatsResult, error) {
+	if !isCanonicalRevision(expectedRevision) {
+		return SetCharacterStatsResult{}, fmt.Errorf(
+			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
+	}
+	if levelPolicy != LevelPolicyRecalculate {
+		return SetCharacterStatsResult{}, fmt.Errorf(
+			"levelPolicy must be %q; got %q", LevelPolicyRecalculate, levelPolicy)
+	}
+
+	values := attributes.ordered()
+	level, err := recalculateCharacterLevel(values)
+	if err != nil {
+		return SetCharacterStatsResult{}, err
+	}
+	requiredSoulMemory := minimumSoulMemoryForLevel(level)
+
+	var soulMemory uint32
+	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+		if characterID < 0 || characterID >= characterSlotCount {
+			return fmt.Errorf("characterID %d is outside the range 0..%d",
+				characterID, characterSlotCount-1)
+		}
+
+		current := loaded.session.revisionString()
+		if expectedRevision != current {
+			return fmt.Errorf(
+				"expectedRevision %q does not match the current saveRevision %q",
+				expectedRevision, current)
+		}
+
+		base := userData10Base(loaded.session.platform)
+		flag, err := loaded.snapshot.readAt(base+userData10ActiveFlagsOffset+int64(characterID), 1)
+		if err != nil {
+			return fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
+		}
+		if flag[0] != userData10ActiveFlagValue {
+			return fmt.Errorf("character %d is not active", characterID)
+		}
+
+		summary := base + userData10SummaryOffset + int64(characterID)*userData10SummaryStride
+
+		anchor, err := findStatsAnchor(loaded.snapshot, loaded.session.platform, characterID)
+		if err != nil {
+			return err
+		}
+
+		rawClass, err := loaded.snapshot.readAt(anchor+statsClassOffset, 1)
+		if err != nil {
+			return fmt.Errorf("cannot read starting class of character %d: %w", characterID, err)
+		}
+		if err := validateAgainstStartingClass(values, rawClass[0]); err != nil {
+			return err
+		}
+
+		// Both target ranges are resolved and read before the first byte is
+		// written, so a truncated range fails the whole mutation untouched.
+		blockAt := anchor + statsWritableBlockOffset
+		summaryLevelAt := summary + summaryLevelOffset
+		blockBefore, err := loaded.snapshot.readAt(blockAt, statsWritableBlockSize)
+		if err != nil {
+			return fmt.Errorf("cannot read statistics of character %d: %w", characterID, err)
+		}
+		summaryLevelBefore, err := loaded.snapshot.readAt(summaryLevelAt, summaryLevelSize)
+		if err != nil {
+			return fmt.Errorf("cannot read profile summary level of character %d: %w", characterID, err)
+		}
+
+		storedSoulMemory := binary.LittleEndian.Uint32(blockBefore[statsBlockTotalGetSoulPosition:])
+		soulMemory = storedSoulMemory
+		if soulMemory < requiredSoulMemory {
+			soulMemory = requiredSoulMemory
+		}
+
+		blockAfter := bytes.Clone(blockBefore)
+		for index, value := range values {
+			binary.LittleEndian.PutUint32(blockAfter[index*4:], value)
+		}
+		binary.LittleEndian.PutUint32(blockAfter[statsBlockLevelPosition:], level)
+		binary.LittleEndian.PutUint32(blockAfter[statsBlockTotalGetSoulPosition:], soulMemory)
+
+		summaryLevelAfter := make([]byte, summaryLevelSize)
+		binary.LittleEndian.PutUint32(summaryLevelAfter, level)
+
+		if bytes.Equal(blockBefore, blockAfter) && bytes.Equal(summaryLevelBefore, summaryLevelAfter) {
+			return nil
+		}
+
+		if err := loaded.snapshot.writeAt(blockAt, blockAfter); err != nil {
+			return fmt.Errorf("cannot write statistics of character %d: %w", characterID, err)
+		}
+		if err := loaded.snapshot.writeAt(summaryLevelAt, summaryLevelAfter); err != nil {
+			return restoreCharacterStats(loaded.snapshot, characterID,
+				blockAt, blockBefore, summaryLevelAt, summaryLevelBefore,
+				fmt.Sprintf("cannot write profile summary level of character %d: %v", characterID, err))
+		}
+
+		blockWritten, blockErr := loaded.snapshot.readAt(blockAt, statsWritableBlockSize)
+		summaryWritten, summaryErr := loaded.snapshot.readAt(summaryLevelAt, summaryLevelSize)
+		if blockErr == nil && summaryErr == nil &&
+			bytes.Equal(blockWritten, blockAfter) && bytes.Equal(summaryWritten, summaryLevelAfter) {
+			return nil
+		}
+
+		return restoreCharacterStats(loaded.snapshot, characterID,
+			blockAt, blockBefore, summaryLevelAt, summaryLevelBefore,
+			fmt.Sprintf("statistics of character %d could not be verified", characterID))
+	})
+	if err != nil {
+		return SetCharacterStatsResult{}, err
+	}
+
+	return SetCharacterStatsResult{
+		SaveSessionID: saveSessionID,
+		SaveRevision:  saveRevision,
+		CharacterID:   characterID,
+		Attributes:    attributes,
+		Level:         level,
+		SoulMemory:    soulMemory,
+	}, nil
+}
+
+// recalculateCharacterLevel validates the absolute range of every attribute and
+// returns the level the confirmed formula derives from them. The sum is taken in
+// a type that cannot overflow, and the resulting level must itself be legal.
+func recalculateCharacterLevel(values [characterAttributeCount]uint32) (uint32, error) {
+	total := int64(0)
+	for index, value := range values {
+		if value < statsMinimumAttribute || value > statsMaximumAttribute {
+			return 0, fmt.Errorf("attributes.%s %d is outside the range %d..%d",
+				characterAttributeNames[index], value,
+				statsMinimumAttribute, statsMaximumAttribute)
+		}
+		total += int64(value)
+	}
+	level := total - statsLevelBase
+	if level < statsMinimumLevel || level > statsMaximumLevel {
+		return 0, fmt.Errorf("recalculated level %d is outside the range %d..%d",
+			level, statsMinimumLevel, statsMaximumLevel)
+	}
+	return uint32(level), nil
+}
+
+// validateAgainstStartingClass rejects any attribute below the base value of the
+// character's own starting class, as stored in its PlayerGameData. An identifier
+// outside the ten confirmed
+// classes is a hard rejection, not a skipped check: an unknown class carries no
+// known minima, so its save must not be written.
+func validateAgainstStartingClass(values [characterAttributeCount]uint32, startingClassID uint8) error {
+	if int(startingClassID) >= len(startingClassBaseAttributes) {
+		return fmt.Errorf("starting class %d is unknown; its attribute minima are not confirmed",
+			startingClassID)
+	}
+	minima := startingClassBaseAttributes[startingClassID]
+	for index, value := range values {
+		if value < minima[index] {
+			return fmt.Errorf("attributes.%s %d is below the starting-class minimum %d",
+				characterAttributeNames[index], value, minima[index])
+		}
+	}
+	return nil
+}
+
+// minimumSoulMemoryForLevel returns the total runes a character must have earned
+// to reach the given level: the sum of the per-level costs
+// cost(n) = floor(0.02*n^3 + 3.06*n^2 + 105.6*n - 895), clamped to zero.
+//
+// The sum is evaluated in integers so the result cannot depend on the host's
+// floating-point behaviour. Six per-level costs are corrected by one to keep the
+// established results at the boundaries where the historical floating-point
+// evaluation rounded down; without them the totals from level 45 upwards would
+// drift from the confirmed reference values. The maximum possible result,
+// 1692560963 at level 713, fits into uint32, so no clamp is needed.
+func minimumSoulMemoryForLevel(level uint32) uint32 {
+	total := int64(0)
+	for step := int64(2); step <= int64(level); step++ {
+		cost := (2*step*step*step + 306*step*step + 10_560*step - 89_500) / 100
+		switch step {
+		case 45, 205, 257, 282, 410, 707:
+			cost--
+		}
+		if cost > 0 {
+			total += cost
+		}
+	}
+	return uint32(total)
+}
+
+// restoreCharacterStats puts both mutated ranges back and reports the failure
+// that caused the rollback. A rollback that cannot be written or verified is
+// reported instead, so a partially mutated snapshot is never presented as
+// unchanged.
+func restoreCharacterStats(
+	snapshot *codec,
+	characterID int,
+	blockAt int64,
+	blockBefore []byte,
+	summaryLevelAt int64,
+	summaryLevelBefore []byte,
+	failure string,
+) error {
+	if err := errors.Join(
+		snapshot.writeAt(blockAt, blockBefore),
+		snapshot.writeAt(summaryLevelAt, summaryLevelBefore),
+	); err != nil {
+		return fmt.Errorf("%s and the prior statistics could not be restored: %w", failure, err)
+	}
+
+	blockRestored, blockErr := snapshot.readAt(blockAt, len(blockBefore))
+	summaryRestored, summaryErr := snapshot.readAt(summaryLevelAt, len(summaryLevelBefore))
+	if blockErr != nil || summaryErr != nil ||
+		!bytes.Equal(blockRestored, blockBefore) ||
+		!bytes.Equal(summaryRestored, summaryLevelBefore) {
+		return fmt.Errorf("%s and the rollback of character %d could not be verified",
+			failure, characterID)
+	}
+	return fmt.Errorf("%s; the save is unchanged", failure)
+}

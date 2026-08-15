@@ -2796,6 +2796,52 @@
             }
           }
         }
+      },
+      "patch": {
+        "operationId": "setCharacterStats",
+        "tags": ["Character"],
+        "summary": "SetCharacterStats",
+        "description": "Atomically assigns the eight attributes of one active character under expectedRevision control. All eight attributes are mandatory and must lie in 1..99 and at or above the base value of the character's own starting class; an unknown starting class is rejected. levelPolicy accepts exactly the value \"recalculate\": the level is never an input, it is always recalculated as the attribute sum minus 79 and written to PlayerGameData and to the character's profile summary. TotalGetSoul, the lifetime-runes value the legacy implementation calls SoulMemory, is raised to the minimum that level requires and otherwise left unchanged. HP, FP and SP with their maximum and base maximum, the held runes, the starting class and every unrelated field remain untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCharacterStatsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The committed statistics assignment",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetCharacterStatsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, a missing or unknown attribute field, an attribute outside 1..99 or below the starting-class minimum, a recalculated level outside 1..713, an unknown starting class, a levelPolicy other than \"recalculate\", invalid expectedRevision, unknown session, inactive slot, stale revision, unsupported layout, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions/{saveSessionID}/network-settings": {
@@ -3604,6 +3650,80 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "runes"]
+      },
+      "CharacterAttributes": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The complete writable attribute set. All eight fields are mandatory; an omitted field is rejected, never read as zero.",
+        "properties": {
+          "vigor": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "mind": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "endurance": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "strength": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "dexterity": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "intelligence": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "faith": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 },
+          "arcane": { "type": "integer", "format": "int64", "minimum": 1, "maximum": 99 }
+        },
+        "required": [
+          "vigor", "mind", "endurance", "strength",
+          "dexterity", "intelligence", "faith", "arcane"
+        ]
+      },
+      "SetCharacterStatsRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Complete attribute assignment, level policy and optimistic-concurrency revision. The level is not an input.",
+        "properties": {
+          "attributes": {
+            "$ref": "#/components/schemas/CharacterAttributes"
+          },
+          "levelPolicy": {
+            "type": "string",
+            "enum": ["recalculate"],
+            "description": "Accepted exactly as written. The value is never trimmed or normalised, and no other policy exists."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["attributes", "levelPolicy", "expectedRevision"]
+      },
+      "SetCharacterStatsResult": {
+        "type": "object",
+        "description": "Receipt for one committed statistics assignment. It reports the accepted attributes and the two values SaveEngine derived from them.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "attributes": {
+            "$ref": "#/components/schemas/CharacterAttributes"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 713
+          },
+          "soulMemory": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "saveSessionID", "saveRevision", "characterID",
+          "attributes", "level", "soulMemory"
+        ]
       },
       "CharacterStats": {
         "type": "object",

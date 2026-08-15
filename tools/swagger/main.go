@@ -401,6 +401,53 @@ type setCharacterRunesRequest struct {
 	ExpectedRevision string  `json:"expectedRevision"`
 }
 
+// setCharacterAttributesRequest keeps every one of the eight mandatory
+// attributes distinguishable from an omitted field, so a missing attribute is
+// rejected instead of reaching SaveEngine as the illegal value zero.
+type setCharacterAttributesRequest struct {
+	Vigor        *uint32 `json:"vigor"`
+	Mind         *uint32 `json:"mind"`
+	Endurance    *uint32 `json:"endurance"`
+	Strength     *uint32 `json:"strength"`
+	Dexterity    *uint32 `json:"dexterity"`
+	Intelligence *uint32 `json:"intelligence"`
+	Faith        *uint32 `json:"faith"`
+	Arcane       *uint32 `json:"arcane"`
+}
+
+// setCharacterStatsRequest is the strict JSON body of the statistics route. The
+// level is not an input: SaveEngine recalculates it from the attributes.
+type setCharacterStatsRequest struct {
+	Attributes       *setCharacterAttributesRequest `json:"attributes"`
+	LevelPolicy      string                         `json:"levelPolicy"`
+	ExpectedRevision string                         `json:"expectedRevision"`
+}
+
+func (request setCharacterAttributesRequest) values() (character.CharacterAttributes, error) {
+	values := character.CharacterAttributes{}
+	for _, field := range []struct {
+		name   string
+		source *uint32
+		target *uint32
+	}{
+		{"vigor", request.Vigor, &values.Vigor},
+		{"mind", request.Mind, &values.Mind},
+		{"endurance", request.Endurance, &values.Endurance},
+		{"strength", request.Strength, &values.Strength},
+		{"dexterity", request.Dexterity, &values.Dexterity},
+		{"intelligence", request.Intelligence, &values.Intelligence},
+		{"faith", request.Faith, &values.Faith},
+		{"arcane", request.Arcane, &values.Arcane},
+	} {
+		if field.source == nil {
+			return character.CharacterAttributes{},
+				fmt.Errorf("attributes.%s is required", field.name)
+		}
+		*field.target = *field.source
+	}
+	return values, nil
+}
+
 // setCharacterAppearanceValuesRequest keeps required zero-valued scalar fields
 // distinguishable from omitted ones and validates the four physical array
 // lengths before converting them to SaveEngine's fixed-size model.
@@ -1001,6 +1048,50 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				*body.Runes,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PATCH /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setCharacterStatsRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Attributes == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("attributes is required"))
+				return
+			}
+			attributes, err := body.Attributes.values()
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.SetCharacterStats(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				attributes,
+				body.LevelPolicy,
 				body.ExpectedRevision,
 			)
 			if err != nil {

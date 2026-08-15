@@ -1072,6 +1072,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[characterAppearance]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", characterAppearance)
 	}
+	characterStats := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats"
+	if _, hasPatch := document.Paths[characterStats]["patch"]; !hasPatch {
+		t.Fatalf("openapi.json describes no PATCH for %s", characterStats)
+	}
 	physickMixture := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/physick-mixture"
 	if _, hasPut := document.Paths[physickMixture]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", physickMixture)
@@ -1149,6 +1153,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetCharacterRunesRequest",
 		"SetCharacterRunesResult",
 		"CharacterStats",
+		"CharacterAttributes",
+		"SetCharacterStatsRequest",
+		"SetCharacterStatsResult",
 		"CharacterAppearance",
 		"CharacterAppearanceValues",
 		"SetCharacterAppearanceRequest",
@@ -1275,8 +1282,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 56 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 56", found)
+	if found != 57 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 57", found)
 	}
 }
 
@@ -2144,6 +2151,109 @@ func TestSetCharacterRunesRouteIsAbsentWithoutAnEngine(t *testing.T) {
 	target := "/api/v1/save-sessions/any-session/characters/0/runes"
 	recorder := doSave(t, nil, http.MethodPatch, target,
 		`{"runes":1,"expectedRevision":"0"}`)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)",
+			target, recorder.Code, recorder.Body.String())
+	}
+}
+
+// setCharacterStatsRouteBody is a legal Vagabond assignment for the synthetic
+// route fixture: every value is at or above the Vagabond base and the sum
+// recalculates to level 44.
+const setCharacterStatsRouteBody = `{"attributes":{"vigor":20,"mind":15,"endurance":16,` +
+	`"strength":20,"dexterity":18,"intelligence":12,"faith":12,"arcane":10},` +
+	`"levelPolicy":"recalculate","expectedRevision":"0"}`
+
+func TestSetCharacterStatsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/stats"
+		request := httptest.NewRequest(http.MethodPatch, target,
+			strings.NewReader(setCharacterStatsRouteBody))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got character.SetCharacterStatsResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := character.SetCharacterStats(
+			saveEngine, directSession.SaveSessionID, 0,
+			character.CharacterAttributes{
+				Vigor: 20, Mind: 15, Endurance: 16, Strength: 20,
+				Dexterity: 18, Intelligence: 12, Faith: 12, Arcane: 10,
+			}, "recalculate", "0")
+		if err != nil {
+			t.Fatalf("character.SetCharacterStats: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies before mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/stats"
+		for name, body := range map[string]string{
+			"missing attributes": `{"levelPolicy":"recalculate","expectedRevision":"0"}`,
+			"missing one attribute": `{"attributes":{"vigor":20,"mind":15,"endurance":16,` +
+				`"strength":20,"dexterity":18,"intelligence":12,"faith":12},` +
+				`"levelPolicy":"recalculate","expectedRevision":"0"}`,
+			"unknown attribute field": `{"attributes":{"vigor":20,"mind":15,"endurance":16,` +
+				`"strength":20,"dexterity":18,"intelligence":12,"faith":12,"arcane":10,"luck":5},` +
+				`"levelPolicy":"recalculate","expectedRevision":"0"}`,
+			"unknown top-level field": `{"attributes":{"vigor":20,"mind":15,"endurance":16,` +
+				`"strength":20,"dexterity":18,"intelligence":12,"faith":12,"arcane":10},` +
+				`"levelPolicy":"recalculate","expectedRevision":"0","level":44}`,
+			"negative attribute": `{"attributes":{"vigor":-1,"mind":15,"endurance":16,` +
+				`"strength":20,"dexterity":18,"intelligence":12,"faith":12,"arcane":10},` +
+				`"levelPolicy":"recalculate","expectedRevision":"0"}`,
+			"unknown level policy": `{"attributes":{"vigor":20,"mind":15,"endurance":16,` +
+				`"strength":20,"dexterity":18,"intelligence":12,"faith":12,"arcane":10},` +
+				`"levelPolicy":"preserve","expectedRevision":"0"}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				request := httptest.NewRequest(http.MethodPatch, base, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)",
+						recorder.Code, recorder.Body.String())
+				}
+			})
+		}
+		info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+		if err != nil {
+			t.Fatalf("GetSessionInfo: %v", err)
+		}
+		if info.UnsavedChanges {
+			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+	})
+}
+
+func TestSetCharacterStatsRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/stats"
+	recorder := doSave(t, nil, http.MethodPatch, target, setCharacterStatsRouteBody)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("%s: status = %d, want 404 (body %q)",
 			target, recorder.Code, recorder.Body.String())

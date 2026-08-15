@@ -1,0 +1,90 @@
+package character
+
+import (
+	"reflect"
+	"testing"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
+
+// setCharacterStatsAttributes is a legal Vagabond assignment: the synthetic
+// fixture stores starting class 0, and the sum recalculates to level 44.
+var setCharacterStatsAttributes = CharacterAttributes{
+	Vigor: 20, Mind: 15, Endurance: 16, Strength: 20,
+	Dexterity: 18, Intelligence: 12, Faith: 12, Arcane: 10,
+}
+
+func TestSetCharacterStatsReturnsTheSaveEngineReceipt(t *testing.T) {
+	engine := saveengine.New()
+	loaded, err := engine.LoadSave(
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	result, err := SetCharacterStats(
+		engine, loaded.SaveSessionID, getCharacterStatsSlot,
+		setCharacterStatsAttributes, "recalculate", "0")
+	if err != nil {
+		t.Fatalf("SetCharacterStats: %v", err)
+	}
+	want := SetCharacterStatsResult{
+		SaveSessionID: loaded.SaveSessionID,
+		SaveRevision:  "1",
+		CharacterID:   getCharacterStatsSlot,
+		Attributes:    setCharacterStatsAttributes,
+		Level:         44,
+		SoulMemory:    177_486,
+	}
+	if result != want {
+		t.Errorf("result = %+v, want %+v", result, want)
+	}
+}
+
+func TestSetCharacterStatsRejectsMissingEngine(t *testing.T) {
+	result, err := SetCharacterStats(
+		nil, "any-session", 0, setCharacterStatsAttributes, "recalculate", "0")
+	if err == nil || err.Error() != "save engine is not available" {
+		t.Fatalf("error = %v, want missing-engine error", err)
+	}
+	if !reflect.DeepEqual(result, SetCharacterStatsResult{}) {
+		t.Errorf("result = %+v, want the zero value", result)
+	}
+}
+
+func TestSetCharacterStatsDelegatesValidationWithoutMutation(t *testing.T) {
+	engine := saveengine.New()
+	loaded, err := engine.LoadSave(
+		writeGetCharacterStatsFixture(t, GetCharacterStatsResult{}), "")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	result, err := SetCharacterStats(
+		engine, loaded.SaveSessionID, getCharacterStatsSlot,
+		setCharacterStatsAttributes, "preserve", "0")
+	if err == nil || err.Error() != `levelPolicy must be "recalculate"; got "preserve"` {
+		t.Fatalf("error = %v, want level-policy error", err)
+	}
+	if !reflect.DeepEqual(result, SetCharacterStatsResult{}) {
+		t.Errorf("result = %+v, want the zero value", result)
+	}
+
+	info, err := engine.GetSessionInfo(loaded.SaveSessionID)
+	if err != nil {
+		t.Fatalf("GetSessionInfo: %v", err)
+	}
+	if info.UnsavedChanges {
+		t.Errorf("session after rejection = %+v, want clean", info)
+	}
+	accepted, err := SetCharacterStats(
+		engine, loaded.SaveSessionID, getCharacterStatsSlot,
+		setCharacterStatsAttributes, "recalculate", "0")
+	if err != nil {
+		t.Fatalf("valid request after rejection: %v", err)
+	}
+	if accepted.SaveRevision != "1" {
+		t.Errorf("saveRevision after rejected request = %q, want first commit revision 1",
+			accepted.SaveRevision)
+	}
+}

@@ -153,6 +153,11 @@
                 "filepath": "../../../docs/endpoints/character/get_character_stats.md",
                 "title": "GetCharacterStats"
               },
+              "/set-character-stats": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/set_character_stats.md",
+                "title": "SetCharacterStats"
+              },
               "/get-character-appearance": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/get_character_appearance.md",
