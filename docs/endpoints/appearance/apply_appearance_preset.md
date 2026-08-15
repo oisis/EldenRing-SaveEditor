@@ -3,8 +3,10 @@
 ## Overview
 
 `ApplyAppearancePreset` resolves one stored appearance preset and applies its
-complete appearance through the existing `SetCharacterAppearance` SaveEngine
-operation. It introduces no second binary writer or parallel mutation rule.
+complete appearance through `SaveEngine.ApplyCharacterAppearancePreset`, the
+preset entry point of the one private appearance writer every appearance
+mutation shares. It introduces no second binary writer or parallel mutation
+rule.
 
 | | |
 |---|---|
@@ -16,7 +18,7 @@ operation. It introduces no second binary writer or parallel mutation rule.
 | Implementation source | [../../../backend/endpoints/appearance/apply_appearance_preset.go](../../../backend/endpoints/appearance/apply_appearance_preset.go) |
 | Test source | [../../../backend/endpoints/appearance/apply_appearance_preset_test.go](../../../backend/endpoints/appearance/apply_appearance_preset_test.go) |
 | GameCatalog access | one exact preset from `presets/appearance.json` and the confirmed Type A/Type B model mapping |
-| Save access | exactly one call to `SaveEngine.SetCharacterAppearance`; persistence remains a separate `WriteSave` operation |
+| Save access | exactly one call to `SaveEngine.ApplyCharacterAppearancePreset`; persistence remains a separate `WriteSave` operation |
 
 ## Input
 
@@ -57,7 +59,8 @@ The endpoint performs four steps:
    finite confirmed maps for each model field. An absent mapping is an error,
    never a guessed value.
 4. Pass the complete gender, voice type, raw model IDs, face shape, body and
-   skin model plus `expectedRevision` to `SaveEngine.SetCharacterAppearance`.
+   skin model plus `expectedRevision` to
+   `SaveEngine.ApplyCharacterAppearancePreset`.
 
 SaveEngine remains the single owner of validation, atomicity, revision handling,
 rollback and the PC/PS4 DFLT/ZSTD write paths. The endpoint never merges a

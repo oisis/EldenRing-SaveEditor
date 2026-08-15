@@ -62,6 +62,10 @@ func (engine *Engine) WriteSave(
 
 	loaded.snapshot = &codec{data: candidate}
 	loaded.session.dirty = false
+	// The persisted file is the new baseline, so the undo point of the last
+	// mutation is retired together with the revision it belonged to. A failed
+	// write returns above and leaves it untouched.
+	loaded.session.undo = nil
 	return WriteSaveResult{
 		SaveSessionID: saveSessionID,
 		SaveRevision:  loaded.session.advanceRevision(),

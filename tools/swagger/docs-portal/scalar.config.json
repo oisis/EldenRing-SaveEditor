@@ -167,6 +167,16 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/character/set_character_appearance.md",
                 "title": "SetCharacterAppearance"
+              },
+              "/get-undo-state": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/get_undo_state.md",
+                "title": "GetUndoState"
+              },
+              "/undo-character-changes": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/character/undo_character_changes.md",
+                "title": "UndoCharacterChanges"
               }
             }
           },

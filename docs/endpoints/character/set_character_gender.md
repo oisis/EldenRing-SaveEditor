@@ -5,7 +5,8 @@
 `SetCharacterGender` switches one active character to body type `0` (Type B)
 or `1` (Type A). A body-type change is a complete appearance operation: the
 endpoint applies the confirmed Ciri default for Type B or Geralt default for
-Type A through the existing `SetCharacterAppearance` SaveEngine mutation.
+Type A through `SaveEngine.SetCharacterGenderAppearance`, the gender entry
+point of the one private appearance writer every appearance mutation shares.
 
 | | |
 |---|---|
@@ -17,7 +18,7 @@ Type A through the existing `SetCharacterAppearance` SaveEngine mutation.
 | Implementation source | [../../../backend/endpoints/character/set_character_gender.go](../../../backend/endpoints/character/set_character_gender.go) |
 | Test source | [../../../backend/endpoints/character/set_character_gender_test.go](../../../backend/endpoints/character/set_character_gender_test.go) |
 | GameCatalog access | the confirmed default appearance preset for the requested body type |
-| Save access | exactly one call to `SaveEngine.SetCharacterAppearance`; persistence remains a separate `WriteSave` operation |
+| Save access | exactly one call to `SaveEngine.SetCharacterGenderAppearance`; persistence remains a separate `WriteSave` operation |
 
 ## Input
 
@@ -64,7 +65,7 @@ The endpoint performs four steps:
 3. Build the complete appearance assignment: gender, voice type, model IDs,
    face shape, body and skin.
 4. Pass that assignment and `expectedRevision` to
-   `SaveEngine.SetCharacterAppearance`.
+   `SaveEngine.SetCharacterGenderAppearance`.
 
 The operation intentionally does not preserve the previous face or voice. This
 matches the behavior shared by SaveForge 1.5.8 and 1.6.8, where changing body

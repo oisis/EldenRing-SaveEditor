@@ -26,7 +26,8 @@ func (engine *Engine) SetWeaponUpgradeLevel(
 	targetGameID uint32,
 ) (SetWeaponUpgradeLevelResult, error) {
 	saveRevision, container, err := engine.setOwnedWeaponGameID(
-		saveSessionID, characterID, ownedItemID, expectedRevision, expectedGameID, targetGameID)
+		saveSessionID, characterID, ownedItemID, expectedRevision, expectedGameID, targetGameID,
+		opSetWeaponUpgradeLevel)
 	if err != nil {
 		return SetWeaponUpgradeLevelResult{}, err
 	}

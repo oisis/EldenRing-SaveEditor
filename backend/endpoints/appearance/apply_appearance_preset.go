@@ -2,11 +2,11 @@
 Endpoint: ApplyAppearancePreset
 EndpointID: apply_appearance_preset
 Purpose: Applies a verified appearance preset through the same domain operation as SetCharacterAppearance.
-How it works: The runtime handler resolves presetID exactly in the loaded GameCatalog, converts its verified UI model selections to raw PartsIds, and delegates the complete model to SaveEngine.SetCharacterAppearance.
+How it works: The runtime handler resolves presetID exactly in the loaded GameCatalog, converts its verified UI model selections to raw PartsIds, and delegates the complete model to SaveEngine.ApplyCharacterAppearancePreset, the preset entry point of the single private appearance writer in SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, presetID, expectedRevision.
 GameCatalog variables read: the ID, bodyType, voiceType, eight model selections, faceShape, body and skin of one appearance preset.
-Save variables processed: the confirmed appearance fields through SaveEngine.SetCharacterAppearance; no separate writer exists here.
+Save variables processed: the confirmed appearance fields through SaveEngine.ApplyCharacterAppearancePreset; no separate writer exists here.
 Implementation status: implemented
 */
 package appearance
@@ -75,7 +75,7 @@ func ApplyAppearancePreset(
 		Body:      selected.Body,
 		Skin:      selected.Skin,
 	}
-	committed, err := engine.SetCharacterAppearance(
+	committed, err := engine.ApplyCharacterAppearancePreset(
 		saveSessionID, characterID, appearance, expectedRevision)
 	if err != nil {
 		return ApplyAppearancePresetResult{}, err

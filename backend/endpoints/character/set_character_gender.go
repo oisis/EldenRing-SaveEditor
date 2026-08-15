@@ -2,11 +2,11 @@
 Endpoint: SetCharacterGender
 EndpointID: set_character_gender
 Purpose: Sets the body type or gender and every required confirmed dependency of that change.
-How it works: The runtime handler resolves the confirmed default appearance preset for gender 0 or 1 from GameCatalog and delegates its complete appearance model to SaveEngine.SetCharacterAppearance.
+How it works: The runtime handler resolves the confirmed default appearance preset for gender 0 or 1 from GameCatalog and delegates its complete appearance model to SaveEngine.SetCharacterGenderAppearance, the gender entry point of the single private appearance writer in SaveEngine.
 Supported resource types: —.
 Input variables: saveSessionID, characterID, gender, expectedRevision.
 GameCatalog variables read: the confirmed default Type A or Type B appearance preset and its complete appearance model.
-Save variables processed: the active-slot flag, gender, voice type, the first confirmed FACE block and its two dependent sex-flag bytes through SaveEngine.SetCharacterAppearance.
+Save variables processed: the active-slot flag, gender, voice type, the first confirmed FACE block and its two dependent sex-flag bytes through SaveEngine.SetCharacterGenderAppearance.
 Implementation status: implemented
 */
 package character
@@ -75,7 +75,7 @@ func SetCharacterGender(
 		Body:      preset.Body,
 		Skin:      preset.Skin,
 	}
-	committed, err := engine.SetCharacterAppearance(
+	committed, err := engine.SetCharacterGenderAppearance(
 		saveSessionID, characterID, appearance, expectedRevision)
 	if err != nil {
 		return SetCharacterGenderResult{}, err

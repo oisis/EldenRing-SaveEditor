@@ -174,7 +174,7 @@ func (engine *Engine) AddItemToInventory(
 	}
 
 	var outcome addedInventoryRecord
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opAddItemToInventory, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)

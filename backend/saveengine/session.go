@@ -43,6 +43,10 @@ type Session struct {
 	ownedByID      map[string]ownedItemLocator
 	// ownedSeq numbers the tokens minted by this session.
 	ownedSeq uint64
+	// undo is the single private restore point of this session, described in
+	// undo.go. It starts nil, holds at most one character mutation, and is
+	// never serialized.
+	undo *undoPoint
 }
 
 // SessionInfo is the safe, public metadata of a session. It is the only session

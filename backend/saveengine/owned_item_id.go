@@ -162,6 +162,9 @@ func (session *Session) advanceRevision() string {
 // be held already, and must not call a public engine method, which would take
 // the same lock again.
 //
+// A global mutation invalidates the session's single undo point, because the
+// point is pinned to a revision this call is about to retire.
+//
 // ponytail: this is the whole mutation path. The callback is the smallest hook
 // that keeps the increment, the non-increment and the invalidation in one place;
 // there is no transaction framework, no mutation-plan type and no per-session
@@ -169,6 +172,40 @@ func (session *Session) advanceRevision() string {
 // express.
 func (engine *Engine) commitRevision(
 	saveSessionID string,
+	commit func(*loadedSave) error,
+) (string, error) {
+	return engine.commit(saveSessionID, "", 0, commit)
+}
+
+// commitCharacterRevision is commitRevision for a mutation that owns one
+// character slot. In addition to the revision contract it records the session's
+// single undo point: the three ranges of characterID as they were before
+// commit, attributed to operationID.
+//
+// The point replaces any earlier one. A commit that changes none of the three
+// ranges records no point and drops the earlier one, so an undo can never
+// restore a revision that is no longer the current one.
+//
+// When the point cannot be captured the mutation is refused before commit runs,
+// so a character mutation never succeeds without the undo point it promises.
+func (engine *Engine) commitCharacterRevision(
+	saveSessionID string,
+	operationID string,
+	characterID int,
+	commit func(*loadedSave) error,
+) (string, error) {
+	if operationID == "" {
+		return "", errors.New("operationID is required")
+	}
+	return engine.commit(saveSessionID, operationID, characterID, commit)
+}
+
+// commit is the one implementation behind both entry points. An empty
+// operationID marks a global mutation, which records no undo point.
+func (engine *Engine) commit(
+	saveSessionID string,
+	operationID string,
+	characterID int,
 	commit func(*loadedSave) error,
 ) (string, error) {
 	if saveSessionID == "" {
@@ -182,11 +219,34 @@ func (engine *Engine) commitRevision(
 		return "", fmt.Errorf("unknown save session %q", saveSessionID)
 	}
 
+	// Fail closed: a character mutation that cannot get its undo point does not
+	// run at all. Returning here leaves the earlier point, the revision, the
+	// dirty flag and both registries exactly as they were.
+	var point *undoPoint
+	if operationID != "" {
+		captured, err := captureUndoPoint(loaded, characterID, operationID)
+		if err != nil {
+			return "", err
+		}
+		point = captured
+	}
+
 	if err := commit(loaded); err != nil {
 		return "", err
 	}
 
 	session := loaded.session
+	// The previous point cannot survive this commit under any branch: its
+	// revision expires below.
+	session.undo = nil
+	if point != nil && point.changedIn(loaded.snapshot) {
+		point.dirtyBefore = session.dirty
+		session.undo = point
+	}
 	session.dirty = true
-	return session.advanceRevision(), nil
+	revision := session.advanceRevision()
+	if session.undo != nil {
+		session.undo.revision = session.revision
+	}
+	return revision, nil
 }

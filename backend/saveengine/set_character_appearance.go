@@ -43,6 +43,48 @@ func (engine *Engine) SetCharacterAppearance(
 	appearance CharacterAppearanceValues,
 	expectedRevision string,
 ) (SetCharacterAppearanceResult, error) {
+	return engine.setCharacterAppearance(
+		saveSessionID, characterID, appearance, expectedRevision, opSetCharacterAppearance)
+}
+
+// SetCharacterGenderAppearance is SetCharacterAppearance for the gender change,
+// which replaces the whole appearance with the gender preset the caller
+// resolved. It exists so the undo point reports the gender operation instead of
+// the plain appearance one.
+func (engine *Engine) SetCharacterGenderAppearance(
+	saveSessionID string,
+	characterID int,
+	appearance CharacterAppearanceValues,
+	expectedRevision string,
+) (SetCharacterAppearanceResult, error) {
+	return engine.setCharacterAppearance(
+		saveSessionID, characterID, appearance, expectedRevision, opSetCharacterGender)
+}
+
+// ApplyCharacterAppearancePreset is SetCharacterAppearance for an appearance
+// preset the caller resolved. It exists so the undo point reports the preset
+// operation instead of the plain appearance one.
+func (engine *Engine) ApplyCharacterAppearancePreset(
+	saveSessionID string,
+	characterID int,
+	appearance CharacterAppearanceValues,
+	expectedRevision string,
+) (SetCharacterAppearanceResult, error) {
+	return engine.setCharacterAppearance(
+		saveSessionID, characterID, appearance, expectedRevision, opApplyAppearancePreset)
+}
+
+// setCharacterAppearance is the one writer behind the three public appearance
+// entry points. operationID is chosen by those entry points and never by a
+// caller outside this package, so the undo point reports the operation the user
+// actually performed.
+func (engine *Engine) setCharacterAppearance(
+	saveSessionID string,
+	characterID int,
+	appearance CharacterAppearanceValues,
+	expectedRevision string,
+	operationID string,
+) (SetCharacterAppearanceResult, error) {
 	if !isCanonicalRevision(expectedRevision) {
 		return SetCharacterAppearanceResult{}, fmt.Errorf(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
@@ -58,7 +100,7 @@ func (engine *Engine) SetCharacterAppearance(
 			appearance.VoiceType, appearanceMaximumVoiceType)
 	}
 
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
+	saveRevision, err := engine.commitCharacterRevision(saveSessionID, operationID, characterID, func(loaded *loadedSave) error {
 		if characterID < 0 || characterID >= characterSlotCount {
 			return fmt.Errorf("characterID %d is outside the range 0..%d",
 				characterID, characterSlotCount-1)

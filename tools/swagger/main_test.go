@@ -884,6 +884,8 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/profile", ""},
 		{http.MethodPatch, "/api/v1/save-sessions/any-session/characters/0/gender", `{"gender":0,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/stats", ""},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/undo", ""},
+		{http.MethodPost, "/api/v1/save-sessions/any-session/characters/0/undo", `{"undoToken":"any-token","expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance", `{"appearance":{},"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance/preset", `{"presetID":"geralt-of-rivia-the-witcher","expectedRevision":"0"}`},
@@ -1004,6 +1006,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/gender":                             "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/runes":                              "patch",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats":                              "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo":                               "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
@@ -1041,6 +1044,12 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 	if _, hasDelete := document.Paths["/api/v1/save-sessions/{saveSessionID}"]["delete"]; !hasDelete {
 		t.Fatal("openapi.json describes no DELETE for /api/v1/save-sessions/{saveSessionID}")
+	}
+	// The undo path carries the getter and the mutation, so the map above can
+	// only state one of them.
+	undo := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo"
+	if _, hasPost := document.Paths[undo]["post"]; !hasPost {
+		t.Fatalf("openapi.json describes no POST for %s", undo)
 	}
 	// The owned-item path carries two operations: reading one instance and
 	// removing it, so the map above can only state one of them.
@@ -1282,8 +1291,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 57 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 57", found)
+	if found != 59 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 59", found)
 	}
 }
 
@@ -1573,6 +1582,50 @@ func writeActiveSpellsFixture(t *testing.T) string {
 		t.Fatalf("write fixture: %v", err)
 	}
 	return path
+}
+
+// Both undo routes share one path, so the getter and the mutation have to be
+// reachable under their own methods, and the mutation body has to stay strict.
+func TestCharacterUndoRoutes(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/undo"
+
+	want, err := character.GetUndoState(saveEngine, session.SaveSessionID, 0)
+	if err != nil {
+		t.Fatalf("character.GetUndoState: %v", err)
+	}
+	state := doSave(t, saveEngine, http.MethodGet, target, "")
+	assertOK(t, state, target)
+	if !reflect.DeepEqual(decode(t, state.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("undo route body differs from the GetUndoState result")
+	}
+
+	unknownField := doSave(t, saveEngine, http.MethodPost, target,
+		`{"undoToken":"any-token","expectedRevision":"0","extra":true}`)
+	if unknownField.Code != http.StatusBadRequest {
+		t.Fatalf("unknown field: status = %d, body = %q",
+			unknownField.Code, unknownField.Body.String())
+	}
+	if !strings.Contains(unknownField.Body.String(), "unknown field") {
+		t.Fatalf("unknown field: body = %q, want the strict-decoder rejection",
+			unknownField.Body.String())
+	}
+
+	// A well-formed request reaches SaveEngine, which owns the absent-point rule.
+	delegated := doSave(t, saveEngine, http.MethodPost, target,
+		`{"undoToken":"any-token","expectedRevision":"0"}`)
+	if delegated.Code != http.StatusBadRequest {
+		t.Fatalf("absent undo point: status = %d, body = %q",
+			delegated.Code, delegated.Body.String())
+	}
+	if !strings.Contains(delegated.Body.String(), "no undo point is available") {
+		t.Fatalf("absent undo point: body = %q, want the SaveEngine rejection",
+			delegated.Body.String())
+	}
 }
 
 func TestDeleteCharacterRoute(t *testing.T) {

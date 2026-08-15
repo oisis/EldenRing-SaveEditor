@@ -29,16 +29,20 @@ func (engine *Engine) CloneCharacter(
 			"expectedRevision must be a canonical decimal saveRevision; got %q", expectedRevision)
 	}
 
+	// Both slot indices are checked before the commit, because the undo point of
+	// the target slot is captured there and must not report the generic
+	// characterID name for a rejected targetSlotID.
+	if sourceCharacterID < 0 || sourceCharacterID >= characterSlotCount {
+		return CloneCharacterResult{}, fmt.Errorf("sourceCharacterID %d is outside the range 0..%d",
+			sourceCharacterID, characterSlotCount-1)
+	}
+	if targetSlotID < 0 || targetSlotID >= characterSlotCount {
+		return CloneCharacterResult{}, fmt.Errorf("targetSlotID %d is outside the range 0..%d",
+			targetSlotID, characterSlotCount-1)
+	}
+
 	cloneName := ""
-	saveRevision, err := engine.commitRevision(saveSessionID, func(loaded *loadedSave) error {
-		if sourceCharacterID < 0 || sourceCharacterID >= characterSlotCount {
-			return fmt.Errorf("sourceCharacterID %d is outside the range 0..%d",
-				sourceCharacterID, characterSlotCount-1)
-		}
-		if targetSlotID < 0 || targetSlotID >= characterSlotCount {
-			return fmt.Errorf("targetSlotID %d is outside the range 0..%d",
-				targetSlotID, characterSlotCount-1)
-		}
+	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opCloneCharacter, targetSlotID, func(loaded *loadedSave) error {
 		if sourceCharacterID == targetSlotID {
 			return errors.New("sourceCharacterID and targetSlotID must differ")
 		}

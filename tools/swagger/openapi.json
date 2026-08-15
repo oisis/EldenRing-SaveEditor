@@ -2760,6 +2760,90 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo": {
+      "get": {
+        "operationId": "getUndoState",
+        "tags": ["Character"],
+        "summary": "GetUndoState",
+        "description": "Reports whether the session still holds a usable undo point for this character and which operation created it. The session keeps exactly one undo point: it belongs to the newest committed character mutation, is valid only for the revision that mutation created, and is dropped by any later mutation, by a successful WriteSave and by closing the session. The getter changes nothing and returns no save bytes. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The current undo state of the character",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CharacterUndoState"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A missing or unknown session, or a characterID outside 0..9",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "undoCharacterChanges",
+        "tags": ["Character"],
+        "summary": "UndoCharacterChanges",
+        "description": "Restores the character slot data, its ProfileSummary and its activity flag to the state captured before the last committed mutation of that character. The undoToken and expectedRevision must both match the stored undo point exactly. A successful undo consumes the point, restores the unsaved-changes flag that was in force before the undone mutation, advances saveRevision by exactly one and retires every OwnedItemID of the previous revision. It creates no redo point. A rejected or failed undo leaves the session, revision and undo point unchanged. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UndoCharacterChangesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The consumed undo point and the revision it created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UndoCharacterChangesResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, unknown JSON field, missing or mismatched undoToken, invalid or stale expectedRevision, unknown session, characterID outside 0..9, absent undo point, or a write/verification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/stats": {
       "get": {
         "operationId": "getCharacterStats",
@@ -3607,6 +3691,75 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "presetID", "appearance"]
+      },
+      "CharacterUndoState": {
+        "type": "object",
+        "description": "The undo state of one character slot in one save session.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "The session's current canonical decimal revision."
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "available": {
+            "type": "boolean",
+            "description": "True only when the session's single undo point belongs to this character and to the current revision."
+          },
+          "undoToken": {
+            "type": "string",
+            "description": "Opaque identifier of the available undo point. Absent when available is false. It is not a GameResource reference."
+          },
+          "operationID": {
+            "type": "string",
+            "description": "EndpointID of the mutation the undo point would revert, such as set_character_stats. Absent when available is false."
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "available"]
+      },
+      "UndoCharacterChangesRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "The undo point to consume and the optimistic-concurrency revision.",
+        "properties": {
+          "undoToken": {
+            "type": "string",
+            "description": "The exact token reported by GetUndoState for this character. It is matched byte for byte."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "Canonical decimal revision that must equal the session's current revision."
+          }
+        },
+        "required": ["undoToken", "expectedRevision"]
+      },
+      "UndoCharacterChangesResult": {
+        "type": "object",
+        "description": "Receipt for one consumed undo point.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "The revision created by the undo, exactly one above the revision the request matched."
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "undoneOperationID": {
+            "type": "string",
+            "description": "EndpointID of the mutation that was reverted."
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "undoneOperationID"]
       },
       "SetCharacterRunesRequest": {
         "type": "object",

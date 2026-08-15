@@ -401,6 +401,14 @@ type setCharacterRunesRequest struct {
 	ExpectedRevision string  `json:"expectedRevision"`
 }
 
+// undoCharacterChangesRequest is the strict JSON body of the character undo
+// route. Both values reach SaveEngine exactly as sent; the transport owns no
+// token or revision rule.
+type undoCharacterChangesRequest struct {
+	UndoToken        string `json:"undoToken"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setCharacterAttributesRequest keeps every one of the eight mandatory
 // attributes distinguishable from an omitted field, so a missing attribute is
 // rejected instead of reaching SaveEngine as the illegal value zero.
@@ -1111,6 +1119,57 @@ func registerSaveSessionRoutes(
 				return
 			}
 			result, err := character.GetCharacterStats(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.GetUndoState(saveEngine, request.PathValue("saveSessionID"), characterID)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body undoCharacterChangesRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := character.UndoCharacterChanges(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.UndoToken,
+				body.ExpectedRevision,
+			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
 				return

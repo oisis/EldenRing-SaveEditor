@@ -88,6 +88,16 @@ func (source *codec) writeAt(offset int64, data []byte) error {
 	return nil
 }
 
+// sameAt reports whether the snapshot range starting at offset already equals
+// data. A range reaching past the end of the snapshot is never equal. It exists
+// so a large range can be compared without copying it out of the codec.
+func (source *codec) sameAt(offset int64, data []byte) bool {
+	if !source.covers(offset, int64(len(data))) {
+		return false
+	}
+	return bytes.Equal(source.data[offset:offset+int64(len(data))], data)
+}
+
 // indexIn reports the absolute offset of the first occurrence of pattern inside
 // the window [offset, offset+length), or -1 when the window holds none. The
 // window is checked against the snapshot before anything is read, and the caller
