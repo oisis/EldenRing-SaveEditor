@@ -2703,6 +2703,31 @@ func registerSaveSessionRoutes(
 	)
 
 	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			query := request.URL.Query()
+			result, err := world.GetQuests(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				query.Get("questKind"),
+				query.Get("questKey"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
 		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step",
 		func(writer http.ResponseWriter, request *http.Request) {
 			characterID, err := parseCharacterID(request.PathValue("characterID"))

@@ -930,6 +930,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/summoning-pools/activate", `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/bosses/defeat", `{"bossKind":"boss","bossKey":"stormveil_castle_godrick_the_grafted","defeated":true,"expectedRevision":"0"}`},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quests?questKind=quest", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quests/step", `{"questKind":"quest","questKey":"brother_corhyn","stepKind":"quest_step","stepKey":"legacy_000","expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
@@ -1059,6 +1060,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step":                        "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
@@ -1292,6 +1294,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"GetMapRegionsResult",
 		"TutorialEntry",
 		"GetTutorialsResult",
+		"QuestStepEntry",
+		"QuestEntry",
+		"GetQuestsResult",
 		"SetWhetbladeUnlockedRequest",
 		"SetWhetbladeUnlockedResult",
 		"SetCookbookUnlockedRequest",
@@ -1547,8 +1552,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 74 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 74", found)
+	if found != 75 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 75", found)
 	}
 }
 
@@ -6385,6 +6390,52 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 			})
 		}
 	})
+}
+
+func TestQuestsRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/quests"
+
+	want, err := world.GetQuests(saveEngine, gameCatalog, session.SaveSessionID, 0, "quest", "")
+	if err != nil {
+		t.Fatalf("world.GetQuests: %v", err)
+	}
+	if !want.Active || len(want.Quests) != 36 {
+		t.Fatalf("fixture result = active %t with %d quests, want true/36",
+			want.Active, len(want.Quests))
+	}
+
+	target := base + "?questKind=quest"
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("quests route body differs from the GetQuests result")
+	}
+
+	// The route hands both query values through unchanged, so the endpoint's own
+	// strict validation decides. An omitted questKind is a rejected request, not
+	// a defaulted one.
+	for name, query := range map[string]string{
+		"missing questKind": "",
+		"wrong questKind":   "?questKind=item",
+		"unknown questKey":  "?questKind=quest&questKey=unknown_npc",
+	} {
+		t.Run(name, func(t *testing.T) {
+			rejected := httptest.NewRecorder()
+			newHandler(gameCatalog, testApplicationVersion, saveEngine).
+				ServeHTTP(rejected, httptest.NewRequest(http.MethodGet, base+query, nil))
+			if rejected.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", rejected.Code, rejected.Body.String())
+			}
+		})
+	}
 }
 
 func TestSetQuestStepRoute(t *testing.T) {

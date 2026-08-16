@@ -438,6 +438,11 @@
                 "filepath": "../../../docs/endpoints/world/get_summoning_pools.md",
                 "title": "GetSummoningPools"
               },
+              "/get-quests": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/get_quests.md",
+                "title": "GetQuests"
+              },
               "/set-boss-defeated": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_boss_defeated.md",

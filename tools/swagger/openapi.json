@@ -2738,6 +2738,52 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests": {
+      "get": {
+        "operationId": "getQuests",
+        "tags": ["World"],
+        "summary": "GetQuests",
+        "description": "Returns the 36 curated questlines GameCatalog declares with their 908 supported steps, and reports per step whether its canonical event flag plan currently holds its declared target values. Several steps of one questline can match the same save state at once; the endpoint names no current step and declares no allowed transitions, because no confirmed source declares a quest graph or a precondition rule. questKind is required and must be quest; an empty questKey returns every questline ordered by name and key, a non-empty one exactly that questline. Event flag IDs, their targets and their bitfield positions are not exposed. An inactive or residual slot reports active false and every step unmatched without reading its slot data. Available only in local loopback mode; an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {"$ref": "#/components/parameters/SaveSessionID"},
+          {"$ref": "#/components/parameters/CharacterID"},
+          {
+            "name": "questKind",
+            "in": "query",
+            "required": true,
+            "description": "The resource kind of the requested questlines. It is matched exactly and case-sensitively and must be quest; any other value, including an omitted or empty one, is rejected.",
+            "schema": {"type": "string", "enum": ["quest"]},
+            "example": "quest"
+          },
+          {
+            "name": "questKey",
+            "in": "query",
+            "required": false,
+            "description": "The resource key of one curated questline. Omitted or empty returns every declared questline; a non-empty unknown key is rejected instead of answered with an empty result.",
+            "schema": {"type": "string"},
+            "example": "brother_corhyn"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The requested questlines of the character slot with the match state of every supported step",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/GetQuestsResult"}
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, an unknown session, a questKind other than quest, an unknown questKey, an unsupported event flag block, or incomplete quest catalog data",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Error"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step": {
       "put": {
         "operationId": "setQuestStep",
@@ -6147,6 +6193,55 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "tutorials"]
+      },
+      "QuestStepEntry": {
+        "type": "object",
+        "description": "One supported step of a questline. matched is true when every event flag of the step's canonical plan currently holds its declared target value. It is a statement about the save state alone: it is not a progression position, several steps of one questline may match at the same time, and none of them is reported as the current step. The plan itself is not exposed.",
+        "properties": {
+          "stepKind": {"type": "string", "enum": ["quest_step"]},
+          "stepKey": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1},
+          "location": {
+            "type": "string",
+            "description": "The curated location of the step. It is empty when the curated source declares none."
+          },
+          "matched": {"type": "boolean"}
+        },
+        "required": ["stepKind", "stepKey", "description", "location", "matched"]
+      },
+      "QuestEntry": {
+        "type": "object",
+        "description": "One curated questline with its supported steps in the declaration order of its catalog document. That order is stable but carries no confirmed progression meaning and declares no allowed transitions.",
+        "properties": {
+          "kind": {"type": "string", "enum": ["quest"]},
+          "key": {"type": "string", "minLength": 1},
+          "name": {"type": "string", "minLength": 1},
+          "steps": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"$ref": "#/components/schemas/QuestStepEntry"}
+          }
+        },
+        "required": ["kind", "key", "name", "steps"]
+      },
+      "GetQuestsResult": {
+        "type": "object",
+        "description": "The requested questlines of one character slot, ordered by name and key. The array is empty rather than null.",
+        "properties": {
+          "saveSessionID": {"type": "string"},
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "active": {"type": "boolean"},
+          "quests": {
+            "type": "array",
+            "items": {"$ref": "#/components/schemas/QuestEntry"}
+          }
+        },
+        "required": ["saveSessionID", "characterID", "active", "quests"]
       },
       "WhetbladeEntry": {
         "type": "object",

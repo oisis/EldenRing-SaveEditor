@@ -84,8 +84,9 @@ that touched unmapped BST blocks are excluded fail-closed. Conflicting duplicate
 flags in legacy steps are canonicalized with last-write-wins before mutation.
 
 The endpoint implements no transition graph, no prerequisites and no automatic
-step progression: it applies exactly the requested step plan. `GetQuests` stays
-a contract only and is not exposed over any transport.
+step progression: it applies exactly the requested step plan.
+[`GetQuests`](get_quests.md) reports the match state of the same step plans and
+likewise declares no transitions; neither endpoint calls the other.
 
 ## SaveEngine mutation semantics
 
