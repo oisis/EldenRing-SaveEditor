@@ -26,21 +26,21 @@ const (
 	// world blocks, the player coordinates, the version-gated spawn fields and
 	// NetMan. Every distance below is one step of that confirmed chain.
 	//
-	// accountIDPlayerCoordinatesSize is the real 61-byte block: coordinates (12),
+	// playerCoordinatesSize is the real 61-byte block: coordinates (12),
 	// map ID (4), angle (16), one game-manager byte, unknown coordinates (12) and
 	// an unknown angle (16).
-	accountIDPlayerCoordinatesSize = 12 + 4 + 16 + 1 + 12 + 16
+	playerCoordinatesSize = 12 + 4 + 16 + 1 + 12 + 16
 
-	// accountIDSpawnFixedSize covers the two padding bytes behind the coordinates
+	// spawnPointFixedSize covers the two padding bytes behind the coordinates
 	// and the two always-present spawn identifiers. The two trailing spawn fields
 	// exist only from the slot versions below, so the slot declares them itself.
-	accountIDSpawnFixedSize          = 2 + 4 + 4
-	accountIDTempSpawnPointVersion   = 65
-	accountIDSpawnGameManByteVersion = 66
+	spawnPointFixedSize          = 2 + 4 + 4
+	spawnPointTempVersion        = 65
+	spawnPointGameManByteVersion = 66
 
-	// accountIDNetManSize is the network-manager block: one uint32 and a 128 KB
+	// netManSectionSize is the network-manager block: one uint32 and a 128 KB
 	// opaque payload, neither of which is parsed here.
-	accountIDNetManSize = 4 + 0x20000
+	netManSectionSize = 4 + 0x20000
 
 	// accountIDTrailingOffset is the distance from the first byte of the trailing
 	// fixed block to the identifier: WorldAreaWeather (12), WorldAreaTime (12) and
@@ -48,12 +48,12 @@ const (
 	accountIDTrailingOffset = 12 + 12 + 16
 )
 
-// accountIDWorldBlockLimits are the five size-prefixed blocks between the
+// worldBlockLimits are the five size-prefixed blocks between the
 // event-flag terminator and the player coordinates, with the confirmed ceiling
 // of each: field area, world area, world geometry, its second block and the
 // renderer block. A declared size outside its ceiling is treated as corrupt, so
 // a slot is never walked from a guessed position.
-var accountIDWorldBlockLimits = [...]int64{0x10000, 0x10000, 0x100000, 0x100000, 0x100000}
+var worldBlockLimits = [...]int64{0x10000, 0x10000, 0x100000, 0x100000, 0x100000}
 
 // SetSaveAccountIDResult reports one committed account-identifier change. It
 // carries no identifier: the value is private account data and never leaves the
@@ -168,7 +168,7 @@ func pcAccountIDFieldAt(loaded *loadedSave, characterID int) (int64, error) {
 	}
 
 	at := sectionAt + eventFlagSectionSize + eventFlagTerminatorSize
-	for index, maximum := range accountIDWorldBlockLimits {
+	for index, maximum := range worldBlockLimits {
 		if at+4 > slotEnd {
 			return 0, fmt.Errorf(
 				"world block %d of character %d lies outside its slot", index, characterID)
@@ -187,14 +187,14 @@ func pcAccountIDFieldAt(loaded *loadedSave, characterID int) (int64, error) {
 		at += 4 + size
 	}
 
-	at += accountIDPlayerCoordinatesSize + accountIDSpawnFixedSize
-	if version >= accountIDTempSpawnPointVersion {
+	at += playerCoordinatesSize + spawnPointFixedSize
+	if version >= spawnPointTempVersion {
 		at += 4
 	}
-	if version >= accountIDSpawnGameManByteVersion {
+	if version >= spawnPointGameManByteVersion {
 		at++
 	}
-	at += accountIDNetManSize + accountIDTrailingOffset
+	at += netManSectionSize + accountIDTrailingOffset
 
 	if at+accountIDSize > slotEnd {
 		return 0, fmt.Errorf(
