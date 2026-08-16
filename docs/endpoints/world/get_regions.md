@@ -96,5 +96,4 @@ membership, deterministic ordering, unknown raw IDs, inactive slots and a
 duplicate catalog region ID. Transport coverage compares the HTTP response with
 the typed getter result.
 
-`SetRegionUnlocked` remains contract-only and is not exposed in OpenAPI or
-Scalar.
+`SetRegionUnlocked` is documented in [set_region_unlocked.md](set_region_unlocked.md).

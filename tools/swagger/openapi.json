@@ -2364,6 +2364,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions/unlock": {
+      "put": {
+        "operationId": "setRegionUnlocked",
+        "tags": ["World"],
+        "summary": "SetRegionUnlocked",
+        "description": "Sets the unlock state of one curated region by adding or removing its internal RegionID in the character's UnlockedRegions list. Unrelated entries, duplicates, zeros, unknown IDs and their order remain untouched; the operation does not sort or deduplicate the whole list. Fog of War, event flags, map regions and fragments remain unchanged. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetRegionUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed region unlock change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetRegionUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, invalid expectedRevision, unknown session, inactive slot, invalid or unknown region resource, malformed slot layout, or a write/verification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces": {
       "get": {
         "operationId": "getGraces",
@@ -6417,6 +6465,60 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "colosseumKind", "colosseumKey", "unlocked"]
+      },
+      "SetRegionUnlockedRequest": {
+        "type": "object",
+        "description": "The exact public region identity, desired unlock state and expected save revision.",
+        "additionalProperties": false,
+        "properties": {
+          "regionKind": {
+            "type": "string",
+            "enum": ["region"],
+            "description": "The public GameCatalog resource kind. Always region."
+          },
+          "regionKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The public slug resource key of the region."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True to unlock the region by adding its confirmed RegionID to UnlockedRegions; false to lock it by removing all occurrences of that RegionID."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["regionKind", "regionKey", "unlocked", "expectedRevision"]
+      },
+      "SetRegionUnlockedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful region unlock mutation.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "regionKind": {
+            "type": "string",
+            "enum": ["region"]
+          },
+          "regionKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "regionKind", "regionKey", "unlocked"]
       },
       "GestureEntry": {
         "type": "object",

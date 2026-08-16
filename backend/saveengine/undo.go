@@ -73,6 +73,8 @@ const opSetGraceVisited = "set_grace_visited"
 
 const opSetColosseumUnlocked = "set_colosseum_unlocked"
 
+const opSetRegionUnlocked = "set_region_unlocked"
+
 const opSetMapRegionRevealed = "set_map_region_revealed"
 
 const opSetFogOfWarRemoved = "set_fog_of_war_removed"

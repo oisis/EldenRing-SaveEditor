@@ -1046,6 +1046,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions":                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/regions/unlock":                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools":                    "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools/activate":           "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/graces":                             "get",
@@ -1298,6 +1299,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetGraceVisitedResult",
 		"SetColosseumUnlockedRequest",
 		"SetColosseumUnlockedResult",
+		"SetRegionUnlockedRequest",
+		"SetRegionUnlockedResult",
 		"SetMapRegionRevealedRequest",
 		"SetMapRegionRevealedResult",
 		"SetFogOfWarRemovedRequest",
@@ -1538,8 +1541,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 72 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 72", found)
+	if found != 73 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 73", found)
 	}
 }
 
@@ -6185,6 +6188,195 @@ func TestSetSummoningPoolActivatedRoute(t *testing.T) {
 		}
 		if info.UnsavedChanges {
 			t.Errorf("session after rejected bodies = %+v, want clean", info)
+		}
+	})
+}
+
+func writeSetRegionRouteFixture(t *testing.T) string {
+	t.Helper()
+
+	const (
+		fixtureSize                 = 0x1A00000
+		pcUserData10DataOffset      = 0x19003B0
+		userData10ActiveFlagsOffset = 0x1954
+		slotBase                    = 0x00000310
+		characterSlotDataSize       = 0x280000
+		slotFixedDlcOffset          = characterSlotDataSize - 128 - 50
+		slotFixedHashOffset         = characterSlotDataSize - 128
+	)
+
+	data := make([]byte, fixtureSize)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[0x0C:], 12)
+
+	data[pcUserData10DataOffset+userData10ActiveFlagsOffset] = 1
+
+	put32 := func(at int64, v uint32) {
+		binary.LittleEndian.PutUint32(data[slotBase+at:], v)
+	}
+
+	put32(0, 230) // version
+
+	const (
+		anchorAt               = int64(0x01A7)
+		projectileCountOffset  = 0x93DC
+		blocksBeforeStorage    = 0x1D7
+		storageBoxSize         = 0x6010
+		gestureSectionSize     = 0x100
+		worldHeadSize          = 117
+		menuProfilePayloadSize = 0x20
+		trophyEquipSize        = 52
+		gaItemSize             = 112008
+		tutorialPayloadSize    = 0x20
+		scalarsSize            = 29
+		eventFlagsSize         = 0x1BF99F + 1
+		coordinatesSize        = 61
+		spawnPointSize         = 15
+		netManSize             = 4 + 0x20000
+		trailingFixedSize      = 130
+		playerHashSize         = 128
+	)
+
+	anchor := []byte{
+		0x00,
+
+		0xFF, 0xFF, 0xFF, 0xFF,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+		0xFF, 0xFF, 0xFF, 0xFF,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+		0xFF, 0xFF, 0xFF, 0xFF,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+		0xFF, 0xFF, 0xFF, 0xFF,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	}
+	copy(data[slotBase+anchorAt:], anchor)
+
+	projAt := anchorAt + projectileCountOffset
+	put32(projAt, 0)
+
+	countAt := projAt + 4 + blocksBeforeStorage + storageBoxSize + gestureSectionSize
+	initialRegions := []uint32{6200000}
+	put32(countAt, uint32(len(initialRegions)))
+	for i, id := range initialRegions {
+		put32(countAt+4+int64(i)*4, id)
+	}
+
+	pos := countAt + 4 + int64(len(initialRegions))*4
+	pos += worldHeadSize
+	put32(pos+4, menuProfilePayloadSize)
+	pos += 8 + menuProfilePayloadSize
+	pos += trophyEquipSize
+	pos += gaItemSize
+	put32(pos+4, tutorialPayloadSize)
+	pos += 8 + tutorialPayloadSize
+	pos += scalarsSize
+	pos += eventFlagsSize
+
+	// WorldGeom 5 blocks
+	for i := 0; i < 5; i++ {
+		put32(pos, 0x10)
+		pos += 4 + 0x10
+	}
+
+	pos += coordinatesSize
+	pos += spawnPointSize
+	pos += netManSize
+	pos += trailingFixedSize
+	pos += playerHashSize
+
+	// Fixed DLC & Hash
+	for i := int64(0); i < 50; i++ {
+		data[slotBase+slotFixedDlcOffset+i] = 0xAA
+	}
+	for i := int64(0); i < 128; i++ {
+		data[slotBase+slotFixedHashOffset+i] = 0xBB
+	}
+
+	path := filepath.Join(t.TempDir(), "set-regions-route.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetRegionUnlockedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	unlocked := true
+	const regionKey = "limgrave_the_first_step"
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, _ := json.Marshal(setRegionUnlockedRequest{
+			RegionKind: "region", RegionKey: regionKey,
+			Unlocked: &unlocked, ExpectedRevision: "0",
+		})
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/regions/unlock"
+		request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got world.SetRegionUnlockedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		direct, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetRegionUnlocked(saveEngine, gameCatalog,
+			direct.SaveSessionID, 0, "region", regionKey, true, "0")
+		if err != nil {
+			t.Fatalf("world.SetRegionUnlocked: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		for name, body := range map[string]string{
+			"missing unlocked": `{"regionKind":"region","regionKey":"` + regionKey + `","expectedRevision":"0"}`,
+			"unknown field":    `{"regionKind":"region","regionKey":"` + regionKey + `","unlocked":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				session, err := savesession.LoadSave(saveEngine, writeSetRegionRouteFixture(t), "")
+				if err != nil {
+					t.Fatalf("LoadSave: %v", err)
+				}
+				target := "/api/v1/save-sessions/" + session.SaveSessionID +
+					"/characters/0/regions/unlock"
+				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+				info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+				if err != nil {
+					t.Fatalf("GetSessionInfo: %v", err)
+				}
+				if info.UnsavedChanges {
+					t.Errorf("rejected body dirtied the session: %+v", info)
+				}
+			})
 		}
 	})
 }
