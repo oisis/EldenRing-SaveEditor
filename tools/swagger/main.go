@@ -712,6 +712,14 @@ type setRegionUnlockedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setTutorialUnlockedRequest is the strict JSON body of the tutorial unlock mutation.
+type setTutorialUnlockedRequest struct {
+	TutorialKind     string `json:"tutorialKind"`
+	TutorialKey      string `json:"tutorialKey"`
+	Unlocked         *bool  `json:"unlocked"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setMapRegionRevealedRequest is the strict JSON body of the map region mutation.
 type setMapRegionRevealedRequest struct {
 	MapRegionKind    string `json:"mapRegionKind"`
@@ -2779,6 +2787,47 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				request.URL.Query().Get("availabilityFilter"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials/unlock",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setTutorialUnlockedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Unlocked == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("unlocked is required"))
+				return
+			}
+			result, err := world.SetTutorialUnlocked(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.TutorialKind,
+				body.TutorialKey,
+				*body.Unlocked,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

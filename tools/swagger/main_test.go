@@ -927,6 +927,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/map-regions/reveal", `{"mapRegionKind":"map_region","mapRegionKey":"limgrave_weeping_peninsula","revealed":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/fog-of-war", `{"removed":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/tutorials", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/tutorials/unlock", `{"tutorialKind":"tutorial","tutorialKey":"2010","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/summoning-pools/activate", `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/bosses/defeat", `{"bossKind":"boss","bossKey":"stormveil_castle_godrick_the_grafted","defeated":true,"expectedRevision":"0"}`},
@@ -1058,6 +1059,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions/reveal":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/fog-of-war":                         "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials":                          "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests":                             "get",
@@ -1315,6 +1317,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetMapRegionRevealedResult",
 		"SetFogOfWarRemovedRequest",
 		"SetFogOfWarRemovedResult",
+		"SetTutorialUnlockedRequest",
+		"SetTutorialUnlockedResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1552,8 +1556,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 75 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 75", found)
+	if found != 76 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 76", found)
 	}
 }
 
@@ -5465,7 +5469,7 @@ func TestMapRegionsRouteMatchesTheGetter(t *testing.T) {
 
 func TestTutorialsRouteMatchesTheGetter(t *testing.T) {
 	saveEngine := saveengine.New()
-	session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+	session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
 	if err != nil {
 		t.Fatalf("savesession.LoadSave: %v", err)
 	}
@@ -6372,6 +6376,102 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 				}
 				target := "/api/v1/save-sessions/" + session.SaveSessionID +
 					"/characters/0/regions/unlock"
+				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+				info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+				if err != nil {
+					t.Fatalf("GetSessionInfo: %v", err)
+				}
+				if info.UnsavedChanges {
+					t.Errorf("rejected body dirtied the session: %+v", info)
+				}
+			})
+		}
+	})
+}
+
+// writeSetTutorialRouteFixture is the cookbooks fixture with a TutorialData
+// payload large enough to hold IDs. Raising the declared size shifts the event
+// flag bitfield behind it, which this route neither reads nor writes.
+func writeSetTutorialRouteFixture(t *testing.T) string {
+	t.Helper()
+
+	path := writeCookbooksFixture(t)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read fixture: %v", err)
+	}
+	tutorialAt := gesturesRouteSlotDataBase + gesturesRouteAnchorAt +
+		cookbooksRouteSectionAt - cookbooksRouteScalarsSize -
+		cookbooksRouteTutorialSize - cookbooksRouteDynamicHeader
+	binary.LittleEndian.PutUint32(data[tutorialAt+4:], 0x20)
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestSetTutorialUnlockedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	unlocked := true
+	const tutorialKey = "2010"
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, _ := json.Marshal(setTutorialUnlockedRequest{
+			TutorialKind: "tutorial", TutorialKey: tutorialKey,
+			Unlocked: &unlocked, ExpectedRevision: "0",
+		})
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/tutorials/unlock"
+		request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got world.SetTutorialUnlockedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		direct, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetTutorialUnlocked(saveEngine, gameCatalog,
+			direct.SaveSessionID, 0, "tutorial", tutorialKey, true, "0")
+		if err != nil {
+			t.Fatalf("world.SetTutorialUnlocked: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		for name, body := range map[string]string{
+			"missing unlocked": `{"tutorialKind":"tutorial","tutorialKey":"` + tutorialKey + `","expectedRevision":"0"}`,
+			"unknown field":    `{"tutorialKind":"tutorial","tutorialKey":"` + tutorialKey + `","unlocked":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				session, err := savesession.LoadSave(saveEngine, writeSetTutorialRouteFixture(t), "")
+				if err != nil {
+					t.Fatalf("LoadSave: %v", err)
+				}
+				target := "/api/v1/save-sessions/" + session.SaveSessionID +
+					"/characters/0/tutorials/unlock"
 				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
 				request.Header.Set("Content-Type", "application/json")
 				recorder := httptest.NewRecorder()

@@ -81,6 +81,8 @@ const opSetFogOfWarRemoved = "set_fog_of_war_removed"
 
 const opSetQuestStep = "set_quest_step"
 
+const opSetTutorialUnlocked = "set_tutorial_unlocked"
+
 // undoPoint is the private, non-serializable restore point of one committed
 // character mutation. It belongs to exactly one session, one characterID and
 // one revision.

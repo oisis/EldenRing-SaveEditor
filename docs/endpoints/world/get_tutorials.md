@@ -108,5 +108,6 @@ anchor, malformed dynamic length, invalid tutorial count or truncated snapshot.
 
 ## Related endpoint
 
-`SetTutorialUnlocked` remains contract-only. It has no runtime handler, HTTP
-route, OpenAPI operation or Scalar page.
+[`SetTutorialUnlocked`](set_tutorial_unlocked.md) writes the same
+`TutorialData` membership this getter reads, resolving the tutorial by the same
+public kind and key.

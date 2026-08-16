@@ -102,3 +102,17 @@ func TestGetTutorialIDsRejectsCountOutsideTheDeclaredPayload(t *testing.T) {
 		t.Fatalf("malformed count error = %v", err)
 	}
 }
+
+func TestGetTutorialIDsRejectsAPayloadTooSmallForTheCount(t *testing.T) {
+	engine := New()
+	loaded, err := engine.LoadSave(
+		writeTutorialDataFixture(t, PlatformPC, true, tutorialDataCountSize-1, nil), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	_, err = engine.GetTutorialIDs(loaded.SaveSessionID, 3)
+	if err == nil ||
+		!strings.Contains(err.Error(), "does not hold the 4-byte tutorial count field") {
+		t.Fatalf("undersized payload error = %v", err)
+	}
+}

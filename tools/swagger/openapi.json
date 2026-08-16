@@ -2863,6 +2863,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials/unlock": {
+      "put": {
+        "operationId": "setTutorialUnlocked",
+        "tags": ["World"],
+        "summary": "SetTutorialUnlocked",
+        "description": "Sets the unlock state of one titled tutorial by adding or removing its confirmed TutorialParam row ID in the character's TutorialData list. The declared payload size, the block header, unknown IDs and every byte outside the changed range stay untouched, so the write is in place and never rebuilds the slot. A native ascending list receives the new ID at its ascending position; a list SaveForge 1.5.8 or 1.6.8 left unsorted keeps its exact physical order and receives the new ID at the end, because the list is never sorted, deduplicated or normalised. unlocked false removes every occurrence of that one ID, shifts the rest left and zeroes the freed entries; its in-game consequences are not measured, so it is not a guaranteed inert toggle. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetTutorialUnlockedRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed tutorial unlock change",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetTutorialUnlockedResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, invalid expectedRevision, unknown session, inactive slot, invalid or unknown tutorial resource, malformed TutorialData layout, a full tutorial list, or a write/verification error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/summoning-pools": {
       "get": {
         "operationId": "getSummoningPools",
@@ -6662,6 +6710,60 @@
           }
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "regionKind", "regionKey", "unlocked"]
+      },
+      "SetTutorialUnlockedRequest": {
+        "type": "object",
+        "description": "The exact public tutorial identity, desired unlock state and expected save revision.",
+        "additionalProperties": false,
+        "properties": {
+          "tutorialKind": {
+            "type": "string",
+            "enum": ["tutorial"],
+            "description": "The public GameCatalog resource kind. Always tutorial."
+          },
+          "tutorialKey": {
+            "type": "string",
+            "pattern": "^[0-9]+$",
+            "description": "The public resource key of the tutorial, which is its decimal TutorialParam row ID."
+          },
+          "unlocked": {
+            "type": "boolean",
+            "description": "True to unlock the tutorial by adding its confirmed TutorialParam row ID to TutorialData; false to lock it by removing all occurrences of that ID. The gameplay effect of a removal is not measured and may let the game re-trigger the popup or re-spawn a tutorial-bound world item."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision string expected by the caller."
+          }
+        },
+        "required": ["tutorialKind", "tutorialKey", "unlocked", "expectedRevision"]
+      },
+      "SetTutorialUnlockedResult": {
+        "type": "object",
+        "description": "The receipt returned upon successful tutorial unlock mutation. The private TutorialParam row ID is not exposed.",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "tutorialKind": {
+            "type": "string",
+            "enum": ["tutorial"]
+          },
+          "tutorialKey": {
+            "type": "string"
+          },
+          "unlocked": {
+            "type": "boolean"
+          }
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "tutorialKind", "tutorialKey", "unlocked"]
       },
       "GestureEntry": {
         "type": "object",

@@ -64,41 +64,65 @@ func (engine *Engine) GetTutorialIDs(
 		return result, nil
 	}
 
-	sectionAt, slotEnd, err := tutorialDataStart(loaded, characterID)
+	layout, err := readTutorialData(loaded, characterID)
 	if err != nil {
 		return CharacterTutorialIDs{}, err
+	}
+	result.Active = true
+	result.IDs = layout.ids
+	return result, nil
+}
+
+// tutorialDataLayout is one character's validated TutorialData list: where its
+// count lives, how many IDs the declared payload may hold and the IDs currently
+// stored, in physical order.
+type tutorialDataLayout struct {
+	countAt  int64
+	capacity int64
+	ids      []uint32
+}
+
+// readTutorialData locates and validates the TutorialData list of one active
+// character. It is the single owner of the block's bounds, count and capacity
+// rules, so the getter and the mutation cannot drift apart. The caller must
+// already hold Engine.mutex and must have established that the slot is active.
+func readTutorialData(loaded *loadedSave, characterID int) (tutorialDataLayout, error) {
+	sectionAt, slotEnd, err := tutorialDataStart(loaded, characterID)
+	if err != nil {
+		return tutorialDataLayout{}, err
 	}
 	payloadSize, err := eventFlagDeclaredValue(
 		loaded, characterID, sectionAt+4, slotEnd, "tutorial size", eventFlagMaxDynamicSize)
 	if err != nil {
-		return CharacterTutorialIDs{}, err
+		return tutorialDataLayout{}, err
 	}
 	if sectionAt+eventFlagDynamicHeaderSize+payloadSize > slotEnd {
-		return CharacterTutorialIDs{}, fmt.Errorf(
+		return tutorialDataLayout{}, fmt.Errorf(
 			"tutorial data of character %d do not fit into its slot", characterID)
 	}
 	if !loaded.snapshot.covers(sectionAt, eventFlagDynamicHeaderSize+payloadSize) {
-		return CharacterTutorialIDs{}, fmt.Errorf(
+		return tutorialDataLayout{}, fmt.Errorf(
 			"tutorial data of character %d do not fit into the save file", characterID)
 	}
 
-	countAt := sectionAt + eventFlagDynamicHeaderSize
-	if countAt+tutorialDataCountSize > slotEnd {
-		return CharacterTutorialIDs{}, fmt.Errorf(
-			"tutorial count of character %d lies outside its slot", characterID)
+	// The count is part of the declared payload, so a payload too small to hold
+	// it is malformed. Reading the four bytes anyway would read past the payload.
+	if payloadSize < tutorialDataCountSize {
+		return tutorialDataLayout{}, fmt.Errorf(
+			"tutorial data of character %d declare a payload of %d bytes, which does not hold the %d-byte tutorial count field",
+			characterID, payloadSize, tutorialDataCountSize)
 	}
+
+	countAt := sectionAt + eventFlagDynamicHeaderSize
 	rawCount, err := loaded.snapshot.readAt(countAt, tutorialDataCountSize)
 	if err != nil {
-		return CharacterTutorialIDs{}, fmt.Errorf(
+		return tutorialDataLayout{}, fmt.Errorf(
 			"cannot read tutorial count of character %d: %w", characterID, err)
 	}
 	count := int64(binary.LittleEndian.Uint32(rawCount))
-	maximumFromPayload := int64(0)
-	if payloadSize >= tutorialDataCountSize {
-		maximumFromPayload = (payloadSize - tutorialDataCountSize) / tutorialDataIDSize
-	}
+	maximumFromPayload := (payloadSize - tutorialDataCountSize) / tutorialDataIDSize
 	if count > maximumFromPayload || count > tutorialDataMaxIDs {
-		return CharacterTutorialIDs{}, fmt.Errorf(
+		return tutorialDataLayout{}, fmt.Errorf(
 			"tutorial count %d of character %d exceeds the declared payload capacity %d or hard cap %d",
 			count, characterID, maximumFromPayload, tutorialDataMaxIDs)
 	}
@@ -106,16 +130,19 @@ func (engine *Engine) GetTutorialIDs(
 	rawIDs, err := loaded.snapshot.readAt(
 		countAt+tutorialDataCountSize, int(count)*tutorialDataIDSize)
 	if err != nil {
-		return CharacterTutorialIDs{}, fmt.Errorf(
+		return tutorialDataLayout{}, fmt.Errorf(
 			"cannot read tutorial IDs of character %d: %w", characterID, err)
 	}
 	ids := make([]uint32, count)
 	for index := range ids {
 		ids[index] = binary.LittleEndian.Uint32(rawIDs[index*tutorialDataIDSize:])
 	}
-	result.Active = true
-	result.IDs = ids
-	return result, nil
+
+	capacity := maximumFromPayload
+	if capacity > tutorialDataMaxIDs {
+		capacity = tutorialDataMaxIDs
+	}
+	return tutorialDataLayout{countAt: countAt, capacity: capacity, ids: ids}, nil
 }
 
 // tutorialDataStart returns the first byte of TutorialData and its slot bound.
