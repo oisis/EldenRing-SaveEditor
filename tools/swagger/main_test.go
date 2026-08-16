@@ -930,6 +930,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/summoning-pools/activate", `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/bosses/defeat", `{"bossKind":"boss","bossKey":"stormveil_castle_godrick_the_grafted","defeated":true,"expectedRevision":"0"}`},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quests/step", `{"questKind":"quest","questKey":"brother_corhyn","stepKind":"quest_step","stepKey":"legacy_000","expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -1058,6 +1059,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step":                        "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
 	} {
@@ -1152,7 +1154,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	resourceTypes := document.Comps.Parameters["ResourceTypeFilter"].Schema.Enum
 	if !reflect.DeepEqual(resourceTypes, []string{
 		"", "item", "colosseum", "region", "summoning_pool", "grace", "boss",
-		"map_region", "tutorial",
+		"map_region", "tutorial", "quest",
 	}) {
 		t.Fatalf("ResourceTypeFilter enum = %v", resourceTypes)
 	}
@@ -1169,6 +1171,9 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"BossDocument",
 		"MapRegionDocument",
 		"TutorialDocument",
+		"QuestDocument",
+		"QuestStepDocument",
+		"QuestFlag",
 		"GetResourceResult",
 		"GetItemVariantsResult",
 		"GetResourceRelationsResult",
@@ -1332,6 +1337,7 @@ var resourceUnionDocuments = map[string]string{
 	"boss":           "boss",
 	"map_region":     "mapRegion",
 	"tutorial":       "tutorial",
+	"quest":          "quest",
 }
 
 func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
@@ -1369,11 +1375,11 @@ func TestResourceUnionStaysWithinOpenAPI303(t *testing.T) {
 	}
 
 	branches := document.Comps.Schemas["Resource"].OneOf
-	if len(branches) != 8 {
-		t.Fatalf("Resource has %d oneOf branches, want 8", len(branches))
+	if len(branches) != 9 {
+		t.Fatalf("Resource has %d oneOf branches, want 9", len(branches))
 	}
 	for index, kind := range []string{
-		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial",
+		"item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial", "quest",
 	} {
 		branch := branches[index]
 		if got := branch.Properties["kind"].Enum; len(got) != 1 || got[0] != kind {
@@ -1541,8 +1547,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 73 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 73", found)
+	if found != 74 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 74", found)
 	}
 }
 
@@ -6361,6 +6367,92 @@ func TestSetRegionUnlockedRoute(t *testing.T) {
 				}
 				target := "/api/v1/save-sessions/" + session.SaveSessionID +
 					"/characters/0/regions/unlock"
+				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+				info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+				if err != nil {
+					t.Fatalf("GetSessionInfo: %v", err)
+				}
+				if info.UnsavedChanges {
+					t.Errorf("rejected body dirtied the session: %+v", info)
+				}
+			})
+		}
+	})
+}
+
+func TestSetQuestStepRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	gameCatalog := newFullCatalog(t)
+
+	const (
+		questKey = "brother_corhyn"
+		stepKey  = "legacy_000"
+	)
+
+	t.Run("applies the quest step", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/quests/step"
+		body := `{"questKind":"quest","questKey":"` + questKey + `","stepKind":"quest_step","stepKey":"` + stepKey + `","expectedRevision":"0"}`
+		request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got world.SetQuestStepResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("decode route result: %v", err)
+		}
+
+		directSession, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetQuestStep(
+			saveEngine,
+			gameCatalog,
+			directSession.SaveSessionID,
+			0,
+			"quest",
+			questKey,
+			"quest_step",
+			stepKey,
+			"0",
+		)
+		if err != nil {
+			t.Fatalf("world.SetQuestStep: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		for name, body := range map[string]string{
+			"missing questKey": `{"questKind":"quest","stepKind":"quest_step","stepKey":"` + stepKey + `","expectedRevision":"0"}`,
+			"missing stepKey":  `{"questKind":"quest","questKey":"` + questKey + `","stepKind":"quest_step","expectedRevision":"0"}`,
+			"unknown field":    `{"questKind":"quest","questKey":"` + questKey + `","stepKind":"quest_step","stepKey":"` + stepKey + `","expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				session, err := savesession.LoadSave(saveEngine, writeCookbooksFixture(t), "")
+				if err != nil {
+					t.Fatalf("LoadSave: %v", err)
+				}
+				target := "/api/v1/save-sessions/" + session.SaveSessionID +
+					"/characters/0/quests/step"
 				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
 				request.Header.Set("Content-Type", "application/json")
 				recorder := httptest.NewRecorder()

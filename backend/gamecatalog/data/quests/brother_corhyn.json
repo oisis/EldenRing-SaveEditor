@@ -1,0 +1,1745 @@
+{
+  "key": "brother_corhyn",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Brother Corhyn",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"brother_corhyn\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Brother Corhyn",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Brother Corhyn and telling him that you see the Light, leading to menu pop-up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60841,
+            "value": true
+          },
+          {
+            "id": 11009456,
+            "value": false
+          },
+          {
+            "id": 11009458,
+            "value": false
+          },
+          {
+            "id": 11102812,
+            "value": true
+          },
+          {
+            "id": 11102814,
+            "value": true
+          },
+          {
+            "id": 11109855,
+            "value": true
+          },
+          {
+            "id": 11109857,
+            "value": false
+          },
+          {
+            "id": 11109860,
+            "value": false
+          },
+          {
+            "id": 11109861,
+            "value": false
+          },
+          {
+            "id": 11109862,
+            "value": false
+          },
+          {
+            "id": 11109863,
+            "value": false
+          },
+          {
+            "id": 11109864,
+            "value": false
+          },
+          {
+            "id": 11109865,
+            "value": false
+          },
+          {
+            "id": 11109866,
+            "value": false
+          },
+          {
+            "id": 11109867,
+            "value": false
+          },
+          {
+            "id": 11109868,
+            "value": false
+          },
+          {
+            "id": 11109869,
+            "value": false
+          },
+          {
+            "id": 11109870,
+            "value": false
+          },
+          {
+            "id": 11109886,
+            "value": false
+          },
+          {
+            "id": 1040529256,
+            "value": false
+          },
+          {
+            "id": 1040529258,
+            "value": false
+          },
+          {
+            "id": 1040549206,
+            "value": false
+          },
+          {
+            "id": 1051569356,
+            "value": false
+          },
+          {
+            "id": 1051569358,
+            "value": false
+          },
+          {
+            "id": 1051569360,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Assasins Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109864,
+            "value": false
+          },
+          {
+            "id": 11109886,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Godskin Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109876,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "After visiting the Academy for the first time, speaking to Brother Corhyn has a new \"Talk\" option",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109857,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", dialogue talking about leaving RTH and about Goldmask ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109858,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "\"Talk\" option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109857,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to Corhyn for the first time here, \"About the noble Goldmask\" option appears in the menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Altus Highway Junction in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040522712,
+            "value": true
+          },
+          {
+            "id": 1040529255,
+            "value": true
+          },
+          {
+            "id": 1040529256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the noble Goldmask\", option stays, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040529256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Interacting with The Noble Goldmask after using the teleporter next to Forest-Spanning Greatbridge grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Forest-Spanning Greatbridge in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040549255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Talking to him after interacting with Goldmask, \"Tell the noble Goldmask's whereabouts\" appears now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Altus Highway Junction in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040529256,
+            "value": false
+          },
+          {
+            "id": 1040529258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Tell the noble Goldmask's whereabouts\", disappears afterwards, after a reload of the area, Corhyn will move next to Goldmask",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040529258,
+            "value": false
+          },
+          {
+            "id": 1040529259,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Speaking to him next to Goldmask, \"About the noble Goldmask\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Forest-Spanning Greatbridge in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109887,
+            "value": false
+          },
+          {
+            "id": 1040542702,
+            "value": true
+          },
+          {
+            "id": 1040549202,
+            "value": true
+          },
+          {
+            "id": 1040549205,
+            "value": true
+          },
+          {
+            "id": 1040549206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the noble Goldmask\", option disappears afterwards, they will move towards Leyndell now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040549206,
+            "value": false
+          },
+          {
+            "id": 1040549207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Hearing him talk to Goldmask",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Royal Colosseum in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11002733,
+            "value": true
+          },
+          {
+            "id": 11002734,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Talking to him, \"About the noble Goldmask\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11002732,
+            "value": true
+          },
+          {
+            "id": 11009452,
+            "value": true
+          },
+          {
+            "id": 11009456,
+            "value": true
+          },
+          {
+            "id": 11009458,
+            "value": false
+          },
+          {
+            "id": 11009460,
+            "value": true
+          },
+          {
+            "id": 11109857,
+            "value": false
+          },
+          {
+            "id": 11109860,
+            "value": false
+          },
+          {
+            "id": 11109861,
+            "value": false
+          },
+          {
+            "id": 11109862,
+            "value": false
+          },
+          {
+            "id": 11109863,
+            "value": true
+          },
+          {
+            "id": 11109864,
+            "value": false
+          },
+          {
+            "id": 11109865,
+            "value": false
+          },
+          {
+            "id": 11109866,
+            "value": false
+          },
+          {
+            "id": 11109867,
+            "value": false
+          },
+          {
+            "id": 11109868,
+            "value": false
+          },
+          {
+            "id": 11109869,
+            "value": false
+          },
+          {
+            "id": 11109870,
+            "value": false
+          },
+          {
+            "id": 11109886,
+            "value": true
+          },
+          {
+            "id": 11109887,
+            "value": false
+          },
+          {
+            "id": 1040529256,
+            "value": false
+          },
+          {
+            "id": 1040529258,
+            "value": false
+          },
+          {
+            "id": 1040549206,
+            "value": false
+          },
+          {
+            "id": 1051569356,
+            "value": false
+          },
+          {
+            "id": 1051569358,
+            "value": false
+          },
+          {
+            "id": 1051569360,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the noble Goldmask\", option remains, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009456,
+            "value": true
+          },
+          {
+            "id": 11009457,
+            "value": true
+          },
+          {
+            "id": 11109863,
+            "value": true
+          },
+          {
+            "id": 11109886,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Giving him the \"Two Finger Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109877,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "\"Give prayerbook\" option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009456,
+            "value": true
+          },
+          {
+            "id": 11109863,
+            "value": false
+          },
+          {
+            "id": 11109886,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to Goldmask \"...\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009557,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Picking up the \"Golden Order Principia\" prayerbook",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Erdtree Sanctuary in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11007910,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "\"Give a prayerbook\" appears, \"About the noble Goldmask\" still present",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Royal Colosseum in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009456,
+            "value": true
+          },
+          {
+            "id": 11109867,
+            "value": true
+          },
+          {
+            "id": 11109886,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Golden Order Principia\" prayerbook",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109881,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Doing the Law of Regression on the statue, transforming it and making a new message appear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Near Erdtree Sanctuary in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11003723,
+            "value": true
+          },
+          {
+            "id": 11009468,
+            "value": false
+          },
+          {
+            "id": 11009469,
+            "value": true
+          },
+          {
+            "id": 11009556,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Telling Goldmask Radagon is Marika, receiving \"Golden Order Totality\" gesture",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Royal Colosseum in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4611,
+            "value": true
+          },
+          {
+            "id": 60848,
+            "value": true
+          },
+          {
+            "id": 11009452,
+            "value": true
+          },
+          {
+            "id": 11009555,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Speaking to Corhyn after talking to Goldmask, now sells Immutable Shield incantation",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009455,
+            "value": true
+          },
+          {
+            "id": 11009456,
+            "value": false
+          },
+          {
+            "id": 11009458,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the noble Goldmask\" now, option disappears this time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009458,
+            "value": false
+          },
+          {
+            "id": 11009459,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Talking to Goldmask on the bridge",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Stargazers' Ruins in Mountaintop of the Giants",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"brother_corhyn\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051569455,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Talking to Corhyn, menu pops up afterwards, \"About the noble Goldmask\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009456,
+            "value": false
+          },
+          {
+            "id": 11009458,
+            "value": false
+          },
+          {
+            "id": 11109857,
+            "value": false
+          },
+          {
+            "id": 11109860,
+            "value": false
+          },
+          {
+            "id": 11109861,
+            "value": false
+          },
+          {
+            "id": 11109862,
+            "value": false
+          },
+          {
+            "id": 11109863,
+            "value": false
+          },
+          {
+            "id": 11109864,
+            "value": false
+          },
+          {
+            "id": 11109865,
+            "value": false
+          },
+          {
+            "id": 11109866,
+            "value": false
+          },
+          {
+            "id": 11109867,
+            "value": false
+          },
+          {
+            "id": 11109868,
+            "value": false
+          },
+          {
+            "id": 11109869,
+            "value": false
+          },
+          {
+            "id": 11109870,
+            "value": false
+          },
+          {
+            "id": 11109886,
+            "value": false
+          },
+          {
+            "id": 11109887,
+            "value": false
+          },
+          {
+            "id": 1040529256,
+            "value": false
+          },
+          {
+            "id": 1040529258,
+            "value": false
+          },
+          {
+            "id": 1040549206,
+            "value": false
+          },
+          {
+            "id": 1051562732,
+            "value": true
+          },
+          {
+            "id": 1051569355,
+            "value": true
+          },
+          {
+            "id": 1051569356,
+            "value": true
+          },
+          {
+            "id": 1051569358,
+            "value": false
+          },
+          {
+            "id": 1051569360,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the noble Goldmask\", gets replaced with a new one",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051569356,
+            "value": false
+          },
+          {
+            "id": 1051569357,
+            "value": true
+          },
+          {
+            "id": 1051569358,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Choosing it again, disappears afterwards, they will stay here until you unlock the Ash capital",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051569358,
+            "value": false
+          },
+          {
+            "id": 1051569359,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Talking to him, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11059207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Mending Rune of Perfect Order\" from Goldmask's corpse",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9500,
+            "value": true
+          },
+          {
+            "id": 11055019,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Reloading the area after picking up the \"Mending Rune of Perfect Order\" causes Brother Corhyn to die",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4200,
+            "value": false
+          },
+          {
+            "id": 4201,
+            "value": false
+          },
+          {
+            "id": 4202,
+            "value": false
+          },
+          {
+            "id": 4203,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Corhyn's Bell Bearing\",\"Flail\" and \"Corhyn's Robe\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400370,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Picking up Goldmask's armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400500,
+            "value": true
+          },
+          {
+            "id": 11055020,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Fire Monks' Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109874,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Giant's Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109875,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Godskin Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109876,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Two Fingers' Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109877,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Assassin's Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109878,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Dragon Cult Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_040 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109883,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_041",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Ancient Dragon Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"brother_corhyn\" step legacy_041 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"brother_corhyn\" step legacy_041 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Brother Corhyn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109884,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

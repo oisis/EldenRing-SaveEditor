@@ -1,0 +1,402 @@
+{
+  "key": "irina",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Irina",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"irina\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Irina",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Irina",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Bridge of Sacrifice in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"irina\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045349205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Second dialogue with Irina, agreeing to deliver letter to her father",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"irina\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045349207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Irina's Letter\" - repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"irina\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400080,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Talking to Edgar for the first time, receiving \"Sacrificial Twig\" talisman",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Castle Morne in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"irina\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400060,
+            "value": true
+          },
+          {
+            "id": 1043319205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Delivering Irina's Letter to Edgar, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"irina\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3385,
+            "value": false
+          },
+          {
+            "id": 3386,
+            "value": false
+          },
+          {
+            "id": 3387,
+            "value": true
+          },
+          {
+            "id": 3388,
+            "value": false
+          },
+          {
+            "id": 3389,
+            "value": false
+          },
+          {
+            "id": 3390,
+            "value": false
+          },
+          {
+            "id": 3391,
+            "value": false
+          },
+          {
+            "id": 3392,
+            "value": false
+          },
+          {
+            "id": 3393,
+            "value": false
+          },
+          {
+            "id": 3394,
+            "value": false
+          },
+          {
+            "id": 3395,
+            "value": false
+          },
+          {
+            "id": 3396,
+            "value": false
+          },
+          {
+            "id": 3397,
+            "value": false
+          },
+          {
+            "id": 3398,
+            "value": false
+          },
+          {
+            "id": 3399,
+            "value": true
+          },
+          {
+            "id": 1043310706,
+            "value": true
+          },
+          {
+            "id": 1043319206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Defeating Leonine Misbegotten and talking to Edgar afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"irina\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043319207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Finding Irina dead",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Bridge of Sacrifice in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"irina\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045349215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to Edgar at Irina's dead body - repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"irina\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045349255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Defeating the Invader Edgar and receiving a Shabiri Grape and Banished Knight's Halberd+8",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"irina\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Revenger's Shack in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"irina\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Irina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 65836,
+            "value": true
+          },
+          {
+            "id": 400061,
+            "value": true
+          },
+          {
+            "id": 1033440180,
+            "value": true
+          },
+          {
+            "id": 1033442181,
+            "value": true
+          },
+          {
+            "id": 1033442182,
+            "value": true
+          },
+          {
+            "id": 1033445017,
+            "value": true
+          },
+          {
+            "id": 1033445018,
+            "value": true
+          },
+          {
+            "id": 1033445019,
+            "value": true
+          },
+          {
+            "id": 1033447000,
+            "value": true
+          },
+          {
+            "id": 1033447040,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,566 @@
+{
+  "key": "kenneth_haight",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Kenneth Haight",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"kenneth_haight\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Kenneth Haight",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initiating first dialogue with Kenneth Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Mistwood Outskirts in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"kenneth_haight\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045382705,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "End of first dialogue of Kenneth Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "End of second dialogue with Kenneth Haight, telling you about a reward for clearing out the Fort",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "End of the third time using \"Talk\" with Kenneth Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Fourth time using \"Talk\" with Kenneth Haight -\u003e repeating dialogue \"What are you waiting for...\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Ash of War: Bloody Slash\" from the Godrick Knight on the top of Fort Haight -\u003e possibly triggering the Fort to be empty after a reload of the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Fort Haight in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"kenneth_haight\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 65877,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to Kenneth Haight after clearing the Fort Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Mistwood Outskirts in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"kenneth_haight\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389220,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Erdsteel Dagger\" as a reward from Kenneth Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400221,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to Kenneth Haight after receiving \"Erdsteel Dagger\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389221,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Second dialogue with Kenneth Haight after receiving \"Erdsteel Dagger\", asking you to enter his service - prompt to choose pops up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389223,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "After agreeing to enter his service dialogue with Kenneth Haight, leading to repeated dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045389222,
+            "value": true
+          },
+          {
+            "id": 1046360706,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Approaching Fort Haight after exhausting dialogue with Kenneth Haight at Mistwood Outskirts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Fort Haight in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"kenneth_haight\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1045365003,
+            "value": true
+          },
+          {
+            "id": 1045365005,
+            "value": true
+          },
+          {
+            "id": 1045365006,
+            "value": true
+          },
+          {
+            "id": 1045365007,
+            "value": true
+          },
+          {
+            "id": 1045365008,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "End of first dialogue with Kenneth Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1046369205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "End of second dialogue with Kenneth Haight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1046369206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "End of third dialogue with Kenneth Haight -\u003e leading to repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1046369207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to him after killing Morgott, he will be moved here",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Godrick the Grafted grace in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"kenneth_haight\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009755,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kenneth_haight\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kenneth_haight\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kenneth Haight",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009756,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,198 @@
+{
+  "key": "pidia",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Pidia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"pidia\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Pidia",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"pidia\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Caria Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"pidia\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035509205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Talking to Pidia again, being able to purchase something now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"pidia\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"pidia\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035509206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Approaching Pidia, hearing him scream",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"pidia\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"pidia\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035500703,
+            "value": true
+          },
+          {
+            "id": 1035502705,
+            "value": true
+          },
+          {
+            "id": 1035509210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Hearing him die",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"pidia\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"pidia\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035500704,
+            "value": true
+          },
+          {
+            "id": 1035502706,
+            "value": true
+          },
+          {
+            "id": 1035509211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Pidia's Bell Bearing\" and \"Dolores the Sleeping Arrow Puppet\" from his corpse",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"pidia\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"pidia\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Pidia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400149,
+            "value": true
+          },
+          {
+            "id": 710550,
+            "value": true
+          },
+          {
+            "id": 1035505066,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

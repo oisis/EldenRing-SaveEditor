@@ -33,7 +33,7 @@ func TestValidateResourceResolvesTheKindBeforeTheUnionCheck(t *testing.T) {
 	sources := mustValidateManifest(t, manifest)
 	document := resources[0].Item
 
-	unknownKind := schema.Resource{Key: "stormveil_castle", Kind: "quest", Item: document}
+	unknownKind := schema.Resource{Key: "stormveil_castle", Kind: "unknown_future_kind", Item: document}
 	if err := schema.ValidateResource(unknownKind, sources); err == nil ||
 		!strings.Contains(err.Error(), "unsupported kind") {
 		t.Errorf("unknown kind carrying a document = %v, want an unsupported kind error", err)

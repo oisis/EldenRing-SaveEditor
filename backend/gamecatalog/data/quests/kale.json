@@ -1,0 +1,420 @@
+{
+  "key": "kale",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Kale",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"kale\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Kale",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "First Kalé dialogue finished / Kalé menu pop-up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Church of Elleh in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"kale\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042362712,
+            "value": true
+          },
+          {
+            "id": 1042369306,
+            "value": false
+          },
+          {
+            "id": 1042369307,
+            "value": false
+          },
+          {
+            "id": 1042369308,
+            "value": true
+          },
+          {
+            "id": 1042369319,
+            "value": true
+          },
+          {
+            "id": 1042369320,
+            "value": false
+          },
+          {
+            "id": 1042369321,
+            "value": false
+          },
+          {
+            "id": 1042369322,
+            "value": false
+          },
+          {
+            "id": 1042369325,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Purchasing Crafting Kit",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 710570,
+            "value": true
+          },
+          {
+            "id": 1042362713,
+            "value": true
+          },
+          {
+            "id": 1042369309,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Purchasing Cracked Pot",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 710580,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Finishing \"About Kalé\" dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042362714,
+            "value": true
+          },
+          {
+            "id": 1042369319,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Kalé \"Talk\" prompt, dialogue 1",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369321,
+            "value": true
+          },
+          {
+            "id": 1042369322,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Kalé \"Talk\" prompt, dialogue 2 -\u003e \"Talk\" disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369317,
+            "value": true
+          },
+          {
+            "id": 1042369322,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "\"About the howling in the woods\" prompt, receiving \"Finger Snap\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60830,
+            "value": true
+          },
+          {
+            "id": 1042369320,
+            "value": false
+          },
+          {
+            "id": 1042369328,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "After receiving \"Finger Snap\" exiting out of Kalés menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369307,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Menu option \"About Blaidd\", after having met Blaidd",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369325,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "After choosing \"About Blaidd\" dialogue end",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369329,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Menu option \"About Blaidd\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"kale\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"kale\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Kale",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369325,
+            "value": false
+          }
+        ]
+      }
+    ]
+  }
+}

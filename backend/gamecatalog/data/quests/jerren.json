@@ -1,0 +1,675 @@
+{
+  "key": "jerren",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Jerren",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"jerren\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Jerren",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial automatic dialogue when you get near him at the Plaza, welcoming everyone to the festival",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Festival Plaza in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"jerren\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3097,
+            "value": true
+          },
+          {
+            "id": 1051362701,
+            "value": true
+          },
+          {
+            "id": 1051369222,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Object Flag when approaching Jerren",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051362500,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to Jerren and saying you are ready, Cutscene begins to play",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 3618,
+            "value": true
+          },
+          {
+            "id": 3619,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": true
+          },
+          {
+            "id": 9411,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Cutscene ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3605,
+            "value": false
+          },
+          {
+            "id": 3606,
+            "value": false
+          },
+          {
+            "id": 3607,
+            "value": false
+          },
+          {
+            "id": 3608,
+            "value": false
+          },
+          {
+            "id": 3609,
+            "value": false
+          },
+          {
+            "id": 3610,
+            "value": false
+          },
+          {
+            "id": 3611,
+            "value": false
+          },
+          {
+            "id": 3612,
+            "value": true
+          },
+          {
+            "id": 3613,
+            "value": false
+          },
+          {
+            "id": 3614,
+            "value": false
+          },
+          {
+            "id": 3615,
+            "value": false
+          },
+          {
+            "id": 3616,
+            "value": false
+          },
+          {
+            "id": 3617,
+            "value": false
+          },
+          {
+            "id": 3618,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Making Blaidd summonable in the fight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369359,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "These get set after the cutscene ends, they have no reference in the sheet, i have no idea what they do",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9021,
+            "value": false
+          },
+          {
+            "id": 1252382209,
+            "value": true
+          },
+          {
+            "id": 1252382217,
+            "value": true
+          },
+          {
+            "id": 1252382225,
+            "value": true
+          },
+          {
+            "id": 1252382241,
+            "value": true
+          },
+          {
+            "id": 1252382257,
+            "value": true
+          },
+          {
+            "id": 1252382273,
+            "value": true
+          },
+          {
+            "id": 1252382369,
+            "value": true
+          },
+          {
+            "id": 1252382377,
+            "value": true
+          },
+          {
+            "id": 1252382385,
+            "value": true
+          },
+          {
+            "id": 1252382401,
+            "value": true
+          },
+          {
+            "id": 1252382417,
+            "value": true
+          },
+          {
+            "id": 1252382433,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Heartening Cry\" after he is done talking after the cutscene, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60821,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to him after Radahn's fight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369235,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue, disappears afterwards, festival will set to end",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369236,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "After a reload, festival set to be ended",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9413,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041339256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Checking the Invading sign to help Jerren and choosing no",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Raya Lucaria Grand Library in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"jerren\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002142,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Choosing yes, spawning in",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002140,
+            "value": true
+          },
+          {
+            "id": 14002141,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Defeating Sellen, receiving her Bell Bearing and \"Witch's Glintstone Crown\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 7608,
+            "value": true
+          },
+          {
+            "id": 400106,
+            "value": true
+          },
+          {
+            "id": 400107,
+            "value": true
+          },
+          {
+            "id": 14002141,
+            "value": false
+          },
+          {
+            "id": 14002145,
+            "value": true
+          },
+          {
+            "id": 14002660,
+            "value": true
+          },
+          {
+            "id": 14005028,
+            "value": true
+          },
+          {
+            "id": 1034509259,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Speaking to Jerren outside, receiving an \"Ancient Dragon Smithing Stone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400400,
+            "value": true
+          },
+          {
+            "id": 14009355,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jerren\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jerren\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jerren",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14009356,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

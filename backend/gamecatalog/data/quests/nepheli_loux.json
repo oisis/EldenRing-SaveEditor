@@ -1,0 +1,756 @@
+{
+  "key": "nepheli_loux",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Nepheli Loux",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"nepheli_loux\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Nepheli Loux",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial automatic dialogue when you approach her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Stormveil Castle in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10002785,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Talking to her the first time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009705,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to her again and she asked you to call her when fighting Godrick, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009706,
+            "value": true
+          },
+          {
+            "id": 10009709,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Spawning in Nepheli Loux before Godricks bossroom",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10002160,
+            "value": true
+          },
+          {
+            "id": 10002910,
+            "value": true
+          },
+          {
+            "id": 10003775,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to Nepheli after beating Godrick, receiving the Arsenal Charm",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3055,
+            "value": true
+          },
+          {
+            "id": 400420,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Dialogue after receiving the Arsenal Charm ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109905,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Second dialogue ends, telling you about her foster father",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109906,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Third and final dialogue with Nepehli after beating Godrick, saying she is heading off",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109909,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Village of the Albinaurics in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034429205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Second dialogue ends, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034429209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Summoning her for the Omenkiller fight, after the fight ends, she will move back to the Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034420700,
+            "value": true
+          },
+          {
+            "id": 1035422160,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Approaching her at the bottom of the stairs",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009714,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Talking to her, she tells you to leave her be, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109923,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "\"Nephali's despair...\" dialogue option at Gideon appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109677,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "After choosing it, it disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109677,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "\"I heard about Gideon\" chose option appears when talking to Nepheli again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109916,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to her again after the \"I heard about Gideon\" dialogue, leads to repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109917,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Picking up \"The Stormhawk King\" ash",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Chapel of Anticipation in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10017010,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Giving her \"The Stormhawk King\" ash",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109921,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after talking to her again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109922,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "She moved inside the throne room after defeating Morgott, dialogue with her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Godrick the Grafted grace in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"nepheli_loux\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009715,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, receiving \"Ancient Dragon Smithing Stone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400422,
+            "value": true
+          },
+          {
+            "id": 10009716,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"nepheli_loux\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"nepheli_loux\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Nepheli Loux",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009717,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

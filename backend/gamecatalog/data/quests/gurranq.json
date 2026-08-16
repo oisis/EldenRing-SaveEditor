@@ -1,0 +1,765 @@
+{
+  "key": "gurranq",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Gurranq",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"gurranq\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Gurranq",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "\"...\" dialogue when talking to him the first time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Bestial Sanctuary in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gurranq\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Hand over Deathroot\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Dialogue after handing him first Deathroot ends, receiving \"Clawmark Seal\" and \"Beast Eye\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400238,
+            "value": true
+          },
+          {
+            "id": 400239,
+            "value": true
+          },
+          {
+            "id": 1051432705,
+            "value": true
+          },
+          {
+            "id": 1051432706,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "After receiving items and having no deathroot anymore",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439206,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Giving Gurranq the second Deathroot, receiving \"Bestial Sling\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400237,
+            "value": true
+          },
+          {
+            "id": 1051432705,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Sitting down at a grace after giving him the second Deathroot moves him outside near the cliff, he is howling",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "At the cliff next to the Bestial Sanctuary in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gurranq\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051432702,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talk prompt when he is outside just returning \"...\", sitting a grace grace afterwards moves him back inside",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051432704,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Giving Gurranq the third Deathroot, receiving \"Bestial Vitality\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Bestial Sanctuary in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gurranq\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400236,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Giving Gurranq the fourth Deathroot, receiving \"Ash of War: Beast's Roar\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 65869,
+            "value": true
+          },
+          {
+            "id": 400235,
+            "value": true
+          },
+          {
+            "id": 710600,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Gurranq turns hostile after resting at a grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439212,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Fighting him for a while and he stops, resting at the grace makes him return to his default postition, non-hostile",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051430702,
+            "value": true
+          },
+          {
+            "id": 1051439211,
+            "value": true
+          },
+          {
+            "id": 1051439212,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Resting at a grace afterwards, x249 0 means you havent given him the full deathroots yet",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439249,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Amount of deathroot given: 4 (I think those 2 are connected to that event)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439243,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Giving him the fifth Deathroot, new dialogue, receiving \"Beast Claw\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400234,
+            "value": true
+          },
+          {
+            "id": 1051432705,
+            "value": true
+          },
+          {
+            "id": 1051439206,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Picking up the seventh Deathroot",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 30187900,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Picking up eighth Deathroot",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051577720,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Giving him the seventh Deathroot, receiving \"Beastclaw Greathammer\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400232,
+            "value": true
+          },
+          {
+            "id": 1051432705,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Giving him the eighth Deathroot, dialogue stays the same, receiving \"Gurranq's Beast Claw\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400231,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Picking up the ninth and last Deathroot",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 30207910,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Giving him the last Deathroot, receiving \"Ancient Dragon Smithing Stone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400230,
+            "value": true
+          },
+          {
+            "id": 1051430703,
+            "value": true
+          },
+          {
+            "id": 1051435003,
+            "value": true
+          },
+          {
+            "id": 1051435004,
+            "value": true
+          },
+          {
+            "id": 1051439212,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "He howls and disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051432709,
+            "value": true
+          },
+          {
+            "id": 1051439206,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Gets set after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gurranq\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gurranq\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gurranq",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051439212,
+            "value": false
+          }
+        ]
+      }
+    ]
+  }
+}

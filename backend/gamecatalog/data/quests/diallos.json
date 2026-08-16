@@ -1,0 +1,435 @@
+{
+  "key": "diallos",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Diallos",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"diallos\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Diallos",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Diallos",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"diallos\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109406,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Dialogue when you approach him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "on a sunken building roof near the Academy Gate Town grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"diallos\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037449202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after talking to him on the roof, repeating dialogue, will move back to the RTH",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037449205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after talking to him at the RTH after the conversation at the Academy Gate Town, repeating dialogue, reloading the area makes him disappear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"diallos\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109430,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to Diallos for the first time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Drawing Room in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"diallos\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009405,
+            "value": true
+          },
+          {
+            "id": 16009412,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009406,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Diallos reappears after a reload again, talking to him, repeating dialogue after",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002730,
+            "value": true
+          },
+          {
+            "id": 16009415,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Approaching Diallos after the second invasion, talks to himself, no new dialogue, after a reload he will be gone again tho",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009416,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "After defeating Rykard, Diallos moves to Jarburg, he talks to a living jar when you approach him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Jarburg in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"diallos\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442721,
+            "value": true
+          },
+          {
+            "id": 1039449302,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Talking to him, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449305,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to the now wounded Diallos in the middle of the town, he asks if he defended the jars, you say no, he says hes a fool and dies",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040,
+            "value": true
+          },
+          {
+            "id": 3440,
+            "value": false
+          },
+          {
+            "id": 3441,
+            "value": false
+          },
+          {
+            "id": 3442,
+            "value": false
+          },
+          {
+            "id": 3443,
+            "value": true
+          },
+          {
+            "id": 3444,
+            "value": false
+          },
+          {
+            "id": 1039445049,
+            "value": true
+          },
+          {
+            "id": 1039449315,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Looting Diallos, receiving his mask, a Numen Rune and Hoslow's whip",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"diallos\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"diallos\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Diallos",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400451,
+            "value": true
+          },
+          {
+            "id": 400452,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

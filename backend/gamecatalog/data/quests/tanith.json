@@ -1,0 +1,1217 @@
+{
+  "key": "tanith",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Tanith",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"tanith\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Tanith",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "First time talking to Tanith, refusing to join",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"tanith\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3083,
+            "value": true
+          },
+          {
+            "id": 16009202,
+            "value": true
+          },
+          {
+            "id": 16009206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, agreeing to join, receiving the Drawing-Room Key, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3087,
+            "value": true
+          },
+          {
+            "id": 3427,
+            "value": true
+          },
+          {
+            "id": 3438,
+            "value": false
+          },
+          {
+            "id": 3439,
+            "value": false
+          },
+          {
+            "id": 3885,
+            "value": false
+          },
+          {
+            "id": 3886,
+            "value": true
+          },
+          {
+            "id": 3887,
+            "value": false
+          },
+          {
+            "id": 3888,
+            "value": false
+          },
+          {
+            "id": 3889,
+            "value": false
+          },
+          {
+            "id": 3890,
+            "value": false
+          },
+          {
+            "id": 3891,
+            "value": false
+          },
+          {
+            "id": 3892,
+            "value": false
+          },
+          {
+            "id": 3893,
+            "value": false
+          },
+          {
+            "id": 3894,
+            "value": false
+          },
+          {
+            "id": 3895,
+            "value": false
+          },
+          {
+            "id": 3896,
+            "value": false
+          },
+          {
+            "id": 3897,
+            "value": false
+          },
+          {
+            "id": 3898,
+            "value": false
+          },
+          {
+            "id": 3899,
+            "value": false
+          },
+          {
+            "id": 400072,
+            "value": true
+          },
+          {
+            "id": 16003721,
+            "value": true
+          },
+          {
+            "id": 16003740,
+            "value": true
+          },
+          {
+            "id": 16003741,
+            "value": true
+          },
+          {
+            "id": 16009202,
+            "value": true
+          },
+          {
+            "id": 16009207,
+            "value": true
+          },
+          {
+            "id": 16009208,
+            "value": true
+          },
+          {
+            "id": 16009450,
+            "value": true
+          },
+          {
+            "id": 16009464,
+            "value": false
+          },
+          {
+            "id": 1042389252,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Picking up the first \"Letter from Volcano Manor\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3105,
+            "value": false
+          },
+          {
+            "id": 3106,
+            "value": true
+          },
+          {
+            "id": 3107,
+            "value": false
+          },
+          {
+            "id": 3108,
+            "value": false
+          },
+          {
+            "id": 3109,
+            "value": false
+          },
+          {
+            "id": 3110,
+            "value": false
+          },
+          {
+            "id": 3111,
+            "value": false
+          },
+          {
+            "id": 3112,
+            "value": false
+          },
+          {
+            "id": 3113,
+            "value": false
+          },
+          {
+            "id": 3114,
+            "value": false
+          },
+          {
+            "id": 3115,
+            "value": false
+          },
+          {
+            "id": 3116,
+            "value": false
+          },
+          {
+            "id": 3117,
+            "value": false
+          },
+          {
+            "id": 3118,
+            "value": false
+          },
+          {
+            "id": 3119,
+            "value": false
+          },
+          {
+            "id": 400073,
+            "value": true
+          },
+          {
+            "id": 16003702,
+            "value": true
+          },
+          {
+            "id": 16005030,
+            "value": true
+          },
+          {
+            "id": 16005040,
+            "value": true
+          },
+          {
+            "id": 16009202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Talking to Tanith after picking up the first letter, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Finishing the first Invasion, receiving \"Magma Shot\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400076,
+            "value": true
+          },
+          {
+            "id": 16009216,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Talking to Tanith about Rya, repeating dialogue, after a reload, Rya will be human again and Tanith has her other repeating dialogue back",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002702,
+            "value": true
+          },
+          {
+            "id": 16009219,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to Tanith again, receiving the reward for the second invasion, \"Serpentbone Blade\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400077,
+            "value": true
+          },
+          {
+            "id": 16009217,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to Tanith after telling Rya the secret, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009220,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Telling Tanith that Rya is dead",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009224,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Telling Tanith that you gave Rya the Tonic",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009223,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to Tanith after the third invasion, receiving \"Taker's Cameo\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400078,
+            "value": true
+          },
+          {
+            "id": 16009237,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Choosing don't see the Lord",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009236,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Saying yes, cutscene starts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009213,
+            "value": true
+          },
+          {
+            "id": 16009235,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Cutscene ends, now inside the room before Rykard",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002670,
+            "value": true
+          },
+          {
+            "id": 16009000,
+            "value": true
+          },
+          {
+            "id": 16009213,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Talking to Tanith after defeating Rykard",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009245,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, saying she will leave the Manor, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009246,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "After a reload, Tanith is now gone",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009322,
+            "value": true
+          },
+          {
+            "id": 16009452,
+            "value": true
+          },
+          {
+            "id": 16009464,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Teleporting into Rykard's arena, Tanith will be here",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Rykard, Lord of Blasphemy grace in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"tanith\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002752,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to her, repeating dialogue, even after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002703,
+            "value": true
+          },
+          {
+            "id": 16009252,
+            "value": true
+          },
+          {
+            "id": 16009255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Killing Tanith, afterwards her Knight will invade you",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009252,
+            "value": true
+          },
+          {
+            "id": 16009258,
+            "value": true
+          },
+          {
+            "id": 16009265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Killing her invading Knight, receiving \"Aspects of the Crucible: Breath\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16003706,
+            "value": true
+          },
+          {
+            "id": 16003708,
+            "value": true
+          },
+          {
+            "id": 16007950,
+            "value": true
+          },
+          {
+            "id": 16009264,
+            "value": true
+          },
+          {
+            "id": 16009266,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Picking up the \"Consort\" armor set from Tanith's body",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400071,
+            "value": true
+          },
+          {
+            "id": 16005034,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Found this flag for Tanith: If you kill Rykard before speaking to Tanith and receiving the Drawing Room key, it will then be on her chair in the Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009270,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Tanith will never be considered as \"dead\" as other NPC's with the isDead flag, instead she has event flags like these. This one is: \"Event status_initial state\" - Being at the Manor on the chair",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3105,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "\"Event status_Request in progress\" - Still at the Manor on the chair while the invasion requests are ongoing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3106,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "\"Event status_Audience granted to the king\" - When you kill the 3 invasions and she grants you to visit Rykard",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3107,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "\"Event state_After Rycard is defeated\" - Rykard is defeated, but she will still be on the chair, need to exhaust dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3108,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "\"Event Status_Like Card Eating\" after Rykard's death and exhausting dialogue she will move into the arena and will eat Rykard",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3109,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "\"Event status_nowhere\" lol, gets set after killing her and reloading the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3110,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "\"Event status_.\" just a simple event status flag, but it also gets set with the above, these two consider her as \"dead\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"tanith\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"tanith\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Tanith",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3111,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

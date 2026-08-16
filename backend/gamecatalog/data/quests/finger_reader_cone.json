@@ -1,0 +1,240 @@
+{
+  "key": "finger_reader_cone",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Finger Reader Cone",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"finger_reader_cone\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Finger Reader Cone",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Near Stormveil Castle in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041399200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "South Raya Lucaria Gate in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036449200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Smoldering Wall in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1048399200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Forest-Spanning Greatbridge in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040529350,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Outer Wall Phantom Tree in Capital Outskirts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043359300,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Deeproot Depths",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039100,
+            "value": true
+          },
+          {
+            "id": 12039101,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Exhausting single dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"finger_reader_cone\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Grand Lift of Rold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"finger_reader_cone\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Finger Reader Cone",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1049539300,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -727,6 +727,15 @@ type setFogOfWarRemovedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setQuestStepRequest is the strict JSON body of the quest step mutation.
+type setQuestStepRequest struct {
+	QuestKind        string `json:"questKind"`
+	QuestKey         string `json:"questKey"`
+	StepKind         string `json:"stepKind"`
+	StepKey          string `json:"stepKey"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2683,6 +2692,44 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				*body.Removed,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setQuestStepRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := world.SetQuestStep(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.QuestKind,
+				body.QuestKey,
+				body.StepKind,
+				body.StepKey,
 				body.ExpectedRevision,
 			)
 			if err != nil {

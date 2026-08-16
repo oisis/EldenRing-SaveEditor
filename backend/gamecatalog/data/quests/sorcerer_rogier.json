@@ -1,0 +1,951 @@
+{
+  "key": "sorcerer_rogier",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Sorcerer Rogier",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"sorcerer_rogier\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Sorcerer Rogier",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Talking to Rogier, telling him you want to defeat Godrick, menu pop-up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Stormveil Castle in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorcerer_rogier\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10002770,
+            "value": true
+          },
+          {
+            "id": 10009606,
+            "value": true
+          },
+          {
+            "id": 10009616,
+            "value": true
+          },
+          {
+            "id": 10009617,
+            "value": true
+          },
+          {
+            "id": 10009619,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "After buying a Skill, enables \"Talk\" prompt, dialogue of it, afterwards disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009608,
+            "value": true
+          },
+          {
+            "id": 10009609,
+            "value": true
+          },
+          {
+            "id": 11109538,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Rogier after beating Godrick",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorcerer_rogier\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009618,
+            "value": false
+          },
+          {
+            "id": 11102750,
+            "value": true
+          },
+          {
+            "id": 11109505,
+            "value": true
+          },
+          {
+            "id": 11109508,
+            "value": false
+          },
+          {
+            "id": 11109509,
+            "value": false
+          },
+          {
+            "id": 11109510,
+            "value": false
+          },
+          {
+            "id": 11109511,
+            "value": true
+          },
+          {
+            "id": 11109512,
+            "value": true
+          },
+          {
+            "id": 11109513,
+            "value": true
+          },
+          {
+            "id": 11109514,
+            "value": false
+          },
+          {
+            "id": 11109515,
+            "value": false
+          },
+          {
+            "id": 11109516,
+            "value": false
+          },
+          {
+            "id": 11109531,
+            "value": false
+          },
+          {
+            "id": 11109541,
+            "value": false
+          },
+          {
+            "id": 11109542,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Choosing \"I've defeated Godrick\", receiving \"Rogier's Rapier+8\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 65854,
+            "value": true
+          },
+          {
+            "id": 400358,
+            "value": true
+          },
+          {
+            "id": 11109520,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "After receiving his Rapier, dialogue finishes, menu popup, no more \"I've defeated Godrick\" option",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109511,
+            "value": false
+          },
+          {
+            "id": 11109512,
+            "value": true
+          },
+          {
+            "id": 11109513,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the corpse under Stormveil\", option disappears afterwards, menu popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109512,
+            "value": false
+          },
+          {
+            "id": 11109513,
+            "value": true
+          },
+          {
+            "id": 11109521,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About D\", option does not disappear afterwards, menu popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109513,
+            "value": false
+          },
+          {
+            "id": 11109516,
+            "value": true
+          },
+          {
+            "id": 11109522,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About D\" again, dialogue ends, option disappears, menu popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109516,
+            "value": false
+          },
+          {
+            "id": 11109525,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "\"Talk\" option appears, telling you he might fall into a slumber soon",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109531,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "\"Talk\" dialogue ends, option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109531,
+            "value": false
+          },
+          {
+            "id": 11109532,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Returning to RTH he is in a slumber",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009617,
+            "value": true
+          },
+          {
+            "id": 10009619,
+            "value": true
+          },
+          {
+            "id": 11109535,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Looting his dead body, receiving his Bell Bearing and his armor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400359,
+            "value": true
+          },
+          {
+            "id": 11105019,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Rogier's Letter\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400356,
+            "value": true
+          },
+          {
+            "id": 11105020,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "\"Give the Black Knifeprint\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "RTH",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorcerer_rogier\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109508,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Option disappears after choosing it",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400357,
+            "value": false
+          },
+          {
+            "id": 11109508,
+            "value": false
+          },
+          {
+            "id": 11109517,
+            "value": true
+          },
+          {
+            "id": 11109527,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Reloading the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109529,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, getting the Knifeprint back",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400357,
+            "value": true
+          },
+          {
+            "id": 11109506,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "\"About Ranni's whereabouts\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109507,
+            "value": true
+          },
+          {
+            "id": 11109510,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Choosing it, get's replaced with a new version, that just has repeated dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109510,
+            "value": false
+          },
+          {
+            "id": 11109541,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "After talking to Ranni, \"About Ranni's whereabouts\" disappears and \"Ranni cast off her cursemark\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109509,
+            "value": true
+          },
+          {
+            "id": 11109541,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Choosing it, disappears, \"Rogier's proposition\" appears, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109509,
+            "value": false
+          },
+          {
+            "id": 11109518,
+            "value": true
+          },
+          {
+            "id": 11109542,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "\"Why do you want the cursemark\" appears after he tells you that he might fall into a slumber",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109516,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Choosing it, option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109515,
+            "value": true
+          },
+          {
+            "id": 11109516,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "2x \"About D\" dialogue, disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorcerer_rogier\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorcerer_rogier\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorcerer Rogier",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109515,
+            "value": false
+          },
+          {
+            "id": 11109516,
+            "value": false
+          },
+          {
+            "id": 11109524,
+            "value": true
+          },
+          {
+            "id": 11109525,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

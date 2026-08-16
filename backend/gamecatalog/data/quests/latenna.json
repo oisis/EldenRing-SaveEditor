@@ -1,0 +1,424 @@
+{
+  "key": "latenna",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Latenna",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"latenna\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Latenna",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initiating dialogue with Latenna at Slumbering Wolfs Shack",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Slumbering Wolf's Shack in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"latenna\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3084,
+            "value": true
+          },
+          {
+            "id": 1036419206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "First dialogue ends, repeating dialogue if no Medallion half in possesion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036419202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Breaking Ablus' Illusion in the Albinaurics Village",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Village of the Albinaurics in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"latenna\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035429206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Albus",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035429207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "First dialogue ends, receiving \"Haligtree Secret Medallion (Right)\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400130,
+            "value": true
+          },
+          {
+            "id": 1035429209,
+            "value": true
+          },
+          {
+            "id": 1035429211,
+            "value": true
+          },
+          {
+            "id": 1035429213,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after receiving the Medallion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035429212,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, he dies afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035429210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Returning to Latenna, showing her the Medallion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Slumbering Wolf's Shack in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"latenna\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036419202,
+            "value": true
+          },
+          {
+            "id": 1036419205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Refusing to hear her request when talking to her again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036419208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Hearing her request, she disappears, saying goodbye to the wolf Lobo, you receive \"Latenna the Albinauric\" ashes",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400410,
+            "value": true
+          },
+          {
+            "id": 710550,
+            "value": true
+          },
+          {
+            "id": 1036412703,
+            "value": false
+          },
+          {
+            "id": 1036419202,
+            "value": true
+          },
+          {
+            "id": 1036419207,
+            "value": true
+          },
+          {
+            "id": 1036419209,
+            "value": true
+          },
+          {
+            "id": 1036419210,
+            "value": true
+          },
+          {
+            "id": 1036419211,
+            "value": true
+          },
+          {
+            "id": 1036419213,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to her, receiving \"Somber Ancient Dragon Smithing Stone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"latenna\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"latenna\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Latenna",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400411,
+            "value": true
+          },
+          {
+            "id": 1036419213,
+            "value": true
+          },
+          {
+            "id": 1047589202,
+            "value": true
+          },
+          {
+            "id": 1047589206,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1722 @@
+{
+  "key": "fia",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Fia",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"fia\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Fia",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Fia, accepting to be held",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"fia\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102845,
+            "value": true
+          },
+          {
+            "id": 11102846,
+            "value": true
+          },
+          {
+            "id": 11102847,
+            "value": false
+          },
+          {
+            "id": 11102848,
+            "value": true
+          },
+          {
+            "id": 11102849,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Getting held by Fia, she says \"Ah, you are so very warm\" and receiving \"Baldachin's Blessing\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102844,
+            "value": false
+          },
+          {
+            "id": 11105016,
+            "value": true
+          },
+          {
+            "id": 11109006,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Being let go by Fia, finishing dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102845,
+            "value": false
+          },
+          {
+            "id": 11102846,
+            "value": false
+          },
+          {
+            "id": 11102848,
+            "value": false
+          },
+          {
+            "id": 11102849,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Standup animation finishes after letting go from Fia, letting you move around again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11105014,
+            "value": true
+          },
+          {
+            "id": 11105015,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Letting Fia hold you again, menu pop-up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109020,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Finishing \"Talk in secret\" dialogue with Fia / stand up animation",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102845,
+            "value": false
+          },
+          {
+            "id": 11102846,
+            "value": false
+          },
+          {
+            "id": 11102848,
+            "value": false
+          },
+          {
+            "id": 11102849,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Letting Fia hold you, after exhausting Rogier's dialogue, new option \"Do you know...?\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102844,
+            "value": false
+          },
+          {
+            "id": 11102845,
+            "value": true
+          },
+          {
+            "id": 11102846,
+            "value": true
+          },
+          {
+            "id": 11102847,
+            "value": false
+          },
+          {
+            "id": 11102848,
+            "value": true
+          },
+          {
+            "id": 11102849,
+            "value": true
+          },
+          {
+            "id": 11109023,
+            "value": true
+          },
+          {
+            "id": 11109668,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the Black Knifeprint\", receiving \"Knifeprint Clue\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400334,
+            "value": true
+          },
+          {
+            "id": 11109017,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Letting you go after receiving the clue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102845,
+            "value": false
+          },
+          {
+            "id": 11102846,
+            "value": false
+          },
+          {
+            "id": 11102848,
+            "value": false
+          },
+          {
+            "id": 11102849,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Letting Fia hold you again (I'm guessing after Rogier's death or after beating Radahn, unsure), \"May I ask a favor?\" appears now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109020,
+            "value": false
+          },
+          {
+            "id": 11109021,
+            "value": true
+          },
+          {
+            "id": 11109022,
+            "value": false
+          },
+          {
+            "id": 11109023,
+            "value": false
+          },
+          {
+            "id": 11109024,
+            "value": true
+          },
+          {
+            "id": 11109025,
+            "value": false
+          },
+          {
+            "id": 11109026,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Choosing \"May I ask a favor?\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109008,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Weathered Dagger\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400331,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "After receiving the Dagger, \"May I ask a favor disappears\", \"About the dagger\" appears, it's just repeating the dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "RTH backroom",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"fia\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109021,
+            "value": false
+          },
+          {
+            "id": 11109022,
+            "value": true
+          },
+          {
+            "id": 11109024,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Leaving her after the dagger dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11105014,
+            "value": true
+          },
+          {
+            "id": 11105015,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "After reloading, Fia stands over D's dead body in the backroom, talking to her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102843,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "After she is done talking, she will disappear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11100737,
+            "value": true
+          },
+          {
+            "id": 11109015,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to her after the bossfight, saying \"That's right\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Prince of Death's Throne in Deeproot Depths",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"fia\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3094,
+            "value": true
+          },
+          {
+            "id": 12039150,
+            "value": true
+          },
+          {
+            "id": 12039155,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Choosing \"No I want to be held\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12032715,
+            "value": true
+          },
+          {
+            "id": 12032716,
+            "value": true
+          },
+          {
+            "id": 12032717,
+            "value": false
+          },
+          {
+            "id": 12032718,
+            "value": true
+          },
+          {
+            "id": 12032719,
+            "value": true
+          },
+          {
+            "id": 12039150,
+            "value": true
+          },
+          {
+            "id": 12039156,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Receiving Baldachin's Blessing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12032714,
+            "value": false
+          },
+          {
+            "id": 12035055,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Menu pop-up, \"Talk in secret\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039170,
+            "value": false
+          },
+          {
+            "id": 12039171,
+            "value": false
+          },
+          {
+            "id": 12039172,
+            "value": false
+          },
+          {
+            "id": 12039173,
+            "value": true
+          },
+          {
+            "id": 12039174,
+            "value": false
+          },
+          {
+            "id": 12039175,
+            "value": false
+          },
+          {
+            "id": 12039176,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk in secret\", option stays afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039159,
+            "value": true
+          },
+          {
+            "id": 12039173,
+            "value": false
+          },
+          {
+            "id": 12039174,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Choosing it again, now gets replaced with \"Give Cursemark of Death\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039160,
+            "value": true
+          },
+          {
+            "id": 12039174,
+            "value": false
+          },
+          {
+            "id": 12039176,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Give Cursemark of Death\", holds you tight afterwards, receiving \"Radiant Baldachin's Blessing\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400333,
+            "value": true
+          },
+          {
+            "id": 12032720,
+            "value": true
+          },
+          {
+            "id": 12032723,
+            "value": true
+          },
+          {
+            "id": 12039161,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Letting loose of you again ( :c )",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12030707,
+            "value": true
+          },
+          {
+            "id": 12030708,
+            "value": true
+          },
+          {
+            "id": 12032720,
+            "value": false
+          },
+          {
+            "id": 12032721,
+            "value": true
+          },
+          {
+            "id": 12032723,
+            "value": false
+          },
+          {
+            "id": 12032724,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "\"Talk in secret\" appears again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039170,
+            "value": true
+          },
+          {
+            "id": 12039176,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Choosing it again, \"Talk in secret\" stays, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039157,
+            "value": true
+          },
+          {
+            "id": 12039170,
+            "value": false
+          },
+          {
+            "id": 12039171,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Leaving her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12032715,
+            "value": false
+          },
+          {
+            "id": 12032716,
+            "value": false
+          },
+          {
+            "id": 12032718,
+            "value": false
+          },
+          {
+            "id": 12032719,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Animation after leaving her stopped",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12035051,
+            "value": true
+          },
+          {
+            "id": 12035052,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Reloading the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12032503,
+            "value": true
+          },
+          {
+            "id": 12039150,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "\"Talk in secret\" appears again after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12032714,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk in secret\", saying goodbye, option stays",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039158,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Examining Fia's body and choosing to enter the dream",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1020,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Lichdragon Fortissax full fight, receiving the Remembrance",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 551,
+            "value": false
+          },
+          {
+            "id": 553,
+            "value": true
+          },
+          {
+            "id": 1111,
+            "value": true
+          },
+          {
+            "id": 4130,
+            "value": false
+          },
+          {
+            "id": 4137,
+            "value": true
+          },
+          {
+            "id": 4138,
+            "value": false
+          },
+          {
+            "id": 9111,
+            "value": true
+          },
+          {
+            "id": 9319,
+            "value": true
+          },
+          {
+            "id": 61111,
+            "value": true
+          },
+          {
+            "id": 510110,
+            "value": true
+          },
+          {
+            "id": 12030701,
+            "value": true
+          },
+          {
+            "id": 12030705,
+            "value": true
+          },
+          {
+            "id": 12030850,
+            "value": true
+          },
+          {
+            "id": 12030852,
+            "value": true
+          },
+          {
+            "id": 12032106,
+            "value": true
+          },
+          {
+            "id": 12032725,
+            "value": false
+          },
+          {
+            "id": 12032726,
+            "value": false
+          },
+          {
+            "id": 12032858,
+            "value": true
+          },
+          {
+            "id": 12032860,
+            "value": true
+          },
+          {
+            "id": 12032861,
+            "value": true
+          },
+          {
+            "id": 12032870,
+            "value": true
+          },
+          {
+            "id": 12035056,
+            "value": true
+          },
+          {
+            "id": 12035092,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Loading screen + after bossfight flags",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 551,
+            "value": true
+          },
+          {
+            "id": 12030706,
+            "value": true
+          },
+          {
+            "id": 12032503,
+            "value": true
+          },
+          {
+            "id": 12032850,
+            "value": true
+          },
+          {
+            "id": 12035091,
+            "value": true
+          },
+          {
+            "id": 12039150,
+            "value": true
+          },
+          {
+            "id": 12059163,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Mending Rune of the Death-Prince\" from her body",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9502,
+            "value": true
+          },
+          {
+            "id": 12035053,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, Fia now dead",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4120,
+            "value": false
+          },
+          {
+            "id": 4121,
+            "value": false
+          },
+          {
+            "id": 4122,
+            "value": false
+          },
+          {
+            "id": 4123,
+            "value": true
+          },
+          {
+            "id": 12032503,
+            "value": true
+          },
+          {
+            "id": 12039150,
+            "value": true
+          },
+          {
+            "id": 12039162,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Hearing D's brother talk over Fia's dead body",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039011,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "Talking to D's brother, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12039005,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Picking up Fia's armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400339,
+            "value": true
+          },
+          {
+            "id": 12035054,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, D's brother now gone, loot on the ground",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12032503,
+            "value": true
+          },
+          {
+            "id": 12039150,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Inseparable Sword\" and the \"Twinned\" armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"fia\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"fia\" step legacy_040 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Fia",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400348,
+            "value": true
+          },
+          {
+            "id": 12035047,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1254 @@
+{
+  "key": "gideon_ofnir",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Gideon Ofnir",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"gideon_ofnir\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Gideon Ofnir",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Getting welcomed by Gideon Ofnir",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold main grace room",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gideon_ofnir\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109658,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Advise from Gideon Ofnir",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109659,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Gideon Ofnir, telling you to get Great Runes",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold Gideon's room",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gideon_ofnir\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109661,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Second dialogue with Gideon Ofnir, telling you that you will be getting a proper welcome once the Two Fingers door is open, leading to repeating \"We've spoken long enough...\" dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109660,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Gideon Ofnir after receiving the Two Fingers' wisdom",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109662,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Second dialogue with Gideon Ofnir, telling you about all the Great Runes, menu popup with all the \"About\" options",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102782,
+            "value": true
+          },
+          {
+            "id": 11109551,
+            "value": false
+          },
+          {
+            "id": 11109555,
+            "value": false
+          },
+          {
+            "id": 11109664,
+            "value": true
+          },
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": true
+          },
+          {
+            "id": 11109677,
+            "value": false
+          },
+          {
+            "id": 11109679,
+            "value": false
+          },
+          {
+            "id": 11109681,
+            "value": false
+          },
+          {
+            "id": 11109683,
+            "value": false
+          },
+          {
+            "id": 11109684,
+            "value": false
+          },
+          {
+            "id": 11109686,
+            "value": false
+          },
+          {
+            "id": 11109688,
+            "value": false
+          },
+          {
+            "id": 11109689,
+            "value": false
+          },
+          {
+            "id": 11109691,
+            "value": false
+          },
+          {
+            "id": 11109692,
+            "value": false
+          },
+          {
+            "id": 11109693,
+            "value": false
+          },
+          {
+            "id": 11109695,
+            "value": false
+          },
+          {
+            "id": 11109697,
+            "value": false
+          },
+          {
+            "id": 11109699,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Godrick\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Radahn\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109670,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Rykard\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Morgott\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109671,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Rennala\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109672,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Nepheli\" - option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109668,
+            "value": true
+          },
+          {
+            "id": 11109675,
+            "value": false
+          },
+          {
+            "id": 11109676,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "\"About Ensha\" appears after the invasion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109679,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Ensha\" makes it not disappear, but different dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109680,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Chosing \"About Ensha\" the second time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109681,
+            "value": true
+          },
+          {
+            "id": 11109682,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "\"About Ensha\" disappears, \"About the secret medallions\" takes it's place",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109683,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Repeating dialogue, telling you about the Albinauric Woman (Latenna)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109683,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "\"Nephali's despair...\" dialogue option at Gideon appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109677,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "After choosing it, it disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109677,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Talking to Gideon after beating Renalla",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109665,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "\"Show him Seluvis's Potion\" appears after getting the potion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109551,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Refusing to give him Seluvis's Potion when choosing that option, afterwards \"Give Gideon Seluvis's Potion\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109551,
+            "value": false
+          },
+          {
+            "id": 11109552,
+            "value": true
+          },
+          {
+            "id": 11109555,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "After giving Gideon the potion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109553,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "\"Using the secret medallions\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109693,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "\"The secret medallions are reunited\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109684,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Choosing \"The secret medallions are reunited\", disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109684,
+            "value": false
+          },
+          {
+            "id": 11109685,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Using the secret medallions\", option disappears, receiving \"Black Flame's Protection\" as a reward",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400282,
+            "value": true
+          },
+          {
+            "id": 11100791,
+            "value": true
+          },
+          {
+            "id": 11109693,
+            "value": false
+          },
+          {
+            "id": 11109694,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "After defeating Malenia, \"About the Haligtree roots\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109695,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Choosing it and receiving \"Lord's Divine Fortification\", option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400283,
+            "value": true
+          },
+          {
+            "id": 11100792,
+            "value": true
+          },
+          {
+            "id": 11109695,
+            "value": false
+          },
+          {
+            "id": 11109696,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Talking to Gideon after burning the tree and defeating Mohg, \"About the Lord of Blood's cocoon\" and \"Talk\" appear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109666,
+            "value": true
+          },
+          {
+            "id": 11109689,
+            "value": true
+          },
+          {
+            "id": 11109692,
+            "value": true
+          },
+          {
+            "id": 11109699,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", option stays afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109689,
+            "value": false
+          },
+          {
+            "id": 11109690,
+            "value": true
+          },
+          {
+            "id": 11109691,
+            "value": true
+          },
+          {
+            "id": 11109692,
+            "value": true
+          },
+          {
+            "id": 11109699,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\" again, option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109556,
+            "value": true
+          },
+          {
+            "id": 11109691,
+            "value": false
+          },
+          {
+            "id": 11109692,
+            "value": true
+          },
+          {
+            "id": 11109699,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the Lord of Blood's cocoon\", receiving \"Law of Causality\" as a final reward, afterwards no menu at all anymore, just repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gideon_ofnir\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gideon_ofnir\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gideon Ofnir",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400285,
+            "value": true
+          },
+          {
+            "id": 11100794,
+            "value": true
+          },
+          {
+            "id": 11109550,
+            "value": true
+          },
+          {
+            "id": 11109692,
+            "value": false
+          },
+          {
+            "id": 11109699,
+            "value": false
+          }
+        ]
+      }
+    ]
+  }
+}

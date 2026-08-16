@@ -1,0 +1,908 @@
+{
+  "key": "ensha",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Ensha",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"ensha\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Ensha",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Receiving \"What do you want?\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ensha\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ensha",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ensha\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ensha",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60840,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Full Ensha invasion, loading screen flags when porting to the RTH until after spawning back to the normal RTH and receiving \"Clinging Bone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ensha\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ensha",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ensha\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ensha",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 200,
+            "value": true
+          },
+          {
+            "id": 201,
+            "value": false
+          },
+          {
+            "id": 530,
+            "value": true
+          },
+          {
+            "id": 532,
+            "value": false
+          },
+          {
+            "id": 551,
+            "value": true
+          },
+          {
+            "id": 900,
+            "value": true
+          },
+          {
+            "id": 910,
+            "value": true
+          },
+          {
+            "id": 1410,
+            "value": true
+          },
+          {
+            "id": 1411,
+            "value": true
+          },
+          {
+            "id": 1605,
+            "value": true
+          },
+          {
+            "id": 1606,
+            "value": true
+          },
+          {
+            "id": 1607,
+            "value": true
+          },
+          {
+            "id": 1608,
+            "value": true
+          },
+          {
+            "id": 1609,
+            "value": true
+          },
+          {
+            "id": 1610,
+            "value": true
+          },
+          {
+            "id": 1611,
+            "value": true
+          },
+          {
+            "id": 1612,
+            "value": true
+          },
+          {
+            "id": 1613,
+            "value": true
+          },
+          {
+            "id": 1614,
+            "value": true
+          },
+          {
+            "id": 1615,
+            "value": true
+          },
+          {
+            "id": 1616,
+            "value": true
+          },
+          {
+            "id": 1617,
+            "value": true
+          },
+          {
+            "id": 1618,
+            "value": true
+          },
+          {
+            "id": 1630,
+            "value": true
+          },
+          {
+            "id": 1631,
+            "value": true
+          },
+          {
+            "id": 1632,
+            "value": true
+          },
+          {
+            "id": 1633,
+            "value": true
+          },
+          {
+            "id": 1634,
+            "value": true
+          },
+          {
+            "id": 1635,
+            "value": true
+          },
+          {
+            "id": 2000,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 3040,
+            "value": true
+          },
+          {
+            "id": 3044,
+            "value": true
+          },
+          {
+            "id": 3046,
+            "value": true
+          },
+          {
+            "id": 3049,
+            "value": true
+          },
+          {
+            "id": 3050,
+            "value": true
+          },
+          {
+            "id": 3051,
+            "value": true
+          },
+          {
+            "id": 3052,
+            "value": true
+          },
+          {
+            "id": 3056,
+            "value": true
+          },
+          {
+            "id": 3059,
+            "value": true
+          },
+          {
+            "id": 3080,
+            "value": true
+          },
+          {
+            "id": 3081,
+            "value": true
+          },
+          {
+            "id": 3082,
+            "value": true
+          },
+          {
+            "id": 3083,
+            "value": true
+          },
+          {
+            "id": 3084,
+            "value": true
+          },
+          {
+            "id": 3085,
+            "value": true
+          },
+          {
+            "id": 3086,
+            "value": true
+          },
+          {
+            "id": 3087,
+            "value": true
+          },
+          {
+            "id": 3088,
+            "value": true
+          },
+          {
+            "id": 3089,
+            "value": true
+          },
+          {
+            "id": 3090,
+            "value": true
+          },
+          {
+            "id": 3091,
+            "value": true
+          },
+          {
+            "id": 3092,
+            "value": true
+          },
+          {
+            "id": 3093,
+            "value": true
+          },
+          {
+            "id": 3094,
+            "value": true
+          },
+          {
+            "id": 3095,
+            "value": true
+          },
+          {
+            "id": 3096,
+            "value": true
+          },
+          {
+            "id": 3097,
+            "value": true
+          },
+          {
+            "id": 3098,
+            "value": true
+          },
+          {
+            "id": 3099,
+            "value": true
+          },
+          {
+            "id": 3119,
+            "value": true
+          },
+          {
+            "id": 3187,
+            "value": false
+          },
+          {
+            "id": 3188,
+            "value": true
+          },
+          {
+            "id": 3191,
+            "value": false
+          },
+          {
+            "id": 3199,
+            "value": false
+          },
+          {
+            "id": 3239,
+            "value": true
+          },
+          {
+            "id": 3269,
+            "value": true
+          },
+          {
+            "id": 3279,
+            "value": true
+          },
+          {
+            "id": 3379,
+            "value": true
+          },
+          {
+            "id": 3399,
+            "value": true
+          },
+          {
+            "id": 3419,
+            "value": true
+          },
+          {
+            "id": 3426,
+            "value": true
+          },
+          {
+            "id": 3439,
+            "value": false
+          },
+          {
+            "id": 3446,
+            "value": true
+          },
+          {
+            "id": 3459,
+            "value": true
+          },
+          {
+            "id": 3479,
+            "value": true
+          },
+          {
+            "id": 3579,
+            "value": true
+          },
+          {
+            "id": 3599,
+            "value": true
+          },
+          {
+            "id": 3619,
+            "value": true
+          },
+          {
+            "id": 3626,
+            "value": true
+          },
+          {
+            "id": 3639,
+            "value": true
+          },
+          {
+            "id": 3659,
+            "value": true
+          },
+          {
+            "id": 3679,
+            "value": true
+          },
+          {
+            "id": 3686,
+            "value": false
+          },
+          {
+            "id": 3687,
+            "value": true
+          },
+          {
+            "id": 3699,
+            "value": false
+          },
+          {
+            "id": 3707,
+            "value": false
+          },
+          {
+            "id": 3708,
+            "value": true
+          },
+          {
+            "id": 3719,
+            "value": false
+          },
+          {
+            "id": 3739,
+            "value": true
+          },
+          {
+            "id": 3759,
+            "value": true
+          },
+          {
+            "id": 3779,
+            "value": true
+          },
+          {
+            "id": 3799,
+            "value": true
+          },
+          {
+            "id": 3819,
+            "value": true
+          },
+          {
+            "id": 3839,
+            "value": true
+          },
+          {
+            "id": 3879,
+            "value": true
+          },
+          {
+            "id": 3899,
+            "value": true
+          },
+          {
+            "id": 3919,
+            "value": true
+          },
+          {
+            "id": 3966,
+            "value": false
+          },
+          {
+            "id": 3967,
+            "value": true
+          },
+          {
+            "id": 3979,
+            "value": true
+          },
+          {
+            "id": 4059,
+            "value": true
+          },
+          {
+            "id": 4079,
+            "value": true
+          },
+          {
+            "id": 4139,
+            "value": true
+          },
+          {
+            "id": 4159,
+            "value": true
+          },
+          {
+            "id": 4160,
+            "value": true
+          },
+          {
+            "id": 4179,
+            "value": true
+          },
+          {
+            "id": 4199,
+            "value": true
+          },
+          {
+            "id": 4219,
+            "value": true
+          },
+          {
+            "id": 4239,
+            "value": true
+          },
+          {
+            "id": 4259,
+            "value": true
+          },
+          {
+            "id": 4600,
+            "value": true
+          },
+          {
+            "id": 4601,
+            "value": true
+          },
+          {
+            "id": 4602,
+            "value": true
+          },
+          {
+            "id": 4603,
+            "value": true
+          },
+          {
+            "id": 4604,
+            "value": true
+          },
+          {
+            "id": 4606,
+            "value": true
+          },
+          {
+            "id": 4607,
+            "value": true
+          },
+          {
+            "id": 4608,
+            "value": true
+          },
+          {
+            "id": 4609,
+            "value": true
+          },
+          {
+            "id": 4611,
+            "value": true
+          },
+          {
+            "id": 4719,
+            "value": true
+          },
+          {
+            "id": 9807,
+            "value": true
+          },
+          {
+            "id": 11002548,
+            "value": true
+          },
+          {
+            "id": 11009248,
+            "value": false
+          },
+          {
+            "id": 11100020,
+            "value": true
+          },
+          {
+            "id": 11100030,
+            "value": true
+          },
+          {
+            "id": 11100031,
+            "value": true
+          },
+          {
+            "id": 11100680,
+            "value": true
+          },
+          {
+            "id": 11100690,
+            "value": true
+          },
+          {
+            "id": 11100704,
+            "value": true
+          },
+          {
+            "id": 11100732,
+            "value": true
+          },
+          {
+            "id": 11100737,
+            "value": true
+          },
+          {
+            "id": 11100765,
+            "value": true
+          },
+          {
+            "id": 11100790,
+            "value": true
+          },
+          {
+            "id": 11100791,
+            "value": true
+          },
+          {
+            "id": 11100792,
+            "value": true
+          },
+          {
+            "id": 11100793,
+            "value": true
+          },
+          {
+            "id": 11100794,
+            "value": true
+          },
+          {
+            "id": 11100795,
+            "value": true
+          },
+          {
+            "id": 11100796,
+            "value": true
+          },
+          {
+            "id": 11100797,
+            "value": true
+          },
+          {
+            "id": 11102100,
+            "value": true
+          },
+          {
+            "id": 11102602,
+            "value": true
+          },
+          {
+            "id": 11102606,
+            "value": true
+          },
+          {
+            "id": 11102620,
+            "value": true
+          },
+          {
+            "id": 11102621,
+            "value": false
+          },
+          {
+            "id": 11102622,
+            "value": false
+          },
+          {
+            "id": 11102650,
+            "value": true
+          },
+          {
+            "id": 11102651,
+            "value": true
+          },
+          {
+            "id": 11102652,
+            "value": true
+          },
+          {
+            "id": 11102680,
+            "value": true
+          },
+          {
+            "id": 11102790,
+            "value": true
+          },
+          {
+            "id": 11102844,
+            "value": false
+          },
+          {
+            "id": 11103706,
+            "value": true
+          },
+          {
+            "id": 11103707,
+            "value": true
+          },
+          {
+            "id": 11103712,
+            "value": true
+          },
+          {
+            "id": 11103720,
+            "value": true
+          },
+          {
+            "id": 11103775,
+            "value": true
+          },
+          {
+            "id": 11105000,
+            "value": true
+          },
+          {
+            "id": 11105001,
+            "value": true
+          },
+          {
+            "id": 11105002,
+            "value": true
+          },
+          {
+            "id": 11105003,
+            "value": true
+          },
+          {
+            "id": 11105004,
+            "value": true
+          },
+          {
+            "id": 11105005,
+            "value": true
+          },
+          {
+            "id": 11105006,
+            "value": true
+          },
+          {
+            "id": 11105009,
+            "value": true
+          },
+          {
+            "id": 11105010,
+            "value": true
+          },
+          {
+            "id": 11105011,
+            "value": true
+          },
+          {
+            "id": 11105012,
+            "value": true
+          },
+          {
+            "id": 11105013,
+            "value": true
+          },
+          {
+            "id": 11105014,
+            "value": true
+          },
+          {
+            "id": 11105015,
+            "value": true
+          },
+          {
+            "id": 11105016,
+            "value": true
+          },
+          {
+            "id": 11105017,
+            "value": true
+          },
+          {
+            "id": 11105018,
+            "value": true
+          },
+          {
+            "id": 11105019,
+            "value": true
+          },
+          {
+            "id": 11105020,
+            "value": true
+          },
+          {
+            "id": 11105021,
+            "value": true
+          },
+          {
+            "id": 11105022,
+            "value": true
+          },
+          {
+            "id": 11105023,
+            "value": true
+          },
+          {
+            "id": 11105024,
+            "value": true
+          },
+          {
+            "id": 11105025,
+            "value": true
+          },
+          {
+            "id": 11105026,
+            "value": true
+          },
+          {
+            "id": 11107900,
+            "value": true
+          },
+          {
+            "id": 11109355,
+            "value": false
+          },
+          {
+            "id": 11109648,
+            "value": true
+          },
+          {
+            "id": 11109649,
+            "value": true
+          },
+          {
+            "id": 11109655,
+            "value": true
+          },
+          {
+            "id": 11109656,
+            "value": true
+          },
+          {
+            "id": 16009464,
+            "value": true
+          },
+          {
+            "id": 1035429211,
+            "value": false
+          },
+          {
+            "id": 1036419202,
+            "value": true
+          },
+          {
+            "id": 1036439202,
+            "value": true
+          },
+          {
+            "id": 1038419270,
+            "value": false
+          },
+          {
+            "id": 1038419271,
+            "value": true
+          },
+          {
+            "id": 1039409252,
+            "value": true
+          },
+          {
+            "id": 1042389252,
+            "value": true
+          },
+          {
+            "id": 1043359252,
+            "value": true
+          },
+          {
+            "id": 1045399200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Picking up Ensha's armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ensha\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ensha",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ensha\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ensha",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400490,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

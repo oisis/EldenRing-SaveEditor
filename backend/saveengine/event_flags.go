@@ -219,116 +219,14 @@ type eventFlagPosition struct {
 }
 
 // resolveEventFlag places one identifier inside the bitfield. Only blocks with
-// confirmed cookbook, whetblade, bell bearing, colosseum, summoning pool, grace,
-// boss or map region evidence are supported; every other block is rejected
-// instead of being answered from a guessed position, so an unsupported
-// identifier can never be reported as false.
+// confirmed domain resource evidence or supported quest steps are present in
+// confirmedEventFlagBlocks; every other block is rejected instead of being
+// answered from a guessed position, so an unsupported identifier can never be
+// reported as false.
 func resolveEventFlag(id uint32) (eventFlagPosition, error) {
-	var blockPosition int64
-	switch block := id / eventFlagsPerBlock; block {
-	// Synchronized boss defeat flags occupy block 9, whose BST position is 9 in
-	// SaveForge 1.5.8 and 1.6.8 alike. Only block 9 is added: the neighbouring
-	// blocks 8 and 10 carry no curated resource, so they stay rejected.
-	case 9:
-		blockPosition = 9
-	// The global colosseum gameman flag 6080 lies in block 6, whose BST position
-	// is 6 in SaveForge 1.5.8 and 1.6.8 alike. Only block 6 is added; the
-	// neighbouring blocks 5 and 7 carry no curated resource and stay rejected.
-	case 6:
-		blockPosition = 6
-	case 60:
-		blockPosition = 10
-	// Map region visibility flags occupy block 62, whose BST position is 12 in
-	// SaveForge 1.5.8 and 1.6.8 alike. Only block 62 is added: block 63 carries
-	// the transient map fragment pickup triggers and block 82 the system-level
-	// map display switches, neither of which is a map region, so both stay
-	// rejected.
-	case 62:
-		blockPosition = 12
-	case 65:
-		blockPosition = 15
-	// Grace visit flags occupy the blocks 71 to 74 and 76, whose BST positions
-	// are identical in SaveForge 1.5.8 and 1.6.8. Block 75 has a BST position
-	// too, but no grace of the curated table lies in it, so it is deliberately
-	// not resolved here.
-	case 71:
-		blockPosition = 21
-	case 72:
-		blockPosition = 22
-	case 73:
-		blockPosition = 23
-	case 74:
-		blockPosition = 24
-	case 76:
-		blockPosition = 26
-	case 1042378:
-		// Whetstone Knife's confirmed system-affinity flag 1042378601
-		// occupies byte 0xA0D0C in both SaveForge 1.5.8 and 1.6.8.
-		blockPosition = 5269
-	case 67:
-		blockPosition = 17
-	case 68:
-		blockPosition = 18
-	// The colosseum NPC/event-memory markers 69450, 69460 and 69470 and the
-	// global 69480 lie in block 69, whose BST position is 19 in SaveForge 1.5.8
-	// and 1.6.8 alike. Only block 69 is added; no current GameCatalog resource
-	// or endpoint requires block 70, so it stays rejected.
-	case 69:
-		blockPosition = 19
-	case 670:
-		// Summoning pool activation flags occupy BST position 107, confirmed for
-		// the whole block in both SaveForge 1.5.8 and 1.6.8.
-		blockPosition = 107
-	case 11109:
-		blockPosition = 11129
-	// The four confirmed companion flags of the Gatefront grace: 4680 and 4681
-	// lie in block 4, 710520 in block 710 and 60100 in the already resolved
-	// block 60. Both BST positions are identical in SaveForge 1.5.8 and 1.6.8.
-	case 4:
-		blockPosition = 4
-	case 710:
-		blockPosition = 111
-	// The overworld ObjAct door flags of the eighteen blocks the curated Graces
-	// table actually declares. Only blocks a GraceDocument proves are added; the
-	// neighbouring map blocks carry no curated resource and stay rejected. Every
-	// position below is the BST entry of SaveForge 1.5.8 and 1.6.8 alike.
-	case 1033438:
-		blockPosition = 2791
-	case 1036518:
-		blockPosition = 3687
-	case 1037538:
-		blockPosition = 3981
-	case 1038528:
-		blockPosition = 4254
-	case 1039418:
-		blockPosition = 4457
-	case 1039488:
-		blockPosition = 4506
-	case 1040528:
-		blockPosition = 4814
-	case 1041378:
-		blockPosition = 4989
-	case 1043338:
-		blockPosition = 5521
-	case 1043388:
-		blockPosition = 5556
-	case 1043398:
-		blockPosition = 5563
-	case 1045348:
-		blockPosition = 6088
-	case 1045518:
-		blockPosition = 6207
-	case 1045528:
-		blockPosition = 6214
-	case 1047408:
-		blockPosition = 6690
-	case 1048368:
-		blockPosition = 6942
-	case 1050538:
-		blockPosition = 7621
-	case 1050558:
-		blockPosition = 7635
-	default:
+	block := id / eventFlagsPerBlock
+	blockPosition, supported := confirmedEventFlagBlocks[block]
+	if !supported {
 		return eventFlagPosition{}, fmt.Errorf(
 			"event flag %d lies in block %d, which this reader does not support", id, block)
 	}

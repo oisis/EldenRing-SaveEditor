@@ -1,0 +1,874 @@
+{
+  "key": "gowry",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Gowry",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"gowry\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Gowry",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue at his Shack, requesting",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Gowry's Shack in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gowry\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389209,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Refusing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4606,
+            "value": true
+          },
+          {
+            "id": 1050389202,
+            "value": true
+          },
+          {
+            "id": 1050389206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Hearing the request, wanting you to find Millicent",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389202,
+            "value": true
+          },
+          {
+            "id": 1050389205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, wants you to find an unalloyed gold needle, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Millicent Invasion at the swamp",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Aeonia Swamp in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gowry\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1048380180,
+            "value": true
+          },
+          {
+            "id": 1048382182,
+            "value": true
+          },
+          {
+            "id": 1048385004,
+            "value": true
+          },
+          {
+            "id": 1048385005,
+            "value": true
+          },
+          {
+            "id": 1048385006,
+            "value": true
+          },
+          {
+            "id": 1048387500,
+            "value": true
+          },
+          {
+            "id": 1049385008,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Commander O'Neil full fight, receiving \"Commander's Standard\" and \"Unalloyed Golden Needle\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9290,
+            "value": false
+          },
+          {
+            "id": 530405,
+            "value": true
+          },
+          {
+            "id": 1049380800,
+            "value": true
+          },
+          {
+            "id": 1049382161,
+            "value": true
+          },
+          {
+            "id": 1049382300,
+            "value": true
+          },
+          {
+            "id": 1049382301,
+            "value": true
+          },
+          {
+            "id": 1049382820,
+            "value": true
+          },
+          {
+            "id": 1049382821,
+            "value": true
+          },
+          {
+            "id": 1049382824,
+            "value": true
+          },
+          {
+            "id": 1049385000,
+            "value": true
+          },
+          {
+            "id": 1049385005,
+            "value": true
+          },
+          {
+            "id": 1049385006,
+            "value": true
+          },
+          {
+            "id": 1049385017,
+            "value": true
+          },
+          {
+            "id": 1049385018,
+            "value": true
+          },
+          {
+            "id": 1049385019,
+            "value": true
+          },
+          {
+            "id": 1049385020,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Giving him the Unalloyed Gold Needle dialogue, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Gowry's Shack",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gowry\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Sellia's Secret\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400311,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to him after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Unalloyed Gold Needle\" back",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400310,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, telling you that he found her in the swamp, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, after giving Millicent the needle and after she was at the Shack, selling you his wares now. \"Millicent paid a visit\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050382704,
+            "value": true
+          },
+          {
+            "id": 1050389215,
+            "value": true
+          },
+          {
+            "id": 1050389218,
+            "value": true
+          },
+          {
+            "id": 1050389220,
+            "value": false
+          },
+          {
+            "id": 1050389222,
+            "value": false
+          },
+          {
+            "id": 1050389224,
+            "value": false
+          },
+          {
+            "id": 1050389226,
+            "value": false
+          },
+          {
+            "id": 1050389229,
+            "value": false
+          },
+          {
+            "id": 1050389231,
+            "value": false
+          },
+          {
+            "id": 1050389236,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Millicent payed a visit\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389218,
+            "value": false
+          },
+          {
+            "id": 1050389219,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "New dialogue after leaving the menu and talking to him again, asking you to take care of Millicent, afterwards standard shop dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389216,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Talking to him after giving Millicent the prosthesis, \"I gave Millicent the prosthesis\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050382704,
+            "value": true
+          },
+          {
+            "id": 1050389209,
+            "value": false
+          },
+          {
+            "id": 1050389218,
+            "value": false
+          },
+          {
+            "id": 1050389220,
+            "value": true
+          },
+          {
+            "id": 1050389222,
+            "value": false
+          },
+          {
+            "id": 1050389224,
+            "value": false
+          },
+          {
+            "id": 1050389226,
+            "value": false
+          },
+          {
+            "id": 1050389229,
+            "value": false
+          },
+          {
+            "id": 1050389231,
+            "value": false
+          },
+          {
+            "id": 1050389236,
+            "value": false
+          },
+          {
+            "id": 1051395000,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Choosing \"I gave Millicent the prosthesis\", option disappears, \"About Millicent\" appears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389220,
+            "value": false
+          },
+          {
+            "id": 1050389221,
+            "value": true
+          },
+          {
+            "id": 1050389222,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Millicent\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389222,
+            "value": false
+          },
+          {
+            "id": 1050389223,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "\"About Malenia\" appears now too",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389217,
+            "value": true
+          },
+          {
+            "id": 1050389224,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Malenia\", receiving \"Desperate Prayer\" gesture, option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60842,
+            "value": true
+          },
+          {
+            "id": 1050389224,
+            "value": false
+          },
+          {
+            "id": 1050389225,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Talking to Gowry after aiding Millicent, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389234,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Looting him, receiving \"Flock's Canvas Talisman\" and \"Gowry's Bell Bearing\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gowry\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gowry\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gowry",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400312,
+            "value": true
+          },
+          {
+            "id": 1050385004,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

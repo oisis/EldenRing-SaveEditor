@@ -1,0 +1,882 @@
+{
+  "key": "miriel",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Miriel",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"miriel\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Miriel",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Finishing first dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Church of Vows in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"miriel\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037462719,
+            "value": true
+          },
+          {
+            "id": 1037469256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Finishing second dialogue, menu pop-up afterwards, with the options \"Study sorcery\", \"Study incantations\", \"Give scroll\", \"Give a prayerbook\" and \"About Radagon\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469257,
+            "value": true
+          },
+          {
+            "id": 1037469260,
+            "value": false
+          },
+          {
+            "id": 1037469262,
+            "value": false
+          },
+          {
+            "id": 1037469270,
+            "value": false
+          },
+          {
+            "id": 1037469271,
+            "value": false
+          },
+          {
+            "id": 1037469272,
+            "value": true
+          },
+          {
+            "id": 1037469273,
+            "value": false
+          },
+          {
+            "id": 1037469274,
+            "value": false
+          },
+          {
+            "id": 1037469275,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Giving him the Carian Scroll",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469300,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Giving him the Academy Scroll",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469316,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Giving him the Dragon Cult Prayerbook",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469314,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Radagon\", \"About Rennala\" appears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469265,
+            "value": true
+          },
+          {
+            "id": 1037469272,
+            "value": false
+          },
+          {
+            "id": 1037469273,
+            "value": true
+          },
+          {
+            "id": 1037469274,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Radagon\" again, after this \"About Radagon\" stays, but is a repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469266,
+            "value": true
+          },
+          {
+            "id": 1037469273,
+            "value": true
+          },
+          {
+            "id": 1037469274,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Rennala\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469267,
+            "value": true
+          },
+          {
+            "id": 1037469273,
+            "value": true
+          },
+          {
+            "id": 1037469274,
+            "value": false
+          },
+          {
+            "id": 1037469275,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Rennala\" again, option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469268,
+            "value": true
+          },
+          {
+            "id": 1037469273,
+            "value": true
+          },
+          {
+            "id": 1037469275,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "\"About absolution\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469262,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About absolution\", disappears, afterwards \"Talk\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469261,
+            "value": true
+          },
+          {
+            "id": 1037469262,
+            "value": false
+          },
+          {
+            "id": 1037469271,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469264,
+            "value": true
+          },
+          {
+            "id": 1037469271,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Giving him the Giantflame's Prayerbook",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469306,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Giving him the Ancient Dragons' Prayerbook",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469315,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Fire Monks' Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469305,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Giant's Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469306,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Godskin Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469307,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Two Fingers' Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469308,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Assassin's Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469309,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Erdtree Prayerbook\" *doesn't exist in the game",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469310,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Dragon Cult Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469314,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Ancient Dragon Prayerbook\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469315,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Conspectus Scroll\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469300,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Royal House Scroll\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469301,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Giving him \"Academy Scroll\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"miriel\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"miriel\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Miriel",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037469316,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

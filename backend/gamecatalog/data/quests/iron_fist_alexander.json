@@ -1,0 +1,1003 @@
+{
+  "key": "iron_fist_alexander",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Iron Fist Alexander",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"iron_fist_alexander\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Iron Fist Alexander",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Hearing Alexander asking for help",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Saintsbridge in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399302,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Alexander, choice popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399305,
+            "value": true
+          },
+          {
+            "id": 1043399313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Accepting to help him get out of the hole",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399306,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "First dialogue after helping him out of the hole, receiving \"Exalted Flesh\" as a reward",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400170,
+            "value": true
+          },
+          {
+            "id": 1043399307,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Dialogue after receiving reward, telling you about the festival at Redmane Castle, leads to repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399308,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to him at the Festival, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Festival Plaza in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Initiating dialogue after Radahn's fight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Radahn's arena in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "First dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Talking to him again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369266,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to him twice again, repeating dialogue afterwards, disappears after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051369267,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Initiating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "After he is done talking, menu pop-up, either helping him or not, saying no does nothing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442702,
+            "value": true
+          },
+          {
+            "id": 1039442703,
+            "value": false
+          },
+          {
+            "id": 1039449205,
+            "value": true
+          },
+          {
+            "id": 1043392716,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Saying youll help him out",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Attacking him, telling you to stop, since he's stuck, asking you to use something slippery",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Using an Oil Pot on him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449207,
+            "value": true
+          },
+          {
+            "id": 1039449208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Talking to him again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Exalted Flesh\" as a thanks",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400171,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, telling you he will move to a mountain, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Interacting with his message infront of Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400179,
+            "value": true
+          },
+          {
+            "id": 710630,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Hearing him scream inside the Lava",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "near Fort Laiedd in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035532702,
+            "value": false
+          },
+          {
+            "id": 1035532703,
+            "value": true
+          },
+          {
+            "id": 1035535016,
+            "value": true
+          },
+          {
+            "id": 1035539202,
+            "value": true
+          },
+          {
+            "id": 1035539206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Talking to him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends, he gives you \"Jar\" helmet, repeating dialogue, he does not disappear after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400172,
+            "value": true
+          },
+          {
+            "id": 1035539205,
+            "value": true
+          },
+          {
+            "id": 1035539209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Talking to Alexander",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Dragon Temple Lift site of grace in Crumbling Farum Azula",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043399313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends, wants you to fight him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 13009255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Talking to him and fighting him afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3660,
+            "value": true
+          },
+          {
+            "id": 3661,
+            "value": false
+          },
+          {
+            "id": 3662,
+            "value": false
+          },
+          {
+            "id": 3663,
+            "value": false
+          },
+          {
+            "id": 400175,
+            "value": true
+          },
+          {
+            "id": 13002712,
+            "value": true
+          },
+          {
+            "id": 13005031,
+            "value": true
+          },
+          {
+            "id": 13005032,
+            "value": true
+          },
+          {
+            "id": 13009256,
+            "value": true
+          },
+          {
+            "id": 13009258,
+            "value": true
+          },
+          {
+            "id": 13009261,
+            "value": true
+          },
+          {
+            "id": 13009262,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Talking to him after the fight, he will die, you receive \"Shard of Alexander\" and \"Alexander's Innards\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iron_fist_alexander\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3660,
+            "value": false
+          },
+          {
+            "id": 3663,
+            "value": true
+          },
+          {
+            "id": 400174,
+            "value": true
+          },
+          {
+            "id": 13003711,
+            "value": true
+          },
+          {
+            "id": 13005033,
+            "value": true
+          },
+          {
+            "id": 13009257,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Talking to him, repeating dialogue, when festival starts he will move",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iron_fist_alexander\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Gael Tunnel in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iron_fist_alexander\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iron Fist Alexander",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 32009206,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

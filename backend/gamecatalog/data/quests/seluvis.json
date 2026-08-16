@@ -1,0 +1,1582 @@
+{
+  "key": "seluvis",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Seluvis",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"seluvis\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Seluvis",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Seluvis",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"seluvis\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509305,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Seluvis again, having talked to all 3 now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034500734,
+            "value": true
+          },
+          {
+            "id": 1034509306,
+            "value": true
+          },
+          {
+            "id": 1034509417,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to him for the first time in his Rise and refusing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Seluvis's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"seluvis\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034502726,
+            "value": false
+          },
+          {
+            "id": 1034509300,
+            "value": true
+          },
+          {
+            "id": 1034509310,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Accepting and receiving \"Seluvis's Potion\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400140,
+            "value": true
+          },
+          {
+            "id": 1034509300,
+            "value": true
+          },
+          {
+            "id": 1034509312,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, he telling you he has no time for chit-chat, option \"Ask about Nokron\" appears (after speaking to Blaidd in Sofria)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509317,
+            "value": true
+          },
+          {
+            "id": 1034509318,
+            "value": false
+          },
+          {
+            "id": 1034509319,
+            "value": true
+          },
+          {
+            "id": 1034509320,
+            "value": false
+          },
+          {
+            "id": 1034509321,
+            "value": true
+          },
+          {
+            "id": 1034509322,
+            "value": false
+          },
+          {
+            "id": 1034509323,
+            "value": false
+          },
+          {
+            "id": 1034509324,
+            "value": false
+          },
+          {
+            "id": 1034509325,
+            "value": false
+          },
+          {
+            "id": 1034509326,
+            "value": false
+          },
+          {
+            "id": 1034509327,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Ask about Nokron\", telling you about Sellen",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509330,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Seluvis's Introduction\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400143,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Returning to Seluvis after giving Gideon the potion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, menu pop-up with the options \"Study sorcery\", \"About Nepheli\" and \"About your chambers\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509314,
+            "value": true
+          },
+          {
+            "id": 1034509317,
+            "value": true
+          },
+          {
+            "id": 1034509321,
+            "value": true
+          },
+          {
+            "id": 1034509346,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "After choosing \"About Nepheli\", option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509317,
+            "value": true
+          },
+          {
+            "id": 1034509321,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About your chambers\", being able to choose a puppet ash, choosing the Finger Maiden ash, \"About your chambers\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034505024,
+            "value": true
+          },
+          {
+            "id": 1034509317,
+            "value": false
+          },
+          {
+            "id": 1034509328,
+            "value": true
+          },
+          {
+            "id": 1034509347,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Picking up a Starlight Shard, causing him to update so he sells the puppets, sometimes you need to aquire a couple more",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041377020,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "\"I want a new puppet\" dialogue option appears in the menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509318,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "After choosing \"I want a new puppet\", \"Obtain a puppet\" appears after his dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509329,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "\"I want a new puppet\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509318,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Buying the other puppet",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034500718,
+            "value": true
+          },
+          {
+            "id": 1034509345,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "\"About the scheme\" appears now after talking to him again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509322,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Choosing to be not interested when choosing \"About the scheme\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509334,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "\"About your scheme\" appears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509323,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About your scheme\" and saying you are interested, talking about an Amber Starlight Shard",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509333,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "\"About your scheme\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509323,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "\"About Amber Starlight\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509324,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Amber Starlight\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509324,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Amber Starlight\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Altus Plateu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"seluvis\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1040527000,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Approaching Seluvis, after picking up the Amber Starlight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's/Seluvis's Rise",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"seluvis\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035505001,
+            "value": true
+          },
+          {
+            "id": 1035515000,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "\"Give Amber Starlight\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509325,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Give Amber Starlight\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509335,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034502726,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Talking to him again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509315,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Magic Scorpion Charm\" as a reward",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400141,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "\"Give Amber Starlight\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509325,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Reloading at a grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509346,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Talking to Seluvis after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509316,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Amber Draught\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400145,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after receiving \"Amber Draught\", \"About the draught\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509326,
+            "value": true
+          },
+          {
+            "id": 1034509346,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the draught\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509336,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "\"About the draught\" disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509326,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "After a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509346,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Trying to talk to Ranni",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509423,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Option pop-up, asking if sure to give the Draught",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509422,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Giving Ranni the Draught (This will turn Ranni's quest incompletable)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_040 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3568,
+            "value": false
+          },
+          {
+            "id": 3569,
+            "value": true
+          },
+          {
+            "id": 3578,
+            "value": false
+          },
+          {
+            "id": 3579,
+            "value": true
+          },
+          {
+            "id": 1034500716,
+            "value": true
+          },
+          {
+            "id": 1034500717,
+            "value": true
+          },
+          {
+            "id": 1034500735,
+            "value": true
+          },
+          {
+            "id": 1034502745,
+            "value": true
+          },
+          {
+            "id": 1034509424,
+            "value": true
+          },
+          {
+            "id": 1034509425,
+            "value": true
+          },
+          {
+            "id": 1035500700,
+            "value": true
+          },
+          {
+            "id": 1035500701,
+            "value": true
+          },
+          {
+            "id": 1035502700,
+            "value": false
+          },
+          {
+            "id": 1035502702,
+            "value": true
+          },
+          {
+            "id": 1035509215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_041",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_041 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_041 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509422,
+            "value": false
+          },
+          {
+            "id": 1034509426,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_042",
+        "description": {
+          "known": true,
+          "value": "Talking to her again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_042 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_042 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509427,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_043",
+        "description": {
+          "known": true,
+          "value": "Talking to her the third time, she instantly kills you",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_043 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"seluvis\" step legacy_043 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509428,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_044",
+        "description": {
+          "known": true,
+          "value": "Seluvis will now be dead at his Rise, you can loot his Bell Bearing and armor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"seluvis\" step legacy_044 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Seluvis's Rise",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"seluvis\" step legacy_044 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Seluvis",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400148,
+            "value": true
+          },
+          {
+            "id": 1034505025,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

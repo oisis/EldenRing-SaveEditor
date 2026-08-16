@@ -487,6 +487,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_whetblade_unlocked.md",
                 "title": "SetWhetbladeUnlocked"
+              },
+              "/set-quest-step": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_quest_step.md",
+                "title": "SetQuestStep"
               }
             }
           }

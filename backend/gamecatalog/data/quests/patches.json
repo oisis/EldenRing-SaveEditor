@@ -1,0 +1,2007 @@
+{
+  "key": "patches",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Patches",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"patches\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Patches",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Entering \"Murkwater Cave\" bossfight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Murkwater Cave in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31002810,
+            "value": true
+          },
+          {
+            "id": 31002830,
+            "value": true
+          },
+          {
+            "id": 31008821,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Opening Patches' chest",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31000811,
+            "value": true
+          },
+          {
+            "id": 31002813,
+            "value": true
+          },
+          {
+            "id": 31003702,
+            "value": true
+          },
+          {
+            "id": 31008521,
+            "value": true
+          },
+          {
+            "id": 31009210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Taking items from chest -\u003e Patches giving up, give-up dialogue finishes, bossfight ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1232,
+            "value": true
+          },
+          {
+            "id": 3680,
+            "value": true
+          },
+          {
+            "id": 3682,
+            "value": false
+          },
+          {
+            "id": 9232,
+            "value": true
+          },
+          {
+            "id": 60819,
+            "value": true
+          },
+          {
+            "id": 61232,
+            "value": true
+          },
+          {
+            "id": 400183,
+            "value": true
+          },
+          {
+            "id": 520320,
+            "value": true
+          },
+          {
+            "id": 31000800,
+            "value": true
+          },
+          {
+            "id": 31000845,
+            "value": true
+          },
+          {
+            "id": 31002703,
+            "value": true
+          },
+          {
+            "id": 31002704,
+            "value": true
+          },
+          {
+            "id": 31002811,
+            "value": true
+          },
+          {
+            "id": 31002832,
+            "value": true
+          },
+          {
+            "id": 31002833,
+            "value": true
+          },
+          {
+            "id": 31002845,
+            "value": true
+          },
+          {
+            "id": 31003703,
+            "value": true
+          },
+          {
+            "id": 31003704,
+            "value": true
+          },
+          {
+            "id": 31007010,
+            "value": true
+          },
+          {
+            "id": 31009208,
+            "value": true
+          },
+          {
+            "id": 31009211,
+            "value": true
+          },
+          {
+            "id": 31009214,
+            "value": true
+          },
+          {
+            "id": 31009215,
+            "value": true
+          },
+          {
+            "id": 31009217,
+            "value": true
+          },
+          {
+            "id": 31009219,
+            "value": false
+          },
+          {
+            "id": 31009810,
+            "value": true
+          },
+          {
+            "id": 31009811,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "First dialogue after bossfight, choosing \"Forgive and Forget\", repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Taking the teleport to go back to the entrance",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31002840,
+            "value": true
+          },
+          {
+            "id": 31002876,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Returning and initiating dialogue with Patches again, menu popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31002708,
+            "value": true
+          },
+          {
+            "id": 31009207,
+            "value": false
+          },
+          {
+            "id": 31009229,
+            "value": true
+          },
+          {
+            "id": 31009240,
+            "value": true
+          },
+          {
+            "id": 31009243,
+            "value": true
+          },
+          {
+            "id": 31009244,
+            "value": false
+          },
+          {
+            "id": 31009245,
+            "value": false
+          },
+          {
+            "id": 31009246,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "\"About those bandits\" dialogue option in the menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009244,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "\"This chest...\" dialogue option, afterwards only shop available",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31002706,
+            "value": true
+          },
+          {
+            "id": 31009228,
+            "value": true
+          },
+          {
+            "id": 31009244,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to him again after leaving menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009225,
+            "value": true
+          },
+          {
+            "id": 31009241,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Talking to him yet again after not buying anything and leaving menu again, changes leaving dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009226,
+            "value": true
+          },
+          {
+            "id": 31009242,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Opening the chest, getting ensnared, short Patches dialogue plays",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31003707,
+            "value": true
+          },
+          {
+            "id": 31008522,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Returning to Patches after being teleported, receiving \"Calm Down!\" emote from him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60816,
+            "value": true
+          },
+          {
+            "id": 31009234,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Attacking Patches, receiving \"Extreme Repentance\" emote when being at low health",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60818,
+            "value": true
+          },
+          {
+            "id": 31002700,
+            "value": true
+          },
+          {
+            "id": 31002711,
+            "value": true
+          },
+          {
+            "id": 31003701,
+            "value": true
+          },
+          {
+            "id": 31005000,
+            "value": true
+          },
+          {
+            "id": 31005002,
+            "value": true
+          },
+          {
+            "id": 31005003,
+            "value": true
+          },
+          {
+            "id": 31005005,
+            "value": true
+          },
+          {
+            "id": 31005006,
+            "value": true
+          },
+          {
+            "id": 31005008,
+            "value": true
+          },
+          {
+            "id": 31009205,
+            "value": true
+          },
+          {
+            "id": 31009218,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Either dying to Patches or using the emote, returning him to normal, dialogue after that happens",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009205,
+            "value": false
+          },
+          {
+            "id": 31009207,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Patches, menu popup with \"Purchase, Sell, Speaking of..., Talk and Leave\" options",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Scenic Isle in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037422730,
+            "value": true
+          },
+          {
+            "id": 1038419255,
+            "value": true
+          },
+          {
+            "id": 1038419262,
+            "value": true
+          },
+          {
+            "id": 1038419263,
+            "value": false
+          },
+          {
+            "id": 1038419265,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Speaking of...\", talking about Rya, option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038419258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", tells you about the Abductor Virgin under the waterwheel in the academy, option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038419259,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "\"What you spoke of before\" option appears (repeat of Talk about the Virgin)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038419263,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to Patches",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009355,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, he offers you his wares again, \"About Patches\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002720,
+            "value": true
+          },
+          {
+            "id": 16009356,
+            "value": true
+          },
+          {
+            "id": 16009362,
+            "value": false
+          },
+          {
+            "id": 16009363,
+            "value": false
+          },
+          {
+            "id": 16009364,
+            "value": false
+          },
+          {
+            "id": 16009365,
+            "value": true
+          },
+          {
+            "id": 16009366,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Patches\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009361,
+            "value": true
+          },
+          {
+            "id": 16009365,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Letter to Patches\" from Patches after the first invasion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400180,
+            "value": true
+          },
+          {
+            "id": 16005039,
+            "value": true
+          },
+          {
+            "id": 16009357,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Examining the Great Horned Tragoth invasion sign and saying no",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Magma Wyrm Makar bossroom",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 39202142,
+            "value": false
+          },
+          {
+            "id": 39205016,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Saying yes",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 39202140,
+            "value": true
+          },
+          {
+            "id": 39202141,
+            "value": true
+          },
+          {
+            "id": 39203701,
+            "value": true
+          },
+          {
+            "id": 39209201,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Defeating Great horned Tragoth",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 7606,
+            "value": true
+          },
+          {
+            "id": 39205017,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Spawning back into the world, receiving the full Bull-Goat armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4197,
+            "value": true
+          },
+          {
+            "id": 39207500,
+            "value": true
+          },
+          {
+            "id": 1038519255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Talking to Patches after the invasion, \"The request is done\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009364,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Choosing \"The request is done\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002721,
+            "value": true
+          },
+          {
+            "id": 16009358,
+            "value": true
+          },
+          {
+            "id": 16009364,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Reloading the area and talking to him again, \"What about my reward?\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009366,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Choosing \"What about my reward?\", receiving Magma Whip Candlestick",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400182,
+            "value": true
+          },
+          {
+            "id": 16009367,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "\"What about my reward?\" option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009366,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Talking to Patches after defeating Rykard",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009359,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, menu pop-up, no new options",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009362,
+            "value": false
+          },
+          {
+            "id": 16009363,
+            "value": false
+          },
+          {
+            "id": 16009364,
+            "value": false
+          },
+          {
+            "id": 16009365,
+            "value": false
+          },
+          {
+            "id": 16009366,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, Patches and Bernahl are now gone from the Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16003723,
+            "value": true
+          },
+          {
+            "id": 16009322,
+            "value": false
+          },
+          {
+            "id": 16009452,
+            "value": false
+          },
+          {
+            "id": 16009464,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Talking to Patches, receiving \"Dancer's Castanets\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "The Shaded Castle in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400181,
+            "value": true
+          },
+          {
+            "id": 1039549205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Entering Patches's bossroom again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Murkwater Cave in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31002855,
+            "value": true
+          },
+          {
+            "id": 31008871,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "full bossfight, after getting him lower on health he realizes it's you and you can spare him again. Receiving \"Patches' Crouch\" gesture",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3680,
+            "value": true
+          },
+          {
+            "id": 3682,
+            "value": false
+          },
+          {
+            "id": 9232,
+            "value": true
+          },
+          {
+            "id": 60832,
+            "value": true
+          },
+          {
+            "id": 61232,
+            "value": true
+          },
+          {
+            "id": 31000845,
+            "value": true
+          },
+          {
+            "id": 31000850,
+            "value": true
+          },
+          {
+            "id": 31000861,
+            "value": true
+          },
+          {
+            "id": 31002720,
+            "value": true
+          },
+          {
+            "id": 31002721,
+            "value": true
+          },
+          {
+            "id": 31002724,
+            "value": true
+          },
+          {
+            "id": 31002727,
+            "value": true
+          },
+          {
+            "id": 31002728,
+            "value": true
+          },
+          {
+            "id": 31002730,
+            "value": true
+          },
+          {
+            "id": 31002845,
+            "value": true
+          },
+          {
+            "id": 31007030,
+            "value": true
+          },
+          {
+            "id": 31008523,
+            "value": true
+          },
+          {
+            "id": 31009257,
+            "value": true
+          },
+          {
+            "id": 31009258,
+            "value": true
+          },
+          {
+            "id": 31009267,
+            "value": true
+          },
+          {
+            "id": 31009269,
+            "value": false
+          },
+          {
+            "id": 31009889,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Talking to him after sparing him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009255,
+            "value": true
+          },
+          {
+            "id": 31009266,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "After a reload he will move closer to the campfire and sell his wares again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_040 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31002708,
+            "value": true
+          },
+          {
+            "id": 31009275,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_041",
+        "description": {
+          "known": true,
+          "value": "Leaving the menu without buying something one time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_041 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_041 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009225,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_042",
+        "description": {
+          "known": true,
+          "value": "Doing it again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_042 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_042 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31009226,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_043",
+        "description": {
+          "known": true,
+          "value": "Attacking Patches",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_043 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_043 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3680,
+            "value": false
+          },
+          {
+            "id": 3681,
+            "value": true
+          },
+          {
+            "id": 31002700,
+            "value": true
+          },
+          {
+            "id": 31005008,
+            "value": true
+          },
+          {
+            "id": 31009205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_044",
+        "description": {
+          "known": true,
+          "value": "Killing him, says \"What a shit show...\" xD",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_044 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_044 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3681,
+            "value": false
+          },
+          {
+            "id": 3683,
+            "value": true
+          },
+          {
+            "id": 31005007,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_045",
+        "description": {
+          "known": true,
+          "value": "Picking up Patches' Bell Bearing, his Spear+7 and his armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_045 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_045 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400189,
+            "value": true
+          },
+          {
+            "id": 1039549203,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_046",
+        "description": {
+          "known": true,
+          "value": "Talking to him near the shimmering stones, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_046 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "First Mt. Gelmir Campsite",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"patches\" step legacy_046 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037549202,
+            "value": true
+          },
+          {
+            "id": 1037549206,
+            "value": true
+          },
+          {
+            "id": 1037549209,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_047",
+        "description": {
+          "known": true,
+          "value": "Getting near the last stone and cutscene starts where Patches kickes you off",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_047 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_047 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": true
+          },
+          {
+            "id": 1037549210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_049",
+        "description": {
+          "known": true,
+          "value": "Going back to Patches and talking to him, repeating dialogue, he will move to Volcano Manor after talking to Tanith and joining them",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"patches\" step legacy_049 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"patches\" step legacy_049 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Patches",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037549202,
+            "value": true
+          },
+          {
+            "id": 1037549207,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

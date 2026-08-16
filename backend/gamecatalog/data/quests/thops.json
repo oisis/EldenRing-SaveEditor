@@ -1,0 +1,677 @@
+{
+  "key": "thops",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Thops",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"thops\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Thops",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Church of Irith in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"thops\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039397000,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends, propmt being able to donate 10 runes or not",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039392704,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Saying no",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Donating 10 runes, menu popup, \"Talk\" option available",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039392702,
+            "value": true
+          },
+          {
+            "id": 1039399206,
+            "value": true
+          },
+          {
+            "id": 1039399208,
+            "value": false
+          },
+          {
+            "id": 1039399209,
+            "value": true
+          },
+          {
+            "id": 1039399210,
+            "value": false
+          },
+          {
+            "id": 1039399211,
+            "value": false
+          },
+          {
+            "id": 1039399223,
+            "value": false
+          },
+          {
+            "id": 1039399226,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Dialogue of \"Talk\" after buying all sorceries",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399213,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "After choosing \"Talk\" when having bought all sorceries",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399208,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "\"Talk\" option, that is about the glintstone key he wants",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Dialogue after \"Talk\" prompt ends, \"Talk\" disappears, \"About the glintstone key\" and \"About Sellen\" appear now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399209,
+            "value": false
+          },
+          {
+            "id": 1039399210,
+            "value": true
+          },
+          {
+            "id": 1039399214,
+            "value": true
+          },
+          {
+            "id": 1039399223,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the glintstone key\", option stays afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399210,
+            "value": true
+          },
+          {
+            "id": 1039399215,
+            "value": true
+          },
+          {
+            "id": 1039399223,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after choosing \"About Sellen\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399210,
+            "value": false
+          },
+          {
+            "id": 1039399221,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Removes \"About Sellen\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399223,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after choosing \"About Sellen\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Menu pop-up after acquiring the second Glintstone Key, \"Give the Academy Glintstone Key\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039392702,
+            "value": true
+          },
+          {
+            "id": 1039392704,
+            "value": false
+          },
+          {
+            "id": 1039399207,
+            "value": true
+          },
+          {
+            "id": 1039399208,
+            "value": false
+          },
+          {
+            "id": 1039399209,
+            "value": false
+          },
+          {
+            "id": 1039399210,
+            "value": false
+          },
+          {
+            "id": 1039399211,
+            "value": true
+          },
+          {
+            "id": 1039399223,
+            "value": false
+          },
+          {
+            "id": 1039399226,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Give the Academy Glintstone Key\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039392704,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Erudition\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60845,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after giving him the key",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039399220,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Porting to the grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Schoolhouse Classroom grace in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"thops\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002660,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Looting his dead body and receiving \"Thops's Bell Bearing\", \"Academy Glintstone Staff\" and \"Thops's Barrier\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"thops\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"thops\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Thops",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400360,
+            "value": true
+          },
+          {
+            "id": 400361,
+            "value": true
+          },
+          {
+            "id": 400362,
+            "value": true
+          },
+          {
+            "id": 14002660,
+            "value": true
+          },
+          {
+            "id": 14005036,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

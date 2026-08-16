@@ -1,0 +1,680 @@
+{
+  "key": "d_hunter_of_the_dead",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "D Hunter of the Dead",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"d_hunter_of_the_dead\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "D Hunter of the Dead",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with D",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"d_hunter_of_the_dead\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044399206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Speaking to D after killing a Tibia Mariner, showing him a Deathroot and accepting to take his place to deliver Deathroots to Gurranq, marking your map, leading to repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3095,
+            "value": true
+          },
+          {
+            "id": 11105013,
+            "value": true
+          },
+          {
+            "id": 1045399200,
+            "value": true
+          },
+          {
+            "id": 1045399206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to D after meeting Gurranq for the first time, menu pop up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102770,
+            "value": true
+          },
+          {
+            "id": 11109617,
+            "value": true
+          },
+          {
+            "id": 11109620,
+            "value": false
+          },
+          {
+            "id": 11109622,
+            "value": true
+          },
+          {
+            "id": 11109624,
+            "value": false
+          },
+          {
+            "id": 1044399206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after choosing \"About Rogier\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109620,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends after choosing \"About D\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109620,
+            "value": false
+          },
+          {
+            "id": 11109621,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "After reloading at a grace and talking to him again, thanking you for giving Gurranq a Deathroot, menu popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109618,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "\"Give the Weathered Dagger\" appears in D's menu now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109624,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Giving him the dagger",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109625,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "\"Give the Weathered Dagger\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109624,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "After reloading D is set to survival 0 and dead 1",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "RTH backroom",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"d_hunter_of_the_dead\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4040,
+            "value": false
+          },
+          {
+            "id": 4041,
+            "value": false
+          },
+          {
+            "id": 4042,
+            "value": false
+          },
+          {
+            "id": 4043,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Looting D's dead body in the backroom, receiving his armor and bell bearing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400349,
+            "value": true
+          },
+          {
+            "id": 11105012,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "\"Hand over the Twinned Armor set?\" prompt on D's brother",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12029015,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Choosing yes, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12029016,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Inner Order\" gesture",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60847,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Approaching D, hearing him talk",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Summonwater Village Outskirts in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"d_hunter_of_the_dead\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044395007,
+            "value": true
+          },
+          {
+            "id": 1044399210,
+            "value": false
+          },
+          {
+            "id": 1044399211,
+            "value": true
+          },
+          {
+            "id": 1044399212,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044399213,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Dialogue finishes, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044399205,
+            "value": true
+          },
+          {
+            "id": 1044399206,
+            "value": true
+          },
+          {
+            "id": 1044399207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Reloading the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044399214,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, still repeating dialogue, unlocking the RTH will make him move",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"d_hunter_of_the_dead\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"d_hunter_of_the_dead\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "D Hunter of the Dead",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044399214,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

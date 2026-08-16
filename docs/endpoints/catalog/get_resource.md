@@ -10,13 +10,14 @@ and the provenance of both, a `RegionDocument` for kind `region` with its
 internal region ID, name and area, a `SummoningPoolDocument` for kind
 `summoning_pool` with its name, curated region label and activation event flag
 ID, a `GraceDocument` for kind `grace` with its name, curated region label,
-visit event flag ID, boss-arena fact, dungeon type and door event flag ID, or a
-`BossDocument` for kind `boss` with its name, curated region label, encounter
-type, remembrance fact and synchronized defeat event flag ID, or a
-`MapRegionDocument` for kind `map_region` with its name, area label and safe
-visibility event flag ID, or a `TutorialDocument` for kind `tutorial` with its
-`TutorialParam` row ID and official title. It
-returns no relations; those belong to
+visit event flag ID, boss-arena fact, dungeon type and door event flag ID,
+a `BossDocument` for kind `boss` with its name, curated region label, encounter
+type, remembrance fact and synchronized defeat event flag ID,
+a `MapRegionDocument` for kind `map_region` with its name, area label and safe
+visibility event flag ID, a `TutorialDocument` for kind `tutorial` with its
+`TutorialParam` row ID and official title, or a `QuestDocument` for kind
+`quest` with its name, supported steps, locations, descriptions and canonical
+event flag plans. It returns no relations; those belong to
 [`GetResourceRelations`](get_resource_relations.md).
 
 | | |
@@ -58,8 +59,8 @@ The pair is **not**:
 The lookup resolves the kind first and the key only inside that kind:
 
 - `kind` is matched exactly against `Resource.Kind`. `item`, `colosseum`,
-  `region`, `summoning_pool`, `grace`, `boss`, `map_region` and `tutorial` are
-  the kinds the current schema supports.
+  `region`, `summoning_pool`, `grace`, `boss`, `map_region`, `tutorial` and
+  `quest` are the kinds the current schema supports.
 - `key` is matched exactly against `Resource.Key` inside the resolved kind. The
   same key may later exist under a different kind, so the key alone is not an
   identity.
@@ -71,12 +72,12 @@ The lookup resolves the kind first and the key only inside that kind:
 
 `schema.ValidateResource` requires an item key to be exactly eight uppercase
 hexadecimal characters (`0-9`, `A-F`), so `000F4240` is well formed and
-`000f4240` is not. Colosseum, region, summoning pool, grace, boss and map region
-keys use lowercase letters, digits and underscores, for example
+`000f4240` is not. Colosseum, region, summoning pool, grace, boss, map region
+and quest keys use lowercase letters, digits and underscores, for example
 `royal_colosseum`, `limgrave_the_first_step`,
-`stormveil_castle_gateside_chamber` and
-`weeping_peninsula_tombsward_catacombs`. A tutorial key is the decimal form of
-its `TutorialParam` row ID, for example `2010`.
+`stormveil_castle_gateside_chamber`,
+`weeping_peninsula_tombsward_catacombs` and `brother_corhyn`. A tutorial key is
+the decimal form of its `TutorialParam` row ID, for example `2010`.
 `gamecatalog.New` rejects a catalog containing the same `(kind, key)` pair
 twice, so at most one resource can match.
 

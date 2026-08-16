@@ -1,0 +1,861 @@
+{
+  "key": "hyetta",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Hyetta",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"hyetta\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Hyetta",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue ends at Lake-Facing Cliffs site of grace in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Lake-Facing Cliffs in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"hyetta\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039409205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Giving her a Shabiri Grape, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039409206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Receiving \"As You Wish\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60810,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Flags that printed after sitting down at a grace after talking to Hyetta, causing her to disappear (may be flags that remove her from this spot?) (Looked similar to the dialogue ones, so i included them)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039409252,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue asking for a Grape",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Purified Ruins in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"hyetta\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038419200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Picking up second Shabiri Grape",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039417200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Giving Hyetta her second Grape, leads to repeating dialogue, she disappears after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038419205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Giving Hyetta her third Grape",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Gate Town Bridge in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"hyetta\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3096,
+            "value": true
+          },
+          {
+            "id": 1038439200,
+            "value": true
+          },
+          {
+            "id": 1038439205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Telling her the Grapes are really human eyes",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038439206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Moving away from her, hearing her puke",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038439207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "After resting at a grace and speaking to her again, she tells you she will become a Finger Maiden, disappears after a reload now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038439209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue, asking for a Fingerprint Grape, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Bellum Church in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"hyetta\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036499205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Giving her the Fingerprint Grape, repeating dialogue, disappears from here after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036499206,
+            "value": true
+          },
+          {
+            "id": 1036499207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to her, telling you to go to the door",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Frenzied Flame Proscription site of grace in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"hyetta\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3096,
+            "value": true
+          },
+          {
+            "id": 35009200,
+            "value": true
+          },
+          {
+            "id": 35009205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "GOING MAD, + full cutscene and after cutscene flags, Hyetta dies",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 108,
+            "value": true
+          },
+          {
+            "id": 1020,
+            "value": true
+          },
+          {
+            "id": 1800,
+            "value": true
+          },
+          {
+            "id": 1801,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 3620,
+            "value": false
+          },
+          {
+            "id": 3621,
+            "value": false
+          },
+          {
+            "id": 3622,
+            "value": false
+          },
+          {
+            "id": 3623,
+            "value": true
+          },
+          {
+            "id": 3624,
+            "value": false
+          },
+          {
+            "id": 7500,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": false
+          },
+          {
+            "id": 9420,
+            "value": true
+          },
+          {
+            "id": 9421,
+            "value": true
+          },
+          {
+            "id": 9430,
+            "value": true
+          },
+          {
+            "id": 9431,
+            "value": true
+          },
+          {
+            "id": 35000500,
+            "value": true
+          },
+          {
+            "id": 35000501,
+            "value": false
+          },
+          {
+            "id": 35002500,
+            "value": true
+          },
+          {
+            "id": 35003500,
+            "value": true
+          },
+          {
+            "id": 35003730,
+            "value": true
+          },
+          {
+            "id": 35003790,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to Hyetta afterwards, she wants you to touch her with the flame",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009200,
+            "value": true
+          },
+          {
+            "id": 35009206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Touching Hyetta",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35002705,
+            "value": true
+          },
+          {
+            "id": 35002706,
+            "value": true
+          },
+          {
+            "id": 35002707,
+            "value": true
+          },
+          {
+            "id": 35002708,
+            "value": true
+          },
+          {
+            "id": 35002709,
+            "value": true
+          },
+          {
+            "id": 35009210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "After touching her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35000701,
+            "value": true
+          },
+          {
+            "id": 35002705,
+            "value": false
+          },
+          {
+            "id": 35002706,
+            "value": false
+          },
+          {
+            "id": 35002707,
+            "value": false
+          },
+          {
+            "id": 35002708,
+            "value": false
+          },
+          {
+            "id": 35005031,
+            "value": true
+          },
+          {
+            "id": 35009210,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to her after touching her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "She burns away and dies",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35000703,
+            "value": true
+          },
+          {
+            "id": 35009211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Looting her body, receiving \"Frenzied Flame Seal\" and \"Frenzyflame Stone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"hyetta\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"hyetta\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Hyetta",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400089,
+            "value": true
+          },
+          {
+            "id": 35005033,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

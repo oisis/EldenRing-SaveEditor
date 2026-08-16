@@ -23,6 +23,8 @@ func ValidateResource(resource Resource, sources map[SourceID]struct{}) error {
 		return validateMapRegionResource(resource, sources)
 	case ResourceKindTutorial:
 		return validateTutorialResource(resource, sources)
+	case ResourceKindQuest:
+		return validateQuestResource(resource, sources)
 	default:
 		return fmt.Errorf("resource %q: unsupported kind %q", resource.Key, resource.Kind)
 	}
@@ -48,6 +50,7 @@ func validateSoleDocument(resource Resource) error {
 		{ResourceKindBoss, resource.Boss != nil},
 		{ResourceKindMapRegion, resource.MapRegion != nil},
 		{ResourceKindTutorial, resource.Tutorial != nil},
+		{ResourceKindQuest, resource.Quest != nil},
 	}
 	for _, document := range present {
 		if document.carried && document.kind != resource.Kind {
@@ -441,6 +444,73 @@ func validateTutorialResource(resource Resource, sources map[SourceID]struct{}) 
 	}
 	if !title.Known || title.Value == "" {
 		return fmt.Errorf("resource %q: tutorial.title must be known and non-empty", resource.Key)
+	}
+	return nil
+}
+
+// validateQuestResource fails closed: an unknown or empty name, missing steps,
+// invalid step keys, duplicate step keys, unknown step descriptions or empty
+// flag lists are all rejected.
+func validateQuestResource(resource Resource, sources map[SourceID]struct{}) error {
+	if err := validateSlugKey(ResourceKindQuest, resource.Key); err != nil {
+		return err
+	}
+	if err := validateSoleDocument(resource); err != nil {
+		return err
+	}
+	if resource.Quest == nil {
+		return fmt.Errorf("resource %q: quest document is required", resource.Key)
+	}
+	name := resource.Quest.Name
+	if err := validateFact("quest.name", name, sources); err != nil {
+		return fmt.Errorf("resource %q: %w", resource.Key, err)
+	}
+	if !name.Known || name.Value == "" {
+		return fmt.Errorf("resource %q: quest.name must be known and non-empty", resource.Key)
+	}
+	if len(resource.Quest.Steps) == 0 {
+		return fmt.Errorf("resource %q: quest must contain at least one supported step", resource.Key)
+	}
+
+	seenStepKeys := make(map[string]struct{}, len(resource.Quest.Steps))
+	for stepIdx, step := range resource.Quest.Steps {
+		if err := validateSlugKey("quest_step", step.Key); err != nil {
+			return fmt.Errorf("resource %q step %d: %w", resource.Key, stepIdx, err)
+		}
+		if _, duplicate := seenStepKeys[step.Key]; duplicate {
+			return fmt.Errorf("resource %q: duplicate step key %q", resource.Key, step.Key)
+		}
+		seenStepKeys[step.Key] = struct{}{}
+
+		if err := validateFact("quest.step.description", step.Description, sources); err != nil {
+			return fmt.Errorf("resource %q step %q: %w", resource.Key, step.Key, err)
+		}
+		if !step.Description.Known || step.Description.Value == "" {
+			return fmt.Errorf("resource %q step %q: quest.step.description must be known and non-empty",
+				resource.Key, step.Key)
+		}
+
+		if err := validateFact("quest.step.location", step.Location, sources); err != nil {
+			return fmt.Errorf("resource %q step %q: %w", resource.Key, step.Key, err)
+		}
+
+		if len(step.Flags) == 0 {
+			return fmt.Errorf("resource %q step %q: flags list must not be empty",
+				resource.Key, step.Key)
+		}
+
+		seenFlags := make(map[uint32]struct{}, len(step.Flags))
+		for _, flag := range step.Flags {
+			if flag.ID == 0 {
+				return fmt.Errorf("resource %q step %q: flag ID must be non-zero",
+					resource.Key, step.Key)
+			}
+			if _, duplicate := seenFlags[flag.ID]; duplicate {
+				return fmt.Errorf("resource %q step %q: duplicate flag ID %d in canonical plan",
+					resource.Key, step.Key, flag.ID)
+			}
+			seenFlags[flag.ID] = struct{}{}
+		}
 	}
 	return nil
 }

@@ -78,10 +78,10 @@ explicitly case-insensitive.
 Matched exactly and case-sensitively against `schema.Resource.Kind`.
 
 - Empty means every kind, which today mixes items, colosseums, regions,
-  summoning pools, graces, bosses, map regions and tutorials in one page.
+  summoning pools, graces, bosses, map regions, tutorials and quests in one page.
 - `item`, `colosseum`, `region`, `summoning_pool`, `grace`, `boss`,
-  `map_region` and `tutorial` are the kinds the current schema declares, so
-  they are the only accepted non-empty values.
+  `map_region`, `tutorial` and `quest` are the kinds the current schema
+  declares, so they are the only accepted non-empty values.
 - Any other value, including `Item`, is rejected with
   `unsupported resource type "…"`. It is not silently ignored and it does not
   fall back to the unfiltered list.

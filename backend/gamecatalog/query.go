@@ -188,6 +188,12 @@ func (catalog *Catalog) ResourceSummaries() []ResourceSummary {
 			// TutorialParam row ID remains part of the full document.
 			summary.NameKnown = resource.Tutorial.Title.Known
 			summary.Name = resource.Tutorial.Title.Value
+		case resource.Quest != nil:
+			// A quest likewise carries a name only; its steps and event flag
+			// plans are part of the full document and are never projected into
+			// a summary.
+			summary.NameKnown = resource.Quest.Name.Known
+			summary.Name = resource.Quest.Name.Value
 		}
 		summaries = append(summaries, summary)
 	}

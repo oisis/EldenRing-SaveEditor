@@ -1,0 +1,694 @@
+{
+  "key": "knight_bernahl",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Knight Bernahl",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"knight_bernahl\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Knight Bernahl",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue at \"Warmaster's Shack\" - menu pop-up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Warmaster's Shack in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"knight_bernahl\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3087,
+            "value": true
+          },
+          {
+            "id": 1042382713,
+            "value": true
+          },
+          {
+            "id": 1042389252,
+            "value": true
+          },
+          {
+            "id": 1042389255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "\"Talk\" dialogue -\u003e exhuasted dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042389257,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to Bernahl the first time, saying you don't understand",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Drawing Room in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"knight_bernahl\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009452,
+            "value": true
+          },
+          {
+            "id": 16009456,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, saying you understand",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002740,
+            "value": true
+          },
+          {
+            "id": 16009452,
+            "value": true
+          },
+          {
+            "id": 16009455,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to Bernahl after the first Invasion, able to buy something, \"Talk\" option appears in the menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002741,
+            "value": true
+          },
+          {
+            "id": 16009457,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009459,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to Bernahl after the first Invasion, able to buy something, \"Talk\" option appears in the menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002741,
+            "value": true
+          },
+          {
+            "id": 16009457,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009459,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to Bernahl after the second invasion, receiving \"Letter to Bernahl\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400290,
+            "value": true
+          },
+          {
+            "id": 16005038,
+            "value": true
+          },
+          {
+            "id": 16009458,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Saying no to invading \"Vargram the Raging Wolf and Errant Sorcerer Wilhelm's world\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Fortified Manor, First Floor in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"knight_bernahl\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11002142,
+            "value": false
+          },
+          {
+            "id": 11005036,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Saying yes",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11002140,
+            "value": true
+          },
+          {
+            "id": 11002141,
+            "value": true
+          },
+          {
+            "id": 11008544,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Killing them",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 7605,
+            "value": true
+          },
+          {
+            "id": 11002155,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Spawning back in your world, receiving \"Raging Wolf\" armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11000511,
+            "value": false
+          },
+          {
+            "id": 11000516,
+            "value": true
+          },
+          {
+            "id": 11000522,
+            "value": false
+          },
+          {
+            "id": 11000527,
+            "value": false
+          },
+          {
+            "id": 11000531,
+            "value": true
+          },
+          {
+            "id": 11002141,
+            "value": false
+          },
+          {
+            "id": 11007985,
+            "value": true
+          },
+          {
+            "id": 11009500,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to him after the invasion, receiving \"Gerlmir's Fury\", no new dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Drawing Room in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"knight_bernahl\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400291,
+            "value": true
+          },
+          {
+            "id": 16002840,
+            "value": true
+          },
+          {
+            "id": 16009461,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Talking to Bernahl after defeating Rykard, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009452,
+            "value": true
+          },
+          {
+            "id": 16009460,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Getting invaded by Bernahl",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Beside the Great Bridge site of grace in Crumbling Farum Azula",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"knight_bernahl\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 13009300,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Defeating Bernahl, receiving \"Blasphemous Claw\", \"Devourer's Scepter\" and Beast Champion armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"knight_bernahl\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"knight_bernahl\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Knight Bernahl",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3087,
+            "value": true
+          },
+          {
+            "id": 400292,
+            "value": true
+          },
+          {
+            "id": 400293,
+            "value": true
+          },
+          {
+            "id": 400294,
+            "value": true
+          },
+          {
+            "id": 13000180,
+            "value": true
+          },
+          {
+            "id": 13002182,
+            "value": true
+          },
+          {
+            "id": 13005028,
+            "value": true
+          },
+          {
+            "id": 13005029,
+            "value": true
+          },
+          {
+            "id": 13005030,
+            "value": true
+          },
+          {
+            "id": 13005205,
+            "value": true
+          },
+          {
+            "id": 13005206,
+            "value": true
+          },
+          {
+            "id": 13005207,
+            "value": true
+          },
+          {
+            "id": 13005208,
+            "value": true
+          },
+          {
+            "id": 13005209,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

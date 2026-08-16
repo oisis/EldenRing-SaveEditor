@@ -1,0 +1,1075 @@
+{
+  "key": "iji",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Iji",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"iji\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Iji",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Road to Manor in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iji\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3092,
+            "value": true
+          },
+          {
+            "id": 1034499200,
+            "value": true
+          },
+          {
+            "id": 1034499205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Menu pop up after second dialogue ends, options are \"Purchase\", \"Strengthen armaments\", \"Please take care\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034492702,
+            "value": true
+          },
+          {
+            "id": 1034499206,
+            "value": true
+          },
+          {
+            "id": 1034499208,
+            "value": true
+          },
+          {
+            "id": 1034499209,
+            "value": true
+          },
+          {
+            "id": 1034499213,
+            "value": false
+          },
+          {
+            "id": 1034499214,
+            "value": true
+          },
+          {
+            "id": 1034499215,
+            "value": false
+          },
+          {
+            "id": 1034499216,
+            "value": false
+          },
+          {
+            "id": 1034499230,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Please take care\", option gets replaced with \"Talk\" afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499211,
+            "value": true
+          },
+          {
+            "id": 1034499213,
+            "value": true
+          },
+          {
+            "id": 1034499214,
+            "value": false
+          },
+          {
+            "id": 1034499215,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\", gets replaced with \"About advice\" afterwards - also repeats, \"Blaidd sent me\" appears now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499210,
+            "value": true
+          },
+          {
+            "id": 1034499213,
+            "value": false
+          },
+          {
+            "id": 1034499215,
+            "value": true
+          },
+          {
+            "id": 1034499216,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Blaidd sent me\", disappears afterwards, now also sells \"Carian Filigreed Crest\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499215,
+            "value": false
+          },
+          {
+            "id": 1034499216,
+            "value": true
+          },
+          {
+            "id": 1034509360,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Iji",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iji\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509355,
+            "value": true
+          },
+          {
+            "id": 1034509357,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Iji again, saying sorry for the warning he gave, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509358,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to Iji again after searching for Nokron and going with Blaidd, options \"About Nokron\" and \"About Blaidd\" appear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Road to Manor in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iji\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034495010,
+            "value": true
+          },
+          {
+            "id": 1034499221,
+            "value": false
+          },
+          {
+            "id": 1034499225,
+            "value": true
+          },
+          {
+            "id": 1034499226,
+            "value": false
+          },
+          {
+            "id": 1034499227,
+            "value": true
+          },
+          {
+            "id": 1034499228,
+            "value": false
+          },
+          {
+            "id": 1034499229,
+            "value": false
+          },
+          {
+            "id": 1034499231,
+            "value": false
+          },
+          {
+            "id": 1034499234,
+            "value": false
+          },
+          {
+            "id": 1034499235,
+            "value": false
+          },
+          {
+            "id": 1034499244,
+            "value": false
+          },
+          {
+            "id": 1034499245,
+            "value": false
+          },
+          {
+            "id": 1034499246,
+            "value": false
+          },
+          {
+            "id": 1034499247,
+            "value": false
+          },
+          {
+            "id": 1034499248,
+            "value": false
+          },
+          {
+            "id": 1034499249,
+            "value": false
+          },
+          {
+            "id": 1035502701,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "After choosing \"About Nokron\", option doesn't disappear, repeating dialogue on it",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499222,
+            "value": true
+          },
+          {
+            "id": 1034499225,
+            "value": false
+          },
+          {
+            "id": 1034499226,
+            "value": true
+          },
+          {
+            "id": 1034499227,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "After choosing \"About Blaidd\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499223,
+            "value": true
+          },
+          {
+            "id": 1034499226,
+            "value": true
+          },
+          {
+            "id": 1034499227,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "After exhausting all of Jar-Bairn's first dialogue, this got set, apparently a flag for Iji (has no new talking options, so idk why this was set)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Jar-Burg in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iji\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442739,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Talking to Iji after defeating Radahn and having been to Blaidd in the Evergaol, \"Why is Blaidd in the Evergaol?\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Road to Manor in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"iji\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3092,
+            "value": true
+          },
+          {
+            "id": 1034499200,
+            "value": true
+          },
+          {
+            "id": 1034499221,
+            "value": false
+          },
+          {
+            "id": 1034499225,
+            "value": false
+          },
+          {
+            "id": 1034499226,
+            "value": false
+          },
+          {
+            "id": 1034499227,
+            "value": false
+          },
+          {
+            "id": 1034499228,
+            "value": false
+          },
+          {
+            "id": 1034499229,
+            "value": false
+          },
+          {
+            "id": 1034499231,
+            "value": false
+          },
+          {
+            "id": 1034499234,
+            "value": false
+          },
+          {
+            "id": 1034499235,
+            "value": false
+          },
+          {
+            "id": 1034499244,
+            "value": false
+          },
+          {
+            "id": 1034499245,
+            "value": false
+          },
+          {
+            "id": 1034499246,
+            "value": false
+          },
+          {
+            "id": 1034499247,
+            "value": true
+          },
+          {
+            "id": 1034499248,
+            "value": false
+          },
+          {
+            "id": 1034499249,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Why is Blaidd in the Evergaol?\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499241,
+            "value": true
+          },
+          {
+            "id": 1034499247,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to Iji after Ranni leaves for her Journey, \"Talk\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499200,
+            "value": true
+          },
+          {
+            "id": 1034499233,
+            "value": true
+          },
+          {
+            "id": 1034499234,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk\" option, now a repeating dialogue option",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499232,
+            "value": true
+          },
+          {
+            "id": 1034499234,
+            "value": false
+          },
+          {
+            "id": 1034499235,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to Iji after Blaidd's death",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034482260,
+            "value": true
+          },
+          {
+            "id": 1034482261,
+            "value": true
+          },
+          {
+            "id": 1035482260,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Menu pop-up, \"Blaidd's death\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034492702,
+            "value": true
+          },
+          {
+            "id": 1034499221,
+            "value": false
+          },
+          {
+            "id": 1034499225,
+            "value": false
+          },
+          {
+            "id": 1034499226,
+            "value": false
+          },
+          {
+            "id": 1034499227,
+            "value": false
+          },
+          {
+            "id": 1034499228,
+            "value": false
+          },
+          {
+            "id": 1034499229,
+            "value": false
+          },
+          {
+            "id": 1034499231,
+            "value": false
+          },
+          {
+            "id": 1034499234,
+            "value": false
+          },
+          {
+            "id": 1034499235,
+            "value": false
+          },
+          {
+            "id": 1034499244,
+            "value": false
+          },
+          {
+            "id": 1034499245,
+            "value": false
+          },
+          {
+            "id": 1034499246,
+            "value": false
+          },
+          {
+            "id": 1034499247,
+            "value": false
+          },
+          {
+            "id": 1034499248,
+            "value": true
+          },
+          {
+            "id": 1034499249,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Blaidd's death\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034499242,
+            "value": true
+          },
+          {
+            "id": 1034499248,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "After a reload, Iji is now dead",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9804,
+            "value": true
+          },
+          {
+            "id": 9809,
+            "value": false
+          },
+          {
+            "id": 10009656,
+            "value": false
+          },
+          {
+            "id": 11009255,
+            "value": false
+          },
+          {
+            "id": 11009265,
+            "value": false
+          },
+          {
+            "id": 11009270,
+            "value": false
+          },
+          {
+            "id": 11009275,
+            "value": false
+          },
+          {
+            "id": 35009350,
+            "value": false
+          },
+          {
+            "id": 35009352,
+            "value": false
+          },
+          {
+            "id": 35009355,
+            "value": false
+          },
+          {
+            "id": 35009358,
+            "value": false
+          },
+          {
+            "id": 1034495002,
+            "value": true
+          },
+          {
+            "id": 1034495006,
+            "value": true
+          },
+          {
+            "id": 1035502701,
+            "value": true
+          },
+          {
+            "id": 1036489250,
+            "value": false
+          },
+          {
+            "id": 1037519200,
+            "value": false
+          },
+          {
+            "id": 1038509250,
+            "value": false
+          },
+          {
+            "id": 1039519250,
+            "value": false
+          },
+          {
+            "id": 1042379200,
+            "value": false
+          },
+          {
+            "id": 1042379202,
+            "value": false
+          },
+          {
+            "id": 1042379206,
+            "value": false
+          },
+          {
+            "id": 1042379208,
+            "value": false
+          },
+          {
+            "id": 1043349250,
+            "value": false
+          },
+          {
+            "id": 1043509200,
+            "value": false
+          },
+          {
+            "id": 1043539250,
+            "value": false
+          },
+          {
+            "id": 1046389201,
+            "value": false
+          },
+          {
+            "id": 1054539210,
+            "value": false
+          },
+          {
+            "id": 1054539215,
+            "value": false
+          },
+          {
+            "id": 1054559200,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Iji's Bell Bearing\" and \"Iji's Mirrorhelm\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"iji\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"iji\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Iji",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400240,
+            "value": true
+          },
+          {
+            "id": 400241,
+            "value": true
+          },
+          {
+            "id": 1034495011,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

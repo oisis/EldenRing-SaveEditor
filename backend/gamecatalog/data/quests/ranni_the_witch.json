@@ -1,0 +1,2944 @@
+{
+  "key": "ranni_the_witch",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Ranni the Witch",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"ranni_the_witch\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Ranni the Witch",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Ranni saying \"This way Tarnished, may I have a word?\" when porting to \"Church of Elleh\" grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Church of Elleh in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369406,
+            "value": true
+          },
+          {
+            "id": 1042369412,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Approaching Ranni",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042372701,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "First dialogue part of Ranni ends, after saying yes to having Torrent",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369407,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Spirit Calling Bell\" and \"Lone Wolf Ashes\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60110,
+            "value": true
+          },
+          {
+            "id": 400390,
+            "value": true
+          },
+          {
+            "id": 710550,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Second dialogue part of Ranni ends, after receiving Bell and Ashes, also ends dialogue completely, \"Talk\" pop-up appearing",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1725,
+            "value": true
+          },
+          {
+            "id": 69110,
+            "value": true
+          },
+          {
+            "id": 1042369405,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Activating third dialogue part from Ranni, dialogue ending, she disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3091,
+            "value": true
+          },
+          {
+            "id": 3746,
+            "value": false
+          },
+          {
+            "id": 3747,
+            "value": true
+          },
+          {
+            "id": 3758,
+            "value": false
+          },
+          {
+            "id": 4705,
+            "value": true
+          },
+          {
+            "id": 4717,
+            "value": false
+          },
+          {
+            "id": 4718,
+            "value": false
+          },
+          {
+            "id": 4719,
+            "value": false
+          },
+          {
+            "id": 1042360712,
+            "value": true
+          },
+          {
+            "id": 1042360713,
+            "value": true
+          },
+          {
+            "id": 1042360724,
+            "value": true
+          },
+          {
+            "id": 1042362732,
+            "value": true
+          },
+          {
+            "id": 1042362734,
+            "value": true
+          },
+          {
+            "id": 1042365012,
+            "value": true
+          },
+          {
+            "id": 1042369409,
+            "value": true
+          },
+          {
+            "id": 1042369410,
+            "value": true
+          },
+          {
+            "id": 1042369413,
+            "value": true
+          },
+          {
+            "id": 1042369415,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Riding up the elevator to Ranni printed these flags",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3758,
+            "value": false
+          },
+          {
+            "id": 1034500510,
+            "value": true
+          },
+          {
+            "id": 1034500511,
+            "value": true
+          },
+          {
+            "id": 1034500512,
+            "value": true
+          },
+          {
+            "id": 1034500731,
+            "value": true
+          },
+          {
+            "id": 1034509419,
+            "value": true
+          },
+          {
+            "id": 1034509422,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Standing in the middle of Ranni's room prints this",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12012713,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Standing right infront of her or just outside her room prints this",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12012713,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Going near Ranni",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12012713,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Distancing yourself from Ranni",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12012713,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Talking to Ranni the first time and choosing to refuse to enter her service",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509400,
+            "value": true
+          },
+          {
+            "id": 1034509411,
+            "value": true
+          },
+          {
+            "id": 1034509431,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Choosing to enter her service",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3565,
+            "value": false
+          },
+          {
+            "id": 3566,
+            "value": true
+          },
+          {
+            "id": 3567,
+            "value": false
+          },
+          {
+            "id": 3568,
+            "value": false
+          },
+          {
+            "id": 3569,
+            "value": false
+          },
+          {
+            "id": 3570,
+            "value": false
+          },
+          {
+            "id": 3571,
+            "value": false
+          },
+          {
+            "id": 3572,
+            "value": false
+          },
+          {
+            "id": 3573,
+            "value": false
+          },
+          {
+            "id": 3574,
+            "value": false
+          },
+          {
+            "id": 3575,
+            "value": false
+          },
+          {
+            "id": 3576,
+            "value": false
+          },
+          {
+            "id": 3577,
+            "value": false
+          },
+          {
+            "id": 3578,
+            "value": false
+          },
+          {
+            "id": 3605,
+            "value": false
+          },
+          {
+            "id": 3606,
+            "value": false
+          },
+          {
+            "id": 3607,
+            "value": false
+          },
+          {
+            "id": 3608,
+            "value": false
+          },
+          {
+            "id": 3609,
+            "value": true
+          },
+          {
+            "id": 3610,
+            "value": false
+          },
+          {
+            "id": 3611,
+            "value": false
+          },
+          {
+            "id": 3612,
+            "value": false
+          },
+          {
+            "id": 3613,
+            "value": false
+          },
+          {
+            "id": 3614,
+            "value": false
+          },
+          {
+            "id": 3615,
+            "value": false
+          },
+          {
+            "id": 3616,
+            "value": false
+          },
+          {
+            "id": 3617,
+            "value": false
+          },
+          {
+            "id": 3618,
+            "value": false
+          },
+          {
+            "id": 3765,
+            "value": false
+          },
+          {
+            "id": 3766,
+            "value": true
+          },
+          {
+            "id": 3767,
+            "value": false
+          },
+          {
+            "id": 3768,
+            "value": false
+          },
+          {
+            "id": 3769,
+            "value": false
+          },
+          {
+            "id": 3770,
+            "value": false
+          },
+          {
+            "id": 3771,
+            "value": false
+          },
+          {
+            "id": 3772,
+            "value": false
+          },
+          {
+            "id": 3773,
+            "value": false
+          },
+          {
+            "id": 3774,
+            "value": false
+          },
+          {
+            "id": 3775,
+            "value": false
+          },
+          {
+            "id": 3776,
+            "value": false
+          },
+          {
+            "id": 3777,
+            "value": false
+          },
+          {
+            "id": 3778,
+            "value": false
+          },
+          {
+            "id": 1034490700,
+            "value": true
+          },
+          {
+            "id": 1034490701,
+            "value": true
+          },
+          {
+            "id": 1034500700,
+            "value": true
+          },
+          {
+            "id": 1034500710,
+            "value": true
+          },
+          {
+            "id": 1034500715,
+            "value": true
+          },
+          {
+            "id": 1034500732,
+            "value": true
+          },
+          {
+            "id": 1034500736,
+            "value": true
+          },
+          {
+            "id": 1034500738,
+            "value": true
+          },
+          {
+            "id": 1034505015,
+            "value": true
+          },
+          {
+            "id": 1034509361,
+            "value": true
+          },
+          {
+            "id": 1034509410,
+            "value": true
+          },
+          {
+            "id": 1034509412,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, telling you about Blaidd, Iji and Seluvis, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509413,
+            "value": true
+          },
+          {
+            "id": 1034509418,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Iji",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509355,
+            "value": true
+          },
+          {
+            "id": 1034509357,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Iji again, saying sorry for the warning he gave, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509358,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Blaidd, telling you he is still in Limgrave, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509205,
+            "value": true
+          },
+          {
+            "id": 1045379208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Seluvis",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509305,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Talking to Spirit Seluvis again, having talked to all 3 now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034500734,
+            "value": true
+          },
+          {
+            "id": 1034509306,
+            "value": true
+          },
+          {
+            "id": 1034509417,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Sitting at the grace after Ranni tells you she will enter her slumber (thought it might be useful to include this one), Ranni will only return a \"...\" after sitting at a grace+",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 530,
+            "value": true
+          },
+          {
+            "id": 532,
+            "value": false
+          },
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 3269,
+            "value": true
+          },
+          {
+            "id": 3426,
+            "value": true
+          },
+          {
+            "id": 3446,
+            "value": false
+          },
+          {
+            "id": 3447,
+            "value": false
+          },
+          {
+            "id": 3448,
+            "value": true
+          },
+          {
+            "id": 3486,
+            "value": true
+          },
+          {
+            "id": 3499,
+            "value": true
+          },
+          {
+            "id": 3626,
+            "value": false
+          },
+          {
+            "id": 3627,
+            "value": false
+          },
+          {
+            "id": 3630,
+            "value": true
+          },
+          {
+            "id": 3686,
+            "value": false
+          },
+          {
+            "id": 3687,
+            "value": true
+          },
+          {
+            "id": 3707,
+            "value": false
+          },
+          {
+            "id": 3708,
+            "value": true
+          },
+          {
+            "id": 3745,
+            "value": false
+          },
+          {
+            "id": 3746,
+            "value": false
+          },
+          {
+            "id": 3747,
+            "value": false
+          },
+          {
+            "id": 3748,
+            "value": true
+          },
+          {
+            "id": 3749,
+            "value": false
+          },
+          {
+            "id": 3750,
+            "value": false
+          },
+          {
+            "id": 3751,
+            "value": false
+          },
+          {
+            "id": 3752,
+            "value": false
+          },
+          {
+            "id": 3753,
+            "value": false
+          },
+          {
+            "id": 3754,
+            "value": false
+          },
+          {
+            "id": 3755,
+            "value": false
+          },
+          {
+            "id": 3756,
+            "value": false
+          },
+          {
+            "id": 3757,
+            "value": false
+          },
+          {
+            "id": 3966,
+            "value": false
+          },
+          {
+            "id": 3967,
+            "value": true
+          },
+          {
+            "id": 4106,
+            "value": true
+          },
+          {
+            "id": 4119,
+            "value": true
+          },
+          {
+            "id": 4160,
+            "value": true
+          },
+          {
+            "id": 4220,
+            "value": true
+          },
+          {
+            "id": 9000,
+            "value": true
+          },
+          {
+            "id": 9020,
+            "value": true
+          },
+          {
+            "id": 9803,
+            "value": true
+          },
+          {
+            "id": 9805,
+            "value": false
+          },
+          {
+            "id": 11109648,
+            "value": true
+          },
+          {
+            "id": 11109649,
+            "value": true
+          },
+          {
+            "id": 12059163,
+            "value": true
+          },
+          {
+            "id": 16009464,
+            "value": true
+          },
+          {
+            "id": 1034449200,
+            "value": true
+          },
+          {
+            "id": 1034499200,
+            "value": true
+          },
+          {
+            "id": 1034509400,
+            "value": true
+          },
+          {
+            "id": 1034512620,
+            "value": true
+          },
+          {
+            "id": 1035502701,
+            "value": true
+          },
+          {
+            "id": 1036419213,
+            "value": true
+          },
+          {
+            "id": 1036439202,
+            "value": true
+          },
+          {
+            "id": 1036489202,
+            "value": true
+          },
+          {
+            "id": 1038419270,
+            "value": false
+          },
+          {
+            "id": 1038419271,
+            "value": true
+          },
+          {
+            "id": 1042389252,
+            "value": true
+          },
+          {
+            "id": 1045399200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Loading into Ranni's Rise, after the whole festival and freeing Blaidd from the Evergaol, picking up the Amber Starlight for Seluvis",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 558,
+            "value": true
+          },
+          {
+            "id": 78223,
+            "value": true
+          },
+          {
+            "id": 78224,
+            "value": true
+          },
+          {
+            "id": 1034492270,
+            "value": true
+          },
+          {
+            "id": 1034492271,
+            "value": true
+          },
+          {
+            "id": 1034492272,
+            "value": true
+          },
+          {
+            "id": 1034492273,
+            "value": true
+          },
+          {
+            "id": 1034495000,
+            "value": true
+          },
+          {
+            "id": 1034499201,
+            "value": false
+          },
+          {
+            "id": 1034499202,
+            "value": false
+          },
+          {
+            "id": 1034499203,
+            "value": false
+          },
+          {
+            "id": 1034499204,
+            "value": false
+          },
+          {
+            "id": 1034500511,
+            "value": true
+          },
+          {
+            "id": 1034500512,
+            "value": false
+          },
+          {
+            "id": 1034500712,
+            "value": true
+          },
+          {
+            "id": 1034500718,
+            "value": true
+          },
+          {
+            "id": 1034500731,
+            "value": true
+          },
+          {
+            "id": 1034500732,
+            "value": true
+          },
+          {
+            "id": 1034500733,
+            "value": true
+          },
+          {
+            "id": 1034500734,
+            "value": true
+          },
+          {
+            "id": 1034502510,
+            "value": true
+          },
+          {
+            "id": 1034502580,
+            "value": true
+          },
+          {
+            "id": 1034502620,
+            "value": true
+          },
+          {
+            "id": 1034502711,
+            "value": false
+          },
+          {
+            "id": 1034502748,
+            "value": false
+          },
+          {
+            "id": 1034502800,
+            "value": true
+          },
+          {
+            "id": 1034502801,
+            "value": true
+          },
+          {
+            "id": 1034502802,
+            "value": true
+          },
+          {
+            "id": 1034502803,
+            "value": true
+          },
+          {
+            "id": 1034502804,
+            "value": true
+          },
+          {
+            "id": 1034505002,
+            "value": true
+          },
+          {
+            "id": 1034505003,
+            "value": true
+          },
+          {
+            "id": 1034505004,
+            "value": true
+          },
+          {
+            "id": 1034505006,
+            "value": true
+          },
+          {
+            "id": 1034505008,
+            "value": true
+          },
+          {
+            "id": 1034505009,
+            "value": true
+          },
+          {
+            "id": 1034505010,
+            "value": true
+          },
+          {
+            "id": 1034505018,
+            "value": true
+          },
+          {
+            "id": 1034509253,
+            "value": false
+          },
+          {
+            "id": 1034509258,
+            "value": true
+          },
+          {
+            "id": 1034509301,
+            "value": false
+          },
+          {
+            "id": 1034509302,
+            "value": false
+          },
+          {
+            "id": 1034509346,
+            "value": false
+          },
+          {
+            "id": 1034509347,
+            "value": false
+          },
+          {
+            "id": 1034509401,
+            "value": false
+          },
+          {
+            "id": 1034509403,
+            "value": false
+          },
+          {
+            "id": 1034512580,
+            "value": true
+          },
+          {
+            "id": 1034512620,
+            "value": true
+          },
+          {
+            "id": 1034512621,
+            "value": false
+          },
+          {
+            "id": 1034512622,
+            "value": false
+          },
+          {
+            "id": 1035500512,
+            "value": false
+          },
+          {
+            "id": 1035500800,
+            "value": true
+          },
+          {
+            "id": 1035502500,
+            "value": true
+          },
+          {
+            "id": 1035502510,
+            "value": true
+          },
+          {
+            "id": 1035502580,
+            "value": true
+          },
+          {
+            "id": 1035502700,
+            "value": false
+          },
+          {
+            "id": 1035502701,
+            "value": true
+          },
+          {
+            "id": 1035502702,
+            "value": false
+          },
+          {
+            "id": 1035502810,
+            "value": true
+          },
+          {
+            "id": 1035502840,
+            "value": true
+          },
+          {
+            "id": 1035502841,
+            "value": true
+          },
+          {
+            "id": 1035502842,
+            "value": true
+          },
+          {
+            "id": 1035502849,
+            "value": true
+          },
+          {
+            "id": 1035505000,
+            "value": true
+          },
+          {
+            "id": 1035505002,
+            "value": true
+          },
+          {
+            "id": 1035505003,
+            "value": true
+          },
+          {
+            "id": 1035505004,
+            "value": true
+          },
+          {
+            "id": 1035505006,
+            "value": true
+          },
+          {
+            "id": 1035505068,
+            "value": true
+          },
+          {
+            "id": 1035505074,
+            "value": true
+          },
+          {
+            "id": 1035505077,
+            "value": true
+          },
+          {
+            "id": 1035509208,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Opening the Fingerslayer Blade's chest",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Night's Sacred Ground in Nokron",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12023721,
+            "value": true
+          },
+          {
+            "id": 12028670,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Receiving the Fingerslayer Blade",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12027080,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Porting to Ranni's Rise after aquiring the Blade",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 558,
+            "value": true
+          },
+          {
+            "id": 1034512620,
+            "value": true
+          },
+          {
+            "id": 1035502701,
+            "value": false
+          },
+          {
+            "id": 1035502702,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Talking to Ranni after aquiring the Blade",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034502745,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509420,
+            "value": true
+          },
+          {
+            "id": 1034509429,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Talking to her again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509421,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Carian Inverted Statue\", repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400391,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Instead of Ranni there will now be a grace in her room",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 76247,
+            "value": true
+          },
+          {
+            "id": 78230,
+            "value": true
+          },
+          {
+            "id": 1034505001,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Receiving the \"Cursemark of Death\", Renna's Rise will now be unlocked",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Divine Tower of Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 34117500,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Spawning in Ainsel River after using the teleporter in Renna's Rise",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ainsel River Main",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12015063,
+            "value": true
+          },
+          {
+            "id": 12015074,
+            "value": true
+          },
+          {
+            "id": 12015076,
+            "value": true
+          },
+          {
+            "id": 12015078,
+            "value": true
+          },
+          {
+            "id": 1035469205,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Miniature Ranni\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400394,
+            "value": true
+          },
+          {
+            "id": 12015062,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "First time choosing \"Talk to Miniature Ranni\", \"...\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Second time choosing \"Talk to Miniature Ranni\", \"...\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Third time choosing \"Talk to Miniature Ranni\", she will speak afterwards, \"Talk to Ranni\" appears now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019257,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Ranni\", telling you to kill the Bareful Shadow, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Talking to her again at \"Nokstella, Eternal City\" grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Nokstella, Eternal City",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019260,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, turns into repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019261,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Talking to her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Nokstella Waterfall Basin",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_041",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, saying she said too much",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_041 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_041 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019266,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_042",
+        "description": {
+          "known": true,
+          "value": "Distancing from the grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_042 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_042 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12012710,
+            "value": false
+          },
+          {
+            "id": 12012711,
+            "value": false
+          },
+          {
+            "id": 12012712,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_043",
+        "description": {
+          "known": true,
+          "value": "Bareful Shadow spawn in until death",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_043 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_043 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12010516,
+            "value": true
+          },
+          {
+            "id": 12010705,
+            "value": true
+          },
+          {
+            "id": 12010706,
+            "value": true
+          },
+          {
+            "id": 12010707,
+            "value": true
+          },
+          {
+            "id": 12012715,
+            "value": true
+          },
+          {
+            "id": 12012716,
+            "value": true
+          },
+          {
+            "id": 12015059,
+            "value": true
+          },
+          {
+            "id": 12017800,
+            "value": true
+          },
+          {
+            "id": 12017810,
+            "value": true
+          },
+          {
+            "id": 12019270,
+            "value": true
+          },
+          {
+            "id": 12019271,
+            "value": true
+          },
+          {
+            "id": 12019272,
+            "value": true
+          },
+          {
+            "id": 12019273,
+            "value": true
+          },
+          {
+            "id": 12019280,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_044",
+        "description": {
+          "known": true,
+          "value": "She stops talking, you receive \"Discarded Palace Key\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_044 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_044 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3050,
+            "value": true
+          },
+          {
+            "id": 400159,
+            "value": true
+          },
+          {
+            "id": 12010708,
+            "value": true
+          },
+          {
+            "id": 12012716,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_046",
+        "description": {
+          "known": true,
+          "value": "Opening the chest",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_046 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_046 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14000676,
+            "value": true
+          },
+          {
+            "id": 14002606,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_047",
+        "description": {
+          "known": true,
+          "value": "Receiving the \"Dark Moon Ring\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_047 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_047 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 114,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_048",
+        "description": {
+          "known": true,
+          "value": "Reloading the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_048 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_048 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002660,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_049",
+        "description": {
+          "known": true,
+          "value": "\"Put on the ring\" cutscene",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_049 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Cathedral of Manus Celes in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_049 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": true
+          },
+          {
+            "id": 780000,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_050",
+        "description": {
+          "known": true,
+          "value": "Cutscene ends, Ranni appears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_050 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_050 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1937,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 3740,
+            "value": true
+          },
+          {
+            "id": 3741,
+            "value": false
+          },
+          {
+            "id": 3742,
+            "value": false
+          },
+          {
+            "id": 3743,
+            "value": false
+          },
+          {
+            "id": 3745,
+            "value": false
+          },
+          {
+            "id": 3746,
+            "value": false
+          },
+          {
+            "id": 3747,
+            "value": false
+          },
+          {
+            "id": 3748,
+            "value": false
+          },
+          {
+            "id": 3749,
+            "value": false
+          },
+          {
+            "id": 3750,
+            "value": true
+          },
+          {
+            "id": 3751,
+            "value": false
+          },
+          {
+            "id": 3752,
+            "value": false
+          },
+          {
+            "id": 3753,
+            "value": false
+          },
+          {
+            "id": 3754,
+            "value": false
+          },
+          {
+            "id": 3755,
+            "value": false
+          },
+          {
+            "id": 3756,
+            "value": false
+          },
+          {
+            "id": 3757,
+            "value": false
+          },
+          {
+            "id": 3758,
+            "value": false
+          },
+          {
+            "id": 9021,
+            "value": false
+          },
+          {
+            "id": 780000,
+            "value": false
+          },
+          {
+            "id": 1035420150,
+            "value": true
+          },
+          {
+            "id": 1035420710,
+            "value": true
+          },
+          {
+            "id": 1035420712,
+            "value": true
+          },
+          {
+            "id": 1035422150,
+            "value": true
+          },
+          {
+            "id": 1035422151,
+            "value": true
+          },
+          {
+            "id": 1035422714,
+            "value": true
+          },
+          {
+            "id": 1042369415,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_051",
+        "description": {
+          "known": true,
+          "value": "Talking to Ranni, she disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_051 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_051 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509406,
+            "value": true
+          },
+          {
+            "id": 1035420711,
+            "value": true
+          },
+          {
+            "id": 1035429255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_052",
+        "description": {
+          "known": true,
+          "value": "Picking up the \"Dark Moon Greatsword\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_052 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_052 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400393,
+            "value": true
+          },
+          {
+            "id": 1035425013,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_053",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Miniature Ranni\", gets replaced with \"Talk to Ranni\" afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_053 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_053 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019275,
+            "value": true
+          },
+          {
+            "id": 1034509407,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_054",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Ranni\", repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_054 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_054 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12019276,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_055",
+        "description": {
+          "known": true,
+          "value": "Talking to Ranni about the Cursemark",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_055 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ranni's Rise in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"ranni_the_witch\" step legacy_055 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509400,
+            "value": true
+          },
+          {
+            "id": 1034509405,
+            "value": true
+          },
+          {
+            "id": 1034509432,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_056",
+        "description": {
+          "known": true,
+          "value": "Talking to her again asking where the Cursemark is, she says its not here and sends you away",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_056 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_056 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509409,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_057",
+        "description": {
+          "known": true,
+          "value": "Going back to Ranni after talking to Rogier, you can now enter her service this way",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"ranni_the_witch\" step legacy_057 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"ranni_the_witch\" step legacy_057 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Ranni the Witch",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3565,
+            "value": false
+          },
+          {
+            "id": 3566,
+            "value": true
+          },
+          {
+            "id": 3578,
+            "value": false
+          },
+          {
+            "id": 3579,
+            "value": true
+          },
+          {
+            "id": 3605,
+            "value": false
+          },
+          {
+            "id": 3609,
+            "value": true
+          },
+          {
+            "id": 3618,
+            "value": false
+          },
+          {
+            "id": 3619,
+            "value": true
+          },
+          {
+            "id": 3765,
+            "value": false
+          },
+          {
+            "id": 3766,
+            "value": true
+          },
+          {
+            "id": 3778,
+            "value": false
+          },
+          {
+            "id": 3779,
+            "value": true
+          },
+          {
+            "id": 1034490700,
+            "value": true
+          },
+          {
+            "id": 1034490701,
+            "value": true
+          },
+          {
+            "id": 1034500700,
+            "value": true
+          },
+          {
+            "id": 1034500710,
+            "value": true
+          },
+          {
+            "id": 1034500715,
+            "value": true
+          },
+          {
+            "id": 1034500732,
+            "value": true
+          },
+          {
+            "id": 1034500736,
+            "value": true
+          },
+          {
+            "id": 1034500738,
+            "value": true
+          },
+          {
+            "id": 1034505015,
+            "value": true
+          },
+          {
+            "id": 1034509360,
+            "value": true
+          },
+          {
+            "id": 1034509361,
+            "value": true
+          },
+          {
+            "id": 1034509410,
+            "value": true
+          },
+          {
+            "id": 1034509412,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,1387 @@
+{
+  "key": "roderika",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Roderika",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"roderika\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Roderika",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "First time initiating dialogue with Roderika at \"Stormhill Shack\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Stormhill Shack in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"roderika\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041382735,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "End of first dialogue with Roderika at \"Stormhill Shack\", receiving \"Sitting Sideways\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389406,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "\"Sitting Sideways\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60835,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "End of second dialogue with Roderika at \"Stormhill Shack\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389407,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Third dialogue start at \"Stormhill Shack\", receiving \"Spirit Jellyfish Ashes\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389411,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Spirit Jellyfish Ashes\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400190,
+            "value": true
+          },
+          {
+            "id": 710550,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "End of fourth dialogue with Roderika at \"Stormhill Shack\" (\"It was a pleasure to see you.\") -\u003e repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389408,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Picking up Chrysalids' Memento",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10007450,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Giving Roderika the Chrysalids' Memento",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389412,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to her again after giving her the Memento at Stormhill Shack, telling you she will move to the Roundtable Hold, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389409,
+            "value": true
+          },
+          {
+            "id": 1041389413,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Roderika at Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold, next to the grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"roderika\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041382735,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "First dialogue at Roundtable Hold ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to her again at Roundtable Hold, receiving Golden Seed, looking for purpose repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400191,
+            "value": true
+          },
+          {
+            "id": 11109258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Telling Roderika about Master Hewg after talking to him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "After reloading at the grace, Roderika moved to her new place, talking to her, telling you she is a Spirit Tuner prentice now. Menu pop up afterwards, Spirit Tuning is now unlocked",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold, in the same room as Master Hewg, now a Spirit Tuner",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"roderika\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109260,
+            "value": false
+          },
+          {
+            "id": 11109261,
+            "value": false
+          },
+          {
+            "id": 11109262,
+            "value": false
+          },
+          {
+            "id": 11109263,
+            "value": false
+          },
+          {
+            "id": 11109264,
+            "value": false
+          },
+          {
+            "id": 11109265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Clicking on Spirit Tuning",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11103713,
+            "value": true
+          },
+          {
+            "id": 1041389415,
+            "value": false
+          },
+          {
+            "id": 1041389416,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Leaving Spirit Tuning menu",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041389416,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Reloading at grace after exhausting Roderika's and Master Hewg's dialogue printed this flag",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102715,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Crimson Hood\" where you found the Memento after she turned into a Spirit Tuner",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10007452,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Going back to the Roundtable Hold after picking up Crimson Hood printed this flag",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11102712,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Talking to her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041382735,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Curtsy\" gesture",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60803,
+            "value": true
+          },
+          {
+            "id": 11109267,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Talking to her after visiting Altus Plateau, \"There's something you should know\" appears now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109260,
+            "value": true
+          },
+          {
+            "id": 11109261,
+            "value": false
+          },
+          {
+            "id": 11109262,
+            "value": false
+          },
+          {
+            "id": 11109263,
+            "value": false
+          },
+          {
+            "id": 11109264,
+            "value": false
+          },
+          {
+            "id": 1041382735,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Choosing \"There's something you should know\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109268,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "\"There's something you should know\" disappears, gets replaced with a repeating one",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109260,
+            "value": false
+          },
+          {
+            "id": 11109261,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Choosing the repeating \"There's something you should know\", stays even after reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109269,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Speaking to her after Dung Eater left the RTH, \"About the voices\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109260,
+            "value": false
+          },
+          {
+            "id": 11109261,
+            "value": false
+          },
+          {
+            "id": 11109262,
+            "value": true
+          },
+          {
+            "id": 11109263,
+            "value": false
+          },
+          {
+            "id": 11109264,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the voices\", disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109262,
+            "value": false
+          },
+          {
+            "id": 11109270,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Talking to Roderika again after Dung Eater moves back to RTH, \"Please take care\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109264,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "\"About the voices...\"option appears again after giving Dung Eater some Seedbed Curses, causing him to leave the RTH",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109263,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the voices...\", disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109263,
+            "value": false
+          },
+          {
+            "id": 11109271,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Talking to Roderika after burning the tree, she is now next to the grace, wanting you to talk to Master Hewg, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109275,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Talking to Hewg after burning the tree, \"About the god-slaying weapon\" and \"Why are you still making weapons?\" options appear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109233,
+            "value": true
+          },
+          {
+            "id": 11109235,
+            "value": true
+          },
+          {
+            "id": 11109238,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the god-slaying weapon\", stays afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109230,
+            "value": true
+          },
+          {
+            "id": 11109233,
+            "value": false
+          },
+          {
+            "id": 11109234,
+            "value": true
+          },
+          {
+            "id": 11109235,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Choosing it again, calling you Lord ( :'( ), option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109231,
+            "value": true
+          },
+          {
+            "id": 11109234,
+            "value": false
+          },
+          {
+            "id": 11109235,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Why are you still making weapons?\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109227,
+            "value": true
+          },
+          {
+            "id": 11109235,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "Talking to Roderika again after talking to Hewg, \"About Hewg\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109227,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About Hewg\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109276,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Talking to Hewg after talking to Roderika again, \"What happened to her?\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109236,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Choosing \"What happened to her?\", option disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"roderika\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"roderika\" step legacy_040 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Roderika",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109232,
+            "value": true
+          },
+          {
+            "id": 11109236,
+            "value": false
+          }
+        ]
+      }
+    ]
+  }
+}

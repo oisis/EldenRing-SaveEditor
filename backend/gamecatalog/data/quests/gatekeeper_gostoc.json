@@ -1,0 +1,424 @@
+{
+  "key": "gatekeeper_gostoc",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Gatekeeper Gostoc",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"gatekeeper_gostoc\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Gatekeeper Gostoc",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue pop-up when approching him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Stormveil Castle Gate in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gatekeeper_gostoc\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009549,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Talking to him, choosing Very well",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10002724,
+            "value": false
+          },
+          {
+            "id": 10002731,
+            "value": true
+          },
+          {
+            "id": 10009351,
+            "value": true
+          },
+          {
+            "id": 10009352,
+            "value": true
+          },
+          {
+            "id": 10009549,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Choosing that you will use the gate instead",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10002724,
+            "value": true
+          },
+          {
+            "id": 10002731,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Approaching the gate and having it open",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10000500,
+            "value": true
+          },
+          {
+            "id": 10002500,
+            "value": true
+          },
+          {
+            "id": 10002724,
+            "value": false
+          },
+          {
+            "id": 10002731,
+            "value": true
+          },
+          {
+            "id": 10003726,
+            "value": true
+          },
+          {
+            "id": 10009355,
+            "value": true
+          },
+          {
+            "id": 10009378,
+            "value": true
+          },
+          {
+            "id": 10009500,
+            "value": true
+          },
+          {
+            "id": 10009501,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to Gostoc at the gate again, being able to buy goods now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009350,
+            "value": false
+          },
+          {
+            "id": 10009353,
+            "value": true
+          },
+          {
+            "id": 10009549,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Stomping on Godricks Head and talking to himself",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Godrick the Grafted grace in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gatekeeper_gostoc\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009506,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Talking to him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009399,
+            "value": true
+          },
+          {
+            "id": 10009549,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to him again saying \"I'm free\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009549,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to him inside the Throne Room after beating Morgott",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Godrick the Grafted grace in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"gatekeeper_gostoc\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009549,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009516,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, can purchase stuff, including a now \"Ancient Dragon Smithing Stone\", nothing new afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"gatekeeper_gostoc\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"gatekeeper_gostoc\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Gatekeeper Gostoc",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009517,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

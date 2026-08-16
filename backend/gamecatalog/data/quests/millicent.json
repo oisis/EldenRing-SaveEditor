@@ -1,0 +1,1524 @@
+{
+  "key": "millicent",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Millicent",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"millicent\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Millicent",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Millicent Invasion at the swamp",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Aeonia Swamp in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1048380180,
+            "value": true
+          },
+          {
+            "id": 1048382182,
+            "value": true
+          },
+          {
+            "id": 1048385004,
+            "value": true
+          },
+          {
+            "id": 1048385005,
+            "value": true
+          },
+          {
+            "id": 1048385006,
+            "value": true
+          },
+          {
+            "id": 1048387500,
+            "value": true
+          },
+          {
+            "id": 1049385008,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Automatic dialogue, in pain",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Church of the Plague in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389252,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to her, getting an option to give her the needle or not",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050382715,
+            "value": true
+          },
+          {
+            "id": 1050389256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, she is considering leaving, repeated dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "After reloading the area, she disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050389265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Millicent will be at Gowry's Shack and Gowry gone",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Gowry's Shack in Caelid",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050362650,
+            "value": true
+          },
+          {
+            "id": 1050362653,
+            "value": true
+          },
+          {
+            "id": 1050389265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to her, she was expecting someone here, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042559206,
+            "value": true
+          },
+          {
+            "id": 1042559207,
+            "value": false
+          },
+          {
+            "id": 1042559208,
+            "value": false
+          },
+          {
+            "id": 1042559209,
+            "value": false
+          },
+          {
+            "id": 1050389262,
+            "value": true
+          },
+          {
+            "id": 1050389266,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "After a reload, Millicent will be gone and Gowry will be back",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1050362650,
+            "value": true
+          },
+          {
+            "id": 1050362653,
+            "value": true
+          },
+          {
+            "id": 1050389202,
+            "value": true
+          },
+          {
+            "id": 1050389262,
+            "value": false
+          },
+          {
+            "id": 1050389265,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Gets set after killing the Magmar Wyrm and spawning her, no idea if it is at all relevant, I believe this sets her to be at the next site she will be seen, every load includes this flag",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038519255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Talking to Millicent",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Erdtree-Gazing Hill in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038519252,
+            "value": true
+          },
+          {
+            "id": 1038519256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, saying she wants to take the path Malenia took, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038519258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Valkyrie's Prosthesis\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "The Shaded Castle in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039547300,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Giving her the \"Valkyrie's Prosthesis\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Erdtree-Gazing Hill in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038519257,
+            "value": true
+          },
+          {
+            "id": 1042559206,
+            "value": false
+          },
+          {
+            "id": 1042559207,
+            "value": true
+          },
+          {
+            "id": 1042559208,
+            "value": true
+          },
+          {
+            "id": 1042559209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Spawning her for the Godskin Apostle fight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Dominula, Windmill Village in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042552160,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Talking to Millicent after the bossfight, repeating dialogue, will move away after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042559205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Summoning Millicent for the bossfight right before Rold Lift",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1049522160,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Ancient Snow Valley Ruins in Mountaintop of the Giants",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051569255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, repeating dialogue, reloading the area will have her move away from here",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1051569256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue here",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Prayer Room in Haligtree",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15009205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, repeating dialogue, does not move",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15009206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Killing the Tree Spirit",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Drainage Channel in Haligtree",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15000710,
+            "value": true
+          },
+          {
+            "id": 15009208,
+            "value": true
+          },
+          {
+            "id": 15009209,
+            "value": true
+          },
+          {
+            "id": 1042559207,
+            "value": false
+          },
+          {
+            "id": 1042559208,
+            "value": false
+          },
+          {
+            "id": 1042559209,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Choosing no on her assist summon sign",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15002142,
+            "value": false
+          },
+          {
+            "id": 15005002,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Choosing no on her challenge summon sign",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15002152,
+            "value": false
+          },
+          {
+            "id": 15005004,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Choosing yes on challenging her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2000,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 15002150,
+            "value": true
+          },
+          {
+            "id": 15002151,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Loading in",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 551,
+            "value": true
+          },
+          {
+            "id": 900,
+            "value": true
+          },
+          {
+            "id": 1410,
+            "value": true
+          },
+          {
+            "id": 1411,
+            "value": true
+          },
+          {
+            "id": 1612,
+            "value": true
+          },
+          {
+            "id": 1634,
+            "value": true
+          },
+          {
+            "id": 15000526,
+            "value": true
+          },
+          {
+            "id": 15000626,
+            "value": true
+          },
+          {
+            "id": 15000700,
+            "value": true
+          },
+          {
+            "id": 15000701,
+            "value": true
+          },
+          {
+            "id": 15000713,
+            "value": true
+          },
+          {
+            "id": 15001625,
+            "value": true
+          },
+          {
+            "id": 15002570,
+            "value": false
+          },
+          {
+            "id": 15002575,
+            "value": false
+          },
+          {
+            "id": 15002810,
+            "value": true
+          },
+          {
+            "id": 15005154,
+            "value": true
+          },
+          {
+            "id": 15005155,
+            "value": true
+          },
+          {
+            "id": 15005156,
+            "value": true
+          },
+          {
+            "id": 15005157,
+            "value": true
+          },
+          {
+            "id": 15005158,
+            "value": true
+          },
+          {
+            "id": 15005159,
+            "value": true
+          },
+          {
+            "id": 15005161,
+            "value": true
+          },
+          {
+            "id": 15005162,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Defeating Millicent",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_027 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 7611,
+            "value": true
+          },
+          {
+            "id": 15005005,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Loading back into your own world",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4193,
+            "value": false
+          },
+          {
+            "id": 4194,
+            "value": true
+          },
+          {
+            "id": 15000526,
+            "value": false
+          },
+          {
+            "id": 15000626,
+            "value": false
+          },
+          {
+            "id": 15000712,
+            "value": true
+          },
+          {
+            "id": 15002151,
+            "value": false
+          },
+          {
+            "id": 15009208,
+            "value": false
+          },
+          {
+            "id": 15009209,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Millicent's Prosthesis\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400323,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Choosing yes on aiding her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15002140,
+            "value": true
+          },
+          {
+            "id": 15002141,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Loading into the invasion world",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15000526,
+            "value": true
+          },
+          {
+            "id": 15000626,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Defeating the sisters",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 7610,
+            "value": true
+          },
+          {
+            "id": 15005003,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Loading back into your world",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4191,
+            "value": true
+          },
+          {
+            "id": 4194,
+            "value": false
+          },
+          {
+            "id": 15000526,
+            "value": false
+          },
+          {
+            "id": 15000626,
+            "value": false
+          },
+          {
+            "id": 15002141,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Rotten Winged Sword Insignia\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400480,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Talking to Millicent after the invasion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15009207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Talking to her again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15009210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, saying goodbye, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15009211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, Millicent is now dead",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4191,
+            "value": false
+          },
+          {
+            "id": 4192,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Looting her body, receiving \"Unalloyed Gold Needle\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"millicent\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400321,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Returning \"Unalloyed Gold Needle\" to Malenia's Flower and receiving \"Miquella's Needle\" and \"Somber Ancient Dragone Smithing Stone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"millicent\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Malenia's bossroom in the Haligtree",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"millicent\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Millicent",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9020,
+            "value": false
+          },
+          {
+            "id": 400324,
+            "value": true
+          },
+          {
+            "id": 400325,
+            "value": true
+          },
+          {
+            "id": 15000713,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

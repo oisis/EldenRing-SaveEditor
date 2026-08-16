@@ -1,0 +1,822 @@
+{
+  "key": "white_mask_varre",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "White Mask Varre",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"white_mask_varre\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "White Mask Varre",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Finishing first part of dialogue with White Mask Varré",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "First Step in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"white_mask_varre\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Finishing second part of dialogue with White Mask Varré",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Finishing third part of dialogue with White Mask Varré",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Going back after speaking to the Two Fingers, finding a message and receiving \"Bravo!\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60826,
+            "value": true
+          },
+          {
+            "id": 400035,
+            "value": true
+          },
+          {
+            "id": 1042365011,
+            "value": true
+          },
+          {
+            "id": 1043362215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue choosing the option \"They were magnificent\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Rose Church in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"white_mask_varre\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3082,
+            "value": true
+          },
+          {
+            "id": 1035449202,
+            "value": true
+          },
+          {
+            "id": 1035449205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035449208,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Reloading the area (Seamless' way of completing the quest, you have that already) and refusing him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035449215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to him and choosing \"Anoint me\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035449216,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Lord of Blood's Favor\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400031,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Activating the prompt \"Dye cloth with maiden's blood\" and receiving \"Lord of Blood's Favor\" (This time soaked)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Chapel of Anticipation in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"white_mask_varre\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400033,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to him after soaking \"Lord of Blood's Favor\" with blood of a maiden, \"Offer finger\" prompt appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Rose Church in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"white_mask_varre\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035449225,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Offer finger\" animation starts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035442705,
+            "value": true
+          },
+          {
+            "id": 1035442706,
+            "value": true
+          },
+          {
+            "id": 1035442707,
+            "value": false
+          },
+          {
+            "id": 1035442708,
+            "value": true
+          },
+          {
+            "id": 1035442709,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Animation ends and you receive \"Bloody Finger\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1800,
+            "value": true
+          },
+          {
+            "id": 9420,
+            "value": true
+          },
+          {
+            "id": 9432,
+            "value": true
+          },
+          {
+            "id": 60270,
+            "value": true
+          },
+          {
+            "id": 1035442705,
+            "value": false
+          },
+          {
+            "id": 1035442706,
+            "value": false
+          },
+          {
+            "id": 1035442708,
+            "value": false
+          },
+          {
+            "id": 1035442709,
+            "value": false
+          },
+          {
+            "id": 1035445003,
+            "value": true
+          },
+          {
+            "id": 1035445004,
+            "value": true
+          },
+          {
+            "id": 1035449227,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to him again after offering your finger, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1035449226,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Pureblood Knight's Medal\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400032,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Invading him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Dynasty Mausoleum Midpoint in Mohgwyn Palace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"white_mask_varre\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2000,
+            "value": true
+          },
+          {
+            "id": 12052140,
+            "value": true
+          },
+          {
+            "id": 12052141,
+            "value": true
+          },
+          {
+            "id": 12053700,
+            "value": true
+          },
+          {
+            "id": 12053701,
+            "value": true
+          },
+          {
+            "id": 12055109,
+            "value": true
+          },
+          {
+            "id": 12055112,
+            "value": true
+          },
+          {
+            "id": 12055115,
+            "value": true
+          },
+          {
+            "id": 12055120,
+            "value": true
+          },
+          {
+            "id": 12055122,
+            "value": true
+          },
+          {
+            "id": 12055123,
+            "value": true
+          },
+          {
+            "id": 12055124,
+            "value": true
+          },
+          {
+            "id": 12055126,
+            "value": true
+          },
+          {
+            "id": 12055127,
+            "value": true
+          },
+          {
+            "id": 1039532145,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Defeating him",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 710650,
+            "value": true
+          },
+          {
+            "id": 12052141,
+            "value": false
+          },
+          {
+            "id": 12055121,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Talking to him next to where his invasion sign was",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12059165,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, he dies, lootable items appear",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 12059166,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Picking up Festering Bloody Finger and Varré`s Bouquet, questline ends here and his corpse disappears after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"white_mask_varre\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400036,
+            "value": true
+          },
+          {
+            "id": 400037,
+            "value": true
+          },
+          {
+            "id": 12059163,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Talking to him after beating Godrick, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"white_mask_varre\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "First Step in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"white_mask_varre\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "White Mask Varre",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042369202,
+            "value": true
+          },
+          {
+            "id": 1042369235,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

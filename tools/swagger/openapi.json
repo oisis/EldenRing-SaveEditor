@@ -2738,6 +2738,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step": {
+      "put": {
+        "operationId": "setQuestStep",
+        "tags": ["World"],
+        "summary": "SetQuestStep",
+        "description": "Sets an NPC questline to an explicitly specified supported step under expectedRevision control. Resolves the curated quest resource and step plan from GameCatalog and atomically writes the resulting canonical event flags to the character slot. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetQuestStepRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed quest step mutation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetQuestStepResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, invalid expectedRevision, unknown session, inactive slot, unknown quest or step, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials": {
       "get": {
         "operationId": "getTutorials",
@@ -3700,7 +3748,7 @@
         "name": "kind",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Kind, matched exactly. The kind is resolved before the key.",
+        "description": "schema.Resource.Kind, matched exactly. The kind is resolved before the key. Accepted values: item, colosseum, region, summoning_pool, grace, boss, map_region, tutorial, quest.",
         "schema": {
           "type": "string"
         },
@@ -3710,7 +3758,7 @@
         "name": "key",
         "in": "query",
         "required": true,
-        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace, boss and map region keys use lowercase letters, digits and underscores. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
+        "description": "schema.Resource.Key inside the given kind, matched exactly. Its shape depends on the kind: an item key is eight uppercase hexadecimal characters; colosseum, region, summoning pool, grace, boss, map region and quest keys use lowercase letters, digits and underscores; tutorial keys are decimal numbers. Step keys inside a quest use the historical stable format legacy_NNN. It never carries a kind prefix and is not an Item.GameID, not a variant ID and not a data file name.",
         "schema": {
           "type": "string"
         },
@@ -3742,10 +3790,10 @@
         "name": "resourceType",
         "in": "query",
         "required": false,
-        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces, bosses, map regions and tutorials in one page.",
+        "description": "schema.Resource.Kind, matched exactly and case-sensitively. Omitted or empty means every kind, which today mixes items, colosseums, regions, summoning pools, graces, bosses, map regions, tutorials and quests in one page.",
         "schema": {
           "type": "string",
-          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial"]
+          "enum": ["", "item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial", "quest"]
         },
         "example": "item"
       },
@@ -3795,7 +3843,7 @@
         "name": "search",
         "in": "query",
         "required": false,
-        "description": "Case-insensitive substring matched against Resource.Key and the item name. An unknown name is an empty string and is never searched as a placeholder. Omitted or empty means no search.",
+        "description": "Case-insensitive substring matched against Resource.Key and the resource name (item name, colosseum name, region name, summoning pool name, grace name, boss name, map region name, tutorial title, or quest name). An unknown name is an empty string and is never searched as a placeholder. Omitted or empty means no search.",
         "schema": {
           "type": "string"
         },
@@ -7586,14 +7634,14 @@
       },
       "Resource": {
         "type": "object",
-        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument, kind 'boss' carries BossDocument, kind 'map_region' carries MapRegionDocument and kind 'tutorial' carries TutorialDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
+        "description": "schema.Resource identified by the (kind, key) pair. It is a union over the resource kinds: kind 'item' carries ItemDocument, kind 'colosseum' carries ColosseumDocument, kind 'region' carries RegionDocument, kind 'summoning_pool' carries SummoningPoolDocument, kind 'grace' carries GraceDocument, kind 'boss' carries BossDocument, kind 'map_region' carries MapRegionDocument, kind 'tutorial' carries TutorialDocument and kind 'quest' carries QuestDocument. Documents of other kinds are absent, never null. The documents are passed through as stored in the catalog; the full shape of ItemDocument is owned by the catalog schema, not by this explorer.",
         "properties": {
           "key": {
             "type": "string"
           },
           "kind": {
             "type": "string",
-            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial"]
+            "enum": ["item", "colosseum", "region", "summoning_pool", "grace", "boss", "map_region", "tutorial", "quest"]
           },
           "item": {
             "type": "object",
@@ -7620,6 +7668,9 @@
           },
           "tutorial": {
             "$ref": "#/components/schemas/TutorialDocument"
+          },
+          "quest": {
+            "$ref": "#/components/schemas/QuestDocument"
           }
         },
         "required": ["key", "kind"],
@@ -7639,7 +7690,8 @@
                 {"required": ["grace"]},
                 {"required": ["boss"]},
                 {"required": ["mapRegion"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7658,7 +7710,8 @@
                 {"required": ["grace"]},
                 {"required": ["boss"]},
                 {"required": ["mapRegion"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7677,7 +7730,8 @@
                 {"required": ["grace"]},
                 {"required": ["boss"]},
                 {"required": ["mapRegion"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7696,7 +7750,8 @@
                 {"required": ["grace"]},
                 {"required": ["boss"]},
                 {"required": ["mapRegion"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7715,7 +7770,8 @@
                 {"required": ["summoningPool"]},
                 {"required": ["boss"]},
                 {"required": ["mapRegion"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7734,7 +7790,8 @@
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
                 {"required": ["mapRegion"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7753,7 +7810,8 @@
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
                 {"required": ["boss"]},
-                {"required": ["tutorial"]}
+                {"required": ["tutorial"]},
+                {"required": ["quest"]}
               ]
             }
           },
@@ -7772,7 +7830,28 @@
                 {"required": ["summoningPool"]},
                 {"required": ["grace"]},
                 {"required": ["boss"]},
-                {"required": ["mapRegion"]}
+                {"required": ["mapRegion"]},
+                {"required": ["quest"]}
+              ]
+            }
+          },
+          {
+            "properties": {
+              "kind": {
+                "enum": ["quest"]
+              }
+            },
+            "required": ["quest"],
+            "not": {
+              "anyOf": [
+                {"required": ["item"]},
+                {"required": ["colosseum"]},
+                {"required": ["region"]},
+                {"required": ["summoningPool"]},
+                {"required": ["grace"]},
+                {"required": ["boss"]},
+                {"required": ["mapRegion"]},
+                {"required": ["tutorial"]}
               ]
             }
           }
@@ -8075,6 +8154,79 @@
           }
         },
         "required": ["tutorialID", "title"]
+      },
+      "QuestFlag": {
+        "type": "object",
+        "description": "schema.QuestFlag. An event flag state assignment within a quest step.",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64",
+            "minimum": 1,
+            "maximum": 4294967295
+          },
+          "value": {
+            "type": "boolean"
+          }
+        },
+        "required": ["id", "value"]
+      },
+      "QuestStepDocument": {
+        "type": "object",
+        "description": "schema.QuestStepDocument. One supported step of an NPC questline.",
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^legacy_[0-9]{3}$"
+          },
+          "description": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "location": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean"},
+              "value": {"type": "string"},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "flags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestFlag"
+            }
+          }
+        },
+        "required": ["key", "description", "location", "flags"]
+      },
+      "QuestDocument": {
+        "type": "object",
+        "description": "schema.QuestDocument. An NPC questline declaring supported steps with canonical event flag plans.",
+        "properties": {
+          "name": {
+            "type": "object",
+            "properties": {
+              "known": {"type": "boolean", "enum": [true]},
+              "value": {"type": "string", "minLength": 1},
+              "provenance": {"type": "object", "additionalProperties": true}
+            },
+            "required": ["known", "value", "provenance"]
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestStepDocument"
+            }
+          }
+        },
+        "required": ["name", "steps"]
       },
       "ItemVariant": {
         "type": "object",
@@ -8469,6 +8621,76 @@
           }
         },
         "required": ["presets"]
+      },
+      "SetQuestStepRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "questKind": {
+            "type": "string",
+            "enum": ["quest"]
+          },
+          "questKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "stepKind": {
+            "type": "string",
+            "enum": ["quest_step"]
+          },
+          "stepKey": {
+            "type": "string",
+            "minLength": 1
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          }
+        },
+        "required": [
+          "questKind",
+          "questKey",
+          "stepKind",
+          "stepKey",
+          "expectedRevision"
+        ]
+      },
+      "SetQuestStepResult": {
+        "type": "object",
+        "properties": {
+          "saveSessionID": {
+            "type": "string"
+          },
+          "saveRevision": {
+            "type": "string"
+          },
+          "characterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "questKind": {
+            "type": "string"
+          },
+          "questKey": {
+            "type": "string"
+          },
+          "stepKind": {
+            "type": "string"
+          },
+          "stepKey": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "questKind",
+          "questKey",
+          "stepKind",
+          "stepKey"
+        ]
       }
     }
   }

@@ -1,0 +1,2271 @@
+{
+  "key": "melina",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Melina",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"melina\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Melina",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Dying to Grafted Scion",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Chapel of Anticipation in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10010030,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "First Melina Cutscene",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Cave of Knowledge in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 101,
+            "value": true
+          },
+          {
+            "id": 1020,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": false
+          },
+          {
+            "id": 62101,
+            "value": true
+          },
+          {
+            "id": 18000050,
+            "value": true
+          },
+          {
+            "id": 18000511,
+            "value": false
+          },
+          {
+            "id": 18000516,
+            "value": false
+          },
+          {
+            "id": 18000530,
+            "value": true
+          },
+          {
+            "id": 18000531,
+            "value": true
+          },
+          {
+            "id": 18000532,
+            "value": true
+          },
+          {
+            "id": 18000533,
+            "value": false
+          },
+          {
+            "id": 18000820,
+            "value": true
+          },
+          {
+            "id": 18000870,
+            "value": true
+          },
+          {
+            "id": 18002250,
+            "value": true
+          },
+          {
+            "id": 18002251,
+            "value": true
+          },
+          {
+            "id": 18002270,
+            "value": true
+          },
+          {
+            "id": 18002400,
+            "value": true
+          },
+          {
+            "id": 18002510,
+            "value": true
+          },
+          {
+            "id": 18002520,
+            "value": true
+          },
+          {
+            "id": 18002570,
+            "value": false
+          },
+          {
+            "id": 18002571,
+            "value": false
+          },
+          {
+            "id": 18002580,
+            "value": true
+          },
+          {
+            "id": 18005001,
+            "value": true
+          },
+          {
+            "id": 18005012,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Melina cutscene",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Gatefront in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 951,
+            "value": true
+          },
+          {
+            "id": 953,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 3626,
+            "value": true
+          },
+          {
+            "id": 4160,
+            "value": true
+          },
+          {
+            "id": 4698,
+            "value": true
+          },
+          {
+            "id": 9000,
+            "value": true
+          },
+          {
+            "id": 9001,
+            "value": true
+          },
+          {
+            "id": 9020,
+            "value": true
+          },
+          {
+            "id": 9021,
+            "value": true
+          },
+          {
+            "id": 9803,
+            "value": false
+          },
+          {
+            "id": 9804,
+            "value": true
+          },
+          {
+            "id": 10009614,
+            "value": true
+          },
+          {
+            "id": 16009464,
+            "value": true
+          },
+          {
+            "id": 1042369202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Melina cutscene ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 531,
+            "value": false
+          },
+          {
+            "id": 532,
+            "value": true
+          },
+          {
+            "id": 551,
+            "value": true
+          },
+          {
+            "id": 553,
+            "value": false
+          },
+          {
+            "id": 823,
+            "value": true
+          },
+          {
+            "id": 961,
+            "value": true
+          },
+          {
+            "id": 962,
+            "value": true
+          },
+          {
+            "id": 963,
+            "value": true
+          },
+          {
+            "id": 964,
+            "value": true
+          },
+          {
+            "id": 967,
+            "value": true
+          },
+          {
+            "id": 968,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 4651,
+            "value": true
+          },
+          {
+            "id": 4652,
+            "value": true
+          },
+          {
+            "id": 4653,
+            "value": true
+          },
+          {
+            "id": 9001,
+            "value": false
+          },
+          {
+            "id": 9021,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Accept/Refuse pop-up after Melina dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4681,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "\"Gatefront\" Grace menu pop-up, after Melina dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": false
+          },
+          {
+            "id": 4653,
+            "value": false
+          },
+          {
+            "id": 4670,
+            "value": false
+          },
+          {
+            "id": 4698,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "\"Level Up\" select",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": true
+          },
+          {
+            "id": 4656,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Melina disappears from \"Gatefront\" grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 69090,
+            "value": true
+          },
+          {
+            "id": 69370,
+            "value": true
+          },
+          {
+            "id": 710770,
+            "value": true
+          },
+          {
+            "id": 1042372651,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Second \"Talk to Melina\" dialogue while sitting down at a grace, after Gatefront/Ranni",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042379208,
+            "value": true
+          },
+          {
+            "id": 1042379209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" at grace, dialogue starting with \"Me?\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Any grace in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1042379206,
+            "value": false
+          },
+          {
+            "id": 1042379207,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Melina appearing at Grace taking you to Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Margit, the Fell Omen grace or first grace outside of Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009655,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Accepting going to Roundtable Hold prompt",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109786,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Dialogue at a grace starting with \"Words linger here...\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Any grace in Limgrave (might be Churches)",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4651,
+            "value": true
+          },
+          {
+            "id": 4652,
+            "value": true
+          },
+          {
+            "id": 4655,
+            "value": true
+          },
+          {
+            "id": 1043349252,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Choosing you want to hear them, menu pop up afterwards, done talking to Melina",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": false
+          },
+          {
+            "id": 4655,
+            "value": false
+          },
+          {
+            "id": 1043349250,
+            "value": false
+          },
+          {
+            "id": 1043349251,
+            "value": true
+          },
+          {
+            "id": 1046389200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Melina spawns in at Third Church of Marika when choosing \"Talk to Melina\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4651,
+            "value": true
+          },
+          {
+            "id": 4652,
+            "value": true
+          },
+          {
+            "id": 4655,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Talk to Melina \"Spoken echos of Queen Marika...\" dialogue at Third Church of Marika",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1046389203,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Dialogue over, \"Talk to Melina\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": false
+          },
+          {
+            "id": 4655,
+            "value": false
+          },
+          {
+            "id": 1046389200,
+            "value": true
+          },
+          {
+            "id": 1046389201,
+            "value": false
+          },
+          {
+            "id": 1046389202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Melina disappears when standing up from grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4651,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" dialogue about Boc",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "East Raya Lucaria Gate in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1036489250,
+            "value": false
+          },
+          {
+            "id": 1036489251,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Sitting at \"Grand Lift of Dectus\" grace, \"Talk to Melina\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Grand Lift of Dectus in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038509250,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "\"Spoken echos...\" dialogue of her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038509252,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Saying \"I'm not interested\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038509250,
+            "value": true
+          },
+          {
+            "id": 1046382700,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Finishing the dialogue, option \"Talk to Melina\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038509250,
+            "value": false
+          },
+          {
+            "id": 1038509251,
+            "value": true
+          },
+          {
+            "id": 1046389200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037519201,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037519200,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Outerwall Battleground in Captial Outskirts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043539250,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_032",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_032 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_032 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043539252,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends, \"Talk to Melina\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043539250,
+            "value": false
+          },
+          {
+            "id": 1043539251,
+            "value": true
+          },
+          {
+            "id": 1046389200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Melina pays a visit",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "East Capital Rampart",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009260,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "She appears at the grace after interacting with the thorns on the Erdtree, giving you the \"Rold Medallion\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400001,
+            "value": true
+          },
+          {
+            "id": 11002745,
+            "value": true
+          },
+          {
+            "id": 11005058,
+            "value": true
+          },
+          {
+            "id": 11009251,
+            "value": true
+          },
+          {
+            "id": 11009252,
+            "value": true
+          },
+          {
+            "id": 11109687,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" option appears, just repeating dialouge",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_036 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" option appears, saying im not interested",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Minor Erdtree Church in Capital Outskirts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": false
+          },
+          {
+            "id": 4655,
+            "value": false
+          },
+          {
+            "id": 1043509200,
+            "value": true
+          },
+          {
+            "id": 1043509202,
+            "value": true
+          },
+          {
+            "id": 1046382700,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\" again to hear the words, receiving \"Outer Order\" gesture afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": true
+          },
+          {
+            "id": 4655,
+            "value": true
+          },
+          {
+            "id": 60846,
+            "value": true
+          },
+          {
+            "id": 1043509201,
+            "value": true
+          },
+          {
+            "id": 1046389200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Option disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4652,
+            "value": false
+          },
+          {
+            "id": 4655,
+            "value": false
+          },
+          {
+            "id": 1043509200,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" prompt",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Underground Roadside in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009270,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_041",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\", disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_041 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_041 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11009270,
+            "value": false
+          },
+          {
+            "id": 11009271,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_042",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_042 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Cathedral of the Forsaken in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_042 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009350,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_043",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\", warning you about the Frenzied Flame, \"Talk to Melina\" option stays, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_043 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_043 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35002732,
+            "value": true
+          },
+          {
+            "id": 35009350,
+            "value": false
+          },
+          {
+            "id": 35009351,
+            "value": true
+          },
+          {
+            "id": 35009355,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_044",
+        "description": {
+          "known": true,
+          "value": "Leaving the grace makes the option disappear on next grace sit",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_044 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_044 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009355,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_045",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_045 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Frenzied Flame Proscription in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_045 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009352,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_046",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\", option stays",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_046 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_046 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35002733,
+            "value": true
+          },
+          {
+            "id": 35009352,
+            "value": false
+          },
+          {
+            "id": 35009353,
+            "value": true
+          },
+          {
+            "id": 35009358,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_047",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\" again, option still stays, now repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_047 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_047 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009358,
+            "value": true
+          },
+          {
+            "id": 35009359,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_048",
+        "description": {
+          "known": true,
+          "value": "Option disappears on next grace sit",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_048 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_048 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009358,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_049",
+        "description": {
+          "known": true,
+          "value": "Melina appears at the grace after you've gone mad, saying she will kill you and a final goodbye",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_049 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_049 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 4651,
+            "value": false
+          },
+          {
+            "id": 4652,
+            "value": false
+          },
+          {
+            "id": 4653,
+            "value": false
+          },
+          {
+            "id": 12032503,
+            "value": true
+          },
+          {
+            "id": 35009360,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_050",
+        "description": {
+          "known": true,
+          "value": "Gets set after standing up from the grace",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_050 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_050 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35002731,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_051",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_051 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Church of Repose in Mountaintops of the Giants",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_051 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054539210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_052",
+        "description": {
+          "known": true,
+          "value": "Choosing it, disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_052 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_052 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054539210,
+            "value": false
+          },
+          {
+            "id": 1054539211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_053",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_053 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "First Church of Marika in Mountaintops of the Giants",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_053 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054559200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_054",
+        "description": {
+          "known": true,
+          "value": "She talks to you",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_054 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_054 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054559202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_055",
+        "description": {
+          "known": true,
+          "value": "Saying you are not interested",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_055 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_055 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1046382700,
+            "value": true
+          },
+          {
+            "id": 1054559200,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_056",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Talk to Melina\" again, disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_056 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_056 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1046389200,
+            "value": true
+          },
+          {
+            "id": 1054559200,
+            "value": false
+          },
+          {
+            "id": 1054559201,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_057",
+        "description": {
+          "known": true,
+          "value": "\"Talk to Melina\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_057 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Forge of the Giants",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"melina\" step legacy_057 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054539215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_058",
+        "description": {
+          "known": true,
+          "value": "Choosing it, can now choose between \"I'm ready\" and \"I'd like you to wait\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_058 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_058 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054539216,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_059",
+        "description": {
+          "known": true,
+          "value": "Telling her \"I'd like you to wait\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_059 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_059 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1054539215,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_060",
+        "description": {
+          "known": true,
+          "value": "Choosing \"I'm ready\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_060 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_060 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 110,
+            "value": true
+          },
+          {
+            "id": 111,
+            "value": true
+          },
+          {
+            "id": 302,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 9000,
+            "value": false
+          },
+          {
+            "id": 9001,
+            "value": true
+          },
+          {
+            "id": 9020,
+            "value": false
+          },
+          {
+            "id": 9021,
+            "value": true
+          },
+          {
+            "id": 780010,
+            "value": false
+          },
+          {
+            "id": 780011,
+            "value": true
+          },
+          {
+            "id": 1054539200,
+            "value": true
+          },
+          {
+            "id": 1054539205,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_061",
+        "description": {
+          "known": true,
+          "value": "Cutscene ends, next one starts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"melina\" step legacy_061 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"melina\" step legacy_061 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Melina",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 210,
+            "value": true
+          },
+          {
+            "id": 211,
+            "value": true
+          },
+          {
+            "id": 220,
+            "value": true
+          },
+          {
+            "id": 221,
+            "value": true
+          },
+          {
+            "id": 2200,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

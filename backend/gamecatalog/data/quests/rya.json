@@ -1,0 +1,945 @@
+{
+  "key": "rya",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Rya",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"rya\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Rya",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue with Rya next to the Telescope in Liurnia Lake, accepting her request, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Near the telescope that is near Boilprawn Shack in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037429202,
+            "value": true
+          },
+          {
+            "id": 1037429209,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Giving Rya her necklace back, receiving \"Volcano Manor Invitation\" letter",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037429210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "\"Volcano Manor Invitation\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400090,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Talking to her again after receiving the letter, she is telling you about the shortcut to Altus Plateau, repeating dialogue, disappearing from Liurnia after resting/reloading, after this step is done",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1037429211,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to her and refusing to take her hand",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Grand Lift of Dectus",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3081,
+            "value": true
+          },
+          {
+            "id": 1038509202,
+            "value": true
+          },
+          {
+            "id": 1038519206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Taking her hand",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1038502705,
+            "value": true
+          },
+          {
+            "id": 1038502706,
+            "value": true
+          },
+          {
+            "id": 1038502707,
+            "value": false
+          },
+          {
+            "id": 1038502708,
+            "value": true
+          },
+          {
+            "id": 1038502709,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya in the Drawing Room, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Drawing Room in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009302,
+            "value": true
+          },
+          {
+            "id": 16009305,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya after the first Invasion, saying she hears strange sounds, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002710,
+            "value": true
+          },
+          {
+            "id": 16009308,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya after the first Invasion, saying she hears strange sounds, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002710,
+            "value": true
+          },
+          {
+            "id": 16009308,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya as a serpent for the first time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Different room in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3081,
+            "value": true
+          },
+          {
+            "id": 16002711,
+            "value": true
+          },
+          {
+            "id": 16009302,
+            "value": false
+          },
+          {
+            "id": 16009306,
+            "value": true
+          },
+          {
+            "id": 16009312,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, telling you Tanith is her mother, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009307,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya after the second invasion, choosing not to tell her about the secret part of Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009315,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Telling her about the secret, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009318,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Serpent's Amnion\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16007710,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Giving her the \"Serpent's Amnion\", repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009312,
+            "value": true
+          },
+          {
+            "id": 16009319,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Gets set after a reload, Rya will have moved",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009312,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya and not giving her the Tonic, asking you to kill her",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Side room deeper inside Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16002715,
+            "value": true
+          },
+          {
+            "id": 16009322,
+            "value": true
+          },
+          {
+            "id": 16009326,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Killing Rya, thanking you while dying",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3420,
+            "value": false
+          },
+          {
+            "id": 3421,
+            "value": false
+          },
+          {
+            "id": 3422,
+            "value": false
+          },
+          {
+            "id": 3423,
+            "value": true
+          },
+          {
+            "id": 3424,
+            "value": false
+          },
+          {
+            "id": 16005043,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Daedicar's Woe\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400091,
+            "value": true
+          },
+          {
+            "id": 16009322,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Giving Rya the Tonic",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Side room deeper inside Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009322,
+            "value": true
+          },
+          {
+            "id": 16009327,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Rya just falls asleep",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009329,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "After defeating Rykard and having everyone else leave the Manor and having given Rya the tonic from Tanith: Rya will be back in the Drawing Room. Talking to her, single dialogue, repeating dialogue afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Drawing Room inside Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009312,
+            "value": true
+          },
+          {
+            "id": 16009335,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Reloading the area",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009312,
+            "value": true
+          },
+          {
+            "id": 16009464,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "After reloading the area, Rya will be gone too, leaving behind loot you can pick up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_024 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009338,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Picking up the loot, receiving \"Daedicar's Woe\" - second Rya ending",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"rya\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400091,
+            "value": true
+          },
+          {
+            "id": 16005045,
+            "value": true
+          },
+          {
+            "id": 16009312,
+            "value": true
+          },
+          {
+            "id": 16009313,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Talking to Rya after killing Rykard and not giving her the tonic, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"rya\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Side room deeper inside Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"rya\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Rya",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16009322,
+            "value": true
+          },
+          {
+            "id": 16009328,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

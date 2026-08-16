@@ -1,0 +1,1920 @@
+{
+  "key": "sorceress_sellen",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Sorceress Sellen",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"sorceress_sellen\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Sorceress Sellen",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initiating first ever dialogue with Sellen",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Waypoint Ruins Cellar in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "End of first dialogue -\u003e \"I want to learn sorcery\" prompt",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "End of second dialogue after choosing \"I want to learn sorcery\" and leading to menu pop-up, receiving \"Nod In Thought\" emote",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 60817,
+            "value": true
+          },
+          {
+            "id": 1044369209,
+            "value": true
+          },
+          {
+            "id": 1044369211,
+            "value": false
+          },
+          {
+            "id": 1044369212,
+            "value": false
+          },
+          {
+            "id": 1044369213,
+            "value": false
+          },
+          {
+            "id": 1044369214,
+            "value": false
+          },
+          {
+            "id": 1044369215,
+            "value": false
+          },
+          {
+            "id": 1044369216,
+            "value": false
+          },
+          {
+            "id": 1044369217,
+            "value": false
+          },
+          {
+            "id": 1044369218,
+            "value": false
+          },
+          {
+            "id": 1044369219,
+            "value": false
+          },
+          {
+            "id": 1044369220,
+            "value": false
+          },
+          {
+            "id": 1044369238,
+            "value": false
+          },
+          {
+            "id": 1044369239,
+            "value": false
+          },
+          {
+            "id": 1044369240,
+            "value": false
+          },
+          {
+            "id": 1044369243,
+            "value": false
+          },
+          {
+            "id": 1044369249,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Talking to her again after leaving the menu the first time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044362705,
+            "value": true
+          },
+          {
+            "id": 1044369210,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking to her while she is trapped for the first time",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Witchbane Ruins in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041339206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Talking to Sellen after talking to Seluvis about Nokron, \"Show letter of introduction\" option appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Waypoint Ruins in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1043362212,
+            "value": true
+          },
+          {
+            "id": 1043362213,
+            "value": true
+          },
+          {
+            "id": 1043362215,
+            "value": true
+          },
+          {
+            "id": 1043362217,
+            "value": true
+          },
+          {
+            "id": 1044369214,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Receiving Comet Azur from Azur",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Hermit Village in Altus Plateau",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400440,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to Sellen after receiving Comet Azur",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Waypoint Ruins in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369202,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Menu pop-up, now with \"Show Azur's sorcery\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044362705,
+            "value": true
+          },
+          {
+            "id": 1044369211,
+            "value": false
+          },
+          {
+            "id": 1044369212,
+            "value": false
+          },
+          {
+            "id": 1044369213,
+            "value": false
+          },
+          {
+            "id": 1044369214,
+            "value": false
+          },
+          {
+            "id": 1044369215,
+            "value": true
+          },
+          {
+            "id": 1044369216,
+            "value": false
+          },
+          {
+            "id": 1044369217,
+            "value": false
+          },
+          {
+            "id": 1044369218,
+            "value": false
+          },
+          {
+            "id": 1044369219,
+            "value": false
+          },
+          {
+            "id": 1044369220,
+            "value": false
+          },
+          {
+            "id": 1044369238,
+            "value": false
+          },
+          {
+            "id": 1044369239,
+            "value": false
+          },
+          {
+            "id": 1044369240,
+            "value": false
+          },
+          {
+            "id": 1044369243,
+            "value": false
+          },
+          {
+            "id": 1044369249,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Show Azur's sorcery\", gets replaced with \"Tell me your story\" afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369215,
+            "value": false
+          },
+          {
+            "id": 1044369216,
+            "value": true
+          },
+          {
+            "id": 1044369224,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Tell me your story\" and saying let me think about it (refusing), afterwards \"I'll help restore the primeval current\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369216,
+            "value": false
+          },
+          {
+            "id": 1044369217,
+            "value": true
+          },
+          {
+            "id": 1044369226,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Choosing \"I'll help restore...\", disappears afterwards, \"I have a favor to ask\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369217,
+            "value": false
+          },
+          {
+            "id": 1044369218,
+            "value": true
+          },
+          {
+            "id": 1044369229,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Choosing \"I have a favor to ask\", receiving \"Glintstone Sealbreaker\", \"Lead on Lusat\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400102,
+            "value": true
+          },
+          {
+            "id": 1044369218,
+            "value": false
+          },
+          {
+            "id": 1044369227,
+            "value": true
+          },
+          {
+            "id": 1044369249,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Lead on Lusat\", stays and is repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369249,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "\"About glintstone sorcery\" appears after buying more sorceries",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369220,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "\"Choosing \"About glintstone sorcery\", disappears afterwards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369220,
+            "value": false
+          },
+          {
+            "id": 1044369230,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "New dialogue when leaving, after buying all sorceries, saying she is proud",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369236,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Reloading the area after buying all sorceries, \"About the request\" appears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369212,
+            "value": true
+          },
+          {
+            "id": 1044369221,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Choosing \"About the request\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369222,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends, \"About the request\" is still present, repeats dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369212,
+            "value": false
+          },
+          {
+            "id": 1044369213,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Using the Sellian Sealbreaker on the Seal",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 31112400,
+            "value": true
+          },
+          {
+            "id": 31118700,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "Receiving Stars of Ruin from Lusat",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400430,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_024",
+        "description": {
+          "known": true,
+          "value": "Talking to Sellen after receiving \"Stars of Ruin\", \"Lusat's location\" appears now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Waypoint Ruins in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_024 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369219,
+            "value": true
+          },
+          {
+            "id": 1044369249,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_025",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Lusat's location\" and receiving Starlight Shards as a rewards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_025 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_025 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400103,
+            "value": true
+          },
+          {
+            "id": 1044369228,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_026",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends, \"Lusat's location\" disappears",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_026 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_026 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369219,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_027",
+        "description": {
+          "known": true,
+          "value": "Talking to Sellen after her requesting to go there",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Witchbane Ruins in Limgrave",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_027 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1041339206,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_028",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends and you are able to \"Accpet primal glintstone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_028 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_028 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369233,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_029",
+        "description": {
+          "known": true,
+          "value": "Animation for \"Accept primal glintstone\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_029 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_029 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044362702,
+            "value": true
+          },
+          {
+            "id": 1044362703,
+            "value": true
+          },
+          {
+            "id": 1044362704,
+            "value": false
+          },
+          {
+            "id": 1044362708,
+            "value": true
+          },
+          {
+            "id": 1044362709,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_030",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Sellen's Primal Glintstone\", animation stops",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_030 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_030 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400100,
+            "value": true
+          },
+          {
+            "id": 1041335013,
+            "value": true
+          },
+          {
+            "id": 1041335014,
+            "value": true
+          },
+          {
+            "id": 1044362702,
+            "value": false
+          },
+          {
+            "id": 1044362703,
+            "value": false
+          },
+          {
+            "id": 1044362708,
+            "value": false
+          },
+          {
+            "id": 1044362709,
+            "value": false
+          },
+          {
+            "id": 1044369231,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_031",
+        "description": {
+          "known": true,
+          "value": "Talking to her after aquiring the Glintstone, thanking you, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_031 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_031 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044369232,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_033",
+        "description": {
+          "known": true,
+          "value": "Dialogue ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_033 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_033 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509255,
+            "value": true
+          },
+          {
+            "id": 1034509259,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_034",
+        "description": {
+          "known": true,
+          "value": "Talking to her again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_034 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_034 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1034509257,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_035",
+        "description": {
+          "known": true,
+          "value": "Talking to her again for the third time, you can buy sorceries again, she disappears after a reload",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_035 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_035 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14009256,
+            "value": false
+          },
+          {
+            "id": 14009257,
+            "value": false
+          },
+          {
+            "id": 14009258,
+            "value": false
+          },
+          {
+            "id": 14009259,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_036",
+        "description": {
+          "known": true,
+          "value": "Checking her summoning sign and choosing no",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Raya Lucaria Grand Library in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"sorceress_sellen\" step legacy_036 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002144,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_037",
+        "description": {
+          "known": true,
+          "value": "Choosing yes",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_037 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_037 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002143,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_038",
+        "description": {
+          "known": true,
+          "value": "Defeating Jerren, receiving his amor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_038 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_038 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14002143,
+            "value": false
+          },
+          {
+            "id": 14002660,
+            "value": true
+          },
+          {
+            "id": 14003822,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_039",
+        "description": {
+          "known": true,
+          "value": "Spawning into the Library after the fight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_039 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_039 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14000702,
+            "value": true
+          },
+          {
+            "id": 14003814,
+            "value": true
+          },
+          {
+            "id": 14003977,
+            "value": true
+          },
+          {
+            "id": 14005161,
+            "value": true
+          },
+          {
+            "id": 14005163,
+            "value": true
+          },
+          {
+            "id": 14005165,
+            "value": true
+          },
+          {
+            "id": 14005168,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_040",
+        "description": {
+          "known": true,
+          "value": "Talking to her after the fight",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_040 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_040 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14009255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_041",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, receiving \"Glintstone Kris\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_041 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_041 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400101,
+            "value": true
+          },
+          {
+            "id": 14009266,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_042",
+        "description": {
+          "known": true,
+          "value": "Talking to her again, menu opens to buy",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_042 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_042 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14009256,
+            "value": false
+          },
+          {
+            "id": 14009257,
+            "value": false
+          },
+          {
+            "id": 14009258,
+            "value": false
+          },
+          {
+            "id": 14009259,
+            "value": false
+          },
+          {
+            "id": 14009265,
+            "value": true
+          },
+          {
+            "id": 1044369214,
+            "value": false
+          },
+          {
+            "id": 1044369238,
+            "value": false
+          },
+          {
+            "id": 1044369239,
+            "value": false
+          },
+          {
+            "id": 1044369240,
+            "value": false
+          },
+          {
+            "id": 1044369243,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_043",
+        "description": {
+          "known": true,
+          "value": "Leaving the menu and talking to her again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_043 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_043 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 14009264,
+            "value": true
+          },
+          {
+            "id": 1044362706,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_044",
+        "description": {
+          "known": true,
+          "value": "After reloading the area Sellen transforms and Rennala is back",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_044 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_044 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4698,
+            "value": false
+          },
+          {
+            "id": 1034509259,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_045",
+        "description": {
+          "known": true,
+          "value": "All these get set too, but i dont think they have anything to do with Sellen",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_045 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_045 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009656,
+            "value": false
+          },
+          {
+            "id": 11009255,
+            "value": false
+          },
+          {
+            "id": 11009265,
+            "value": false
+          },
+          {
+            "id": 11009270,
+            "value": false
+          },
+          {
+            "id": 11009275,
+            "value": false
+          },
+          {
+            "id": 14002660,
+            "value": true
+          },
+          {
+            "id": 35009350,
+            "value": false
+          },
+          {
+            "id": 35009352,
+            "value": false
+          },
+          {
+            "id": 35009355,
+            "value": false
+          },
+          {
+            "id": 35009358,
+            "value": false
+          },
+          {
+            "id": 1036489250,
+            "value": false
+          },
+          {
+            "id": 1037519200,
+            "value": false
+          },
+          {
+            "id": 1038509250,
+            "value": false
+          },
+          {
+            "id": 1039519250,
+            "value": false
+          },
+          {
+            "id": 1042379200,
+            "value": false
+          },
+          {
+            "id": 1042379202,
+            "value": false
+          },
+          {
+            "id": 1042379206,
+            "value": false
+          },
+          {
+            "id": 1042379208,
+            "value": false
+          },
+          {
+            "id": 1043349250,
+            "value": false
+          },
+          {
+            "id": 1043509200,
+            "value": false
+          },
+          {
+            "id": 1043539250,
+            "value": false
+          },
+          {
+            "id": 1046389201,
+            "value": false
+          },
+          {
+            "id": 1054539210,
+            "value": false
+          },
+          {
+            "id": 1054539215,
+            "value": false
+          },
+          {
+            "id": 1054559200,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_046",
+        "description": {
+          "known": true,
+          "value": "Talking to the now transformed Sellen, repeating dialogue, just menu popup",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_046 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_046 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1044362705,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_047",
+        "description": {
+          "known": true,
+          "value": "Picking up \"Witch's Glintstone Crown\" next to her, Sellen will now remain here transformed with her quest complete",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_047 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_047 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400107,
+            "value": true
+          },
+          {
+            "id": 14005031,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_049",
+        "description": {
+          "known": true,
+          "value": "Picking up Azur's armor pieces",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_049 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_049 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400441,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_051",
+        "description": {
+          "known": true,
+          "value": "Picking up Lusat's armor pieces",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"sorceress_sellen\" step legacy_051 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"sorceress_sellen\" step legacy_051 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Sorceress Sellen",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400431,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

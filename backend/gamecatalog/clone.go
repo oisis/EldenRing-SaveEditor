@@ -38,6 +38,11 @@ func cloneResource(resource schema.Resource) schema.Resource {
 		tutorial := *resource.Tutorial
 		cloned.Tutorial = &tutorial
 	}
+	if resource.Quest != nil {
+		quest := *resource.Quest
+		quest.Steps = cloneQuestSteps(resource.Quest.Steps)
+		cloned.Quest = &quest
+	}
 	if resource.Item == nil {
 		return cloned
 	}
@@ -371,4 +376,12 @@ func cloneStrings(values []string) []string {
 
 func cloneUint32s(values []uint32) []uint32 {
 	return append([]uint32(nil), values...)
+}
+
+func cloneQuestSteps(steps []schema.QuestStepDocument) []schema.QuestStepDocument {
+	cloned := append([]schema.QuestStepDocument(nil), steps...)
+	for index := range cloned {
+		cloned[index].Flags = append([]schema.QuestFlag(nil), steps[index].Flags...)
+	}
+	return cloned
 }

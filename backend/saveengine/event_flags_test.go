@@ -385,7 +385,7 @@ func TestGetEventFlagsResolvesTheMapRegionBlockOfBothPlatforms(t *testing.T) {
 				t.Errorf("flags = %+v, want %+v", result.Flags, want)
 			}
 
-			for _, unsupported := range []uint32{61999, 63000, 82001} {
+			for _, unsupported := range []uint32{63000, 64000, 82001} {
 				if _, err := engine.GetEventFlags(
 					loaded.SaveSessionID, content.slot, []uint32{unsupported}); err == nil {
 					t.Errorf("the unsupported map flag %d was accepted", unsupported)
@@ -466,8 +466,8 @@ func TestGetEventFlagsRejectsWhatItCannotResolve(t *testing.T) {
 			"event flag 66999 lies in block 66, which this reader does not support"},
 		"unsupported block between supported blocks": {present, []uint32{70000},
 			"event flag 70000 lies in block 70, which this reader does not support"},
-		"no block at all": {present, []uint32{7},
-			"event flag 7 lies in block 0, which this reader does not support"},
+		"unsupported block 5": {present, []uint32{5007},
+			"event flag 5007 lies in block 5, which this reader does not support"},
 		"missing anchor": {load(missingAnchor), []uint32{67000},
 			"character 3 carries no event flag anchor"},
 		"corrupt event flag range": {load(corruptRange), []uint32{67000},

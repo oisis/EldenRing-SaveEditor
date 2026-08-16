@@ -1,0 +1,842 @@
+{
+  "key": "dung_eater",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Dung Eater",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"dung_eater\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Dung Eater",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "First time talking to him, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Roundtable Hold",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"dung_eater\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11109955,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Picking up Seedbed Curse in Volcano Manor",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 16007700,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Talking to Dung Eater after picking up 1 Seedbed Curse, receiving \"Sewer-Gaol Key\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400380,
+            "value": true
+          },
+          {
+            "id": 11109957,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Picking up second Seedbed Curse in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11007340,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Picking up third Seedbed Curse in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 11007850,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Hearing Dung Eater in the Sewers",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Underground Roadside grace in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"dung_eater\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4603,
+            "value": true
+          },
+          {
+            "id": 35009302,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "Opening his cell door",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35000564,
+            "value": true
+          },
+          {
+            "id": 35005017,
+            "value": true
+          },
+          {
+            "id": 35008564,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to him and choosing \"say nothing\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35002723,
+            "value": true
+          },
+          {
+            "id": 35009307,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Choosing \"Leave your gaol!\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009306,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue, he will now be gone from the RTH",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 35009308,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Killing him and receiving \"Sword of Milos\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400381,
+            "value": true
+          },
+          {
+            "id": 1045520180,
+            "value": true
+          },
+          {
+            "id": 1045522182,
+            "value": true
+          },
+          {
+            "id": 1045525003,
+            "value": true
+          },
+          {
+            "id": 1045525024,
+            "value": true
+          },
+          {
+            "id": 1045525025,
+            "value": true
+          },
+          {
+            "id": 1045525026,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_012",
+        "description": {
+          "known": true,
+          "value": "Picking up the items on Boggart's dead body, \"Seedbed Curse\", his Bell Bearing, \"Iron Ball\" and \"Blackguard's Iron Mask\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_012 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_012 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 3088,
+            "value": true
+          },
+          {
+            "id": 65831,
+            "value": true
+          },
+          {
+            "id": 400308,
+            "value": true
+          },
+          {
+            "id": 400309,
+            "value": true
+          },
+          {
+            "id": 1036439218,
+            "value": true
+          },
+          {
+            "id": 1044525004,
+            "value": true
+          },
+          {
+            "id": 1044529252,
+            "value": true
+          },
+          {
+            "id": 1044529253,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Using 4 Seedbed Curses on him in the Sewers, cutscene starts",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Underground Roadside in Leyndell",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"dung_eater\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 35002725,
+            "value": false
+          },
+          {
+            "id": 35009327,
+            "value": true
+          },
+          {
+            "id": 35009328,
+            "value": true
+          },
+          {
+            "id": 35009329,
+            "value": true
+          },
+          {
+            "id": 35009330,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "Cutscene ends",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 35003722,
+            "value": true
+          },
+          {
+            "id": 35009325,
+            "value": true
+          },
+          {
+            "id": 35009338,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Picking up 5th Seedbed Curse",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15007840,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Picking up the 6th and final Seedbed Curse",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 15007750,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "Using the last Seedbed Curses on him, cutscene",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": true
+          },
+          {
+            "id": 35002726,
+            "value": false
+          },
+          {
+            "id": 35009323,
+            "value": true
+          },
+          {
+            "id": 35009334,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Cutscene ends, Dung Eater dies, Mending Rune able to be picked up",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 2200,
+            "value": false
+          },
+          {
+            "id": 4240,
+            "value": false
+          },
+          {
+            "id": 4241,
+            "value": false
+          },
+          {
+            "id": 4242,
+            "value": false
+          },
+          {
+            "id": 4243,
+            "value": true
+          },
+          {
+            "id": 35003722,
+            "value": true
+          },
+          {
+            "id": 35005034,
+            "value": true
+          },
+          {
+            "id": 35009333,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Receiving \"Mending Rune of the Fell Curse\"",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 9504,
+            "value": true
+          },
+          {
+            "id": 35003724,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, he is lootable now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4243,
+            "value": true
+          },
+          {
+            "id": 35003725,
+            "value": true
+          },
+          {
+            "id": 35009303,
+            "value": false
+          },
+          {
+            "id": 35009336,
+            "value": true
+          },
+          {
+            "id": 35009337,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Picking up his armor set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"dung_eater\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"dung_eater\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Dung Eater",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400382,
+            "value": true
+          },
+          {
+            "id": 35005038,
+            "value": true
+          },
+          {
+            "id": 35005039,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}

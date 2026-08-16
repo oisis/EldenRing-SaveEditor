@@ -1,0 +1,904 @@
+{
+  "key": "jar_bairn",
+  "kind": "quest",
+  "quest": {
+    "name": {
+      "known": true,
+      "value": "Jar-Bairn",
+      "provenance": {
+        "source": "legacy_db_data",
+        "method": "curated NPC name of quest \"jar_bairn\" from legacy QuestData",
+        "table": "QuestData",
+        "row": "Jar-Bairn",
+        "field": "map key"
+      }
+    },
+    "steps": [
+      {
+        "key": "legacy_000",
+        "description": {
+          "known": true,
+          "value": "Initial dialogue, choosing the bottom option, saying you are not the new Potentate",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": true,
+          "value": "Jar-Burg in Liurnia",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated location of quest \"jar_bairn\" step legacy_000 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 4608,
+            "value": true
+          },
+          {
+            "id": 1039449252,
+            "value": true
+          },
+          {
+            "id": 1039449256,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_001",
+        "description": {
+          "known": true,
+          "value": "Talking to Jar-Bairn again, showing your hands, telling you you are not fit for it, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_001 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_001 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449252,
+            "value": true
+          },
+          {
+            "id": 1039449255,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_002",
+        "description": {
+          "known": true,
+          "value": "Dialogue after reloading the area, telling you, you are free to pick any flowers, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_002 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_002 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442713,
+            "value": true
+          },
+          {
+            "id": 1039449258,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_003",
+        "description": {
+          "known": true,
+          "value": "Reloading the area again, talking to you about Alexander",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_003 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_003 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449260,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_004",
+        "description": {
+          "known": true,
+          "value": "Talking again, telling you he is a warrior jar aswell, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_004 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_004 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449261,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_005",
+        "description": {
+          "known": true,
+          "value": "Reloading yet again, telling you about the poachers, repeating dialogue, even after reload now",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_005 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_005 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449263,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_006",
+        "description": {
+          "known": true,
+          "value": "After defeating Rykard, Jar-Bairn has dialogue about Diallos, who moved here",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_006 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_006 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449265,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_007",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_007 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_007 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449266,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_008",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, you can hear Jar-Bairn talking in his dreams when interacting with him, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_008 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_008 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442715,
+            "value": true
+          },
+          {
+            "id": 1039442716,
+            "value": true
+          },
+          {
+            "id": 1039442730,
+            "value": true
+          },
+          {
+            "id": 1039449275,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_009",
+        "description": {
+          "known": true,
+          "value": "Reloading the area again",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_009 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_009 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442732,
+            "value": true
+          },
+          {
+            "id": 1039449276,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_010",
+        "description": {
+          "known": true,
+          "value": "These are the flags in daytime for Jar-Bairn, he will be awake",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_010 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_010 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442715,
+            "value": false
+          },
+          {
+            "id": 1039442732,
+            "value": false
+          },
+          {
+            "id": 1039442736,
+            "value": true
+          },
+          {
+            "id": 1039449277,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_011",
+        "description": {
+          "known": true,
+          "value": "Talking to Jar-Bairn again, who now moved into the middle of the town, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_011 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_011 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449270,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_013",
+        "description": {
+          "known": true,
+          "value": "Talking to Jar-Bairn after the reload, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_013 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_013 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442712,
+            "value": true
+          },
+          {
+            "id": 1039449285,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_014",
+        "description": {
+          "known": true,
+          "value": "After reloading the area again, Jar-Bairn will now move back to his initial position, Diallos' body will be gone and loot now present",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_014 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_014 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 10009656,
+            "value": false
+          },
+          {
+            "id": 11009255,
+            "value": false
+          },
+          {
+            "id": 11009265,
+            "value": false
+          },
+          {
+            "id": 11009270,
+            "value": false
+          },
+          {
+            "id": 11009275,
+            "value": false
+          },
+          {
+            "id": 35009350,
+            "value": false
+          },
+          {
+            "id": 35009352,
+            "value": false
+          },
+          {
+            "id": 35009355,
+            "value": false
+          },
+          {
+            "id": 35009358,
+            "value": false
+          },
+          {
+            "id": 1036489250,
+            "value": false
+          },
+          {
+            "id": 1037519200,
+            "value": false
+          },
+          {
+            "id": 1038509250,
+            "value": false
+          },
+          {
+            "id": 1039519250,
+            "value": false
+          },
+          {
+            "id": 1042379200,
+            "value": false
+          },
+          {
+            "id": 1042379202,
+            "value": false
+          },
+          {
+            "id": 1042379206,
+            "value": false
+          },
+          {
+            "id": 1042379208,
+            "value": false
+          },
+          {
+            "id": 1043349250,
+            "value": false
+          },
+          {
+            "id": 1043509200,
+            "value": false
+          },
+          {
+            "id": 1043539250,
+            "value": false
+          },
+          {
+            "id": 1046389201,
+            "value": false
+          },
+          {
+            "id": 1054539210,
+            "value": false
+          },
+          {
+            "id": 1054539215,
+            "value": false
+          },
+          {
+            "id": 1054559200,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_015",
+        "description": {
+          "known": true,
+          "value": "Talking to him after the reload, saying he wants to go on a journey, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_015 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_015 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442713,
+            "value": true
+          },
+          {
+            "id": 1039449280,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_016",
+        "description": {
+          "known": true,
+          "value": "Reloading the area, he is still here, talking to him again, saying he'll go once ready, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_016 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_016 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449282,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_017",
+        "description": {
+          "known": true,
+          "value": "After reloading the area again, this gets set",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_017 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_017 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442733,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_018",
+        "description": {
+          "known": true,
+          "value": "Reloading again, 2 more flags",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_018 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_018 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442733,
+            "value": false
+          },
+          {
+            "id": 1039442738,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_019",
+        "description": {
+          "known": true,
+          "value": "Reloading again, he's sleeping, repeating dialogue",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_019 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_019 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442715,
+            "value": true
+          },
+          {
+            "id": 1039442716,
+            "value": true
+          },
+          {
+            "id": 1039442731,
+            "value": true
+          },
+          {
+            "id": 1039442738,
+            "value": false
+          }
+        ]
+      },
+      {
+        "key": "legacy_020",
+        "description": {
+          "known": true,
+          "value": "Reloading again, he is awake again, this cycle repeats",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_020 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_020 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039442715,
+            "value": false
+          },
+          {
+            "id": 1039442731,
+            "value": false
+          },
+          {
+            "id": 1039442736,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_021",
+        "description": {
+          "known": true,
+          "value": "Giving Jar-Bairn Alexander's innards",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_021 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_021 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449289,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_022",
+        "description": {
+          "known": true,
+          "value": "Talking to him again, saying goodbye",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_022 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_022 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 1039449291,
+            "value": true
+          }
+        ]
+      },
+      {
+        "key": "legacy_023",
+        "description": {
+          "known": true,
+          "value": "After a reload he will be gone, picking up \"Companion Jar\" where he was",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "curated description of quest \"jar_bairn\" step legacy_023 from legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Description"
+          }
+        },
+        "location": {
+          "known": false,
+          "value": "",
+          "provenance": {
+            "source": "legacy_db_data",
+            "method": "location not declared for quest \"jar_bairn\" step legacy_023 in legacy QuestData",
+            "table": "QuestData",
+            "row": "Jar-Bairn",
+            "field": "Location"
+          }
+        },
+        "flags": [
+          {
+            "id": 400460,
+            "value": true
+          },
+          {
+            "id": 1039445027,
+            "value": true
+          }
+        ]
+      }
+    ]
+  }
+}
