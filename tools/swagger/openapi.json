@@ -2652,6 +2652,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/fog-of-war": {
+      "put": {
+        "operationId": "setFogOfWarRemoved",
+        "tags": ["World"],
+        "summary": "SetFogOfWarRemoved",
+        "description": "Removes the global cosmetic Fog of War overlay of one character by filling the confirmed 2099-byte bitfield behind the UnlockedRegions list with 0xFF. Only removed=true is accepted: the inverse has no confirmed contract, because the bit-to-tile mapping of the field is unknown, so a false request is rejected instead of being written as zeros. The operation names no map region and reads no GameCatalog; UnlockedRegions, event flags, map fragments, the DLC cover layer, Inventory and Storage remain untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {"$ref": "#/components/parameters/SaveSessionID"},
+          {"$ref": "#/components/parameters/CharacterID"}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/SetFogOfWarRemovedRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed Fog of War removal",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SetFogOfWarRemovedResult"}
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, a removed value other than true, invalid expectedRevision, unknown session, inactive slot, a corrupt or out-of-slot dynamic layout, or a write error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Error"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials": {
       "get": {
         "operationId": "getTutorials",
@@ -5943,6 +5981,43 @@
           "revealed": {"type": "boolean"}
         },
         "required": ["saveSessionID", "saveRevision", "characterID", "mapRegionKind", "mapRegionKey", "revealed"]
+      },
+      "SetFogOfWarRemovedRequest": {
+        "type": "object",
+        "description": "The requested Fog of War state and expected save revision. Only true is accepted; restoring the overlay has no confirmed contract and is rejected.",
+        "additionalProperties": false,
+        "properties": {
+          "removed": {
+            "type": "boolean",
+            "enum": [true],
+            "description": "Must be true. The bitfield is filled with 0xFF; false is rejected and never written as zeros."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision expected by the caller."
+          }
+        },
+        "required": ["removed", "expectedRevision"]
+      },
+      "SetFogOfWarRemovedResult": {
+        "type": "object",
+        "description": "The committed Fog of War state and new save revision.",
+        "properties": {
+          "saveSessionID": {"type": "string"},
+          "saveRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "removed": {"type": "boolean", "enum": [true]}
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "removed"]
       },
       "TutorialEntry": {
         "type": "object",

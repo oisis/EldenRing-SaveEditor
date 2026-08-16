@@ -712,6 +712,13 @@ type setMapRegionRevealedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setFogOfWarRemovedRequest is the strict JSON body of the Fog of War mutation.
+// Only removed=true has a confirmed contract; the endpoint rejects false.
+type setFogOfWarRemovedRequest struct {
+	Removed          *bool  `json:"removed"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2589,6 +2596,44 @@ func registerSaveSessionRoutes(
 				body.MapRegionKind,
 				body.MapRegionKey,
 				*body.Revealed,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/fog-of-war",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setFogOfWarRemovedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Removed == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("removed is required"))
+				return
+			}
+			result, err := world.SetFogOfWarRemoved(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				*body.Removed,
 				body.ExpectedRevision,
 			)
 			if err != nil {

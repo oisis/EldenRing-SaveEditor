@@ -127,5 +127,5 @@ No failure produces a partial result or substitutes a guessed state.
   endpoint.
 - [`SetMapRegionRevealed`](set_map_region_revealed.md) writes the same curated
   visibility state and keeps the catalog-linked Map Fragment in step.
-- `SetFogOfWarRemoved` remains contract-only. It has no runtime handler, route,
-  OpenAPI operation or Scalar page.
+- [`SetFogOfWarRemoved`](set_fog_of_war_removed.md) removes the separate global
+  Fog of War overlay. It names no map region and changes no visibility flag.

@@ -925,6 +925,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bosses", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/map-regions", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/map-regions/reveal", `{"mapRegionKind":"map_region","mapRegionKey":"limgrave_weeping_peninsula","revealed":true,"expectedRevision":"0"}`},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/fog-of-war", `{"removed":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/tutorials", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/summoning-pools/activate", `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0"}`},
@@ -1052,6 +1053,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses/defeat":                      "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions":                        "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions/reveal":                 "put",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/fog-of-war":                         "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
@@ -1298,6 +1300,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetColosseumUnlockedResult",
 		"SetMapRegionRevealedRequest",
 		"SetMapRegionRevealedResult",
+		"SetFogOfWarRemovedRequest",
+		"SetFogOfWarRemovedResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1534,8 +1538,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 71 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 71", found)
+	if found != 72 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 72", found)
 	}
 }
 
@@ -6013,6 +6017,78 @@ func TestSetMapRegionRevealedRoute(t *testing.T) {
 				target := "/api/v1/save-sessions/" + session.SaveSessionID +
 					"/characters/0/map-regions/reveal"
 				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+				info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+				if err != nil {
+					t.Fatalf("GetSessionInfo: %v", err)
+				}
+				if info.UnsavedChanges {
+					t.Errorf("rejected body dirtied the session: %+v", info)
+				}
+			})
+		}
+	})
+}
+
+func TestSetFogOfWarRemovedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	removed := true
+	const target = "/characters/0/fog-of-war"
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, _ := json.Marshal(setFogOfWarRemovedRequest{
+			Removed: &removed, ExpectedRevision: "0",
+		})
+		route := "/api/v1/save-sessions/" + session.SaveSessionID + target
+		request := httptest.NewRequest(http.MethodPut, route, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		assertOK(t, recorder, route)
+
+		var got world.SetFogOfWarRemovedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		direct, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetFogOfWarRemoved(saveEngine, direct.SaveSessionID, 0, true, "0")
+		if err != nil {
+			t.Fatalf("world.SetFogOfWarRemoved: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		for name, body := range map[string]string{
+			"missing removed": `{"expectedRevision":"0"}`,
+			"removed false":   `{"removed":false,"expectedRevision":"0"}`,
+			"unknown field":   `{"removed":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+				if err != nil {
+					t.Fatalf("LoadSave: %v", err)
+				}
+				route := "/api/v1/save-sessions/" + session.SaveSessionID + target
+				request := httptest.NewRequest(http.MethodPut, route, strings.NewReader(body))
 				request.Header.Set("Content-Type", "application/json")
 				recorder := httptest.NewRecorder()
 				newHandler(gameCatalog, testApplicationVersion, saveEngine).

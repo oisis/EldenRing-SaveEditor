@@ -109,38 +109,55 @@ func (engine *Engine) GetRegions(saveSessionID string, characterID int) (Charact
 	return regions, nil
 }
 
-// readUnlockedRegions decodes the region list of one active character. Callers
-// validate the character index and activity before using it.
-func readUnlockedRegions(loaded *loadedSave, characterID int) ([]uint32, error) {
+// unlockedRegionsBounds resolves the dynamic unlocked-regions section of one
+// active character: the offset of its declared count, the count itself and the
+// end of the slot the whole section has to fit into. Callers validate the
+// character index and activity before using it.
+//
+// It is the single owner of that walk. The region getter decodes the IDs from
+// here, and the Fog of War mutation measures its own field from the first byte
+// behind the list, so the two cannot drift to different interpretations of the
+// same slot layout.
+func unlockedRegionsBounds(loaded *loadedSave, characterID int) (int64, int64, int64, error) {
 	gestureAt, err := gestureSectionStart(loaded, characterID)
 	if err != nil {
-		return nil, err
+		return 0, 0, 0, err
 	}
 	_, slotEnd := gestureSlotBounds(loaded.session.platform, characterID)
 
 	countAt := gestureAt + gestureSectionSize
 	if countAt+4 > slotEnd {
-		return nil, fmt.Errorf(
+		return 0, 0, 0, fmt.Errorf(
 			"unlocked region count of character %d lies outside its slot", characterID)
 	}
 	rawCount, err := loaded.snapshot.readAt(countAt, 4)
 	if err != nil {
-		return nil, fmt.Errorf(
+		return 0, 0, 0, fmt.Errorf(
 			"cannot read unlocked region count of character %d: %w", characterID, err)
 	}
 	// The count is widened to int64 before it is multiplied, so a declared
 	// length can never wrap into a small, seemingly valid length.
 	count := int64(binary.LittleEndian.Uint32(rawCount))
 	if count > regionMaxCount {
-		return nil, fmt.Errorf(
+		return 0, 0, 0, fmt.Errorf(
 			"character %d declares %d unlocked regions, want at most %d",
 			characterID, count, regionMaxCount)
 	}
-	size := count * regionRecordSize
-	if countAt+4+size > slotEnd {
-		return nil, fmt.Errorf(
+	if countAt+4+count*regionRecordSize > slotEnd {
+		return 0, 0, 0, fmt.Errorf(
 			"unlocked regions of character %d do not fit into their slot", characterID)
 	}
+	return countAt, count, slotEnd, nil
+}
+
+// readUnlockedRegions decodes the region list of one active character. Callers
+// validate the character index and activity before using it.
+func readUnlockedRegions(loaded *loadedSave, characterID int) ([]uint32, error) {
+	countAt, count, _, err := unlockedRegionsBounds(loaded, characterID)
+	if err != nil {
+		return nil, err
+	}
+	size := count * regionRecordSize
 
 	ids := make([]uint32, count)
 	if count == 0 {

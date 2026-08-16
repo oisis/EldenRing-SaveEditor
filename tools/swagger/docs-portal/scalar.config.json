@@ -458,6 +458,11 @@
                 "filepath": "../../../docs/endpoints/world/set_map_region_revealed.md",
                 "title": "SetMapRegionRevealed"
               },
+              "/set-fog-of-war-removed": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_fog_of_war_removed.md",
+                "title": "SetFogOfWarRemoved"
+              },
               "/set-summoning-pool-activated": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_summoning_pool_activated.md",
