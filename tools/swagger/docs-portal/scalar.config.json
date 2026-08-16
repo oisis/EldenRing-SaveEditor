@@ -453,6 +453,11 @@
                 "filepath": "../../../docs/endpoints/world/set_colosseum_unlocked.md",
                 "title": "SetColosseumUnlocked"
               },
+              "/set-map-region-revealed": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/world/set_map_region_revealed.md",
+                "title": "SetMapRegionRevealed"
+              },
               "/set-summoning-pool-activated": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/world/set_summoning_pool_activated.md",

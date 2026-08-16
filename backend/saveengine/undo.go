@@ -73,6 +73,8 @@ const opSetGraceVisited = "set_grace_visited"
 
 const opSetColosseumUnlocked = "set_colosseum_unlocked"
 
+const opSetMapRegionRevealed = "set_map_region_revealed"
+
 // undoPoint is the private, non-serializable restore point of one committed
 // character mutation. It belongs to exactly one session, one characterID and
 // one revision.

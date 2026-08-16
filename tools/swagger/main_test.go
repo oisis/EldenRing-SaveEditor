@@ -924,6 +924,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/graces", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/bosses", ""},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/map-regions", ""},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/map-regions/reveal", `{"mapRegionKind":"map_region","mapRegionKey":"limgrave_weeping_peninsula","revealed":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/tutorials", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/cookbooks/unlock", `{"cookbookKind":"item","cookbookKey":"40002455","unlocked":true,"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/summoning-pools/activate", `{"summoningPoolKind":"summoning_pool","summoningPoolKey":"stormveil_castle_liftside_chamber","activated":true,"expectedRevision":"0"}`},
@@ -1050,6 +1051,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses":                             "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/bosses/defeat":                      "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions":                        "get",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions/reveal":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/whetblades/unlock":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/cookbooks/unlock":                   "put",
@@ -1294,6 +1296,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetGraceVisitedResult",
 		"SetColosseumUnlockedRequest",
 		"SetColosseumUnlockedResult",
+		"SetMapRegionRevealedRequest",
+		"SetMapRegionRevealedResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1530,8 +1534,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 70 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 70", found)
+	if found != 71 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 71", found)
 	}
 }
 
@@ -5949,6 +5953,81 @@ func TestSetColosseumUnlockedRoute(t *testing.T) {
 		path := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/colosseums/unlock"
 		if _, exists := document.Paths[path]["put"]; !exists {
 			t.Fatalf("openapi.json describes no PUT for %s", path)
+		}
+	})
+}
+
+func TestSetMapRegionRevealedRoute(t *testing.T) {
+	gameCatalog := newFullCatalog(t)
+	saveEngine := saveengine.New()
+	revealed := true
+	const mapRegionKey = "limgrave_weeping_peninsula"
+
+	t.Run("conforms to endpoint mutation", func(t *testing.T) {
+		session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave: %v", err)
+		}
+		body, _ := json.Marshal(setMapRegionRevealedRequest{
+			MapRegionKind: "map_region", MapRegionKey: mapRegionKey,
+			Revealed: &revealed, ExpectedRevision: "0",
+		})
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/0/map-regions/reveal"
+		request := httptest.NewRequest(http.MethodPut, target, bytes.NewReader(body))
+		request.Header.Set("Content-Type", "application/json")
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+		assertOK(t, recorder, target)
+
+		var got world.SetMapRegionRevealedResult
+		if err := json.Unmarshal(recorder.Body.Bytes(), &got); err != nil {
+			t.Fatalf("unmarshal response: %v", err)
+		}
+
+		direct, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+		if err != nil {
+			t.Fatalf("LoadSave direct session: %v", err)
+		}
+		want, err := world.SetMapRegionRevealed(saveEngine, gameCatalog,
+			direct.SaveSessionID, 0, "map_region", mapRegionKey, true, "0")
+		if err != nil {
+			t.Fatalf("world.SetMapRegionRevealed: %v", err)
+		}
+		want.SaveSessionID = got.SaveSessionID
+		if got != want {
+			t.Errorf("route result = %+v, want direct endpoint result %+v", got, want)
+		}
+	})
+
+	t.Run("rejects invalid bodies", func(t *testing.T) {
+		for name, body := range map[string]string{
+			"missing revealed": `{"mapRegionKind":"map_region","mapRegionKey":"` + mapRegionKey + `","expectedRevision":"0"}`,
+			"unknown field":    `{"mapRegionKind":"map_region","mapRegionKey":"` + mapRegionKey + `","revealed":true,"expectedRevision":"0","extra":1}`,
+		} {
+			t.Run(name, func(t *testing.T) {
+				session, err := savesession.LoadSave(saveEngine, writeWhetbladesRouteFixture(t), "")
+				if err != nil {
+					t.Fatalf("LoadSave: %v", err)
+				}
+				target := "/api/v1/save-sessions/" + session.SaveSessionID +
+					"/characters/0/map-regions/reveal"
+				request := httptest.NewRequest(http.MethodPut, target, strings.NewReader(body))
+				request.Header.Set("Content-Type", "application/json")
+				recorder := httptest.NewRecorder()
+				newHandler(gameCatalog, testApplicationVersion, saveEngine).
+					ServeHTTP(recorder, request)
+				if recorder.Code != http.StatusBadRequest {
+					t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+				}
+				info, err := saveEngine.GetSessionInfo(session.SaveSessionID)
+				if err != nil {
+					t.Fatalf("GetSessionInfo: %v", err)
+				}
+				if info.UnsavedChanges {
+					t.Errorf("rejected body dirtied the session: %+v", info)
+				}
+			})
 		}
 	})
 }

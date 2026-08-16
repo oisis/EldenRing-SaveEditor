@@ -2614,6 +2614,44 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions/reveal": {
+      "put": {
+        "operationId": "setMapRegionRevealed",
+        "tags": ["World"],
+        "summary": "SetMapRegionRevealed",
+        "description": "Sets or clears the visibility of one curated map region. The endpoint resolves its block 62 visibility flag from GameCatalog and, when item.unlocks declares a matching Map Fragment, atomically adds or removes that goods record from InventoryHeld. Transient block 63 acquisition flags, system map flags, unsafe sub-region flags, Fog of War and Storage remain untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {"$ref": "#/components/parameters/SaveSessionID"},
+          {"$ref": "#/components/parameters/CharacterID"}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {"$ref": "#/components/schemas/SetMapRegionRevealedRequest"}
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The receipt for the committed map region visibility change",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/SetMapRegionRevealedResult"}
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal or out-of-range characterID, invalid expectedRevision, unknown session, inactive slot, invalid or conflicting catalog data, malformed Inventory or event flags, a referenced fragment record, or a write error",
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/Error"}
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/tutorials": {
       "get": {
         "operationId": "getTutorials",
@@ -5857,6 +5895,54 @@
           }
         },
         "required": ["saveSessionID", "characterID", "active", "mapRegions"]
+      },
+      "SetMapRegionRevealedRequest": {
+        "type": "object",
+        "description": "The exact public map region identity, desired visibility and expected save revision.",
+        "additionalProperties": false,
+        "properties": {
+          "mapRegionKind": {
+            "type": "string",
+            "enum": ["map_region"],
+            "description": "The public GameCatalog resource kind. Always map_region."
+          },
+          "mapRegionKey": {
+            "type": "string",
+            "pattern": "^[a-z0-9_]+$",
+            "description": "The public slug resource key of the map region."
+          },
+          "revealed": {
+            "type": "boolean",
+            "description": "True to reveal the region and add its Map Fragment when one is declared; false to hide it and remove that fragment."
+          },
+          "expectedRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$",
+            "description": "The canonical decimal save revision expected by the caller."
+          }
+        },
+        "required": ["mapRegionKind", "mapRegionKey", "revealed", "expectedRevision"]
+      },
+      "SetMapRegionRevealedResult": {
+        "type": "object",
+        "description": "The committed map region visibility state and new save revision.",
+        "properties": {
+          "saveSessionID": {"type": "string"},
+          "saveRevision": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)$"
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0,
+            "maximum": 9
+          },
+          "mapRegionKind": {"type": "string", "enum": ["map_region"]},
+          "mapRegionKey": {"type": "string", "pattern": "^[a-z0-9_]+$"},
+          "revealed": {"type": "boolean"}
+        },
+        "required": ["saveSessionID", "saveRevision", "characterID", "mapRegionKind", "mapRegionKey", "revealed"]
       },
       "TutorialEntry": {
         "type": "object",

@@ -125,5 +125,7 @@ No failure produces a partial result or substitutes a guessed state.
 - [`GetRegions`](get_regions.md) reads the separate `UnlockedRegions` list and
   returns invasion and blue-summon regions. It is not a parent catalog for this
   endpoint.
-- `SetMapRegionRevealed` and `SetFogOfWarRemoved` remain contract-only. They have
-  no runtime handler, route, OpenAPI operation or Scalar page.
+- [`SetMapRegionRevealed`](set_map_region_revealed.md) writes the same curated
+  visibility state and keeps the catalog-linked Map Fragment in step.
+- `SetFogOfWarRemoved` remains contract-only. It has no runtime handler, route,
+  OpenAPI operation or Scalar page.

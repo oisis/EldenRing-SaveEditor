@@ -704,6 +704,14 @@ type setColosseumUnlockedRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setMapRegionRevealedRequest is the strict JSON body of the map region mutation.
+type setMapRegionRevealedRequest struct {
+	MapRegionKind    string `json:"mapRegionKind"`
+	MapRegionKey     string `json:"mapRegionKey"`
+	Revealed         *bool  `json:"revealed"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // setBellBearingUnlockedRequest is the strict JSON body of the Bell Bearing mutation.
 type setBellBearingUnlockedRequest struct {
 	BellBearingKind  string `json:"bellBearingKind"`
@@ -2541,6 +2549,47 @@ func registerSaveSessionRoutes(
 				gameCatalog,
 				request.PathValue("saveSessionID"),
 				characterID,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/map-regions/reveal",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setMapRegionRevealedRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.Revealed == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("revealed is required"))
+				return
+			}
+			result, err := world.SetMapRegionRevealed(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.MapRegionKind,
+				body.MapRegionKey,
+				*body.Revealed,
+				body.ExpectedRevision,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
