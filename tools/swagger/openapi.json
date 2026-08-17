@@ -3810,6 +3810,62 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}": {
+      "delete": {
+        "operationId": "deleteFavoritePreset",
+        "tags": ["Favorites"],
+        "summary": "DeleteFavoritePreset",
+        "description": "Deletes the specified Mirror Favorites appearance preset slot in UserData10 of an existing save session under expectedRevision control. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "name": "favoriteSlotID",
+            "in": "path",
+            "required": true,
+            "description": "Slot index (0..14) to delete",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 14
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFavoritePresetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receipt of the committed Mirror Favorites deletion",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteFavoritePresetResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty or unknown session, an out-of-range favoriteSlotID, a non-canonical or mismatched revision, or a truncated UserData10 block",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/healthz": {
       "get": {
         "operationId": "healthz",
@@ -8978,6 +9034,45 @@
         "required": [
           "saveSessionID",
           "presets"
+        ]
+      },
+      "DeleteFavoritePresetRequest": {
+        "type": "object",
+        "description": "Expected revision for deleting a Mirror Favorites preset slot",
+        "properties": {
+          "expectedRevision": {
+            "type": "string",
+            "description": "The expected decimal saveRevision of the session"
+          }
+        },
+        "required": [
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "DeleteFavoritePresetResult": {
+        "type": "object",
+        "description": "Receipt of a committed Mirror Favorites deletion",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session that was modified"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "The new decimal saveRevision of the session"
+          },
+          "favoriteSlotID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14,
+            "description": "The slot index 0..14 that was deleted"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "favoriteSlotID"
         ]
       }
     }

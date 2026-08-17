@@ -366,6 +366,12 @@ type deleteCharacterRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// deleteFavoritePresetRequest is the strict JSON body of the Mirror Favorites
+// deletion route. SaveEngine owns the revision and deletion rules.
+type deleteFavoritePresetRequest struct {
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 // cloneCharacterRequest is the strict JSON body of the slot-cloning route. A
 // pointer distinguishes an omitted targetSlotID from the valid slot zero.
 type cloneCharacterRequest struct {
@@ -3180,15 +3186,56 @@ func registerSaveSessionRoutes(
 			writeJSON(writer, http.StatusOK, result)
 		},
 	)
+
+	mux.HandleFunc(
+		"DELETE /api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}",
+		func(writer http.ResponseWriter, request *http.Request) {
+			favoriteSlotID, err := parseFavoriteSlotID(request.PathValue("favoriteSlotID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body deleteFavoritePresetRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := favorites.DeleteFavoritePreset(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				favoriteSlotID,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+}
+
+func parseFavoriteSlotID(raw string) (int, error) {
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return 0, fmt.Errorf("favoriteSlotID must be an integer; got %q", raw)
+	}
+	return value, nil
 }
 
 func parseOptionalFavoriteSlotID(raw string) (*int, error) {
 	if raw == "" {
 		return nil, nil
 	}
-	value, err := strconv.Atoi(raw)
+	value, err := parseFavoriteSlotID(raw)
 	if err != nil {
-		return nil, fmt.Errorf("favoriteSlotID must be an integer; got %q", raw)
+		return nil, err
 	}
 	return &value, nil
 }

@@ -83,8 +83,12 @@ func (engine *Engine) GetFavoritePresets(
 	}, nil
 }
 
+func favoriteSlotOffset(base int64, slot int) int64 {
+	return base + favoriteBaseOffset + int64(slot)*favoriteSlotSize
+}
+
 func readFavoriteSlotActive(snapshot *codec, base int64, slot int) (bool, error) {
-	slotAt := base + favoriteBaseOffset + int64(slot)*favoriteSlotSize
+	slotAt := favoriteSlotOffset(base, slot)
 	if !snapshot.covers(slotAt, favoriteSlotSize) {
 		return false, fmt.Errorf("favorite preset slot %d lies outside UserData10 bounds", slot)
 	}

@@ -935,6 +935,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quests?questKind=quest", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quests/step", `{"questKind":"quest","questKey":"brother_corhyn","stepKind":"quest_step","stepKey":"legacy_000","expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/favorite-presets", ""},
+		{http.MethodDelete, "/api/v1/save-sessions/any-session/favorite-presets/0", `{"expectedRevision":"0"}`},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -1069,6 +1070,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/favorite-presets":                                            "get",
+		"/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}":                           "delete",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1087,6 +1089,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPost := document.Paths[undo]["post"]; !hasPost {
 		t.Fatalf("openapi.json describes no POST for %s", undo)
 	}
+
 	// The owned-item path carries two operations: reading one instance and
 	// removing it, so the map above can only state one of them.
 	ownedItem := "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/owned-items/{ownedItemID}"
@@ -1324,6 +1327,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetTutorialUnlockedResult",
 		"FavoritePreset",
 		"GetFavoritePresetsResult",
+		"DeleteFavoritePresetRequest",
+		"DeleteFavoritePresetResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1561,8 +1566,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 77 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 77", found)
+	if found != 78 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 78", found)
 	}
 }
 
@@ -6723,6 +6728,59 @@ func TestGetFavoritePresetsRoute(t *testing.T) {
 		rec := doSave(t, saveEngine, http.MethodGet, target, "")
 		if rec.Code != http.StatusBadRequest {
 			t.Fatalf("%s: status = %d, want 400 (body %q)", target, rec.Code, rec.Body.String())
+		}
+	}
+}
+
+func TestDeleteFavoritePresetRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	active := map[int]bool{
+		0: true,
+		2: true,
+	}
+	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// 1. Success and route receipt
+	reqBody := `{"expectedRevision":"0"}`
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/2"
+	recorder := doSave(t, saveEngine, http.MethodDelete, target, reqBody)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var routeResult favorites.DeleteFavoritePresetResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &routeResult); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if routeResult.SaveSessionID != session.SaveSessionID || routeResult.SaveRevision != "1" || routeResult.FavoriteSlotID != 2 {
+		t.Fatalf("routeResult = %+v, want slot 2 revision 1", routeResult)
+	}
+
+	// 2. Invalid path favoriteSlotID (non-integer, out of range)
+	for _, invalidTarget := range []string{
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/abc",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/-1",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/15",
+	} {
+		rec := doSave(t, saveEngine, http.MethodDelete, invalidTarget, `{"expectedRevision":"1"}`)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", invalidTarget, rec.Code, rec.Body.String())
+		}
+	}
+
+	// 3. Missing expectedRevision, empty body, unknown fields
+	for _, badBody := range []string{
+		"",
+		"{}",
+		`{"expectedRevision":"1","extra":123}`,
+	} {
+		rec := doSave(t, saveEngine, http.MethodDelete, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets/1", badBody)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("body %q: status = %d, want 400 (body %q)", badBody, rec.Code, rec.Body.String())
 		}
 	}
 }
