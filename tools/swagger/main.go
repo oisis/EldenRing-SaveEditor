@@ -3464,4 +3464,17 @@ func registerTemplatesRoutes(mux *http.ServeMux, templatesStore *buildtemplates.
 		}
 		writeJSON(writer, http.StatusOK, result)
 	})
+	mux.HandleFunc("GET /api/v1/build-templates/{templateID}", func(writer http.ResponseWriter, request *http.Request) {
+		templateID := request.PathValue("templateID")
+		result, err := templates.GetBuildTemplate(templatesStore, templateID)
+		if err != nil {
+			if errors.Is(err, buildtemplates.ErrNotFound) {
+				writeError(writer, http.StatusNotFound, err)
+				return
+			}
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
 }

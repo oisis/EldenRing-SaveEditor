@@ -1,10 +1,12 @@
 package buildtemplates
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 )
@@ -241,5 +243,299 @@ func TestStore_ReadOnlyGuaranteesNoMutation(t *testing.T) {
 
 	if infoBefore.ModTime() != infoAfter.ModTime() {
 		t.Fatalf("modtime changed: before %v, after %v", infoBefore.ModTime(), infoAfter.ModTime())
+	}
+}
+
+func TestStore_GetTemplate_Success(t *testing.T) {
+	dir := t.TempDir()
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-v1",
+      "name": "V1 Loadout",
+      "filename": "v1..json",
+      "createdAt": "2026-05-17T10:00:00Z",
+      "updatedAt": "2026-05-17T10:00:00Z",
+      "version": 1
+    },
+    {
+      "id": "tpl-v2",
+      "name": "V2 Loadout",
+      "filename": "v2.json",
+      "createdAt": "2026-08-17T10:00:00Z",
+      "updatedAt": "2026-08-17T10:00:00Z",
+      "version": 2
+    }
+  ]
+}`
+	payloadV1 := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-05-17T10:00:00Z",
+  "metadata": {
+    "name": "V1 Loadout"
+  },
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [
+        {"baseItemID": 100, "quantity": 1, "container": "inventory", "position": 0}
+      ],
+      "storageItems": []
+    }
+  }
+}`
+	payloadV2 := `{
+  "schema": "saveforge.build-template",
+  "version": 2,
+  "createdAt": "2026-08-17T10:00:00Z",
+  "metadata": {
+    "name": "V2 Loadout"
+  },
+  "selection": {
+    "items": true
+  },
+  "sections": {
+    "items": {
+      "entries": [
+        {"entryID": "e1", "itemID": 100, "category": "melee_armaments", "quantity": 1, "location": "inventory"}
+      ]
+    }
+  }
+}`
+
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "v1..json"), []byte(payloadV1), 0644); err != nil {
+		t.Fatalf("WriteFile v1: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "v2.json"), []byte(payloadV2), 0644); err != nil {
+		t.Fatalf("WriteFile v2: %v", err)
+	}
+
+	store := NewStore(dir)
+
+	// Retrieve v1
+	tpl1, err := store.GetTemplate("tpl-v1")
+	if err != nil {
+		t.Fatalf("GetTemplate(tpl-v1) failed: %v", err)
+	}
+	if tpl1.Version != 1 || tpl1.Sections.InventoryWorkspace == nil {
+		t.Fatalf("unexpected tpl1: %+v", tpl1)
+	}
+
+	// Retrieve v2
+	tpl2, err := store.GetTemplate("tpl-v2")
+	if err != nil {
+		t.Fatalf("GetTemplate(tpl-v2) failed: %v", err)
+	}
+	if tpl2.Version != 2 || tpl2.Sections.Items == nil {
+		t.Fatalf("unexpected tpl2: %+v", tpl2)
+	}
+}
+
+func TestStore_GetTemplate_NotFoundErrors(t *testing.T) {
+	dir := t.TempDir()
+	store := NewStore(dir)
+
+	// Missing index -> ErrNotFound
+	_, err := store.GetTemplate("tpl-1")
+	if err == nil || !errors.Is(err, ErrNotFound) {
+		t.Fatalf("expected ErrNotFound for missing index, got: %v", err)
+	}
+
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-1",
+      "name": "Missing File",
+      "filename": "does-not-exist.json",
+      "createdAt": "2026-05-17T10:00:00Z",
+      "updatedAt": "2026-05-17T10:00:00Z"
+    }
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	// Unknown ID -> ErrNotFound
+	_, err = store.GetTemplate("tpl-unknown")
+	if err == nil || !errors.Is(err, ErrNotFound) {
+		t.Fatalf("expected ErrNotFound for unknown ID, got: %v", err)
+	}
+
+	// Missing target file -> ErrNotFound
+	_, err = store.GetTemplate("tpl-1")
+	if err == nil || !errors.Is(err, ErrNotFound) {
+		t.Fatalf("expected ErrNotFound for missing target payload, got: %v", err)
+	}
+}
+
+func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
+	dir := t.TempDir()
+	store := NewStore(dir)
+
+	// Empty templateID
+	_, err := store.GetTemplate("")
+	if err == nil {
+		t.Fatal("expected error for empty templateID, got nil")
+	}
+
+	// Duplicate template ID in index
+	dupIndex := `{
+  "version": 1,
+  "entries": [
+    {"id": "tpl-dup", "name": "A", "filename": "a.json"},
+    {"id": "tpl-dup", "name": "B", "filename": "b.json"}
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(dupIndex), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err = store.GetTemplate("tpl-dup")
+	if err == nil || !strings.Contains(err.Error(), "duplicate template ID") {
+		t.Fatalf("expected duplicate ID error, got: %v", err)
+	}
+
+	// Empty filename in index
+	emptyFilenameIndex := `{
+  "version": 1,
+  "entries": [
+    {"id": "tpl-empty", "name": "A", "filename": ""}
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(emptyFilenameIndex), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err = store.GetTemplate("tpl-empty")
+	if err == nil || !strings.Contains(err.Error(), "empty filename") {
+		t.Fatalf("expected empty filename error, got: %v", err)
+	}
+
+	// Path traversal filename in index
+	traversalIndex := `{
+  "version": 1,
+  "entries": [
+    {"id": "tpl-trav", "name": "A", "filename": "../outside.json"}
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(traversalIndex), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err = store.GetTemplate("tpl-trav")
+	if err == nil || !strings.Contains(err.Error(), "invalid filename") {
+		t.Fatalf("expected invalid filename error, got: %v", err)
+	}
+
+	// Version mismatch between index and payload
+	mismatchIndex := `{
+  "version": 1,
+  "entries": [
+    {"id": "tpl-mismatch", "name": "V2 in index", "filename": "mismatch.json", "version": 2}
+  ]
+}`
+	mismatchPayload := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-05-17T10:00:00Z",
+  "metadata": {"name": "V2 in index"},
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [{"baseItemID": 1, "quantity": 1, "container": "inventory", "position": 0}],
+      "storageItems": []
+    }
+  }
+}`
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(mismatchIndex), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "mismatch.json"), []byte(mismatchPayload), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err = store.GetTemplate("tpl-mismatch")
+	if err == nil || !strings.Contains(err.Error(), "version mismatch") {
+		t.Fatalf("expected version mismatch error, got: %v", err)
+	}
+
+	// Name mismatch between index and payload
+	nameMismatchIndex := `{
+  "version": 1,
+  "entries": [
+    {"id": "tpl-name-mismatch", "name": "Index Name", "filename": "name-mismatch.json", "version": 1}
+  ]
+}`
+	nameMismatchPayload := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-05-17T10:00:00Z",
+  "metadata": {"name": "Payload Name"},
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [{"baseItemID": 1, "quantity": 1, "container": "inventory", "position": 0}],
+      "storageItems": []
+    }
+  }
+}`
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(nameMismatchIndex), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "name-mismatch.json"), []byte(nameMismatchPayload), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	_, err = store.GetTemplate("tpl-name-mismatch")
+	if err == nil || !strings.Contains(err.Error(), "metadata mismatch") {
+		t.Fatalf("expected metadata mismatch error, got: %v", err)
+	}
+}
+
+func TestStore_GetTemplate_SymlinkEscapeRejected(t *testing.T) {
+	tempParent := t.TempDir()
+	storeDir := filepath.Join(tempParent, "store")
+	outsideDir := filepath.Join(tempParent, "outside")
+	if err := os.Mkdir(storeDir, 0755); err != nil {
+		t.Fatalf("Mkdir store: %v", err)
+	}
+	if err := os.Mkdir(outsideDir, 0755); err != nil {
+		t.Fatalf("Mkdir outside: %v", err)
+	}
+
+	outsideSecret := filepath.Join(outsideDir, "secret-template.json")
+	validPayload := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-05-17T10:00:00Z",
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [{"baseItemID": 1, "quantity": 1, "container": "inventory", "position": 0}],
+      "storageItems": []
+    }
+  }
+}`
+	if err := os.WriteFile(outsideSecret, []byte(validPayload), 0644); err != nil {
+		t.Fatalf("WriteFile outside: %v", err)
+	}
+
+	symlinkPath := filepath.Join(storeDir, "escaped.json")
+	if err := os.Symlink(outsideSecret, symlinkPath); err != nil {
+		t.Fatalf("Symlink: %v", err)
+	}
+
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {"id": "tpl-escape", "name": "Escape", "filename": "escaped.json", "version": 1}
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(storeDir, IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+
+	store := NewStore(storeDir)
+	_, err := store.GetTemplate("tpl-escape")
+	if err == nil || !strings.Contains(err.Error(), "escapes store directory") {
+		t.Fatalf("expected symlink escape error, got: %v", err)
 	}
 }

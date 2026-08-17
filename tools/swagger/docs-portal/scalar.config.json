@@ -230,6 +230,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/templates/get_build_templates.md",
                 "title": "GetBuildTemplates"
+              },
+              "/get-build-template": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/templates/get_build_template.md",
+                "title": "GetBuildTemplate"
               }
             }
           },

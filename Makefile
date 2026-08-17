@@ -3,6 +3,7 @@ VERSION := 2.0.0
 GO_PACKAGES := \
 	./backend/gamecatalog/... \
 	./backend/saveengine/... \
+	./backend/buildtemplates/... \
 	./backend/endpoints/... \
 	./tools/...
 

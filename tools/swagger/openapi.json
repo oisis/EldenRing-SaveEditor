@@ -475,6 +475,57 @@
         }
       }
     },
+    "/api/v1/build-templates/{templateID}": {
+      "get": {
+        "operationId": "getBuildTemplate",
+        "tags": ["Templates"],
+        "summary": "GetBuildTemplate",
+        "description": "Returns one complete Build Template from the local templates library. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "name": "templateID",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the build template",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The complete portable build template document",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildTemplate"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid template ID or corrupt template/index data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions": {
       "post": {
         "operationId": "loadSave",
@@ -9194,6 +9245,574 @@
           }
         },
         "required": ["templates", "total", "page", "pageSize"]
+      },
+      "BuildTemplate": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "schema": {
+            "type": "string",
+            "enum": ["saveforge.build-template"]
+          },
+          "version": {
+            "type": "integer",
+            "enum": [1, 2]
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Creation timestamp in RFC3339 format"
+          },
+          "appVersion": {
+            "type": "string",
+            "description": "Application version that generated the template"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/TemplateDocMetadata"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/TemplateSelection"
+          },
+          "sections": {
+            "$ref": "#/components/schemas/TemplateSections"
+          },
+          "applyOptions": {
+            "$ref": "#/components/schemas/ApplyOptions"
+          }
+        },
+        "required": ["schema", "version", "createdAt", "sections"]
+      },
+      "TemplateDocMetadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sourceCharacterIndex": {
+            "type": "integer"
+          },
+          "sourceCharacterName": {
+            "type": "string"
+          }
+        }
+      },
+      "TemplateSelection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "inventory.workspace": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "equipment": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "spells": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "items": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "inventoryLayout": {
+            "$ref": "#/components/schemas/SectionSelection"
+          },
+          "storageLayout": {
+            "$ref": "#/components/schemas/SectionSelection"
+          }
+        }
+      },
+      "SectionSelection": {
+        "oneOf": [
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        ]
+      },
+      "TemplateSections": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "inventory.workspace": {
+            "$ref": "#/components/schemas/InventoryWorkspaceSection"
+          },
+          "profile": {
+            "$ref": "#/components/schemas/ProfileSection"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/StatsSection"
+          },
+          "equipment": {
+            "$ref": "#/components/schemas/EquipmentSection"
+          },
+          "spells": {
+            "$ref": "#/components/schemas/SpellsSection"
+          },
+          "items": {
+            "$ref": "#/components/schemas/ItemsSection"
+          },
+          "inventoryLayout": {
+            "$ref": "#/components/schemas/InventoryLayoutSection"
+          },
+          "storageLayout": {
+            "$ref": "#/components/schemas/StorageLayoutSection"
+          }
+        }
+      },
+      "InventoryWorkspaceSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "inventoryItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateItem"
+            }
+          },
+          "storageItems": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateItem"
+            }
+          }
+        },
+        "required": ["inventoryItems", "storageItems"]
+      },
+      "TemplateItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "baseItemID": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "upgrade": {
+            "type": "integer"
+          },
+          "infusionName": {
+            "type": "string"
+          },
+          "aowItemID": {
+            "type": "integer"
+          },
+          "container": {
+            "type": "string",
+            "enum": ["inventory", "storage"]
+          },
+          "position": {
+            "type": "integer"
+          }
+        },
+        "required": ["baseItemID", "quantity", "container", "position"]
+      },
+      "ProfileSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "level": {
+            "type": "integer"
+          },
+          "runes": {
+            "type": "integer"
+          },
+          "soulMemory": {
+            "type": "integer"
+          },
+          "class": {
+            "type": "string"
+          },
+          "clearCount": {
+            "type": "integer"
+          },
+          "scadutreeBlessing": {
+            "type": "integer"
+          },
+          "shadowRealmBlessing": {
+            "type": "integer"
+          },
+          "talismanSlots": {
+            "type": "integer"
+          }
+        }
+      },
+      "StatsSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "vigor": {
+            "type": "integer"
+          },
+          "mind": {
+            "type": "integer"
+          },
+          "endurance": {
+            "type": "integer"
+          },
+          "strength": {
+            "type": "integer"
+          },
+          "dexterity": {
+            "type": "integer"
+          },
+          "intelligence": {
+            "type": "integer"
+          },
+          "faith": {
+            "type": "integer"
+          },
+          "arcane": {
+            "type": "integer"
+          }
+        }
+      },
+      "EquipmentSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "weaponLeftHand1": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "weaponRightHand1": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "weaponLeftHand2": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "weaponRightHand2": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "weaponLeftHand3": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "weaponRightHand3": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "arrows1": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "bolts1": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "arrows2": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "bolts2": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "armorHead": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "armorChest": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "armorArms": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "armorLegs": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "talisman1": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "talisman2": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "talisman3": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "talisman4": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          },
+          "talisman5": {
+            "$ref": "#/components/schemas/EquipmentItemRef"
+          }
+        }
+      },
+      "EquipmentItemRef": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "baseItemID": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "upgrade": {
+            "type": "integer"
+          },
+          "infusionName": {
+            "type": "string"
+          },
+          "aowItemID": {
+            "type": "integer"
+          }
+        },
+        "required": ["baseItemID"]
+      },
+      "SpellsSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "spell1": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell2": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell3": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell4": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell5": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell6": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell7": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell8": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell9": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell10": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell11": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell12": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell13": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "spell14": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          }
+        }
+      },
+      "SpellSlotRef": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "baseItemID": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": ["baseItemID"]
+      },
+      "ItemsSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TemplateItemEntryV2"
+            }
+          }
+        },
+        "required": ["entries"]
+      },
+      "TemplateItemEntryV2": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entryID": {
+            "type": "string"
+          },
+          "itemID": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string",
+            "enum": [
+              "melee_armaments",
+              "ranged_and_catalysts",
+              "shields",
+              "ashes_of_war",
+              "head",
+              "chest",
+              "arms",
+              "legs",
+              "talismans",
+              "sorceries",
+              "incantations",
+              "tools",
+              "crafting_materials",
+              "bolstering_materials",
+              "arrows_and_bolts",
+              "key_items",
+              "gestures",
+              "dlc"
+            ]
+          },
+          "quantity": {
+            "type": "integer"
+          },
+          "location": {
+            "type": "string",
+            "enum": ["inventory", "storage", "both"]
+          },
+          "upgradeKind": {
+            "type": "string",
+            "enum": ["none", "standard", "somber"]
+          },
+          "upgradeLevel": {
+            "type": "integer"
+          },
+          "infusionName": {
+            "type": "string"
+          },
+          "ashOfWarItemID": {
+            "type": "integer"
+          }
+        },
+        "required": ["entryID", "itemID", "category", "quantity", "location"]
+      },
+      "InventoryLayoutSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutEntry"
+            }
+          }
+        },
+        "required": ["entries"]
+      },
+      "StorageLayoutSection": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LayoutEntry"
+            }
+          }
+        },
+        "required": ["entries"]
+      },
+      "LayoutEntry": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "entryRef": {
+            "type": "string"
+          },
+          "position": {
+            "type": "integer"
+          }
+        },
+        "required": ["entryRef", "position"]
+      },
+      "ApplyOptions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "$ref": "#/components/schemas/ItemApplyOptions"
+          },
+          "inventoryLayout": {
+            "$ref": "#/components/schemas/LayoutApplyOptions"
+          },
+          "storageLayout": {
+            "$ref": "#/components/schemas/LayoutApplyOptions"
+          },
+          "weaponLevelOverride": {
+            "$ref": "#/components/schemas/WeaponLevelOverride"
+          }
+        }
+      },
+      "ItemApplyOptions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": ["addMissing", "updateExisting", "merge", "replace"]
+          },
+          "preserveExtraItems": {
+            "type": "boolean"
+          }
+        },
+        "required": ["mode"]
+      },
+      "LayoutApplyOptions": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": ["ignore", "append", "reorderOnly", "replace"]
+          }
+        },
+        "required": ["mode"]
+      },
+      "WeaponLevelOverride": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "useTemplateLevels": {
+            "type": "boolean"
+          },
+          "standardOverride": {
+            "type": "integer"
+          },
+          "somberOverride": {
+            "type": "integer"
+          }
+        },
+        "required": ["useTemplateLevels"]
       },
       "SetQuestStepRequest": {
         "type": "object",

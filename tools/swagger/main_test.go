@@ -1073,7 +1073,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/favorite-presets":                                            "get",
-		"/api/v1/build-templates": "get",
+		"/api/v1/build-templates":              "get",
+		"/api/v1/build-templates/{templateID}": "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -7091,6 +7092,146 @@ func TestGetBuildTemplatesRoute_ExternalBindReturns404(t *testing.T) {
 	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
+	}
+}
+
+func TestGetBuildTemplateRoute_Success(t *testing.T) {
+	dir := t.TempDir()
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-123",
+      "name": "PvP Meta",
+      "filename": "pvp.json",
+      "createdAt": "2026-08-17T12:00:00Z",
+      "updatedAt": "2026-08-17T12:00:00Z",
+      "version": 2
+    }
+  ]
+}`
+	payloadJSON := `{
+  "schema": "saveforge.build-template",
+  "version": 2,
+  "createdAt": "2026-08-17T12:00:00Z",
+  "metadata": {
+    "name": "PvP Meta"
+  },
+  "selection": {
+    "items": true
+  },
+  "sections": {
+    "items": {
+      "entries": [
+        {
+          "entryID": "claymore-1",
+          "itemID": 1000,
+          "category": "melee_armaments",
+          "quantity": 1,
+          "location": "inventory"
+        }
+      ]
+    }
+  }
+}`
+	if err := os.WriteFile(filepath.Join(dir, buildtemplates.IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "pvp.json"), []byte(payloadJSON), 0644); err != nil {
+		t.Fatalf("WriteFile payload: %v", err)
+	}
+
+	store := buildtemplates.NewStore(dir)
+	saveEngine := saveengine.New()
+	handler := newHandlerWithTemplatesStore(newPrototypeCatalog(t), testApplicationVersion, saveEngine, store)
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates/tpl-123", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var tpl buildtemplates.BuildTemplate
+	if err := json.Unmarshal(recorder.Body.Bytes(), &tpl); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if tpl.Version != 2 || tpl.Sections.Items == nil || len(tpl.Sections.Items.Entries) != 1 {
+		t.Fatalf("unexpected response payload: %+v", tpl)
+	}
+}
+
+func TestGetBuildTemplateRoute_NotFound(t *testing.T) {
+	dir := t.TempDir()
+	store := buildtemplates.NewStore(dir)
+	saveEngine := saveengine.New()
+	handler := newHandlerWithTemplatesStore(newPrototypeCatalog(t), testApplicationVersion, saveEngine, store)
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates/tpl-nonexistent", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestGetBuildTemplateRoute_CorruptPayloadReturns400(t *testing.T) {
+	dir := t.TempDir()
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-corrupt",
+      "name": "Corrupt",
+      "filename": "corrupt.json",
+      "createdAt": "2026-08-17T12:00:00Z",
+      "updatedAt": "2026-08-17T12:00:00Z"
+    }
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, buildtemplates.IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "corrupt.json"), []byte(`INVALID JSON`), 0644); err != nil {
+		t.Fatalf("WriteFile payload: %v", err)
+	}
+
+	store := buildtemplates.NewStore(dir)
+	saveEngine := saveengine.New()
+	handler := newHandlerWithTemplatesStore(newPrototypeCatalog(t), testApplicationVersion, saveEngine, store)
+
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates/tpl-corrupt", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestGetBuildTemplateRoute_NoExplicitStoreReturns404(t *testing.T) {
+	saveEngine := saveengine.New()
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates/tpl-123", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 when no explicit store provided", recorder.Code)
+	}
+}
+
+func TestGetBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates/tpl-123", nil)
 	handler.ServeHTTP(recorder, request)
 
 	if recorder.Code != http.StatusNotFound {
