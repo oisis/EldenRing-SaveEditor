@@ -205,6 +205,11 @@
                 "filepath": "../../../docs/endpoints/favorites/get_favorite_presets.md",
                 "title": "GetFavoritePresets"
               },
+              "/set-favorite-preset": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/favorites/set_favorite_preset.md",
+                "title": "SetFavoritePreset"
+              },
               "/delete-favorite-preset": {
                 "type": "page",
                 "filepath": "../../../docs/endpoints/favorites/delete_favorite_preset.md",

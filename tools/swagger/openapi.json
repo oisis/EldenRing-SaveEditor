@@ -3811,6 +3811,60 @@
       }
     },
     "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}": {
+      "put": {
+        "operationId": "setFavoritePreset",
+        "tags": ["Favorites"],
+        "summary": "SetFavoritePreset",
+        "description": "Saves or replaces the specified Mirror Favorites appearance preset slot in UserData10 with appearance data from an active character of the session under expectedRevision control. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "name": "favoriteSlotID",
+            "in": "path",
+            "required": true,
+            "description": "Slot index (0..14) to save or replace",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 14
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetFavoritePresetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receipt of the committed Mirror Favorites preset write",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SetFavoritePresetResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty or unknown session, an out-of-range favoriteSlotID or sourceCharacterID, an inactive character, a non-canonical or mismatched revision, or a malformed appearance block",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
       "delete": {
         "operationId": "deleteFavoritePreset",
         "tags": ["Favorites"],
@@ -9073,6 +9127,59 @@
           "saveSessionID",
           "saveRevision",
           "favoriteSlotID"
+        ]
+      },
+      "SetFavoritePresetRequest": {
+        "type": "object",
+        "description": "Input for saving or replacing a Mirror Favorites preset slot",
+        "properties": {
+          "sourceCharacterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "The active character slot index 0..9 providing appearance data"
+          },
+          "expectedRevision": {
+            "type": "string",
+            "description": "The expected decimal saveRevision of the session"
+          }
+        },
+        "required": [
+          "sourceCharacterID",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "SetFavoritePresetResult": {
+        "type": "object",
+        "description": "Receipt of a committed Mirror Favorites preset write",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session that was modified"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "The new decimal saveRevision of the session"
+          },
+          "favoriteSlotID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14,
+            "description": "The slot index 0..14 that was written"
+          },
+          "sourceCharacterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "The source character slot index 0..9 used for appearance data"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "favoriteSlotID",
+          "sourceCharacterID"
         ]
       }
     }

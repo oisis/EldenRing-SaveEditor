@@ -1070,7 +1070,6 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/favorite-presets":                                            "get",
-		"/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}":                           "delete",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1082,6 +1081,14 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	}
 	if _, hasDelete := document.Paths["/api/v1/save-sessions/{saveSessionID}"]["delete"]; !hasDelete {
 		t.Fatal("openapi.json describes no DELETE for /api/v1/save-sessions/{saveSessionID}")
+	}
+	// The favorite-presets slot path carries both PUT and DELETE operations.
+	favSlot := "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}"
+	if _, hasPut := document.Paths[favSlot]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", favSlot)
+	}
+	if _, hasDelete := document.Paths[favSlot]["delete"]; !hasDelete {
+		t.Fatalf("openapi.json describes no DELETE for %s", favSlot)
 	}
 	// The undo path carries the getter and the mutation, so the map above can
 	// only state one of them.
@@ -1327,6 +1334,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetTutorialUnlockedResult",
 		"FavoritePreset",
 		"GetFavoritePresetsResult",
+		"SetFavoritePresetRequest",
+		"SetFavoritePresetResult",
 		"DeleteFavoritePresetRequest",
 		"DeleteFavoritePresetResult",
 	} {
@@ -1566,8 +1575,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 78 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 78", found)
+	if found != 79 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 79", found)
 	}
 }
 
@@ -6645,6 +6654,24 @@ func writeFavoritesSwaggerFixture(t *testing.T, activeSlots map[int]bool) string
 	binary.LittleEndian.PutUint32(data[0x0C:], 12)
 	base := favPCUserData10Offset + 0x10
 
+	// Character 0 appearance data
+	data[base+0x1954] = 1 // active flag for slot 0
+	slotBase := int64(pcHeaderSize) + 0x10
+	anchor := slotBase + 0x1000
+	copy(data[anchor:], []byte{
+		0x00,
+		0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+		0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	})
+	data[anchor-249] = 1 // male
+	data[anchor-245] = 1
+	faceAt := slotBase + 0x2000
+	copy(data[faceAt:], []byte{0xFF, 0xFF, 0xFF, 0xFF, 'F', 'A', 'C', 'E'})
+	binary.LittleEndian.PutUint32(data[faceAt+0x08:], 4)
+	binary.LittleEndian.PutUint32(data[faceAt+0x0C:], 0x120)
+
 	for slot := 0; slot < 15; slot++ {
 		if activeSlots != nil && activeSlots[slot] {
 			slotAt := base + 0x154 + int64(slot)*0x130
@@ -6674,8 +6701,9 @@ func TestGetFavoritePresetsRoute(t *testing.T) {
 		t.Fatalf("LoadSave: %v", err)
 	}
 
-	// 1. Full list (no filter)
-	recorder := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets", "")
+	// 1. Success and route receipt for all presets
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets"
+	recorder := doSave(t, saveEngine, http.MethodGet, target, "")
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
 	}
@@ -6690,44 +6718,46 @@ func TestGetFavoritePresetsRoute(t *testing.T) {
 		t.Fatalf("unmarshal: %v", err)
 	}
 	if !reflect.DeepEqual(routeResult, direct) {
-		t.Fatalf("route result = %+v, want direct result = %+v", routeResult, direct)
+		t.Fatalf("routeResult = %+v, direct = %+v", routeResult, direct)
 	}
 
-	// 2. Filter single slot (slot 3 - active)
-	recFiltered := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets?favoriteSlotID=3", "")
-	if recFiltered.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200 (body %q)", recFiltered.Code, recFiltered.Body.String())
+	// 2. Filter by favoriteSlotID
+	filterTarget := "/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=3"
+	filterRec := doSave(t, saveEngine, http.MethodGet, filterTarget, "")
+	if filterRec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", filterRec.Code, filterRec.Body.String())
 	}
 	var filteredResult favorites.GetFavoritePresetsResult
-	if err := json.Unmarshal(recFiltered.Body.Bytes(), &filteredResult); err != nil {
+	if err := json.Unmarshal(filterRec.Body.Bytes(), &filteredResult); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
 	if len(filteredResult.Presets) != 1 || filteredResult.Presets[0].FavoriteSlotID != 3 || !filteredResult.Presets[0].Active {
-		t.Fatalf("filteredResult = %+v, want 1 active slot with ID 3", filteredResult)
+		t.Fatalf("filteredResult = %+v, want slot 3 active", filteredResult)
 	}
 
-	// 3. Filter single slot (slot 1 - inactive)
-	recFilteredEmpty := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets?favoriteSlotID=1", "")
-	if recFilteredEmpty.Code != http.StatusOK {
-		t.Fatalf("status = %d, want 200 (body %q)", recFilteredEmpty.Code, recFilteredEmpty.Body.String())
+	// 3. Filter inactive slot
+	filterEmptyTarget := "/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=1"
+	filterEmptyRec := doSave(t, saveEngine, http.MethodGet, filterEmptyTarget, "")
+	if filterEmptyRec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", filterEmptyRec.Code, filterEmptyRec.Body.String())
 	}
 	var filteredEmptyResult favorites.GetFavoritePresetsResult
-	if err := json.Unmarshal(recFilteredEmpty.Body.Bytes(), &filteredEmptyResult); err != nil {
+	if err := json.Unmarshal(filterEmptyRec.Body.Bytes(), &filteredEmptyResult); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
 	if len(filteredEmptyResult.Presets) != 1 || filteredEmptyResult.Presets[0].FavoriteSlotID != 1 || filteredEmptyResult.Presets[0].Active {
-		t.Fatalf("filteredEmptyResult = %+v, want 1 inactive slot with ID 1", filteredEmptyResult)
+		t.Fatalf("filteredEmptyResult = %+v, want slot 1 inactive", filteredEmptyResult)
 	}
 
-	// 4. Invalid query parameters
-	for _, target := range []string{
+	// 4. Invalid query parameter favoriteSlotID (non-integer, out of range)
+	for _, invalidTarget := range []string{
 		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=abc",
 		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=-1",
 		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=15",
 	} {
-		rec := doSave(t, saveEngine, http.MethodGet, target, "")
+		rec := doSave(t, saveEngine, http.MethodGet, invalidTarget, "")
 		if rec.Code != http.StatusBadRequest {
-			t.Fatalf("%s: status = %d, want 400 (body %q)", target, rec.Code, rec.Body.String())
+			t.Fatalf("%s: status = %d, want 400 (body %q)", invalidTarget, rec.Code, rec.Body.String())
 		}
 	}
 }
@@ -6779,6 +6809,62 @@ func TestDeleteFavoritePresetRoute(t *testing.T) {
 		`{"expectedRevision":"1","extra":123}`,
 	} {
 		rec := doSave(t, saveEngine, http.MethodDelete, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets/1", badBody)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("body %q: status = %d, want 400 (body %q)", badBody, rec.Code, rec.Body.String())
+		}
+	}
+}
+
+func TestSetFavoritePresetRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	active := map[int]bool{
+		0: true,
+		2: true,
+	}
+	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// 1. Success and route receipt
+	reqBody := `{"sourceCharacterID":0,"expectedRevision":"0"}`
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/3"
+	recorder := doSave(t, saveEngine, http.MethodPut, target, reqBody)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var routeResult favorites.SetFavoritePresetResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &routeResult); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if routeResult.SaveSessionID != session.SaveSessionID || routeResult.SaveRevision != "1" ||
+		routeResult.FavoriteSlotID != 3 || routeResult.SourceCharacterID != 0 {
+		t.Fatalf("routeResult = %+v, want slot 3 character 0 revision 1", routeResult)
+	}
+
+	// 2. Invalid path favoriteSlotID (non-integer, out of range)
+	for _, invalidTarget := range []string{
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/abc",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/-1",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets/15",
+	} {
+		rec := doSave(t, saveEngine, http.MethodPut, invalidTarget, `{"sourceCharacterID":0,"expectedRevision":"1"}`)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", invalidTarget, rec.Code, rec.Body.String())
+		}
+	}
+
+	// 3. Missing sourceCharacterID, missing expectedRevision, empty body, unknown fields
+	for _, badBody := range []string{
+		"",
+		"{}",
+		`{"expectedRevision":"1"}`,
+		`{"sourceCharacterID":0}`,
+		`{"sourceCharacterID":0,"expectedRevision":"1","extra":123}`,
+	} {
+		rec := doSave(t, saveEngine, http.MethodPut, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets/1", badBody)
 		if rec.Code != http.StatusBadRequest {
 			t.Fatalf("body %q: status = %d, want 400 (body %q)", badBody, rec.Code, rec.Body.String())
 		}

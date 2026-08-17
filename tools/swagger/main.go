@@ -372,6 +372,13 @@ type deleteFavoritePresetRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+// setFavoritePresetRequest is the strict JSON body of the Mirror Favorites
+// write route. SaveEngine owns the validation, revision and appearance rules.
+type setFavoritePresetRequest struct {
+	SourceCharacterID *int   `json:"sourceCharacterID"`
+	ExpectedRevision  string `json:"expectedRevision"`
+}
+
 // cloneCharacterRequest is the strict JSON body of the slot-cloning route. A
 // pointer distinguishes an omitted targetSlotID from the valid slot zero.
 type cloneCharacterRequest struct {
@@ -3210,6 +3217,44 @@ func registerSaveSessionRoutes(
 				saveEngine,
 				request.PathValue("saveSessionID"),
 				favoriteSlotID,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}",
+		func(writer http.ResponseWriter, request *http.Request) {
+			favoriteSlotID, err := parseFavoriteSlotID(request.PathValue("favoriteSlotID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body setFavoritePresetRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.SourceCharacterID == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("sourceCharacterID is required"))
+				return
+			}
+			result, err := favorites.SetFavoritePreset(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				favoriteSlotID,
+				*body.SourceCharacterID,
 				body.ExpectedRevision,
 			)
 			if err != nil {
