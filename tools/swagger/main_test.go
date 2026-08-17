@@ -22,6 +22,7 @@ import (
 	"testing"
 	"unicode/utf16"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
@@ -1072,6 +1073,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
 		"/api/v1/save-sessions/{saveSessionID}/favorite-presets":                                            "get",
+		"/api/v1/build-templates": "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -6924,5 +6926,174 @@ func TestApplyFavoritePresetRoute(t *testing.T) {
 		if rec.Code != http.StatusBadRequest {
 			t.Fatalf("body %q: status = %d, want 400 (body %q)", badBody, rec.Code, rec.Body.String())
 		}
+	}
+}
+
+func TestGetBuildTemplatesRoute_EmptyLibrary(t *testing.T) {
+	storeDir := filepath.Join(t.TempDir(), "templates")
+	store := buildtemplates.NewStore(storeDir)
+	saveEngine := saveengine.New()
+
+	handler := newHandlerWithTemplatesStore(newPrototypeCatalog(t), testApplicationVersion, saveEngine, store)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var result struct {
+		Templates []any `json:"templates"`
+		Total     int   `json:"total"`
+		Page      int   `json:"page"`
+		PageSize  int   `json:"pageSize"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if result.Total != 0 || len(result.Templates) != 0 || result.Page != 1 || result.PageSize != 50 {
+		t.Fatalf("unexpected result: %+v", result)
+	}
+}
+
+func TestGetBuildTemplatesRoute_FilteringAndPagination(t *testing.T) {
+	storeDir := t.TempDir()
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-1",
+      "name": "Bleed Build",
+      "description": "PvP Bleed setup",
+      "tags": ["pvp", "bleed"],
+      "filename": "t1.json",
+      "createdAt": "2026-05-17T10:00:00Z",
+      "updatedAt": "2026-05-17T12:00:00Z",
+      "inventoryItems": 10,
+      "storageItems": 2,
+      "warnings": 0,
+      "version": 2,
+      "selectedSections": ["inventory.workspace"]
+    },
+    {
+      "id": "tpl-2",
+      "name": "Mage Build",
+      "description": "PvE Sorcery",
+      "tags": ["pve", "magic"],
+      "filename": "t2.json",
+      "createdAt": "2026-05-17T10:00:00Z",
+      "updatedAt": "2026-05-17T11:00:00Z",
+      "inventoryItems": 8,
+      "storageItems": 0,
+      "warnings": 0,
+      "version": 1
+    }
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(storeDir, buildtemplates.IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	store := buildtemplates.NewStore(storeDir)
+	saveEngine := saveengine.New()
+	handler := newHandlerWithTemplatesStore(newPrototypeCatalog(t), testApplicationVersion, saveEngine, store)
+
+	// 1. Search + repeated Tags query (?tags=pvp&tags=bleed)
+	{
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates?search=bleed&tags=pvp&tags=bleed&page=1&pageSize=10", nil)
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+		}
+		var result struct {
+			Templates []buildtemplates.TemplateMetadata `json:"templates"`
+			Total     int                               `json:"total"`
+			Page      int                               `json:"page"`
+			PageSize  int                               `json:"pageSize"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		if result.Total != 1 || len(result.Templates) != 1 || result.Templates[0].TemplateID != "tpl-1" {
+			t.Fatalf("unexpected result: %+v", result)
+		}
+	}
+
+	// 2. Comma-separated value is NOT split into multiple tags; treated as literal tag
+	{
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates?tags=pvp,bleed", nil)
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusOK {
+			t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+		}
+		var result struct {
+			Total int `json:"total"`
+		}
+		if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		if result.Total != 0 {
+			t.Fatalf("expected 0 matches for unsplit literal tag 'pvp,bleed', got %d", result.Total)
+		}
+	}
+
+	// 3. Empty tag elements return HTTP 400 Bad Request
+	for _, emptyTagQuery := range []string{
+		"/api/v1/build-templates?tags=",
+		"/api/v1/build-templates?tags=pvp&tags=",
+	} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, emptyTagQuery, nil)
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", emptyTagQuery, recorder.Code, recorder.Body.String())
+		}
+	}
+
+	// 4. Invalid paging parameters
+	for _, invalidQuery := range []string{
+		"/api/v1/build-templates?page=-1",
+		"/api/v1/build-templates?page=abc",
+		"/api/v1/build-templates?pageSize=-1",
+		"/api/v1/build-templates?pageSize=xyz",
+	} {
+		recorder := httptest.NewRecorder()
+		request := httptest.NewRequest(http.MethodGet, invalidQuery, nil)
+		handler.ServeHTTP(recorder, request)
+
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", invalidQuery, recorder.Code, recorder.Body.String())
+		}
+	}
+}
+
+func TestGetBuildTemplatesRoute_NoExplicitStoreReturns404(t *testing.T) {
+	saveEngine := saveengine.New()
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, saveEngine)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 when no explicit store provided", recorder.Code)
+	}
+}
+
+func TestGetBuildTemplatesRoute_ExternalBindReturns404(t *testing.T) {
+	// External bind passes saveEngine = nil
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
+	recorder := httptest.NewRecorder()
+	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates", nil)
+	handler.ServeHTTP(recorder, request)
+
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
 	}
 }

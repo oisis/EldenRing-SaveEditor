@@ -222,6 +222,17 @@
               }
             }
           },
+          "/templates": {
+            "type": "group",
+            "title": "Templates",
+            "children": {
+              "/get-build-templates": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/templates/get_build_templates.md",
+                "title": "GetBuildTemplates"
+              }
+            }
+          },
           "/equipment": {
             "type": "group",
             "title": "Equipment",

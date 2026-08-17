@@ -20,6 +20,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/appearance"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
@@ -29,6 +30,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
@@ -63,18 +65,24 @@ func run() error {
 		return err
 	}
 
-	// The save-session routes read local save files and hold sessions in memory,
+	// The save-session and templates routes read local user data,
 	// so they exist only while the explorer is a loopback-only developer tool.
-	// An external bind withholds the engine, and every save-session route is then
-	// absent from the mux and answers 404.
+	// An external bind withholds the engine and store, and those routes are then
+	// absent from the mux and answer 404.
 	var saveEngine *saveengine.Engine
+	var templatesStore *buildtemplates.Store
 	if !*allowExternal {
 		saveEngine = saveengine.New()
+		var err error
+		templatesStore, err = buildtemplates.NewDefaultStore()
+		if err != nil {
+			return fmt.Errorf("initialize templates store: %w", err)
+		}
 	}
 
 	server := &http.Server{
 		Addr:              *address,
-		Handler:           newHandler(gameCatalog, *applicationVersion, saveEngine),
+		Handler:           newHandlerWithTemplatesStore(gameCatalog, *applicationVersion, saveEngine, templatesStore),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	// The browser UI is Scalar Docs, served by a separate process; this one is
@@ -141,12 +149,25 @@ func validateAddress(address string, allowExternal bool) error {
 
 // newHandler builds the explorer mux. A nil saveEngine registers no
 // save-session route at all, which is how the caller disables the
-// save-session lifecycle for an external bind.
+// save-session lifecycle for an external bind. It passes a nil templatesStore,
+// so no templates routes are registered.
 func newHandler(gameCatalog *gamecatalog.Catalog, applicationVersion string, saveEngine *saveengine.Engine) http.Handler {
+	return newHandlerWithTemplatesStore(gameCatalog, applicationVersion, saveEngine, nil)
+}
+
+func newHandlerWithTemplatesStore(
+	gameCatalog *gamecatalog.Catalog,
+	applicationVersion string,
+	saveEngine *saveengine.Engine,
+	templatesStore *buildtemplates.Store,
+) http.Handler {
 	mux := http.NewServeMux()
 
 	if saveEngine != nil {
 		registerSaveSessionRoutes(mux, saveEngine, gameCatalog)
+		if templatesStore != nil {
+			registerTemplatesRoutes(mux, templatesStore)
+		}
 	}
 
 	mux.HandleFunc("GET /healthz", func(writer http.ResponseWriter, _ *http.Request) {
@@ -3418,4 +3439,29 @@ func writeJSON(writer http.ResponseWriter, status int, payload any) {
 // until several endpoint contracts exist.
 func writeError(writer http.ResponseWriter, status int, err error) {
 	writeJSON(writer, status, map[string]string{"error": err.Error()})
+}
+
+// registerTemplatesRoutes registers local Build Templates library routes.
+func registerTemplatesRoutes(mux *http.ServeMux, templatesStore *buildtemplates.Store) {
+	mux.HandleFunc("GET /api/v1/build-templates", func(writer http.ResponseWriter, request *http.Request) {
+		query := request.URL.Query()
+		page, err := parsePagingValue(query.Get("page"), "page")
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		pageSize, err := parsePagingValue(query.Get("pageSize"), "pageSize")
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		tags := query["tags"]
+		search := query.Get("search")
+		result, err := templates.GetBuildTemplates(templatesStore, search, tags, page, pageSize)
+		if err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
 }
