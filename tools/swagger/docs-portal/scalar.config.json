@@ -240,6 +240,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/templates/delete_build_template.md",
                 "title": "DeleteBuildTemplate"
+              },
+              "/update-build-template": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/templates/update_build_template.md",
+                "title": "UpdateBuildTemplate"
               }
             }
           },

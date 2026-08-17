@@ -963,3 +963,259 @@ func TestStore_DeleteTemplate_FailClosedIndexValidation(t *testing.T) {
 		})
 	}
 }
+
+func newUpdateFixture(t *testing.T, warnings int) (string, *Store) {
+	t.Helper()
+	dir := t.TempDir()
+	indexJSON := fmt.Sprintf(`{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-123",
+      "name": "Old Name",
+      "description": "Old Desc",
+      "tags": ["old-tag"],
+      "filename": "tpl-123.json",
+      "createdAt": "2026-05-17T10:00:00Z",
+      "updatedAt": "2026-05-17T10:00:00Z",
+      "inventoryItems": 1,
+      "storageItems": 0,
+      "warnings": %d,
+      "version": 1,
+      "selectedSections": ["inventory.workspace"],
+      "revision": 5
+    }
+  ]
+}`, warnings)
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+	payloadJSON := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-05-17T10:00:00Z",
+  "metadata": {
+    "name": "Old Name",
+    "description": "Old Desc",
+    "author": "Original Author",
+    "tags": ["old-tag"],
+    "sourceCharacterIndex": 2,
+    "sourceCharacterName": "Tarnished"
+  },
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [{"baseItemID": 100, "quantity": 1, "container": "inventory", "position": 0}],
+      "storageItems": []
+    }
+  }
+}`
+	if err := os.WriteFile(filepath.Join(dir, "tpl-123.json"), []byte(payloadJSON), 0644); err != nil {
+		t.Fatalf("WriteFile payload: %v", err)
+	}
+	return dir, NewStore(dir)
+}
+
+func TestStore_UpdateTemplate_MetadataOnly(t *testing.T) {
+	dir, store := newUpdateFixture(t, 2)
+
+	newRev, err := store.UpdateTemplate("tpl-123", "5", &TemplateMetadataUpdate{
+		Name:        "Updated Name",
+		Description: "Updated Desc",
+		Tags:        []string{"new-tag1", "new-tag2"},
+	}, nil)
+	if err != nil {
+		t.Fatalf("UpdateTemplate failed: %v", err)
+	}
+	if newRev != "6" {
+		t.Errorf("newRev = %q, want %q", newRev, "6")
+	}
+
+	tpl, rev, err := store.GetTemplate("tpl-123")
+	if err != nil {
+		t.Fatalf("GetTemplate: %v", err)
+	}
+	if rev != "6" || tpl.Metadata.Name != "Updated Name" || tpl.Metadata.Description != "Updated Desc" {
+		t.Errorf("GetTemplate mismatch: rev=%q tpl=%+v", rev, tpl.Metadata)
+	}
+	if tpl.Metadata.Author != "Original Author" || tpl.Metadata.SourceCharacterIndex != 2 || tpl.Metadata.SourceCharacterName != "Tarnished" {
+		t.Errorf("author/source character corrupted: %+v", tpl.Metadata)
+	}
+
+	list, err := store.ListTemplates()
+	if err != nil || len(list) != 1 {
+		t.Fatalf("ListTemplates err=%v len=%d", err, len(list))
+	}
+	e := list[0]
+	if e.Name != "Updated Name" || e.Warnings != 2 || e.TemplateRevision != "6" {
+		t.Errorf("index entry mismatch: %+v", e)
+	}
+	_ = dir
+}
+
+func TestStore_UpdateTemplate_ContentOnly(t *testing.T) {
+	_, store := newUpdateFixture(t, 3)
+
+	var newDoc BuildTemplate
+	v2JSON := `{
+  "schema": "saveforge.build-template",
+  "version": 2,
+  "createdAt": "2026-08-17T12:00:00Z",
+  "metadata": {
+    "name": "New V2 Build",
+    "description": "V2 Description",
+    "tags": ["v2", "items"]
+  },
+  "selection": {"items": true},
+  "sections": {
+    "items": {
+      "entries": [
+        {"entryID": "entry-1", "itemID": 1000, "category": "melee_armaments", "quantity": 1, "location": "inventory"},
+        {"entryID": "entry-2", "itemID": 2000, "category": "talismans", "quantity": 2, "location": "storage"}
+      ]
+    }
+  }
+}`
+	if err := json.Unmarshal([]byte(v2JSON), &newDoc); err != nil {
+		t.Fatalf("unmarshal v2Doc: %v", err)
+	}
+
+	newRev, err := store.UpdateTemplate("tpl-123", "5", nil, &newDoc)
+	if err != nil {
+		t.Fatalf("UpdateTemplate: %v", err)
+	}
+	if newRev != "6" {
+		t.Errorf("newRev = %q, want %q", newRev, "6")
+	}
+
+	loaded, rev, err := store.GetTemplate("tpl-123")
+	if err != nil || rev != "6" || loaded.Version != 2 || loaded.Metadata.Name != "New V2 Build" {
+		t.Errorf("loaded template mismatch: rev=%q err=%v tpl=%+v", rev, err, loaded)
+	}
+
+	list, err := store.ListTemplates()
+	if err != nil || len(list) != 1 {
+		t.Fatalf("ListTemplates err=%v len=%d", err, len(list))
+	}
+	e := list[0]
+	if e.InventoryItems != 1 || e.StorageItems != 1 || e.SchemaVersion != 2 || e.Warnings != 3 {
+		t.Errorf("index entry mismatch: %+v", e)
+	}
+}
+
+func TestStore_UpdateTemplate_BothFields_MetadataPrecedence(t *testing.T) {
+	_, store := newUpdateFixture(t, 0)
+
+	var doc BuildTemplate
+	docJSON := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-08-17T12:00:00Z",
+  "metadata": {
+    "name": "Content Name",
+    "description": "Content Desc",
+    "author": "Content Author",
+    "tags": ["content-tag"]
+  },
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [{"baseItemID": 100, "quantity": 1, "container": "inventory", "position": 0}],
+      "storageItems": []
+    }
+  }
+}`
+	if err := json.Unmarshal([]byte(docJSON), &doc); err != nil {
+		t.Fatalf("unmarshal doc: %v", err)
+	}
+
+	newRev, err := store.UpdateTemplate("tpl-123", "5", &TemplateMetadataUpdate{
+		Name:        "Override Name",
+		Description: "Override Desc",
+		Tags:        []string{"override-tag"},
+	}, &doc)
+	if err != nil {
+		t.Fatalf("UpdateTemplate: %v", err)
+	}
+	if newRev != "6" {
+		t.Errorf("newRev = %q, want %q", newRev, "6")
+	}
+
+	loaded, _, err := store.GetTemplate("tpl-123")
+	if err != nil || loaded.Metadata.Name != "Override Name" || loaded.Metadata.Author != "Content Author" {
+		t.Errorf("metadata override failed: %+v", loaded.Metadata)
+	}
+}
+
+func TestStore_UpdateTemplate_Rejections(t *testing.T) {
+	for name, setup := range map[string]func(t *testing.T) (store *Store, id, rev string, meta *TemplateMetadataUpdate, content *BuildTemplate, dir string){
+		"nil store": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			return nil, "tpl-123", "5", &TemplateMetadataUpdate{Name: "X"}, nil, ""
+		},
+		"empty templateID": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			return store, "", "5", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"neither metadata nor content": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			return store, "tpl-123", "5", nil, nil, dir
+		},
+		"stale revision": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			return store, "tpl-123", "4", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"non-canonical revision": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			return store, "tpl-123", "05", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"max uint64 overflow": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir := t.TempDir()
+			idx := fmt.Sprintf(`{"version":1,"entries":[{"id":"tpl-max","name":"M","filename":"m.json","revision":%d}]}`, uint64(math.MaxUint64))
+			_ = os.WriteFile(filepath.Join(dir, IndexFileName), []byte(idx), 0644)
+			_ = os.WriteFile(filepath.Join(dir, "m.json"), []byte(`{"schema":"saveforge.build-template","version":1,"metadata":{"name":"M"},"sections":{"inventory.workspace":{"inventoryItems":[{"baseItemID":100,"quantity":1,"container":"inventory","position":0}],"storageItems":[]}}}`), 0644)
+			return NewStore(dir), "tpl-max", "18446744073709551615", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"not found": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			return store, "tpl-missing", "0", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"invalid candidate template content": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			invalidDoc := &BuildTemplate{Schema: SchemaKey, Version: 1}
+			return store, "tpl-123", "5", nil, invalidDoc, dir
+		},
+		"corrupted existing payload": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			_ = os.WriteFile(filepath.Join(dir, "tpl-123.json"), []byte(`{invalid`), 0644)
+			return store, "tpl-123", "5", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"existing payload metadata mismatch with index": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			mismatchedPayload := `{"schema":"saveforge.build-template","version":1,"metadata":{"name":"Mismatched Name"},"sections":{"inventory.workspace":{"inventoryItems":[{"baseItemID":100,"quantity":1,"container":"inventory","position":0}],"storageItems":[]}}}`
+			_ = os.WriteFile(filepath.Join(dir, "tpl-123.json"), []byte(mismatchedPayload), 0644)
+			return store, "tpl-123", "5", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+		"symlink payload rejected": func(t *testing.T) (*Store, string, string, *TemplateMetadataUpdate, *BuildTemplate, string) {
+			dir, store := newUpdateFixture(t, 0)
+			realFile := filepath.Join(dir, "real.json")
+			_ = os.Rename(filepath.Join(dir, "tpl-123.json"), realFile)
+			_ = os.Symlink(realFile, filepath.Join(dir, "tpl-123.json"))
+			return store, "tpl-123", "5", &TemplateMetadataUpdate{Name: "X"}, nil, dir
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			store, id, rev, meta, content, dir := setup(t)
+			var before map[string]string
+			if dir != "" {
+				before = snapshotDir(t, dir)
+			}
+			_, err := store.UpdateTemplate(id, rev, meta, content)
+			if err == nil {
+				t.Fatal("expected error, got nil")
+			}
+			if dir != "" {
+				if after := snapshotDir(t, dir); !reflect.DeepEqual(before, after) {
+					t.Error("files were mutated on error")
+				}
+			}
+		})
+	}
+}

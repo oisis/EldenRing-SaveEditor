@@ -593,6 +593,75 @@
             }
           }
         }
+      },
+      "put": {
+        "operationId": "updateBuildTemplate",
+        "tags": ["Templates"],
+        "summary": "UpdateBuildTemplate",
+        "description": "Changes the metadata or contents of an existing Build Template with revision control. The caller must provide templateRevision and at least one of metadata or content. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "name": "templateID",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the build template",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBuildTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The template was updated and a new revision was assigned",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UpdateBuildTemplateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body, non-canonical templateRevision, missing both metadata and content, invalid payload, or corrupt index data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The supplied templateRevision no longer matches the library entry; nothing was modified",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions": {
@@ -9354,6 +9423,67 @@
           }
         },
         "required": ["templateID"]
+      },
+      "UpdateBuildTemplateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateRevision": {
+            "type": "string",
+            "description": "The templateRevision the caller last read for this template, echoed back unchanged. It must be the canonical decimal token; \"0\" is the token of an entry written before the revision counter existed."
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/UpdateBuildTemplateMetadata"
+          },
+          "content": {
+            "$ref": "#/components/schemas/BuildTemplate"
+          }
+        },
+        "required": ["templateRevision"],
+        "anyOf": [
+          {
+            "required": ["metadata"]
+          },
+          {
+            "required": ["content"]
+          }
+        ]
+      },
+      "UpdateBuildTemplateMetadata": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name of the build template"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the build template"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorizing and searching the template"
+          }
+        }
+      },
+      "UpdateBuildTemplateResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateID": {
+            "type": "string",
+            "description": "Identifier of the updated template"
+          },
+          "templateRevision": {
+            "type": "string",
+            "description": "New canonical revision token of the updated template entry"
+          }
+        },
+        "required": ["templateID", "templateRevision"]
       },
       "BuildTemplate": {
         "type": "object",

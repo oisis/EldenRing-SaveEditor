@@ -329,8 +329,16 @@ func (s *Store) GetTemplate(templateID string) (*BuildTemplate, string, error) {
 		return nil, "", fmt.Errorf("template %q: %w", templateID, err)
 	}
 
-	if matched.Version != 0 && tpl.Version != matched.Version {
-		return nil, "", fmt.Errorf("template %q schema version mismatch: index=%d payload=%d", templateID, matched.Version, tpl.Version)
+	if err := validateEntryPayloadMatch(*matched, tpl); err != nil {
+		return nil, "", err
+	}
+
+	return tpl, formatRevision(matched.Revision), nil
+}
+
+func validateEntryPayloadMatch(entry indexEntry, tpl *BuildTemplate) error {
+	if entry.Version != 0 && tpl.Version != entry.Version {
+		return fmt.Errorf("template %q schema version mismatch: index=%d payload=%d", entry.ID, entry.Version, tpl.Version)
 	}
 	payloadName := ""
 	payloadDescription := ""
@@ -340,11 +348,10 @@ func (s *Store) GetTemplate(templateID string) (*BuildTemplate, string, error) {
 		payloadDescription = tpl.Metadata.Description
 		payloadTags = tpl.Metadata.Tags
 	}
-	if matched.Name != payloadName || matched.Description != payloadDescription || !slices.Equal(matched.Tags, payloadTags) {
-		return nil, "", fmt.Errorf("template %q metadata mismatch with its index entry", templateID)
+	if entry.Name != payloadName || entry.Description != payloadDescription || !slices.Equal(entry.Tags, payloadTags) {
+		return fmt.Errorf("template %q metadata mismatch with its index entry", entry.ID)
 	}
-
-	return tpl, formatRevision(matched.Revision), nil
+	return nil
 }
 
 // DeleteTemplate removes one template from the local library: it drops the
@@ -436,6 +443,352 @@ func (s *Store) DeleteTemplate(templateID string, templateRevision string) error
 	// invisible orphan file behind; nothing cleans it up.
 	_ = os.Remove(filepath.Join(s.dir, filename))
 	return nil
+}
+
+// TemplateMetadataUpdate contains the editable metadata fields for updating
+// a build template entry and its payload.
+type TemplateMetadataUpdate struct {
+	Name        string   `json:"name"`
+	Description string   `json:"description,omitempty"`
+	Tags        []string `json:"tags,omitempty"`
+}
+
+// UpdateTemplate modifies an existing build template in the store library.
+// The caller must supply the canonical decimal templateRevision token.
+// At least one of metadata or content must be non-nil.
+//
+// The existing payload is always loaded, decoded and validated against the
+// index entry before any write.
+//
+// If content is provided without metadata, index metadata is derived from the
+// new content document's metadata.
+// If both metadata and content are provided, metadata overrides the name,
+// description, and tags in the new content document.
+// If only metadata is provided, only name, description, and tags are modified
+// in the existing payload.
+//
+// The mutation replaces the payload file atomically and then replaces the
+// index file atomically. If the index write fails, an in-process rollback of the
+// payload is attempted.
+//
+// On success, the template revision counter increments by exactly 1 and the
+// new canonical revision token is returned.
+func (s *Store) UpdateTemplate(
+	templateID string,
+	templateRevision string,
+	metadata *TemplateMetadataUpdate,
+	content *BuildTemplate,
+) (string, error) {
+	if s == nil {
+		return "", errors.New("store is nil")
+	}
+	if templateID == "" {
+		return "", errors.New("templateID must not be empty")
+	}
+	if metadata == nil && content == nil {
+		return "", errors.New("at least one of metadata or content must be provided")
+	}
+	if err := validateRevisionToken(templateRevision); err != nil {
+		return "", err
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	data, err := os.ReadFile(filepath.Join(s.dir, IndexFileName))
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("template %q: %w", templateID, ErrNotFound)
+		}
+		return "", fmt.Errorf("read index: %w", withoutPath(err))
+	}
+	idx, err := decodeIndexForWrite(data)
+	if err != nil {
+		return "", err
+	}
+	if err := validateIndexForWrite(idx); err != nil {
+		return "", err
+	}
+
+	matched := -1
+	for i := range idx.Entries {
+		if idx.Entries[i].ID == templateID {
+			matched = i
+			break
+		}
+	}
+	if matched < 0 {
+		return "", fmt.Errorf("template %q: %w", templateID, ErrNotFound)
+	}
+	entry := idx.Entries[matched]
+
+	if formatRevision(entry.Revision) != templateRevision {
+		return "", fmt.Errorf("template %q: %w", templateID, ErrStaleRevision)
+	}
+	if entry.Revision == math.MaxUint64 {
+		return "", fmt.Errorf("template %q: revision overflow", templateID)
+	}
+
+	if err := validateEntryFilename(templateID, entry.Filename); err != nil {
+		return "", err
+	}
+
+	targetPath := filepath.Join(s.dir, entry.Filename)
+	fi, err := os.Lstat(targetPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("template payload not found for %q: %w", templateID, ErrNotFound)
+		}
+		return "", fmt.Errorf("resolve payload for template %q: %w", templateID, withoutPath(err))
+	}
+	if fi.Mode()&os.ModeSymlink != 0 {
+		return "", fmt.Errorf("template %q target is a symlink", templateID)
+	}
+
+	evalTarget, err := filepath.EvalSymlinks(targetPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("template payload not found for %q: %w", templateID, ErrNotFound)
+		}
+		return "", fmt.Errorf("resolve payload for template %q: %w", templateID, withoutPath(err))
+	}
+	evalDir, err := filepath.EvalSymlinks(s.dir)
+	if err != nil {
+		return "", fmt.Errorf("resolve template store: %w", withoutPath(err))
+	}
+	rel, err := filepath.Rel(evalDir, evalTarget)
+	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) || filepath.IsAbs(rel) {
+		return "", fmt.Errorf("template %q target escapes store directory", templateID)
+	}
+
+	oldPayloadBytes, err := os.ReadFile(targetPath)
+	if err != nil {
+		return "", fmt.Errorf("read template payload for %q: %w", templateID, withoutPath(err))
+	}
+
+	existingTpl, err := DecodeTemplate(oldPayloadBytes)
+	if err != nil {
+		return "", fmt.Errorf("template %q: %w", templateID, err)
+	}
+	if err := validateEntryPayloadMatch(entry, existingTpl); err != nil {
+		return "", err
+	}
+
+	var newTpl *BuildTemplate
+	if content != nil {
+		copiedBytes, err := json.Marshal(content)
+		if err != nil {
+			return "", fmt.Errorf("marshal template content: %w", err)
+		}
+		var copied BuildTemplate
+		if err := json.Unmarshal(copiedBytes, &copied); err != nil {
+			return "", fmt.Errorf("unmarshal template content: %w", err)
+		}
+		newTpl = &copied
+		if metadata != nil {
+			if newTpl.Metadata == nil {
+				newTpl.Metadata = &TemplateDocMetadata{}
+			}
+			newTpl.Metadata.Name = metadata.Name
+			newTpl.Metadata.Description = metadata.Description
+			if metadata.Tags != nil {
+				newTpl.Metadata.Tags = append([]string(nil), metadata.Tags...)
+			} else {
+				newTpl.Metadata.Tags = nil
+			}
+		}
+	} else {
+		newTpl = existingTpl
+		if newTpl.Metadata == nil {
+			newTpl.Metadata = &TemplateDocMetadata{}
+		}
+		newTpl.Metadata.Name = metadata.Name
+		newTpl.Metadata.Description = metadata.Description
+		if metadata.Tags != nil {
+			newTpl.Metadata.Tags = append([]string(nil), metadata.Tags...)
+		} else {
+			newTpl.Metadata.Tags = nil
+		}
+	}
+
+	if err := ValidateTemplate(newTpl); err != nil {
+		return "", fmt.Errorf("template %q: %w", templateID, err)
+	}
+
+	encodedPayload, err := json.MarshalIndent(newTpl, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("encode template payload: %w", err)
+	}
+	if _, err := DecodeTemplate(encodedPayload); err != nil {
+		return "", fmt.Errorf("verify template payload: %w", err)
+	}
+
+	newRevision := entry.Revision + 1
+	nowUTC := time.Now().UTC().Format(time.RFC3339Nano)
+
+	payloadName := ""
+	payloadDesc := ""
+	var payloadTags []string
+	if newTpl.Metadata != nil {
+		payloadName = newTpl.Metadata.Name
+		payloadDesc = newTpl.Metadata.Description
+		if len(newTpl.Metadata.Tags) > 0 {
+			payloadTags = append([]string(nil), newTpl.Metadata.Tags...)
+		}
+	}
+
+	updatedEntries := make([]indexEntry, len(idx.Entries))
+	copy(updatedEntries, idx.Entries)
+	updatedEntries[matched] = indexEntry{
+		ID:               entry.ID,
+		Name:             payloadName,
+		Description:      payloadDesc,
+		Tags:             payloadTags,
+		Filename:         entry.Filename,
+		CreatedAt:        entry.CreatedAt,
+		UpdatedAt:        nowUTC,
+		InventoryItems:   countInventoryItems(newTpl),
+		StorageItems:     countStorageItems(newTpl),
+		Warnings:         entry.Warnings,
+		Version:          newTpl.Version,
+		SelectedSections: selectedSectionsForTemplate(newTpl),
+		Revision:         newRevision,
+	}
+
+	nextIdx := indexFile{
+		Version: idx.Version,
+		Entries: updatedEntries,
+	}
+	encodedIndex, err := json.MarshalIndent(nextIdx, "", "  ")
+	if err != nil {
+		return "", fmt.Errorf("encode index: %w", err)
+	}
+	verifyIdx, err := decodeIndexForWrite(encodedIndex)
+	if err != nil {
+		return "", fmt.Errorf("verify new index: %w", err)
+	}
+	if err := validateIndexForWrite(verifyIdx); err != nil {
+		return "", fmt.Errorf("verify new index: %w", err)
+	}
+
+	if err := s.writePayloadAtomic(entry.Filename, encodedPayload); err != nil {
+		return "", err
+	}
+	if err := s.writeIndexAtomic(encodedIndex); err != nil {
+		if rollbackErr := s.writePayloadAtomic(entry.Filename, oldPayloadBytes); rollbackErr != nil {
+			return "", fmt.Errorf("replace index: %w; rollback payload failed: %v", err, withoutPath(rollbackErr))
+		}
+		return "", err
+	}
+
+	return formatRevision(newRevision), nil
+}
+
+func (s *Store) writePayloadAtomic(filename string, encoded []byte) error {
+	tmp, err := os.CreateTemp(s.dir, ".payload-*.tmp")
+	if err != nil {
+		return fmt.Errorf("create temporary payload: %w", withoutPath(err))
+	}
+	tmpName := tmp.Name()
+	defer func() { _ = os.Remove(tmpName) }()
+
+	if _, err := tmp.Write(encoded); err != nil {
+		_ = tmp.Close()
+		return fmt.Errorf("write temporary payload: %w", withoutPath(err))
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		return fmt.Errorf("sync temporary payload: %w", withoutPath(err))
+	}
+	if err := tmp.Close(); err != nil {
+		return fmt.Errorf("close temporary payload: %w", withoutPath(err))
+	}
+	if err := os.Chmod(tmpName, 0644); err != nil {
+		return fmt.Errorf("set payload permissions: %w", withoutPath(err))
+	}
+	if err := os.Rename(tmpName, filepath.Join(s.dir, filename)); err != nil {
+		return fmt.Errorf("replace payload: %w", withoutPath(err))
+	}
+	return nil
+}
+
+func countInventoryItems(tpl *BuildTemplate) int {
+	if tpl == nil {
+		return 0
+	}
+	if tpl.Sections.InventoryWorkspace != nil {
+		return len(tpl.Sections.InventoryWorkspace.InventoryItems)
+	}
+	if tpl.Sections.Items != nil {
+		count := 0
+		for _, e := range tpl.Sections.Items.Entries {
+			if e.Location == ItemLocationInventory || e.Location == ItemLocationBoth {
+				count++
+			}
+		}
+		return count
+	}
+	return 0
+}
+
+func countStorageItems(tpl *BuildTemplate) int {
+	if tpl == nil {
+		return 0
+	}
+	if tpl.Sections.InventoryWorkspace != nil {
+		return len(tpl.Sections.InventoryWorkspace.StorageItems)
+	}
+	if tpl.Sections.Items != nil {
+		count := 0
+		for _, e := range tpl.Sections.Items.Entries {
+			if e.Location == ItemLocationStorage || e.Location == ItemLocationBoth {
+				count++
+			}
+		}
+		return count
+	}
+	return 0
+}
+
+func selectedSectionsForTemplate(tpl *BuildTemplate) []string {
+	if tpl == nil {
+		return nil
+	}
+	if tpl.Version == SchemaVersionV1 {
+		if tpl.Sections.InventoryWorkspace != nil {
+			return []string{"inventory.workspace"}
+		}
+		return nil
+	}
+	if tpl.Selection == nil {
+		return nil
+	}
+	var out []string
+	if tpl.Selection.Profile.HasAny() {
+		out = append(out, "profile")
+	}
+	if tpl.Selection.Stats.HasAny() {
+		out = append(out, "stats")
+	}
+	if tpl.Selection.InventoryWorkspace.HasAny() {
+		out = append(out, "inventory.workspace")
+	}
+	if tpl.Selection.Equipment.HasAny() {
+		out = append(out, "equipment")
+	}
+	if tpl.Selection.Spells.HasAny() {
+		out = append(out, "spells")
+	}
+	if tpl.Selection.Items.HasAny() {
+		out = append(out, "items")
+	}
+	if tpl.Selection.InventoryLayout.HasAny() {
+		out = append(out, "inventoryLayout")
+	}
+	if tpl.Selection.StorageLayout.HasAny() {
+		out = append(out, "storageLayout")
+	}
+	return out
 }
 
 // writeIndexAtomic replaces _index.json through a temporary file in the same

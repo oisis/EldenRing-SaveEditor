@@ -1088,11 +1088,14 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths["/api/v1/save-sessions/{saveSessionID}"]["delete"]; !hasDelete {
 		t.Fatal("openapi.json describes no DELETE for /api/v1/save-sessions/{saveSessionID}")
 	}
-	// The build-template path carries both the getter and DeleteBuildTemplate,
+	// The build-template path carries the getter, DeleteBuildTemplate and UpdateBuildTemplate,
 	// so the map above can only state one of them.
 	buildTemplate := "/api/v1/build-templates/{templateID}"
 	if _, hasDelete := document.Paths[buildTemplate]["delete"]; !hasDelete {
 		t.Fatalf("openapi.json describes no DELETE for %s", buildTemplate)
+	}
+	if _, hasPut := document.Paths[buildTemplate]["put"]; !hasPut {
+		t.Fatalf("openapi.json describes no PUT for %s", buildTemplate)
 	}
 	// The favorite-presets slot path carries both PUT and DELETE operations.
 	favSlot := "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}"
@@ -7365,6 +7368,151 @@ func TestDeleteBuildTemplateRoute_NotFound(t *testing.T) {
 func TestDeleteBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
 	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
 	recorder := deleteBuildTemplate(t, handler, "tpl-123", `{"templateRevision":"7"}`)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
+	}
+}
+
+// newUpdateBuildTemplateHandler builds a loopback explorer over a one-entry
+// library at revision 3 and returns the handler plus the store directory.
+func newUpdateBuildTemplateHandler(t *testing.T) (http.Handler, string) {
+	t.Helper()
+	dir := t.TempDir()
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-123",
+      "name": "PvP Meta",
+      "filename": "pvp.json",
+      "createdAt": "2026-08-17T12:00:00Z",
+      "updatedAt": "2026-08-17T12:00:00Z",
+      "revision": 3
+    }
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, buildtemplates.IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+	payloadJSON := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-08-17T12:00:00Z",
+  "metadata": {
+    "name": "PvP Meta"
+  },
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [
+        {
+          "baseItemID": 100,
+          "quantity": 1,
+          "container": "inventory",
+          "position": 0
+        }
+      ],
+      "storageItems": []
+    }
+  }
+}`
+	if err := os.WriteFile(filepath.Join(dir, "pvp.json"), []byte(payloadJSON), 0644); err != nil {
+		t.Fatalf("WriteFile payload: %v", err)
+	}
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t), testApplicationVersion, saveengine.New(), buildtemplates.NewStore(dir),
+	)
+	return handler, dir
+}
+
+func updateBuildTemplate(t *testing.T, handler http.Handler, templateID string, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	target := "/api/v1/build-templates/" + templateID
+	var request *http.Request
+	if body == "" {
+		request = httptest.NewRequest(http.MethodPut, target, nil)
+	} else {
+		request = httptest.NewRequest(http.MethodPut, target, bytes.NewReader([]byte(body)))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+	return recorder
+}
+
+func TestUpdateBuildTemplateRoute_Success(t *testing.T) {
+	handler, _ := newUpdateBuildTemplateHandler(t)
+
+	body := `{
+		"templateRevision": "3",
+		"metadata": {
+			"name": "Updated PvP Meta",
+			"description": "New description",
+			"tags": ["pvp", "meta", "bleed"]
+		}
+	}`
+	recorder := updateBuildTemplate(t, handler, "tpl-123", body)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var result templates.UpdateBuildTemplateResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if result.TemplateID != "tpl-123" {
+		t.Errorf("templateID = %q, want %q", result.TemplateID, "tpl-123")
+	}
+	if result.TemplateRevision != "4" {
+		t.Errorf("templateRevision = %q, want %q", result.TemplateRevision, "4")
+	}
+}
+
+func TestUpdateBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
+	for name, body := range map[string]string{
+		"no body":                      "",
+		"no templateRevision":          `{"metadata":{"name":"X"}}`,
+		"neither metadata nor content": `{"templateRevision":"3"}`,
+		"unknown field":                `{"templateRevision":"3","metadata":{"name":"X"},"extra":true}`,
+		"non-canonical revision":       `{"templateRevision":"03","metadata":{"name":"X"}}`,
+		"revision as JSON number":      `{"templateRevision":3,"metadata":{"name":"X"}}`,
+		"trailing JSON document":       `{"templateRevision":"3","metadata":{"name":"X"}}{"extra":1}`,
+		"invalid payload in content":   `{"templateRevision":"3","content":{"schema":"invalid"}}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			handler, _ := newUpdateBuildTemplateHandler(t)
+			recorder := updateBuildTemplate(t, handler, "tpl-123", body)
+			if recorder.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestUpdateBuildTemplateRoute_StaleRevisionReturns409(t *testing.T) {
+	handler, _ := newUpdateBuildTemplateHandler(t)
+
+	body := `{"templateRevision":"2","metadata":{"name":"Stale"}}`
+	recorder := updateBuildTemplate(t, handler, "tpl-123", body)
+	if recorder.Code != http.StatusConflict {
+		t.Fatalf("status = %d, want 409 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestUpdateBuildTemplateRoute_NotFound(t *testing.T) {
+	handler, _ := newUpdateBuildTemplateHandler(t)
+
+	body := `{"templateRevision":"0","metadata":{"name":"Missing"}}`
+	recorder := updateBuildTemplate(t, handler, "tpl-nonexistent", body)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestUpdateBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
+	body := `{"templateRevision":"3","metadata":{"name":"X"}}`
+	recorder := updateBuildTemplate(t, handler, "tpl-123", body)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
 	}

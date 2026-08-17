@@ -3449,6 +3449,14 @@ type deleteBuildTemplateRequest struct {
 	TemplateRevision string `json:"templateRevision"`
 }
 
+// updateBuildTemplateRequest is the JSON body of PUT
+// /api/v1/build-templates/{templateID}.
+type updateBuildTemplateRequest struct {
+	TemplateRevision string                                 `json:"templateRevision"`
+	Metadata         *buildtemplates.TemplateMetadataUpdate `json:"metadata,omitempty"`
+	Content          *buildtemplates.BuildTemplate          `json:"content,omitempty"`
+}
+
 // registerTemplatesRoutes registers local Build Templates library routes.
 func registerTemplatesRoutes(mux *http.ServeMux, templatesStore *buildtemplates.Store) {
 	mux.HandleFunc("GET /api/v1/build-templates", func(writer http.ResponseWriter, request *http.Request) {
@@ -3505,6 +3513,44 @@ func registerTemplatesRoutes(mux *http.ServeMux, templatesStore *buildtemplates.
 			templatesStore,
 			request.PathValue("templateID"),
 			body.TemplateRevision,
+		)
+		if err != nil {
+			switch {
+			case errors.Is(err, buildtemplates.ErrNotFound):
+				writeError(writer, http.StatusNotFound, err)
+			case errors.Is(err, buildtemplates.ErrStaleRevision):
+				writeError(writer, http.StatusConflict, err)
+			default:
+				writeError(writer, http.StatusBadRequest, err)
+			}
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+	mux.HandleFunc("PUT /api/v1/build-templates/{templateID}", func(writer http.ResponseWriter, request *http.Request) {
+		if err := requireJSONBody(request); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		var body updateBuildTemplateRequest
+		decoder := json.NewDecoder(request.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&body); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+			writeError(writer, http.StatusBadRequest, errors.New("request body must contain exactly one JSON value"))
+			return
+		}
+		result, err := templates.UpdateBuildTemplate(
+			templatesStore,
+			request.PathValue("templateID"),
+			templates.UpdateBuildTemplateRequest{
+				TemplateRevision: body.TemplateRevision,
+				Metadata:         body.Metadata,
+				Content:          body.Content,
+			},
 		)
 		if err != nil {
 			switch {
