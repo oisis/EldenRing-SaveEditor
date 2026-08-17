@@ -214,6 +214,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/favorites/delete_favorite_preset.md",
                 "title": "DeleteFavoritePreset"
+              },
+              "/apply-favorite-preset": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/favorites/apply_favorite_preset.md",
+                "title": "ApplyFavoritePreset"
               }
             }
           },

@@ -761,6 +761,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/favorite-preset": {
+      "put": {
+        "operationId": "applyFavoritePreset",
+        "tags": ["Favorites"],
+        "summary": "ApplyFavoritePreset",
+        "description": "Applies the appearance fields from the specified Mirror Favorites preset slot to an active character under expectedRevision control. The preset supplies model IDs, face shape, body proportions, skin & cosmetics, and inverted body type to gender. VoiceType and opaque FaceData remain untouched. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyFavoritePresetRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Receipt of the applied Mirror Favorites preset",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyFavoritePresetResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A malformed request, invalid or inactive preset slot, inactive character, stale revision, or write error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment": {
       "get": {
         "operationId": "getEquipment",
@@ -9180,6 +9228,59 @@
           "saveRevision",
           "favoriteSlotID",
           "sourceCharacterID"
+        ]
+      },
+      "ApplyFavoritePresetRequest": {
+        "type": "object",
+        "description": "Input for applying a Mirror Favorites preset slot to a character",
+        "properties": {
+          "favoriteSlotID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14,
+            "description": "The Mirror Favorites preset slot index 0..14 to apply"
+          },
+          "expectedRevision": {
+            "type": "string",
+            "description": "The expected decimal saveRevision of the session"
+          }
+        },
+        "required": [
+          "favoriteSlotID",
+          "expectedRevision"
+        ],
+        "additionalProperties": false
+      },
+      "ApplyFavoritePresetResult": {
+        "type": "object",
+        "description": "Receipt of a committed Mirror Favorites preset application",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session that was modified"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "The new decimal saveRevision of the session"
+          },
+          "characterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "The character slot index 0..9 that was modified"
+          },
+          "favoriteSlotID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14,
+            "description": "The Mirror Favorites preset slot index 0..14 that was applied"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "favoriteSlotID"
         ]
       }
     }

@@ -122,82 +122,7 @@ func (engine *Engine) setCharacterAppearance(
 			return fmt.Errorf("character %d is not active", characterID)
 		}
 
-		anchor, err := findAppearancePlayerAnchor(
-			loaded.snapshot, loaded.session.platform, characterID)
-		if err != nil {
-			return err
-		}
-		faceAt, faceBefore, err := readFaceData(
-			loaded.snapshot, loaded.session.platform, characterID)
-		if err != nil {
-			return err
-		}
-		genderAt := anchor + appearanceGenderOffset
-		voiceAt := anchor + appearanceVoiceTypeOffset
-		genderBefore, err := loaded.snapshot.readAt(genderAt, 1)
-		if err != nil {
-			return fmt.Errorf("cannot read gender of character %d: %w", characterID, err)
-		}
-		voiceBefore, err := loaded.snapshot.readAt(voiceAt, 1)
-		if err != nil {
-			return fmt.Errorf("cannot read voice type of character %d: %w", characterID, err)
-		}
-
-		faceAfter := bytes.Clone(faceBefore)
-		for index, modelID := range appearance.ModelIDs {
-			binary.LittleEndian.PutUint32(
-				faceAfter[faceDataModelIDsOffset+index*4:], modelID)
-		}
-		copy(faceAfter[faceDataFaceShapeOffset:], appearance.FaceShape[:])
-		copy(faceAfter[faceDataBodyOffset:], appearance.Body[:])
-		copy(faceAfter[faceDataSkinOffset:], appearance.Skin[:])
-		clear(faceAfter[faceDataSexFlagsOffset : faceDataSexFlagsOffset+faceDataSexFlagsSize])
-
-		genderAfter := []byte{appearance.Gender}
-		voiceAfter := []byte{appearance.VoiceType}
-		if bytes.Equal(genderBefore, genderAfter) && bytes.Equal(voiceBefore, voiceAfter) &&
-			bytes.Equal(faceBefore, faceAfter) {
-			return nil
-		}
-
-		if err := loaded.snapshot.writeAt(genderAt, genderAfter); err != nil {
-			return fmt.Errorf("cannot write gender of character %d: %w", characterID, err)
-		}
-		if err := loaded.snapshot.writeAt(voiceAt, voiceAfter); err != nil {
-			if rollback := restoreCharacterAppearance(
-				loaded.snapshot, genderAt, genderBefore, voiceAt, voiceBefore, faceAt, faceBefore); rollback != nil {
-				return fmt.Errorf(
-					"voice type of character %d could not be written and the prior appearance could not be restored: %w",
-					characterID, rollback)
-			}
-			return fmt.Errorf("cannot write voice type of character %d: %w", characterID, err)
-		}
-		if err := loaded.snapshot.writeAt(faceAt, faceAfter); err != nil {
-			if rollback := restoreCharacterAppearance(
-				loaded.snapshot, genderAt, genderBefore, voiceAt, voiceBefore, faceAt, faceBefore); rollback != nil {
-				return fmt.Errorf(
-					"appearance block of character %d could not be written and the prior appearance could not be restored: %w",
-					characterID, rollback)
-			}
-			return fmt.Errorf("cannot write appearance block of character %d: %w", characterID, err)
-		}
-
-		genderWritten, genderErr := loaded.snapshot.readAt(genderAt, 1)
-		voiceWritten, voiceErr := loaded.snapshot.readAt(voiceAt, 1)
-		faceWritten, faceErr := loaded.snapshot.readAt(faceAt, faceDataSize)
-		if genderErr == nil && voiceErr == nil && faceErr == nil &&
-			bytes.Equal(genderWritten, genderAfter) && bytes.Equal(voiceWritten, voiceAfter) &&
-			bytes.Equal(faceWritten, faceAfter) {
-			return nil
-		}
-
-		if rollback := restoreCharacterAppearance(
-			loaded.snapshot, genderAt, genderBefore, voiceAt, voiceBefore, faceAt, faceBefore); rollback != nil {
-			return fmt.Errorf(
-				"appearance of character %d could not be verified and could not be restored: %w",
-				characterID, rollback)
-		}
-		return errors.New("character appearance mutation could not be verified; the save is unchanged")
+		return writeCharacterAppearance(loaded, characterID, appearance)
 	})
 	if err != nil {
 		return SetCharacterAppearanceResult{}, err
@@ -209,6 +134,89 @@ func (engine *Engine) setCharacterAppearance(
 		CharacterID:   characterID,
 		Appearance:    appearance,
 	}, nil
+}
+
+func writeCharacterAppearance(
+	loaded *loadedSave,
+	characterID int,
+	appearance CharacterAppearanceValues,
+) error {
+	anchor, err := findAppearancePlayerAnchor(
+		loaded.snapshot, loaded.session.platform, characterID)
+	if err != nil {
+		return err
+	}
+	faceAt, faceBefore, err := readFaceData(
+		loaded.snapshot, loaded.session.platform, characterID)
+	if err != nil {
+		return err
+	}
+	genderAt := anchor + appearanceGenderOffset
+	voiceAt := anchor + appearanceVoiceTypeOffset
+	genderBefore, err := loaded.snapshot.readAt(genderAt, 1)
+	if err != nil {
+		return fmt.Errorf("cannot read gender of character %d: %w", characterID, err)
+	}
+	voiceBefore, err := loaded.snapshot.readAt(voiceAt, 1)
+	if err != nil {
+		return fmt.Errorf("cannot read voice type of character %d: %w", characterID, err)
+	}
+
+	faceAfter := bytes.Clone(faceBefore)
+	for index, modelID := range appearance.ModelIDs {
+		binary.LittleEndian.PutUint32(
+			faceAfter[faceDataModelIDsOffset+index*4:], modelID)
+	}
+	copy(faceAfter[faceDataFaceShapeOffset:], appearance.FaceShape[:])
+	copy(faceAfter[faceDataBodyOffset:], appearance.Body[:])
+	copy(faceAfter[faceDataSkinOffset:], appearance.Skin[:])
+	clear(faceAfter[faceDataSexFlagsOffset : faceDataSexFlagsOffset+faceDataSexFlagsSize])
+
+	genderAfter := []byte{appearance.Gender}
+	voiceAfter := []byte{appearance.VoiceType}
+	if bytes.Equal(genderBefore, genderAfter) && bytes.Equal(voiceBefore, voiceAfter) &&
+		bytes.Equal(faceBefore, faceAfter) {
+		return nil
+	}
+
+	if err := loaded.snapshot.writeAt(genderAt, genderAfter); err != nil {
+		return fmt.Errorf("cannot write gender of character %d: %w", characterID, err)
+	}
+	if err := loaded.snapshot.writeAt(voiceAt, voiceAfter); err != nil {
+		if rollback := restoreCharacterAppearance(
+			loaded.snapshot, genderAt, genderBefore, voiceAt, voiceBefore, faceAt, faceBefore); rollback != nil {
+			return fmt.Errorf(
+				"voice type of character %d could not be written and the prior appearance could not be restored: %w",
+				characterID, rollback)
+		}
+		return fmt.Errorf("cannot write voice type of character %d: %w", characterID, err)
+	}
+	if err := loaded.snapshot.writeAt(faceAt, faceAfter); err != nil {
+		if rollback := restoreCharacterAppearance(
+			loaded.snapshot, genderAt, genderBefore, voiceAt, voiceBefore, faceAt, faceBefore); rollback != nil {
+			return fmt.Errorf(
+				"appearance block of character %d could not be written and the prior appearance could not be restored: %w",
+				characterID, rollback)
+		}
+		return fmt.Errorf("cannot write appearance block of character %d: %w", characterID, err)
+	}
+
+	genderWritten, genderErr := loaded.snapshot.readAt(genderAt, 1)
+	voiceWritten, voiceErr := loaded.snapshot.readAt(voiceAt, 1)
+	faceWritten, faceErr := loaded.snapshot.readAt(faceAt, faceDataSize)
+	if genderErr == nil && voiceErr == nil && faceErr == nil &&
+		bytes.Equal(genderWritten, genderAfter) && bytes.Equal(voiceWritten, voiceAfter) &&
+		bytes.Equal(faceWritten, faceAfter) {
+		return nil
+	}
+
+	if rollback := restoreCharacterAppearance(
+		loaded.snapshot, genderAt, genderBefore, voiceAt, voiceBefore, faceAt, faceBefore); rollback != nil {
+		return fmt.Errorf(
+			"appearance of character %d could not be verified and could not be restored: %w",
+			characterID, rollback)
+	}
+	return errors.New("character appearance mutation could not be verified; the save is unchanged")
 }
 
 func restoreCharacterAppearance(

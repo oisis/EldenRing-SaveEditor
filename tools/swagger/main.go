@@ -494,6 +494,11 @@ type applyAppearancePresetRequest struct {
 	ExpectedRevision string `json:"expectedRevision"`
 }
 
+type applyFavoritePresetRequest struct {
+	FavoriteSlotID   *int   `json:"favoriteSlotID"`
+	ExpectedRevision string `json:"expectedRevision"`
+}
+
 func (request setCharacterAppearanceValuesRequest) values() (character.CharacterAppearanceValues, error) {
 	if request.Gender == nil {
 		return character.CharacterAppearanceValues{}, errors.New("appearance.gender is required")
@@ -1349,6 +1354,44 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				body.PresetID,
+				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"PUT /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/favorite-preset",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body applyFavoritePresetRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if body.FavoriteSlotID == nil {
+				writeError(writer, http.StatusBadRequest, errors.New("favoriteSlotID is required"))
+				return
+			}
+			result, err := favorites.ApplyFavoritePreset(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				characterID,
+				*body.FavoriteSlotID,
 				body.ExpectedRevision,
 			)
 			if err != nil {

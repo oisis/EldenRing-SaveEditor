@@ -890,6 +890,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/appearance", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance", `{"appearance":{},"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance/preset", `{"presetID":"geralt-of-rivia-the-witcher","expectedRevision":"0"}`},
+		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/appearance/favorite-preset", `{"favoriteSlotID":0,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/equipment", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-armaments", `{"slotAssignments":[null,null,null,null,null,null],"expectedRevision":"0"}`},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/equipped-armor", `{"slotAssignments":[null,null,null,null],"expectedRevision":"0"}`},
@@ -1030,6 +1031,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/undo":                               "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset":                  "put",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/favorite-preset":         "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor":                     "put",
@@ -1575,8 +1577,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 79 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 79", found)
+	if found != 80 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 80", found)
 	}
 }
 
@@ -6865,6 +6867,60 @@ func TestSetFavoritePresetRoute(t *testing.T) {
 		`{"sourceCharacterID":0,"expectedRevision":"1","extra":123}`,
 	} {
 		rec := doSave(t, saveEngine, http.MethodPut, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets/1", badBody)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("body %q: status = %d, want 400 (body %q)", badBody, rec.Code, rec.Body.String())
+		}
+	}
+}
+
+func TestApplyFavoritePresetRoute(t *testing.T) {
+	path := writeFavoritesSwaggerFixture(t, map[int]bool{3: true})
+
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, path, "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// 1. Success apply favorite preset 3 to character 0
+	reqBody := `{"favoriteSlotID":3,"expectedRevision":"0"}`
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/appearance/favorite-preset"
+	recorder := doSave(t, saveEngine, http.MethodPut, target, reqBody)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var routeResult favorites.ApplyFavoritePresetResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &routeResult); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if routeResult.SaveSessionID != session.SaveSessionID || routeResult.SaveRevision != "1" ||
+		routeResult.CharacterID != 0 || routeResult.FavoriteSlotID != 3 {
+		t.Fatalf("routeResult = %+v, want character 0 slot 3 revision 1", routeResult)
+	}
+
+	// 2. Invalid path characterID
+	for _, invalidTarget := range []string{
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/characters/abc/appearance/favorite-preset",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/characters/-1/appearance/favorite-preset",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/characters/10/appearance/favorite-preset",
+	} {
+		rec := doSave(t, saveEngine, http.MethodPut, invalidTarget, `{"favoriteSlotID":3,"expectedRevision":"1"}`)
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", invalidTarget, rec.Code, rec.Body.String())
+		}
+	}
+
+	// 3. Bad body (missing favoriteSlotID, missing expectedRevision, empty, extra fields)
+	for _, badBody := range []string{
+		"",
+		"{}",
+		`{"expectedRevision":"1"}`,
+		`{"favoriteSlotID":3}`,
+		`{"favoriteSlotID":3,"expectedRevision":"1","extra":123}`,
+	} {
+		rec := doSave(t, saveEngine, http.MethodPut, target, badBody)
 		if rec.Code != http.StatusBadRequest {
 			t.Fatalf("body %q: status = %d, want 400 (body %q)", badBody, rec.Code, rec.Body.String())
 		}
