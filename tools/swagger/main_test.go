@@ -27,6 +27,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
@@ -933,6 +934,7 @@ func TestSaveSessionRoutesAreAbsentWithoutAnEngine(t *testing.T) {
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/bosses/defeat", `{"bossKind":"boss","bossKey":"stormveil_castle_godrick_the_grafted","defeated":true,"expectedRevision":"0"}`},
 		{http.MethodGet, "/api/v1/save-sessions/any-session/characters/0/quests?questKind=quest", ""},
 		{http.MethodPut, "/api/v1/save-sessions/any-session/characters/0/quests/step", `{"questKind":"quest","questKey":"brother_corhyn","stepKind":"quest_step","stepKey":"legacy_000","expectedRevision":"0"}`},
+		{http.MethodGet, "/api/v1/save-sessions/any-session/favorite-presets", ""},
 	} {
 		recorder := doSave(t, nil, request.method, request.target, request.body)
 		if recorder.Code != http.StatusNotFound {
@@ -1066,6 +1068,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/quests/step":                        "put",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings":                                            "get",
 		"/api/v1/save-sessions/{saveSessionID}/network-settings/preset":                                     "put",
+		"/api/v1/save-sessions/{saveSessionID}/favorite-presets":                                            "get",
 	} {
 		operation, exists := document.Paths[path]
 		if !exists {
@@ -1319,6 +1322,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetFogOfWarRemovedResult",
 		"SetTutorialUnlockedRequest",
 		"SetTutorialUnlockedResult",
+		"FavoritePreset",
+		"GetFavoritePresetsResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -1556,8 +1561,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 76 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 76", found)
+	if found != 77 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 77", found)
 	}
 }
 
@@ -6622,4 +6627,102 @@ func TestSetQuestStepRoute(t *testing.T) {
 			})
 		}
 	})
+}
+
+func writeFavoritesSwaggerFixture(t *testing.T, activeSlots map[int]bool) string {
+	t.Helper()
+	const (
+		favPCUserData10Offset = int64(pcHeaderSize) + 10*0x280010
+		favPCUserData10Size   = 0x60010
+	)
+	data := make([]byte, favPCUserData10Offset+favPCUserData10Size)
+	copy(data, []byte("BND4"))
+	binary.LittleEndian.PutUint32(data[0x0C:], 12)
+	base := favPCUserData10Offset + 0x10
+
+	for slot := 0; slot < 15; slot++ {
+		if activeSlots != nil && activeSlots[slot] {
+			slotAt := base + 0x154 + int64(slot)*0x130
+			binary.LittleEndian.PutUint16(data[slotAt:], 0xFACE)
+			binary.LittleEndian.PutUint32(data[slotAt+4:], 0x11D0)
+			copy(data[slotAt+0x18:], []byte("FACE"))
+			binary.LittleEndian.PutUint32(data[slotAt+0x1C:], 4)
+			binary.LittleEndian.PutUint32(data[slotAt+0x20:], 0x120)
+		}
+	}
+
+	path := filepath.Join(t.TempDir(), "swagger_favorites.sl2")
+	if err := os.WriteFile(path, data, 0o600); err != nil {
+		t.Fatalf("write fixture: %v", err)
+	}
+	return path
+}
+
+func TestGetFavoritePresetsRoute(t *testing.T) {
+	saveEngine := saveengine.New()
+	active := map[int]bool{
+		0: true,
+		3: true,
+	}
+	session, err := savesession.LoadSave(saveEngine, writeFavoritesSwaggerFixture(t, active), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	// 1. Full list (no filter)
+	recorder := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets", "")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	direct, err := favorites.GetFavoritePresets(saveEngine, session.SaveSessionID, nil)
+	if err != nil {
+		t.Fatalf("direct GetFavoritePresets: %v", err)
+	}
+	var routeResult favorites.GetFavoritePresetsResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &routeResult); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if !reflect.DeepEqual(routeResult, direct) {
+		t.Fatalf("route result = %+v, want direct result = %+v", routeResult, direct)
+	}
+
+	// 2. Filter single slot (slot 3 - active)
+	recFiltered := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets?favoriteSlotID=3", "")
+	if recFiltered.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recFiltered.Code, recFiltered.Body.String())
+	}
+	var filteredResult favorites.GetFavoritePresetsResult
+	if err := json.Unmarshal(recFiltered.Body.Bytes(), &filteredResult); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(filteredResult.Presets) != 1 || filteredResult.Presets[0].FavoriteSlotID != 3 || !filteredResult.Presets[0].Active {
+		t.Fatalf("filteredResult = %+v, want 1 active slot with ID 3", filteredResult)
+	}
+
+	// 3. Filter single slot (slot 1 - inactive)
+	recFilteredEmpty := doSave(t, saveEngine, http.MethodGet, "/api/v1/save-sessions/"+session.SaveSessionID+"/favorite-presets?favoriteSlotID=1", "")
+	if recFilteredEmpty.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recFilteredEmpty.Code, recFilteredEmpty.Body.String())
+	}
+	var filteredEmptyResult favorites.GetFavoritePresetsResult
+	if err := json.Unmarshal(recFilteredEmpty.Body.Bytes(), &filteredEmptyResult); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if len(filteredEmptyResult.Presets) != 1 || filteredEmptyResult.Presets[0].FavoriteSlotID != 1 || filteredEmptyResult.Presets[0].Active {
+		t.Fatalf("filteredEmptyResult = %+v, want 1 inactive slot with ID 1", filteredEmptyResult)
+	}
+
+	// 4. Invalid query parameters
+	for _, target := range []string{
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=abc",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=-1",
+		"/api/v1/save-sessions/" + session.SaveSessionID + "/favorite-presets?favoriteSlotID=15",
+	} {
+		rec := doSave(t, saveEngine, http.MethodGet, target, "")
+		if rec.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", target, rec.Code, rec.Body.String())
+		}
+	}
 }

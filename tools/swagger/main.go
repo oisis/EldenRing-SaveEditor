@@ -25,6 +25,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
@@ -3154,6 +3155,42 @@ func registerSaveSessionRoutes(
 			writeJSON(writer, http.StatusOK, result)
 		},
 	)
+
+	// Mirror Favorites belong to UserData10 and are shared globally across the
+	// save session. The route passes the identifier and optional slot filter
+	// on to the endpoint.
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/favorite-presets",
+		func(writer http.ResponseWriter, request *http.Request) {
+			query := request.URL.Query()
+			favoriteSlotID, err := parseOptionalFavoriteSlotID(query.Get("favoriteSlotID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := favorites.GetFavoritePresets(
+				saveEngine,
+				request.PathValue("saveSessionID"),
+				favoriteSlotID,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+}
+
+func parseOptionalFavoriteSlotID(raw string) (*int, error) {
+	if raw == "" {
+		return nil, nil
+	}
+	value, err := strconv.Atoi(raw)
+	if err != nil {
+		return nil, fmt.Errorf("favoriteSlotID must be an integer; got %q", raw)
+	}
+	return &value, nil
 }
 
 // parseCharacterID turns the path segment into the integer the character getters

@@ -196,6 +196,17 @@
               }
             }
           },
+          "/favorites": {
+            "type": "group",
+            "title": "Favorites",
+            "children": {
+              "/get-favorite-presets": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/favorites/get_favorite_presets.md",
+                "title": "GetFavoritePresets"
+              }
+            }
+          },
           "/equipment": {
             "type": "group",
             "title": "Equipment",

@@ -29,6 +29,10 @@
       "description": "Appearance preset metadata stored in the catalog data."
     },
     {
+      "name": "Favorites",
+      "description": "Read-only Mirror Favorites getters over an open save session. Registered only when the explorer binds a loopback address."
+    },
+    {
       "name": "Save sessions",
       "description": "Read-only save-session lifecycle. Registered only when the explorer binds a loopback address."
     },
@@ -3749,6 +3753,52 @@
           },
           "400": {
             "description": "Malformed JSON, a missing or unknown presetID, a revision conflict, an unavailable catalog or session, or a UserData11 that cannot be safely rewritten",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/favorite-presets": {
+      "get": {
+        "operationId": "getFavoritePresets",
+        "tags": ["Favorites"],
+        "summary": "GetFavoritePresets",
+        "description": "Returns the occupancy state of the 15 global Mirror Favorites appearance preset slots stored in UserData10 of an existing save session. An optional favoriteSlotID query parameter selects a single slot index 0..14. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "name": "favoriteSlotID",
+            "in": "query",
+            "required": false,
+            "description": "Optional slot index (0..14) to return exactly one slot. When omitted, all 15 slots are returned.",
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 14
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The occupancy state of the Mirror Favorites preset slots",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetFavoritePresetsResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "An empty or unknown session, an out-of-range or malformed favoriteSlotID, or a truncated UserData10 block",
             "content": {
               "application/json": {
                 "schema": {
@@ -8887,6 +8937,47 @@
           "questKey",
           "stepKind",
           "stepKey"
+        ]
+      },
+      "FavoritePreset": {
+        "type": "object",
+        "description": "Occupancy state of one Mirror Favorites preset slot in UserData10",
+        "properties": {
+          "favoriteSlotID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 14,
+            "description": "The slot index 0..14"
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Whether the preset slot is populated with an active appearance preset"
+          }
+        },
+        "required": [
+          "favoriteSlotID",
+          "active"
+        ]
+      },
+      "GetFavoritePresetsResult": {
+        "type": "object",
+        "description": "Occupancy state of the 15 Mirror Favorites preset slots in UserData10",
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session that was read"
+          },
+          "presets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FavoritePreset"
+            },
+            "description": "Occupancy records of the requested Mirror Favorites preset slots"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "presets"
         ]
       }
     }

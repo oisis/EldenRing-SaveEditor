@@ -1,17 +1,22 @@
 /*
 Endpoint: GetFavoritePresets
 EndpointID: get_favorite_presets
-Purpose: Returns saved Favorites presets and their assignments.
-How it works: The runtime handler reads only through the responsible backend owners and returns a typed result without modifying save or application state.
+Purpose: Returns the occupancy state of the 15 global Mirror Favorites appearance preset slots stored in UserData10.
+How it works: The runtime handler passes saveSessionID and optional favoriteSlotID to SaveEngine, which reads the preset slots from the private snapshot of an already loaded session. The endpoint opens no file, reads no snapshot, parses no save data of its own, reads no GameCatalog and modifies nothing.
 Supported resource types: —.
-Input variables: favoriteSlotID.
-GameCatalog variables read: none required by the current contract.
-Save variables read: the state required by the declared variables; the getter must remain non-mutating.
-Implementation status: contract definition only; no runtime handler is implemented in this file yet.
+Input variables: saveSessionID, favoriteSlotID.
+GameCatalog variables read: none.
+Save variables read: the 15 global Mirror Favorites slots in UserData10; the getter is non-mutating.
+Implementation status: implemented
 */
 package favorites
 
-import "github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+import (
+	"errors"
+
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
+	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
+)
 
 // GetFavoritePresetsEndpointID is the stable backend identifier of GetFavoritePresets.
 const GetFavoritePresetsEndpointID = "get_favorite_presets"
@@ -22,6 +27,29 @@ var GetFavoritePresetsDefinition = contract.MustDefine(contract.Definition{
 	ID:                         GetFavoritePresetsEndpointID,
 	Kind:                       contract.Getter,
 	SupportedResourceTypes:     "—",
-	SupportedResourceVariables: []string{"favoriteSlotID"},
-	Description:                "Returns saved Favorites presets and their assignments.",
+	SupportedResourceVariables: []string{"saveSessionID", "favoriteSlotID"},
+	Description:                "Returns the occupancy state of the 15 global Mirror Favorites appearance preset slots stored in UserData10.",
 })
+
+// FavoritePreset is the occupancy state of one Mirror Favorites preset slot.
+type FavoritePreset = saveengine.FavoritePreset
+
+// GetFavoritePresetsResult is the typed result of GetFavoritePresets: the session
+// that was read and the list of preset slot occupancy records.
+type GetFavoritePresetsResult = saveengine.FavoritePresetsState
+
+// GetFavoritePresets returns the occupancy state of Mirror Favorites preset slots
+// from an existing save session.
+//
+// The endpoint is thin: it rejects a missing engine and delegates everything
+// else to SaveEngine.
+func GetFavoritePresets(
+	engine *saveengine.Engine,
+	saveSessionID string,
+	favoriteSlotID *int,
+) (GetFavoritePresetsResult, error) {
+	if engine == nil {
+		return GetFavoritePresetsResult{}, errors.New("save engine is not available")
+	}
+	return engine.GetFavoritePresets(saveSessionID, favoriteSlotID)
+}
