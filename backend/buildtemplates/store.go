@@ -2,10 +2,13 @@ package buildtemplates
 
 import (
 	"bytes"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"slices"
@@ -13,6 +16,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 )
 
 // IndexFileName is the on-disk metadata file name.
@@ -823,4 +827,156 @@ func (s *Store) writeIndexAtomic(encoded []byte) error {
 		return fmt.Errorf("replace index: %w", withoutPath(err))
 	}
 	return nil
+}
+
+func generateTemplateID() (string, error) {
+	var b [16]byte
+	if _, err := rand.Read(b[:]); err != nil {
+		return "", fmt.Errorf("generate template ID: %w", err)
+	}
+	return "tpl-" + hex.EncodeToString(b[:]), nil
+}
+
+// CreateTemplate persists a new build template to the local library.
+// It strictly re-validates the supplied template, generates an unpredictable,
+// cryptographically random templateID, derives the filename solely from that
+// templateID, assigns revision 1, updates _index.json fail-closed, and commits
+// the payload file atomically followed by the index file atomically.
+// If index write fails, cleanup of the newly written payload is performed.
+//
+// Each file is replaced atomically, but writing two separate files is not a
+// crash-proof atomic transaction.
+func (s *Store) CreateTemplate(tpl *BuildTemplate) (string, string, error) {
+	if s == nil {
+		return "", "", errors.New("store is nil")
+	}
+	if tpl == nil {
+		return "", "", errors.New("template is nil")
+	}
+
+	encodedPayload, err := json.MarshalIndent(tpl, "", "  ")
+	if err != nil {
+		return "", "", fmt.Errorf("encode template payload: %w", err)
+	}
+	if _, err := DecodeTemplate(encodedPayload); err != nil {
+		return "", "", fmt.Errorf("verify template payload: %w", err)
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if err := os.MkdirAll(s.dir, 0700); err != nil {
+		return "", "", fmt.Errorf("create template store directory: %w", withoutPath(err))
+	}
+
+	indexPath := filepath.Join(s.dir, IndexFileName)
+	var idx indexFile
+	data, err := os.ReadFile(indexPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			idx = indexFile{Version: IndexVersion, Entries: []indexEntry{}}
+		} else {
+			return "", "", fmt.Errorf("read index: %w", withoutPath(err))
+		}
+	} else {
+		idx, err = decodeIndexForWrite(data)
+		if err != nil {
+			return "", "", err
+		}
+		if err := validateIndexForWrite(idx); err != nil {
+			return "", "", err
+		}
+	}
+
+	seenIDs := make(map[string]bool, len(idx.Entries))
+	seenFilenames := make(map[string]bool, len(idx.Entries))
+	for _, e := range idx.Entries {
+		seenIDs[e.ID] = true
+		seenFilenames[e.Filename] = true
+	}
+
+	var templateID string
+	var filename string
+	const maxAttempts = 10
+	foundUnique := false
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		id, err := generateTemplateID()
+		if err != nil {
+			return "", "", err
+		}
+		candidateFile := id + ".json"
+		if seenIDs[id] || seenFilenames[candidateFile] {
+			continue
+		}
+		targetPath := filepath.Join(s.dir, candidateFile)
+		if _, err := os.Lstat(targetPath); err == nil || !os.IsNotExist(err) {
+			continue
+		}
+		templateID = id
+		filename = candidateFile
+		foundUnique = true
+		break
+	}
+	if !foundUnique {
+		return "", "", errors.New("failed to generate unique template ID and filename")
+	}
+
+	nowUTC := time.Now().UTC().Format(time.RFC3339Nano)
+	newRevision := uint64(1)
+
+	payloadName := ""
+	payloadDesc := ""
+	var payloadTags []string
+	if tpl.Metadata != nil {
+		payloadName = tpl.Metadata.Name
+		payloadDesc = tpl.Metadata.Description
+		if len(tpl.Metadata.Tags) > 0 {
+			payloadTags = append([]string(nil), tpl.Metadata.Tags...)
+		}
+	}
+
+	newEntry := indexEntry{
+		ID:               templateID,
+		Name:             payloadName,
+		Description:      payloadDesc,
+		Tags:             payloadTags,
+		Filename:         filename,
+		CreatedAt:        nowUTC,
+		UpdatedAt:        nowUTC,
+		InventoryItems:   countInventoryItems(tpl),
+		StorageItems:     countStorageItems(tpl),
+		Warnings:         0,
+		Version:          tpl.Version,
+		SelectedSections: selectedSectionsForTemplate(tpl),
+		Revision:         newRevision,
+	}
+
+	nextIdx := indexFile{
+		Version: idx.Version,
+		Entries: append(idx.Entries, newEntry),
+	}
+
+	encodedIndex, err := json.MarshalIndent(nextIdx, "", "  ")
+	if err != nil {
+		return "", "", fmt.Errorf("encode index: %w", err)
+	}
+	verifyIdx, err := decodeIndexForWrite(encodedIndex)
+	if err != nil {
+		return "", "", fmt.Errorf("verify new index: %w", err)
+	}
+	if err := validateIndexForWrite(verifyIdx); err != nil {
+		return "", "", fmt.Errorf("verify new index: %w", err)
+	}
+
+	if err := s.writePayloadAtomic(filename, encodedPayload); err != nil {
+		return "", "", err
+	}
+	if err := s.writeIndexAtomic(encodedIndex); err != nil {
+		if removeErr := os.Remove(filepath.Join(s.dir, filename)); removeErr != nil && !os.IsNotExist(removeErr) {
+			return "", "", fmt.Errorf("write index: %w; cleanup new payload failed: %v", err, withoutPath(removeErr))
+		}
+		return "", "", err
+	}
+
+	return templateID, formatRevision(newRevision), nil
 }

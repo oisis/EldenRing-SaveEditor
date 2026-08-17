@@ -245,6 +245,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/templates/update_build_template.md",
                 "title": "UpdateBuildTemplate"
+              },
+              "/create-build-template": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/templates/create_build_template.md",
+                "title": "CreateBuildTemplate"
               }
             }
           },

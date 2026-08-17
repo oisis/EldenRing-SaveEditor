@@ -167,7 +167,7 @@ func newHandlerWithTemplatesStore(
 	if saveEngine != nil {
 		registerSaveSessionRoutes(mux, saveEngine, gameCatalog)
 		if templatesStore != nil {
-			registerTemplatesRoutes(mux, templatesStore)
+			registerTemplatesRoutes(mux, templatesStore, saveEngine, gameCatalog, applicationVersion)
 		}
 	}
 
@@ -3457,8 +3457,24 @@ type updateBuildTemplateRequest struct {
 	Content          *buildtemplates.BuildTemplate          `json:"content,omitempty"`
 }
 
+// createBuildTemplateRequest is the JSON body of POST /api/v1/build-templates.
+type createBuildTemplateRequest struct {
+	SaveSessionID     string                           `json:"saveSessionID"`
+	SourceCharacterID *int                             `json:"sourceCharacterID"`
+	Selection         buildtemplates.TemplateSelection `json:"selection"`
+	Name              string                           `json:"name"`
+	Description       string                           `json:"description,omitempty"`
+	Tags              []string                         `json:"tags,omitempty"`
+}
+
 // registerTemplatesRoutes registers local Build Templates library routes.
-func registerTemplatesRoutes(mux *http.ServeMux, templatesStore *buildtemplates.Store) {
+func registerTemplatesRoutes(
+	mux *http.ServeMux,
+	templatesStore *buildtemplates.Store,
+	saveEngine *saveengine.Engine,
+	gameCatalog *gamecatalog.Catalog,
+	applicationVersion string,
+) {
 	mux.HandleFunc("GET /api/v1/build-templates", func(writer http.ResponseWriter, request *http.Request) {
 		query := request.URL.Query()
 		page, err := parsePagingValue(query.Get("page"), "page")
@@ -3479,6 +3495,53 @@ func registerTemplatesRoutes(mux *http.ServeMux, templatesStore *buildtemplates.
 			return
 		}
 		writeJSON(writer, http.StatusOK, result)
+	})
+	mux.HandleFunc("POST /api/v1/build-templates", func(writer http.ResponseWriter, request *http.Request) {
+		if err := requireJSONBody(request); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		var body createBuildTemplateRequest
+		decoder := json.NewDecoder(request.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&body); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+			writeError(writer, http.StatusBadRequest, errors.New("request body must contain exactly one JSON value"))
+			return
+		}
+		if body.SourceCharacterID == nil {
+			writeError(writer, http.StatusBadRequest, errors.New("sourceCharacterID is required"))
+			return
+		}
+		result, err := templates.CreateBuildTemplate(
+			templatesStore,
+			saveEngine,
+			gameCatalog,
+			applicationVersion,
+			templates.CreateBuildTemplateRequest{
+				SaveSessionID:     body.SaveSessionID,
+				SourceCharacterID: *body.SourceCharacterID,
+				Selection:         body.Selection,
+				Name:              body.Name,
+				Description:       body.Description,
+				Tags:              body.Tags,
+			},
+		)
+		if err != nil {
+			switch {
+			case strings.Contains(err.Error(), "unknown save session"):
+				writeError(writer, http.StatusNotFound, err)
+			case errors.Is(err, templates.ErrSaveRevisionConflict):
+				writeError(writer, http.StatusConflict, err)
+			default:
+				writeError(writer, http.StatusBadRequest, err)
+			}
+			return
+		}
+		writeJSON(writer, http.StatusCreated, result)
 	})
 	mux.HandleFunc("GET /api/v1/build-templates/{templateID}", func(writer http.ResponseWriter, request *http.Request) {
 		templateID := request.PathValue("templateID")

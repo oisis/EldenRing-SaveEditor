@@ -1219,3 +1219,137 @@ func TestStore_UpdateTemplate_Rejections(t *testing.T) {
 		})
 	}
 }
+
+func TestStore_CreateTemplate_Success(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "new_templates_dir")
+	store := NewStore(dir)
+
+	vig := uint32(50)
+	str := uint32(40)
+	charName := "Tarnished Hero"
+	tpl := &BuildTemplate{
+		Schema:     SchemaKey,
+		Version:    MaxSchemaVersion,
+		CreatedAt:  time.Now().UTC().Format(time.RFC3339Nano),
+		AppVersion: "2.0.0",
+		Metadata: &TemplateDocMetadata{
+			Name:                 "Strength Build",
+			Description:          "Pure STR build",
+			Tags:                 []string{"str", "pve"},
+			SourceCharacterIndex: 2,
+			SourceCharacterName:  charName,
+		},
+		Selection: &TemplateSelection{
+			Profile: &SectionSelection{
+				Fields: map[string]bool{"name": true},
+			},
+			Stats: &SectionSelection{
+				Fields: map[string]bool{"vigor": true, "strength": true},
+			},
+		},
+		Sections: TemplateSections{
+			Profile: &ProfileSection{
+				Name: &charName,
+			},
+			Stats: &StatsSection{
+				Vigor:    &vig,
+				Strength: &str,
+			},
+		},
+	}
+
+	id, rev, err := store.CreateTemplate(tpl)
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+	if id == "" {
+		t.Fatal("expected non-empty templateID")
+	}
+	if rev != "1" {
+		t.Fatalf("templateRevision = %q, want %q", rev, "1")
+	}
+
+	entries, err := store.ListTemplates()
+	if err != nil {
+		t.Fatalf("ListTemplates: %v", err)
+	}
+	if len(entries) != 1 {
+		t.Fatalf("expected 1 entry, got %d", len(entries))
+	}
+	e := entries[0]
+	if e.TemplateID != id {
+		t.Errorf("entry.TemplateID = %q, want %q", e.TemplateID, id)
+	}
+	if e.Name != "Strength Build" {
+		t.Errorf("entry.Name = %q, want %q", e.Name, "Strength Build")
+	}
+	if e.TemplateRevision != "1" {
+		t.Errorf("entry.TemplateRevision = %q, want %q", e.TemplateRevision, "1")
+	}
+	if e.SchemaVersion != 2 {
+		t.Errorf("entry.SchemaVersion = %d, want 2", e.SchemaVersion)
+	}
+
+	loaded, loadedRev, err := store.GetTemplate(id)
+	if err != nil {
+		t.Fatalf("GetTemplate: %v", err)
+	}
+	if loadedRev != "1" {
+		t.Errorf("loadedRev = %q, want %q", loadedRev, "1")
+	}
+	if loaded.Metadata.Name != "Strength Build" {
+		t.Errorf("loaded.Metadata.Name = %q, want %q", loaded.Metadata.Name, "Strength Build")
+	}
+}
+
+func TestStore_CreateTemplate_CorruptIndexFailsClosedWithoutMutation(t *testing.T) {
+	dir := t.TempDir()
+	store := NewStore(dir)
+	indexPath := filepath.Join(dir, IndexFileName)
+	corruptContent := `{"version": 999, "corrupt": true}`
+	if err := os.WriteFile(indexPath, []byte(corruptContent), 0644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	vig := uint32(50)
+	tpl := &BuildTemplate{
+		Schema:    SchemaKey,
+		Version:   MaxSchemaVersion,
+		CreatedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		Selection: &TemplateSelection{
+			Stats: &SectionSelection{All: true},
+		},
+		Sections: TemplateSections{
+			Stats: &StatsSection{Vigor: &vig},
+		},
+	}
+
+	before := snapshotDir(t, dir)
+	_, _, err := store.CreateTemplate(tpl)
+	if err == nil {
+		t.Fatal("expected error on corrupt index, got nil")
+	}
+	after := snapshotDir(t, dir)
+	if !reflect.DeepEqual(before, after) {
+		t.Error("corrupt index was mutated or orphan files were created on failed CreateTemplate")
+	}
+}
+
+func TestStore_CreateTemplate_InvalidPayloadRejected(t *testing.T) {
+	dir := t.TempDir()
+	store := NewStore(dir)
+
+	// nil template
+	if _, _, err := store.CreateTemplate(nil); err == nil {
+		t.Fatal("expected error for nil template, got nil")
+	}
+
+	// invalid schema
+	tpl := &BuildTemplate{
+		Schema:  "invalid.schema",
+		Version: MaxSchemaVersion,
+	}
+	if _, _, err := store.CreateTemplate(tpl); err == nil {
+		t.Fatal("expected error for invalid schema, got nil")
+	}
+}

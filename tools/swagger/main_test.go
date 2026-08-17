@@ -1097,6 +1097,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPut := document.Paths[buildTemplate]["put"]; !hasPut {
 		t.Fatalf("openapi.json describes no PUT for %s", buildTemplate)
 	}
+	buildTemplatesList := "/api/v1/build-templates"
+	if _, hasPost := document.Paths[buildTemplatesList]["post"]; !hasPost {
+		t.Fatalf("openapi.json describes no POST for %s", buildTemplatesList)
+	}
 	// The favorite-presets slot path carries both PUT and DELETE operations.
 	favSlot := "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}"
 	if _, hasPut := document.Paths[favSlot]["put"]; !hasPut {
@@ -7513,6 +7517,125 @@ func TestUpdateBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
 	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
 	body := `{"templateRevision":"3","metadata":{"name":"X"}}`
 	recorder := updateBuildTemplate(t, handler, "tpl-123", body)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
+	}
+}
+
+func createBuildTemplate(t *testing.T, handler http.Handler, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	target := "/api/v1/build-templates"
+	var request *http.Request
+	if body == "" {
+		request = httptest.NewRequest(http.MethodPost, target, nil)
+	} else {
+		request = httptest.NewRequest(http.MethodPost, target, bytes.NewReader([]byte(body)))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+	return recorder
+}
+
+func TestCreateBuildTemplateRoute_Success(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		buildtemplates.NewStore(templatesDir),
+	)
+
+	body := fmt.Sprintf(`{
+		"saveSessionID": %q,
+		"sourceCharacterID": 0,
+		"name": "Swagger Route Test Build",
+		"description": "Created from swagger route test",
+		"tags": ["swagger", "test"],
+		"selection": {
+			"spells": {
+				"spell1": true
+			}
+		}
+	}`, session.SaveSessionID)
+
+	recorder := createBuildTemplate(t, handler, body)
+	if recorder.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want 201 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var result templates.CreateBuildTemplateResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if result.TemplateID == "" {
+		t.Errorf("expected non-empty templateID")
+	}
+	if result.TemplateRevision != "1" {
+		t.Errorf("templateRevision = %q, want %q", result.TemplateRevision, "1")
+	}
+}
+
+func TestCreateBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		buildtemplates.NewStore(templatesDir),
+	)
+
+	for name, body := range map[string]string{
+		"no body":                         "",
+		"missing saveSessionID":           `{"sourceCharacterID":0,"name":"X","selection":{"stats":true}}`,
+		"missing sourceCharacterID":       fmt.Sprintf(`{"saveSessionID":%q,"name":"X","selection":{"stats":true}}`, session.SaveSessionID),
+		"missing name":                    fmt.Sprintf(`{"saveSessionID":%q,"sourceCharacterID":0,"selection":{"stats":true}}`, session.SaveSessionID),
+		"empty selection":                 fmt.Sprintf(`{"saveSessionID":%q,"sourceCharacterID":0,"name":"X","selection":{}}`, session.SaveSessionID),
+		"unsupported field":               fmt.Sprintf(`{"saveSessionID":%q,"sourceCharacterID":0,"name":"X","selection":{"profile":{"runes":true}}}`, session.SaveSessionID),
+		"spells.All shortcut is rejected": fmt.Sprintf(`{"saveSessionID":%q,"sourceCharacterID":0,"name":"X","selection":{"spells":true}}`, session.SaveSessionID),
+		"unknown json field":              fmt.Sprintf(`{"saveSessionID":%q,"sourceCharacterID":0,"name":"X","selection":{"stats":true},"extra":true}`, session.SaveSessionID),
+		"trailing json document":          fmt.Sprintf(`{"saveSessionID":%q,"sourceCharacterID":0,"name":"X","selection":{"stats":true}}{"extra":1}`, session.SaveSessionID),
+	} {
+		t.Run(name, func(t *testing.T) {
+			recorder := createBuildTemplate(t, handler, body)
+			if recorder.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestCreateBuildTemplateRoute_NotFound(t *testing.T) {
+	templatesDir := t.TempDir()
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveengine.New(),
+		buildtemplates.NewStore(templatesDir),
+	)
+
+	body := `{"saveSessionID":"nonexistent-session","sourceCharacterID":0,"name":"Test","selection":{"stats":true}}`
+	recorder := createBuildTemplate(t, handler, body)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestCreateBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
+	body := `{"saveSessionID":"session-1","sourceCharacterID":0,"name":"Test","selection":{"stats":true}}`
+	recorder := createBuildTemplate(t, handler, body)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
 	}

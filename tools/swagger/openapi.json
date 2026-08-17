@@ -473,6 +473,64 @@
             }
           }
         }
+      },
+      "post": {
+        "operationId": "createBuildTemplate",
+        "tags": ["Templates"],
+        "summary": "CreateBuildTemplate",
+        "description": "Creates a new Build Template in the local templates library from an explicit validated data selection of a character in an active save session. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBuildTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The template was created and persisted to the local library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateBuildTemplateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body, invalid selection, unsupported fields or section, inactive character, or schema validation failure",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Save session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The save revision changed while building the template payload; nothing was written",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/build-templates/{templateID}": {
@@ -9423,6 +9481,69 @@
           }
         },
         "required": ["templateID"]
+      },
+      "CreateBuildTemplateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the loaded save session"
+          },
+          "sourceCharacterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "Character slot index (0..9)"
+          },
+          "selection": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TemplateSelection"
+              }
+            ],
+            "description": "Explicit data selection. Supported sections and fields for template creation: 'profile' (fields 'name' and 'level' only; boolean shortcut is rejected), 'stats' (all eight attributes or boolean true), and 'spells' (fields 'spell1'..'spell12' only; boolean shortcut is rejected). Sections 'equipment', 'inventory.workspace', 'items', 'inventoryLayout', and 'storageLayout' are rejected."
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the build template"
+          },
+          "description": {
+            "type": "string",
+            "description": "Detailed description of the build template"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for categorizing and searching the template"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "sourceCharacterID",
+          "selection",
+          "name"
+        ]
+      },
+      "CreateBuildTemplateResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateID": {
+            "type": "string",
+            "description": "Generated unique identifier of the newly created template"
+          },
+          "templateRevision": {
+            "type": "string",
+            "description": "Initial canonical revision token of the created template entry (always \"1\")"
+          }
+        },
+        "required": [
+          "templateID",
+          "templateRevision"
+        ]
       },
       "UpdateBuildTemplateRequest": {
         "type": "object",
