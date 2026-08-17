@@ -250,6 +250,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/templates/create_build_template.md",
                 "title": "CreateBuildTemplate"
+              },
+              "/get-build-template-preview": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/templates/get_build_template_preview.md",
+                "title": "GetBuildTemplatePreview"
               }
             }
           },

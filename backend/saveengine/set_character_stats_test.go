@@ -512,3 +512,81 @@ func TestMinimumSoulMemoryForLevelReproducesTheConfirmedVectors(t *testing.T) {
 		}
 	}
 }
+
+func TestPlanCharacterStats_ReadOnly(t *testing.T) {
+	savePath := writeSetStatsTestFile(t, setStatsTestContent{
+		platform:   PlatformPC,
+		active:     true,
+		withAnchor: true,
+		anchorAt:   setStatsTestAnchorAt,
+		classID:    setStatsTestVagabond,
+		attributes: CharacterAttributes{
+			Vigor: 15, Mind: 10, Endurance: 11, Strength: 14,
+			Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7,
+		},
+		level:      9,
+		soulMemory: 473,
+	})
+
+	engine := New()
+	loaded, err := engine.LoadSave(savePath, "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+
+	engine.mutex.Lock()
+	sessionBefore := engine.sessions[loaded.SaveSessionID]
+	snapshotBefore := bytes.Clone(sessionBefore.snapshot.data)
+	revBefore := sessionBefore.session.revisionString()
+	dirtyBefore := sessionBefore.session.dirty
+	undoBefore := sessionBefore.session.undo
+	ownedSeqBefore := sessionBefore.session.ownedSeq
+	ownedByIDCountBefore := len(sessionBefore.session.ownedByID)
+	ownedByLocCountBefore := len(sessionBefore.session.ownedByLocator)
+	engine.mutex.Unlock()
+
+	level, soulMemory, err := engine.PlanCharacterStats(
+		loaded.SaveSessionID, setStatsTestSlot, setStatsTestAttributes)
+	if err != nil {
+		t.Fatalf("PlanCharacterStats: %v", err)
+	}
+	if level != setStatsTestLevel {
+		t.Errorf("level = %d, want %d", level, setStatsTestLevel)
+	}
+	if soulMemory != setStatsTestRequiredSoulMemory {
+		t.Errorf("soulMemory = %d, want %d", soulMemory, setStatsTestRequiredSoulMemory)
+	}
+
+	engine.mutex.Lock()
+	sessionAfter := engine.sessions[loaded.SaveSessionID]
+	snapshotAfter := sessionAfter.snapshot.data
+	revAfter := sessionAfter.session.revisionString()
+	dirtyAfter := sessionAfter.session.dirty
+	undoAfter := sessionAfter.session.undo
+	ownedSeqAfter := sessionAfter.session.ownedSeq
+	ownedByIDCountAfter := len(sessionAfter.session.ownedByID)
+	ownedByLocCountAfter := len(sessionAfter.session.ownedByLocator)
+	engine.mutex.Unlock()
+
+	if !bytes.Equal(snapshotBefore, snapshotAfter) {
+		t.Error("PlanCharacterStats mutated snapshot bytes")
+	}
+	if revBefore != revAfter {
+		t.Errorf("revision mutated from %q to %q", revBefore, revAfter)
+	}
+	if dirtyBefore != dirtyAfter {
+		t.Errorf("dirty changed from %v to %v", dirtyBefore, dirtyAfter)
+	}
+	if undoBefore != undoAfter {
+		t.Errorf("undo pointer changed from %p to %p", undoBefore, undoAfter)
+	}
+	if ownedSeqBefore != ownedSeqAfter {
+		t.Errorf("ownedSeq changed from %d to %d", ownedSeqBefore, ownedSeqAfter)
+	}
+	if ownedByIDCountBefore != ownedByIDCountAfter {
+		t.Errorf("ownedByID count changed from %d to %d", ownedByIDCountBefore, ownedByIDCountAfter)
+	}
+	if ownedByLocCountBefore != ownedByLocCountAfter {
+		t.Errorf("ownedByLocator count changed from %d to %d", ownedByLocCountBefore, ownedByLocCountAfter)
+	}
+}

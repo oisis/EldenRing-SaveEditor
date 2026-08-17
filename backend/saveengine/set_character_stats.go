@@ -139,20 +139,13 @@ func (engine *Engine) SetCharacterStats(
 			"levelPolicy must be %q; got %q", LevelPolicyRecalculate, levelPolicy)
 	}
 
-	values := attributes.ordered()
-	level, err := recalculateCharacterLevel(values)
+	values, level, requiredSoulMemory, err := prepareCharacterAttributes(attributes)
 	if err != nil {
 		return SetCharacterStatsResult{}, err
 	}
-	requiredSoulMemory := minimumSoulMemoryForLevel(level)
 
 	var soulMemory uint32
 	saveRevision, err := engine.commitCharacterRevision(saveSessionID, opSetCharacterStats, characterID, func(loaded *loadedSave) error {
-		if characterID < 0 || characterID >= characterSlotCount {
-			return fmt.Errorf("characterID %d is outside the range 0..%d",
-				characterID, characterSlotCount-1)
-		}
-
 		current := loaded.session.revisionString()
 		if expectedRevision != current {
 			return fmt.Errorf(
@@ -160,50 +153,13 @@ func (engine *Engine) SetCharacterStats(
 				expectedRevision, current)
 		}
 
-		base := userData10Base(loaded.session.platform)
-		flag, err := loaded.snapshot.readAt(base+userData10ActiveFlagsOffset+int64(characterID), 1)
-		if err != nil {
-			return fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
-		}
-		if flag[0] != userData10ActiveFlagValue {
-			return fmt.Errorf("character %d is not active", characterID)
-		}
-
-		summary := base + userData10SummaryOffset + int64(characterID)*userData10SummaryStride
-
-		anchor, err := findStatsAnchor(loaded.snapshot, loaded.session.platform, characterID)
+		ctx, err := planCharacterStatsState(loaded, characterID, values, level, requiredSoulMemory)
 		if err != nil {
 			return err
 		}
+		soulMemory = ctx.soulMemory
 
-		rawClass, err := loaded.snapshot.readAt(anchor+statsClassOffset, 1)
-		if err != nil {
-			return fmt.Errorf("cannot read starting class of character %d: %w", characterID, err)
-		}
-		if err := validateAgainstStartingClass(values, rawClass[0]); err != nil {
-			return err
-		}
-
-		// Both target ranges are resolved and read before the first byte is
-		// written, so a truncated range fails the whole mutation untouched.
-		blockAt := anchor + statsWritableBlockOffset
-		summaryLevelAt := summary + summaryLevelOffset
-		blockBefore, err := loaded.snapshot.readAt(blockAt, statsWritableBlockSize)
-		if err != nil {
-			return fmt.Errorf("cannot read statistics of character %d: %w", characterID, err)
-		}
-		summaryLevelBefore, err := loaded.snapshot.readAt(summaryLevelAt, summaryLevelSize)
-		if err != nil {
-			return fmt.Errorf("cannot read profile summary level of character %d: %w", characterID, err)
-		}
-
-		storedSoulMemory := binary.LittleEndian.Uint32(blockBefore[statsBlockTotalGetSoulPosition:])
-		soulMemory = storedSoulMemory
-		if soulMemory < requiredSoulMemory {
-			soulMemory = requiredSoulMemory
-		}
-
-		blockAfter := bytes.Clone(blockBefore)
+		blockAfter := bytes.Clone(ctx.blockBefore)
 		for index, value := range values {
 			binary.LittleEndian.PutUint32(blockAfter[index*4:], value)
 		}
@@ -213,28 +169,28 @@ func (engine *Engine) SetCharacterStats(
 		summaryLevelAfter := make([]byte, summaryLevelSize)
 		binary.LittleEndian.PutUint32(summaryLevelAfter, level)
 
-		if bytes.Equal(blockBefore, blockAfter) && bytes.Equal(summaryLevelBefore, summaryLevelAfter) {
+		if bytes.Equal(ctx.blockBefore, blockAfter) && bytes.Equal(ctx.summaryLevelBefore, summaryLevelAfter) {
 			return nil
 		}
 
-		if err := loaded.snapshot.writeAt(blockAt, blockAfter); err != nil {
+		if err := loaded.snapshot.writeAt(ctx.blockAt, blockAfter); err != nil {
 			return fmt.Errorf("cannot write statistics of character %d: %w", characterID, err)
 		}
-		if err := loaded.snapshot.writeAt(summaryLevelAt, summaryLevelAfter); err != nil {
+		if err := loaded.snapshot.writeAt(ctx.summaryLevelAt, summaryLevelAfter); err != nil {
 			return restoreCharacterStats(loaded.snapshot, characterID,
-				blockAt, blockBefore, summaryLevelAt, summaryLevelBefore,
+				ctx.blockAt, ctx.blockBefore, ctx.summaryLevelAt, ctx.summaryLevelBefore,
 				fmt.Sprintf("cannot write profile summary level of character %d: %v", characterID, err))
 		}
 
-		blockWritten, blockErr := loaded.snapshot.readAt(blockAt, statsWritableBlockSize)
-		summaryWritten, summaryErr := loaded.snapshot.readAt(summaryLevelAt, summaryLevelSize)
+		blockWritten, blockErr := loaded.snapshot.readAt(ctx.blockAt, statsWritableBlockSize)
+		summaryWritten, summaryErr := loaded.snapshot.readAt(ctx.summaryLevelAt, summaryLevelSize)
 		if blockErr == nil && summaryErr == nil &&
 			bytes.Equal(blockWritten, blockAfter) && bytes.Equal(summaryWritten, summaryLevelAfter) {
 			return nil
 		}
 
 		return restoreCharacterStats(loaded.snapshot, characterID,
-			blockAt, blockBefore, summaryLevelAt, summaryLevelBefore,
+			ctx.blockAt, ctx.blockBefore, ctx.summaryLevelAt, ctx.summaryLevelBefore,
 			fmt.Sprintf("statistics of character %d could not be verified", characterID))
 	})
 	if err != nil {
@@ -249,6 +205,117 @@ func (engine *Engine) SetCharacterStats(
 		Level:         level,
 		SoulMemory:    soulMemory,
 	}, nil
+}
+
+// prepareCharacterAttributes is a pure validator for ordered values, recalculated level and minimum SoulMemory.
+func prepareCharacterAttributes(attributes CharacterAttributes) (values [characterAttributeCount]uint32, level uint32, requiredSoulMemory uint32, err error) {
+	values = attributes.ordered()
+	lvl, err := recalculateCharacterLevel(values)
+	if err != nil {
+		return [characterAttributeCount]uint32{}, 0, 0, err
+	}
+	return values, lvl, minimumSoulMemoryForLevel(lvl), nil
+}
+
+type plannedStatsContext struct {
+	blockAt            int64
+	blockBefore        []byte
+	summaryLevelAt     int64
+	summaryLevelBefore []byte
+	soulMemory         uint32
+}
+
+// planCharacterStatsState reads and validates starting class and soul memory on a locked save snapshot.
+func planCharacterStatsState(
+	loaded *loadedSave,
+	characterID int,
+	values [characterAttributeCount]uint32,
+	level uint32,
+	requiredSoulMemory uint32,
+) (plannedStatsContext, error) {
+	if characterID < 0 || characterID >= characterSlotCount {
+		return plannedStatsContext{}, fmt.Errorf("characterID %d is outside the range 0..%d",
+			characterID, characterSlotCount-1)
+	}
+
+	base := userData10Base(loaded.session.platform)
+	flag, err := loaded.snapshot.readAt(base+userData10ActiveFlagsOffset+int64(characterID), 1)
+	if err != nil {
+		return plannedStatsContext{}, fmt.Errorf("cannot read activity of character %d: %w", characterID, err)
+	}
+	if flag[0] != userData10ActiveFlagValue {
+		return plannedStatsContext{}, fmt.Errorf("character %d is not active", characterID)
+	}
+
+	anchor, err := findStatsAnchor(loaded.snapshot, loaded.session.platform, characterID)
+	if err != nil {
+		return plannedStatsContext{}, err
+	}
+
+	rawClass, err := loaded.snapshot.readAt(anchor+statsClassOffset, 1)
+	if err != nil {
+		return plannedStatsContext{}, fmt.Errorf("cannot read starting class of character %d: %w", characterID, err)
+	}
+	if err := validateAgainstStartingClass(values, rawClass[0]); err != nil {
+		return plannedStatsContext{}, err
+	}
+
+	summary := base + userData10SummaryOffset + int64(characterID)*userData10SummaryStride
+	blockAt := anchor + statsWritableBlockOffset
+	summaryLevelAt := summary + summaryLevelOffset
+	blockBefore, err := loaded.snapshot.readAt(blockAt, statsWritableBlockSize)
+	if err != nil {
+		return plannedStatsContext{}, fmt.Errorf("cannot read statistics of character %d: %w", characterID, err)
+	}
+	summaryLevelBefore, err := loaded.snapshot.readAt(summaryLevelAt, summaryLevelSize)
+	if err != nil {
+		return plannedStatsContext{}, fmt.Errorf("cannot read profile summary level of character %d: %w", characterID, err)
+	}
+
+	storedSoulMemory := binary.LittleEndian.Uint32(blockBefore[statsBlockTotalGetSoulPosition:])
+	sm := storedSoulMemory
+	if sm < requiredSoulMemory {
+		sm = requiredSoulMemory
+	}
+
+	return plannedStatsContext{
+		blockAt:            blockAt,
+		blockBefore:        blockBefore,
+		summaryLevelAt:     summaryLevelAt,
+		summaryLevelBefore: summaryLevelBefore,
+		soulMemory:         sm,
+	}, nil
+}
+
+// PlanCharacterStats calculates the resulting level and required SoulMemory for a
+// proposed attribute set against the starting class of an active character without mutating the save.
+func (engine *Engine) PlanCharacterStats(
+	saveSessionID string,
+	characterID int,
+	attributes CharacterAttributes,
+) (level uint32, soulMemory uint32, err error) {
+	if saveSessionID == "" {
+		return 0, 0, errors.New("saveSessionID is required")
+	}
+
+	values, lvl, requiredSoulMemory, err := prepareCharacterAttributes(attributes)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	engine.mutex.Lock()
+	defer engine.mutex.Unlock()
+	loaded, exists := engine.sessions[saveSessionID]
+	if !exists {
+		return 0, 0, fmt.Errorf("unknown save session %q", saveSessionID)
+	}
+
+	ctx, err := planCharacterStatsState(loaded, characterID, values, lvl, requiredSoulMemory)
+	if err != nil {
+		return 0, 0, err
+	}
+
+	return lvl, ctx.soulMemory, nil
 }
 
 // recalculateCharacterLevel validates the absolute range of every attribute and

@@ -67,6 +67,38 @@ func validateBuildTemplateV1(tpl *BuildTemplate) error {
 	return nil
 }
 
+// ValidateTemplateSelection validates that a selection contains only supported fields and formats.
+func ValidateTemplateSelection(sel *TemplateSelection) error {
+	if sel == nil {
+		return nil
+	}
+	if err := validateProfileSelection(sel.Profile); err != nil {
+		return err
+	}
+	if err := validateStatsSelection(sel.Stats); err != nil {
+		return err
+	}
+	if err := validateInventoryWorkspaceSelection(sel.InventoryWorkspace); err != nil {
+		return err
+	}
+	if err := validateEquipmentSelection(sel.Equipment); err != nil {
+		return err
+	}
+	if err := validateSpellsSelection(sel.Spells); err != nil {
+		return err
+	}
+	if err := validateBooleanOnlySelection("selection.items", sel.Items); err != nil {
+		return err
+	}
+	if err := validateBooleanOnlySelection("selection.inventoryLayout", sel.InventoryLayout); err != nil {
+		return err
+	}
+	if err := validateBooleanOnlySelection("selection.storageLayout", sel.StorageLayout); err != nil {
+		return err
+	}
+	return nil
+}
+
 func validateBuildTemplateV2(tpl *BuildTemplate) error {
 	if tpl.Selection == nil {
 		return fmt.Errorf("ValidateTemplate: v2 template requires a selection object")
@@ -75,28 +107,7 @@ func validateBuildTemplateV2(tpl *BuildTemplate) error {
 		return fmt.Errorf("ValidateTemplate: v2 template selection has no selected fields")
 	}
 
-	if err := validateProfileSelection(tpl.Selection.Profile); err != nil {
-		return err
-	}
-	if err := validateStatsSelection(tpl.Selection.Stats); err != nil {
-		return err
-	}
-	if err := validateInventoryWorkspaceSelection(tpl.Selection.InventoryWorkspace); err != nil {
-		return err
-	}
-	if err := validateEquipmentSelection(tpl.Selection.Equipment); err != nil {
-		return err
-	}
-	if err := validateSpellsSelection(tpl.Selection.Spells); err != nil {
-		return err
-	}
-	if err := validateBooleanOnlySelection("selection.items", tpl.Selection.Items); err != nil {
-		return err
-	}
-	if err := validateBooleanOnlySelection("selection.inventoryLayout", tpl.Selection.InventoryLayout); err != nil {
-		return err
-	}
-	if err := validateBooleanOnlySelection("selection.storageLayout", tpl.Selection.StorageLayout); err != nil {
+	if err := ValidateTemplateSelection(tpl.Selection); err != nil {
 		return err
 	}
 

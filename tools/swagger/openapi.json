@@ -722,6 +722,77 @@
         }
       }
     },
+    "/api/v1/build-templates/{templateID}/preview": {
+      "post": {
+        "operationId": "getBuildTemplatePreview",
+        "tags": ["Templates"],
+        "summary": "GetBuildTemplatePreview",
+        "description": "Builds a non-mutating preview of applying a template to the specified character. Compares the character's current state with the template target values and reports whether the plan is executable. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "name": "templateID",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the build template",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetBuildTemplatePreviewRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The preview comparison plan and executability report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetBuildTemplatePreviewResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body, invalid character ID, or inactive character",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template or save session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The save revision changed while building the preview; nothing was written",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions": {
       "post": {
         "operationId": "loadSave",
@@ -9543,6 +9614,282 @@
         "required": [
           "templateID",
           "templateRevision"
+        ]
+      },
+      "GetBuildTemplatePreviewRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the loaded save session"
+          },
+          "characterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "Character slot index (0..9)"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/TemplateSelection"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ApplyOptions"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID"
+        ]
+      },
+      "GetBuildTemplatePreviewResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateID": {
+            "type": "string",
+            "description": "Identifier of the template"
+          },
+          "templateRevision": {
+            "type": "string",
+            "description": "Revision of the template in the library"
+          },
+          "characterID": {
+            "type": "integer",
+            "description": "Target character slot index"
+          },
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "Revision of the save session during preview construction"
+          },
+          "executable": {
+            "type": "boolean",
+            "description": "Whether the plan is fully executable without blocking issues"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/BuildTemplatePreviewPlan"
+          },
+          "blockingIssues": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuildTemplatePreviewIssue"
+            },
+            "description": "List of blocking issues preventing plan execution"
+          }
+        },
+        "required": [
+          "templateID",
+          "templateRevision",
+          "characterID",
+          "saveSessionID",
+          "saveRevision",
+          "executable",
+          "plan"
+        ]
+      },
+      "BuildTemplatePreviewIssue": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable issue code identifying the failure category",
+            "enum": [
+              "empty_selection",
+              "unsupported_section",
+              "unsupported_field",
+              "selection_not_in_template",
+              "missing_section",
+              "missing_value",
+              "unsupported_option",
+              "invalid_stats",
+              "level_mismatch",
+              "invalid_spell_loadout"
+            ]
+          },
+          "section": {
+            "type": "string",
+            "description": "Section associated with the issue"
+          },
+          "field": {
+            "type": "string",
+            "description": "Optional field name associated with the issue"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation of the issue"
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      },
+      "BuildTemplatePreviewPlan": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "profile": {
+            "$ref": "#/components/schemas/ProfilePreviewPlan"
+          },
+          "stats": {
+            "$ref": "#/components/schemas/StatsPreviewPlan"
+          },
+          "spells": {
+            "$ref": "#/components/schemas/SpellsPreviewPlan"
+          }
+        }
+      },
+      "ProfilePreviewPlan": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "$ref": "#/components/schemas/StringFieldChange"
+          },
+          "level": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          }
+        }
+      },
+      "StatsPreviewPlan": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "vigor": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "mind": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "endurance": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "strength": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "dexterity": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "intelligence": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "faith": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "arcane": {
+            "$ref": "#/components/schemas/Uint32FieldChange"
+          },
+          "resultLevel": {
+            "type": "integer",
+            "description": "Calculated character level from resulting attributes"
+          },
+          "resultSoulMemory": {
+            "type": "integer",
+            "description": "Resulting total lifetime runes (SoulMemory)"
+          }
+        }
+      },
+      "SpellsPreviewPlan": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "slots": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellSlotChange"
+            },
+            "description": "List of planned spell memory slot comparisons"
+          },
+          "usedMemorySlots": {
+            "type": "integer",
+            "description": "Total memory slots consumed by the compact spell loadout"
+          },
+          "availableMemorySlots": {
+            "type": "integer",
+            "description": "Available memory slots capacity of the character"
+          },
+          "equippedSpells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SpellSlotRef"
+            },
+            "description": "Final compact ordered spell loadout"
+          }
+        }
+      },
+      "StringFieldChange": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "type": "string",
+            "description": "Current value on the character"
+          },
+          "target": {
+            "type": "string",
+            "description": "Target value from the template"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "Whether the value differs"
+          }
+        },
+        "required": [
+          "current",
+          "target",
+          "changed"
+        ]
+      },
+      "Uint32FieldChange": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "current": {
+            "type": "integer",
+            "description": "Current value on the character"
+          },
+          "target": {
+            "type": "integer",
+            "description": "Target value from the template"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "Whether the value differs"
+          }
+        },
+        "required": [
+          "current",
+          "target",
+          "changed"
+        ]
+      },
+      "SpellSlotChange": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "slotNumber": {
+            "type": "integer",
+            "description": "1-based spell slot number (1..12)"
+          },
+          "current": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "target": {
+            "$ref": "#/components/schemas/SpellSlotRef"
+          },
+          "changed": {
+            "type": "boolean",
+            "description": "Whether the slot content differs"
+          }
+        },
+        "required": [
+          "slotNumber",
+          "changed"
         ]
       },
       "UpdateBuildTemplateRequest": {
