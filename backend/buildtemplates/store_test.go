@@ -1,6 +1,7 @@
 package buildtemplates
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
@@ -636,5 +637,329 @@ func TestStore_TemplateRevisionToken(t *testing.T) {
 			t.Errorf("%s templateRevision differs: GetTemplate %q, ListTemplates %q",
 				templateID, revision, listed[templateID])
 		}
+	}
+}
+
+// newDeleteFixture writes a three-entry library: a legacy entry with no
+// revision field, an entry at revision 7, and an entry at math.MaxUint64.
+// Payload contents are opaque here, because DeleteTemplate never decodes them.
+func newDeleteFixture(t *testing.T) string {
+	t.Helper()
+	dir := t.TempDir()
+	indexJSON := fmt.Sprintf(`{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-legacy",
+      "name": "Legacy",
+      "filename": "legacy.json",
+      "createdAt": "2026-08-17T10:00:00Z",
+      "updatedAt": "2026-08-17T10:00:00Z"
+    },
+    {
+      "id": "tpl-seven",
+      "name": "Seven",
+      "filename": "seven.json",
+      "createdAt": "2026-08-17T11:00:00Z",
+      "updatedAt": "2026-08-17T11:00:00Z",
+      "revision": 7
+    },
+    {
+      "id": "tpl-max",
+      "name": "Max",
+      "filename": "max.json",
+      "createdAt": "2026-08-17T12:00:00Z",
+      "updatedAt": "2026-08-17T12:00:00Z",
+      "revision": %d
+    }
+  ]
+}`, uint64(math.MaxUint64))
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+	for _, filename := range []string{"legacy.json", "seven.json", "max.json"} {
+		if err := os.WriteFile(filepath.Join(dir, filename), []byte("payload of "+filename), 0644); err != nil {
+			t.Fatalf("WriteFile %s: %v", filename, err)
+		}
+	}
+	return dir
+}
+
+func readIndexEntryIDs(t *testing.T, dir string) []string {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(dir, IndexFileName))
+	if err != nil {
+		t.Fatalf("ReadFile index: %v", err)
+	}
+	var idx indexFile
+	if err := json.Unmarshal(data, &idx); err != nil {
+		t.Fatalf("unmarshal index: %v", err)
+	}
+	if idx.Version != IndexVersion {
+		t.Fatalf("rewritten index version = %d, want %d", idx.Version, IndexVersion)
+	}
+	ids := make([]string, 0, len(idx.Entries))
+	for _, e := range idx.Entries {
+		ids = append(ids, e.ID)
+	}
+	return ids
+}
+
+func snapshotDir(t *testing.T, dir string) map[string]string {
+	t.Helper()
+	names, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatalf("ReadDir: %v", err)
+	}
+	snapshot := make(map[string]string, len(names))
+	for _, name := range names {
+		data, err := os.ReadFile(filepath.Join(dir, name.Name()))
+		if err != nil {
+			t.Fatalf("ReadFile %s: %v", name.Name(), err)
+		}
+		snapshot[name.Name()] = string(data)
+	}
+	return snapshot
+}
+
+// A delete against an explicit revision removes exactly one entry and exactly
+// one payload; the surviving entries keep their order, and a neighbouring
+// payload is left untouched.
+func TestStore_DeleteTemplate_Success(t *testing.T) {
+	dir := newDeleteFixture(t)
+	store := NewStore(dir)
+
+	if err := store.DeleteTemplate("tpl-seven", "7"); err != nil {
+		t.Fatalf("DeleteTemplate: %v", err)
+	}
+
+	if got := readIndexEntryIDs(t, dir); !reflect.DeepEqual(got, []string{"tpl-legacy", "tpl-max"}) {
+		t.Errorf("index entries = %v, want [tpl-legacy tpl-max]", got)
+	}
+	if _, err := os.Stat(filepath.Join(dir, "seven.json")); !os.IsNotExist(err) {
+		t.Errorf("payload seven.json still present: %v", err)
+	}
+	neighbour, err := os.ReadFile(filepath.Join(dir, "legacy.json"))
+	if err != nil {
+		t.Fatalf("ReadFile legacy.json: %v", err)
+	}
+	if string(neighbour) != "payload of legacy.json" {
+		t.Errorf("neighbouring payload = %q, want it untouched", neighbour)
+	}
+
+	// The entry is gone, so a repeat delete is a not-found.
+	err = store.DeleteTemplate("tpl-seven", "7")
+	if !errors.Is(err, ErrNotFound) {
+		t.Errorf("repeat DeleteTemplate error = %v, want ErrNotFound", err)
+	}
+}
+
+// An entry written before the revision counter existed has the canonical token
+// "0", which must be enough to delete it.
+func TestStore_DeleteTemplate_LegacyRevisionZero(t *testing.T) {
+	dir := newDeleteFixture(t)
+	store := NewStore(dir)
+
+	if err := store.DeleteTemplate("tpl-legacy", "0"); err != nil {
+		t.Fatalf("DeleteTemplate legacy entry: %v", err)
+	}
+	if got := readIndexEntryIDs(t, dir); !reflect.DeepEqual(got, []string{"tpl-seven", "tpl-max"}) {
+		t.Errorf("index entries = %v, want [tpl-seven tpl-max]", got)
+	}
+}
+
+// math.MaxUint64 is an ordinary, valid revision for Delete.
+func TestStore_DeleteTemplate_MaxUint64Revision(t *testing.T) {
+	dir := newDeleteFixture(t)
+	store := NewStore(dir)
+
+	if err := store.DeleteTemplate("tpl-max", "18446744073709551615"); err != nil {
+		t.Fatalf("DeleteTemplate max revision: %v", err)
+	}
+	if got := readIndexEntryIDs(t, dir); !reflect.DeepEqual(got, []string{"tpl-legacy", "tpl-seven"}) {
+		t.Errorf("index entries = %v, want [tpl-legacy tpl-seven]", got)
+	}
+}
+
+// A revision that no longer matches the entry is a stale-revision refusal, and
+// it must not change a single byte in the library.
+func TestStore_DeleteTemplate_StaleRevisionMutatesNothing(t *testing.T) {
+	dir := newDeleteFixture(t)
+	store := NewStore(dir)
+	before := snapshotDir(t, dir)
+
+	err := store.DeleteTemplate("tpl-seven", "6")
+	if !errors.Is(err, ErrStaleRevision) {
+		t.Fatalf("DeleteTemplate error = %v, want ErrStaleRevision", err)
+	}
+	// A legacy entry must not accept a non-zero token either.
+	if err := store.DeleteTemplate("tpl-legacy", "1"); !errors.Is(err, ErrStaleRevision) {
+		t.Fatalf("legacy entry with revision \"1\": error = %v, want ErrStaleRevision", err)
+	}
+	if after := snapshotDir(t, dir); !reflect.DeepEqual(before, after) {
+		t.Error("a stale revision changed the library on disk")
+	}
+}
+
+// Non-canonical tokens are rejected before the first file is touched.
+func TestStore_DeleteTemplate_NonCanonicalRevisionRejected(t *testing.T) {
+	dir := newDeleteFixture(t)
+	store := NewStore(dir)
+	before := snapshotDir(t, dir)
+
+	for _, token := range []string{"", "01", "+1", "-1", " 1", "1 ", "1.0", "0x7", "seven", "18446744073709551616"} {
+		err := store.DeleteTemplate("tpl-seven", token)
+		if err == nil {
+			t.Fatalf("DeleteTemplate(%q) succeeded, want a canonical-token rejection", token)
+		}
+		if errors.Is(err, ErrStaleRevision) || errors.Is(err, ErrNotFound) {
+			t.Errorf("DeleteTemplate(%q) error = %v, want a canonical-token rejection", token, err)
+		}
+		if !strings.Contains(err.Error(), "canonical decimal revision token") {
+			t.Errorf("DeleteTemplate(%q) error = %v, want the canonical-token message", token, err)
+		}
+	}
+	if after := snapshotDir(t, dir); !reflect.DeepEqual(before, after) {
+		t.Error("a non-canonical revision changed the library on disk")
+	}
+}
+
+func TestStore_DeleteTemplate_RejectsNilStoreAndEmptyID(t *testing.T) {
+	var nilStore *Store
+	if err := nilStore.DeleteTemplate("tpl-seven", "7"); err == nil {
+		t.Error("nil store: expected an error, got nil")
+	}
+
+	store := NewStore(newDeleteFixture(t))
+	if err := store.DeleteTemplate("", "7"); err == nil || err.Error() != "templateID must not be empty" {
+		t.Errorf("empty templateID error = %v, want \"templateID must not be empty\"", err)
+	}
+}
+
+func TestStore_DeleteTemplate_UnknownTemplateID(t *testing.T) {
+	dir := newDeleteFixture(t)
+	store := NewStore(dir)
+	before := snapshotDir(t, dir)
+
+	if err := store.DeleteTemplate("tpl-unknown", "0"); !errors.Is(err, ErrNotFound) {
+		t.Fatalf("DeleteTemplate error = %v, want ErrNotFound", err)
+	}
+	if after := snapshotDir(t, dir); !reflect.DeepEqual(before, after) {
+		t.Error("an unknown templateID changed the library on disk")
+	}
+}
+
+// A payload the user already removed by hand does not block the entry removal:
+// the index is the authority, and it must not keep pointing at a missing file.
+func TestStore_DeleteTemplate_MissingPayloadStillRemovesEntry(t *testing.T) {
+	dir := newDeleteFixture(t)
+	if err := os.Remove(filepath.Join(dir, "seven.json")); err != nil {
+		t.Fatalf("Remove payload: %v", err)
+	}
+	store := NewStore(dir)
+
+	if err := store.DeleteTemplate("tpl-seven", "7"); err != nil {
+		t.Fatalf("DeleteTemplate with missing payload: %v", err)
+	}
+	if got := readIndexEntryIDs(t, dir); !reflect.DeepEqual(got, []string{"tpl-legacy", "tpl-max"}) {
+		t.Errorf("index entries = %v, want [tpl-legacy tpl-max]", got)
+	}
+}
+
+// The writer refuses to rewrite an index it cannot fully account for, even when
+// the defect sits on an entry other than the target.
+func TestStore_DeleteTemplate_FailClosedIndexValidation(t *testing.T) {
+	for name, spec := range map[string]struct {
+		index    string
+		wantText string
+	}{
+		"duplicate template ID": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-dup","name":"A","filename":"a.json"},
+			  {"id":"tpl-dup","name":"B","filename":"b.json"},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "duplicate template ID",
+		},
+		"shared filename": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-a","name":"A","filename":"shared.json"},
+			  {"id":"tpl-b","name":"B","filename":"shared.json"},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "shares filename",
+		},
+		"target filename shared with another entry": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-other","name":"O","filename":"t.json"},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "shares filename",
+		},
+		"empty filename": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-empty","name":"E","filename":""},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "empty filename",
+		},
+		"unsafe filename": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-trav","name":"X","filename":"../escape.json"},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "invalid filename",
+		},
+		"filename dot": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-dot","name":"Dot","filename":"."},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "invalid filename",
+		},
+		"filename dot-dot": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-dotdot","name":"DotDot","filename":".."},
+			  {"id":"tpl-target","name":"T","filename":"t.json"}
+			]}`,
+			wantText: "invalid filename",
+		},
+		"unsupported index version": {
+			index:    `{"version":99,"entries":[{"id":"tpl-target","name":"T","filename":"t.json"}]}`,
+			wantText: "unsupported index version",
+		},
+		"unknown top-level field": {
+			index:    `{"version":1,"unknownField":"val","entries":[{"id":"tpl-target","name":"T","filename":"t.json"}]}`,
+			wantText: "unknown field",
+		},
+		"unknown entry field": {
+			index: `{"version":1,"entries":[
+			  {"id":"tpl-target","name":"T","filename":"t.json","unknownField":"val"}
+			]}`,
+			wantText: "unknown field",
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			dir := t.TempDir()
+			if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(spec.index), 0644); err != nil {
+				t.Fatalf("WriteFile index: %v", err)
+			}
+			if err := os.WriteFile(filepath.Join(dir, "t.json"), []byte("target payload"), 0644); err != nil {
+				t.Fatalf("WriteFile payload: %v", err)
+			}
+			store := NewStore(dir)
+			before := snapshotDir(t, dir)
+
+			err := store.DeleteTemplate("tpl-target", "0")
+			if err == nil {
+				t.Fatal("DeleteTemplate succeeded on an invalid index")
+			}
+			if !strings.Contains(err.Error(), spec.wantText) {
+				t.Errorf("error = %v, want it to mention %q", err, spec.wantText)
+			}
+			if after := snapshotDir(t, dir); !reflect.DeepEqual(before, after) {
+				t.Error("an invalid index was partially rewritten")
+			}
+		})
 	}
 }

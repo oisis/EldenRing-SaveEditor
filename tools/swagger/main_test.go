@@ -1088,6 +1088,12 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasDelete := document.Paths["/api/v1/save-sessions/{saveSessionID}"]["delete"]; !hasDelete {
 		t.Fatal("openapi.json describes no DELETE for /api/v1/save-sessions/{saveSessionID}")
 	}
+	// The build-template path carries both the getter and DeleteBuildTemplate,
+	// so the map above can only state one of them.
+	buildTemplate := "/api/v1/build-templates/{templateID}"
+	if _, hasDelete := document.Paths[buildTemplate]["delete"]; !hasDelete {
+		t.Fatalf("openapi.json describes no DELETE for %s", buildTemplate)
+	}
 	// The favorite-presets slot path carries both PUT and DELETE operations.
 	favSlot := "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}"
 	if _, hasPut := document.Paths[favSlot]["put"]; !hasPut {
@@ -1344,6 +1350,8 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"SetFavoritePresetResult",
 		"DeleteFavoritePresetRequest",
 		"DeleteFavoritePresetResult",
+		"DeleteBuildTemplateRequest",
+		"DeleteBuildTemplateResult",
 	} {
 		if _, exists := document.Comps.Schemas[name]; !exists {
 			t.Fatalf("openapi.json is missing the %s schema", name)
@@ -7243,6 +7251,120 @@ func TestGetBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
 	request := httptest.NewRequest(http.MethodGet, "/api/v1/build-templates/tpl-123", nil)
 	handler.ServeHTTP(recorder, request)
 
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
+	}
+}
+
+// newDeleteBuildTemplateHandler builds a loopback explorer over a one-entry
+// library at revision 7 and returns the handler plus the store directory.
+func newDeleteBuildTemplateHandler(t *testing.T) (http.Handler, string) {
+	t.Helper()
+	dir := t.TempDir()
+	indexJSON := `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-123",
+      "name": "PvP Meta",
+      "filename": "pvp.json",
+      "createdAt": "2026-08-17T12:00:00Z",
+      "updatedAt": "2026-08-17T12:00:00Z",
+      "revision": 7
+    }
+  ]
+}`
+	if err := os.WriteFile(filepath.Join(dir, buildtemplates.IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "pvp.json"), []byte("payload"), 0644); err != nil {
+		t.Fatalf("WriteFile payload: %v", err)
+	}
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t), testApplicationVersion, saveengine.New(), buildtemplates.NewStore(dir),
+	)
+	return handler, dir
+}
+
+func deleteBuildTemplate(t *testing.T, handler http.Handler, templateID string, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	target := "/api/v1/build-templates/" + templateID
+	var request *http.Request
+	if body == "" {
+		request = httptest.NewRequest(http.MethodDelete, target, nil)
+	} else {
+		request = httptest.NewRequest(http.MethodDelete, target, bytes.NewReader([]byte(body)))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+	return recorder
+}
+
+func TestDeleteBuildTemplateRoute_Success(t *testing.T) {
+	handler, dir := newDeleteBuildTemplateHandler(t)
+
+	recorder := deleteBuildTemplate(t, handler, "tpl-123", `{"templateRevision":"7"}`)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var result templates.DeleteBuildTemplateResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if result.TemplateID != "tpl-123" {
+		t.Errorf("templateID = %q, want %q", result.TemplateID, "tpl-123")
+	}
+	if _, err := os.Stat(filepath.Join(dir, "pvp.json")); !os.IsNotExist(err) {
+		t.Errorf("payload still present: %v", err)
+	}
+}
+
+func TestDeleteBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
+	for name, body := range map[string]string{
+		"no body":                 "",
+		"no templateRevision":     `{}`,
+		"unknown field":           `{"templateRevision":"7","force":true}`,
+		"non-canonical revision":  `{"templateRevision":"07"}`,
+		"revision as JSON number": `{"templateRevision":7}`,
+		"trailing JSON document":  `{"templateRevision":"7"}{"extra":1}`,
+	} {
+		t.Run(name, func(t *testing.T) {
+			handler, _ := newDeleteBuildTemplateHandler(t)
+			recorder := deleteBuildTemplate(t, handler, "tpl-123", body)
+			if recorder.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestDeleteBuildTemplateRoute_StaleRevisionReturns409(t *testing.T) {
+	handler, dir := newDeleteBuildTemplateHandler(t)
+
+	recorder := deleteBuildTemplate(t, handler, "tpl-123", `{"templateRevision":"6"}`)
+	if recorder.Code != http.StatusConflict {
+		t.Fatalf("status = %d, want 409 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	if _, err := os.Stat(filepath.Join(dir, "pvp.json")); err != nil {
+		t.Errorf("payload was removed on a stale revision: %v", err)
+	}
+}
+
+func TestDeleteBuildTemplateRoute_NotFound(t *testing.T) {
+	handler, _ := newDeleteBuildTemplateHandler(t)
+
+	recorder := deleteBuildTemplate(t, handler, "tpl-nonexistent", `{"templateRevision":"0"}`)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestDeleteBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
+	recorder := deleteBuildTemplate(t, handler, "tpl-123", `{"templateRevision":"7"}`)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
 	}

@@ -524,6 +524,75 @@
             }
           }
         }
+      },
+      "delete": {
+        "operationId": "deleteBuildTemplate",
+        "tags": ["Templates"],
+        "summary": "DeleteBuildTemplate",
+        "description": "Deletes one Build Template from the local templates library. The caller must echo back the templateRevision it last read for the template. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "name": "templateID",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the build template",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteBuildTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The template was deleted from the library",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteBuildTemplateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body, non-canonical templateRevision, or corrupt index data",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The supplied templateRevision no longer matches the library entry; nothing was deleted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/save-sessions": {
@@ -9263,6 +9332,28 @@
           }
         },
         "required": ["template", "templateRevision"]
+      },
+      "DeleteBuildTemplateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateRevision": {
+            "type": "string",
+            "description": "The templateRevision the caller last read for this template, echoed back unchanged. It must be the canonical decimal token; \"0\" is the token of an entry written before the revision counter existed."
+          }
+        },
+        "required": ["templateRevision"]
+      },
+      "DeleteBuildTemplateResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateID": {
+            "type": "string",
+            "description": "Identifier of the template that was removed from the library"
+          }
+        },
+        "required": ["templateID"]
       },
       "BuildTemplate": {
         "type": "object",
