@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 )
 
@@ -42,6 +43,7 @@ type TemplateMetadata struct {
 	InventoryItems   int      `json:"inventoryItems"`
 	StorageItems     int      `json:"storageItems"`
 	Warnings         int      `json:"warnings"`
+	TemplateRevision string   `json:"templateRevision"`
 }
 
 // indexEntry is the on-disk JSON structure of an entry in _index.json.
@@ -58,12 +60,20 @@ type indexEntry struct {
 	Warnings         int      `json:"warnings"`
 	Version          int      `json:"version,omitempty"`
 	SelectedSections []string `json:"selectedSections,omitempty"`
+	Revision         uint64   `json:"revision,omitempty"`
 }
 
 // indexFile is the on-disk JSON structure of _index.json.
 type indexFile struct {
 	Version int          `json:"version"`
 	Entries []indexEntry `json:"entries"`
+}
+
+// formatRevision renders the persistent per-template revision counter as the
+// canonical decimal templateRevision token. An index entry written before the
+// counter existed carries no revision field and therefore reports "0".
+func formatRevision(revision uint64) string {
+	return strconv.FormatUint(revision, 10)
 }
 
 // Store provides read-only access to a local Build Templates library.
@@ -142,6 +152,7 @@ func (s *Store) ListTemplates() ([]TemplateMetadata, error) {
 			InventoryItems:   e.InventoryItems,
 			StorageItems:     e.StorageItems,
 			Warnings:         e.Warnings,
+			TemplateRevision: formatRevision(e.Revision),
 		})
 	}
 
@@ -157,29 +168,29 @@ func (s *Store) ListTemplates() ([]TemplateMetadata, error) {
 
 // GetTemplate loads, decodes, and validates a build template by templateID.
 // It resolves the template only via _index.json and rejects symlinks or paths outside the store.
-func (s *Store) GetTemplate(templateID string) (*BuildTemplate, error) {
+func (s *Store) GetTemplate(templateID string) (*BuildTemplate, string, error) {
 	if s == nil {
-		return nil, errors.New("store is nil")
+		return nil, "", errors.New("store is nil")
 	}
 	if templateID == "" {
-		return nil, errors.New("templateID must not be empty")
+		return nil, "", errors.New("templateID must not be empty")
 	}
 
 	indexPath := filepath.Join(s.dir, IndexFileName)
 	data, err := os.ReadFile(indexPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("template %q: %w", templateID, ErrNotFound)
+			return nil, "", fmt.Errorf("template %q: %w", templateID, ErrNotFound)
 		}
-		return nil, fmt.Errorf("read index: %w", withoutPath(err))
+		return nil, "", fmt.Errorf("read index: %w", withoutPath(err))
 	}
 
 	var idx indexFile
 	if err := json.Unmarshal(data, &idx); err != nil {
-		return nil, fmt.Errorf("unmarshal index: %w", err)
+		return nil, "", fmt.Errorf("unmarshal index: %w", err)
 	}
 	if idx.Version != IndexVersion {
-		return nil, fmt.Errorf("unsupported index version %d; expected %d", idx.Version, IndexVersion)
+		return nil, "", fmt.Errorf("unsupported index version %d; expected %d", idx.Version, IndexVersion)
 	}
 
 	seenIDs := make(map[string]bool, len(idx.Entries))
@@ -187,7 +198,7 @@ func (s *Store) GetTemplate(templateID string) (*BuildTemplate, error) {
 	for i := range idx.Entries {
 		e := &idx.Entries[i]
 		if seenIDs[e.ID] {
-			return nil, fmt.Errorf("index contains duplicate template ID %q", e.ID)
+			return nil, "", fmt.Errorf("index contains duplicate template ID %q", e.ID)
 		}
 		seenIDs[e.ID] = true
 		if e.ID == templateID {
@@ -195,15 +206,15 @@ func (s *Store) GetTemplate(templateID string) (*BuildTemplate, error) {
 		}
 	}
 	if matched == nil {
-		return nil, fmt.Errorf("template %q: %w", templateID, ErrNotFound)
+		return nil, "", fmt.Errorf("template %q: %w", templateID, ErrNotFound)
 	}
 
 	if matched.Filename == "" {
-		return nil, fmt.Errorf("template %q index entry has empty filename", templateID)
+		return nil, "", fmt.Errorf("template %q index entry has empty filename", templateID)
 	}
 	if filepath.IsAbs(matched.Filename) || filepath.Clean(matched.Filename) != matched.Filename ||
 		strings.ContainsAny(matched.Filename, `/\`) {
-		return nil, fmt.Errorf("template %q index entry has invalid filename %q", templateID, matched.Filename)
+		return nil, "", fmt.Errorf("template %q index entry has invalid filename %q", templateID, matched.Filename)
 	}
 
 	targetPath := filepath.Join(s.dir, matched.Filename)
@@ -211,31 +222,31 @@ func (s *Store) GetTemplate(templateID string) (*BuildTemplate, error) {
 	evalTarget, err := filepath.EvalSymlinks(targetPath)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("template payload not found for %q: %w", templateID, ErrNotFound)
+			return nil, "", fmt.Errorf("template payload not found for %q: %w", templateID, ErrNotFound)
 		}
-		return nil, fmt.Errorf("resolve payload for template %q: %w", templateID, withoutPath(err))
+		return nil, "", fmt.Errorf("resolve payload for template %q: %w", templateID, withoutPath(err))
 	}
 	evalDir, err := filepath.EvalSymlinks(s.dir)
 	if err != nil {
-		return nil, fmt.Errorf("resolve template store: %w", withoutPath(err))
+		return nil, "", fmt.Errorf("resolve template store: %w", withoutPath(err))
 	}
 	rel, err := filepath.Rel(evalDir, evalTarget)
 	if err != nil || rel == ".." || strings.HasPrefix(rel, ".."+string(os.PathSeparator)) || filepath.IsAbs(rel) {
-		return nil, fmt.Errorf("template %q target escapes store directory", templateID)
+		return nil, "", fmt.Errorf("template %q target escapes store directory", templateID)
 	}
 
 	payload, err := os.ReadFile(targetPath)
 	if err != nil {
-		return nil, fmt.Errorf("read template payload for %q: %w", templateID, withoutPath(err))
+		return nil, "", fmt.Errorf("read template payload for %q: %w", templateID, withoutPath(err))
 	}
 
 	tpl, err := DecodeTemplate(payload)
 	if err != nil {
-		return nil, fmt.Errorf("template %q: %w", templateID, err)
+		return nil, "", fmt.Errorf("template %q: %w", templateID, err)
 	}
 
 	if matched.Version != 0 && tpl.Version != matched.Version {
-		return nil, fmt.Errorf("template %q schema version mismatch: index=%d payload=%d", templateID, matched.Version, tpl.Version)
+		return nil, "", fmt.Errorf("template %q schema version mismatch: index=%d payload=%d", templateID, matched.Version, tpl.Version)
 	}
 	payloadName := ""
 	payloadDescription := ""
@@ -246,8 +257,8 @@ func (s *Store) GetTemplate(templateID string) (*BuildTemplate, error) {
 		payloadTags = tpl.Metadata.Tags
 	}
 	if matched.Name != payloadName || matched.Description != payloadDescription || !slices.Equal(matched.Tags, payloadTags) {
-		return nil, fmt.Errorf("template %q metadata mismatch with its index entry", templateID)
+		return nil, "", fmt.Errorf("template %q metadata mismatch with its index entry", templateID)
 	}
 
-	return tpl, nil
+	return tpl, formatRevision(matched.Revision), nil
 }

@@ -267,3 +267,40 @@ func TestGetBuildTemplates_PropagatesStoreErrors(t *testing.T) {
 		t.Fatal("expected error for corrupted index file, got nil")
 	}
 }
+
+func TestGetBuildTemplates_ExposesTemplateRevision(t *testing.T) {
+	store := newTestStoreWithIndex(t, `{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-rev",
+      "name": "Revised",
+      "filename": "rev.json",
+      "createdAt": "2026-08-17T10:00:00Z",
+      "updatedAt": "2026-08-17T11:00:00Z",
+      "revision": 7
+    },
+    {
+      "id": "tpl-legacy",
+      "name": "Legacy",
+      "filename": "legacy.json",
+      "createdAt": "2026-08-17T09:00:00Z",
+      "updatedAt": "2026-08-17T10:00:00Z"
+    }
+  ]
+}`)
+
+	result, err := templates.GetBuildTemplates(store, "", nil, 0, 0)
+	if err != nil {
+		t.Fatalf("GetBuildTemplates: %v", err)
+	}
+	if len(result.Templates) != 2 {
+		t.Fatalf("expected 2 templates, got %d", len(result.Templates))
+	}
+	if result.Templates[0].TemplateRevision != "7" {
+		t.Errorf("tpl-rev templateRevision = %q, want \"7\"", result.Templates[0].TemplateRevision)
+	}
+	if result.Templates[1].TemplateRevision != "0" {
+		t.Errorf("tpl-legacy templateRevision = %q, want \"0\"", result.Templates[1].TemplateRevision)
+	}
+}

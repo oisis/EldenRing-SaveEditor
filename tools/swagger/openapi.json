@@ -494,11 +494,11 @@
         ],
         "responses": {
           "200": {
-            "description": "The complete portable build template document",
+            "description": "The complete portable build template document with the library generation token",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BuildTemplate"
+                  "$ref": "#/components/schemas/GetBuildTemplateResult"
                 }
               }
             }
@@ -9209,6 +9209,10 @@
           "warnings": {
             "type": "integer",
             "description": "Count of warnings associated with this template"
+          },
+          "templateRevision": {
+            "type": "string",
+            "description": "Opaque generation token of the library entry, the canonical decimal form of the persistent per-template revision counter. An entry written before the counter existed reports \"0\"."
           }
         },
         "required": [
@@ -9218,7 +9222,8 @@
           "updatedAt",
           "inventoryItems",
           "storageItems",
-          "warnings"
+          "warnings",
+          "templateRevision"
         ]
       },
       "GetBuildTemplatesResult": {
@@ -9245,6 +9250,19 @@
           }
         },
         "required": ["templates", "total", "page", "pageSize"]
+      },
+      "GetBuildTemplateResult": {
+        "type": "object",
+        "properties": {
+          "template": {
+            "$ref": "#/components/schemas/BuildTemplate"
+          },
+          "templateRevision": {
+            "type": "string",
+            "description": "Opaque generation token of the library entry, the canonical decimal form of the persistent per-template revision counter. It is not part of the portable template document. An entry written before the counter existed reports \"0\"."
+          }
+        },
+        "required": ["template", "templateRevision"]
       },
       "BuildTemplate": {
         "type": "object",

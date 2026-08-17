@@ -27,25 +27,36 @@ func TestGetBuildTemplateDefinition(t *testing.T) {
 	}
 }
 
+// Every error path returns the zero result so no caller can read a template or
+// a revision token out of a failed lookup.
+func assertZeroGetBuildTemplateResult(t *testing.T, result templates.GetBuildTemplateResult) {
+	t.Helper()
+	if result.Template != nil || result.TemplateRevision != "" {
+		t.Errorf("result = %+v, want the zero GetBuildTemplateResult", result)
+	}
+}
+
 func TestGetBuildTemplate_NilStore(t *testing.T) {
-	_, err := templates.GetBuildTemplate(nil, "tpl-1")
+	result, err := templates.GetBuildTemplate(nil, "tpl-1")
 	if err == nil {
 		t.Fatal("expected error for nil store, got nil")
 	}
 	if err.Error() != "templates store is not available" {
 		t.Errorf("error = %q, want %q", err.Error(), "templates store is not available")
 	}
+	assertZeroGetBuildTemplateResult(t, result)
 }
 
 func TestGetBuildTemplate_EmptyTemplateID(t *testing.T) {
 	store := buildtemplates.NewStore(t.TempDir())
-	_, err := templates.GetBuildTemplate(store, "")
+	result, err := templates.GetBuildTemplate(store, "")
 	if err == nil {
 		t.Fatal("expected error for empty templateID, got nil")
 	}
 	if err.Error() != "templateID must not be empty" {
 		t.Errorf("error = %q, want %q", err.Error(), "templateID must not be empty")
 	}
+	assertZeroGetBuildTemplateResult(t, result)
 }
 
 func TestGetBuildTemplate_Success(t *testing.T) {
@@ -95,9 +106,13 @@ func TestGetBuildTemplate_Success(t *testing.T) {
 	}
 
 	store := buildtemplates.NewStore(dir)
-	tpl, err := templates.GetBuildTemplate(store, "tpl-test")
+	result, err := templates.GetBuildTemplate(store, "tpl-test")
 	if err != nil {
 		t.Fatalf("GetBuildTemplate failed: %v", err)
+	}
+	tpl := result.Template
+	if tpl == nil {
+		t.Fatal("result.Template is nil")
 	}
 	if tpl.Version != 2 {
 		t.Errorf("tpl.Version = %d, want 2", tpl.Version)
@@ -105,17 +120,22 @@ func TestGetBuildTemplate_Success(t *testing.T) {
 	if tpl.Sections.Items == nil || len(tpl.Sections.Items.Entries) != 1 {
 		t.Fatalf("unexpected tpl items: %+v", tpl.Sections.Items)
 	}
+	// The index entry predates the persistent revision counter.
+	if result.TemplateRevision != "0" {
+		t.Errorf("result.TemplateRevision = %q, want \"0\"", result.TemplateRevision)
+	}
 }
 
 func TestGetBuildTemplate_NotFound(t *testing.T) {
 	dir := t.TempDir()
 	store := buildtemplates.NewStore(dir)
 
-	_, err := templates.GetBuildTemplate(store, "tpl-nonexistent")
+	result, err := templates.GetBuildTemplate(store, "tpl-nonexistent")
 	if err == nil {
 		t.Fatal("expected error for non-existent template, got nil")
 	}
 	if !errors.Is(err, buildtemplates.ErrNotFound) {
 		t.Fatalf("expected ErrTemplateNotFound, got: %v", err)
 	}
+	assertZeroGetBuildTemplateResult(t, result)
 }

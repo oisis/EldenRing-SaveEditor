@@ -3,6 +3,7 @@ package buildtemplates
 import (
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -317,21 +318,28 @@ func TestStore_GetTemplate_Success(t *testing.T) {
 	store := NewStore(dir)
 
 	// Retrieve v1
-	tpl1, err := store.GetTemplate("tpl-v1")
+	tpl1, revision1, err := store.GetTemplate("tpl-v1")
 	if err != nil {
 		t.Fatalf("GetTemplate(tpl-v1) failed: %v", err)
 	}
 	if tpl1.Version != 1 || tpl1.Sections.InventoryWorkspace == nil {
 		t.Fatalf("unexpected tpl1: %+v", tpl1)
 	}
+	// Legacy index entries carry no revision field.
+	if revision1 != "0" {
+		t.Errorf("GetTemplate(tpl-v1) revision = %q, want \"0\"", revision1)
+	}
 
 	// Retrieve v2
-	tpl2, err := store.GetTemplate("tpl-v2")
+	tpl2, revision2, err := store.GetTemplate("tpl-v2")
 	if err != nil {
 		t.Fatalf("GetTemplate(tpl-v2) failed: %v", err)
 	}
 	if tpl2.Version != 2 || tpl2.Sections.Items == nil {
 		t.Fatalf("unexpected tpl2: %+v", tpl2)
+	}
+	if revision2 != "0" {
+		t.Errorf("GetTemplate(tpl-v2) revision = %q, want \"0\"", revision2)
 	}
 }
 
@@ -340,7 +348,7 @@ func TestStore_GetTemplate_NotFoundErrors(t *testing.T) {
 	store := NewStore(dir)
 
 	// Missing index -> ErrNotFound
-	_, err := store.GetTemplate("tpl-1")
+	_, _, err := store.GetTemplate("tpl-1")
 	if err == nil || !errors.Is(err, ErrNotFound) {
 		t.Fatalf("expected ErrNotFound for missing index, got: %v", err)
 	}
@@ -362,13 +370,13 @@ func TestStore_GetTemplate_NotFoundErrors(t *testing.T) {
 	}
 
 	// Unknown ID -> ErrNotFound
-	_, err = store.GetTemplate("tpl-unknown")
+	_, _, err = store.GetTemplate("tpl-unknown")
 	if err == nil || !errors.Is(err, ErrNotFound) {
 		t.Fatalf("expected ErrNotFound for unknown ID, got: %v", err)
 	}
 
 	// Missing target file -> ErrNotFound
-	_, err = store.GetTemplate("tpl-1")
+	_, _, err = store.GetTemplate("tpl-1")
 	if err == nil || !errors.Is(err, ErrNotFound) {
 		t.Fatalf("expected ErrNotFound for missing target payload, got: %v", err)
 	}
@@ -379,7 +387,7 @@ func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
 	store := NewStore(dir)
 
 	// Empty templateID
-	_, err := store.GetTemplate("")
+	_, _, err := store.GetTemplate("")
 	if err == nil {
 		t.Fatal("expected error for empty templateID, got nil")
 	}
@@ -395,7 +403,7 @@ func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(dupIndex), 0644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	_, err = store.GetTemplate("tpl-dup")
+	_, _, err = store.GetTemplate("tpl-dup")
 	if err == nil || !strings.Contains(err.Error(), "duplicate template ID") {
 		t.Fatalf("expected duplicate ID error, got: %v", err)
 	}
@@ -410,7 +418,7 @@ func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(emptyFilenameIndex), 0644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	_, err = store.GetTemplate("tpl-empty")
+	_, _, err = store.GetTemplate("tpl-empty")
 	if err == nil || !strings.Contains(err.Error(), "empty filename") {
 		t.Fatalf("expected empty filename error, got: %v", err)
 	}
@@ -425,7 +433,7 @@ func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(traversalIndex), 0644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	_, err = store.GetTemplate("tpl-trav")
+	_, _, err = store.GetTemplate("tpl-trav")
 	if err == nil || !strings.Contains(err.Error(), "invalid filename") {
 		t.Fatalf("expected invalid filename error, got: %v", err)
 	}
@@ -455,7 +463,7 @@ func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "mismatch.json"), []byte(mismatchPayload), 0644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	_, err = store.GetTemplate("tpl-mismatch")
+	_, _, err = store.GetTemplate("tpl-mismatch")
 	if err == nil || !strings.Contains(err.Error(), "version mismatch") {
 		t.Fatalf("expected version mismatch error, got: %v", err)
 	}
@@ -485,7 +493,7 @@ func TestStore_GetTemplate_FailClosedIndexAndPayload(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "name-mismatch.json"), []byte(nameMismatchPayload), 0644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
 	}
-	_, err = store.GetTemplate("tpl-name-mismatch")
+	_, _, err = store.GetTemplate("tpl-name-mismatch")
 	if err == nil || !strings.Contains(err.Error(), "metadata mismatch") {
 		t.Fatalf("expected metadata mismatch error, got: %v", err)
 	}
@@ -534,8 +542,99 @@ func TestStore_GetTemplate_SymlinkEscapeRejected(t *testing.T) {
 	}
 
 	store := NewStore(storeDir)
-	_, err := store.GetTemplate("tpl-escape")
+	_, _, err := store.GetTemplate("tpl-escape")
 	if err == nil || !strings.Contains(err.Error(), "escapes store directory") {
 		t.Fatalf("expected symlink escape error, got: %v", err)
+	}
+}
+
+// The revision counter is a persistent per-template value in _index.json that
+// both getters must surface as the same canonical decimal templateRevision
+// token. An entry written before the counter existed reports "0".
+func TestStore_TemplateRevisionToken(t *testing.T) {
+	dir := t.TempDir()
+	indexJSON := fmt.Sprintf(`{
+  "version": 1,
+  "entries": [
+    {
+      "id": "tpl-legacy",
+      "name": "Legacy",
+      "filename": "legacy.json",
+      "createdAt": "2026-08-17T10:00:00Z",
+      "updatedAt": "2026-08-17T10:00:00Z"
+    },
+    {
+      "id": "tpl-seven",
+      "name": "Seven",
+      "filename": "seven.json",
+      "createdAt": "2026-08-17T11:00:00Z",
+      "updatedAt": "2026-08-17T11:00:00Z",
+      "revision": 7
+    },
+    {
+      "id": "tpl-max",
+      "name": "Max",
+      "filename": "max.json",
+      "createdAt": "2026-08-17T12:00:00Z",
+      "updatedAt": "2026-08-17T12:00:00Z",
+      "revision": %d
+    }
+  ]
+}`, uint64(math.MaxUint64))
+	if err := os.WriteFile(filepath.Join(dir, IndexFileName), []byte(indexJSON), 0644); err != nil {
+		t.Fatalf("WriteFile index: %v", err)
+	}
+
+	payload := `{
+  "schema": "saveforge.build-template",
+  "version": 1,
+  "createdAt": "2026-08-17T10:00:00Z",
+  "metadata": {"name": %q},
+  "sections": {
+    "inventory.workspace": {
+      "inventoryItems": [{"baseItemID": 1, "quantity": 1, "container": "inventory", "position": 0}],
+      "storageItems": []
+    }
+  }
+}`
+	for filename, name := range map[string]string{
+		"legacy.json": "Legacy",
+		"seven.json":  "Seven",
+		"max.json":    "Max",
+	} {
+		if err := os.WriteFile(filepath.Join(dir, filename), []byte(fmt.Sprintf(payload, name)), 0644); err != nil {
+			t.Fatalf("WriteFile %s: %v", filename, err)
+		}
+	}
+
+	store := NewStore(dir)
+	entries, err := store.ListTemplates()
+	if err != nil {
+		t.Fatalf("ListTemplates: %v", err)
+	}
+	listed := make(map[string]string, len(entries))
+	for _, entry := range entries {
+		listed[entry.TemplateID] = entry.TemplateRevision
+	}
+
+	for templateID, want := range map[string]string{
+		"tpl-legacy": "0",
+		"tpl-seven":  "7",
+		"tpl-max":    "18446744073709551615",
+	} {
+		if listed[templateID] != want {
+			t.Errorf("ListTemplates %s templateRevision = %q, want %q", templateID, listed[templateID], want)
+		}
+		_, revision, err := store.GetTemplate(templateID)
+		if err != nil {
+			t.Fatalf("GetTemplate(%s): %v", templateID, err)
+		}
+		if revision != want {
+			t.Errorf("GetTemplate %s templateRevision = %q, want %q", templateID, revision, want)
+		}
+		if revision != listed[templateID] {
+			t.Errorf("%s templateRevision differs: GetTemplate %q, ListTemplates %q",
+				templateID, revision, listed[templateID])
+		}
 	}
 }

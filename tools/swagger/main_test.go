@@ -32,6 +32,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/network"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/savesession"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/world"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
 	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
@@ -7158,12 +7159,20 @@ func TestGetBuildTemplateRoute_Success(t *testing.T) {
 	}
 	assertJSONContentType(t, recorder)
 
-	var tpl buildtemplates.BuildTemplate
-	if err := json.Unmarshal(recorder.Body.Bytes(), &tpl); err != nil {
+	var result templates.GetBuildTemplateResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
 		t.Fatalf("unmarshal response: %v", err)
+	}
+	tpl := result.Template
+	if tpl == nil {
+		t.Fatal("response carries no template")
 	}
 	if tpl.Version != 2 || tpl.Sections.Items == nil || len(tpl.Sections.Items.Entries) != 1 {
 		t.Fatalf("unexpected response payload: %+v", tpl)
+	}
+	// The index entry predates the persistent revision counter.
+	if result.TemplateRevision != "0" {
+		t.Errorf("templateRevision = %q, want \"0\"", result.TemplateRevision)
 	}
 }
 

@@ -5,7 +5,8 @@
 `GetBuildTemplate` returns one complete Build Template from the local templates
 library by its unique `templateID`. It resolves the template file exclusively
 through `_index.json`, decodes the payload fail-closed, and enforces all
-structural schema invariants before returning the portable template document.
+structural schema invariants before returning the portable template document
+together with the library generation token `templateRevision`.
 
 The getter accepts no `saveSessionID` and no `characterID`, and does not access
 `SaveEngine` or `GameCatalog`. It is strictly read-only: it never creates the
@@ -31,7 +32,7 @@ modifies files.
 func GetBuildTemplate(
 	store *buildtemplates.Store,
 	templateID string,
-) (*buildtemplates.BuildTemplate, error)
+) (GetBuildTemplateResult, error)
 ```
 
 | Parameter | Type | Meaning |
@@ -47,7 +48,47 @@ func GetBuildTemplate(
 
 ## Result
 
-The endpoint returns the complete portable `BuildTemplate` document:
+The endpoint returns a wrapper carrying the complete portable `BuildTemplate`
+document and the library generation token of the template:
+
+```go
+type GetBuildTemplateResult struct {
+	Template         *BuildTemplate `json:"template"`
+	TemplateRevision string         `json:"templateRevision"`
+}
+```
+
+| Field | Type | Meaning |
+|---|---|---|
+| `template` | `*BuildTemplate` | The complete decoded and validated portable template document described below. |
+| `templateRevision` | `string` | Opaque generation token of the template in the local library. |
+
+Every error path returns the zero `GetBuildTemplateResult` (`template` is `nil`
+and `templateRevision` is empty) together with the error.
+
+### `templateRevision`
+
+- It is an **opaque generation token of the template**, not a semantic version,
+  not a timestamp and not a content hash. Callers must treat it as a string to
+  be echoed back, never parsed, compared as a number, or ordered.
+- On the wire it is always a JSON string, never a JSON number.
+- It is the canonical decimal form of a persistent, monotonic per-template
+  counter stored in the template's `_index.json` entry.
+- One generation is the state committed by the Store writers, covering both the
+  `_index.json` entry and the payload file it points to. A future update
+  increments the counter for a metadata change and for a payload content change
+  alike. Because the token is not a content hash, it does not detect edits made
+  to the library outside the Store.
+- An entry written before the counter existed carries no revision field and
+  therefore reports `"0"`. `"0"` is a valid token, not a missing value.
+- **The revision is not part of the portable template document.** It never
+  appears in `BuildTemplate`, in `TemplateDocMetadata`, or in the payload file
+  on disk. It belongs to the local library, so a template exported from one
+  library and imported into another does not carry its revision with it.
+
+### `template`
+
+The `template` field carries the complete portable `BuildTemplate` document:
 
 ```go
 type BuildTemplate struct {

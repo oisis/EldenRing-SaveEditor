@@ -79,6 +79,7 @@ type BuildTemplateEntry struct {
 	InventoryItems   int      `json:"inventoryItems"`
 	StorageItems     int      `json:"storageItems"`
 	Warnings         int      `json:"warnings"`
+	TemplateRevision string   `json:"templateRevision"`
 }
 
 type GetBuildTemplatesResult struct {
@@ -103,6 +104,7 @@ type GetBuildTemplatesResult struct {
 | `templates[].inventoryItems` | `int` | Count of inventory items in the template. |
 | `templates[].storageItems` | `int` | Count of storage items in the template. |
 | `templates[].warnings` | `int` | Count of warnings recorded for the template. |
+| `templates[].templateRevision` | `string` | Opaque generation token of the library entry, always present. It is the canonical decimal form of the persistent per-template revision counter stored in `_index.json`, and it is the same token [`GetBuildTemplate`](get_build_template.md) returns for that `templateID`. An entry written before the counter existed carries no revision field and reports `"0"`, which is a valid token and not a missing value. The revision is not part of the portable template document. |
 | `total` | `int` | Total number of templates matching the search and tag filters before paging. |
 | `page` | `int` | The effective 1-based page number. |
 | `pageSize` | `int` | The effective page size. |
