@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [1.6.9] - 2026-08-18
+
+### fix(storage): advance both counters when adding to a populated storage
+
+Adding items to a Storage that already held records left two save counters
+inconsistent with what the game writes, which could make the save fail to load
+after enough additions. `NextEquipIndex` stayed frozen at whatever value the
+first batch had reached, and `NextAcquisitionSortId` was computed with the
+Inventory rule instead of the Storage one.
+
+Both now follow the confirmed native behaviour: `NextEquipIndex` advances by one
+per deposited record, and `NextAcquisitionSortId` holds the next free
+acquisition bucket. Storage records themselves were always written correctly;
+only the two header counters were wrong.
+
+The defect only affected additions made after the first batch of a freshly
+loaded save, which is why it grew with continued use and never appeared when
+Storage started empty. Adding through the Sort Order tab was unaffected, because
+that tab does not write to Storage.
+
+### fix(db): Deathbed Dress is not cut content
+
+Deathbed Dress is obtainable in the base game at the Lower Capital Church site
+of grace in Leyndell, so its cut-content and ban-risk flags were wrong. It is
+now available in Safe Mode without warnings. Deathbed Smalls keeps both flags:
+that item is genuinely unobtainable in-game.
+
 ## [1.6.8] - 2026-07-31
 
 ### fix(inventory): preserve native low acquisition indices
