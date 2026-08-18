@@ -147,19 +147,27 @@ func TestAddItemsToSlotBatch_EmptyStorageSixItemBatchMatchesT330(t *testing.T) {
 	}
 }
 
-// TestAddItemsToSlotBatch_SecondBatchOnPopulatedStorageDoesNotAdvanceNextEquipIndex
-// guards the review fix for this file's original T330 batch test: T330 only
-// confirms the +1-per-record NextEquipIndex rule for the ONE batch that started
-// with a genuinely empty Storage. A second, independent AddItemsToSlotBatch call
-// against that now-populated Storage must fall back to the pre-existing policy —
-// NextEquipIndex untouched — because storageBatchStartedEmpty is decided fresh
-// per AddItemsToSlotBatch call from Storage's state at that call's start, never
-// inferred from the mutated persisted counters inside addToInventory. Plain
-// AddItemsToSlotBatch never gains app-session semantics — only the explicit
-// AddItemsToSlotBatchForStorageSession override can (see
-// TestAddItemsToSlotBatchForStorageSession_SixIndependentCallsOnEmptyStorageMatchT350
-// below), and this test deliberately does not use it.
-func TestAddItemsToSlotBatch_SecondBatchOnPopulatedStorageDoesNotAdvanceNextEquipIndex(t *testing.T) {
+// TestAddItemsToSlotBatch_SecondBatchOnPopulatedStorageAdvancesBothCounters
+// covers a second, independent AddItemsToSlotBatch call against a Storage that
+// is already populated — the case a user hits on every add after the first,
+// because storageBatchStartedEmpty is decided fresh per call from Storage's
+// state at that call's start.
+//
+// Both counters advance exactly as they do in a first batch. NextEquipIndex
+// takes +1 per record; NextAcquisitionSortId takes the BUCKET of the new
+// record's Index, because Storage stores Index = 2*bucket and the game keys
+// Order of Acquisition by Index>>1.
+//
+// This test previously asserted the opposite — NextEquipIndex untouched and
+// NextAcquisitionSortId as a raw high-water mark — on the grounds that lab T330
+// only proved the +1 rule for a batch that started from an empty Storage. That
+// caution turned out to be wrong: three untouched slots of ER0000-out.sl2
+// (250 records -> STOequip 377, 88 -> 215, 6 -> 133, i.e. 127 + N) and their
+// bucket values (max Index 1086 -> 544, 1572 -> 787, 198 -> 100) show the rules
+// hold regardless of whether the container was empty when the save was loaded.
+// The raw high-water rule the old assertion encoded is the INVENTORY rule
+// (max(Index) + 1), which had been applied to Storage by mistake.
+func TestAddItemsToSlotBatch_SecondBatchOnPopulatedStorageAdvancesBothCounters(t *testing.T) {
 	slot := storageEmptyInitFixture(t)
 
 	if err := AddItemsToSlotBatch(slot, []ItemToAdd{{ItemID: testTrickMirrorID, StorageQty: 1}}); err != nil {
@@ -198,26 +206,24 @@ func TestAddItemsToSlotBatch_SecondBatchOnPopulatedStorageDoesNotAdvanceNextEqui
 		t.Errorf("after second batch: no record with Index=4 (pre-existing policy: next even index past the existing record at Index=2)")
 	}
 
-	if slot.Storage.NextEquipIndex != equipBeforeSecondBatch {
-		t.Errorf("Storage.NextEquipIndex: got %d, want unchanged %d (second batch did not start from an empty Storage)",
-			slot.Storage.NextEquipIndex, equipBeforeSecondBatch)
+	if want := equipBeforeSecondBatch + 1; slot.Storage.NextEquipIndex != want {
+		t.Errorf("Storage.NextEquipIndex: got %d, want %d (+1 for the second record)",
+			slot.Storage.NextEquipIndex, want)
 	}
-	// Pre-existing non-empty-Storage policy: NextAcquisitionSortId advances as a
-	// high-water mark past the assigned Index (4), i.e. 4+1=5 — not a plain +1
-	// off the pre-batch value (2+1=3), which is the T330-scoped rule this test
-	// must NOT extend to a second, independent batch.
-	if slot.Storage.NextAcquisitionSortId != 5 {
-		t.Errorf("Storage.NextAcquisitionSortId: got %d, want 5 (high-water mark past new record Index=4)",
+	// The new record sits at Index=4, whose bucket is 2, so the next free bucket
+	// is 3. The old assertion of 5 was the raw Inventory rule (Index+1).
+	if slot.Storage.NextAcquisitionSortId != 3 {
+		t.Errorf("Storage.NextAcquisitionSortId: got %d, want 3 (bucket of Index=4, i.e. 4/2+1)",
 			slot.Storage.NextAcquisitionSortId)
 	}
 
 	rawEquip := binary.LittleEndian.Uint32(slot.Data[slot.Storage.nextEquipIndexOff:])
-	if rawEquip != equipBeforeSecondBatch {
-		t.Errorf("binary NextEquipIndex: got %d, want unchanged %d", rawEquip, equipBeforeSecondBatch)
+	if want := equipBeforeSecondBatch + 1; rawEquip != want {
+		t.Errorf("binary NextEquipIndex: got %d, want %d", rawEquip, want)
 	}
 	rawAcq := binary.LittleEndian.Uint32(slot.Data[slot.Storage.nextAcqSortIdOff:])
-	if rawAcq != 5 {
-		t.Errorf("binary NextAcquisitionSortId: got %d, want 5", rawAcq)
+	if rawAcq != 3 {
+		t.Errorf("binary NextAcquisitionSortId: got %d, want 3", rawAcq)
 	}
 }
 
@@ -275,4 +281,129 @@ func TestAddItemsToSlotBatchForStorageSession_SixIndependentCallsOnEmptyStorageM
 	if rawAcq != 7 {
 		t.Errorf("binary NextAcquisitionSortId: got %d, want 7", rawAcq)
 	}
+}
+
+// nativeT330StorageFixture reproduces the persisted state of the native lab
+// artifact task-330-native-storage-mega through the writer's own verified
+// empty-Storage path: six Storage records at the even indices 2..12, with
+// NextEquipIndex 133 and NextAcquisitionSortId 7.
+//
+// Building it this way rather than hand-writing the bytes makes the fixture
+// self-validating: if the empty-Storage contract ever drifts from T310/T330,
+// these tests fail in setup instead of silently testing a state the app can no
+// longer produce.
+func nativeT330StorageFixture(t *testing.T) *SaveSlot {
+	t.Helper()
+	slot := storageEmptyInitFixture(t)
+
+	items := make([]ItemToAdd, 0, 6)
+	for i := 0; i < 6; i++ {
+		items = append(items, ItemToAdd{ItemID: testTrickMirrorID, StorageQty: 1})
+	}
+	if err := AddItemsToSlotBatch(slot, items); err != nil {
+		t.Fatalf("seeding batch: %v", err)
+	}
+
+	if got := len(slot.Storage.CommonItems); got != 6 {
+		t.Fatalf("seeded Storage records: got %d, want 6", got)
+	}
+	for i, item := range slot.Storage.CommonItems {
+		if want := uint32(2 + i*2); item.Index != want {
+			t.Fatalf("seeded record %d: Index = %d, want %d (native even stride 2)", i, item.Index, want)
+		}
+	}
+	if slot.Storage.NextEquipIndex != 133 {
+		t.Fatalf("seeded NextEquipIndex = %d, want 133 (native T330)", slot.Storage.NextEquipIndex)
+	}
+	if slot.Storage.NextAcquisitionSortId != 7 {
+		t.Fatalf("seeded NextAcquisitionSortId = %d, want 7 (native T330)", slot.Storage.NextAcquisitionSortId)
+	}
+	return slot
+}
+
+// TestAddItemsToSlotBatch_PopulatedStorageMatchesNativeCounters is the
+// regression for the frozen-counter defect: a Storage that already holds records
+// must keep advancing both counters exactly as the game does.
+//
+// Starting from the native T330 state, one further record must reach Index 14,
+// NextEquipIndex 134 (127 + 7 records) and NextAcquisitionSortId 8 (the bucket
+// of Index 14).
+//
+// Before the fix the writer produced 133 and 15: the counter stayed frozen and
+// the acquisition mark was computed with the raw Inventory rule.
+func TestAddItemsToSlotBatch_PopulatedStorageMatchesNativeCounters(t *testing.T) {
+	slot := nativeT330StorageFixture(t)
+
+	if err := AddItemsToSlotBatch(slot, []ItemToAdd{{ItemID: testTrickMirrorID, StorageQty: 1}}); err != nil {
+		t.Fatalf("second batch: %v", err)
+	}
+
+	if got := len(slot.Storage.CommonItems); got != 7 {
+		t.Fatalf("Storage records: got %d, want 7", got)
+	}
+	found := false
+	for _, item := range slot.Storage.CommonItems {
+		if item.Index == 14 {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("no record at Index 14 (next even index past 12); got %v", storageIndices(slot))
+	}
+	if slot.Storage.NextEquipIndex != 134 {
+		t.Errorf("Storage.NextEquipIndex: got %d, want 134 (127 + 7 records)",
+			slot.Storage.NextEquipIndex)
+	}
+	if slot.Storage.NextAcquisitionSortId != 8 {
+		t.Errorf("Storage.NextAcquisitionSortId: got %d, want 8 (bucket of Index 14)",
+			slot.Storage.NextAcquisitionSortId)
+	}
+
+	rawEquip := binary.LittleEndian.Uint32(slot.Data[slot.Storage.nextEquipIndexOff:])
+	if rawEquip != 134 {
+		t.Errorf("binary NextEquipIndex: got %d, want 134", rawEquip)
+	}
+	rawAcq := binary.LittleEndian.Uint32(slot.Data[slot.Storage.nextAcqSortIdOff:])
+	if rawAcq != 8 {
+		t.Errorf("binary NextAcquisitionSortId: got %d, want 8", rawAcq)
+	}
+}
+
+// TestAddItemsToSlotBatch_PopulatedStorageCountersTrackRecordCount proves the
+// defect cannot come back in the form that mattered: the drift grew with every
+// add, so a single-record test would still pass while a real save was hundreds
+// of records out of step. Each batch here is independent, which is what a user
+// does when adding items repeatedly to a loaded save.
+func TestAddItemsToSlotBatch_PopulatedStorageCountersTrackRecordCount(t *testing.T) {
+	slot := nativeT330StorageFixture(t)
+
+	const batches = 50
+	for i := 0; i < batches; i++ {
+		if err := AddItemsToSlotBatch(slot, []ItemToAdd{{ItemID: testTrickMirrorID, StorageQty: 1}}); err != nil {
+			t.Fatalf("batch %d: %v", i, err)
+		}
+	}
+
+	records := len(slot.Storage.CommonItems)
+	if records != 6+batches {
+		t.Fatalf("Storage records: got %d, want %d", records, 6+batches)
+	}
+	if want := uint32(127 + records); slot.Storage.NextEquipIndex != want {
+		t.Errorf("Storage.NextEquipIndex: got %d, want %d (127 + %d records)",
+			slot.Storage.NextEquipIndex, want, records)
+	}
+	if want := uint32(records + 1); slot.Storage.NextAcquisitionSortId != want {
+		t.Errorf("Storage.NextAcquisitionSortId: got %d, want %d (one bucket per record)",
+			slot.Storage.NextAcquisitionSortId, want)
+	}
+}
+
+// storageIndices lists the Index of every occupied Storage record, for failure
+// messages.
+func storageIndices(slot *SaveSlot) []uint32 {
+	out := []uint32{}
+	for _, item := range slot.Storage.CommonItems {
+		out = append(out, item.Index)
+	}
+	return out
 }

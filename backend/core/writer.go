@@ -1191,16 +1191,39 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, a
 		// The `default` branch below (populated Storage) preserves the
 		// writer's pre-existing fallback policy, unchanged by this task: it
 		// leaves NextEquipIndex untouched and advances NextAcquisitionSortId
-		// as a high-water mark. This is not asserted here as a universal
-		// native-save contract — T310/T330/T352 do not establish a rule for
-		// every already-populated Storage insertion pattern. Changing this
-		// fallback policy would require separate native save evidence and a
-		// regression test.
+		// as a high-water mark.
+		//
+		// The default branch below covers a Storage that already held records
+		// when the save was loaded. It used to leave NextEquipIndex frozen and
+		// to compute NextAcquisitionSortId with the Inventory rule; both are
+		// corrected here against native evidence, so all three branches now
+		// describe the same two counters consistently.
+		//
+		// VERIFIED NATIVE SAVE CONTRACT — DO NOT CHANGE WITHOUT NEW NATIVE SAVE
+		// EVIDENCE AND A REGRESSION TEST.
+		//
+		// NextEquipIndex is an allocation high-water mark: the first record of a
+		// previously empty Storage sets it to 128 and every further record adds
+		// exactly one, whether or not the container was empty when the save was
+		// loaded. Evidence: STOequip == 127 + (deposits ever made) holds exactly
+		// on lab T330 (6 records, 133) and on three untouched slots of
+		// ER0000-out.sl2 (250 records -> 377, 88 -> 215, 6 -> 133); the one slot
+		// that differs by one had a single item withdrawn, which lab T508 shows
+		// lowers the mark by one.
+		//
+		// NextAcquisitionSortId is a BUCKET counter, and this is where Storage
+		// differs from Inventory. The game keys Order of Acquisition by
+		// Index>>1, Storage stores Index = 2*bucket, and the field holds the next
+		// free bucket: STOacq == max(Index)/2 + 1. Evidence: lab T330 (max Index
+		// 12 -> 7) and ER0000-out.sl2 (1086 -> 544, 1572 -> 787, 198 -> 100).
+		// Inventory instead keeps a raw mark, max(Index) + 1 (15668 -> 15669,
+		// 969 -> 970), which is the rule this branch previously applied to
+		// Storage by mistake. The two empty-Storage branches already produce the
+		// bucket value because they step by one while Index steps by two.
 		switch {
 		case isEmptyStorageInit:
-			// T310: unlike the general mark+1 high-water-mark rule, the confirmed
-			// empty-Storage init sets NextAcquisitionSortId equal to the new
-			// record's own Index (2), not Index+1.
+			// T310: the confirmed empty-Storage init writes the bucket of the
+			// record's own Index (2 -> bucket 1 -> next bucket 2).
 			slot.Storage.NextAcquisitionSortId = nextListId
 			slot.Storage.NextEquipIndex = 128
 		case storageBatchStartedEmpty:
@@ -1208,7 +1231,9 @@ func addToInventory(slot *SaveSlot, handle uint32, qty uint32, isStorage bool, a
 			slot.Storage.NextAcquisitionSortId++
 			slot.Storage.NextEquipIndex++
 		default:
-			slot.Storage.NextAcquisitionSortId = nextListId + 1
+			// Storage already populated when the save was loaded.
+			slot.Storage.NextAcquisitionSortId = nextListId/2 + 1
+			slot.Storage.NextEquipIndex++
 		}
 		if slot.Storage.nextEquipIndexOff > 0 {
 			binary.LittleEndian.PutUint32(slot.Data[slot.Storage.nextEquipIndexOff:], slot.Storage.NextEquipIndex)

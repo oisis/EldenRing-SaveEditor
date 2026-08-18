@@ -138,7 +138,11 @@ func TestNextEquipIndex_StorageInsert(t *testing.T) {
 		t.Fatalf("addToInventory: %v", err)
 	}
 
-	const wantEquip = uint32(500)
+	// A record inserted into an already-populated Storage advances NextEquipIndex
+	// by exactly one, like every other Storage record. Native evidence:
+	// STOequip == 127 + (deposits ever made) holds on lab T330 and on three
+	// untouched slots of ER0000-out.sl2 (250 records -> 377, 88 -> 215, 6 -> 133).
+	const wantEquip = uint32(501)
 	if slot.Storage.NextEquipIndex != wantEquip {
 		t.Errorf("struct NextEquipIndex: got %d, want %d", slot.Storage.NextEquipIndex, wantEquip)
 	}
@@ -146,8 +150,31 @@ func TestNextEquipIndex_StorageInsert(t *testing.T) {
 	if rawEquip != wantEquip {
 		t.Errorf("binary NextEquipIndex: got %d, want %d", rawEquip, wantEquip)
 	}
-	if slot.Storage.NextAcquisitionSortId != acqBefore+1 {
-		t.Errorf("NextAcquisitionSortId: got %d, want %d", slot.Storage.NextAcquisitionSortId, acqBefore+1)
+
+	// Storage keeps NextAcquisitionSortId in BUCKETS, not raw indices: the game
+	// keys Order of Acquisition by Index>>1 and Storage stores Index = 2*bucket,
+	// so the field is max(Index)/2 + 1. Native evidence: lab T330 (max Index 12
+	// -> 7) and ER0000-out.sl2 (1086 -> 544, 1572 -> 787, 198 -> 100). This is
+	// where Storage differs from Inventory, which keeps a raw mark of
+	// max(Index) + 1 (15668 -> 15669, 969 -> 970).
+	_ = acqBefore
+	newIndex := uint32(0)
+	for _, item := range slot.Storage.CommonItems {
+		if item.GaItemHandle == newHandle {
+			newIndex = item.Index
+		}
+	}
+	if newIndex == 0 {
+		t.Fatal("the inserted record was not found in Storage")
+	}
+	wantAcq := newIndex/2 + 1
+	if slot.Storage.NextAcquisitionSortId != wantAcq {
+		t.Errorf("NextAcquisitionSortId: got %d, want %d (bucket of Index %d)",
+			slot.Storage.NextAcquisitionSortId, wantAcq, newIndex)
+	}
+	rawAcq := binary.LittleEndian.Uint32(slot.Data[slot.Storage.nextAcqSortIdOff:])
+	if rawAcq != wantAcq {
+		t.Errorf("binary NextAcquisitionSortId: got %d, want %d", rawAcq, wantAcq)
 	}
 }
 

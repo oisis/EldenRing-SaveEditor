@@ -123,9 +123,15 @@ func TestAddItemsToCharacter_SixIndependentDatabaseAddCallsOnEmptyStorageMatchT3
 // successful add (which both mutates Storage away from empty AND would
 // establish the T350 session), a real save-to-disk via writeSaveCore (the
 // same internal path WriteSave uses, exercised directly here to avoid the
-// Wails file dialog) must end the series. A second independent add afterward
-// must fall back to the pre-existing populated-Storage policy — NextEquipIndex
-// left unchanged — never the T330 same-series +1 rule.
+// Wails file dialog) must end the series.
+//
+// The series is now asserted directly through storageAddSessions rather than
+// inferred from a frozen NextEquipIndex. The old assertion read "NextEquipIndex
+// left unchanged" as the signature of a closed series; that signature was the
+// populated-Storage defect itself, and with it corrected both branches advance
+// the counter identically. The counter is still asserted here, against the
+// native rule (+1 per record, one bucket per record), so the add after the save
+// is checked for correctness as well as for series closure.
 func TestAddItemsToCharacter_DatabaseAddSessionDoesNotSurviveSuccessfulSave(t *testing.T) {
 	app, _ := emptyStorageDatabaseAddApp(t)
 
@@ -151,9 +157,17 @@ func TestAddItemsToCharacter_DatabaseAddSessionDoesNotSurviveSuccessfulSave(t *t
 		t.Fatalf("second AddItemsToCharacter (post-save): %v", err)
 	}
 
-	if slot.Storage.NextEquipIndex != equipBeforeSave {
-		t.Errorf("Storage.NextEquipIndex: got %d, want unchanged %d — the Database Add series must not survive a successful Save",
-			slot.Storage.NextEquipIndex, equipBeforeSave)
+	if app.storageAddSessions[0] {
+		t.Error("the Database Add series survived a successful Save")
+	}
+	if want := equipBeforeSave + 1; slot.Storage.NextEquipIndex != want {
+		t.Errorf("Storage.NextEquipIndex: got %d, want %d (+1 for the second record)",
+			slot.Storage.NextEquipIndex, want)
+	}
+	// Two records at Index 2 and 4; the next free bucket is 4/2+1 = 3.
+	if slot.Storage.NextAcquisitionSortId != 3 {
+		t.Errorf("Storage.NextAcquisitionSortId: got %d, want 3 (bucket of Index 4)",
+			slot.Storage.NextAcquisitionSortId)
 	}
 }
 
@@ -162,10 +176,12 @@ func TestAddItemsToCharacter_DatabaseAddSessionDoesNotSurviveSuccessfulSave(t *t
 // commit path SelectAndOpenSave/LoadSaveFromPath use) must end any open
 // Database Add series for every character, even one whose Storage the OLD
 // save had genuinely empty. The reloaded save's slot 0 Storage is
-// pre-populated (non-empty at the start of the new session), so if the old
-// session context wrongly survived, this add would incorrectly apply the
-// T310/T330 rule (NextEquipIndex advancing by 1) instead of the
-// populated-Storage policy (NextEquipIndex left untouched).
+// pre-populated (non-empty at the start of the new session), so an old session
+// context that wrongly survived would apply the T310 empty-init rule and reset
+// NextEquipIndex to 128 instead of advancing the existing mark.
+//
+// Series closure is asserted directly through storageAddSessions; the counters
+// are asserted against the native rule, which both branches now share.
 func TestAddItemsToCharacter_DatabaseAddSessionDoesNotSurviveReload(t *testing.T) {
 	app, _ := emptyStorageDatabaseAddApp(t)
 
@@ -200,9 +216,16 @@ func TestAddItemsToCharacter_DatabaseAddSessionDoesNotSurviveReload(t *testing.T
 	}
 
 	slot := &app.save.Slots[0]
-	if slot.Storage.NextEquipIndex != equipBeforeReload {
-		t.Errorf("Storage.NextEquipIndex: got %d, want unchanged %d — a reload must not let the old save's Database Add series apply to the new save",
-			slot.Storage.NextEquipIndex, equipBeforeReload)
+	if want := equipBeforeReload + 1; slot.Storage.NextEquipIndex != want {
+		t.Errorf("Storage.NextEquipIndex: got %d, want %d (+1 for the record added after the reload)",
+			slot.Storage.NextEquipIndex, want)
+	}
+	if slot.Storage.NextEquipIndex == 128 {
+		t.Error("the reloaded save was treated as an empty-Storage init, so the old series survived")
+	}
+	if slot.Storage.NextAcquisitionSortId != 3 {
+		t.Errorf("Storage.NextAcquisitionSortId: got %d, want 3 (bucket of Index 4)",
+			slot.Storage.NextAcquisitionSortId)
 	}
 }
 
