@@ -192,7 +192,7 @@ var Chest = map[uint32]ItemData{
 	0x101C8914: {Name: "Bloodsoaked Tabard", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/bloodsoaked_tabard.png"},
 	0x101CB024: {Name: "Ivory-Draped Tabard", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/ivory_draped_tabard.png"},
 	0x101CD734: {Name: "Omenkiller Robe", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/omenkiller_robe.png"},
-	0x101D7374: {Name: "Deathbed Dress", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/deathbed_dress.png", Flags: []string{"cut_content", "ban_risk"}},
+	0x101D7374: {Name: "Deathbed Dress", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/deathbed_dress.png"},
 	0x101D9A84: {Name: "Fia's Robe", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/fia_s_robe.png"},
 	0x101D9E6C: {Name: "Fia's Robe (Altered)", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/fia_s_robe_altered.png"},
 	0x101DC194: {Name: "Millicent's Robe", Category: "chest", MaxInventory: 1, MaxStorage: 1, MaxUpgrade: 0, IconPath: "items/chest/millicent_s_robe.png", Flags: []string{"cut_content", "ban_risk"}},
