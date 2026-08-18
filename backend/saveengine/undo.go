@@ -33,6 +33,7 @@ import (
 const (
 	opAddItemToInventory       = "add_item_to_inventory"
 	opApplyAppearancePreset    = "apply_appearance_preset"
+	opApplyBuildTemplate       = "apply_build_template"
 	opApplyFavoritePreset      = "apply_favorite_preset"
 	opAddItemToStorage         = "add_item_to_storage"
 	opCloneCharacter           = "clone_character"

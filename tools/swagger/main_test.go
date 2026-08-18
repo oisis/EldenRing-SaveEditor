@@ -1105,6 +1105,10 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 	if _, hasPost := document.Paths[buildTemplatePreview]["post"]; !hasPost {
 		t.Fatalf("openapi.json describes no POST for %s", buildTemplatePreview)
 	}
+	buildTemplateApply := "/api/v1/build-templates/{templateID}/apply"
+	if _, hasPost := document.Paths[buildTemplateApply]["post"]; !hasPost {
+		t.Fatalf("openapi.json describes no POST for %s", buildTemplateApply)
+	}
 	// The favorite-presets slot path carries both PUT and DELETE operations.
 	favSlot := "/api/v1/save-sessions/{saveSessionID}/favorite-presets/{favoriteSlotID}"
 	if _, hasPut := document.Paths[favSlot]["put"]; !hasPut {
@@ -7549,7 +7553,7 @@ func TestCreateBuildTemplateRoute_Success(t *testing.T) {
 	}
 	templatesDir := t.TempDir()
 	handler := newHandlerWithTemplatesStore(
-		newPrototypeCatalog(t),
+		newFullCatalog(t),
 		testApplicationVersion,
 		saveEngine,
 		buildtemplates.NewStore(templatesDir),
@@ -7669,7 +7673,14 @@ func TestGetBuildTemplatePreviewRoute_Success(t *testing.T) {
 	templatesDir := t.TempDir()
 	store := buildtemplates.NewStore(templatesDir)
 	name := "Preview Route Build"
-	vig := uint32(50)
+	vig := uint32(20)
+	mind := uint32(15)
+	end := uint32(16)
+	str := uint32(20)
+	dex := uint32(18)
+	intel := uint32(12)
+	faith := uint32(12)
+	arc := uint32(10)
 	tplID, _, err := store.CreateTemplate(&buildtemplates.BuildTemplate{
 		Schema:  buildtemplates.SchemaKey,
 		Version: buildtemplates.MaxSchemaVersion,
@@ -7678,12 +7689,19 @@ func TestGetBuildTemplatePreviewRoute_Success(t *testing.T) {
 		},
 		Selection: &buildtemplates.TemplateSelection{
 			Stats: &buildtemplates.SectionSelection{
-				Fields: map[string]bool{"vigor": true},
+				All: true,
 			},
 		},
 		Sections: buildtemplates.TemplateSections{
 			Stats: &buildtemplates.StatsSection{
-				Vigor: &vig,
+				Vigor:        &vig,
+				Mind:         &mind,
+				Endurance:    &end,
+				Strength:     &str,
+				Dexterity:    &dex,
+				Intelligence: &intel,
+				Faith:        &faith,
+				Arcane:       &arc,
 			},
 		},
 	})
@@ -7821,5 +7839,306 @@ func TestGetBuildTemplatePreviewRoute_ExternalBindReturns404(t *testing.T) {
 	recorder := getBuildTemplatePreview(t, handler, "tpl-123", body)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
+	}
+}
+
+func applyBuildTemplate(t *testing.T, handler http.Handler, templateID string, body string) *httptest.ResponseRecorder {
+	t.Helper()
+	target := fmt.Sprintf("/api/v1/build-templates/%s/apply", templateID)
+	var request *http.Request
+	if body == "" {
+		request = httptest.NewRequest(http.MethodPost, target, nil)
+	} else {
+		request = httptest.NewRequest(http.MethodPost, target, bytes.NewReader([]byte(body)))
+	}
+	request.Header.Set("Content-Type", "application/json")
+	recorder := httptest.NewRecorder()
+	handler.ServeHTTP(recorder, request)
+	return recorder
+}
+
+func TestApplyBuildTemplateRoute_Success(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	store := buildtemplates.NewStore(templatesDir)
+	name := "Apply Route Build"
+	vig := uint32(20)
+	mind := uint32(15)
+	end := uint32(16)
+	str := uint32(20)
+	dex := uint32(18)
+	intel := uint32(12)
+	faith := uint32(12)
+	arc := uint32(10)
+	tplID, _, err := store.CreateTemplate(&buildtemplates.BuildTemplate{
+		Schema:  buildtemplates.SchemaKey,
+		Version: buildtemplates.MaxSchemaVersion,
+		Metadata: &buildtemplates.TemplateDocMetadata{
+			Name: name,
+		},
+		Selection: &buildtemplates.TemplateSelection{
+			Stats: &buildtemplates.SectionSelection{
+				All: true,
+			},
+		},
+		Sections: buildtemplates.TemplateSections{
+			Stats: &buildtemplates.StatsSection{
+				Vigor:        &vig,
+				Mind:         &mind,
+				Endurance:    &end,
+				Strength:     &str,
+				Dexterity:    &dex,
+				Intelligence: &intel,
+				Faith:        &faith,
+				Arcane:       &arc,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		store,
+	)
+
+	body := fmt.Sprintf(`{
+		"saveSessionID": %q,
+		"characterID": 0,
+		"expectedRevision": "0"
+	}`, session.SaveSessionID)
+
+	recorder := applyBuildTemplate(t, handler, tplID, body)
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200 (body %q)", recorder.Code, recorder.Body.String())
+	}
+	assertJSONContentType(t, recorder)
+
+	var result templates.ApplyBuildTemplateResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &result); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if result.TemplateID != tplID {
+		t.Errorf("TemplateID = %q, want %q", result.TemplateID, tplID)
+	}
+	if result.SaveRevision == "0" {
+		t.Errorf("expected new SaveRevision, got %q", result.SaveRevision)
+	}
+	if result.Plan.Stats == nil || result.Plan.Stats.Vigor == nil {
+		t.Errorf("Plan.Stats.Vigor is nil")
+	}
+}
+
+func TestApplyBuildTemplateRoute_RejectsMalformedBodies(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		buildtemplates.NewStore(templatesDir),
+	)
+
+	for name, body := range map[string]string{
+		"no body":                  "",
+		"missing saveSessionID":    `{"characterID":0,"expectedRevision":"0"}`,
+		"missing characterID":      fmt.Sprintf(`{"saveSessionID":%q,"expectedRevision":"0"}`, session.SaveSessionID),
+		"missing expectedRevision": fmt.Sprintf(`{"saveSessionID":%q,"characterID":0}`, session.SaveSessionID),
+		"unknown json field":       fmt.Sprintf(`{"saveSessionID":%q,"characterID":0,"expectedRevision":"0","extra":true}`, session.SaveSessionID),
+		"trailing json document":   fmt.Sprintf(`{"saveSessionID":%q,"characterID":0,"expectedRevision":"0"}{"extra":1}`, session.SaveSessionID),
+	} {
+		t.Run(name, func(t *testing.T) {
+			recorder := applyBuildTemplate(t, handler, "tpl-123", body)
+			if recorder.Code != http.StatusBadRequest {
+				t.Fatalf("status = %d, want 400 (body %q)", recorder.Code, recorder.Body.String())
+			}
+		})
+	}
+}
+
+func TestApplyBuildTemplateRoute_UnknownTemplate(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		buildtemplates.NewStore(templatesDir),
+	)
+
+	body := fmt.Sprintf(`{"saveSessionID":%q,"characterID":0,"expectedRevision":"0"}`, session.SaveSessionID)
+	recorder := applyBuildTemplate(t, handler, "tpl-nonexistent", body)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestApplyBuildTemplateRoute_UnknownSession(t *testing.T) {
+	templatesDir := t.TempDir()
+	store := buildtemplates.NewStore(templatesDir)
+	name := "Route Build"
+	vig := uint32(50)
+	tplID, _, err := store.CreateTemplate(&buildtemplates.BuildTemplate{
+		Schema:  buildtemplates.SchemaKey,
+		Version: buildtemplates.MaxSchemaVersion,
+		Metadata: &buildtemplates.TemplateDocMetadata{
+			Name: name,
+		},
+		Selection: &buildtemplates.TemplateSelection{
+			Stats: &buildtemplates.SectionSelection{
+				Fields: map[string]bool{"vigor": true},
+			},
+		},
+		Sections: buildtemplates.TemplateSections{
+			Stats: &buildtemplates.StatsSection{
+				Vigor: &vig,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveengine.New(),
+		store,
+	)
+
+	body := `{"saveSessionID":"nonexistent-session","characterID":0,"expectedRevision":"1"}`
+	recorder := applyBuildTemplate(t, handler, tplID, body)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestApplyBuildTemplateRoute_ExternalBindReturns404(t *testing.T) {
+	handler := newHandler(newPrototypeCatalog(t), testApplicationVersion, nil)
+	body := `{"saveSessionID":"session-1","characterID":0,"expectedRevision":"1"}`
+	recorder := applyBuildTemplate(t, handler, "tpl-123", body)
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404 on external bind", recorder.Code)
+	}
+}
+
+func TestApplyBuildTemplateRoute_NonCanonicalRevisionReturns400(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	store := buildtemplates.NewStore(templatesDir)
+	name := "Route Build"
+	vig := uint32(50)
+	tplID, _, err := store.CreateTemplate(&buildtemplates.BuildTemplate{
+		Schema:  buildtemplates.SchemaKey,
+		Version: buildtemplates.MaxSchemaVersion,
+		Metadata: &buildtemplates.TemplateDocMetadata{
+			Name: name,
+		},
+		Selection: &buildtemplates.TemplateSelection{
+			Stats: &buildtemplates.SectionSelection{
+				Fields: map[string]bool{"vigor": true},
+			},
+		},
+		Sections: buildtemplates.TemplateSections{
+			Stats: &buildtemplates.StatsSection{
+				Vigor: &vig,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		store,
+	)
+
+	for _, badRev := range []string{"01", "+1", "rev1"} {
+		body := fmt.Sprintf(`{"saveSessionID":%q,"characterID":0,"expectedRevision":%q}`, session.SaveSessionID, badRev)
+		recorder := applyBuildTemplate(t, handler, tplID, body)
+		if recorder.Code != http.StatusBadRequest {
+			t.Fatalf("expectedRevision %q: status = %d, want 400 (body %q)", badRev, recorder.Code, recorder.Body.String())
+		}
+	}
+}
+
+func TestApplyBuildTemplateRoute_StaleRevisionReturns409(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "pc")
+	if err != nil {
+		t.Fatalf("LoadSave: %v", err)
+	}
+	templatesDir := t.TempDir()
+	store := buildtemplates.NewStore(templatesDir)
+	name := "Route Build"
+	vig := uint32(20)
+	mind := uint32(15)
+	end := uint32(16)
+	str := uint32(20)
+	dex := uint32(18)
+	intel := uint32(12)
+	faith := uint32(12)
+	arc := uint32(10)
+	tplID, _, err := store.CreateTemplate(&buildtemplates.BuildTemplate{
+		Schema:  buildtemplates.SchemaKey,
+		Version: buildtemplates.MaxSchemaVersion,
+		Metadata: &buildtemplates.TemplateDocMetadata{
+			Name: name,
+		},
+		Selection: &buildtemplates.TemplateSelection{
+			Stats: &buildtemplates.SectionSelection{
+				All: true,
+			},
+		},
+		Sections: buildtemplates.TemplateSections{
+			Stats: &buildtemplates.StatsSection{
+				Vigor:        &vig,
+				Mind:         &mind,
+				Endurance:    &end,
+				Strength:     &str,
+				Dexterity:    &dex,
+				Intelligence: &intel,
+				Faith:        &faith,
+				Arcane:       &arc,
+			},
+		},
+	})
+	if err != nil {
+		t.Fatalf("CreateTemplate: %v", err)
+	}
+
+	handler := newHandlerWithTemplatesStore(
+		newPrototypeCatalog(t),
+		testApplicationVersion,
+		saveEngine,
+		store,
+	)
+
+	body := fmt.Sprintf(`{"saveSessionID":%q,"characterID":0,"expectedRevision":"9999"}`, session.SaveSessionID)
+	recorder := applyBuildTemplate(t, handler, tplID, body)
+	if recorder.Code != http.StatusConflict {
+		t.Fatalf("status = %d, want 409 (body %q)", recorder.Code, recorder.Body.String())
 	}
 }

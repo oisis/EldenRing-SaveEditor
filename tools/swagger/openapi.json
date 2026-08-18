@@ -793,6 +793,77 @@
         }
       }
     },
+    "/api/v1/build-templates/{templateID}/apply": {
+      "post": {
+        "operationId": "applyBuildTemplate",
+        "tags": ["Templates"],
+        "summary": "ApplyBuildTemplate",
+        "description": "Atomically applies a validated build template to the specified character. Evaluates the preview plan against live save data, checks expectedRevision, and commits the mutation atomically. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "name": "templateID",
+            "in": "path",
+            "required": true,
+            "description": "Unique identifier of the build template",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyBuildTemplateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The applied template receipt and applied plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApplyBuildTemplateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid request body, invalid character ID, inactive character, or non-executable plan",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Template or save session not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The expectedRevision does not match current saveRevision, or save revision changed during apply",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions": {
       "post": {
         "operationId": "loadSave",
@@ -9614,6 +9685,74 @@
         "required": [
           "templateID",
           "templateRevision"
+        ]
+      },
+      "ApplyBuildTemplateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the loaded save session"
+          },
+          "characterID": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9,
+            "description": "Character slot index (0..9)"
+          },
+          "selection": {
+            "$ref": "#/components/schemas/TemplateSelection"
+          },
+          "options": {
+            "$ref": "#/components/schemas/ApplyOptions"
+          },
+          "expectedRevision": {
+            "type": "string",
+            "description": "The exact decimal saveRevision expected before applying changes"
+          }
+        },
+        "required": [
+          "saveSessionID",
+          "characterID",
+          "expectedRevision"
+        ]
+      },
+      "ApplyBuildTemplateResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "templateID": {
+            "type": "string",
+            "description": "Identifier of the template"
+          },
+          "templateRevision": {
+            "type": "string",
+            "description": "Revision of the template in the library"
+          },
+          "saveSessionID": {
+            "type": "string",
+            "description": "Identifier of the save session"
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "New saveRevision after the atomic mutation"
+          },
+          "characterID": {
+            "type": "integer",
+            "description": "Target character slot index"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/BuildTemplatePreviewPlan"
+          }
+        },
+        "required": [
+          "templateID",
+          "templateRevision",
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "plan"
         ]
       },
       "GetBuildTemplatePreviewRequest": {

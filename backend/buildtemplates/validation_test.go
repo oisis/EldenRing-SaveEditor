@@ -536,6 +536,21 @@ func TestValidateTemplate_ValidationNegativeCases(t *testing.T) {
 			errContains: "profile.name exceeds 16 UTF-16 code units",
 		},
 		{
+			name: "v2 profile name contains NUL",
+			tpl: buildtemplates.BuildTemplate{
+				Schema:    buildtemplates.SchemaKey,
+				Version:   2,
+				CreatedAt: "2026-05-17T10:00:00Z",
+				Selection: &buildtemplates.TemplateSelection{Profile: &buildtemplates.SectionSelection{All: true}},
+				Sections: buildtemplates.TemplateSections{
+					Profile: &buildtemplates.ProfileSection{
+						Name: strPtr("Bad\x00Name"),
+					},
+				},
+			},
+			errContains: "profile.name contains NUL",
+		},
+		{
 			name: "v2 profile level out of range",
 			tpl: buildtemplates.BuildTemplate{
 				Schema:    buildtemplates.SchemaKey,

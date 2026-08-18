@@ -14,6 +14,7 @@ package templates
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/contract"
@@ -142,48 +143,87 @@ func GetBuildTemplatePreview(
 	catalog *gamecatalog.Catalog,
 	req GetBuildTemplatePreviewRequest,
 ) (GetBuildTemplatePreviewResult, error) {
+	resolved, err := planBuildTemplate(
+		store,
+		engine,
+		catalog,
+		req.SaveSessionID,
+		req.CharacterID,
+		req.TemplateID,
+		req.Selection,
+		req.Options,
+	)
+	if err != nil {
+		return GetBuildTemplatePreviewResult{}, err
+	}
+	return resolved.previewResult, nil
+}
+
+type resolvedBuildTemplatePlan struct {
+	previewResult GetBuildTemplatePreviewResult
+	targetName    *string
+	targetAttrs   *saveengine.CharacterAttributes
+	targetSpells  *saveengine.CharacterSpellsPlan
+}
+
+// planBuildTemplate builds a preview plan and resolves the validated target mutation state.
+// It is the single shared planner used by GetBuildTemplatePreview and ApplyBuildTemplate.
+func planBuildTemplate(
+	store *buildtemplates.Store,
+	engine *saveengine.Engine,
+	catalog *gamecatalog.Catalog,
+	saveSessionID string,
+	characterID int,
+	templateID string,
+	selection *buildtemplates.TemplateSelection,
+	options *buildtemplates.ApplyOptions,
+) (resolvedBuildTemplatePlan, error) {
 	if store == nil {
-		return GetBuildTemplatePreviewResult{}, errors.New("templates store is not available")
+		return resolvedBuildTemplatePlan{}, errors.New("templates store is not available")
 	}
 	if engine == nil {
-		return GetBuildTemplatePreviewResult{}, errors.New("save engine is not available")
+		return resolvedBuildTemplatePlan{}, errors.New("save engine is not available")
 	}
 	if catalog == nil {
-		return GetBuildTemplatePreviewResult{}, errors.New("game catalog is not available")
+		return resolvedBuildTemplatePlan{}, errors.New("game catalog is not available")
 	}
-	if req.SaveSessionID == "" {
-		return GetBuildTemplatePreviewResult{}, errors.New("saveSessionID must not be empty")
+	if saveSessionID == "" {
+		return resolvedBuildTemplatePlan{}, errors.New("saveSessionID must not be empty")
 	}
-	if req.TemplateID == "" {
-		return GetBuildTemplatePreviewResult{}, errors.New("templateID must not be empty")
+	if templateID == "" {
+		return resolvedBuildTemplatePlan{}, errors.New("templateID must not be empty")
 	}
-	if req.CharacterID < 0 || req.CharacterID > 9 {
-		return GetBuildTemplatePreviewResult{}, fmt.Errorf("characterID %d out of range (0..9)", req.CharacterID)
+	if characterID < 0 || characterID > 9 {
+		return resolvedBuildTemplatePlan{}, fmt.Errorf("characterID %d out of range (0..9)", characterID)
 	}
 
 	// 1. Load template from store.
-	tpl, templateRevision, err := store.GetTemplate(req.TemplateID)
+	tpl, templateRevision, err := store.GetTemplate(templateID)
 	if err != nil {
-		return GetBuildTemplatePreviewResult{}, err
+		return resolvedBuildTemplatePlan{}, err
 	}
 
 	// 2. Initial save read consistency check.
-	initialUndo, err := engine.GetUndoState(req.SaveSessionID, req.CharacterID)
+	initialUndo, err := engine.GetUndoState(saveSessionID, characterID)
 	if err != nil {
-		return GetBuildTemplatePreviewResult{}, err
+		return resolvedBuildTemplatePlan{}, err
 	}
 
 	// 3. Verify character slot is active.
-	profile, err := engine.GetCharacterProfile(req.SaveSessionID, req.CharacterID)
+	profile, err := engine.GetCharacterProfile(saveSessionID, characterID)
 	if err != nil {
-		return GetBuildTemplatePreviewResult{}, err
+		return resolvedBuildTemplatePlan{}, err
 	}
 	if !profile.Active {
-		return GetBuildTemplatePreviewResult{}, fmt.Errorf("character slot %d is inactive", req.CharacterID)
+		return resolvedBuildTemplatePlan{}, fmt.Errorf("character slot %d is inactive", characterID)
 	}
 
 	var blockingIssues []BuildTemplatePreviewIssue
 	var plan BuildTemplatePreviewPlan
+
+	var targetName *string
+	var targetAttrs *saveengine.CharacterAttributes
+	var targetSpells *saveengine.CharacterSpellsPlan
 
 	// 4. Validate and resolve selection narrowing.
 	baseSelection := tpl.Selection
@@ -195,22 +235,22 @@ func GetBuildTemplatePreview(
 	}
 
 	var effectiveSelection *buildtemplates.TemplateSelection
-	if req.Selection == nil {
+	if selection == nil {
 		effectiveSelection = baseSelection
 	} else {
-		if err := buildtemplates.ValidateTemplateSelection(req.Selection); err != nil {
+		if err := buildtemplates.ValidateTemplateSelection(selection); err != nil {
 			blockingIssues = append(blockingIssues, BuildTemplatePreviewIssue{
 				Code:    IssueCodeUnsupportedField,
 				Message: fmt.Sprintf("invalid selection: %v", err),
 			})
 		}
-		if !req.Selection.HasAnySelected() {
+		if !selection.HasAnySelected() {
 			blockingIssues = append(blockingIssues, BuildTemplatePreviewIssue{
 				Code:    IssueCodeEmptySelection,
 				Message: "selection contains no selected sections or fields",
 			})
 		} else {
-			// Enforce narrowing rule: req.Selection can only disable or pick a subset of baseSelection.
+			// Enforce narrowing rule: selection can only disable or pick a subset of baseSelection.
 			checkSubset := func(secName string, reqSec, baseSec *buildtemplates.SectionSelection) {
 				if reqSec == nil || !reqSec.HasAny() {
 					return
@@ -248,19 +288,19 @@ func GetBuildTemplatePreview(
 				}
 			}
 
-			checkSubset("inventory.workspace", req.Selection.InventoryWorkspace, baseSelection.InventoryWorkspace)
-			checkSubset("profile", req.Selection.Profile, baseSelection.Profile)
-			checkSubset("stats", req.Selection.Stats, baseSelection.Stats)
-			checkSubset("equipment", req.Selection.Equipment, baseSelection.Equipment)
-			checkSubset("spells", req.Selection.Spells, baseSelection.Spells)
-			checkSubset("items", req.Selection.Items, baseSelection.Items)
-			checkSubset("inventoryLayout", req.Selection.InventoryLayout, baseSelection.InventoryLayout)
-			checkSubset("storageLayout", req.Selection.StorageLayout, baseSelection.StorageLayout)
+			checkSubset("inventory.workspace", selection.InventoryWorkspace, baseSelection.InventoryWorkspace)
+			checkSubset("profile", selection.Profile, baseSelection.Profile)
+			checkSubset("stats", selection.Stats, baseSelection.Stats)
+			checkSubset("equipment", selection.Equipment, baseSelection.Equipment)
+			checkSubset("spells", selection.Spells, baseSelection.Spells)
+			checkSubset("items", selection.Items, baseSelection.Items)
+			checkSubset("inventoryLayout", selection.InventoryLayout, baseSelection.InventoryLayout)
+			checkSubset("storageLayout", selection.StorageLayout, baseSelection.StorageLayout)
 		}
-		effectiveSelection = req.Selection
+		effectiveSelection = selection
 	}
 
-	// 5. Validate options: unsupported options in tpl.ApplyOptions or req.Options create blocking issues.
+	// 5. Validate options: unsupported options in tpl.ApplyOptions or options create blocking issues.
 	checkApplyOptions := func(source string, opts *buildtemplates.ApplyOptions) {
 		if opts == nil {
 			return
@@ -295,7 +335,7 @@ func GetBuildTemplatePreview(
 		}
 	}
 	checkApplyOptions("template.applyOptions", tpl.ApplyOptions)
-	checkApplyOptions("applyOptions", req.Options)
+	checkApplyOptions("applyOptions", options)
 
 	// 6. Check unsupported sections in effective selection.
 	if effectiveSelection.InventoryWorkspace.HasAny() {
@@ -344,15 +384,15 @@ func GetBuildTemplatePreview(
 				Message: "template does not contain a stats section",
 			})
 		} else {
-			curStats, err := engine.GetCharacterStats(req.SaveSessionID, req.CharacterID)
+			curStats, err := engine.GetCharacterStats(saveSessionID, characterID)
 			if err != nil {
-				return GetBuildTemplatePreviewResult{}, err
+				return resolvedBuildTemplatePlan{}, err
 			}
 			sPlan := &StatsPreviewPlan{}
 			selAll := effectiveSelection.Stats.All
 			fields := effectiveSelection.Stats.Fields
 
-			targetAttrs := saveengine.CharacterAttributes{
+			resolvedAttrs := saveengine.CharacterAttributes{
 				Vigor:        curStats.Vigor,
 				Mind:         curStats.Mind,
 				Endurance:    curStats.Endurance,
@@ -385,16 +425,16 @@ func GetBuildTemplatePreview(
 				}
 			}
 
-			sPlan.Vigor = checkStat("vigor", curStats.Vigor, tpl.Sections.Stats.Vigor, &targetAttrs.Vigor)
-			sPlan.Mind = checkStat("mind", curStats.Mind, tpl.Sections.Stats.Mind, &targetAttrs.Mind)
-			sPlan.Endurance = checkStat("endurance", curStats.Endurance, tpl.Sections.Stats.Endurance, &targetAttrs.Endurance)
-			sPlan.Strength = checkStat("strength", curStats.Strength, tpl.Sections.Stats.Strength, &targetAttrs.Strength)
-			sPlan.Dexterity = checkStat("dexterity", curStats.Dexterity, tpl.Sections.Stats.Dexterity, &targetAttrs.Dexterity)
-			sPlan.Intelligence = checkStat("intelligence", curStats.Intelligence, tpl.Sections.Stats.Intelligence, &targetAttrs.Intelligence)
-			sPlan.Faith = checkStat("faith", curStats.Faith, tpl.Sections.Stats.Faith, &targetAttrs.Faith)
-			sPlan.Arcane = checkStat("arcane", curStats.Arcane, tpl.Sections.Stats.Arcane, &targetAttrs.Arcane)
+			sPlan.Vigor = checkStat("vigor", curStats.Vigor, tpl.Sections.Stats.Vigor, &resolvedAttrs.Vigor)
+			sPlan.Mind = checkStat("mind", curStats.Mind, tpl.Sections.Stats.Mind, &resolvedAttrs.Mind)
+			sPlan.Endurance = checkStat("endurance", curStats.Endurance, tpl.Sections.Stats.Endurance, &resolvedAttrs.Endurance)
+			sPlan.Strength = checkStat("strength", curStats.Strength, tpl.Sections.Stats.Strength, &resolvedAttrs.Strength)
+			sPlan.Dexterity = checkStat("dexterity", curStats.Dexterity, tpl.Sections.Stats.Dexterity, &resolvedAttrs.Dexterity)
+			sPlan.Intelligence = checkStat("intelligence", curStats.Intelligence, tpl.Sections.Stats.Intelligence, &resolvedAttrs.Intelligence)
+			sPlan.Faith = checkStat("faith", curStats.Faith, tpl.Sections.Stats.Faith, &resolvedAttrs.Faith)
+			sPlan.Arcane = checkStat("arcane", curStats.Arcane, tpl.Sections.Stats.Arcane, &resolvedAttrs.Arcane)
 
-			plannedLevel, plannedSoulMemory, planErr := engine.PlanCharacterStats(req.SaveSessionID, req.CharacterID, targetAttrs)
+			plannedLevel, plannedSoulMemory, planErr := engine.PlanCharacterStats(saveSessionID, characterID, resolvedAttrs)
 			if planErr != nil {
 				blockingIssues = append(blockingIssues, BuildTemplatePreviewIssue{
 					Code:    IssueCodeInvalidStats,
@@ -405,6 +445,7 @@ func GetBuildTemplatePreview(
 				sPlan.ResultLevel = plannedLevel
 				sPlan.ResultSoulMemory = plannedSoulMemory
 				calculatedStatsLevel = &plannedLevel
+				targetAttrs = &resolvedAttrs
 			}
 			plan.Stats = sPlan
 		}
@@ -456,6 +497,7 @@ func GetBuildTemplatePreview(
 						Target:  tgtVal,
 						Changed: curVal != tgtVal,
 					}
+					targetName = &tgtVal
 				}
 			}
 			if effectiveSelection.Profile.Fields["level"] {
@@ -519,9 +561,9 @@ func GetBuildTemplatePreview(
 				})
 			}
 
-			rawSpells, err := engine.GetEquippedSpells(req.SaveSessionID, req.CharacterID)
+			rawSpells, err := engine.GetEquippedSpells(saveSessionID, characterID)
 			if err != nil {
-				return GetBuildTemplatePreviewResult{}, err
+				return resolvedBuildTemplatePlan{}, err
 			}
 			if rawSpells.Spells[12] != 0xFFFFFFFF || rawSpells.Spells[13] != 0xFFFFFFFF {
 				blockingIssues = append(blockingIssues, BuildTemplatePreviewIssue{
@@ -531,9 +573,9 @@ func GetBuildTemplatePreview(
 				})
 			}
 
-			spellsRes, err := equipment.GetEquippedSpells(engine, catalog, req.SaveSessionID, req.CharacterID)
+			spellsRes, err := equipment.GetEquippedSpells(engine, catalog, saveSessionID, characterID)
 			if err != nil {
-				return GetBuildTemplatePreviewResult{}, err
+				return resolvedBuildTemplatePlan{}, err
 			}
 
 			// Step 9.1: Build 12-position intermediate array with current vs template targets.
@@ -577,6 +619,7 @@ func GetBuildTemplatePreview(
 			seenRawIDs := make(map[uint32]struct{}, len(compactTargets))
 			usedMemorySlots := 0
 			var resolvedEquipped []buildtemplates.SpellSlotRef
+			var resolvedRawIDs []uint32
 
 			for idx, tgt := range compactTargets {
 				res, exists := catalog.ItemByGameID(tgt.BaseItemID)
@@ -589,7 +632,7 @@ func GetBuildTemplatePreview(
 					})
 					continue
 				}
-				rawID, memCost, valErr := equipment.ValidateSpellResource(res)
+				rawID, memCost, valErr := gamecatalog.ValidateSpellResource(res)
 				if valErr != nil {
 					spellLoadoutValid = false
 					blockingIssues = append(blockingIssues, BuildTemplatePreviewIssue{
@@ -625,6 +668,7 @@ func GetBuildTemplatePreview(
 					BaseItemID: tgt.BaseItemID,
 					Name:       resolvedName,
 				})
+				resolvedRawIDs = append(resolvedRawIDs, rawID)
 			}
 
 			if usedMemorySlots > 12 {
@@ -685,29 +729,54 @@ func GetBuildTemplatePreview(
 					})
 				}
 				plan.Spells = spPlan
+				targetSpells = &saveengine.CharacterSpellsPlan{
+					RawMagicParamIDs: resolvedRawIDs,
+					UsedMemorySlots:  usedMemorySlots,
+				}
 			}
 		}
 	}
 
 	// 10. Final save read consistency check.
-	finalUndo, err := engine.GetUndoState(req.SaveSessionID, req.CharacterID)
+	finalUndo, err := engine.GetUndoState(saveSessionID, characterID)
 	if err != nil {
-		return GetBuildTemplatePreviewResult{}, err
+		return resolvedBuildTemplatePlan{}, err
 	}
 	if finalUndo.SaveRevision != initialUndo.SaveRevision {
-		return GetBuildTemplatePreviewResult{}, ErrSaveRevisionConflict
+		return resolvedBuildTemplatePlan{}, ErrSaveRevisionConflict
 	}
 
 	executable := len(blockingIssues) == 0
+	if !executable {
+		targetName = nil
+		targetAttrs = nil
+		targetSpells = nil
+	}
 
-	return GetBuildTemplatePreviewResult{
-		TemplateID:       req.TemplateID,
-		TemplateRevision: templateRevision,
-		CharacterID:      req.CharacterID,
-		SaveSessionID:    req.SaveSessionID,
-		SaveRevision:     initialUndo.SaveRevision,
-		Executable:       executable,
-		Plan:             plan,
-		BlockingIssues:   blockingIssues,
+	return resolvedBuildTemplatePlan{
+		previewResult: GetBuildTemplatePreviewResult{
+			TemplateID:       templateID,
+			TemplateRevision: templateRevision,
+			CharacterID:      characterID,
+			SaveSessionID:    saveSessionID,
+			SaveRevision:     initialUndo.SaveRevision,
+			Executable:       executable,
+			Plan:             plan,
+			BlockingIssues:   blockingIssues,
+		},
+		targetName:   targetName,
+		targetAttrs:  targetAttrs,
+		targetSpells: targetSpells,
 	}, nil
+}
+
+func formatBlockingIssues(issues []BuildTemplatePreviewIssue) string {
+	if len(issues) == 0 {
+		return ""
+	}
+	parts := make([]string, len(issues))
+	for i, iss := range issues {
+		parts[i] = fmt.Sprintf("[%s] %s", iss.Code, iss.Message)
+	}
+	return strings.Join(parts, "; ")
 }

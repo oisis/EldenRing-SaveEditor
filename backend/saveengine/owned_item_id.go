@@ -126,6 +126,12 @@ func (session *Session) revisionString() string {
 	return strconv.FormatUint(session.revision, 10)
 }
 
+// IsCanonicalRevision reports whether value is a canonical decimal saveRevision
+// string with no sign, prefix, padding or separator.
+func IsCanonicalRevision(value string) bool {
+	return isCanonicalRevision(value)
+}
+
 // isCanonicalRevision accepts exactly the decimal representation emitted by
 // revisionString. Callers still compare the original string byte for byte; the
 // parsed value never becomes part of the public contract.

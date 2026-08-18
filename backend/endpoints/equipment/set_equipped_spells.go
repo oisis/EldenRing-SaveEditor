@@ -46,59 +46,6 @@ type SetEquippedSpellsResult struct {
 	AvailableMemorySlots int                   `json:"availableMemorySlots"`
 }
 
-// ValidateSpellResource validates one spell resource against catalog rules and returns its raw ID and memory cost.
-// It does not require presentation name, preserving the SetEquippedSpells contract.
-func ValidateSpellResource(resource schema.Resource) (rawID uint32, memoryCost int, err error) {
-	if resource.Item == nil {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q has no item document",
-			resource.Kind, resource.Key)
-	}
-	item := resource.Item
-	if !item.Family.Known || item.Family.Value != schema.ItemFamilySpell {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q has item family %q, want %q",
-			resource.Kind, resource.Key, item.Family.Value, schema.ItemFamilySpell)
-	}
-	if !item.GameID.Known {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q has no known game ID",
-			resource.Kind, resource.Key)
-	}
-	gameID := item.GameID.Value
-	if gameID&0xF0000000 != equippedSpellGameIDPrefix {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q has unsupported spell game ID 0x%08X",
-			resource.Kind, resource.Key, gameID)
-	}
-	if item.Spell == nil || !item.Spell.MemorySlots.Known || item.Spell.MemorySlots.Value <= 0 {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q has invalid memory slots",
-			resource.Kind, resource.Key)
-	}
-
-	equipment := item.Capabilities.Equipment
-	if !equipment.Known || !equipment.Enabled || equipment.Rules == nil {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q has no confirmed equipment capability",
-			resource.Kind, resource.Key)
-	}
-	allowed := false
-	for _, slot := range equipment.Rules.AllowedSlots {
-		if slot == schema.EquipmentSlotSpellMemory {
-			allowed = true
-			break
-		}
-	}
-	if !allowed {
-		return 0, 0, fmt.Errorf(
-			"resource kind %q key %q cannot be equipped in the spell memory slot",
-			resource.Kind, resource.Key)
-	}
-
-	return gameID &^ equippedSpellGameIDPrefix, int(item.Spell.MemorySlots.Value), nil
-}
-
 // SetEquippedSpells replaces the compact spell memory positions of one active character.
 func SetEquippedSpells(
 	engine *saveengine.Engine,
@@ -136,7 +83,7 @@ func SetEquippedSpells(
 			return SetEquippedSpellsResult{}, fmt.Errorf("orderedResources[%d]: %w", index, err)
 		}
 
-		rawID, memCost, err := ValidateSpellResource(resource)
+		rawID, memCost, err := gamecatalog.ValidateSpellResource(resource)
 		if err != nil {
 			return SetEquippedSpellsResult{}, fmt.Errorf("orderedResources[%d]: %w", index, err)
 		}

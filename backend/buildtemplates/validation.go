@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
 	"unicode/utf16"
 )
 
@@ -275,6 +276,9 @@ func validateProfileSection(p *ProfileSection) error {
 		name := *p.Name
 		if name == "" {
 			return fmt.Errorf("ValidateTemplate: profile.name is empty")
+		}
+		if strings.ContainsRune(name, '\x00') {
+			return fmt.Errorf("ValidateTemplate: profile.name contains NUL")
 		}
 		if len(utf16.Encode([]rune(name))) > MaxProfileNameUTF16Units {
 			return fmt.Errorf("ValidateTemplate: profile.name exceeds %d UTF-16 code units", MaxProfileNameUTF16Units)

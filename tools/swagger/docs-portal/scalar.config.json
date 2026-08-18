@@ -255,6 +255,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/templates/get_build_template_preview.md",
                 "title": "GetBuildTemplatePreview"
+              },
+              "/apply-build-template": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/templates/apply_build_template.md",
+                "title": "ApplyBuildTemplate"
               }
             }
           },

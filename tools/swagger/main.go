@@ -3475,6 +3475,15 @@ type getBuildTemplatePreviewRequest struct {
 	Options       *buildtemplates.ApplyOptions      `json:"options,omitempty"`
 }
 
+// applyBuildTemplateRequest is the JSON body of POST /api/v1/build-templates/{templateID}/apply.
+type applyBuildTemplateRequest struct {
+	SaveSessionID    string                            `json:"saveSessionID"`
+	CharacterID      *int                              `json:"characterID"`
+	Selection        *buildtemplates.TemplateSelection `json:"selection,omitempty"`
+	Options          *buildtemplates.ApplyOptions      `json:"options,omitempty"`
+	ExpectedRevision string                            `json:"expectedRevision"`
+}
+
 // registerTemplatesRoutes registers local Build Templates library routes.
 func registerTemplatesRoutes(
 	mux *http.ServeMux,
@@ -3673,6 +3682,61 @@ func registerTemplatesRoutes(
 			case errors.Is(err, buildtemplates.ErrNotFound) || strings.Contains(err.Error(), "unknown save session"):
 				writeError(writer, http.StatusNotFound, err)
 			case errors.Is(err, templates.ErrSaveRevisionConflict):
+				writeError(writer, http.StatusConflict, err)
+			default:
+				writeError(writer, http.StatusBadRequest, err)
+			}
+			return
+		}
+		writeJSON(writer, http.StatusOK, result)
+	})
+	mux.HandleFunc("POST /api/v1/build-templates/{templateID}/apply", func(writer http.ResponseWriter, request *http.Request) {
+		if err := requireJSONBody(request); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		var body applyBuildTemplateRequest
+		decoder := json.NewDecoder(request.Body)
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&body); err != nil {
+			writeError(writer, http.StatusBadRequest, err)
+			return
+		}
+		if err := decoder.Decode(&struct{}{}); !errors.Is(err, io.EOF) {
+			writeError(writer, http.StatusBadRequest, errors.New("request body must contain exactly one JSON value"))
+			return
+		}
+		if body.SaveSessionID == "" {
+			writeError(writer, http.StatusBadRequest, errors.New("saveSessionID is required"))
+			return
+		}
+		if body.CharacterID == nil {
+			writeError(writer, http.StatusBadRequest, errors.New("characterID is required"))
+			return
+		}
+		if body.ExpectedRevision == "" {
+			writeError(writer, http.StatusBadRequest, errors.New("expectedRevision is required"))
+			return
+		}
+		result, err := templates.ApplyBuildTemplate(
+			templatesStore,
+			saveEngine,
+			gameCatalog,
+			templates.ApplyBuildTemplateRequest{
+				SaveSessionID:    body.SaveSessionID,
+				CharacterID:      *body.CharacterID,
+				TemplateID:       request.PathValue("templateID"),
+				Selection:        body.Selection,
+				Options:          body.Options,
+				ExpectedRevision: body.ExpectedRevision,
+			},
+		)
+		if err != nil {
+			switch {
+			case errors.Is(err, buildtemplates.ErrNotFound) || strings.Contains(err.Error(), "unknown save session"):
+				writeError(writer, http.StatusNotFound, err)
+			case errors.Is(err, templates.ErrSaveRevisionConflict) ||
+				strings.Contains(err.Error(), "does not match the current saveRevision"):
 				writeError(writer, http.StatusConflict, err)
 			default:
 				writeError(writer, http.StatusBadRequest, err)
