@@ -1,7 +1,7 @@
 {
   "manifest": {
     "schemaVersion": 16,
-    "dataVersion": "30686a361ae848d981abafef02fa45ebdf9c2eafb5ccc63913b740d578e01423",
+    "dataVersion": "509a91ca6e22bf69330f2f1f02b90306a3622c7b189119c4459db96d11fdd200",
     "gameVersion": "1.16-class",
     "sources": [
       {
@@ -250,6 +250,14 @@
         "location": "regulation.bin/msg/engus/menu_dlc02.msgbnd/TutorialTitle_dlc02.fmg",
         "version": "aae8bddca1b233c7047ab8f2c90c3fdf592278682ca2d5d2689f31092d98152a",
         "evidence": "game_data",
+        "reviewed": true
+      },
+      {
+        "id": "curated_safety",
+        "kind": "curated_safety_overrides",
+        "location": "archive/saveforge-1.6.8/backend/gamecatalog/migration/safety_curation.go",
+        "version": "0466c76dce87e5fc6fe5eb9913ebe57e5d1ed56609a376e5fbd14a5f5d67fa4e",
+        "evidence": "curated",
         "reviewed": true
       },
       {

@@ -216,18 +216,18 @@
     "safety": {
       "cutContent": {
         "known": true,
-        "value": true,
+        "value": false,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "derived from legacy ItemData flags"
+          "source": "curated_safety",
+          "method": "curated safety override (ItemLotParam_map:11000035 / ProtectorName.fmg:1930100): normally obtainable in Leyndell Lower Capital Church"
         }
       },
       "banRisk": {
         "known": true,
-        "value": true,
+        "value": false,
         "provenance": {
-          "source": "legacy_db_data",
-          "method": "derived from legacy ItemData flags"
+          "source": "curated_safety",
+          "method": "curated safety override (ItemLotParam_map:11000035 / ProtectorName.fmg:1930100): normally obtainable in Leyndell Lower Capital Church"
         }
       },
       "dlc": {
