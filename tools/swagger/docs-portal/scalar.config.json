@@ -230,6 +230,11 @@
                 "type": "page",
                 "filepath": "../../../docs/endpoints/diagnostics/get_save_validation_report.md",
                 "title": "GetSaveValidationReport"
+              },
+              "/get-repair-plan": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/diagnostics/get_repair_plan.md",
+                "title": "GetRepairPlan"
               }
             }
           },

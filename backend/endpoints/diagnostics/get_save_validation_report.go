@@ -75,10 +75,18 @@ var saveValidationScopes = []string{
 // where, and deliberately nothing about how to resolve it: this getter proposes
 // no action, no default action and no repair.
 //
+// ID addresses this one finding for GetRepairPlan. It is derived from the scope,
+// the code and the position of the finding inside its own scope, so it is stable
+// for a given SaveRevision and unaffected by the scope filter: a scope is always
+// judged as a whole, so narrowing the report can never renumber what it returns.
+// Like OwnedItemID it is valid for the SaveRevision of the report and for
+// nothing else.
+//
 // OwnedItemID identifies the container record a record-scoped issue was found
 // in, valid for the SaveRevision of the report and for nothing else. It is empty
 // for an issue that names no record.
 type SaveValidationIssue struct {
+	ID          string `json:"id"`
 	Code        string `json:"code"`
 	Severity    string `json:"severity"`
 	Scope       string `json:"scope"`
@@ -162,7 +170,18 @@ func GetSaveValidationReport(
 	if err != nil {
 		return GetSaveValidationReportResult{}, err
 	}
+	return buildSaveValidationReport(gameCatalog, facts, requested), nil
+}
 
+// buildSaveValidationReport judges one already-read set of facts. It exists so
+// GetRepairPlan can derive a plan and the report it explains from the same facts
+// of the same lock and the same revision, instead of reading the save twice and
+// risking two reports that disagree.
+func buildSaveValidationReport(
+	gameCatalog *gamecatalog.Catalog,
+	facts saveengine.SaveValidationFacts,
+	requested map[string]bool,
+) GetSaveValidationReportResult {
 	result := GetSaveValidationReportResult{
 		SaveSessionID: facts.SaveSessionID,
 		SaveRevision:  facts.SaveRevision,
@@ -184,6 +203,9 @@ func GetSaveValidationReport(
 		}
 
 		coverage, issues := checkValidationScope(gameCatalog, facts, name)
+		for index := range issues {
+			issues[index].ID = validationIssueID(name, issues[index].Code, index)
+		}
 		result.Coverage = append(result.Coverage, coverage)
 		result.Issues = append(result.Issues, issues...)
 	}
@@ -195,7 +217,19 @@ func GetSaveValidationReport(
 		}
 		result.WarningCount++
 	}
-	return result, nil
+	return result
+}
+
+// validationIssueID builds the stable identifier of one finding. The position is
+// counted inside the scope and not inside the report, because only the scope is
+// judged as an indivisible unit: numbering across the whole report would shift
+// every identifier as soon as a caller narrowed the scope.
+//
+// The code travels inside the identifier so a caller replaying an identifier
+// against a report it does not belong to is rejected instead of silently
+// repairing a different finding.
+func validationIssueID(scope string, code string, indexInScope int) string {
+	return fmt.Sprintf("%s:%s:%d", scope, code, indexInScope)
 }
 
 // requestedValidationScopes turns the scope input into the set of scopes to

@@ -123,15 +123,18 @@ type reportTestRef struct {
 }
 
 type reportTestFixture struct {
-	platform   saveengine.Platform
-	inactive   bool
-	attributes *[8]uint32
-	level      *uint32
-	soulMemory *uint32
-	inventory  []reportTestRow
-	storage    []reportTestRow
-	spells     map[int]uint32
-	references []reportTestRef
+	platform saveengine.Platform
+	inactive bool
+	// startingClass is the raw StartingClassID written to the slot. The zero
+	// value is class 0, Vagabond, whose minima reportTestVagabond restates.
+	startingClass uint8
+	attributes    *[8]uint32
+	level         *uint32
+	soulMemory    *uint32
+	inventory     []reportTestRow
+	storage       []reportTestRow
+	spells        map[int]uint32
+	references    []reportTestRef
 }
 
 func writeReportFixture(t *testing.T, content reportTestFixture) string {
@@ -187,7 +190,7 @@ func writeReportFixture(t *testing.T, content reportTestFixture) string {
 		soulMemory = *content.soulMemory
 	}
 	put(reportTestSoulMemoryOffset, soulMemory)
-	data[anchor+reportTestClassOffset] = 0
+	data[anchor+reportTestClassOffset] = content.startingClass
 	data[anchor+reportTestTalismanOffset] = 0
 
 	for _, row := range content.inventory {

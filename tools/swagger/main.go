@@ -441,6 +441,14 @@ type setCharacterRunesRequest struct {
 // undoCharacterChangesRequest is the strict JSON body of the character undo
 // route. Both values reach SaveEngine exactly as sent; the transport owns no
 // token or revision rule.
+// getRepairPlanRequest carries the identifiers of the findings to plan for. It
+// is a POST body rather than a query string only because it is a list; the
+// operation behind it is a getter and mutates nothing.
+type getRepairPlanRequest struct {
+	SaveRevision string   `json:"saveRevision"`
+	IssueIDs     []string `json:"issueIDs"`
+}
+
 type undoCharacterChangesRequest struct {
 	UndoToken        string `json:"undoToken"`
 	ExpectedRevision string `json:"expectedRevision"`
@@ -1682,6 +1690,41 @@ func registerSaveSessionRoutes(
 				request.PathValue("saveSessionID"),
 				characterID,
 				request.URL.Query().Get("scope"),
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"POST /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repair-plan",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			if err := requireJSONBody(request); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			var body getRepairPlanRequest
+			decoder := json.NewDecoder(request.Body)
+			decoder.DisallowUnknownFields()
+			if err := decoder.Decode(&body); err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := diagnostics.GetRepairPlan(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				body.SaveRevision,
+				body.IssueIDs,
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)

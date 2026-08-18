@@ -77,6 +77,55 @@ var startingClassBaseAttributes = [10][characterAttributeCount]uint32{
 	{10, 10, 10, 10, 10, 10, 10, 10}, // Wretch
 }
 
+// LegalAttributesFor returns the attribute set closest to the supplied one that
+// satisfies both confirmed attribute rules: the absolute range 1..99 and the
+// per-attribute minimum of the character's own starting class. Each attribute is
+// moved the smallest distance that makes it legal, and an already legal
+// attribute is returned unchanged.
+//
+// It exists so a consumer deriving a corrected attribute set — currently
+// GetRepairPlan — applies exactly the rules SetCharacterStats enforces, instead
+// of keeping a second copy of the range and the class table. The two would
+// otherwise be free to drift, and a plan built against a stale copy would be
+// rejected by the very endpoint meant to execute it.
+//
+// An unknown starting class is an error, not a skipped check: a class outside
+// the ten confirmed ones carries no known minima, so no legal set can be derived
+// for it. The class minimum is applied after the range, because every confirmed
+// class minimum already lies inside 1..99 and is therefore the stricter bound.
+//
+// This applies rules; it decides no policy. Whether a caller may write the
+// result is the caller's contract, not this function's.
+func LegalAttributesFor(
+	attributes CharacterAttributes,
+	startingClassID uint8,
+) (CharacterAttributes, error) {
+	if int(startingClassID) >= len(startingClassBaseAttributes) {
+		return CharacterAttributes{}, fmt.Errorf(
+			"starting class %d is unknown; its attribute minima are not confirmed",
+			startingClassID)
+	}
+	minima := startingClassBaseAttributes[startingClassID]
+
+	values := attributes.ordered()
+	for index, value := range values {
+		if value < statsMinimumAttribute {
+			value = statsMinimumAttribute
+		}
+		if value > statsMaximumAttribute {
+			value = statsMaximumAttribute
+		}
+		if value < minima[index] {
+			value = minima[index]
+		}
+		values[index] = value
+	}
+	return CharacterAttributes{
+		Vigor: values[0], Mind: values[1], Endurance: values[2], Strength: values[3],
+		Dexterity: values[4], Intelligence: values[5], Faith: values[6], Arcane: values[7],
+	}, nil
+}
+
 // CharacterAttributes is the complete writable attribute set of one character.
 // All eight fields are mandatory: the transport rejects a request that omits one
 // instead of reading the omission as the illegal value zero.

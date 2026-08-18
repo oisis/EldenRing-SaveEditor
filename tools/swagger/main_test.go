@@ -1620,8 +1620,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 81 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 81", found)
+	if found != 82 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 82", found)
 	}
 }
 
@@ -8295,5 +8295,106 @@ func TestSaveValidationReportRouteIsDescribedInTheOpenAPIDocument(t *testing.T) 
 	want := []string{"inventory", "storage", "stats", "equipment", "spells"}
 	if !reflect.DeepEqual(scope.Schema.Enum, want) {
 		t.Errorf("ValidationScope enum = %v, want %v", scope.Schema.Enum, want)
+	}
+}
+
+// TestRepairPlanRouteMatchesTheGetter proves the transport is a thin shell: the
+// route body must be exactly what GetRepairPlan returns for the same input, and
+// the request body must reach the endpoint unchanged.
+func TestRepairPlanRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/repair-plan"
+
+	report, err := diagnostics.GetSaveValidationReport(saveEngine, gameCatalog, session.SaveSessionID, 0, "")
+	if err != nil {
+		t.Fatalf("diagnostics.GetSaveValidationReport: %v", err)
+	}
+	if len(report.Issues) == 0 {
+		t.Skip("the fixture slot is clean, so it names no finding to plan for")
+	}
+	ids := make([]string, 0, len(report.Issues))
+	for _, issue := range report.Issues {
+		ids = append(ids, issue.ID)
+	}
+
+	want, err := diagnostics.GetRepairPlan(
+		saveEngine, gameCatalog, session.SaveSessionID, 0, report.SaveRevision, ids)
+	if err != nil {
+		t.Fatalf("diagnostics.GetRepairPlan: %v", err)
+	}
+
+	body, err := json.Marshal(map[string]any{"saveRevision": report.SaveRevision, "issueIDs": ids})
+	if err != nil {
+		t.Fatalf("marshal request: %v", err)
+	}
+	request := httptest.NewRequest(http.MethodPost, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("repair plan route body differs from the GetRepairPlan result")
+	}
+}
+
+// TestRepairPlanRouteRejectsAStaleRevision proves the route forwards the save
+// revision rather than substituting the current one. A plan that could be built
+// against any revision would silently address findings that have moved.
+func TestRepairPlanRouteRejectsAStaleRevision(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/repair-plan"
+
+	body := []byte(`{"saveRevision":"999999","issueIDs":["stats:level_mismatch:0"]}`)
+	request := httptest.NewRequest(http.MethodPost, target, bytes.NewReader(body))
+	request.Header.Set("Content-Type", "application/json")
+
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).ServeHTTP(recorder, request)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400 for a revision the session is not at", recorder.Code)
+	}
+}
+
+// TestRepairPlanRouteIsDescribedInTheOpenAPIDocument keeps the contract the
+// portal serves in step with the route.
+func TestRepairPlanRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Paths map[string]map[string]any `json:"paths"`
+		Comps struct {
+			Schemas map[string]any `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	const path = "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repair-plan"
+	operation, exists := document.Paths[path]
+	if !exists {
+		t.Fatalf("openapi.json does not describe %s", path)
+	}
+	if _, hasPost := operation["post"]; !hasPost {
+		t.Fatalf("openapi.json describes %s without a POST operation", path)
+	}
+	for _, name := range []string{"RepairPlan", "RepairAction", "RepairRejection", "GetRepairPlanRequest"} {
+		if _, exists := document.Comps.Schemas[name]; !exists {
+			t.Errorf("openapi.json does not describe the %s schema", name)
+		}
 	}
 }

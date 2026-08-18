@@ -590,3 +590,77 @@ func TestPlanCharacterStats_ReadOnly(t *testing.T) {
 		t.Errorf("ownedByLocator count changed from %d to %d", ownedByLocCountBefore, ownedByLocCountAfter)
 	}
 }
+
+// TestLegalAttributesFor covers the rule application GetRepairPlan derives a
+// corrected attribute set from. Both bounds and the class minimum are exercised
+// together, because the class minimum is the stricter one wherever they overlap
+// and a correction that applied only the range would still be rejected by
+// SetCharacterStats.
+func TestLegalAttributesFor(t *testing.T) {
+	// Vagabond, class 0, minima {15, 10, 11, 14, 13, 9, 9, 7}.
+	const vagabond = uint8(0)
+
+	t.Run("a legal set is returned unchanged", func(t *testing.T) {
+		legal := CharacterAttributes{
+			Vigor: 20, Mind: 30, Endurance: 11, Strength: 14,
+			Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7,
+		}
+		got, err := LegalAttributesFor(legal, vagabond)
+		if err != nil {
+			t.Fatalf("LegalAttributesFor: %v", err)
+		}
+		if got != legal {
+			t.Errorf("a legal set was altered: %+v -> %+v", legal, got)
+		}
+	})
+
+	t.Run("each attribute moves the smallest legal distance", func(t *testing.T) {
+		got, err := LegalAttributesFor(CharacterAttributes{
+			Vigor: 0, Mind: 200, Endurance: 40, Strength: 12,
+			Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7,
+		}, vagabond)
+		if err != nil {
+			t.Fatalf("LegalAttributesFor: %v", err)
+		}
+		want := CharacterAttributes{
+			// 0 is below both bounds; the class minimum 15 is the stricter one.
+			Vigor: 15,
+			// 200 is above the absolute maximum.
+			Mind: 99,
+			// 40 is legal on both rules and must not move.
+			Endurance: 40,
+			// 12 is inside 1..99 but below the class minimum 14.
+			Strength:  14,
+			Dexterity: 13, Intelligence: 9, Faith: 9, Arcane: 7,
+		}
+		if got != want {
+			t.Errorf("LegalAttributesFor = %+v, want %+v", got, want)
+		}
+	})
+
+	t.Run("the result is always writable by SetCharacterStats", func(t *testing.T) {
+		// Every confirmed class sums to at least 80, so a corrected set can never
+		// produce a level below the minimum 1. This is the invariant that lets a
+		// plan promise the executing endpoint will accept its target.
+		for class := uint8(0); class < 10; class++ {
+			got, err := LegalAttributesFor(CharacterAttributes{}, class)
+			if err != nil {
+				t.Fatalf("class %d: LegalAttributesFor: %v", class, err)
+			}
+			sum := got.Vigor + got.Mind + got.Endurance + got.Strength +
+				got.Dexterity + got.Intelligence + got.Faith + got.Arcane
+			if sum < 80 {
+				t.Errorf("class %d minima sum to %d, which produces a level below 1", class, sum)
+			}
+		}
+	})
+
+	t.Run("an unknown starting class is rejected", func(t *testing.T) {
+		if _, err := LegalAttributesFor(CharacterAttributes{
+			Vigor: 20, Mind: 20, Endurance: 20, Strength: 20,
+			Dexterity: 20, Intelligence: 20, Faith: 20, Arcane: 20,
+		}, 10); err == nil {
+			t.Error("class 10 was accepted, but it carries no confirmed minima")
+		}
+	})
+}

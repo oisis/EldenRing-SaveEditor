@@ -1699,6 +1699,54 @@
         }
       }
     },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/repair-plan": {
+      "post": {
+        "operationId": "getRepairPlan",
+        "tags": ["Diagnostics"],
+        "summary": "GetRepairPlan",
+        "description": "Turns selected findings of GetSaveValidationReport into a non-mutating plan of the changes that would resolve them, bound to the exact save version the findings were observed at. POST is the transport verb only because the request carries a list of identifiers; the operation is a getter that writes nothing, reserves nothing and changes no session state. A finding becomes an action only when confirmed data determines a single target state for it; every other requested finding is returned as an explicit rejection carrying the reason it carries no plan, because inventing a resolution policy here would turn a heuristic into a save mutation. Actions and rejections together account for every requested identifier exactly once, ordered by the order the report lists their findings, so the same request always produces the same plan. The plan is sealed with a derived planToken so ApplyRepairs can prove it is executing exactly this plan of exactly this save version without any server-side reservation. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/SaveSessionID"
+          },
+          {
+            "$ref": "#/components/parameters/CharacterID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetRepairPlanRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The repair plan of the selected findings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RepairPlan"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, a missing saveRevision, a saveRevision that is not the current revision of the session, an inactive or residual slot, an empty, repeated or empty-string issue identifier, or an identifier naming no finding of the current report",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-spells": {
       "get": {
         "operationId": "getEquippedSpells",
@@ -4722,11 +4770,157 @@
       }
     },
     "schemas": {
+      "GetRepairPlanRequest": {
+        "type": "object",
+        "description": "The findings to plan for, together with the save revision they were observed at.",
+        "required": ["saveRevision", "issueIDs"],
+        "additionalProperties": false,
+        "properties": {
+          "saveRevision": {
+            "type": "string",
+            "description": "The revision the findings were observed at, exactly as returned in saveRevision by GetSaveValidationReport. It is required and matched exactly: an issue identifier describes a position inside a report of one revision, so a plan derived from identifiers of an older revision would address findings that have since moved. A revision that no longer matches the session is rejected rather than reinterpreted.",
+            "example": "1"
+          },
+          "issueIDs": {
+            "type": "array",
+            "description": "The id values of the SaveValidationIssue entries to plan for, from a report of this same character at this same revision. At least one is required. An empty list, a repeated identifier and an identifier naming no current finding are all rejected: the endpoint never guesses which defect a caller meant and never silently returns a smaller plan than was asked for. The order of the request is ignored; the plan is ordered by the report.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            },
+            "example": ["stats:level_mismatch:0", "inventory:quantity_zero:1"]
+          }
+        }
+      },
+      "RepairAction": {
+        "type": "object",
+        "description": "One planned change. It is a description, not an execution: building it changes nothing and reserves nothing.",
+        "required": ["issueIDs", "scope", "operation", "description"],
+        "properties": {
+          "issueIDs": {
+            "type": "array",
+            "description": "Every finding this one action resolves, in report order. It is a list because the statistics block is repaired by a single atomic set_character_stats over all eight attributes, which can answer several findings at once; a container action always names exactly one. Each requested identifier still points at exactly one action or one rejection, so nothing is ever silently dropped, but an action may be shared.",
+            "minItems": 1,
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["inventory", "storage", "stats", "equipment", "spells"],
+            "description": "The validation scope the finding was made in."
+          },
+          "operation": {
+            "type": "string",
+            "enum": [
+              "set_owned_item_quantity",
+              "remove_owned_item",
+              "set_character_stats"
+            ],
+            "description": "The mutating contract that would carry out this action. The plan never invents a new way to write the save."
+          },
+          "ownedItemID": {
+            "type": "string",
+            "description": "The container record the action applies to, valid for the saveRevision of this plan and for nothing else. Absent for an action that names no record."
+          },
+          "targetValue": {
+            "type": "integer",
+            "format": "int64",
+            "description": "The single count the operation sets. Present only for set_owned_item_quantity, which is the one operation whose target is a single number."
+          },
+          "attributes": {
+            "type": "object",
+            "description": "The corrected attribute set of a set_character_stats action: the nearest set satisfying both the absolute range 1..99 and the per-attribute minima of the character's own starting class, each attribute moved the smallest legal distance. Absent for every other operation. Applying it also recalculates the stored level from these attributes and raises the lifetime runes to that level's minimum, which SetCharacterStats always does.",
+            "required": ["vigor", "mind", "endurance", "strength", "dexterity", "intelligence", "faith", "arcane"],
+            "properties": {
+              "vigor": { "type": "integer", "format": "int64" },
+              "mind": { "type": "integer", "format": "int64" },
+              "endurance": { "type": "integer", "format": "int64" },
+              "strength": { "type": "integer", "format": "int64" },
+              "dexterity": { "type": "integer", "format": "int64" },
+              "intelligence": { "type": "integer", "format": "int64" },
+              "faith": { "type": "integer", "format": "int64" },
+              "arcane": { "type": "integer", "format": "int64" }
+            }
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable statement of what the action would change and to what."
+          }
+        }
+      },
+      "RepairRejection": {
+        "type": "object",
+        "description": "One requested finding this build refuses to plan for, with the reason. It exists so a caller never has to read an absent action as either already fine or silently handled: a finding is planned or it is refused, never omitted. A refusal is a result, not an error.",
+        "required": ["issueID", "code", "scope", "reason"],
+        "properties": {
+          "issueID": {
+            "type": "string",
+            "description": "The validation issue that carries no plan."
+          },
+          "code": {
+            "type": "string",
+            "description": "The issue code of that finding."
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["inventory", "storage", "stats", "equipment", "spells"],
+            "description": "The validation scope the finding was made in."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why no repair is derived. Either this build cannot resolve the stored data, so a repair would mean guessing what it was meant to be, or the resolution would need a policy this project has not confirmed."
+          }
+        }
+      },
+      "RepairPlan": {
+        "type": "object",
+        "description": "A non-mutating plan of selected repairs bound to one save version. Actions and rejected together account for every requested identifier exactly once, both ordered by the order the validation report lists their findings, so two plans of the same revision and the same request are identical.",
+        "required": ["saveSessionID", "saveRevision", "characterID", "planToken", "actions", "rejected"],
+        "properties": {
+          "saveSessionID": {
+            "type": "string",
+            "description": "The session the plan was derived from."
+          },
+          "saveRevision": {
+            "type": "string",
+            "description": "The save revision the plan is bound to."
+          },
+          "characterID": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The character slot the plan applies to. A plan is per-character because a validation issue identifier is unique inside one slot and nowhere else."
+          },
+          "planToken": {
+            "type": "string",
+            "description": "The SHA-256 digest, hex-encoded, of the session identifier, the save revision, the character and every action in order. It is derived rather than random so ApplyRepairs can derive the plan itself, recompute the token and compare: a plan needs no server-side storage, no expiry and no reservation. Any change to the save, the character, the selection or a single action target produces a different token, so a token can never authorise a mutation that was not the one described."
+          },
+          "actions": {
+            "type": "array",
+            "description": "The findings whose target state confirmed data determines uniquely.",
+            "items": {
+              "$ref": "#/components/schemas/RepairAction"
+            }
+          },
+          "rejected": {
+            "type": "array",
+            "description": "The requested findings that carry no repair contract, each with the reason. This is deliberately the larger group.",
+            "items": {
+              "$ref": "#/components/schemas/RepairRejection"
+            }
+          }
+        }
+      },
       "SaveValidationIssue": {
         "type": "object",
         "description": "One detected problem. It states what is wrong and where, and deliberately nothing about how to resolve it: this getter proposes no action, no default action and no repair.",
-        "required": ["code", "severity", "scope", "message", "ownedItemID"],
+        "required": ["id", "code", "severity", "scope", "message", "ownedItemID"],
         "properties": {
+          "id": {
+            "type": "string",
+            "description": "Identifier addressing this one finding for GetRepairPlan. It is derived from the scope, the code and the position of the finding inside its own scope, so it is stable for a given saveRevision and unaffected by the scope filter: a scope is always judged as a whole, so narrowing the report never renumbers what it returns. Like ownedItemID it is valid for the saveRevision of this report and for nothing else.",
+            "example": "inventory:quantity_zero:0"
+          },
           "code": {
             "type": "string",
             "description": "Stable identifier of the problem a caller may branch on. The message beside it is not stable.",

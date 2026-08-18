@@ -8,7 +8,8 @@ the problems it found.
 
 It reports defects. It does not resolve them: this getter emits no action, no
 default action and no repair proposal. Proposing a repair belongs to
-`GetRepairPlan`, and performing one belongs to `ApplyRepairs`; both are still
+[`GetRepairPlan`](get_repair_plan.md), which consumes the `id` of the findings
+selected here; performing one belongs to `ApplyRepairs`, which is still
 contract-only.
 
 The session must have been created earlier by
@@ -80,6 +81,7 @@ func GetSaveValidationReport(
 
 ```go
 type SaveValidationIssue struct {
+	ID          string `json:"id"`
 	Code        string `json:"code"`
 	Severity    string `json:"severity"`
 	Scope       string `json:"scope"`
@@ -115,6 +117,13 @@ same revision are identical.
 describes that one revision, because SaveEngine gathers all facts under a single
 lock; a concurrent mutation cannot land between two scopes and leave a report
 that mixes two states.
+
+`ID` addresses one finding for `GetRepairPlan`. It is derived from the scope, the
+code and the position of the finding inside its own scope, so it is stable for a
+given `SaveRevision` and unaffected by the `scope` filter: a scope is always
+judged as a whole, so narrowing the report never renumbers what it returns and an
+identifier taken from any report of a revision is usable against that revision.
+Like `OwnedItemID` it is valid for `SaveRevision` and for nothing else.
 
 `OwnedItemID` identifies the container record a record-scoped issue was found in.
 It is valid for `SaveRevision` and for nothing else. It is empty for an issue
@@ -274,5 +283,6 @@ reports of the same session are byte-for-byte identical.
 - It reports one character slot per call. Scanning a whole save is a loop on the
   caller's side, so a report never has to decide what an inactive slot means in
   the middle of a combined result.
-- It reports defects only. `GetRepairPlan` and `ApplyRepairs` remain
-  contract-only, so nothing in this build proposes or performs a repair.
+- It reports defects only. [`GetRepairPlan`](get_repair_plan.md) turns selected
+  findings into a plan, but `ApplyRepairs` remains contract-only, so nothing in
+  this build performs a repair.
