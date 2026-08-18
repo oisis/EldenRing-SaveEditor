@@ -5,12 +5,15 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"unicode/utf16"
 
 	"github.com/oisis/EldenRing-SaveForge/backend/buildtemplates"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/templates"
 	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog"
+	catalogdata "github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/data"
+	"github.com/oisis/EldenRing-SaveForge/backend/gamecatalog/loader"
 	"github.com/oisis/EldenRing-SaveForge/backend/saveengine"
 )
 
@@ -46,6 +49,9 @@ const (
 	testStatsFaithOffset        = -355
 	testStatsArcaneOffset       = -351
 	testStatsLevelOffset        = -335
+	testInventoryAt             = 505
+	testMemoryStones            = 2
+	testMemoryStoneHandle       = 0xB000272E
 )
 
 var testAnchor = []byte{
@@ -79,7 +85,7 @@ func writeTestSaveFixture(t *testing.T) (string, []byte) {
 
 	// Summary for slot 2
 	summary := testFixtureUserData10Offset + testFixtureSummaryOffset + int64(testSlotActive)*testFixtureSummaryStride
-	for index, unit := range utf16.Encode([]rune("Tarnished Warrior")) {
+	for index, unit := range utf16.Encode([]rune("Tarnished Hero")) {
 		binary.LittleEndian.PutUint16(data[summary+int64(index)*2:], unit)
 	}
 	binary.LittleEndian.PutUint32(data[summary+testFixtureLevelOffset:], 125)
@@ -114,6 +120,11 @@ func writeTestSaveFixture(t *testing.T) (string, []byte) {
 
 	binary.LittleEndian.PutUint32(data[anchorBase+testCountAt:], testProjectileCount)
 
+	// One Memory Stone stack in inventory (base 2 + 2 stones = exactly 4 available slots; tested loadout consumes exactly 4 slots)
+	stoneAt := anchorBase + testInventoryAt + 97*12
+	binary.LittleEndian.PutUint32(data[stoneAt:], testMemoryStoneHandle)
+	binary.LittleEndian.PutUint32(data[stoneAt+4:], testMemoryStones)
+
 	path := filepath.Join(t.TempDir(), "test_save.sl2")
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatalf("write fixture: %v", err)
@@ -121,11 +132,23 @@ func writeTestSaveFixture(t *testing.T) (string, []byte) {
 	return path, data
 }
 
+var (
+	testCatalogOnce sync.Once
+	testCatalogData loader.Data
+	testCatalogErr  error
+)
+
 func newTestCatalog(t *testing.T) *gamecatalog.Catalog {
 	t.Helper()
-	cat, err := gamecatalog.LoadEmbedded()
+	testCatalogOnce.Do(func() {
+		testCatalogData, testCatalogErr = loader.LoadFS(catalogdata.Files())
+	})
+	if testCatalogErr != nil {
+		t.Fatalf("loader.LoadFS: %v", testCatalogErr)
+	}
+	cat, err := gamecatalog.New(testCatalogData.Manifest, testCatalogData.Resources())
 	if err != nil {
-		t.Fatalf("LoadEmbedded catalog: %v", err)
+		t.Fatalf("gamecatalog.New: %v", err)
 	}
 	return cat
 }
@@ -182,7 +205,7 @@ func TestCreateBuildTemplate_Success(t *testing.T) {
 	if tpl.Metadata == nil || tpl.Metadata.Name != "Sorcerer STR Hybrid" {
 		t.Errorf("tpl.Metadata.Name = %v", tpl.Metadata)
 	}
-	if tpl.Sections.Profile == nil || *tpl.Sections.Profile.Name != "Tarnished Warrior" || *tpl.Sections.Profile.Level != 125 {
+	if tpl.Sections.Profile == nil || *tpl.Sections.Profile.Name != "Tarnished Hero" || *tpl.Sections.Profile.Level != 125 {
 		t.Errorf("tpl.Sections.Profile = %+v", tpl.Sections.Profile)
 	}
 	if tpl.Sections.Stats == nil || *tpl.Sections.Stats.Vigor != 50 || *tpl.Sections.Stats.Strength != 40 {

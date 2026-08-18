@@ -137,7 +137,7 @@ func TestGetBuildTemplatePreview_Success(t *testing.T) {
 	if res.Plan.Profile == nil || res.Plan.Profile.Name == nil || res.Plan.Profile.Level == nil {
 		t.Fatalf("Plan.Profile missing: %+v", res.Plan.Profile)
 	}
-	if res.Plan.Profile.Name.Current != "Tarnished Warrior" || res.Plan.Profile.Name.Target != "Archmage" || !res.Plan.Profile.Name.Changed {
+	if res.Plan.Profile.Name.Current != "Tarnished Hero" || res.Plan.Profile.Name.Target != "Archmage" || !res.Plan.Profile.Name.Changed {
 		t.Errorf("Plan.Profile.Name = %+v", res.Plan.Profile.Name)
 	}
 	if res.Plan.Profile.Level.Current != 125 || res.Plan.Profile.Level.Target != expectedTargetLevel || !res.Plan.Profile.Level.Changed {
@@ -423,7 +423,7 @@ func TestGetBuildTemplatePreview_LevelMismatch(t *testing.T) {
 	store := buildtemplates.NewStore(t.TempDir())
 
 	vig := uint32(60)
-	wrongLevel := uint32(999)
+	wrongLevel := uint32(100)
 	name := "Hero"
 
 	tpl := &buildtemplates.BuildTemplate{

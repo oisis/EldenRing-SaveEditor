@@ -514,7 +514,7 @@ func TestMinimumSoulMemoryForLevelReproducesTheConfirmedVectors(t *testing.T) {
 }
 
 func TestPlanCharacterStats_ReadOnly(t *testing.T) {
-	savePath := writeSetStatsTestFile(t, setStatsTestContent{
+	savePath := writeSetStatsFixture(t, setStatsTestContent{
 		platform:   PlatformPC,
 		active:     true,
 		withAnchor: true,
