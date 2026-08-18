@@ -6,7 +6,7 @@ How it works: The runtime handler resolves the addressed record and its item doc
 Supported resource types: ItemDocument with a known positive maxStorage.
 Input variables: saveSessionID, characterID, ownedItemID, targetPosition, expectedRevision.
 GameCatalog variables read: item.gameID and item.storage.maxStorage.
-Save variables processed: one Inventory common record and count, the affected common Storage rows and count, and Storage NextAcquisitionSortId; NextEquipIndex, GaItem data and references stay unchanged.
+Save variables processed: one Inventory common record and count, the affected common Storage rows and count, and Storage acquisition allocators (NextEquipIndex and NextAcquisitionSortId); GaItem data and references stay unchanged.
 Implementation status: implemented
 */
 package inventory

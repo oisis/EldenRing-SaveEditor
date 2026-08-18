@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-const moveStorageReservedIndexMax uint32 = 432
-
 // MoveOwnedItemToStorageResult reports one committed Inventory-to-Storage move.
 // OwnedItemID is the now-stale source identity. The destination receives a new
 // identity on the next Storage read under SaveRevision.
@@ -218,8 +216,20 @@ func moveOwnedItemToStorageRecord(
 			"common Storage count of character %d cannot be advanced", locator.characterID)
 	}
 
-	acquisitionIndex, nextAcquisition, err := nextStorageMoveAcquisition(
-		loaded, storageAt, common, locator.characterID)
+	countersAt := storageAt + storageKeyAt + storageKeySize
+	nextEquip, err := loaded.snapshot.uint32At(countersAt)
+	if err != nil {
+		return movedStorageRecord{}, fmt.Errorf("cannot read Storage NextEquipIndex of character %d: %w",
+			locator.characterID, err)
+	}
+	storedNext, err := loaded.snapshot.uint32At(countersAt + 4)
+	if err != nil {
+		return movedStorageRecord{}, fmt.Errorf(
+			"cannot read Storage NextAcquisitionSortId of character %d: %w", locator.characterID, err)
+	}
+
+	acquisitionIndex, nextAcquisition, updatedEquip, err := nextStorageAcquisitionAndCounters(
+		storedNext, nextEquip, stored, locator.characterID)
 	if err != nil {
 		return movedStorageRecord{}, err
 	}
@@ -247,7 +257,8 @@ func moveOwnedItemToStorageRecord(
 		{at: inventoryCountAt, data: littleEndianUint32(newInventoryCount)},
 		{at: storageAt + storageCommonAt, data: updatedCommon},
 		{at: storageAt, data: littleEndianUint32(storageCount + 1)},
-		{at: storageAt + storageKeyAt + storageKeySize + 4, data: littleEndianUint32(nextAcquisition)},
+		{at: countersAt, data: littleEndianUint32(updatedEquip)},
+		{at: countersAt + 4, data: littleEndianUint32(nextAcquisition)},
 	}
 	if err := applyByteWrites(loaded.snapshot, writes); err != nil {
 		return movedStorageRecord{}, fmt.Errorf("ownedItemID %q: %w", ownedItemID, err)
@@ -259,53 +270,6 @@ func moveOwnedItemToStorageRecord(
 		physicalIndex:    physicalIndex,
 		acquisitionIndex: acquisitionIndex,
 	}, nil
-}
-
-// nextStorageMoveAcquisition reproduces the common Storage destination rule
-// shared by SaveForge 1.5.8 and 1.6.8. NextEquipIndex is an input only and is
-// deliberately never changed.
-func nextStorageMoveAcquisition(
-	loaded *loadedSave,
-	storageAt int64,
-	common []byte,
-	characterID int,
-) (uint32, uint32, error) {
-	countersAt := storageAt + storageKeyAt + storageKeySize
-	nextEquip, err := loaded.snapshot.uint32At(countersAt)
-	if err != nil {
-		return 0, 0, fmt.Errorf("cannot read Storage NextEquipIndex of character %d: %w",
-			characterID, err)
-	}
-	storedNext, err := loaded.snapshot.uint32At(countersAt + 4)
-	if err != nil {
-		return 0, 0, fmt.Errorf(
-			"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
-	}
-	if storedNext == ^uint32(0) {
-		return 0, 0, fmt.Errorf(
-			"Storage NextAcquisitionSortId of character %d cannot be advanced", characterID)
-	}
-
-	index := nextEquip
-	if index <= moveStorageReservedIndexMax {
-		index = moveStorageReservedIndexMax + 1
-	}
-	for row := 0; row < storageCommonRecords; row++ {
-		record := common[row*storageRecordSize:]
-		handle := binary.LittleEndian.Uint32(record)
-		if handle == storageEmptyHandle || handle == storageInvalidHandle {
-			continue
-		}
-		stored := binary.LittleEndian.Uint32(record[8:])
-		if stored > moveStorageReservedIndexMax && stored < 50000 && stored >= index {
-			index = stored + 1
-		}
-	}
-	next := storedNext + 1
-	if storedNext <= index {
-		next = index + 1
-	}
-	return index, next, nil
 }
 
 // insertStorageCommonRecord inserts one row into the physical order of the

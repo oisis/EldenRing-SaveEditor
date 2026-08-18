@@ -166,7 +166,7 @@ func (engine *Engine) SetStorageOrder(
 		}
 		writes = append(writes, byteWrite{
 			at:   nextAcquisitionAt,
-			data: littleEndianUint32(indices[len(indices)-1] + 1),
+			data: littleEndianUint32(indices[len(indices)-1]/2 + 1),
 		})
 		if err := applyByteWrites(loaded.snapshot, writes); err != nil {
 			return fmt.Errorf("cannot set Storage order: %w", err)

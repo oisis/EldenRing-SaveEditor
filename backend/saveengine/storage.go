@@ -431,3 +431,60 @@ func storageSlotBounds(platform Platform, characterID int) (int64, int64) {
 	}
 	return pcStorageSlotBounds(characterID)
 }
+
+// nextStorageAcquisitionAndCounters derives the assigned acquisition index, the
+// updated NextAcquisitionSortId and the updated NextEquipIndex for one deposit
+// into common Storage.
+//
+// Native Storage indices are even with stride 2 starting at 2 (bucket 1).
+// NextAcquisitionSortId holds the next free bucket (Index/2 + 1).
+// NextEquipIndex advances on each deposit (starting at 128 on initial deposit).
+func nextStorageAcquisitionAndCounters(
+	storedNextAcquisition uint32,
+	storedNextEquip uint32,
+	records []StorageRecord,
+	characterID int,
+) (assignedIndex uint32, newNextAcquisition uint32, newNextEquip uint32, err error) {
+	var maxBucket uint64
+	for _, record := range records {
+		if record.ContainerSection != StorageSectionCommon || record.AcquisitionIndex >= 50000 {
+			continue
+		}
+		bucket := uint64(record.AcquisitionIndex) / 2
+		if bucket > maxBucket {
+			maxBucket = bucket
+		}
+	}
+
+	effectiveBucket := uint64(storedNextAcquisition)
+	if maxBucket+1 > effectiveBucket {
+		effectiveBucket = maxBucket + 1
+	}
+	if effectiveBucket < 1 {
+		effectiveBucket = 1
+	}
+
+	assigned := effectiveBucket * 2
+	if assigned >= uint64(^uint32(0)) {
+		return 0, 0, 0, fmt.Errorf(
+			"Storage acquisition index of character %d would overflow uint32", characterID)
+	}
+
+	nextAcq := effectiveBucket + 1
+	if nextAcq > uint64(^uint32(0)) {
+		return 0, 0, 0, fmt.Errorf(
+			"Storage NextAcquisitionSortId of character %d cannot be advanced", characterID)
+	}
+
+	equipBase := uint64(storedNextEquip)
+	if equipBase < 127 {
+		equipBase = 127
+	}
+	nextEquipVal := equipBase + 1
+	if nextEquipVal > uint64(^uint32(0)) {
+		return 0, 0, 0, fmt.Errorf(
+			"Storage NextEquipIndex of character %d cannot be advanced", characterID)
+	}
+
+	return uint32(assigned), uint32(nextAcq), uint32(nextEquipVal), nil
+}

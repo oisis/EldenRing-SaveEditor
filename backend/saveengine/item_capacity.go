@@ -339,33 +339,8 @@ func capacityAllocatorAvailable(
 			return false, fmt.Errorf(
 				"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
 		}
-
-		occupied := 0
-		index := uint64(storedNext)
-		for _, record := range storage {
-			if record.ContainerSection != StorageSectionCommon {
-				continue
-			}
-			occupied++
-			stored := record.AcquisitionIndex
-			if stored < 50000 && uint64(stored) >= index {
-				index = uint64(stored) + 1
-			}
-		}
-		// T310/T330: a genuinely empty Storage starts at index 2 and jumps
-		// NextEquipIndex to 128. A populated Storage leaves NextEquipIndex
-		// alone and derives an even index at or above 2 from the acquisition
-		// high-water mark. Both 1.5.8 and 1.6.8 use this direct-add rule.
-		if occupied == 0 && storedNext <= 1 && nextEquip == 0 {
-			return true, nil
-		}
-		if index < 2 {
-			index = 2
-		}
-		if index%2 != 0 {
-			index++
-		}
-		return index < uint64(^uint32(0)), nil
+		_, _, _, err = nextStorageAcquisitionAndCounters(storedNext, nextEquip, storage, characterID)
+		return err == nil, nil
 	default:
 		return false, nil
 	}

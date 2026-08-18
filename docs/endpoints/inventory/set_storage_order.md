@@ -66,7 +66,7 @@ range:
 - must end below `10000`, the native unsafe boundary established by the legacy
   save experiments.
 
-Storage `NextAcquisitionSortId` becomes the last assigned index plus one.
+Storage `NextAcquisitionSortId` becomes the next free sort bucket (`lastAssignedIndex / 2 + 1`).
 Storage `NextEquipIndex` is a separate native counter and remains unchanged.
 
 Only the four acquisition-index bytes of supported common records whose values

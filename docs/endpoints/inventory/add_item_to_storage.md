@@ -100,31 +100,19 @@ A new record changes:
 
 No section changes length and no GaItem table record is allocated.
 
-### Empty Storage
+### Storage allocation rule
 
-The native empty signature is no common records,
-`NextAcquisitionSortId <= 1` and `NextEquipIndex == 0`. Its first direct add
-uses:
+Depositing a new record into common Storage follows the unified SaveForge 2.0
+allocator confirmed by native T310 and T330 evidence:
 
-| Field | Value |
-|---|---:|
-| record acquisition index | `2` |
-| `NextAcquisitionSortId` | `2` |
-| `NextEquipIndex` | `128` |
-
-These values are confirmed by the T310 native before/after evidence and are
-identical in SaveForge 1.5.8 and 1.6.8.
-
-### Populated Storage
-
-For an already populated Storage, the endpoint:
-
-1. starts from `NextAcquisitionSortId`;
-2. raises it above every common record index below `50000`;
-3. applies a floor of `2` and rounds upward to an even value;
-4. assigns that value to the new row;
-5. stores the assigned value plus one in `NextAcquisitionSortId`;
-6. leaves `NextEquipIndex` unchanged.
+1. Derives the effective bucket:
+   `effectiveBucket = max(storedNextAcquisitionSortId, maxExistingBucket + 1, 1)`
+   where `maxExistingBucket` is the highest `acquisitionIndex / 2` among active
+   common records below `50000`.
+2. Assigns the even index `2 * effectiveBucket` with stride 2 to the new record.
+3. Advances `NextAcquisitionSortId` to `effectiveBucket + 1`.
+4. Advances `NextEquipIndex` to `max(storedNextEquipIndex, 127) + 1` (starting
+   at `128` for an initial deposit).
 
 An allocator that cannot advance without wrapping is rejected before mutation.
 

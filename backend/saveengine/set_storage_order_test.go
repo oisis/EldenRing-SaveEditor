@@ -118,8 +118,8 @@ func TestSetStorageOrderWritesOnlyIndicesAndReloadsOnBothPlatforms(t *testing.T)
 			if got := addItemTestUint32(after, storageNextEquipAt); got != 777 {
 				t.Errorf("Storage NextEquipIndex = %d, want unchanged 777", got)
 			}
-			if got := addItemTestUint32(after, storageNextAcqAt); got != 507 {
-				t.Errorf("Storage NextAcquisitionSortId = %d, want 507", got)
+			if got := addItemTestUint32(after, storageNextAcqAt); got != 254 {
+				t.Errorf("Storage NextAcquisitionSortId = %d, want 254", got)
 			}
 			if got := addItemTestUint32(after,
 				addItemTestStorageAt+addItemTestStorageKeyAt+addItemTestRecordSize+8); got != 500 {

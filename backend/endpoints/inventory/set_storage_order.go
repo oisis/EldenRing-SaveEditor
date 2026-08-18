@@ -6,7 +6,7 @@ How it works: The runtime handler classifies Storage records through GameCatalog
 Supported resource types: ItemDocument in a confirmed Storage order category, excluding the technical Unarmed record.
 Input variables: saveSessionID, characterID, orderedOwnedItemIDs, expectedRevision.
 GameCatalog variables read: item.gameID and item.category.
-Save variables processed: acquisition indices of every supported Storage common record and Storage NextAcquisitionSortId; physical rows, handles, quantities, key records, NextEquipIndex, Inventory, Equipment and GaItem data stay unchanged.
+Save variables processed: acquisition indices of every supported Storage common record and Storage NextAcquisitionSortId (set to the next free bucket); physical rows, handles, quantities, key records, NextEquipIndex, Inventory, Equipment and GaItem data stay unchanged.
 Implementation status: implemented
 */
 package inventory

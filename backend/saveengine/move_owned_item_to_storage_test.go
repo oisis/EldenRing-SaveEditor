@@ -66,7 +66,7 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 			}
 			if result.SaveRevision != "1" || result.GameID != addItemTestGoodsID ||
 				result.Quantity != 3 || result.TargetPosition != 1 || result.PhysicalIndex != 4 ||
-				result.AcquisitionIndex != 451 {
+				result.AcquisitionIndex != 452 {
 				t.Errorf("result = %+v", result)
 			}
 
@@ -95,7 +95,7 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 						index, record.GaItemHandle, wantHandles[index])
 				}
 			}
-			if storage.Records[1].Quantity != 3 || storage.Records[1].AcquisitionIndex != 451 {
+			if storage.Records[1].Quantity != 3 || storage.Records[1].AcquisitionIndex != 452 {
 				t.Errorf("moved Storage record = %+v", storage.Records[1])
 			}
 
@@ -117,13 +117,13 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 			storageNextEquipAt := base + addItemTestStorageAt +
 				addItemTestStorageKeyAt + 0x80*addItemTestRecordSize
 			if got := binary.LittleEndian.Uint32(removeTestBytes(
-				t, engine, sessionID, storageNextEquipAt, 4)); got != 0 {
-				t.Errorf("Storage NextEquipIndex = %d, want unchanged 0", got)
+				t, engine, sessionID, storageNextEquipAt, 4)); got != 128 {
+				t.Errorf("Storage NextEquipIndex = %d, want 128", got)
 			}
 			storageNextAcqAt := storageNextEquipAt + 4
 			if got := binary.LittleEndian.Uint32(removeTestBytes(
-				t, engine, sessionID, storageNextAcqAt, 4)); got != 452 {
-				t.Errorf("Storage NextAcquisitionSortId = %d, want 452", got)
+				t, engine, sessionID, storageNextAcqAt, 4)); got != 227 {
+				t.Errorf("Storage NextAcquisitionSortId = %d, want 227", got)
 			}
 
 			target := filepath.Join(t.TempDir(), "moved.sl2")
@@ -143,6 +143,65 @@ func TestMoveOwnedItemToStorageWritesBothPlatformsAndReloads(t *testing.T) {
 			if len(reloadedStorage.Records) != 3 ||
 				reloadedStorage.Records[1].GaItemHandle != addItemTestGoodsHandle {
 				t.Errorf("reloaded Storage = %+v", reloadedStorage.Records)
+			}
+		})
+	}
+}
+
+func TestMoveOwnedItemToStorageMatchesAddItemAllocatorCounters(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			// T330 shape in Storage (6 records, max index 12, equip 133, acq 7)
+			rows := make([]addItemTestRow, 6)
+			for i := 0; i < 6; i++ {
+				rows[i] = addItemTestRow{
+					index:       i,
+					handle:      addItemTestFillHandleBase + uint32(i),
+					rawQuantity: 1,
+					acquisition: uint32((i + 1) * 2), // 2, 4, 6, 8, 10, 12
+				}
+			}
+			content := addItemTestFixture{
+				platform: platform,
+				slot:     moveStorageTestSlot,
+				common: []addItemTestRow{{
+					index:       2,
+					handle:      addItemTestGoodsHandle,
+					rawQuantity: 0x80000001,
+					acquisition: 17,
+				}},
+				storage:      rows,
+				commonCount:  1,
+				storageCount: 6,
+			}
+
+			engine, sessionID, ownedItemID := moveStorageTestTarget(t, platform, content)
+			setAddStorageTestCounters(t, engine, sessionID, platform, moveStorageTestSlot, 133, 7)
+
+			result, err := engine.MoveOwnedItemToStorage(
+				sessionID, moveStorageTestSlot, ownedItemID, 6, "0", addItemTestGoodsID, 99)
+			if err != nil {
+				t.Fatalf("MoveOwnedItemToStorage: %v", err)
+			}
+			if result.AcquisitionIndex != 14 {
+				t.Errorf("moved acquisitionIndex = %d, want 14", result.AcquisitionIndex)
+			}
+			if result.AcquisitionIndex%2 != 0 {
+				t.Errorf("moved acquisitionIndex %d is not even", result.AcquisitionIndex)
+			}
+
+			base := addItemTestSlotBase(t, platform, moveStorageTestSlot) + addItemTestAnchorAt
+			storageNextEquipAt := base + addItemTestStorageAt +
+				addItemTestStorageKeyAt + 0x80*addItemTestRecordSize
+			storageNextAcqAt := storageNextEquipAt + 4
+
+			if equip := binary.LittleEndian.Uint32(removeTestBytes(
+				t, engine, sessionID, storageNextEquipAt, 4)); equip != 134 {
+				t.Errorf("Storage NextEquipIndex = %d, want 134", equip)
+			}
+			if acq := binary.LittleEndian.Uint32(removeTestBytes(
+				t, engine, sessionID, storageNextAcqAt, 4)); acq != 8 {
+				t.Errorf("Storage NextAcquisitionSortId = %d, want 8", acq)
 			}
 		})
 	}

@@ -281,9 +281,8 @@ func createStorageRecord(
 			"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
 	}
 
-	emptyInitial := occupied == 0 && storedNext <= 1 && nextEquip == 0
-	acquisitionIndex, nextAcquisition, updatedEquip, err := nextStorageAddAcquisition(
-		storedNext, nextEquip, emptyInitial, records, characterID)
+	acquisitionIndex, nextAcquisition, updatedEquip, err := nextStorageAcquisitionAndCounters(
+		storedNext, nextEquip, records, characterID)
 	if err != nil {
 		return addedStorageRecord{}, err
 	}
@@ -302,47 +301,11 @@ func createStorageRecord(
 	writes := append([]byteWrite{
 		{at: sectionAt + storageCommonAt + int64(row)*storageRecordSize, data: record},
 		{at: sectionAt, data: littleEndianUint32(declared + 1)},
+		{at: countersAt, data: littleEndianUint32(updatedEquip)},
 		{at: countersAt + 4, data: littleEndianUint32(nextAcquisition)},
 	}, gaItemData...)
-	if updatedEquip != nextEquip {
-		writes = append(writes, byteWrite{at: countersAt, data: littleEndianUint32(updatedEquip)})
-	}
 	if err := applyByteWrites(loaded.snapshot, writes); err != nil {
 		return addedStorageRecord{}, fmt.Errorf("item 0x%08X: %w", gameID, err)
 	}
 	return addedStorageRecord{physicalIndex: row, quantity: quantity, created: true}, nil
-}
-
-// nextStorageAddAcquisition is the direct-add rule confirmed by native T310 and
-// T330 evidence and shared unchanged by SaveForge 1.5.8 and 1.6.8.
-func nextStorageAddAcquisition(
-	storedNext uint32,
-	nextEquip uint32,
-	emptyInitial bool,
-	records []StorageRecord,
-	characterID int,
-) (uint32, uint32, uint32, error) {
-	if emptyInitial {
-		return 2, 2, 128, nil
-	}
-	index := uint64(storedNext)
-	for _, record := range records {
-		if record.ContainerSection != StorageSectionCommon || record.AcquisitionIndex >= 50000 {
-			continue
-		}
-		if uint64(record.AcquisitionIndex) >= index {
-			index = uint64(record.AcquisitionIndex) + 1
-		}
-	}
-	if index < 2 {
-		index = 2
-	}
-	if index%2 != 0 {
-		index++
-	}
-	if index >= uint64(^uint32(0)) {
-		return 0, 0, 0, fmt.Errorf(
-			"Storage NextAcquisitionSortId of character %d cannot be advanced", characterID)
-	}
-	return uint32(index), uint32(index + 1), nextEquip, nil
 }
