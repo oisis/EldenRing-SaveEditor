@@ -606,6 +606,12 @@ func sortResourceRefs(refs []schema.ResourceRef) {
 // converts between a raw MagicParam ID and a catalog game ID reads it from here.
 const EquippedSpellGameIDPrefix = uint32(0x40000000)
 
+// EquippedSpellRawIDLimit is the first value a raw MagicParam ID may no longer
+// reach: a stored identifier that already carries family bits is not a raw ID
+// and is never prefixed a second time. It sits beside the prefix so the two
+// halves of the same conversion rule cannot drift apart.
+const EquippedSpellRawIDLimit = uint32(0x10000000)
+
 // ValidateSpellResource validates one spell resource against catalog rules and returns its raw ID and memory cost.
 // It does not require presentation name, preserving the SetEquippedSpells contract.
 func ValidateSpellResource(resource schema.Resource) (rawID uint32, memoryCost int, err error) {

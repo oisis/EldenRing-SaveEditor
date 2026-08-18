@@ -34,12 +34,6 @@ var GetEquippedSpellsDefinition = contract.MustDefine(contract.Definition{
 	Description:                "Returns spells in memory slots together with used and available Memory Slots capacity.",
 })
 
-// equippedSpellRawIDLimit is the first value a raw MagicParam ID may no longer
-// reach: a stored identifier that already carries family bits is not a raw ID
-// and is never prefixed a second time. The item-family prefix itself lives in
-// GameCatalog as gamecatalog.EquippedSpellGameIDPrefix.
-const equippedSpellRawIDLimit uint32 = 0x10000000
-
 // equippedSpellEmptyID is the raw identifier the game stores in an empty record.
 // It is preserved in the result, and it is the one occupied-slot rule that never
 // applies: an empty record resolves nothing.
@@ -140,7 +134,7 @@ func GetEquippedSpells(
 // before the item-family prefix is applied, so a stored value that is not a raw
 // MagicParam ID is rejected instead of being converted into a different item.
 func resolveEquippedSpell(gameCatalog *gamecatalog.Catalog, raw uint32) (EquippedSpellSlot, error) {
-	if raw == 0 || raw >= equippedSpellRawIDLimit {
+	if raw == 0 || raw >= gamecatalog.EquippedSpellRawIDLimit {
 		return EquippedSpellSlot{}, fmt.Errorf("0x%08X is not a raw MagicParam ID", raw)
 	}
 
