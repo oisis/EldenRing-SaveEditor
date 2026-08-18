@@ -19,6 +19,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"sync"
 	"testing"
 	"unicode/utf16"
 
@@ -52,14 +53,27 @@ const (
 // to newHandler.
 const testApplicationVersion = "test-version"
 
+var (
+	prototypeCatalogOnce sync.Once
+	prototypeCatalog     *gamecatalog.Catalog
+	prototypeCatalogErr  error
+)
+
+// newPrototypeCatalog returns the prototype catalog shared by every route test.
+// It is built once per test binary: parsing the embedded catalog on each of the
+// calls in this package cost minutes of test time and exceeded the default
+// go test timeout. GameCatalog is never mutated at runtime and every query
+// returns an independent copy, so one instance is safe to share.
 func newPrototypeCatalog(t *testing.T) *gamecatalog.Catalog {
 	t.Helper()
 
-	gameCatalog, err := gamecatalog.NewPrototype()
-	if err != nil {
-		t.Fatalf("gamecatalog.NewPrototype: %v", err)
+	prototypeCatalogOnce.Do(func() {
+		prototypeCatalog, prototypeCatalogErr = gamecatalog.NewPrototype()
+	})
+	if prototypeCatalogErr != nil {
+		t.Fatalf("gamecatalog.NewPrototype: %v", prototypeCatalogErr)
 	}
-	return gameCatalog
+	return prototypeCatalog
 }
 
 func do(t *testing.T, gameCatalog *gamecatalog.Catalog, target string) *httptest.ResponseRecorder {

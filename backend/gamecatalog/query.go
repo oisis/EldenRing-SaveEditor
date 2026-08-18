@@ -601,7 +601,10 @@ func sortResourceRefs(refs []schema.ResourceRef) {
 	})
 }
 
-const equippedSpellGameIDPrefix = uint32(0x40000000)
+// EquippedSpellGameIDPrefix is the item-family prefix a raw MagicParam ID carries
+// in GameCatalog. It is the single definition of that prefix: every caller that
+// converts between a raw MagicParam ID and a catalog game ID reads it from here.
+const EquippedSpellGameIDPrefix = uint32(0x40000000)
 
 // ValidateSpellResource validates one spell resource against catalog rules and returns its raw ID and memory cost.
 // It does not require presentation name, preserving the SetEquippedSpells contract.
@@ -623,7 +626,7 @@ func ValidateSpellResource(resource schema.Resource) (rawID uint32, memoryCost i
 			resource.Kind, resource.Key)
 	}
 	gameID := item.GameID.Value
-	if gameID&0xF0000000 != equippedSpellGameIDPrefix {
+	if gameID&0xF0000000 != EquippedSpellGameIDPrefix {
 		return 0, 0, fmt.Errorf(
 			"resource kind %q key %q has unsupported spell game ID 0x%08X",
 			resource.Kind, resource.Key, gameID)
@@ -653,5 +656,5 @@ func ValidateSpellResource(resource schema.Resource) (rawID uint32, memoryCost i
 			resource.Kind, resource.Key)
 	}
 
-	return gameID &^ equippedSpellGameIDPrefix, int(item.Spell.MemorySlots.Value), nil
+	return gameID &^ EquippedSpellGameIDPrefix, int(item.Spell.MemorySlots.Value), nil
 }

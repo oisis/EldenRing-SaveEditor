@@ -90,7 +90,7 @@ func SetEquippedSpells(
 
 		if _, duplicate := seenRawIDs[rawID]; duplicate {
 			return SetEquippedSpellsResult{}, fmt.Errorf(
-				"orderedResources[%d]: spell 0x%08X is duplicated", index, rawID|equippedSpellGameIDPrefix)
+				"orderedResources[%d]: spell 0x%08X is duplicated", index, rawID|gamecatalog.EquippedSpellGameIDPrefix)
 		}
 		seenRawIDs[rawID] = struct{}{}
 		rawSpellIDs[index] = rawID
