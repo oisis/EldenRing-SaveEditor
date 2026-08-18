@@ -432,6 +432,20 @@ func storageSlotBounds(platform Platform, characterID int) (int64, int64) {
 	return pcStorageSlotBounds(characterID)
 }
 
+// nextStorageEffectiveBucket derives the effective bucket for Storage index
+// allocation given a stored NextAcquisitionSortId bucket counter and the highest
+// occupied bucket among retained or existing records.
+func nextStorageEffectiveBucket(storedNextBucket uint32, maxOccupiedBucket uint64, hasOccupied bool) uint64 {
+	effectiveBucket := uint64(storedNextBucket)
+	if hasOccupied && maxOccupiedBucket+1 > effectiveBucket {
+		effectiveBucket = maxOccupiedBucket + 1
+	}
+	if effectiveBucket < 1 {
+		effectiveBucket = 1
+	}
+	return effectiveBucket
+}
+
 // nextStorageAcquisitionAndCounters derives the assigned acquisition index, the
 // updated NextAcquisitionSortId and the updated NextEquipIndex for one deposit
 // into common Storage.
@@ -446,23 +460,19 @@ func nextStorageAcquisitionAndCounters(
 	characterID int,
 ) (assignedIndex uint32, newNextAcquisition uint32, newNextEquip uint32, err error) {
 	var maxBucket uint64
+	var hasBucket bool
 	for _, record := range records {
 		if record.ContainerSection != StorageSectionCommon || record.AcquisitionIndex >= 50000 {
 			continue
 		}
 		bucket := uint64(record.AcquisitionIndex) / 2
-		if bucket > maxBucket {
+		if !hasBucket || bucket > maxBucket {
 			maxBucket = bucket
+			hasBucket = true
 		}
 	}
 
-	effectiveBucket := uint64(storedNextAcquisition)
-	if maxBucket+1 > effectiveBucket {
-		effectiveBucket = maxBucket + 1
-	}
-	if effectiveBucket < 1 {
-		effectiveBucket = 1
-	}
+	effectiveBucket := nextStorageEffectiveBucket(storedNextAcquisition, maxBucket, hasBucket)
 
 	assigned := effectiveBucket * 2
 	if assigned >= uint64(^uint32(0)) {

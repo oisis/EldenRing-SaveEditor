@@ -2182,7 +2182,7 @@
         "operationId": "setStorageOrder",
         "tags": ["Inventory"],
         "summary": "SetStorageOrder",
-        "description": "Replaces the complete logical order of supported common Storage records. The request must contain every current ownedItemID whose GameCatalog category is melee_armaments, ranged_and_catalysts, shields, talismans, head, chest, arms or legs, excluding the technical Unarmed record, exactly once. Unsupported common records and every key record remain untouched. A successful mutation assigns fresh even acquisition indices with stride 2, starting above the reserved range and avoiding retained sort buckets; it rejects any plan that would reach acquisition index 10000. Storage NextAcquisitionSortId is set to the next free sort bucket (lastAssignedIndex / 2 + 1), while physical rows, handles, quantities, Storage NextEquipIndex, Inventory, Equipment and GaItem data remain unchanged. The mutation advances saveRevision by exactly one, marks the session dirty and retires all previous-revision ownedItemID tokens. WriteSave remains separate. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "description": "Replaces the complete logical order of supported common Storage records. The request must contain every current ownedItemID whose GameCatalog category is melee_armaments, ranged_and_catalysts, shields, talismans, head, chest, arms or legs, excluding the technical Unarmed record, exactly once. Unsupported common records and every key record remain untouched. A successful mutation assigns fresh even acquisition indices with stride 2, starting from the next available sort bucket and avoiding retained sort buckets; it rejects any plan that would reach acquisition index 10000. Storage NextAcquisitionSortId is set to the next free sort bucket (lastAssignedIndex / 2 + 1), while physical rows, handles, quantities, Storage NextEquipIndex, Inventory, Equipment and GaItem data remain unchanged. The mutation advances saveRevision by exactly one, marks the session dirty and retires all previous-revision ownedItemID tokens. WriteSave remains separate. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
         "parameters": [
           {
             "$ref": "#/components/parameters/SaveSessionID"
@@ -8515,7 +8515,7 @@
             "items": {
               "type": "integer",
               "format": "int64",
-              "minimum": 434,
+              "minimum": 2,
               "maximum": 9999
             }
           }

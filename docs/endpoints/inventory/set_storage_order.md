@@ -60,8 +60,7 @@ Storage uses acquisition-sort buckets derived from `acquisitionIndex >> 1`.
 Consequently the endpoint assigns fresh even indices with a stride of two. The
 range:
 
-- starts at or above `434`, after the native reserved range `0..432`;
-- starts at or above Storage `NextAcquisitionSortId`;
+- starts at or above `2 * Storage NextAcquisitionSortId` (or index `2` when the counter is zero), without any reserved range;
 - skips ranges whose buckets collide with retained common or key records;
 - must end below `10000`, the native unsafe boundary established by the legacy
   save experiments.
@@ -90,7 +89,7 @@ or identity. A success advances `saveRevision` exactly once and invalidates all
   "orderedResources": [
     {"kind": "item", "key": "100704E0"}
   ],
-  "acquisitionIndices": [434]
+  "acquisitionIndices": [14]
 }
 ```
 

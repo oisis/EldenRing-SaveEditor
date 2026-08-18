@@ -36,7 +36,7 @@ func TestSetStorageOrderUsesConfirmedCatalogCategories(t *testing.T) {
 	}
 	if result.SaveRevision != "1" || len(result.OrderedResources) != 1 ||
 		result.OrderedResources[0].Key != "100704E0" ||
-		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{434}) {
+		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{14}) {
 		t.Errorf("result = %+v", result)
 	}
 }
@@ -61,5 +61,46 @@ func TestSetStorageOrderDefinitionMatchesRuntimeContract(t *testing.T) {
 	if !reflect.DeepEqual(SetStorageOrderDefinition.SupportedResourceVariables, want) {
 		t.Errorf("supported variables = %v, want %v",
 			SetStorageOrderDefinition.SupportedResourceVariables, want)
+	}
+}
+
+func TestSetStorageOrderLeavesSetInventoryOrderUnaffected(t *testing.T) {
+	// Guard: verify SetInventoryOrder continues to enforce the 434 floor.
+	engine, sessionID, records := setInventoryOrderEndpointTarget(t)
+	result, err := SetInventoryOrder(
+		engine, inventoryCatalog(t), sessionID, getInventorySlot,
+		[]string{records[1].OwnedItemID}, "0")
+	if err != nil {
+		t.Fatalf("SetInventoryOrder: %v", err)
+	}
+	if result.SaveRevision != "1" || len(result.OrderedResources) != 1 ||
+		result.OrderedResources[0].Key != "100704E0" ||
+		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{434}) {
+		t.Errorf("SetInventoryOrder result = %+v, want floor 434 intact", result)
+	}
+}
+
+func TestSetStorageOrderOnPS4(t *testing.T) {
+	engine := saveengine.New()
+	loaded, err := engine.LoadSave(
+		writeGetStorageFixture(t, "ps4", true, getStorageAnchorAt), "ps4")
+	if err != nil {
+		t.Fatalf("LoadSave PS4: %v", err)
+	}
+	storage, err := GetStorage(
+		engine, inventoryCatalog(t), loaded.SaveSessionID, getStorageSlot, "common", 0, 0)
+	if err != nil {
+		t.Fatalf("GetStorage PS4: %v", err)
+	}
+	result, err := SetStorageOrder(
+		engine, inventoryCatalog(t), loaded.SaveSessionID, getStorageSlot,
+		[]string{storage.Records[1].OwnedItemID}, "0")
+	if err != nil {
+		t.Fatalf("SetStorageOrder PS4: %v", err)
+	}
+	if result.SaveRevision != "1" || len(result.OrderedResources) != 1 ||
+		result.OrderedResources[0].Key != "100704E0" ||
+		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{14}) {
+		t.Errorf("PS4 result = %+v", result)
 	}
 }

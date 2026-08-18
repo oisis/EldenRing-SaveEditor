@@ -4678,7 +4678,7 @@ func TestSetStorageOrderRoute(t *testing.T) {
 		result.CharacterID != 0 || len(result.OrderedResources) != 2 ||
 		result.OrderedResources[0].Key != daggerResourceKey ||
 		result.OrderedResources[1].Key != daggerResourceKey ||
-		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{434, 436}) {
+		!reflect.DeepEqual(result.AcquisitionIndices, []uint32{14, 16}) {
 		t.Fatalf("SetStorageOrder result = %+v", result)
 	}
 
@@ -4687,7 +4687,7 @@ func TestSetStorageOrderRoute(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetStorage after reorder: %v", err)
 	}
-	wantIndices := map[int]uint32{5: 434, 0: 436}
+	wantIndices := map[int]uint32{5: 14, 0: 16}
 	for _, record := range updated.Records {
 		if want, exists := wantIndices[record.PhysicalIndex]; exists &&
 			record.AcquisitionIndex != want {

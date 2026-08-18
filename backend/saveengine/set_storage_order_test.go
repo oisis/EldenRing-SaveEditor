@@ -48,7 +48,7 @@ func setStorageOrderFixtureCounters(
 		addItemTestStorageAt + addItemTestStorageKeyAt +
 		setStorageOrderTestKeyRecords*addItemTestRecordSize
 	binary.LittleEndian.PutUint32(data[base:], 777)
-	binary.LittleEndian.PutUint32(data[base+4:], 500)
+	binary.LittleEndian.PutUint32(data[base+4:], 250)
 	if err := os.WriteFile(path, data, 0o600); err != nil {
 		t.Fatalf("write fixture: %v", err)
 	}
@@ -187,6 +187,127 @@ func TestSetStorageOrderRejectsInvalidPermutationsWithoutMutation(t *testing.T) 
 			if revision, dirty := addItemTestSessionState(
 				t, engine, sessionID); revision != "0" || dirty {
 				t.Errorf("rejected order left revision %q, dirty %v", revision, dirty)
+			}
+		})
+	}
+}
+
+func TestPlanStorageOrderIndicesUnit(t *testing.T) {
+	// Zero counter and no retained buckets assigns index 2 with stride 2.
+	zeroIndices, err := planStorageOrderIndices(0, 3, nil)
+	if err != nil {
+		t.Fatalf("planStorageOrderIndices(0, 3, nil): %v", err)
+	}
+	wantZero := []uint32{2, 4, 6}
+	if !reflect.DeepEqual(zeroIndices, wantZero) {
+		t.Errorf("zero plan = %v, want %v", zeroIndices, wantZero)
+	}
+	for _, idx := range zeroIndices {
+		if idx%2 != 0 {
+			t.Errorf("zero plan index %d is not even", idx)
+		}
+	}
+
+	// Retained buckets push base above occupied buckets.
+	retained := map[uint32]struct{}{3: {}, 6: {}}
+	pushedIndices, err := planStorageOrderIndices(0, 2, retained)
+	if err != nil {
+		t.Fatalf("planStorageOrderIndices with retained: %v", err)
+	}
+	wantPushed := []uint32{14, 16}
+	if !reflect.DeepEqual(pushedIndices, wantPushed) {
+		t.Errorf("pushed plan = %v, want %v", pushedIndices, wantPushed)
+	}
+
+	// Lagging counter is advanced past existing buckets.
+	laggingIndices, err := planStorageOrderIndices(2, 2, map[uint32]struct{}{9: {}})
+	if err != nil {
+		t.Fatalf("planStorageOrderIndices with lagging counter: %v", err)
+	}
+	wantLagging := []uint32{20, 22}
+	if !reflect.DeepEqual(laggingIndices, wantLagging) {
+		t.Errorf("lagging plan = %v, want %v", laggingIndices, wantLagging)
+	}
+
+	// Leading counter higher than retained buckets is preserved.
+	leadingIndices, err := planStorageOrderIndices(50, 2, map[uint32]struct{}{10: {}})
+	if err != nil {
+		t.Fatalf("planStorageOrderIndices with leading counter: %v", err)
+	}
+	wantLeading := []uint32{100, 102}
+	if !reflect.DeepEqual(leadingIndices, wantLeading) {
+		t.Errorf("leading plan = %v, want %v", leadingIndices, wantLeading)
+	}
+
+	// Ceiling rejection at 10000.
+	_, err = planStorageOrderIndices(5000, 1, nil)
+	if err == nil {
+		t.Errorf("planStorageOrderIndices(5000, 1) succeeded, want unsafe ceiling rejection")
+	}
+}
+
+func TestSetStorageOrderZeroCounterStartsAtTwoOnBothPlatforms(t *testing.T) {
+	for _, platform := range []Platform{PlatformPC, PlatformPS4} {
+		t.Run(string(platform), func(t *testing.T) {
+			engine := New()
+			// Fixture with only common records, no key records, and zero counters.
+			fixture := addItemTestFixture{
+				platform: platform,
+				slot:     setStorageOrderTestSlot,
+				common: []addItemTestRow{
+					{index: 1, handle: addItemTestGoodsHandle, rawQuantity: 3, acquisition: 39},
+				},
+				storage: []addItemTestRow{
+					{index: 1, handle: addItemTestGoodsHandle, rawQuantity: 3, acquisition: 440},
+					{index: 4, handle: addItemTestTalismanHandle, rawQuantity: 1, acquisition: 460},
+				},
+				commonCount:  1,
+				storageCount: 2,
+			}
+			path := writeAddItemFixture(t, fixture)
+			// Ensure Storage NextAcquisitionSortId is 0.
+			data, err := os.ReadFile(path)
+			if err != nil {
+				t.Fatalf("read fixture: %v", err)
+			}
+			base := addItemTestSlotBase(t, platform, setStorageOrderTestSlot) + addItemTestAnchorAt +
+				addItemTestStorageAt + addItemTestStorageKeyAt +
+				setStorageOrderTestKeyRecords*addItemTestRecordSize
+			binary.LittleEndian.PutUint32(data[base:], 128)
+			binary.LittleEndian.PutUint32(data[base+4:], 0)
+			if err := os.WriteFile(path, data, 0o600); err != nil {
+				t.Fatalf("write fixture: %v", err)
+			}
+
+			loaded, err := engine.LoadSave(path, string(platform))
+			if err != nil {
+				t.Fatalf("LoadSave: %v", err)
+			}
+			storage, err := engine.GetStorage(
+				loaded.SaveSessionID, setStorageOrderTestSlot, StorageSectionCommon, 0, 0)
+			if err != nil {
+				t.Fatalf("GetStorage: %v", err)
+			}
+			if len(storage.Records) != 2 {
+				t.Fatalf("records = %d, want 2", len(storage.Records))
+			}
+
+			orderedIDs := []string{storage.Records[1].OwnedItemID, storage.Records[0].OwnedItemID}
+			result, err := engine.SetStorageOrder(
+				loaded.SaveSessionID, setStorageOrderTestSlot, orderedIDs, "0",
+				func(uint32) (bool, error) { return true, nil })
+			if err != nil {
+				t.Fatalf("SetStorageOrder: %v", err)
+			}
+
+			wantIndices := []uint32{2, 4}
+			if !reflect.DeepEqual(result.AcquisitionIndices, wantIndices) {
+				t.Errorf("result.AcquisitionIndices = %v, want %v", result.AcquisitionIndices, wantIndices)
+			}
+			for _, idx := range result.AcquisitionIndices {
+				if idx%2 != 0 {
+					t.Errorf("assigned index %d is not even", idx)
+				}
 			}
 		})
 	}

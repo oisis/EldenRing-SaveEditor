@@ -148,7 +148,7 @@ func (engine *Engine) SetStorageOrder(
 			return fmt.Errorf(
 				"cannot read Storage NextAcquisitionSortId of character %d: %w", characterID, err)
 		}
-		indices, err := planItemOrderIndices(storedNext, len(ordered), retainedBuckets)
+		indices, err := planStorageOrderIndices(storedNext, len(ordered), retainedBuckets)
 		if err != nil {
 			return fmt.Errorf("character %d Storage: %w", characterID, err)
 		}
@@ -190,4 +190,35 @@ func (engine *Engine) SetStorageOrder(
 		GameIDs:            gameIDs,
 		AcquisitionIndices: acquisitionIndices,
 	}, nil
+}
+
+func planStorageOrderIndices(
+	storedNextBucket uint32,
+	count int,
+	retainedBuckets map[uint32]struct{},
+) ([]uint32, error) {
+	var maxBucket uint64
+	var hasBucket bool
+	for bucket := range retainedBuckets {
+		b := uint64(bucket)
+		if !hasBucket || b > maxBucket {
+			maxBucket = b
+			hasBucket = true
+		}
+	}
+
+	effectiveBucket := nextStorageEffectiveBucket(storedNextBucket, maxBucket, hasBucket)
+	base := effectiveBucket * 2
+	last := base + uint64(count-1)*2
+	if last >= uint64(itemOrderUnsafeIndex) {
+		return nil, fmt.Errorf(
+			"Storage item order would assign acquisition index %d, want at most %d",
+			last, itemOrderUnsafeIndex-1)
+	}
+
+	indices := make([]uint32, count)
+	for position := range indices {
+		indices[position] = uint32(base) + uint32(position)*2
+	}
+	return indices, nil
 }
