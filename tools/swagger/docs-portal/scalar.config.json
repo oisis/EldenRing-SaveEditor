@@ -222,6 +222,17 @@
               }
             }
           },
+          "/diagnostics": {
+            "type": "group",
+            "title": "Diagnostics",
+            "children": {
+              "/get-save-validation-report": {
+                "type": "page",
+                "filepath": "../../../docs/endpoints/diagnostics/get_save_validation_report.md",
+                "title": "GetSaveValidationReport"
+              }
+            }
+          },
           "/templates": {
             "type": "group",
             "title": "Templates",

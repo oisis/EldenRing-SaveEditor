@@ -28,6 +28,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
@@ -1048,6 +1049,7 @@ func TestOpenAPIDocumentDescribesEveryRoute(t *testing.T) {
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance":                         "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/preset":                  "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/appearance/favorite-preset":         "put",
+		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report":                  "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipment":                          "get",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armaments":                 "put",
 		"/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/equipped-armor":                     "put",
@@ -1618,8 +1620,8 @@ func assertLoopbackOnlySaveSessionRoutes(t *testing.T, paths map[string]map[stri
 			found++
 		}
 	}
-	if found != 80 {
-		t.Fatalf("openapi.json describes %d save-session operations, want 80", found)
+	if found != 81 {
+		t.Fatalf("openapi.json describes %d save-session operations, want 81", found)
 	}
 }
 
@@ -8154,5 +8156,144 @@ func TestApplyBuildTemplateRoute_StaleRevisionReturns409(t *testing.T) {
 	recorder := applyBuildTemplate(t, handler, tplID, body)
 	if recorder.Code != http.StatusConflict {
 		t.Fatalf("status = %d, want 409 (body %q)", recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestSaveValidationReportRouteMatchesTheGetter(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	target := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/validation-report"
+
+	want, err := diagnostics.GetSaveValidationReport(saveEngine, gameCatalog, session.SaveSessionID, 0, "")
+	if err != nil {
+		t.Fatalf("diagnostics.GetSaveValidationReport: %v", err)
+	}
+	if !want.Active {
+		t.Fatal("the fixture slot is inactive, so the route would prove no validation at all")
+	}
+
+	// The route has to run against the same catalog, so it is served by a
+	// handler built here instead of by the shared prototype-catalog helper.
+	recorder := httptest.NewRecorder()
+	newHandler(gameCatalog, testApplicationVersion, saveEngine).
+		ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+	assertOK(t, recorder, target)
+	if !reflect.DeepEqual(decode(t, recorder.Body.Bytes()), marshalled(t, want)) {
+		t.Fatal("validation report route body differs from the GetSaveValidationReport result")
+	}
+}
+
+// TestSaveValidationReportRouteForwardsTheScope proves the query parameter
+// reaches the endpoint unchanged: a narrowed scope must narrow the report, and
+// an unknown one must be rejected rather than silently ignored.
+func TestSaveValidationReportRouteForwardsTheScope(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writeActiveSpellsFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+	gameCatalog := newFullCatalog(t)
+	base := "/api/v1/save-sessions/" + session.SaveSessionID + "/characters/0/validation-report"
+
+	serve := func(target string) *httptest.ResponseRecorder {
+		recorder := httptest.NewRecorder()
+		newHandler(gameCatalog, testApplicationVersion, saveEngine).
+			ServeHTTP(recorder, httptest.NewRequest(http.MethodGet, target, nil))
+		return recorder
+	}
+
+	recorder := serve(base + "?scope=stats")
+	assertOK(t, recorder, base+"?scope=stats")
+	var narrowed diagnostics.GetSaveValidationReportResult
+	if err := json.Unmarshal(recorder.Body.Bytes(), &narrowed); err != nil {
+		t.Fatalf("unmarshal response: %v", err)
+	}
+	if len(narrowed.Coverage) != 1 || narrowed.Coverage[0].Scope != "stats" {
+		t.Fatalf("coverage = %+v, want the stats scope only", narrowed.Coverage)
+	}
+
+	for _, scope := range []string{"Stats", "world"} {
+		if recorder := serve(base + "?scope=" + scope); recorder.Code != http.StatusBadRequest {
+			t.Errorf("scope %q: status = %d, want 400 (body %q)",
+				scope, recorder.Code, recorder.Body.String())
+		}
+	}
+}
+
+func TestSaveValidationReportRouteRejectsAMalformedCharacterID(t *testing.T) {
+	saveEngine := saveengine.New()
+	session, err := savesession.LoadSave(saveEngine, writePCFixture(t), "")
+	if err != nil {
+		t.Fatalf("savesession.LoadSave: %v", err)
+	}
+
+	for _, raw := range []string{"one", " 0", "0x1"} {
+		target := "/api/v1/save-sessions/" + session.SaveSessionID +
+			"/characters/" + url.PathEscape(raw) + "/validation-report"
+		if recorder := doSave(t, saveEngine, http.MethodGet, target, ""); recorder.Code != http.StatusBadRequest {
+			t.Fatalf("%s: status = %d, want 400 (body %q)", target, recorder.Code, recorder.Body.String())
+		}
+	}
+}
+
+func TestSaveValidationReportRouteIsAbsentWithoutAnEngine(t *testing.T) {
+	target := "/api/v1/save-sessions/any-session/characters/0/validation-report"
+	recorder := doSave(t, nil, http.MethodGet, target, "")
+	if recorder.Code != http.StatusNotFound {
+		t.Fatalf("%s: status = %d, want 404 (body %q)", target, recorder.Code, recorder.Body.String())
+	}
+}
+
+func TestSaveValidationReportRouteIsDescribedInTheOpenAPIDocument(t *testing.T) {
+	recorder := do(t, newPrototypeCatalog(t), "/openapi.json")
+	if recorder.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", recorder.Code)
+	}
+
+	var document struct {
+		Paths map[string]map[string]any `json:"paths"`
+		Comps struct {
+			Parameters map[string]struct {
+				Name   string `json:"name"`
+				In     string `json:"in"`
+				Schema struct {
+					Enum []string `json:"enum"`
+				} `json:"schema"`
+			} `json:"parameters"`
+			Schemas map[string]any `json:"schemas"`
+		} `json:"components"`
+	}
+	if err := json.Unmarshal(recorder.Body.Bytes(), &document); err != nil {
+		t.Fatalf("decode openapi.json: %v", err)
+	}
+
+	const path = "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report"
+	operation, exists := document.Paths[path]
+	if !exists {
+		t.Fatalf("openapi.json does not describe %s", path)
+	}
+	if _, hasGet := operation["get"]; !hasGet {
+		t.Fatalf("openapi.json describes %s without a GET operation", path)
+	}
+	for _, name := range []string{"SaveValidationReport", "SaveValidationIssue", "SaveValidationScopeCoverage"} {
+		if _, exists := document.Comps.Schemas[name]; !exists {
+			t.Errorf("openapi.json does not describe the %s schema", name)
+		}
+	}
+
+	scope, exists := document.Comps.Parameters["ValidationScope"]
+	if !exists {
+		t.Fatal("openapi.json does not describe the ValidationScope parameter")
+	}
+	if scope.Name != "scope" || scope.In != "query" {
+		t.Errorf("ValidationScope = %s in %s, want scope in query", scope.Name, scope.In)
+	}
+	want := []string{"inventory", "storage", "stats", "equipment", "spells"}
+	if !reflect.DeepEqual(scope.Schema.Enum, want) {
+		t.Errorf("ValidationScope enum = %v, want %v", scope.Schema.Enum, want)
 	}
 }

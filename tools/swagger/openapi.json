@@ -53,6 +53,10 @@
       "description": "Read-only world and progression getters over an open save session. Registered only when the explorer binds a loopback address."
     },
     {
+      "name": "Diagnostics",
+      "description": "Non-mutating save validation. These operations read a loaded session and report what is wrong with it; they never repair, propose or write anything."
+    },
+    {
       "name": "Explorer",
       "description": "Routes of the explorer process itself, not part of the endpoint surface."
     }
@@ -1658,6 +1662,37 @@
                 "schema": {
                   "$ref": "#/components/schemas/Error"
                 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report": {
+      "get": {
+        "operationId": "getSaveValidationReport",
+        "tags": ["Diagnostics"],
+        "summary": "GetSaveValidationReport",
+        "description": "Runs one non-mutating validation pass over a single character slot and returns the problems it found, without proposing any repair: naming a defect belongs to this getter, resolving one belongs to GetRepairPlan and ApplyRepairs. Every scope is read under one lock and one save revision, so a report can never mix two states. Container records are judged against the same GameCatalog limits the mutating endpoints enforce, and the statistics against the same rules SetCharacterStats enforces. Data this build cannot resolve becomes a warning counted in the coverage of its scope; it is never converted into a defect, a deletion or a repair. An inactive or residual slot is a normal result whose residual data is never judged. Available only in the local loopback mode of the explorer: an explorer started with -allow-external-bind does not register this route and answers 404.",
+        "parameters": [
+          { "$ref": "#/components/parameters/SaveSessionID" },
+          { "$ref": "#/components/parameters/CharacterID" },
+          { "$ref": "#/components/parameters/ValidationScope" }
+        ],
+        "responses": {
+          "200": {
+            "description": "The validation report of the character slot",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/SaveValidationReport" }
+              }
+            }
+          },
+          "400": {
+            "description": "A non-decimal characterID, a characterID outside the slot range, an empty, unknown or already closed session identifier, or a scope that is not one of the five accepted values",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
               }
             }
           }
@@ -4673,9 +4708,127 @@
           "format": "int32"
         },
         "example": 50
+      },
+      "ValidationScope": {
+        "name": "scope",
+        "in": "query",
+        "required": false,
+        "description": "Restricts the report to one validation scope. It is matched exactly and never trimmed or normalised, so an unknown value is rejected. Omitted or empty means every scope.",
+        "schema": {
+          "type": "string",
+          "enum": ["inventory", "storage", "stats", "equipment", "spells"]
+        },
+        "example": "inventory"
       }
     },
     "schemas": {
+      "SaveValidationIssue": {
+        "type": "object",
+        "description": "One detected problem. It states what is wrong and where, and deliberately nothing about how to resolve it: this getter proposes no action, no default action and no repair.",
+        "required": ["code", "severity", "scope", "message", "ownedItemID"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Stable identifier of the problem a caller may branch on. The message beside it is not stable.",
+            "enum": [
+              "unresolved_item",
+              "unknown_item",
+              "quantity_zero",
+              "quantity_above_stack_limit",
+              "quantity_above_container_limit",
+              "item_not_allowed_in_container",
+              "attribute_out_of_range",
+              "level_mismatch",
+              "attribute_below_class_minimum",
+              "soul_memory_below_minimum",
+              "dangling_equipment_reference",
+              "reserved_spell_position_occupied",
+              "unresolved_equipped_spell",
+              "memory_slots_exceeded"
+            ]
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["error", "warning"],
+            "description": "An error names a state the save cannot legally be in. A warning names data this build cannot judge, which is reported rather than silently accepted."
+          },
+          "scope": {
+            "type": "string",
+            "enum": ["inventory", "storage", "stats", "equipment", "spells"],
+            "description": "The validation scope the problem was found in."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable explanation naming the exact rejected field and reason."
+          },
+          "ownedItemID": {
+            "type": "string",
+            "description": "Identity of the container record the problem was found in, valid for the saveRevision of this report and for nothing else. Empty for a problem that names no record."
+          }
+        }
+      },
+      "SaveValidationScopeCoverage": {
+        "type": "object",
+        "description": "What one scope actually checked. It exists so an empty issue list can be read correctly: checked false with a reason means the scope could not be decoded and its data was not judged at all, so the save is not thereby clean.",
+        "required": ["scope", "checked", "reason", "recordsChecked", "unresolvedRecords"],
+        "properties": {
+          "scope": {
+            "type": "string",
+            "enum": ["inventory", "storage", "stats", "equipment", "spells"]
+          },
+          "checked": {
+            "type": "boolean",
+            "description": "True when the scope was decoded and judged."
+          },
+          "reason": {
+            "type": "string",
+            "description": "Why the scope was not checked. Empty when it was."
+          },
+          "recordsChecked": {
+            "type": "integer",
+            "format": "int32",
+            "description": "How many records of the scope were judged."
+          },
+          "unresolvedRecords": {
+            "type": "integer",
+            "format": "int32",
+            "description": "How many of those records carried data this build could not resolve, and therefore stayed unjudged."
+          }
+        }
+      },
+      "SaveValidationReport": {
+        "type": "object",
+        "description": "The result of one non-mutating validation pass over a single character slot. Issues are ordered by scope in the order coverage lists them, and inside a scope in the stored order of the data they were found in, so two reports of the same revision are identical. An inactive or residual slot reports active false, no issue and every requested scope unchecked with that reason.",
+        "required": [
+          "saveSessionID",
+          "saveRevision",
+          "characterID",
+          "active",
+          "coverage",
+          "issues",
+          "errorCount",
+          "warningCount"
+        ],
+        "properties": {
+          "saveSessionID": { "type": "string" },
+          "saveRevision": {
+            "type": "string",
+            "description": "The revision the whole report was read under. Every scope describes this one revision."
+          },
+          "characterID": { "type": "integer", "format": "int32" },
+          "active": { "type": "boolean" },
+          "coverage": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SaveValidationScopeCoverage" }
+          },
+          "issues": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/SaveValidationIssue" }
+          },
+          "errorCount": { "type": "integer", "format": "int32" },
+          "warningCount": { "type": "integer", "format": "int32" }
+        }
+      },
       "LoadSaveRequest": {
         "type": "object",
         "description": "Body of LoadSave. Both fields reach the endpoint exactly as sent; unknown fields are rejected.",

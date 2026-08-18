@@ -26,6 +26,7 @@ import (
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/application"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/catalog"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/character"
+	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/diagnostics"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/equipment"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/favorites"
 	"github.com/oisis/EldenRing-SaveForge/backend/endpoints/inventory"
@@ -1658,6 +1659,29 @@ func registerSaveSessionRoutes(
 				characterID,
 				body.CrystalTearResources,
 				body.ExpectedRevision,
+			)
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			writeJSON(writer, http.StatusOK, result)
+		},
+	)
+
+	mux.HandleFunc(
+		"GET /api/v1/save-sessions/{saveSessionID}/characters/{characterID}/validation-report",
+		func(writer http.ResponseWriter, request *http.Request) {
+			characterID, err := parseCharacterID(request.PathValue("characterID"))
+			if err != nil {
+				writeError(writer, http.StatusBadRequest, err)
+				return
+			}
+			result, err := diagnostics.GetSaveValidationReport(
+				saveEngine,
+				gameCatalog,
+				request.PathValue("saveSessionID"),
+				characterID,
+				request.URL.Query().Get("scope"),
 			)
 			if err != nil {
 				writeError(writer, http.StatusBadRequest, err)
