@@ -63,7 +63,7 @@ const (
 	InvStartFromMagic  = 505    // MagicOffset + 505 — points to first common item (common_count header at -4)
 	CommonItemCount    = 0xA80  // 2688 common item slots
 	KeyItemCount       = 0x180  // 384 key item slots
-	StorageItemCount   = 2048   // storage box capacity (read limit for ReadStorage)
+	StorageItemCount   = 2048   // total storage box capacity (1920 common + 128 key)
 	StorageCommonCount = 0x780  // 1920 actual common item slots in storage
 	StorageKeyCount    = 0x80   // 128 key item slots in storage
 	InvRecordLen       = 12     // bytes per inventory record (handle + qty + index)

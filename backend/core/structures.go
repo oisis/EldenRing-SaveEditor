@@ -782,7 +782,7 @@ func (s *SaveSlot) mapInventory() error {
 	if storageStart+StorageSafetyMarg < len(s.Data) {
 		sr := NewReader(s.Data)
 		sr.Seek(int64(storageStart), 0)
-		if err := s.Storage.ReadStorage(sr, StorageItemCount); err != nil {
+		if err := s.Storage.ReadStorage(sr, StorageCommonCount); err != nil {
 			return fmt.Errorf("storage read: %w", err)
 		}
 

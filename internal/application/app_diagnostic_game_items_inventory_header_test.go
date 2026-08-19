@@ -103,8 +103,10 @@ func TestGameItemsAddInventoryHeaderStackUpdate(t *testing.T) {
 	// In-place stack update allocates no new record: header self-excludes.
 	assertNoField(t, lc, "inventory_common_header_count")
 
-	// The direct quantity change still carries its own lifecycle: 2 -> 5 -> 5.
-	assertContainerLifecycle(t, lc, "inventory_common_row_0_quantity", "2", "5", "5")
+	// The direct quantity change still carries its own lifecycle. A stackable
+	// add tops the existing stack up rather than replacing it, so the 2 already
+	// held plus the 5 requested make 7 (see app_stack_topup_test.go).
+	assertContainerLifecycle(t, lc, "inventory_common_row_0_quantity", "2", "7", "7")
 
 	// Header untouched by the stacking add.
 	if got := rawInventoryHeader(slot); got != "1" {
